@@ -25,6 +25,7 @@ import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
 import DocumentViewerRender from './DocumentViewerRender.jsx';
 import CompareOverlayView from './CompareOverlayView.jsx';
+import CompareCurtainView from './CompareCurtainView.jsx';
 import PrintSelectionWorkspace from '../PrintSelectionWorkspace.jsx';
 import Resizer from '../Resizer.jsx';
 import logger from '../../logging/systemLogger.js';
@@ -164,6 +165,10 @@ const DocumentViewer = () => {
     openCompareOverlay,
     closeCompareOverlay,
     resetCompareOverlayCalibration,
+    compareCalibrated,
+    compareCurtainOpen,
+    openCompareCurtain,
+    closeCompareCurtain,
     viewerPages,
     totalPages,
     totalPagesDisplay,
@@ -179,6 +184,8 @@ const DocumentViewer = () => {
     hidePageFromSelection,
     hideDocumentFromSelection,
   } = useDocumentViewer();
+  // The overlay and curtain views replace the toolbar and the viewer surface while open.
+  const compareViewOpen = compareOverlayOpen || compareCurtainOpen;
 
   const isDocumentLoading = useMemo(() => {
     if (loadingRunActive) return true;
@@ -333,7 +340,7 @@ const DocumentViewer = () => {
 
     /** @param {KeyboardEvent} event */
     const onKeyDown = (event) => {
-      if (printSelectionWorkspaceOpen || compareOverlayOpen) return;
+      if (printSelectionWorkspaceOpen || compareViewOpen) return;
       if (!canOpenMetadataMatrix) return;
       if (event.defaultPrevented || event.isComposing) return;
       const key = String(event.key || '').toLowerCase();
@@ -347,7 +354,7 @@ const DocumentViewer = () => {
 
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [canOpenMetadataMatrix, compareOverlayOpen, openMetadataMatrix, printSelectionWorkspaceOpen]);
+  }, [canOpenMetadataMatrix, compareViewOpen, openMetadataMatrix, printSelectionWorkspaceOpen]);
 
   const viewerRuntimeStatus = useMemo(() => {
     if (error) {
@@ -463,10 +470,27 @@ const DocumentViewer = () => {
           canResetToCompare={!!compareOverlaySnapshot}
           onResetToCompare={resetCompareOverlayCalibration}
           onClose={closeCompareOverlay}
+          onOpenCurtain={openCompareCurtain}
         />
       ) : null}
 
-      {compareOverlayOpen ? null : (
+      {compareCurtainOpen ? (
+        <CompareCurtainView
+          pageNumberA={renderPageNumber}
+          pageNumberB={renderComparePageNumber}
+          allPages={allPages}
+          zoom={zoom}
+          setZoom={setZoom}
+          zoomMode={zoomState?.mode}
+          customFitSizeLimits={customFitSizeLimits}
+          imagePropertiesA={primaryImageProperties}
+          imagePropertiesB={compareImageProperties}
+          transforms={compareTransforms}
+          onClose={closeCompareCurtain}
+        />
+      ) : null}
+
+      {compareViewOpen ? null : (
       <DocumentViewerToolbar
         runtimeStatusLedState={viewerRuntimeStatus.ledState}
         runtimeStatusLedTitle={viewerRuntimeStatus.title}
@@ -558,6 +582,8 @@ const DocumentViewer = () => {
         onOpenSignatureOverview={openSignatureOverview}
         canOpenCompareOverlay={isComparing && renderComparePageNumber != null}
         openCompareOverlay={openCompareOverlay}
+        compareCalibrated={compareCalibrated}
+        openCompareCurtain={openCompareCurtain}
       />
       )}
 
@@ -567,7 +593,7 @@ const DocumentViewer = () => {
         loadingRunActive={loadingRunActive}
       />
 
-      {compareOverlayOpen ? null : printSelectionWorkspaceOpen ? (
+      {compareViewOpen ? null : printSelectionWorkspaceOpen ? (
         <PrintSelectionWorkspace
           allPages={allPages || []}
           bundle={bundle || null}

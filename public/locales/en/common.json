@@ -618,6 +618,22 @@
     "closeShort": "Close",
     "stage": "Overlaid pages. Drag to move the top page; Ctrl+wheel zooms it."
   },
+  "compareCurtain": {
+    "region": "Curtain view: page A and page B on either side of a border",
+    "toolbar": "Curtain view controls",
+    "title": "Curtain",
+    "mode": "Direction of the border",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "border": "Border between page A (left) and page B (right). Arrow keys move it 1 %, Shift 10 %.",
+    "borderHorizontal": "Border between page A (above) and page B (below). Arrow keys move it 1 %, Shift 10 %.",
+    "sideA": "A · page {page}",
+    "sideB": "B · page {page}",
+    "close": "Close the curtain view and go back",
+    "closeShort": "Close",
+    "open": "Curtain: show the calibrated pages with a draggable border",
+    "needsCalibration": "Curtain: open the overlay view first – it calibrates the two pages"
+  },
   "generic": {
     "loading": "Loading"
   },
@@ -693,7 +709,10 @@
       },
       "compare": {
         "title": "Compare mode",
-        "body": "Compare mode shows two pages side by side. The left page is the primary page and the right page is the compare page."
+        "body": "Compare mode shows two pages side by side. The left page is the primary page and the right page is the compare page.",
+        "fineTune": "Fine-tune: each page has a Fine-tune bar for zoom (0.1 %), position (px) and rotation (0.1°). Drag the page to move it, Ctrl + wheel zooms only that page.",
+        "overlay": "Overlay: the stacked-layers button puts page B on top of page A. The slider sets the opacity of the top page; calibrate with the Fine-tune bars, drag or nudge mode. Close or Esc returns to the compare view and keeps the calibration.",
+        "curtain": "Curtain: shows the calibrated pages with a border you drag – page A on one side, page B on the other. Choose Horizontal or Vertical; arrow keys move the border 1 % (Shift: 10 %). Open it from the overlay view, or from the toolbar once the overlay view has calibrated the pages. Close or Esc returns to where you opened it."
       },
       "thumbnails": {
         "title": "Thumbnails and document grouping",

@@ -1,6 +1,32 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 13. Line count: 6439. JSDoc symbol count: 132.
+File count: 16. Line count: 6985. JSDoc symbol count: 140.
+
+## src/components/DocumentViewer/CompareCurtainButton.jsx
+
+Entry to the curtain view \(CompareCurtainView.jsx\), shown in the compare toolbar and in the overlay view's toolbar.
+
+Exports: `CompareCurtainButton`
+
+Symbols:
+
+- `CompareCurtainButton` (function) - No description.
+
+## src/components/DocumentViewer/CompareCurtainView.jsx
+
+Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, page B clipped to one side of a draggable border.
+
+Exports: `CompareCurtainView`
+
+Local imports: `src/components/DocumentRender.jsx`, `src/utils/compareTransform.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`
+
+Symbols:
+
+- `CurtainMode` (typedef) - No description.
+- `needsCanvas` (function) - No description.
+- `applyCurtainStyles` (function) - Write the clip and the grab bar position straight to the DOM \(drag path, no React render\).
+- `CompareCurtainView` (function) - No description.
+- `<anonymous>~onKeyDown` (function) - No description.
 
 ## src/components/DocumentViewer/CompareOverlayView.jsx
 
@@ -8,13 +34,11 @@ Overlay view of the compare mode: the two compared pages stacked in one coordina
 
 Exports: `CompareOverlayView`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/components/DocumentViewer/CompareCurtainButton.jsx`, `src/components/DocumentViewer/compareViewKeys.js`
 
 Symbols:
 
 - `OverlayTarget` (typedef) - No description.
-- `isOwnKeyTarget` (function) - Keys typed into fields \(and controls that handle their own arrows\) must not nudge the page.
-- `hasActiveModalDialog` (function) - No description.
 - `needsCanvas` (function) - No description.
 - `CompareOverlayView` (function) - No description.
 - `<anonymous>~onKeyDown` (function) - No description.
@@ -33,6 +57,19 @@ Symbols:
 - `toSignedRotation` (function) - Rotation shown signed in \(\-180, 180\] so a small counter\-clockwise tilt reads as −0,1 and not 359,9.
 - `TransformNumberField` (function) - Numeric text field with locale\-aware parsing; keeps a draft while focused.
 - `CompareTransformControls` (function) - No description.
+
+## src/components/DocumentViewer/compareViewKeys.js
+
+File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full\-surface compare views \(CompareOverlayView.jsx, CompareCurtainView.jsx\): which focused el...
+
+Exports: `isOwnKeyTarget`, `shouldEscapeCloseView`, `hasActiveModalDialog`
+
+Symbols:
+
+- `module:compareViewKeys` (module) - File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full\-surface compare views \(CompareOverlayView.jsx, CompareCurtainView.jsx\): which focused el...
+- `module:compareViewKeys.isOwnKeyTarget` (function) - Keys typed into fields \(and controls that handle their own arrows\) must not reach the view.
+- `module:compareViewKeys.shouldEscapeCloseView` (function) - Escape closes the view unless a text field has focus \(Escape undoes its typed value there\).
+- `module:compareViewKeys.hasActiveModalDialog` (function) - No description.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -54,7 +91,7 @@ OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(acti
 
 Exports: `DocumentViewer`
 
-Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`, `src/components/DocumentMetadataMatrixOverlayDialog.jsx`
+Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`
 
 Symbols:
 
@@ -122,7 +159,7 @@ File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state 
 
 Exports: `useCompareOverlay`
 
-Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`
+Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`
 
 Symbols:
 

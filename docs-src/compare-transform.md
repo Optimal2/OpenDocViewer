@@ -93,14 +93,16 @@ context on release, so a drag does not re-render the viewer for every pointer mo
 (`primary`, left) below, page B (`compare`, right) above. It is opened from a toolbar button
 (`toolbar.compareOverlay.open`) that only exists in compare mode with two pages shown, and it
 replaces the main toolbar and the viewer surface while open, like the print selection workspace.
-Close or Escape returns to the compare view; leaving compare mode closes it.
+Close or Escape returns to the compare view (Escape also while the opacity slider has focus; text
+fields keep Escape to undo their typed value); leaving compare mode closes it.
 
 - Each layer is a `DocumentRender` with the page's own transform (`buildCompareTransformCss`) and
   the shared base zoom. The layer viewports do not scroll; pan and zoom go through the transforms,
   so both pages stay in the same coordinate space. In fit modes page A fits the overlay surface.
 - The overlay settings are a second piece of context state, `compareOverlay`
   (`src/utils/compareOverlay.js`): `{ opacity: 0–100 (default 50), top: 'compare' | 'primary' }`,
-  changed through `dispatchCompareOverlay` (`setOpacity`, `stepOpacity`, `swap`, `reset`). The
+  changed through `dispatchCompareOverlay` (`setOpacity`, `stepOpacity`, `swap`, `markCalibrated`,
+  `clearCalibrated`, `reset`). The
   slider sets the opacity of the page on top; swap changes which page that is.
 - Calibration uses the same `CompareTransformControls` as the compare view, one per page. Dragging
   the stage moves the top page and Ctrl+wheel zooms it; nudge mode maps the arrow keys to the top
@@ -116,6 +118,39 @@ Close or Escape returns to the compare view; leaving compare mode closes it.
 
 Tests: `src/utils/__tests__/compareOverlay.test.js`, `src/components/__tests__/compareOverlayView.test.jsx`,
 `src/components/__tests__/useCompareOverlay.test.jsx`, `tests/ui/compare-overlay.spec.mjs`.
+
+## Curtain view
+
+`CompareCurtainView.jsx` shows the calibration with nothing but a draggable border: the two pages
+in the overlay's coordinate space (same `DocumentRender` layers and transforms), page A below and
+page B above, page B clipped to one side of the border.
+
+- Calibration presence: `compareOverlay.calibrated` is set (`markCalibrated`) when the overlay
+  view opens and cleared (`clearCalibrated`) when compare mode ends or the second page goes away;
+  `hasCompareCalibration()` reads it. The transforms are never written by the curtain view.
+- Entry: `CompareCurtainButton.jsx`, in the overlay view's toolbar and in the compare toolbar next
+  to the overlay button. Without a calibration the compare toolbar button is `aria-disabled` (still
+  focusable, so its tooltip explains that the overlay view calibrates first).
+- Return: `hooks/useCompareOverlay.js` holds `curtainOpen` next to the overlay's open flag. Opened
+  from the overlay view, the overlay stays open but hidden (`compareOverlayOpen` is false while the
+  curtain shows), so Close returns to it with its "reset to compare" snapshot intact; opened from
+  the compare view, Close returns there. Escape closes like Close (also from a slider).
+- Geometry (`src/utils/compareCurtain.js`): `buildCurtainClipPath(mode, p)` is
+  `inset(p% 0% 0% 0%)` in horizontal mode (horizontal line, page B below) and
+  `inset(0% 0% 0% p%)` in vertical mode (vertical line, page B right); 0 % shows page B on the
+  whole stage, 100 % hides it. The layers fill the non-scrolling stage, so percent of the layer is
+  percent of the stage.
+- Controls: one Horizontal/Vertical toggle and the border, a `role="slider"` grab bar focused on
+  open. Arrow keys 1 %, Shift 10 % (`resolveCurtainKeyAction`); the reducer keeps one position per
+  mode (`{ mode, positions: { horizontal, vertical } }`) in local state for as long as the view is
+  open. A drag writes `clip-path` and the bar position straight to the DOM and commits on release;
+  the page elements are memoized, so neither drag nor keys re-render the pages.
+- Labels in the stage corners name the sides: `A · page n` (top left), `B · page m` (top right in
+  vertical mode, bottom left in horizontal mode).
+
+Tests: `src/utils/__tests__/compareCurtain.test.js`, `src/components/__tests__/compareCurtainView.test.jsx`,
+`src/components/__tests__/useCompareOverlay.test.jsx`, `src/__tests__/compareHelp.test.js`,
+`tests/ui/compare-curtain.spec.mjs`.
 
 ## Measurement
 

@@ -1375,6 +1375,186 @@
   scrollbar-gutter: auto;
 }
 
+/* Curtain entry (CompareCurtainButton.jsx): aria-disabled keeps the explaining tooltip reachable. */
+.compare-curtain-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compare-curtain-button.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Curtain view of the compare mode (CompareCurtainView.jsx): full surface, own toolbar. */
+.compare-curtain-view {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 8px;
+  background: var(--background-color);
+  color: var(--text-color);
+  overflow: hidden;
+}
+
+.compare-curtain-toolbar {
+  flex: none;
+  flex-wrap: wrap;
+}
+
+.compare-curtain-title,
+.compare-curtain-mode,
+.compare-curtain-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compare-curtain-title {
+  font-weight: 600;
+}
+
+.compare-curtain-mode .odv-btn {
+  padding: 0 10px;
+}
+
+.compare-curtain-close {
+  margin-left: auto;
+  padding: 0 10px;
+}
+
+.compare-curtain-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 15px;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Both layers share one coordinate space; page B (above) is clipped with clip-path: inset(). */
+.compare-curtain-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.compare-curtain-layer .document-render-viewport {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+.compare-curtain-label {
+  position: absolute;
+  z-index: 4;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  pointer-events: none;
+  background: var(--thumbnail-primary-color);
+}
+
+.compare-curtain-label.is-primary {
+  top: 8px;
+  left: 8px;
+}
+
+.compare-curtain-label.is-compare {
+  background: var(--thumbnail-compare-color);
+}
+
+/* Vertical border: B is on the right; horizontal border: B is below. */
+.compare-curtain-stage.is-vertical .compare-curtain-label.is-compare {
+  top: 8px;
+  right: 8px;
+}
+
+.compare-curtain-stage.is-horizontal .compare-curtain-label.is-compare {
+  bottom: 8px;
+  left: 8px;
+}
+
+/* The border: a wide transparent hit area around a visible grab bar. */
+.compare-curtain-handle {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+
+.compare-curtain-stage.is-vertical .compare-curtain-handle {
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  transform: translateX(-50%);
+  cursor: ew-resize;
+}
+
+.compare-curtain-stage.is-horizontal .compare-curtain-handle {
+  left: 0;
+  right: 0;
+  height: 24px;
+  transform: translateY(-50%);
+  cursor: ns-resize;
+}
+
+.compare-curtain-handle::before {
+  content: '';
+  position: absolute;
+  background: var(--thumbnail-compare-color);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.compare-curtain-stage.is-vertical .compare-curtain-handle::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+.compare-curtain-stage.is-horizontal .compare-curtain-handle::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.compare-curtain-grip {
+  position: relative;
+  border-radius: 6px;
+  background: var(--thumbnail-compare-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.compare-curtain-stage.is-vertical .compare-curtain-grip {
+  width: 12px;
+  height: 48px;
+}
+
+.compare-curtain-stage.is-horizontal .compare-curtain-grip {
+  width: 48px;
+  height: 12px;
+}
+
+.compare-curtain-handle:focus-visible .compare-curtain-grip,
+.compare-curtain-handle.is-dragging .compare-curtain-grip {
+  outline: 2px solid var(--text-color);
+  outline-offset: 2px;
+}
+
 .document-pane-frame.is-transform-active .document-render-viewport {
   cursor: move;
 }

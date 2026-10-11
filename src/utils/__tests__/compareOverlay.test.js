@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import {
   COMPARE_OVERLAY_OPACITY,
   INITIAL_COMPARE_OVERLAY_STATE,
+  hasCompareCalibration,
   clampOverlayOpacity,
   compareOverlayReducer,
   getOverlayBottomTarget,
@@ -23,7 +24,7 @@ function run(actions, state = INITIAL_COMPARE_OVERLAY_STATE) {
 
 describe('overlay opacity', () => {
   it('defaults to 50 % with page B (compare) on top', () => {
-    expect(INITIAL_COMPARE_OVERLAY_STATE).toEqual({ opacity: 50, top: 'compare' });
+    expect(INITIAL_COMPARE_OVERLAY_STATE).toEqual({ opacity: 50, top: 'compare', calibrated: false });
     expect(COMPARE_OVERLAY_OPACITY).toMatchObject({ min: 0, max: 100, step: 1, largeStep: 10 });
   });
 
@@ -83,6 +84,20 @@ describe('overlay swap and nudge', () => {
     expect(resolveOverlayNudgeKeyAction({ key: 'ArrowDown', shiftKey: true }, 'primary'))
       .toEqual({ type: 'nudge', target: 'primary', field: 'dy', delta: 10 });
     expect(resolveOverlayNudgeKeyAction({ key: 'Enter' }, 'compare')).toBe(null);
+  });
+});
+
+describe('calibration presence', () => {
+  it('is set when the overlay view calibrates and cleared when compare mode ends', () => {
+    expect(hasCompareCalibration(INITIAL_COMPARE_OVERLAY_STATE)).toBe(false);
+    const marked = run([{ type: 'setOpacity', value: 30 }, { type: 'markCalibrated' }]);
+    expect(marked).toEqual({ opacity: 30, top: 'compare', calibrated: true });
+    expect(hasCompareCalibration(marked)).toBe(true);
+    expect(compareOverlayReducer(marked, { type: 'markCalibrated' })).toBe(marked);
+    const cleared = compareOverlayReducer(marked, { type: 'clearCalibrated' });
+    expect(cleared).toEqual({ opacity: 30, top: 'compare', calibrated: false });
+    expect(compareOverlayReducer(cleared, { type: 'clearCalibrated' })).toBe(cleared);
+    expect(hasCompareCalibration(null)).toBe(false);
   });
 });
 

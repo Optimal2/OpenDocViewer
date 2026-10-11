@@ -39,6 +39,7 @@ import {
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import SignatureOverviewButton from '../SignatureOverviewButton.jsx';
+import CompareCurtainButton from '../DocumentViewer/CompareCurtainButton.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
 import {
@@ -214,6 +215,8 @@ function getPdfProgressPercent(progress) {
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} compareDocumentNavigation
  * @property {boolean=} canOpenCompareOverlay True in compare mode with two pages shown.
  * @property {function(): void=} openCompareOverlay Opens the overlay view of the two compared pages.
+ * @property {boolean=} compareCalibrated True when the overlay view has calibrated the two pages.
+ * @property {function(): void=} openCompareCurtain Opens the curtain view of the calibrated pages.
  */
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
@@ -370,6 +373,8 @@ const DocumentToolbar = ({
   onOpenSignatureOverview,
   canOpenCompareOverlay = false,
   openCompareOverlay,
+  compareCalibrated = false,
+  openCompareCurtain,
 }) => {
   const { t, i18n } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
@@ -1693,6 +1698,11 @@ const DocumentToolbar = ({
         </button>
       ) : null}
 
+      {/* Curtain view: same condition; disabled with an explanation until the overlay view calibrated */}
+      {canOpenCompareOverlay && typeof openCompareCurtain === 'function' ? (
+        <CompareCurtainButton calibrated={compareCalibrated} onOpen={openCompareCurtain} />
+      ) : null}
+
       <div className="separator" />
 
       {/* Editing controls are always visible. Canvas rendering activates only when a non-neutral adjustment exists. */}
@@ -2188,6 +2198,8 @@ DocumentToolbar.propTypes = {
   onOpenSignatureOverview: PropTypes.func,
   canOpenCompareOverlay: PropTypes.bool,
   openCompareOverlay: PropTypes.func,
+  compareCalibrated: PropTypes.bool,
+  openCompareCurtain: PropTypes.func,
 };
 
 export default React.memo(DocumentToolbar);

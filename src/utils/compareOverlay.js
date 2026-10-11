@@ -19,6 +19,8 @@ import { normalizeCompareTransform, resolveTransformKeyAction } from './compareT
  * @typedef {Object} CompareOverlayState
  * @property {number} opacity Opacity of the top page in percent, 0–100 (0 = invisible).
  * @property {('primary'|'compare')} top The page drawn on top (`compare` = page B by default).
+ * @property {boolean} calibrated True once the overlay view has been opened in this compare session,
+ *   i.e. a calibration exists that the curtain view can show (utils/compareCurtain.js).
  */
 
 /** Opacity range and steps of the overlay slider (percent). */
@@ -34,6 +36,7 @@ export const COMPARE_OVERLAY_OPACITY = Object.freeze({
 export const INITIAL_COMPARE_OVERLAY_STATE = Object.freeze({
   opacity: COMPARE_OVERLAY_OPACITY.defaultValue,
   top: 'compare',
+  calibrated: false,
 });
 
 /**
@@ -61,11 +64,24 @@ export function getOverlayBottomTarget(top) {
 }
 
 /**
+ * True when a calibration exists in the viewer context: the overlay view has been opened since
+ * compare mode started. Enables the curtain view from the compare toolbar.
+ *
+ * @param {(CompareOverlayState|null|undefined)} state
+ * @returns {boolean}
+ */
+export function hasCompareCalibration(state) {
+  return !!state?.calibrated;
+}
+
+/**
  * Reducer for the overlay settings. Actions:
  * - `{ type: 'setOpacity', value }` absolute opacity in percent.
  * - `{ type: 'stepOpacity', delta }` relative change in percent.
  * - `{ type: 'swap' }` exchange which page lies on top.
- * - `{ type: 'reset' }` back to the defaults (50 %, page B on top).
+ * - `{ type: 'markCalibrated' }` the overlay view was opened: a calibration exists.
+ * - `{ type: 'clearCalibrated' }` compare mode ended: the calibration no longer applies.
+ * - `{ type: 'reset' }` back to the defaults (50 %, page B on top, not calibrated).
  *
  * @param {CompareOverlayState} state
  * @param {Object} action
@@ -86,6 +102,10 @@ export function compareOverlayReducer(state, action) {
     }
     case 'swap':
       return { ...current, top: getOverlayBottomTarget(current.top) };
+    case 'markCalibrated':
+      return current.calibrated ? current : { ...current, calibrated: true };
+    case 'clearCalibrated':
+      return current.calibrated ? { ...current, calibrated: false } : current;
     case 'reset':
       return INITIAL_COMPARE_OVERLAY_STATE;
     default:

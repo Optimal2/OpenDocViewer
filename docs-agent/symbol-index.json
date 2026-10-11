@@ -5597,7 +5597,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 109,
+    "line": 110,
     "description": "Mutable ref-like object used by the toolbar.",
     "params": [],
     "returns": [],
@@ -5610,7 +5610,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 1133,
+    "line": 1138,
     "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
     "params": [
       {
@@ -5635,7 +5635,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 288,
+    "line": 291,
     "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
     "params": [
       {
@@ -5660,7 +5660,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 137,
+    "line": 138,
     "description": "Props for {@link DocumentToolbar}.",
     "params": [],
     "returns": [],
@@ -5673,7 +5673,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 65,
+    "line": 66,
     "description": "",
     "params": [
       {
@@ -5704,7 +5704,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 82,
+    "line": 83,
     "description": "",
     "params": [
       {
@@ -5729,7 +5729,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 693,
+    "line": 698,
     "description": "Handle brightness slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5754,7 +5754,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 707,
+    "line": 712,
     "description": "Handle contrast slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5779,7 +5779,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 729,
+    "line": 734,
     "description": "",
     "params": [
       {
@@ -5804,7 +5804,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 416,
+    "line": 421,
     "description": "",
     "params": [
       {
@@ -5824,7 +5824,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 408,
+    "line": 413,
     "description": "",
     "params": [
       {
@@ -5844,7 +5844,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 1301,
+    "line": 1306,
     "description": "Handle the dialog submit event and dispatch the correct print action.",
     "params": [
       {
@@ -5869,7 +5869,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 742,
+    "line": 747,
     "description": "",
     "params": [
       {
@@ -5894,7 +5894,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 721,
+    "line": 726,
     "description": "",
     "params": [
       {
@@ -5925,7 +5925,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 115,
+    "line": 116,
     "description": "Editable image state shown by the toolbar.",
     "params": [],
     "returns": [],
@@ -5938,7 +5938,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 56,
+    "line": 57,
     "description": "",
     "params": [
       {
@@ -5963,7 +5963,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 275,
+    "line": 278,
     "description": "",
     "params": [
       {
@@ -5988,7 +5988,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 265,
+    "line": 268,
     "description": "",
     "params": [
       {
@@ -6013,7 +6013,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 872,
+    "line": 877,
     "description": "",
     "params": [
       {
@@ -6038,7 +6038,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 253,
+    "line": 256,
     "description": "Clamp a page number into the valid viewer range while preserving a safe fallback.",
     "params": [
       {
@@ -6075,7 +6075,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 222,
+    "line": 225,
     "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
     "params": [],
     "returns": [],
@@ -6088,7 +6088,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 123,
+    "line": 124,
     "description": "React-like numeric page setter used by the toolbar.",
     "params": [
       {
@@ -6113,7 +6113,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 89,
+    "line": 90,
     "description": "Detail payload emitted by the print dialog.",
     "params": [],
     "returns": [],
@@ -6126,7 +6126,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 822,
+    "line": 827,
     "description": "Resolve page metadata objects aligned with the printed page sequence.",
     "params": [
       {
@@ -6151,7 +6151,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 800,
+    "line": 805,
     "description": "Estimate the number of pages the user is about to print.",
     "params": [
       {
@@ -6176,7 +6176,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 836,
+    "line": 841,
     "description": "",
     "params": [
       {
@@ -6201,7 +6201,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 220,
+    "line": 223,
     "description": "Range (±) around 100% where sliders snap back to the neutral value.",
     "params": [],
     "returns": [],
@@ -6214,7 +6214,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 900,
+    "line": 905,
     "description": "Fire-and-forget user print log.",
     "params": [
       {
@@ -6239,7 +6239,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 751,
+    "line": 756,
     "description": "",
     "params": [
       {
@@ -6264,7 +6264,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 780,
+    "line": 785,
     "description": "Build a compact &quot;pages&quot; descriptor for logging.",
     "params": [
       {
@@ -6289,7 +6289,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 130,
+    "line": 131,
     "description": "Zoom display state used by the newer toolbar UX paths.",
     "params": [],
     "returns": [],
@@ -8802,13 +8802,254 @@
     "examples": 0
   },
   {
+    "id": "CompareCurtainButton",
+    "name": "CompareCurtainButton",
+    "longname": "CompareCurtainButton",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareCurtainButton.jsx",
+    "line": 25,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.calibrated",
+        "type": "boolean",
+        "optional": false,
+        "description": "True when a calibration exists in the viewer context."
+      },
+      {
+        "name": "props.onOpen",
+        "type": "function",
+        "optional": false,
+        "description": "Opens the curtain view."
+      },
+      {
+        "name": "props.className",
+        "type": "string",
+        "optional": true,
+        "description": "Extra class names."
+      },
+      {
+        "name": "props.showLabel",
+        "type": "boolean",
+        "optional": true,
+        "description": "Show the &quot;Curtain&quot; text next to the icon."
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "applyCurtainStyles",
+    "name": "applyCurtainStyles",
+    "longname": "applyCurtainStyles",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+    "line": 72,
+    "description": "Write the clip and the grab bar position straight to the DOM (drag path, no React render).",
+    "params": [
+      {
+        "name": "layer",
+        "type": "HTMLElement|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "handle",
+        "type": "HTMLElement|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "mode",
+        "type": "CurtainMode",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "position",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "CompareCurtainView",
+    "name": "CompareCurtainView",
+    "longname": "CompareCurtainView",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+    "line": 96,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.pageNumberA",
+        "type": "number",
+        "optional": false,
+        "description": "Original page number of page A (primary/left)."
+      },
+      {
+        "name": "props.pageNumberB",
+        "type": "number",
+        "optional": false,
+        "description": "Original page number of page B (compare/right)."
+      },
+      {
+        "name": "props.allPages",
+        "type": "Array.<any>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.zoom",
+        "type": "number",
+        "optional": false,
+        "description": "Shared base zoom."
+      },
+      {
+        "name": "props.setZoom",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.zoomMode",
+        "type": "'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "props.customFitSizeLimits",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "props.imagePropertiesA",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.imagePropertiesB",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.transforms",
+        "type": "Object",
+        "optional": false,
+        "description": "Calibrated per-page transforms (viewer context)."
+      },
+      {
+        "name": "props.onClose",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "CurtainMode",
+    "name": "CurtainMode",
+    "longname": "CurtainMode",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+    "line": 51,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "needsCanvas",
+    "name": "needsCanvas",
+    "longname": "needsCanvas",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+    "line": 57,
+    "description": "",
+    "params": [
+      {
+        "name": "properties",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "<anonymous>~onKeyDown",
+    "name": "onKeyDown",
+    "longname": "<anonymous>~onKeyDown",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+    "line": 130,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "KeyboardEvent",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "CompareOverlayView",
     "name": "CompareOverlayView",
     "longname": "CompareOverlayView",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 101,
+    "line": 90,
     "description": "",
     "params": [
       {
@@ -8912,54 +9153,17 @@
         "type": "function",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "props.onOpenCurtain",
+        "type": "function",
+        "optional": false,
+        "description": "Opens the curtain view with this calibration."
       }
     ],
     "returns": [
       {
         "type": "React.ReactElement",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "hasActiveModalDialog",
-    "name": "hasActiveModalDialog",
-    "longname": "hasActiveModalDialog",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 66,
-    "description": "",
-    "params": [],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "isOwnKeyTarget",
-    "name": "isOwnKeyTarget",
-    "longname": "isOwnKeyTarget",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 59,
-    "description": "Keys typed into fields (and controls that handle their own arrows) must not nudge the page.",
-    "params": [
-      {
-        "name": "target",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
         "description": ""
       }
     ],
@@ -8972,7 +9176,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 75,
+    "line": 63,
     "description": "",
     "params": [
       {
@@ -8997,7 +9201,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 155,
+    "line": 145,
     "description": "",
     "params": [
       {
@@ -9017,7 +9221,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 181,
+    "line": 171,
     "description": "",
     "params": [
       {
@@ -9037,7 +9241,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 48,
+    "line": 53,
     "description": "",
     "params": [],
     "returns": [],
@@ -9221,6 +9425,87 @@
     "examples": 0
   },
   {
+    "id": "module:compareViewKeys",
+    "name": "compareViewKeys",
+    "longname": "module:compareViewKeys",
+    "kind": "module",
+    "scope": null,
+    "file": "src/components/DocumentViewer/compareViewKeys.js",
+    "line": 2,
+    "description": "File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full-surface compare views (CompareOverlayView.jsx, CompareCurtainView.jsx): which focused el...",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:compareViewKeys.hasActiveModalDialog",
+    "name": "hasActiveModalDialog",
+    "longname": "module:compareViewKeys.hasActiveModalDialog",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/DocumentViewer/compareViewKeys.js",
+    "line": 37,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareViewKeys.isOwnKeyTarget",
+    "name": "isOwnKeyTarget",
+    "longname": "module:compareViewKeys.isOwnKeyTarget",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/DocumentViewer/compareViewKeys.js",
+    "line": 18,
+    "description": "Keys typed into fields (and controls that handle their own arrows) must not reach the view.",
+    "params": [
+      {
+        "name": "target",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareViewKeys.shouldEscapeCloseView",
+    "name": "shouldEscapeCloseView",
+    "longname": "module:compareViewKeys.shouldEscapeCloseView",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/DocumentViewer/compareViewKeys.js",
+    "line": 31,
+    "description": "Escape closes the view unless a text field has focus (Escape undoes its typed value there).",
+    "params": [
+      {
+        "name": "target",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "COLLAPSE_DELAY_MS",
     "name": "COLLAPSE_DELAY_MS",
     "longname": "COLLAPSE_DELAY_MS",
@@ -9278,7 +9563,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 423,
+    "line": 430,
     "description": "",
     "params": [
       {
@@ -9303,7 +9588,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 331,
+    "line": 338,
     "description": "",
     "params": [],
     "returns": [
@@ -9321,7 +9606,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 324,
+    "line": 331,
     "description": "",
     "params": [
       {
@@ -9341,7 +9626,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 302,
+    "line": 309,
     "description": "Overview row activation: show the document's first page and keep the overview open.",
     "params": [],
     "returns": [],
@@ -9354,7 +9639,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 335,
+    "line": 342,
     "description": "",
     "params": [
       {
@@ -9374,7 +9659,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 260,
+    "line": 267,
     "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
     "params": [
       {
@@ -10248,7 +10533,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-    "line": 131,
+    "line": 133,
     "description": "Renders the toolbar for the document viewer by delegating to .",
     "params": [
       {
@@ -10362,7 +10647,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
-    "line": 29,
+    "line": 40,
     "description": "",
     "params": [
       {
@@ -10915,7 +11200,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1546,
+    "line": 1550,
     "description": "Open compare mode when needed and make the right pane the default target.",
     "params": [],
     "returns": [
@@ -10933,7 +11218,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1538,
+    "line": 1542,
     "description": "",
     "params": [],
     "returns": [
@@ -10951,7 +11236,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1653,
+    "line": 1657,
     "description": "Mouse down handler for the thumbnail resizer; listens for mousemove/up on window.",
     "params": [
       {
@@ -11125,7 +11410,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1574,
+    "line": 1578,
     "description": "Close compare mode without affecting the left page.",
     "params": [],
     "returns": [
@@ -11237,7 +11522,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1300,
+    "line": 1304,
     "description": "Jump to the first page of the first visible document.",
     "params": [
       {
@@ -11262,7 +11547,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1256,
+    "line": 1260,
     "description": "Jump to the first visible page in the requested target pane.",
     "params": [
       {
@@ -11287,7 +11572,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1312,
+    "line": 1316,
     "description": "Jump to the first page of the last visible document.",
     "params": [
       {
@@ -11312,7 +11597,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1265,
+    "line": 1269,
     "description": "Jump to the last visible page in the requested target pane.",
     "params": [
       {
@@ -11337,7 +11622,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1288,
+    "line": 1292,
     "description": "Jump to the first page of the next visible document.",
     "params": [
       {
@@ -11362,7 +11647,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1247,
+    "line": 1251,
     "description": "Move one page forward in the requested target pane.",
     "params": [
       {
@@ -11387,7 +11672,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1276,
+    "line": 1280,
     "description": "Jump to the first page of the previous visible document (or to the current document start when the active pane already points inside the first visible document).",
     "params": [
       {
@@ -11412,7 +11697,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1238,
+    "line": 1242,
     "description": "Move one page backward in the requested target pane.",
     "params": [
       {
@@ -11437,7 +11722,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1606,
+    "line": 1610,
     "description": "",
     "params": [
       {
@@ -11457,7 +11742,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1556,
+    "line": 1560,
     "description": "Toggle compare mode.",
     "params": [],
     "returns": [],
@@ -11470,7 +11755,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1618,
+    "line": 1622,
     "description": "",
     "params": [
       {
@@ -11490,7 +11775,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1154,
+    "line": 1158,
     "description": "Change the primary page using an original page number (or a visible-page updater function when called from navigation helpers).",
     "params": [
       {
@@ -11515,7 +11800,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1202,
+    "line": 1206,
     "description": "Keep requested-page state and the actually displayed page synchronized for diagnostics.",
     "params": [
       {
@@ -11540,7 +11825,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1163,
+    "line": 1167,
     "description": "Change the primary page by a visible page number from the thumbnail strip.",
     "params": [
       {
@@ -11596,7 +11881,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1029,
+    "line": 1033,
     "description": "Immediately exclude every page that belongs to the same document as the provided original page index.",
     "params": [
       {
@@ -11621,7 +11906,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 991,
+    "line": 995,
     "description": "Immediately exclude a page from the active selection and apply the filtered session.",
     "params": [
       {
@@ -11870,7 +12155,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1739,
+    "line": 1743,
     "description": "",
     "params": [
       {
@@ -12070,7 +12355,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1106,
+    "line": 1110,
     "description": "Resolve the next original 1-based page number from a visible-page update.",
     "params": [
       {
@@ -12101,7 +12386,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1589,
+    "line": 1593,
     "description": "Select a page for the right-hand compare pane.",
     "params": [
       {
@@ -12151,7 +12436,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1531,
+    "line": 1535,
     "description": "Set the default pane for compare-aware navigation and editing actions.",
     "params": [
       {
@@ -12176,7 +12461,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1190,
+    "line": 1194,
     "description": "Change the compare page using an original page number (or a visible-page updater function when called from compare navigation helpers).",
     "params": [
       {
@@ -12201,7 +12486,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1519,
+    "line": 1523,
     "description": "Setter for the editing controls visibility.",
     "params": [
       {
@@ -12221,7 +12506,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1176,
+    "line": 1180,
     "description": "Change the compare page by a visible page number from the toolbar page field.",
     "params": [
       {
@@ -12246,7 +12531,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1426,
+    "line": 1430,
     "description": "Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM').",
     "params": [],
     "returns": [],
@@ -12259,7 +12544,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1230,
+    "line": 1234,
     "description": "The thumbnail pane should react immediately when the user changes page.",
     "params": [],
     "returns": [],
@@ -12272,7 +12557,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1503,
+    "line": 1507,
     "description": "Toggle between the two fit modes from the page surface.",
     "params": [],
     "returns": [],
@@ -12285,7 +12570,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1129,
+    "line": 1133,
     "description": "Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number.",
     "params": [
       {
@@ -13834,7 +14119,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 229,
+    "line": 230,
     "description": "",
     "params": [],
     "returns": [],
@@ -20243,13 +20528,332 @@
     "examples": 0
   },
   {
+    "id": "module:compareCurtain.buildCurtainClipPath",
+    "name": "buildCurtainClipPath",
+    "longname": "module:compareCurtain.buildCurtainClipPath",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 88,
+    "description": "CSS clip of the top page (page B): everything on the A side of the border is cut away.",
+    "params": [
+      {
+        "name": "mode",
+        "type": "CurtainMode",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "position",
+        "type": "number",
+        "optional": false,
+        "description": "Percent of the stage."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "A clip-path value."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.buildCurtainHandleStyle",
+    "name": "buildCurtainHandleStyle",
+    "longname": "module:compareCurtain.buildCurtainHandleStyle",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 102,
+    "description": "Position of the grab bar on the border.",
+    "params": [
+      {
+        "name": "mode",
+        "type": "CurtainMode",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "position",
+        "type": "number",
+        "optional": false,
+        "description": "Percent of the stage."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.clampCurtainPosition",
+    "name": "clampCurtainPosition",
+    "longname": "module:compareCurtain.clampCurtainPosition",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 61,
+    "description": "Clamp a border position to [0, 100] with two decimals; non-numbers fall back to 50.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.COMPARE_CURTAIN_POSITION",
+    "name": "COMPARE_CURTAIN_POSITION",
+    "longname": "module:compareCurtain.COMPARE_CURTAIN_POSITION",
+    "kind": "constant",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 27,
+    "description": "Border position range and keyboard steps (percent of the stage).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain",
+    "name": "compareCurtain",
+    "longname": "module:compareCurtain",
+    "kind": "module",
+    "scope": null,
+    "file": "src/utils/compareCurtain.js",
+    "line": 2,
+    "description": "File: src/utils/compareCurtain.js Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A (left/primary) below and page B (right/compare) above,...",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.compareCurtainReducer",
+    "name": "compareCurtainReducer",
+    "longname": "module:compareCurtain.compareCurtainReducer",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 170,
+    "description": "Reducer for the curtain view.",
+    "params": [
+      {
+        "name": "state",
+        "type": "CompareCurtainState",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "action",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "CompareCurtainState",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain~CompareCurtainState",
+    "name": "CompareCurtainState",
+    "longname": "module:compareCurtain~CompareCurtainState",
+    "kind": "typedef",
+    "scope": "inner",
+    "file": "src/utils/compareCurtain.js",
+    "line": 20,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain~CurtainMode",
+    "name": "CurtainMode",
+    "longname": "module:compareCurtain~CurtainMode",
+    "kind": "typedef",
+    "scope": "inner",
+    "file": "src/utils/compareCurtain.js",
+    "line": 18,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.curtainPositionFromPointer",
+    "name": "curtainPositionFromPointer",
+    "longname": "module:compareCurtain.curtainPositionFromPointer",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 117,
+    "description": "Border position under a pointer: the share of the stage along the moving axis (y for the horizontal border, x for the vertical one).",
+    "params": [
+      {
+        "name": "mode",
+        "type": "CurtainMode",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "rect",
+        "type": "Object",
+        "optional": false,
+        "description": "Stage bounds."
+      },
+      {
+        "name": "clientX",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "clientY",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain~normalizeMode",
+    "name": "normalizeMode",
+    "longname": "module:compareCurtain~normalizeMode",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/compareCurtain.js",
+    "line": 51,
+    "description": "",
+    "params": [
+      {
+        "name": "mode",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "CurtainMode",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.resolveCurtainKeyAction",
+    "name": "resolveCurtainKeyAction",
+    "longname": "module:compareCurtain.resolveCurtainKeyAction",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 133,
+    "description": "Map a key press on the border to a reducer action: Left/Up −1 %, Right/Down +1 %, Shift ×10.",
+    "params": [
+      {
+        "name": "event",
+        "type": "KeyboardEvent|Object|null",
+        "optional": false,
+        "description": "A keydown event or { key, shiftKey, ... } ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain.selectCurtainPosition",
+    "name": "selectCurtainPosition",
+    "longname": "module:compareCurtain.selectCurtainPosition",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareCurtain.js",
+    "line": 75,
+    "description": "The border position of the current mode.",
+    "params": [
+      {
+        "name": "state",
+        "type": "CompareCurtainState|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:compareCurtain~withPosition",
+    "name": "withPosition",
+    "longname": "module:compareCurtain~withPosition",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/compareCurtain.js",
+    "line": 153,
+    "description": "",
+    "params": [
+      {
+        "name": "state",
+        "type": "CompareCurtainState",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "value",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "CompareCurtainState",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module:compareOverlay.clampOverlayOpacity",
     "name": "clampOverlayOpacity",
     "longname": "module:compareOverlay.clampOverlayOpacity",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 45,
+    "line": 48,
     "description": "Clamp an opacity to whole percents in [0, 100]; non-numbers fall back to the default.",
     "params": [
       {
@@ -20274,7 +20878,7 @@
     "kind": "constant",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 25,
+    "line": 27,
     "description": "Opacity range and steps of the overlay slider (percent).",
     "params": [],
     "returns": [],
@@ -20300,7 +20904,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 74,
+    "line": 90,
     "description": "Reducer for the overlay settings.",
     "params": [
       {
@@ -20344,7 +20948,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 59,
+    "line": 62,
     "description": "The page under the top page.",
     "params": [
       {
@@ -20363,13 +20967,38 @@
     "examples": 0
   },
   {
+    "id": "module:compareOverlay.hasCompareCalibration",
+    "name": "hasCompareCalibration",
+    "longname": "module:compareOverlay.hasCompareCalibration",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/compareOverlay.js",
+    "line": 73,
+    "description": "True when a calibration exists in the viewer context: the overlay view has been opened since compare mode started.",
+    "params": [
+      {
+        "name": "state",
+        "type": "CompareOverlayState|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module:compareOverlay.resolveOverlayNudgeKeyAction",
     "name": "resolveOverlayNudgeKeyAction",
     "longname": "module:compareOverlay.resolveOverlayNudgeKeyAction",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 129,
+    "line": 149,
     "description": "Nudge mode: arrow keys move the top page only (1 px, Shift 10 px), as on the move control.",
     "params": [
       {
@@ -20400,7 +21029,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 103,
+    "line": 123,
     "description": "Map a key press on the opacity slider to a reducer action: Left/Down −1 %, Right/Up +1 %, Shift ×10, Home 0 %, End 100 %.",
     "params": [
       {
@@ -20425,7 +21054,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/compareOverlay.js",
-    "line": 140,
+    "line": 160,
     "description": "The calibration as JSON for support cases: { &quot;A&quot;: transform, &quot;B&quot;: transform } , where A is the primary (left) page and B the compare (right) page.",
     "params": [
       {

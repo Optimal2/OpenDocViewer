@@ -19,8 +19,11 @@
  *   arrow keys move the top page (1 px, Shift 10 px).
  * - "Reset to compare" restores the transforms from when the view was opened; "copy calibration"
  *   writes `{ A, B }` as JSON to the clipboard for support cases.
- * - Escape or Close returns to the compare view. The calibration (transforms, top page, opacity)
- *   lives in the viewer context, so it survives closing and reopening the view.
+ * - Escape or Close returns to the compare view (Escape also from the opacity slider; text fields
+ *   keep Escape for themselves). The calibration (transforms, top page, opacity) lives in the viewer
+ *   context, so it survives closing and reopening the view.
+ * - "Curtain" opens the curtain view (CompareCurtainView.jsx) with this calibration; its Close
+ *   returns here.
  *
  * Design note: docs-src/compare-transform.md (section "Overlay view").
  *
@@ -44,29 +47,14 @@ import {
   resolveOverlayOpacityKeyAction,
   serializeCompareCalibration,
 } from '../../utils/compareOverlay.js';
+import CompareCurtainButton from './CompareCurtainButton.jsx';
+import { hasActiveModalDialog, isOwnKeyTarget, shouldEscapeCloseView } from './compareViewKeys.js';
 
 /** @typedef {'primary'|'compare'} OverlayTarget */
 
 const TARGETS = /** @type {Array<OverlayTarget>} */ (['primary', 'compare']);
 const DRAG_THRESHOLD_PX = 3;
 const COPY_STATUS_MS = 4000;
-
-/**
- * Keys typed into fields (and controls that handle their own arrows) must not nudge the page.
- * @param {*} target
- * @returns {boolean}
- */
-function isOwnKeyTarget(target) {
-  if (!(target instanceof Element)) return false;
-  if (target.isContentEditable) return true;
-  return !!target.closest('input, textarea, select, [contenteditable="true"], [data-odv-shortcuts="off"]');
-}
-
-/** @returns {boolean} */
-function hasActiveModalDialog() {
-  return typeof document !== 'undefined'
-    && !!document.querySelector('[role="dialog"][aria-modal="true"], dialog[open][aria-modal="true"]');
-}
 
 /**
  * @param {{ rotation:number, brightness:number, contrast:number }} properties
@@ -96,6 +84,7 @@ function needsCanvas(properties) {
  * @param {boolean} props.canResetToCompare
  * @param {function(): void} props.onResetToCompare
  * @param {function(): void} props.onClose
+ * @param {function(): void=} props.onOpenCurtain Opens the curtain view with this calibration.
  * @returns {React.ReactElement}
  */
 const CompareOverlayView = ({
@@ -115,6 +104,7 @@ const CompareOverlayView = ({
   canResetToCompare,
   onResetToCompare,
   onClose,
+  onOpenCurtain,
 }) => {
   const { t } = useTranslation('common');
   const top = overlay?.top === 'primary' ? 'primary' : 'compare';
@@ -157,7 +147,7 @@ const CompareOverlayView = ({
       if (hasActiveModalDialog()) return;
       const latest = latestRef.current;
       if (event.key === 'Escape') {
-        if (isOwnKeyTarget(event.target)) return;
+        if (!shouldEscapeCloseView(event.target)) return;
         event.preventDefault();
         latest.onClose();
         return;
@@ -406,6 +396,10 @@ const CompareOverlayView = ({
           <span className="material-icons" aria-hidden="true">content_copy</span>
         </button>
 
+        {typeof onOpenCurtain === 'function' ? (
+          <CompareCurtainButton calibrated onOpen={onOpenCurtain} className="compare-overlay-curtain" showLabel />
+        ) : null}
+
         <span className="compare-overlay-status" role="status" aria-live="polite">
           {copyStatus === 'copied' ? t('compareOverlay.copied', { defaultValue: 'Calibration copied' }) : null}
           {copyStatus === 'failed' ? t('compareOverlay.copyFailed', { defaultValue: 'Could not copy the calibration' }) : null}
@@ -493,6 +487,7 @@ CompareOverlayView.propTypes = {
   canResetToCompare: PropTypes.bool.isRequired,
   onResetToCompare: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  onOpenCurtain: PropTypes.func,
 };
 
 export default React.memo(CompareOverlayView);

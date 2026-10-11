@@ -117,6 +117,17 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
             <p>{t('help.sections.compare.body', {
               defaultValue: 'Compare mode shows two pages side by side. The left page is the primary page and the right page is the compare page.',
             })}</p>
+            <ul>
+              <li>{t('help.sections.compare.fineTune', {
+                defaultValue: 'Fine-tune: each page has a Fine-tune bar for zoom (0.1 %), position (px) and rotation (0.1°). Drag the page to move it, Ctrl + wheel zooms only that page.',
+              })}</li>
+              <li>{t('help.sections.compare.overlay', {
+                defaultValue: 'Overlay: the stacked-layers button puts page B on top of page A. The slider sets the opacity of the top page; calibrate with the Fine-tune bars, drag or nudge mode. Close or Esc returns to the compare view and keeps the calibration.',
+              })}</li>
+              <li>{t('help.sections.compare.curtain', {
+                defaultValue: 'Curtain: shows the calibrated pages with a border you drag – page A on one side, page B on the other. Choose Horizontal or Vertical; arrow keys move the border 1 % (Shift: 10 %). Open it from the overlay view, or from the toolbar once the overlay view has calibrated the pages. Close or Esc returns to where you opened it.',
+              })}</li>
+            </ul>
           </section>
 
           <section className="odv-help-section">

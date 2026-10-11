@@ -171,9 +171,9 @@ describe('provider compare transform (selector + setter)', () => {
 
   it('keeps the overlay view settings (top page, opacity) next to the transforms', () => {
     const api = ViewerProvider({ children: null }).props.value;
-    expect(api.compareOverlay).toEqual({ opacity: 50, top: 'compare' });
+    expect(api.compareOverlay).toEqual({ opacity: 50, top: 'compare', calibrated: false });
     api.dispatchCompareOverlay({ type: 'setOpacity', value: 140 });
     api.dispatchCompareOverlay({ type: 'swap' });
-    expect(harness.states.find((state) => typeof state === 'object' && state !== null && 'opacity' in state && 'top' in state)).toEqual({ opacity: 100, top: 'primary' });
+    expect(harness.states.find((state) => typeof state === 'object' && state !== null && 'opacity' in state && 'top' in state)).toEqual({ opacity: 100, top: 'primary', calibrated: false });
   });
 });

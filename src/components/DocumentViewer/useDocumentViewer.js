@@ -876,6 +876,10 @@ export function useDocumentViewer() {
     openCompareOverlay,
     closeCompareOverlay,
     resetCompareOverlayCalibration,
+    compareCalibrated,
+    compareCurtainOpen,
+    openCompareCurtain,
+    closeCompareCurtain,
   } = useCompareOverlay(isComparing && compareOriginalPageNumber != null);
 
   const primaryQuarterTurn = splitTransformRotation(primaryTransform.rotation).quarterTurn;
@@ -1799,7 +1803,7 @@ export function useDocumentViewer() {
     onOpenPrintDialog: openPrintDialog,
     keyboardPrintShortcutBehavior,
     printEnabled: printEnabled && !printSelectionWorkspaceOpen,
-    interactionSuspended: printSelectionWorkspaceOpen || compareOverlayOpen,
+    interactionSuspended: printSelectionWorkspaceOpen || compareOverlayOpen || compareCurtainOpen,
   });
 
   // --- Public API ---------------------------------------------------------------
@@ -1821,6 +1825,10 @@ export function useDocumentViewer() {
     openCompareOverlay,
     closeCompareOverlay,
     resetCompareOverlayCalibration,
+    compareCalibrated,
+    compareCurtainOpen,
+    openCompareCurtain,
+    closeCompareCurtain,
 
     thumbnailSelectionPageNumber,
     compareThumbnailPageNumber,

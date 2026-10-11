@@ -478,6 +478,38 @@
   </figure>
 </details>
 
+<h3 id="fler-compare-finetune">Fine-tune zoom, position and rotation</h3>
+<p>In compare mode, each page has a <strong>Fine-tune</strong> bar above it. Collapsed, the bar shows a summary, for example <em>100.0 % · 0.0°</em>. Click it to show the controls for that page:</p>
+<ul>
+  <li><strong>Zoom</strong> in percent with one decimal. The − and + buttons change it by 0.1 % (with <kbd>Shift</kbd>: 1 %). The zoom buttons along the top of the page still step by 10 % and keep the fine adjustment.</li>
+  <li><strong>Position</strong>: X and Y in pixels. Drag the page with the mouse, or select the move button (four arrows) and use the arrow keys: 1 px per press, 10 px with <kbd>Shift</kbd>.</li>
+  <li><strong>Rotation</strong> in degrees with one decimal. The ↺ and ↻ buttons turn the page 0.1° (with <kbd>Shift</kbd>: 1°). A small counter-clockwise tilt shows as a negative number, for example −0.3. The 90° buttons in the toolbar work as before and keep the fine rotation.</li>
+  <li><strong>Reset</strong> (circular arrow) returns the page to 100 %, position 0 and rotation 0.</li>
+</ul>
+<p>You can type into the fields with a decimal comma or a decimal point – 12,5 and 12.5 both work. <kbd>Enter</kbd>, or leaving the field, applies the value. <kbd>Esc</kbd> undoes what you typed, and <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> step the value (with <kbd>Shift</kbd>: ten steps). While the bar is open, dragging the page moves it instead of scrolling, and <kbd>Ctrl</kbd> + mouse wheel over the page zooms only that page, 1 % per notch. Close the bar to scroll and zoom as usual again.</p>
+
+<h3 id="fler-compare-overlay">Lay the pages on top of each other (overlay)</h3>
+<p>Small differences are easiest to see when the pages lie on top of each other. Click the <strong>overlay button</strong> (stacked layers) next to the compare button – it is only there while two pages are compared. The overlay view fills the window and has its own toolbar. Page A (the left page, blue) lies underneath and page B (the right page, orange) on top. Both keep the zoom, position and rotation you set in the compare view.</p>
+<ul>
+  <li><strong>Opacity</strong>: the slider sets how visible the top page is, from 0 % (invisible) to 100 % (fully opaque). It starts at 50 %. With the slider selected, <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd> change it by 1 %, with <kbd>Shift</kbd> by 10 %, and <kbd>Home</kbd> / <kbd>End</kbd> go to 0 % and 100 %.</li>
+  <li><strong>Swap</strong> (up and down arrows) puts the other page on top. The slider always controls the page on top.</li>
+  <li><strong>Calibrate</strong>: the same fine-tune bars as in the compare view, marked A and B, are shown above the pages. Dragging the pages moves the top page, and <kbd>Ctrl</kbd> + mouse wheel zooms the top page.</li>
+  <li><strong>Nudge mode</strong> (the move button): while it is on, the arrow keys move the top page 1 px (with <kbd>Shift</kbd>: 10 px). Click the pages first so that the keys go there.</li>
+  <li><strong>Reset to compare</strong> (clock with an arrow) restores the zoom, position and rotation the pages had when you opened the overlay view.</li>
+  <li><strong>Copy calibration</strong> copies the settings of both pages as text (JSON), so you can paste them into a support case.</li>
+  <li><strong>Curtain</strong> opens the curtain view with the same calibration, see the next section.</li>
+  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to the compare view. The calibration is kept: the pages keep their adjustments, and the next time you open the overlay view the opacity and the top page are as you left them.</li>
+</ul>
+
+<h3 id="fler-compare-curtain">Drag a border between the pages (curtain)</h3>
+<p>In the curtain view the two calibrated pages lie in the same place, and a border you drag decides where you see which page: page A on one side of the border and page B on the other. This shows quickly whether lines and text continue unbroken across the border.</p>
+<ul>
+  <li><strong>Open</strong>: click <strong>Curtain</strong> in the overlay view's toolbar. In the compare view the curtain button sits next to the overlay button. It can only be used once you have opened the overlay view, which calibrates the pages – until then it is grey, and its tooltip explains why.</li>
+  <li><strong>Horizontal / Vertical</strong> chooses the direction of the border. Vertical: the border is upright, page A shows on the left and page B on the right. Horizontal: the border is level, page A shows above and page B below. The labels in the corners show which page, with its page number, is where.</li>
+  <li><strong>Move the border</strong>: drag the grip on the border with the mouse or a finger. The border is selected when the view opens, so the <kbd>arrow keys</kbd> move it at once: 1 % per press, 10 % with <kbd>Shift</kbd>. Each direction remembers its own position while the view is open.</li>
+  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to where you opened the curtain view: the overlay view or the compare view. The curtain view never changes the calibration.</li>
+</ul>
+
 <h2 id="fler-metadata">Document metadata</h2>
 <p>Right-click a thumbnail or the page and choose <strong>Show document metadata</strong>. You see the information the system that opened ODV sent with the document – for example ID, name, department, date, number of pages and document ID. Which fields exist depends on that system. The information is for display only and cannot be changed in ODV.</p>
 <figure class="wide">

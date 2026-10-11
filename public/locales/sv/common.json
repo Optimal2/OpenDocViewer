@@ -618,6 +618,22 @@
     "closeShort": "Stäng",
     "stage": "Sidorna lagda på varandra. Dra för att flytta den översta sidan; Ctrl+hjul zoomar den."
   },
+  "compareCurtain": {
+    "region": "Gardinvy: sida A och sida B på var sin sida om en gräns",
+    "toolbar": "Kontroller för gardinvyn",
+    "title": "Gardin",
+    "mode": "Gränsens riktning",
+    "horizontal": "Horisontell",
+    "vertical": "Vertikal",
+    "border": "Gräns mellan sida A (vänster) och sida B (höger). Piltangenterna flyttar den 1 %, Shift 10 %.",
+    "borderHorizontal": "Gräns mellan sida A (ovanför) och sida B (nedanför). Piltangenterna flyttar den 1 %, Shift 10 %.",
+    "sideA": "A · sida {page}",
+    "sideB": "B · sida {page}",
+    "close": "Stäng gardinvyn och gå tillbaka",
+    "closeShort": "Stäng",
+    "open": "Gardin: visa de kalibrerade sidorna med en gräns du kan dra",
+    "needsCalibration": "Gardin: öppna överlagringsvyn först – den kalibrerar de två sidorna"
+  },
   "generic": {
     "loading": "Laddar"
   },
@@ -693,7 +709,10 @@
       },
       "compare": {
         "title": "Jämförelsevy",
-        "body": "Jämförelsevy visar två sidor bredvid varandra. Vänster sida är huvudsidan och höger sida är jämförelsesidan."
+        "body": "Jämförelsevy visar två sidor bredvid varandra. Vänster sida är huvudsidan och höger sida är jämförelsesidan.",
+        "fineTune": "Finjustera: varje sida har en rad Finjustera för zoom (0,1 %), läge (px) och rotation (0,1°). Dra i sidan för att flytta den, Ctrl + mushjulet zoomar bara den sidan.",
+        "overlay": "Överlagring: knappen med staplade lager lägger sida B ovanpå sida A. Reglaget styr hur synlig den översta sidan är; kalibrera med raderna Finjustera, genom att dra eller med knuffläget. Stäng eller Esc tar dig tillbaka till jämförelsevyn och kalibreringen sparas.",
+        "curtain": "Gardin: visar de kalibrerade sidorna med en gräns som du drar – sida A på ena sidan, sida B på den andra. Välj Horisontell eller Vertikal; piltangenterna flyttar gränsen 1 % (Shift: 10 %). Öppna den från överlagringsvyn, eller från verktygsfältet när överlagringsvyn har kalibrerat sidorna. Stäng eller Esc tar dig tillbaka dit du öppnade den."
       },
       "thumbnails": {
         "title": "Miniatyrer och dokumentindelning",

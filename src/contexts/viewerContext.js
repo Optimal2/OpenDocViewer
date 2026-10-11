@@ -224,6 +224,7 @@ import { createContext } from 'react';
  * @typedef {Object} CompareOverlayState
  * @property {number} opacity Opacity of the top page in percent (0–100).
  * @property {('primary'|'compare')} top The page drawn on top.
+ * @property {boolean} calibrated True once the overlay view has calibrated in this compare session.
  */
 
 /**

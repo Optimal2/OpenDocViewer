@@ -1,12 +1,33 @@
 # OpenDocViewer / src/utils
 
-File count: 49. Line count: 18925. JSDoc symbol count: 745.
+File count: 50. Line count: 19132. JSDoc symbol count: 759.
+
+## src/utils/compareCurtain.js
+
+File: src/utils/compareCurtain.js Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above,...
+
+Exports: `COMPARE_CURTAIN_POSITION`, `COMPARE_CURTAIN_MODES`, `INITIAL_COMPARE_CURTAIN_STATE`, `clampCurtainPosition`, `selectCurtainPosition`, `buildCurtainClipPath`, `buildCurtainHandleStyle`, `curtainPositionFromPointer`, `resolveCurtainKeyAction`, `compareCurtainReducer`
+
+Symbols:
+
+- `module:compareCurtain` (module) - File: src/utils/compareCurtain.js Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above,...
+- `module:compareCurtain~CurtainMode` (typedef) - No description.
+- `module:compareCurtain~CompareCurtainState` (typedef) - No description.
+- `module:compareCurtain.COMPARE_CURTAIN_POSITION` (constant) - Border position range and keyboard steps \(percent of the stage\).
+- `module:compareCurtain~normalizeMode` (function) - No description.
+- `module:compareCurtain.clampCurtainPosition` (function) - Clamp a border position to \[0, 100\] with two decimals; non\-numbers fall back to 50.
+- `module:compareCurtain.selectCurtainPosition` (function) - The border position of the current mode.
+- `module:compareCurtain.buildCurtainClipPath` (function) - CSS clip of the top page \(page B\): everything on the A side of the border is cut away.
+- `module:compareCurtain.buildCurtainHandleStyle` (function) - Position of the grab bar on the border.
+- `module:compareCurtain.curtainPositionFromPointer` (function) - Border position under a pointer: the share of the stage along the moving axis \(y for the horizontal border, x for the vertical one\).
+- `module:compareCurtain.resolveCurtainKeyAction` (function) - Map a key press on the border to a reducer action: Left/Up −1 %, Right/Down \+1 %, Shift ×10.
+- `module:compareCurtain~withPosition` (function) - No description.
 
 ## src/utils/compareOverlay.js
 
 File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi\-transparent.
 
-Exports: `COMPARE_OVERLAY_OPACITY`, `INITIAL_COMPARE_OVERLAY_STATE`, `clampOverlayOpacity`, `getOverlayBottomTarget`, `compareOverlayReducer`, `resolveOverlayOpacityKeyAction`, `resolveOverlayNudgeKeyAction`, `serializeCompareCalibration`
+Exports: `COMPARE_OVERLAY_OPACITY`, `INITIAL_COMPARE_OVERLAY_STATE`, `clampOverlayOpacity`, `getOverlayBottomTarget`, `hasCompareCalibration`, `compareOverlayReducer`, `resolveOverlayOpacityKeyAction`, `resolveOverlayNudgeKeyAction`, `serializeCompareCalibration`
 
 Local imports: `src/utils/compareTransform.js`
 
@@ -17,6 +38,7 @@ Symbols:
 - `module:compareOverlay.COMPARE_OVERLAY_OPACITY` (constant) - Opacity range and steps of the overlay slider \(percent\).
 - `module:compareOverlay.clampOverlayOpacity` (function) - Clamp an opacity to whole percents in \[0, 100\]; non\-numbers fall back to the default.
 - `module:compareOverlay.getOverlayBottomTarget` (function) - The page under the top page.
+- `module:compareOverlay.hasCompareCalibration` (function) - True when a calibration exists in the viewer context: the overlay view has been opened since compare mode started.
 - `module:compareOverlay.compareOverlayReducer` (function) - Reducer for the overlay settings.
 - `module:compareOverlay.resolveOverlayOpacityKeyAction` (function) - Map a key press on the opacity slider to a reducer action: Left/Down −1 %, Right/Up \+1 %, Shift ×10, Home 0 %, End 100 %.
 - `module:compareOverlay.resolveOverlayNudgeKeyAction` (function) - Nudge mode: arrow keys move the top page only \(1 px, Shift 10 px\), as on the move control.

@@ -121,6 +121,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(HTMLElement=): void=} onOpenSignatureOverview - Opens the signature overview dialog; receives the button for focus return.
  * @property {boolean=} canOpenCompareOverlay - True in compare mode with two pages shown.
  * @property {function(): void=} openCompareOverlay - Opens the overlay view of the two compared pages.
+ * @property {boolean=} compareCalibrated - True when the overlay view has calibrated the two pages.
+ * @property {function(): void=} openCompareCurtain - Opens the curtain view of the calibrated pages.
  */
 
 /**
@@ -214,6 +216,8 @@ const DocumentViewerToolbar = ({
   onOpenSignatureOverview,
   canOpenCompareOverlay = false,
   openCompareOverlay,
+  compareCalibrated = false,
+  openCompareCurtain,
 }) => {
   return (
     <DocumentToolbar
@@ -302,6 +306,8 @@ const DocumentViewerToolbar = ({
       onOpenSignatureOverview={onOpenSignatureOverview}
       canOpenCompareOverlay={canOpenCompareOverlay}
       openCompareOverlay={openCompareOverlay}
+      compareCalibrated={compareCalibrated}
+      openCompareCurtain={openCompareCurtain}
     />
   );
 };
@@ -432,6 +438,8 @@ DocumentViewerToolbar.propTypes = {
   onOpenSignatureOverview: PropTypes.func,
   canOpenCompareOverlay: PropTypes.bool,
   openCompareOverlay: PropTypes.func,
+  compareCalibrated: PropTypes.bool,
+  openCompareCurtain: PropTypes.func,
 };
 
 export default React.memo(DocumentViewerToolbar);

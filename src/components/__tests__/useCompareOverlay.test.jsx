@@ -4,7 +4,8 @@
  * Open/close state of the compare overlay view (hooks/useCompareOverlay.js) against a viewer
  * context that holds the real compare-transform and overlay reducers: the round trip keeps the
  * transforms and the overlay settings, "reset to compare" restores the calibration from when the
- * view was opened, and the view closes itself when compare mode ends.
+ * view was opened, and the view closes itself when compare mode ends. The curtain view opens only
+ * once a calibration exists and its Close returns to the view it was opened from.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -80,7 +81,7 @@ describe('useCompareOverlay', () => {
 
     await run(() => probe.hook.openCompareOverlay());
     expect(probe.context.compareTransforms).toEqual(calibrated);
-    expect(probe.context.compareOverlay).toEqual({ opacity: 30, top: 'primary' });
+    expect(probe.context.compareOverlay).toEqual({ opacity: 30, top: 'primary', calibrated: true });
     expect(probe.hook.compareOverlaySnapshot).toEqual(calibrated);
     await view.unmount();
   });
@@ -109,6 +110,72 @@ describe('useCompareOverlay', () => {
     await view.rerender(false);
     expect(probe.hook.compareOverlayOpen).toBe(false);
     await view.rerender(true);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    await view.unmount();
+  });
+
+  it('curtain: needs a calibration; the overlay view creates it and leaving compare mode clears it', async () => {
+    const view = await mount(true);
+    expect(probe.hook.compareCalibrated).toBe(false);
+    await run(() => expect(probe.hook.openCompareCurtain()).toBe(false));
+    expect(probe.hook.compareCurtainOpen).toBe(false);
+
+    await run(() => probe.hook.openCompareOverlay());
+    expect(probe.hook.compareCalibrated).toBe(true);
+    await run(() => probe.hook.closeCompareOverlay());
+    expect(probe.hook.compareCalibrated).toBe(true);
+
+    await view.rerender(false);
+    expect(probe.hook.compareCalibrated).toBe(false);
+    await view.rerender(true);
+    await run(() => expect(probe.hook.openCompareCurtain()).toBe(false));
+    await view.unmount();
+  });
+
+  it('curtain opened from the compare view: Close returns to the compare view', async () => {
+    const view = await mount(true);
+    await run(() => probe.hook.openCompareOverlay());
+    await run(() => probe.hook.closeCompareOverlay());
+
+    await run(() => expect(probe.hook.openCompareCurtain()).toBe(true));
+    expect(probe.hook.compareCurtainOpen).toBe(true);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    await run(() => probe.hook.closeCompareCurtain());
+    expect(probe.hook.compareCurtainOpen).toBe(false);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    await view.unmount();
+  });
+
+  it('curtain opened from the overlay view: Close returns to the overlay view with its reset point', async () => {
+    const view = await mount(true);
+    await run(() => probe.context.dispatchCompareTransform({ type: 'set', target: 'compare', transform: { dx: 7 } }));
+    const atOverlayOpen = probe.context.compareTransforms;
+    await run(() => probe.hook.openCompareOverlay());
+    await run(() => probe.context.dispatchCompareTransform({ type: 'set', target: 'compare', transform: { dy: 3 } }));
+    const calibrated = probe.context.compareTransforms;
+
+    await run(() => expect(probe.hook.openCompareCurtain()).toBe(true));
+    expect(probe.hook.compareCurtainOpen).toBe(true);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    expect(probe.context.compareTransforms).toEqual(calibrated);
+
+    await run(() => probe.hook.closeCompareCurtain());
+    expect(probe.hook.compareCurtainOpen).toBe(false);
+    expect(probe.hook.compareOverlayOpen).toBe(true);
+    expect(probe.hook.compareOverlaySnapshot).toEqual(atOverlayOpen);
+    expect(probe.context.compareTransforms).toEqual(calibrated);
+    await view.unmount();
+  });
+
+  it('curtain closes with the overlay view when compare mode ends', async () => {
+    const view = await mount(true);
+    await run(() => probe.hook.openCompareOverlay());
+    await run(() => probe.hook.openCompareCurtain());
+    await view.rerender(false);
+    expect(probe.hook.compareCurtainOpen).toBe(false);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    await view.rerender(true);
+    expect(probe.hook.compareCurtainOpen).toBe(false);
     expect(probe.hook.compareOverlayOpen).toBe(false);
     await view.unmount();
   });

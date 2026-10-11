@@ -37,7 +37,7 @@
 - `src/utils/runtimeConfig.js`: 16 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 12 incoming local imports
-- `src/utils/compareTransform.js`: 9 incoming local imports
+- `src/utils/compareTransform.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 7 incoming local imports
 - `src/utils/viewerPreferences.js`: 7 incoming local imports
@@ -49,7 +49,7 @@
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
 - `src/utils/printSanitize.js`: 4 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
+- `src/components/DocumentRender.jsx`: 3 incoming local imports
 - `src/contexts/themeContext.js`: 3 incoming local imports
+- `src/utils/compareOverlay.js`: 3 incoming local imports
 - `src/utils/documentMetadata.js`: 3 incoming local imports
-- `src/utils/objectUrlRegistry.js`: 3 incoming local imports
-- `src/utils/ompThemePreference.js`: 3 incoming local imports
