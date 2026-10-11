@@ -575,6 +575,28 @@
     "factor": "Panelens zoomfaktor",
     "groupLabel": "Zoomkontroller per panel"
   },
+  "compareTransform": {
+    "toolbarPrimary": "Finjustering, vänster sida",
+    "toolbarCompare": "Finjustering, höger sida",
+    "toggle": "Finjustera",
+    "show": "Finjustera zoom, läge och rotation för sidan",
+    "hide": "Dölj finjusteringen för sidan",
+    "summary": "{zoom} % · {rotation}°",
+    "zoomGroup": "Zoom",
+    "zoomField": "Sidans zoom i procent",
+    "zoomIn": "Zooma in 0,1 % (Shift: 1 %)",
+    "zoomOut": "Zooma ut 0,1 % (Shift: 1 %)",
+    "moveGroup": "Läge",
+    "movePad": "Flytta sidan: dra i den, eller använd piltangenterna här (Shift: 10 px)",
+    "dxField": "Vågrät förskjutning i pixlar",
+    "dyField": "Lodrät förskjutning i pixlar",
+    "rotationGroup": "Rotation",
+    "rotationField": "Rotation i grader",
+    "rotateCcw": "Rotera 0,1° moturs (Shift: 1°)",
+    "rotateCw": "Rotera 0,1° medurs (Shift: 1°)",
+    "reset": "Återställ zoom, läge och rotation för sidan",
+    "invalidNumber": "Ange ett tal, till exempel 12,5 eller 12.5"
+  },
   "generic": {
     "loading": "Laddar"
   },

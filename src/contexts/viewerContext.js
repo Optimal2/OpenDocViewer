@@ -200,6 +200,27 @@ import { createContext } from 'react';
  * @property {ViewerRuntimeDiagnostics} runtimeDiagnostics
  * @property {ViewerPageLoadState} pageLoadState
  * @property {function(number, number): void} scheduleSourceWarmup
+ * @property {CompareTransformState} compareTransforms
+ *   Free per-page transform of the compare view (docs-src/compare-transform.md).
+ * @property {function(('primary'|'compare')): CompareTransform} getCompareTransform
+ * @property {function(('primary'|'compare'), (Object|function(CompareTransform): Object)): void} setCompareTransform
+ * @property {function(Object): void} dispatchCompareTransform compareTransformReducer action.
+ */
+
+/**
+ * Per-page compare transform (utils/compareTransform.js): `scale` multiplies the base zoom
+ * (1 = 100 %), `dx`/`dy` are CSS px at transform scale 1, `rotation` is degrees in [0, 360).
+ * @typedef {Object} CompareTransform
+ * @property {number} scale
+ * @property {number} dx
+ * @property {number} dy
+ * @property {number} rotation
+ */
+
+/**
+ * @typedef {Object} CompareTransformState
+ * @property {CompareTransform} primary
+ * @property {CompareTransform} compare
  */
 
 const ViewerContext = createContext(/** @type {ViewerContextValue} */ ({ bundle: null }));

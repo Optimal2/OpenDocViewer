@@ -22,7 +22,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentLoader/workerHandler.js</code> | 301 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
 | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx</code> | 177 | 1 | 2 | high | Session-wide document metadata matrix overlay. |
 | <code>src/components/DocumentMetadataOverlayDialog.jsx</code> | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
-| <code>src/components/DocumentRender.jsx</code> | 1135 | 1 | 25 | high | OpenDocViewer — Active page renderer. |
+| <code>src/components/DocumentRender.jsx</code> | 1148 | 1 | 25 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1592 | 2 | 28 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
@@ -42,16 +42,17 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js</code> | 362 | 1 | 8 | high | Background prebuild/cache for configured &quot;all pages&quot; generated-PDF variants. |
 | <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 667 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 566 | 1 | 3 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
+| <code>src/components/DocumentViewer/CompareTransformControls.jsx</code> | 361 | 1 | 3 | high | Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page&#39;s free transform \(utils/compareTransform.js\): zoom \[−\] \[ 100,0 \] % \[+\] 0.1 % steps \(Shift: 1 |
 | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx</code> | 229 | 1 | 3 | high | Per-pane “post-zoom” controls shown in comparison mode, tucked behind the pane marker ring at the top-left of each pane. |
-| <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 699 | 1 | 6 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
-| <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1072 | 1 | 17 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
+| <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 705 | 1 | 6 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
+| <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1239 | 1 | 18 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
 | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx</code> | 230 | 1 | 1 | high | OpenDocViewer — Document Viewer Thumbnails \(Wrapper\) Provides the deterministic thumbnail list and local width controls for the viewer shell. |
 | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx</code> | 430 | 1 | 5 | high | Toolbar adapter for the document viewer. |
+| <code>src/components/DocumentViewer/hooks/useCompareTransforms.js</code> | 75 | 1 | 5 | high | File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer-side access to the free per-page compare transform kept in the viewer context \(utils/compareTransform.js,... |
 | <code>src/components/DocumentViewer/hooks/useViewerEffects.js</code> | 123 | 1 | 8 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects. |
 | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js</code> | 311 | 1 | 10 | high | Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer. |
-| <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js</code> | 86 | 1 | 7 | high | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
-| <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js</code> | 160 | 1 | 4 | high | Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer. |
-| <code>src/components/DocumentViewer/useDocumentViewer.js</code> | 1905 | 1 | 60 | high | Primary viewer-state hook. |
+| <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js</code> | 162 | 1 | 4 | high | Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer. |
+| <code>src/components/DocumentViewer/useDocumentViewer.js</code> | 1927 | 1 | 60 | high | Primary viewer-state hook. |
 | <code>src/components/ImageRenderer.jsx</code> | 121 | 1 | 2 | high | OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor. |
 | <code>src/components/LoadingMessage.jsx</code> | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
@@ -65,8 +66,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/ViewerProblemNotice.jsx</code> | 285 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 1 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
-| <code>src/contexts/viewerContext.js</code> | 208 | 10 | 9 | medium | Exports ViewerContext. |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2680 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/viewerContext.js</code> | 229 | 11 | 11 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2716 | 1 | 61 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
@@ -88,6 +89,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/PerformanceMonitor.jsx</code> | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | <code>src/schemas/portableBundle.js</code> | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
 | <code>src/types/jsdoc-types.js</code> | 101 | 0 | 13 | high | Centralized JSDoc-only type and callback definitions. |
+| <code>src/utils/compareTransform.js</code> | 344 | 5 | 24 | high | File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary = lef... |
 | <code>src/utils/documentLoadingConfig.js</code> | 1099 | 14 | 34 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
 | <code>src/utils/documentMetadata.js</code> | 404 | 3 | 18 | high | Helpers for resolving document-level metadata from the normalized portable bundle. |
 | <code>src/utils/i18nVersion.js</code> | 69 | 1 | 4 | high | Cache-busting version token for the locale files \( locales/&amp;lt;lng&amp;gt;/common.json?v=&amp;lt;token&amp;gt; \). |

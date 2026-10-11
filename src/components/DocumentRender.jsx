@@ -95,6 +95,8 @@ function isBlobAssetUrl(url) {
  * @param {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} props.customFitSizeLimits
  * @param {function(): void=} props.onToggleFitZoomMode
  * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
+ * @param {string=} props.surfaceTransform CSS transform for the page stage (compare view, see
+ *   utils/compareTransform.js); applied around the page centre without re-rasterising the page.
  * @returns {React.ReactElement}
  */
 const DocumentRender = React.forwardRef(function DocumentRender(
@@ -112,6 +114,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     customFitSizeLimits = null,
     onToggleFitZoomMode,
     onDisplayStateChange = () => {},
+    surfaceTransform = '',
   },
   ref
 ) {
@@ -338,8 +341,18 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       height: stageHeightPx ? `${stageHeightPx}px` : '100%',
       minWidth: '100%',
       minHeight: '100%',
+      ...(surfaceTransform
+        ? {
+            transform: surfaceTransform,
+            // The page sits at the stage's top-left, so its centre is half the scaled page size.
+            transformOrigin: stageWidthPx && stageHeightPx
+              ? `${stageWidthPx / 2}px ${stageHeightPx / 2}px`
+              : '50% 50%',
+            willChange: 'transform',
+          }
+        : null),
     }),
-    [stageHeightPx, stageWidthPx]
+    [stageHeightPx, stageWidthPx, surfaceTransform]
   );
 
   useLayoutEffect(() => {

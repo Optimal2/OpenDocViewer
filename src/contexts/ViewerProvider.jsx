@@ -42,6 +42,11 @@ import {
 import usePdfSignatureReports from '../hooks/usePdfSignatureReports.js';
 import { disposePdfSignatureWorker } from '../utils/pdfSignatureInspector.js';
 import { getSourceFileNameFromUrl } from '../utils/pdfSignatureDocuments.js';
+import {
+  INITIAL_COMPARE_TRANSFORM_STATE,
+  compareTransformReducer,
+  selectCompareTransform,
+} from '../utils/compareTransform.js';
 
 
 /**
@@ -340,6 +345,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const [documentLoadingConfig, setDocumentLoadingConfig] = useState(getDocumentLoadingConfig());
   const [memoryPressureStage, setMemoryPressureStage] = useState('normal');
   const [pdfResolutionBoostState, setPdfResolutionBoostState] = useState({ boostedKeys: [], pendingKeys: [], maxedKeys: [] });
+  // Free per-page transform of the compare view (utils/compareTransform.js). Plain data, so later
+  // compare views can read and write it here instead of owning their own alignment state.
+  const [compareTransforms, setCompareTransforms] = useState(INITIAL_COMPARE_TRANSFORM_STATE);
   const [runtimeDiagnostics, setRuntimeDiagnostics] = useState({
     sessionStartedAtMs: 0,
     loadRunStartedAtMs: 0,
@@ -2596,6 +2604,26 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     });
   }, [resetViewerState]);
 
+  /** @param {Object} action compareTransformReducer action */
+  const dispatchCompareTransform = useCallback((action) => {
+    setCompareTransforms((current) => compareTransformReducer(current, action));
+  }, []);
+
+  /**
+   * Write one page's transform: a partial transform or `current => partial`.
+   * @param {('primary'|'compare')} target
+   * @param {(Object|function(Object): Object)} transform
+   */
+  const setCompareTransform = useCallback((target, transform) => {
+    dispatchCompareTransform({ type: 'set', target, transform });
+  }, [dispatchCompareTransform]);
+
+  /** @param {('primary'|'compare')} target */
+  const getCompareTransform = useCallback(
+    (target) => selectCompareTransform(compareTransforms, target),
+    [compareTransforms]
+  );
+
   const contextValue = useMemo(() => ({
     bundle,
     allPages,
@@ -2635,6 +2663,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     setSignaturePrioritySourceKey,
     getSignatureSourceFileName,
     scheduleSourceWarmup,
+    compareTransforms,
+    getCompareTransform,
+    setCompareTransform,
+    dispatchCompareTransform,
   }), [
     bundle,
     allPages,
@@ -2669,6 +2701,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     signatureReports,
     getSignatureSourceFileName,
     scheduleSourceWarmup,
+    compareTransforms,
+    getCompareTransform,
+    setCompareTransform,
+    dispatchCompareTransform,
   ]);
 
   return (

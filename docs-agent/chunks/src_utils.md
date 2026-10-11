@@ -1,6 +1,27 @@
 # OpenDocViewer / src/utils
 
-File count: 47. Line count: 18426. JSDoc symbol count: 712.
+File count: 48. Line count: 18770. JSDoc symbol count: 736.
+
+## src/utils/compareTransform.js
+
+File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
+
+Exports: `COMPARE_TRANSFORM_LIMITS`, `IDENTITY_COMPARE_TRANSFORM`, `INITIAL_COMPARE_TRANSFORM_STATE`, `normalizeTransformRotation`, `normalizeCompareTransform`, `isIdentityCompareTransform`, `selectCompareTransform`, `splitTransformRotation`, `buildCompareTransformCss`, `compareTransformReducer`, `parseLocaleNumber`, `formatTransformNumber`, `resolveTransformKeyAction`
+
+Symbols:
+
+- `module:compareTransform` (module) - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
+- `module:compareTransform~CompareTransform` (typedef) - Per\-page transform.
+- `module:compareTransform~CompareTransformTarget` (typedef) - No description.
+- `module:compareTransform~CompareTransformState` (typedef) - No description.
+- `module:compareTransform.COMPARE_TRANSFORM_LIMITS` (constant) - Supported range.
+- `module:compareTransform~roundTo` (function) - No description.
+- `module:compareTransform~finiteOr` (function) - No description.
+- `module:compareTransform~normalizeScale` (function) - No description.
+- `module:compareTransform~normalizeOffset` (function) - No description.
+- `module:compareTransform.normalizeTransformRotation` (function) - Normalize an angle to \[0, 360\) with 0.1 degree resolution.
+- `module:compareTransform.normalizeCompareTransform` (function) - No description.
+- `module:compareTransform.isIdentityCompareTransform` (function) - No description.
 
 ## src/utils/documentLoadingConfig.js
 

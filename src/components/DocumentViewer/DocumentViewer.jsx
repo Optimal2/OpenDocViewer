@@ -152,6 +152,9 @@ const DocumentViewer = () => {
     postZoomRight,
     bumpPostZoomLeft,
     bumpPostZoomRight,
+    primaryTransform,
+    compareTransform,
+    dispatchCompareTransform,
     viewerPages,
     totalPages,
     totalPagesDisplay,
@@ -646,6 +649,9 @@ const DocumentViewer = () => {
             postZoomRight={postZoomRight}
             bumpPostZoomLeft={bumpPostZoomLeft}
             bumpPostZoomRight={bumpPostZoomRight}
+            primaryTransform={primaryTransform}
+            compareTransform={compareTransform}
+            onCompareTransformAction={dispatchCompareTransform}
             onPrimaryDisplayStateChange={handlePrimaryDisplayStateChange}
             selectionPanelEnabled={selectionPanelEnabled}
             onHidePageFromSelection={hidePageFromSelection}

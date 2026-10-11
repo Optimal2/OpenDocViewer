@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 18. Line count: 7810. JSDoc symbol count: 102.
+File count: 18. Line count: 7823. JSDoc symbol count: 102.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/PrintSelectionWorkspace.jsx` - Full\-window print\-selection workspace.
@@ -62,22 +62,22 @@ File count: 17. Line count: 7615. JSDoc symbol count: 128.
 
 ## src/components/DocumentViewer
 
-File count: 10. Line count: 5245. JSDoc symbol count: 121.
+File count: 11. Line count: 5792. JSDoc symbol count: 123.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;.
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
-- `src/components/DocumentViewer/hooks/useViewerPostZoom.js` - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &quot;post\-zoom&quot; state &amp; handlers used only in compare mode.
 - `src/components/DocumentViewer/DocumentViewerToolbar.jsx` - Toolbar adapter for the document viewer.
+- `src/components/DocumentViewer/hooks/useCompareTransforms.js` - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 
 ## src/contexts
 
-File count: 4. Line count: 3272. JSDoc symbol count: 84.
+File count: 4. Line count: 3329. JSDoc symbol count: 89.
 
-- `src/contexts/viewerContext.js` - Exports ViewerContext.
+- `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
 - `src/contexts/ThemeProvider.jsx` - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
 - `src/contexts/themeContext.js` - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
@@ -150,16 +150,16 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 47. Line count: 18426. JSDoc symbol count: 712.
+File count: 48. Line count: 18770. JSDoc symbol count: 736.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
+- `src/utils/compareTransform.js` - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/pdfSignatureDocuments.js` - Per\-document aggregation of PDF signature reports.
-- `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 
 ## src/workers
 

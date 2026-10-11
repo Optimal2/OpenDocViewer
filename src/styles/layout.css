@@ -1136,6 +1136,130 @@
 .document-render-container-single { width: 100%; }
 .document-render-container-comparison { width: 50%; }
 
+/* Compare panes stack the per-page fine-tuning bar (CompareTransformControls) above the frame. */
+.document-render-container-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.document-render-container-comparison > .document-pane-frame {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+}
+
+.compare-transform-bar {
+  --odv-transform-accent: var(--thumbnail-primary-color);
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  min-width: 0;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+
+.compare-transform-bar.is-compare {
+  --odv-transform-accent: var(--thumbnail-compare-color);
+}
+
+.compare-transform-bar .odv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--odv-transform-accent) 40%, transparent 60%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--canvas-background-color) 92%, var(--odv-transform-accent) 8%);
+  color: inherit;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.compare-transform-bar .odv-btn:hover,
+.compare-transform-bar .odv-btn:focus-visible {
+  background: color-mix(in srgb, var(--canvas-background-color) 78%, var(--odv-transform-accent) 22%);
+}
+
+.compare-transform-bar .odv-btn:focus-visible,
+.compare-transform-field input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--odv-transform-accent) 78%, var(--text-color) 22%);
+  outline-offset: 1px;
+}
+
+.compare-transform-bar .odv-btn:disabled {
+  color: color-mix(in srgb, var(--text-color) 55%, transparent 45%);
+  cursor: default;
+}
+
+.compare-transform-bar .material-icons {
+  font-size: 18px;
+  color: currentColor;
+}
+
+.compare-transform-bar .compare-transform-toggle {
+  gap: 6px;
+  padding: 0 10px 0 6px;
+  line-height: 1;
+}
+
+.compare-transform-toggle .material-icons {
+  color: var(--odv-transform-accent);
+}
+
+.compare-transform-toggle[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--canvas-background-color) 80%, var(--odv-transform-accent) 20%);
+}
+
+.compare-transform-summary,
+.compare-transform-field input {
+  font-variant-numeric: tabular-nums;
+}
+
+.compare-transform-summary,
+.compare-transform-unit,
+.compare-transform-axis {
+  opacity: 0.8;
+}
+
+.compare-transform-controls,
+.compare-transform-group,
+.compare-transform-field {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.compare-transform-controls { gap: 6px 12px; }
+.compare-transform-group { gap: 4px; }
+.compare-transform-field { gap: 2px; }
+
+.compare-transform-field input {
+  box-sizing: border-box;
+  width: 5.5em;
+  height: 28px;
+  padding: 2px 6px;
+  border: 1px solid var(--odv-border-strong, var(--thumbnail-border-color));
+  border-radius: 6px;
+  background: var(--odv-surface-elevated, var(--background-color));
+  color: var(--text-color);
+  font: inherit;
+  text-align: right;
+}
+
+.compare-transform-field input.is-invalid {
+  border-color: #c62828;
+}
+
+.document-pane-frame.is-transform-active .document-render-viewport {
+  cursor: move;
+}
+
 .document-pane-frame {
   position: relative;
   width: 100%;

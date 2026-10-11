@@ -145,3 +145,27 @@ describe('provider PDF resolution and asset replacement', () => {
     await api.disposeDocumentSession();
   });
 });
+
+describe('provider compare transform (selector + setter)', () => {
+  const findTransformState = () => harness.states.find((state) => state?.primary && state?.compare && 'rotation' in state.primary);
+
+  it('exposes the serialisable per-page transform and writes it through the setter and dispatcher', () => {
+    const api = ViewerProvider({ children: null }).props.value;
+    expect(api.compareTransforms).toEqual({
+      primary: { scale: 1, dx: 0, dy: 0, rotation: 0 },
+      compare: { scale: 1, dx: 0, dy: 0, rotation: 0 },
+    });
+    expect(api.getCompareTransform('compare')).toEqual({ scale: 1, dx: 0, dy: 0, rotation: 0 });
+
+    api.setCompareTransform('compare', { scale: 1.2345, dx: 3.5, rotation: -0.1 });
+    api.setCompareTransform('compare', (current) => ({ dy: current.dx * 2 }));
+    api.dispatchCompareTransform({ type: 'rotate', target: 'primary', delta: 90 });
+
+    const state = findTransformState();
+    expect(state).toEqual({
+      primary: { scale: 1, dx: 0, dy: 0, rotation: 90 },
+      compare: { scale: 1.235, dx: 3.5, dy: 7, rotation: 359.9 },
+    });
+    expect(JSON.parse(JSON.stringify(state))).toEqual(state);
+  });
+});

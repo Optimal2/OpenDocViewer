@@ -106,6 +106,8 @@ export function useViewerZoomEffects({
       if (!(e.ctrlKey || e.metaKey)) return;
       if (hasActiveModalDialog()) return;
       if (isEditableTarget(e.target) || isEditableTarget(document.activeElement)) return;
+      // A compare pane in fine-tuning mode zooms only its own page (DocumentViewerRender).
+      if (e.target instanceof Element && e.target.closest('[data-odv-transform-wheel="on"]')) return;
 
       e.preventDefault();
       if (interactionSuspended) return;

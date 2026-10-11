@@ -14,10 +14,12 @@
  *   - This wrapper simply provides a flexible container layout.
  *
  * DESIGN NOTES / GOTCHAS
- *   - Base zoom remains global/shared. In compare mode we now apply a *post-zoom*
- *     multiplicative factor per pane to fine-tune each side independently:
- *       effectiveLeft  = zoom * postZoomLeft
- *       effectiveRight = zoom * postZoomRight
+ *   - Base zoom remains global/shared. In compare mode each page also has a free transform
+ *     { scale, dx, dy, rotation } (utils/compareTransform.js, docs-src/compare-transform.md),
+ *     applied as a CSS transform on the page stage so fine steps never re-rasterise the page.
+ *     The per-pane ±0.1 zoom buttons and the 90° buttons are presets on that transform.
+ *   - While a pane's fine-tuning bar is expanded, dragging the page and Ctrl+wheel over it change
+ *     the transform instead of scrolling or changing the shared zoom.
  *   - Sticky fit modes are still honored after each pane renders.
  *   - Per-pane floating zoom controls are rendered above the pane viewport so the
  *     scrollable document surface never overlaps the controls.
@@ -28,7 +30,9 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import DocumentRender from '../DocumentRender.jsx';
 import CompareZoomOverlay from './CompareZoomOverlay.jsx';
+import CompareTransformControls from './CompareTransformControls.jsx';
 import ViewerContext from '../../contexts/viewerContext.js';
+import { IDENTITY_COMPARE_TRANSFORM, buildCompareTransformCss } from '../../utils/compareTransform.js';
 import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
 
 /**
@@ -224,6 +228,9 @@ const DocumentViewerRender = ({
   postZoomRight = 1.0,
   bumpPostZoomLeft,
   bumpPostZoomRight,
+  primaryTransform = IDENTITY_COMPARE_TRANSFORM,
+  compareTransform = IDENTITY_COMPARE_TRANSFORM,
+  onCompareTransformAction,
   onPrimaryDisplayStateChange,
   selectionPanelEnabled = false,
   onHidePageFromSelection,
@@ -266,6 +273,58 @@ const DocumentViewerRender = ({
     /** @type {Record<ViewerPaneKey, boolean>} */ ({ primary: false, compare: false })
   );
   const [activePanPane, setActivePanPane] = useState(/** @type {(ViewerPaneKey|null)} */ (null));
+  // Expanded fine-tuning bars; an expanded pane turns drag and Ctrl+wheel into transform changes.
+  const [transformBarsExpanded, setTransformBarsExpanded] = useState(
+    /** @type {Record<ViewerPaneKey, boolean>} */ ({ primary: false, compare: false })
+  );
+  const transformDragRef = useRef(/** @type {(null|{
+    pane: ViewerPaneKey,
+    pointerId: number,
+    stage: HTMLElement,
+    captureElement: HTMLElement,
+    transform: { scale:number, dx:number, dy:number, rotation:number },
+    startX: number,
+    startY: number,
+    dx: number,
+    dy: number,
+    moved: boolean,
+    captured: boolean
+  })} */ (null));
+  const transformPropsRef = useRef({ primaryTransform, compareTransform, onCompareTransformAction, isComparing, transformBarsExpanded });
+  transformPropsRef.current = { primaryTransform, compareTransform, onCompareTransformAction, isComparing, transformBarsExpanded };
+
+  const isTransformPaneActive = useCallback((pane) => {
+    const current = transformPropsRef.current;
+    return !!current.isComparing
+      && !!current.transformBarsExpanded[pane]
+      && typeof current.onCompareTransformAction === 'function';
+  }, []);
+
+  const setTransformBarExpanded = useCallback((pane, expanded) => {
+    setTransformBarsExpanded((current) => (current[pane] === expanded ? current : { ...current, [pane]: expanded }));
+  }, []);
+
+  /**
+   * Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.
+   * @param {WheelEvent} event
+   * @param {ViewerPaneKey} pane
+   * @returns {boolean} true when the event was consumed.
+   */
+  const handleTransformWheel = useCallback((event, pane) => {
+    if (!(event.ctrlKey || event.metaKey) || !isTransformPaneActive(pane)) return false;
+    event.preventDefault();
+    event.stopPropagation();
+    const deltaY = Number(event.deltaY) || 0;
+    if (deltaY !== 0) {
+      transformPropsRef.current.onCompareTransformAction({
+        type: 'nudge',
+        target: pane,
+        field: 'scale',
+        delta: deltaY < 0 ? 0.01 : -0.01,
+      });
+    }
+    return true;
+  }, [isTransformPaneActive]);
 
   const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
     || Number(primaryImageProperties?.brightness ?? 100) !== 100
@@ -517,6 +576,7 @@ const DocumentViewerRender = ({
       .filter((entry) => entry.element instanceof HTMLElement)
       .map((entry) => {
         const listener = (event) => {
+          if (handleTransformWheel(event, entry.pane)) return;
           handlePaneWheelCaptureRef.current?.(event, entry.pane);
         };
         entry.element.addEventListener('wheel', listener, listenerOptions);
@@ -528,7 +588,7 @@ const DocumentViewerRender = ({
         element.removeEventListener('wheel', listener, removeOptions);
       }
     };
-  }, [comparePageNumber, isComparing]);
+  }, [comparePageNumber, handleTransformWheel, isComparing]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -576,6 +636,31 @@ const DocumentViewerRender = ({
 
     const paneElement = getPaneElement(pane);
     const viewport = getPaneViewport(pane);
+
+    // Fine-tuning: the drag moves the page transform. The stage is updated directly while dragging
+    // (no React render per pointer move) and the offset is committed to the viewer context on release.
+    if (isTransformPaneActive(pane)) {
+      const stage = viewport?.querySelector?.('.document-render-container');
+      if (!paneElement || !(stage instanceof HTMLElement)) return;
+      if (isPointerOnViewportScrollbar(event, viewport)) return;
+      const current = transformPropsRef.current;
+      const transform = pane === 'compare' ? current.compareTransform : current.primaryTransform;
+      transformDragRef.current = {
+        pane,
+        pointerId: Number(event.pointerId),
+        stage,
+        captureElement: paneElement,
+        transform,
+        startX: Number(event.clientX) || 0,
+        startY: Number(event.clientY) || 0,
+        dx: transform.dx,
+        dy: transform.dy,
+        moved: false,
+        captured: false,
+      };
+      return;
+    }
+
     const canPan = isPannableViewport(viewport);
     setPanePannable(pane, canPan);
     if (!paneElement || !viewport || !canPan) return;
@@ -593,9 +678,30 @@ const DocumentViewerRender = ({
       moved: false,
       captured: false,
     };
-  }, [closeContextMenu, getPaneElement, getPaneViewport, isComparing, onSetActivePane, setPanePannable]);
+  }, [closeContextMenu, getPaneElement, getPaneViewport, isComparing, isTransformPaneActive, onSetActivePane, setPanePannable]);
 
   const handlePanePointerMove = useCallback((event, pane) => {
+    const drag = transformDragRef.current;
+    if (drag && drag.pane === pane && drag.pointerId === Number(event?.pointerId)) {
+      const moveX = (Number(event.clientX) || 0) - drag.startX;
+      const moveY = (Number(event.clientY) || 0) - drag.startY;
+      if (!drag.moved && Math.hypot(moveX, moveY) < PAN_POINTER_MOVE_THRESHOLD_PX) return;
+      drag.moved = true;
+      if (!drag.captured) {
+        drag.captured = true;
+        setActivePanPane(pane);
+        try { drag.captureElement?.setPointerCapture?.(drag.pointerId); } catch {}
+      }
+      // dx/dy are CSS px at transform scale 1, so a screen move of N px is N / scale.
+      const scale = drag.transform.scale || 1;
+      drag.dx = drag.transform.dx + moveX / scale;
+      drag.dy = drag.transform.dy + moveY / scale;
+      drag.stage.style.transform = buildCompareTransformCss({ ...drag.transform, dx: drag.dx, dy: drag.dy }) || 'none';
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+      return;
+    }
+
     const state = panStateRef.current;
     if (!state || state.pane !== pane || state.pointerId !== Number(event?.pointerId)) return;
 
@@ -616,6 +722,27 @@ const DocumentViewerRender = ({
   }, []);
 
   const finishPanePan = useCallback((event, pane) => {
+    const drag = transformDragRef.current;
+    if (drag && drag.pane === pane && drag.pointerId === Number(event?.pointerId)) {
+      transformDragRef.current = null;
+      setActivePanPane(null);
+      try {
+        if (drag.captureElement?.hasPointerCapture?.(drag.pointerId)) {
+          drag.captureElement.releasePointerCapture(drag.pointerId);
+        }
+      } catch {}
+      if (drag.moved) {
+        transformPropsRef.current.onCompareTransformAction?.({
+          type: 'set',
+          target: pane,
+          transform: { dx: drag.dx, dy: drag.dy },
+        });
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+      }
+      return;
+    }
+
     const state = panStateRef.current;
     if (!state || state.pane !== pane || state.pointerId !== Number(event?.pointerId)) return;
 
@@ -744,9 +871,12 @@ const DocumentViewerRender = ({
     closeContextMenu();
   }, [closeCompare, closeContextMenu, contextMenuState]);
 
-  // Apply per-pane post-zoom only while comparing; single-pane stays at base zoom
-  const effectiveLeftZoom = isComparing ? zoom * postZoomLeft : zoom;
-  const effectiveRightZoom = isComparing ? zoom * postZoomRight : zoom;
+  // The per-page compare transform (scale, offset, fine rotation) is a CSS transform on the page
+  // stage; both panes keep laying out at the shared base zoom.
+  const primarySurfaceTransform = isComparing ? buildCompareTransformCss(primaryTransform) : '';
+  const compareSurfaceTransform = isComparing ? buildCompareTransformCss(compareTransform) : '';
+  const primaryTransformActive = isComparing && transformBarsExpanded.primary && typeof onCompareTransformAction === 'function';
+  const compareTransformActive = isComparing && transformBarsExpanded.compare && typeof onCompareTransformAction === 'function';
   const normalizedActivePane = isComparing && activePane === 'compare' ? 'compare' : 'primary';
   const normalizedEffectivePane = isComparing && effectivePane === 'compare' ? 'compare' : 'primary';
   const canHidePageFromSelection = !!selectionPanelEnabled && typeof onHidePageFromSelection === 'function';
@@ -837,14 +967,25 @@ const DocumentViewerRender = ({
           className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}
           style={{ position: 'relative' }}
         >
+          {isComparing && typeof onCompareTransformAction === 'function' && (
+            <CompareTransformControls
+              pane="primary"
+              transform={primaryTransform}
+              expanded={transformBarsExpanded.primary}
+              onExpandedChange={(expanded) => setTransformBarExpanded('primary', expanded)}
+              onAction={onCompareTransformAction}
+            />
+          )}
           <div
             ref={primaryPaneRef}
             className={[
               'document-pane-frame',
               isComparing ? 'is-primary-pane' : 'is-single-pane',
               pannablePanes.primary ? 'is-pannable' : '',
+              primaryTransformActive ? 'is-transform-active' : '',
               activePanPane === 'primary' ? 'is-panning' : '',
             ].filter(Boolean).join(' ')}
+            data-odv-transform-wheel={primaryTransformActive ? 'on' : undefined}
             onContextMenu={(event) => handlePaneContextMenu(event, pageNumber, 'primary')}
             onPointerEnter={() => updatePanePannability('primary')}
             onPointerDownCapture={(event) => handlePanePointerDown(event, 'primary')}
@@ -867,7 +1008,8 @@ const DocumentViewerRender = ({
             <DocumentRender
               ref={documentRenderRef}
               pageNumber={pageNumber}
-              zoom={effectiveLeftZoom}
+              zoom={zoom}
+              surfaceTransform={primarySurfaceTransform}
               initialRenderDone={() => {}}
               onRender={handlePrimaryRendered}
               setZoom={setZoom}
@@ -885,14 +1027,25 @@ const DocumentViewerRender = ({
         {/* RIGHT / COMPARE PANE */}
         {isComparing && comparePageNumber !== null && (
           <div className="document-render-container-comparison" style={{ position: 'relative' }}>
+            {typeof onCompareTransformAction === 'function' && (
+              <CompareTransformControls
+                pane="compare"
+                transform={compareTransform}
+                expanded={transformBarsExpanded.compare}
+                onExpandedChange={(expanded) => setTransformBarExpanded('compare', expanded)}
+                onAction={onCompareTransformAction}
+              />
+            )}
             <div
               ref={comparePaneRef}
               className={[
                 'document-pane-frame',
                 'is-compare-pane',
                 pannablePanes.compare ? 'is-pannable' : '',
+                compareTransformActive ? 'is-transform-active' : '',
                 activePanPane === 'compare' ? 'is-panning' : '',
               ].filter(Boolean).join(' ')}
+              data-odv-transform-wheel={compareTransformActive ? 'on' : undefined}
               onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber, 'compare')}
               onPointerEnter={() => updatePanePannability('compare')}
               onPointerDownCapture={(event) => handlePanePointerDown(event, 'compare')}
@@ -913,7 +1066,8 @@ const DocumentViewerRender = ({
               <DocumentRender
                 ref={compareRef}
                 pageNumber={comparePageNumber}
-                zoom={effectiveRightZoom}
+                zoom={zoom}
+                surfaceTransform={compareSurfaceTransform}
                 initialRenderDone={() => {}}
                 onRender={handleCompareRendered}
                 setZoom={setZoom}
@@ -1060,6 +1214,19 @@ DocumentViewerRender.propTypes = {
   postZoomRight: PropTypes.number.isRequired,
   bumpPostZoomLeft: PropTypes.func.isRequired,
   bumpPostZoomRight: PropTypes.func.isRequired,
+  primaryTransform: PropTypes.shape({
+    scale: PropTypes.number.isRequired,
+    dx: PropTypes.number.isRequired,
+    dy: PropTypes.number.isRequired,
+    rotation: PropTypes.number.isRequired,
+  }),
+  compareTransform: PropTypes.shape({
+    scale: PropTypes.number.isRequired,
+    dx: PropTypes.number.isRequired,
+    dy: PropTypes.number.isRequired,
+    rotation: PropTypes.number.isRequired,
+  }),
+  onCompareTransformAction: PropTypes.func,
   onPrimaryDisplayStateChange: PropTypes.func,
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,

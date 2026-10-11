@@ -143,31 +143,31 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx:30</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:21</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:38</code> |  |
-| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:467</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
-| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:490</code> |  |
-| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:217</code> |  |
-| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:205</code> |  |
+| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:480</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
+| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:503</code> |  |
+| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:220</code> |  |
+| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:208</code> |  |
 | <code>DisplayedAsset</code> | typedef | <code>src/components/DocumentRender.jsx:76</code> |  |
-| <code>DocumentRender</code> | constant | <code>src/components/DocumentRender.jsx:100</code> |  |
-| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:376</code> |  |
-| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:712</code> |  |
-| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:454</code> |  |
-| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:435</code> |  |
-| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:444</code> |  |
-| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:422</code> | Returns the surface whose intrinsic size should drive fit calculations. |
+| <code>DocumentRender</code> | constant | <code>src/components/DocumentRender.jsx:102</code> |  |
+| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:389</code> |  |
+| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:725</code> |  |
+| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:467</code> |  |
+| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:448</code> |  |
+| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:457</code> |  |
+| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:435</code> | Returns the surface whose intrinsic size should drive fit calculations. |
 | <code>getCurrentPage</code> | function | <code>src/components/DocumentRender.jsx:44</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:916</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:849</code> |  |
-| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:513</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:944</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:792</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:929</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:862</code> |  |
+| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:526</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:957</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:805</code> |  |
 | <code>hasUsableSize</code> | function | <code>src/components/DocumentRender.jsx:64</code> |  |
 | <code>isBlobAssetUrl</code> | function | <code>src/components/DocumentRender.jsx:72</code> |  |
-| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:143</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
+| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:146</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
 | <code>normalizeSize</code> | function | <code>src/components/DocumentRender.jsx:53</code> |  |
-| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:875</code> |  |
-| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:198</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
-| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:257</code> |  |
+| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:888</code> |  |
+| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:201</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
+| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:260</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentSelectionPanel.jsx:89</code> |  |
 | <code>SelectionCheckboxRow</code> | function | <code>src/components/DocumentSelectionPanel.jsx:30</code> |  |
 | <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:161</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
@@ -326,38 +326,47 @@
 | <code>AdvancedCustomSizeDisclosure</code> | function | <code>src/components/DocumentToolbar/ZoomButtons.jsx:85</code> | &amp;quot;Advanced&amp;quot; disclosure for the secondary custom-size fields \(window height, actual size\). |
 | <code>BASIC_CUSTOM_SIZE_FIELDS</code> | constant | <code>src/components/DocumentToolbar/ZoomButtons.jsx:71</code> | Fields shown by default \(window width\) vs. |
 | <code>parsePercentInput</code> | function | <code>src/components/DocumentToolbar/ZoomButtons.jsx:146</code> | Parse a percent-like string safely. |
+| <code>CompareTransformControls</code> | function | <code>src/components/DocumentViewer/CompareTransformControls.jsx:162</code> |  |
+| <code>toSignedRotation</code> | function | <code>src/components/DocumentViewer/CompareTransformControls.jsx:37</code> | Rotation shown signed in \(-180, 180\] so a small counter-clockwise tilt reads as −0,1 and not 359,9. |
+| <code>TransformNumberField</code> | function | <code>src/components/DocumentViewer/CompareTransformControls.jsx:59</code> | Numeric text field with locale-aware parsing; keeps a draft while focused. |
 | <code>COLLAPSE_DELAY_MS</code> | constant | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:38</code> | Delay before the zone collapses after the pointer/focus has left, so it does not flicker. |
 | <code>CompareZoomOverlay</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:56</code> | CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state. |
 | <code>isKeyboardFocus</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:44</code> |  |
-| <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:411</code> |  |
-| <code>&lt;anonymous&gt;~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:319</code> |  |
-| <code>&lt;anonymous&gt;~isEditableTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:312</code> |  |
-| <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:290</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:323</code> |  |
-| <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:248</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
-| <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:200</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
-| <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:54</code> |  |
-| <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:124</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:668</code> |  |
-| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:694</code> |  |
-| <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:403</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:662</code> |  |
-| <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:144</code> |  |
-| <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:136</code> |  |
-| <code>isPaneInteractiveTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:75</code> |  |
-| <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:86</code> |  |
-| <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:97</code> |  |
-| <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:155</code> |  |
-| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:769</code> |  |
-| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:792</code> |  |
-| <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:38</code> |  |
-| <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:34</code> |  |
+| <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:414</code> |  |
+| <code>&lt;anonymous&gt;~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:322</code> |  |
+| <code>&lt;anonymous&gt;~isEditableTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:315</code> |  |
+| <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:293</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:326</code> |  |
+| <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:251</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
+| <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:204</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
+| <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:58</code> |  |
+| <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:128</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:795</code> |  |
+| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:821</code> |  |
+| <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:462</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:789</code> |  |
+| <code>DocumentViewerRender~handleTransformWheel</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:313</code> | Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch. |
+| <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:148</code> |  |
+| <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:140</code> |  |
+| <code>isPaneInteractiveTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:79</code> |  |
+| <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:90</code> |  |
+| <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:101</code> |  |
+| <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:159</code> |  |
+| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:899</code> |  |
+| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:922</code> |  |
+| <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:42</code> |  |
+| <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:38</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
 | <code>DocumentViewerToolbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:129</code> | Renders the toolbar for the document viewer by delegating to . |
 | <code>DocumentViewerToolbarProps</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:36</code> | Props consumed by DocumentViewerToolbar. |
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:26</code> | React-like numeric/original page setter used by the toolbar adapter. |
 | <code>RefLike</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:13</code> | Ref-like shape used for imperative handles. |
 | <code>SetBooleanState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:19</code> | State setter that accepts a boolean or an updater callback. |
+| <code>module:useCompareTransforms.useCompareTransforms~bumpPostZoomLeft</code> | constant | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:45</code> |  |
+| <code>module:useCompareTransforms.useCompareTransforms~bumpPostZoomRight</code> | constant | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:50</code> |  |
+| <code>module:useCompareTransforms.useCompareTransforms~resetPostZoom</code> | constant | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:55</code> | Scale 1 on both pages \(fit and actual-size presets\). |
+| <code>module:useCompareTransforms</code> | module | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:2</code> | File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer-side access to the free per-page compare transform kept in the viewer context \(utils/compareTransform.js,... |
+| <code>module:useCompareTransforms.useCompareTransforms</code> | function | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:34</code> |  |
 | <code>module:useViewerEffects.hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:89</code> | Determine whether a modal dialog is currently open. |
 | <code>module:useViewerEffects.isEditableTarget</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:74</code> | Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive. |
 | <code>module:useViewerEffects~KeyboardPrintShortcutBehavior</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:22</code> |  |
@@ -376,77 +385,70 @@
 | <code>&lt;anonymous&gt;~onWindowBlur</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:282</code> |  |
 | <code>module:useViewerKeyboardNavigation</code> | module | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:2</code> | Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer. |
 | <code>module:useViewerKeyboardNavigation.useViewerKeyboardNavigation</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:15</code> |  |
-| <code>module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomLeft</code> | constant | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:59</code> | Adjust left pane post-zoom by ±0.1 steps. |
-| <code>module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomRight</code> | constant | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:68</code> | Adjust right pane post-zoom by ±0.1 steps. |
-| <code>module:useViewerPostZoom~clamp</code> | function | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:20</code> | Clamp a numeric value to \[min, max\]. |
-| <code>module:useViewerPostZoom.useViewerPostZoom~resetPostZoom</code> | constant | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:50</code> | Reset both per-pane factors to 1.0. |
-| <code>module:useViewerPostZoom~round1</code> | function | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:29</code> | Round to one decimal place \(avoids float drift when stepping by 0.1\). |
-| <code>module:useViewerPostZoom</code> | module | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:2</code> | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
-| <code>module:useViewerPostZoom.useViewerPostZoom</code> | function | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:45</code> | Hook managing per-pane post-zoom factors for compare mode. |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:122</code> |  |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:124</code> |  |
 | <code>&lt;anonymous&gt;~onWheelGlobal</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:105</code> |  |
 | <code>module:useViewerZoomEffects</code> | module | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:2</code> | Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer. |
 | <code>module:useViewerZoomEffects.useViewerZoomEffects</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:15</code> |  |
-| <code>useDocumentViewer~activateComparePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1515</code> | Open compare mode when needed and make the right pane the default target. |
-| <code>useDocumentViewer~activatePrimaryPane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1507</code> |  |
-| <code>useDocumentViewer~applyThumbnailWidth</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1624</code> | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |
-| <code>buildDocumentSelectionModel</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:358</code> |  |
-| <code>buildImageRotationDependencyKey</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:141</code> |  |
-| <code>buildSelectionMaskFromPrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:264</code> | Build an inclusion mask from a print-page sequence. |
-| <code>buildVisibleDocumentNavigationModel</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:436</code> | Build the visible-document grouping used by document-level navigation. |
-| <code>clampPage</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:46</code> | Clamp a 1-based page number into \[1, total\]. |
-| <code>useDocumentViewer~closeCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1543</code> | Close compare mode without affecting the left page. |
-| <code>CustomFitSizeLimits</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:67</code> | Optional maximum percentage limits for the custom fit-to-size zoom mode. |
-| <code>findNearestVisiblePageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:301</code> | Resolve the nearest visible page number for a requested original page index. |
-| <code>useDocumentViewer~getDocumentNavigationState</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:734</code> | Resolve document-navigation state for the requested pane. |
-| <code>getPageDocumentNavigationMeta</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:410</code> |  |
-| <code>useDocumentViewer~goToFirstDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1269</code> | Jump to the first page of the first visible document. |
-| <code>useDocumentViewer~goToFirstPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1225</code> | Jump to the first visible page in the requested target pane. |
-| <code>useDocumentViewer~goToLastDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1281</code> | Jump to the first page of the last visible document. |
-| <code>useDocumentViewer~goToLastPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1234</code> | Jump to the last visible page in the requested target pane. |
-| <code>useDocumentViewer~goToNextDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1257</code> | Jump to the first page of the next visible document. |
-| <code>useDocumentViewer~goToNextPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1216</code> | Move one page forward in the requested target pane. |
-| <code>useDocumentViewer~goToPreviousDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1245</code> | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
-| <code>useDocumentViewer~goToPreviousPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1207</code> | Move one page backward in the requested target pane. |
-| <code>useDocumentViewer~handleBrightnessChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1579</code> |  |
-| <code>useDocumentViewer~handleCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1525</code> | Toggle compare mode. |
-| <code>useDocumentViewer~handleContrastChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1591</code> |  |
-| <code>useDocumentViewer~handlePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1123</code> | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
-| <code>useDocumentViewer~handlePrimaryDisplayStateChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1171</code> | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
-| <code>useDocumentViewer~handleVisiblePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1132</code> | Change the primary page by a visible page number from the thumbnail strip. |
-| <code>hasExcludedPages</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:174</code> | Return true when the normalized mask excludes at least one page from the current session. |
-| <code>useDocumentViewer~hideDocumentFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:998</code> | Immediately exclude every page that belongs to the same document as the provided original page index. |
-| <code>useDocumentViewer~hidePageFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:960</code> | Immediately exclude a page from the active selection and apply the filtered session. |
-| <code>ImageProperties</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:79</code> | Image adjustment properties for canvas edit mode. |
-| <code>isNaturalPrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:283</code> |  |
-| <code>masksEqual</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:191</code> | Compare two selection masks over the active page count. |
-| <code>normalizeOriginalPageIndex</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:222</code> | Normalize a zero-based original page index and reject invalid/out-of-range values. |
-| <code>normalizePrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:236</code> |  |
-| <code>normalizeRotationDegrees</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:62</code> | Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer. |
-| <code>normalizeSelectionMask</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:154</code> | Normalize a persisted/host-provided page-selection mask to the current page count. |
-| <code>normalizeViewerPaneTarget</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:500</code> | Normalize any pane key into the viewer&#39;s two supported navigation targets. |
-| <code>&lt;anonymous&gt;~onMove</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:1710</code> |  |
-| <code>PrintPageSequence</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:77</code> |  |
-| <code>resolveDocumentSelectionPageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:341</code> | Resolve a page&#39;s 1-based page number within the current document-selection group. |
-| <code>resolveEffectiveCustomFitSizeLimits</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:114</code> | Resolve effective custom-fit limits from a preferred value set and runtime config. |
-| <code>useDocumentViewer~resolveNearestVisibleOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:812</code> |  |
-| <code>resolveOriginalIndexFromPrintPageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:206</code> | Convert a 1-based print/session page number to a zero-based original page index. |
-| <code>resolveProposedVisiblePageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:325</code> | Resolve either a direct visible-page value or a React setState-style updater function. |
-| <code>useDocumentViewer~resolveTargetOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1075</code> | Resolve the next original 1-based page number from a visible-page update. |
-| <code>useDocumentViewer~selectForCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1558</code> | Select a page for the right-hand compare pane. |
-| <code>SelectionMask</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:76</code> |  |
-| <code>useDocumentViewer~setActivePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1500</code> | Set the default pane for compare-aware navigation and editing actions. |
-| <code>useDocumentViewer~setComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1159</code> | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
-| <code>useDocumentViewer~setIsExpanded</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1488</code> | Setter for the editing controls visibility. |
-| <code>useDocumentViewer~setVisibleComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1145</code> | Change the compare page by a visible page number from the toolbar page field. |
-| <code>useDocumentViewer~setZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1395</code> | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
-| <code>useDocumentViewer~thumbnailSelectionPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1199</code> | The thumbnail pane should react immediately when the user changes page. |
-| <code>useDocumentViewer~toggleFitZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1472</code> | Toggle between the two fit modes from the page surface. |
-| <code>useDocumentViewer~updatePageTarget</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1098</code> | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
-| <code>useDocumentViewer</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:521</code> | Hook that centralizes viewer UI state and event handlers. |
-| <code>ViewerPageTarget</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:78</code> |  |
-| <code>ZoomMode</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:482</code> | Sticky zoom modes used by the viewer \(subset is used here\). |
-| <code>ZoomState</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:487</code> | Zoom state \(mode + current numeric scale\). |
+| <code>useDocumentViewer~activateComparePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1536</code> | Open compare mode when needed and make the right pane the default target. |
+| <code>useDocumentViewer~activatePrimaryPane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1528</code> |  |
+| <code>useDocumentViewer~applyThumbnailWidth</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1643</code> | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |
+| <code>buildDocumentSelectionModel</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:359</code> |  |
+| <code>buildImageRotationDependencyKey</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:142</code> |  |
+| <code>buildSelectionMaskFromPrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:265</code> | Build an inclusion mask from a print-page sequence. |
+| <code>buildVisibleDocumentNavigationModel</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:437</code> | Build the visible-document grouping used by document-level navigation. |
+| <code>clampPage</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:47</code> | Clamp a 1-based page number into \[1, total\]. |
+| <code>useDocumentViewer~closeCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1564</code> | Close compare mode without affecting the left page. |
+| <code>CustomFitSizeLimits</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:68</code> | Optional maximum percentage limits for the custom fit-to-size zoom mode. |
+| <code>findNearestVisiblePageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:302</code> | Resolve the nearest visible page number for a requested original page index. |
+| <code>useDocumentViewer~getDocumentNavigationState</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:735</code> | Resolve document-navigation state for the requested pane. |
+| <code>getPageDocumentNavigationMeta</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:411</code> |  |
+| <code>useDocumentViewer~goToFirstDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1290</code> | Jump to the first page of the first visible document. |
+| <code>useDocumentViewer~goToFirstPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1246</code> | Jump to the first visible page in the requested target pane. |
+| <code>useDocumentViewer~goToLastDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1302</code> | Jump to the first page of the last visible document. |
+| <code>useDocumentViewer~goToLastPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1255</code> | Jump to the last visible page in the requested target pane. |
+| <code>useDocumentViewer~goToNextDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1278</code> | Jump to the first page of the next visible document. |
+| <code>useDocumentViewer~goToNextPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1237</code> | Move one page forward in the requested target pane. |
+| <code>useDocumentViewer~goToPreviousDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1266</code> | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
+| <code>useDocumentViewer~goToPreviousPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1228</code> | Move one page backward in the requested target pane. |
+| <code>useDocumentViewer~handleBrightnessChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1596</code> |  |
+| <code>useDocumentViewer~handleCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1546</code> | Toggle compare mode. |
+| <code>useDocumentViewer~handleContrastChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1608</code> |  |
+| <code>useDocumentViewer~handlePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1144</code> | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
+| <code>useDocumentViewer~handlePrimaryDisplayStateChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1192</code> | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
+| <code>useDocumentViewer~handleVisiblePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1153</code> | Change the primary page by a visible page number from the thumbnail strip. |
+| <code>hasExcludedPages</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:175</code> | Return true when the normalized mask excludes at least one page from the current session. |
+| <code>useDocumentViewer~hideDocumentFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1019</code> | Immediately exclude every page that belongs to the same document as the provided original page index. |
+| <code>useDocumentViewer~hidePageFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:981</code> | Immediately exclude a page from the active selection and apply the filtered session. |
+| <code>ImageProperties</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:80</code> | Image adjustment properties for canvas edit mode. |
+| <code>isNaturalPrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:284</code> |  |
+| <code>masksEqual</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:192</code> | Compare two selection masks over the active page count. |
+| <code>normalizeOriginalPageIndex</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:223</code> | Normalize a zero-based original page index and reject invalid/out-of-range values. |
+| <code>normalizePrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:237</code> |  |
+| <code>normalizeRotationDegrees</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:63</code> | Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer. |
+| <code>normalizeSelectionMask</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:155</code> | Normalize a persisted/host-provided page-selection mask to the current page count. |
+| <code>normalizeViewerPaneTarget</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:501</code> | Normalize any pane key into the viewer&#39;s two supported navigation targets. |
+| <code>&lt;anonymous&gt;~onMove</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:1729</code> |  |
+| <code>PrintPageSequence</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:78</code> |  |
+| <code>resolveDocumentSelectionPageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:342</code> | Resolve a page&#39;s 1-based page number within the current document-selection group. |
+| <code>resolveEffectiveCustomFitSizeLimits</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:115</code> | Resolve effective custom-fit limits from a preferred value set and runtime config. |
+| <code>useDocumentViewer~resolveNearestVisibleOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:813</code> |  |
+| <code>resolveOriginalIndexFromPrintPageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:207</code> | Convert a 1-based print/session page number to a zero-based original page index. |
+| <code>resolveProposedVisiblePageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:326</code> | Resolve either a direct visible-page value or a React setState-style updater function. |
+| <code>useDocumentViewer~resolveTargetOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1096</code> | Resolve the next original 1-based page number from a visible-page update. |
+| <code>useDocumentViewer~selectForCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1579</code> | Select a page for the right-hand compare pane. |
+| <code>SelectionMask</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:77</code> |  |
+| <code>useDocumentViewer~setActivePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1521</code> | Set the default pane for compare-aware navigation and editing actions. |
+| <code>useDocumentViewer~setComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1180</code> | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
+| <code>useDocumentViewer~setIsExpanded</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1509</code> | Setter for the editing controls visibility. |
+| <code>useDocumentViewer~setVisibleComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1166</code> | Change the compare page by a visible page number from the toolbar page field. |
+| <code>useDocumentViewer~setZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1416</code> | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
+| <code>useDocumentViewer~thumbnailSelectionPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1220</code> | The thumbnail pane should react immediately when the user changes page. |
+| <code>useDocumentViewer~toggleFitZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1493</code> | Toggle between the two fit modes from the page surface. |
+| <code>useDocumentViewer~updatePageTarget</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1119</code> | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
+| <code>useDocumentViewer</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:522</code> | Hook that centralizes viewer UI state and event handlers. |
+| <code>ViewerPageTarget</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:79</code> |  |
+| <code>ZoomMode</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:483</code> | Sticky zoom modes used by the viewer \(subset is used here\). |
+| <code>ZoomState</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:488</code> | Zoom state \(mode + current numeric scale\). |
 | <code>ImageRenderer</code> | constant | <code>src/components/ImageRenderer.jsx:51</code> | ImageRenderer component. |
 | <code>ImgEventHandler</code> | typedef | <code>src/components/ImageRenderer.jsx:28</code> | Image load/error handler. |
 | <code>LoadingMessage</code> | function | <code>src/components/LoadingMessage.jsx:43</code> | LoadingMessage component. |
@@ -504,6 +506,8 @@
 | <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
 | <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:115</code> | ThemeProvider component to manage and provide theme-related state and functions. |
 | <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:191</code> | Toggle between the two highest-contrast explicit themes. |
+| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:210</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:220</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -513,64 +517,67 @@
 | <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:156</code> |  |
 | <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:79</code> |  |
 | <code>ViewerSourceDescriptor</code> | typedef | <code>src/contexts/viewerContext.js:65</code> |  |
-| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:931</code> |  |
-| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1258</code> |  |
-| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:946</code> |  |
-| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1408</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
-| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:973</code> |  |
-| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:531</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
-| <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:211</code> |  |
-| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1045</code> |  |
-| <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:53</code> |  |
-| <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:47</code> |  |
-| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1506</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1913</code> | Render one PDF page again at twice its effective PDF scale. |
-| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1728</code> |  |
-| <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:68</code> |  |
-| <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:143</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2310</code> |  |
-| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1386</code> |  |
-| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1482</code> |  |
-| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:982</code> |  |
-| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:845</code> |  |
-| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:862</code> |  |
-| <code>isBlobObjectUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:177</code> |  |
-| <code>isPageFailedForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:203</code> |  |
-| <code>isPageReadyForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:195</code> |  |
-| <code>isPdfPageEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:114</code> |  |
-| <code>isReusableAssetUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:185</code> |  |
-| <code>makeAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:83</code> |  |
-| <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:104</code> |  |
-| <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:93</code> |  |
-| <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:125</code> |  |
-| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1270</code> |  |
-| <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:222</code> |  |
-| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:508</code> | Record that a page now has a reusable full-size asset available. |
-| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:518</code> | Record that a page now has a reusable thumbnail asset available. |
-| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:883</code> |  |
-| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1317</code> |  |
-| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1460</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2176</code> | Drain background eager-render work without blocking the UI thread. |
-| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1241</code> |  |
-| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1250</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1995</code> |  |
-| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1197</code> |  |
-| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1636</code> |  |
-| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:684</code> |  |
-| <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:153</code> |  |
-| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1564</code> |  |
-| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:662</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2267</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1551</code> |  |
-| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1217</code> |  |
-| <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:58</code> |  |
-| <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:166</code> |  |
-| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1395</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2017</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1471</code> |  |
-| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:484</code> |  |
-| <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:332</code> |  |
-| <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:321</code> |  |
+| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:939</code> |  |
+| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1266</code> |  |
+| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:954</code> |  |
+| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1416</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:981</code> |  |
+| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:539</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
+| <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:216</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2608</code> |  |
+| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1053</code> |  |
+| <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:58</code> |  |
+| <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:52</code> |  |
+| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1514</code> |  |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1921</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1736</code> |  |
+| <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:73</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2622</code> |  |
+| <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:148</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2318</code> |  |
+| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1394</code> |  |
+| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1490</code> |  |
+| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:990</code> |  |
+| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:853</code> |  |
+| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:870</code> |  |
+| <code>isBlobObjectUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:182</code> |  |
+| <code>isPageFailedForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:208</code> |  |
+| <code>isPageReadyForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:200</code> |  |
+| <code>isPdfPageEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:119</code> |  |
+| <code>isReusableAssetUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:190</code> |  |
+| <code>makeAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:88</code> |  |
+| <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:109</code> |  |
+| <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:98</code> |  |
+| <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:130</code> |  |
+| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1278</code> |  |
+| <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:227</code> |  |
+| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:516</code> | Record that a page now has a reusable full-size asset available. |
+| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:526</code> | Record that a page now has a reusable thumbnail asset available. |
+| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:891</code> |  |
+| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1325</code> |  |
+| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1468</code> |  |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2184</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1249</code> |  |
+| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1258</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2003</code> |  |
+| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1205</code> |  |
+| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1644</code> |  |
+| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:692</code> |  |
+| <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:158</code> |  |
+| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1572</code> |  |
+| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:670</code> |  |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2275</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2617</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1559</code> |  |
+| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1225</code> |  |
+| <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:63</code> |  |
+| <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:171</code> |  |
+| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1403</code> |  |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2025</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1479</code> |  |
+| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:492</code> |  |
+| <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:337</code> |  |
+| <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:326</code> |  |
 | <code>componentDidCatch</code> | function | <code>src/ErrorBoundary.jsx:152</code> | Log error details for diagnostics. |
 | <code>module.exports#copyDetails</code> | member | <code>src/ErrorBoundary.jsx:189</code> | Copy a concise diagnostic bundle to the clipboard \(best effort\). |
 | <code>ErrorBoundaryProps</code> | typedef | <code>src/ErrorBoundary.jsx:103</code> | Props for the ErrorBoundary component. |
@@ -790,6 +797,30 @@
 | <code>SetString</code> | typedef | <code>src/types/jsdoc-types.js:29</code> | Simple string setter. |
 | <code>SetStringNullable</code> | typedef | <code>src/types/jsdoc-types.js:15</code> | Setter for string-or-null values. |
 | <code>ZoomMode</code> | typedef | <code>src/types/jsdoc-types.js:79</code> | Sticky zoom modes used by the viewer. |
+| <code>module:compareTransform~ARROW_PAN</code> | constant | <code>src/utils/compareTransform.js:319</code> | Arrow key → pan axis and direction. |
+| <code>module:compareTransform.buildCompareTransformCss</code> | function | <code>src/utils/compareTransform.js:177</code> | CSS transform the renderer applies to the page stage \(transform-origin: page centre\). |
+| <code>module:compareTransform.COMPARE_TRANSFORM_LIMITS</code> | constant | <code>src/utils/compareTransform.js:41</code> | Supported range. |
+| <code>module:compareTransform</code> | module | <code>src/utils/compareTransform.js:2</code> | File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary = lef... |
+| <code>module:compareTransform~CompareTransform</code> | typedef | <code>src/utils/compareTransform.js:16</code> | Per-page transform. |
+| <code>module:compareTransform.compareTransformReducer</code> | function | <code>src/utils/compareTransform.js:227</code> | Reducer for the per-page transform state. |
+| <code>module:compareTransform~CompareTransformState</code> | typedef | <code>src/utils/compareTransform.js:30</code> |  |
+| <code>module:compareTransform~CompareTransformTarget</code> | typedef | <code>src/utils/compareTransform.js:28</code> |  |
+| <code>module:compareTransform~finiteOr</code> | function | <code>src/utils/compareTransform.js:73</code> |  |
+| <code>module:compareTransform.formatTransformNumber</code> | function | <code>src/utils/compareTransform.js:304</code> | Format a number for a transform field in the UI language, without digit grouping. |
+| <code>module:compareTransform.isIdentityCompareTransform</code> | function | <code>src/utils/compareTransform.js:125</code> |  |
+| <code>module:compareTransform~mapBoth</code> | function | <code>src/utils/compareTransform.js:209</code> |  |
+| <code>module:compareTransform.normalizeCompareTransform</code> | function | <code>src/utils/compareTransform.js:111</code> |  |
+| <code>module:compareTransform~normalizeOffset</code> | function | <code>src/utils/compareTransform.js:91</code> |  |
+| <code>module:compareTransform~normalizeScale</code> | function | <code>src/utils/compareTransform.js:82</code> |  |
+| <code>module:compareTransform~normalizeTarget</code> | function | <code>src/utils/compareTransform.js:137</code> |  |
+| <code>module:compareTransform.normalizeTransformRotation</code> | function | <code>src/utils/compareTransform.js:102</code> | Normalize an angle to \[0, 360\) with 0.1 degree resolution. |
+| <code>module:compareTransform.parseLocaleNumber</code> | function | <code>src/utils/compareTransform.js:275</code> | Parse a number typed by the user in either Swedish \( 12,5 \) or English \( 12.5 \) notation. |
+| <code>module:compareTransform.resolveTransformKeyAction</code> | function | <code>src/utils/compareTransform.js:333</code> | Map a key press on a pan control to a reducer action: arrows pan 1 px, Shift+arrows 10 px. |
+| <code>module:compareTransform~roundTo</code> | function | <code>src/utils/compareTransform.js:63</code> |  |
+| <code>module:compareTransform~sameTransform</code> | function | <code>src/utils/compareTransform.js:189</code> |  |
+| <code>module:compareTransform.selectCompareTransform</code> | function | <code>src/utils/compareTransform.js:148</code> | Read one page&#39;s transform. |
+| <code>module:compareTransform.splitTransformRotation</code> | function | <code>src/utils/compareTransform.js:160</code> | Split a free angle into the quarter turn drawn by the canvas and the residual applied as CSS. |
+| <code>module:compareTransform~withTarget</code> | function | <code>src/utils/compareTransform.js:199</code> |  |
 | <code>countPdfPages</code> | function | <code>src/utils/documentLoadingConfig.js:559</code> | Count PDF pages in a page descriptor list. |
 | <code>detectBrowserFamily</code> | function | <code>src/utils/documentLoadingConfig.js:169</code> |  |
 | <code>DocumentLoadingAdaptiveMemoryConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:30</code> |  |

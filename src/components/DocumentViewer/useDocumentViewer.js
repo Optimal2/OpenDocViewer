@@ -34,7 +34,8 @@ import {
   setCustomFitWidthFactorPreference,
   setDefaultZoomModePreference,
 } from '../../utils/viewerPreferences.js';
-import { useViewerPostZoom } from './hooks/useViewerPostZoom.js';
+import { splitTransformRotation } from '../../utils/compareTransform.js';
+import { useCompareTransforms } from './hooks/useCompareTransforms.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 
 /**
@@ -850,8 +851,33 @@ export function useDocumentViewer() {
     totalPages,
   ]);
 
-  const [primaryImageProperties, setPrimaryImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
-  const [compareImageProperties, setCompareImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
+  // Brightness/contrast stay local; rotation lives in the per-page compare transform (viewer
+  // context), whose whole quarter turn is what the canvas draws (docs-src/compare-transform.md).
+  const [primaryImageAdjustments, setPrimaryImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
+  const [compareImageAdjustments, setCompareImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
+
+  // --- Per-page compare transform (stepless zoom, free pan, 0.1 degree rotation) -------
+  const {
+    primaryTransform,
+    compareTransform,
+    dispatchCompareTransform,
+    postZoomLeft,
+    postZoomRight,
+    bumpPostZoomLeft,
+    bumpPostZoomRight,
+    resetPostZoom,
+  } = useCompareTransforms(isComparing);
+
+  const primaryQuarterTurn = splitTransformRotation(primaryTransform.rotation).quarterTurn;
+  const compareQuarterTurn = splitTransformRotation(compareTransform.rotation).quarterTurn;
+  const primaryImageProperties = useMemo(
+    () => ({ ...primaryImageAdjustments, rotation: primaryQuarterTurn }),
+    [primaryImageAdjustments, primaryQuarterTurn]
+  );
+  const compareImageProperties = useMemo(
+    () => ({ ...compareImageAdjustments, rotation: compareQuarterTurn }),
+    [compareImageAdjustments, compareQuarterTurn]
+  );
 
   const [isExpanded, setIsExpandedState] = useState(false); // editing-controls visibility
 
@@ -875,27 +901,22 @@ export function useDocumentViewer() {
     if (previousPrimaryOriginalPageRef.current === currentOriginalPageNumber) return;
     previousPrimaryOriginalPageRef.current = currentOriginalPageNumber;
     setPrimaryImageProperties(DEFAULT_IMAGE_PROPERTIES);
-  }, [currentOriginalPageNumber]);
+    // A new page starts unrotated, as before; scale and pan persist like the old pane zoom did.
+    dispatchCompareTransform({ type: 'set', target: 'primary', transform: { rotation: 0 } });
+  }, [currentOriginalPageNumber, dispatchCompareTransform]);
 
   useEffect(() => {
     if (!isComparing) {
       previousCompareOriginalPageRef.current = compareOriginalPageNumber;
       setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
+      dispatchCompareTransform({ type: 'reset', target: 'compare' });
       return;
     }
     if (previousCompareOriginalPageRef.current === compareOriginalPageNumber) return;
     previousCompareOriginalPageRef.current = compareOriginalPageNumber;
     setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
-  }, [compareOriginalPageNumber, isComparing]);
-
-  // --- Post-zoom (compare panes) -------------------------------------------------
-  const {
-    postZoomLeft,
-    postZoomRight,
-    bumpPostZoomLeft,
-    bumpPostZoomRight,
-    resetPostZoom,
-  } = useViewerPostZoom(isComparing);
+    dispatchCompareTransform({ type: 'set', target: 'compare', transform: { rotation: 0 } });
+  }, [compareOriginalPageNumber, dispatchCompareTransform, isComparing]);
 
   // --- Selection helpers ---------------------------------------------------------
   const toggleDraftSelectAll = useCallback((checked) => {
@@ -1562,18 +1583,14 @@ export function useDocumentViewer() {
   }, [setComparePageNumber]);
 
   // --- Image adjustments ---------------------------------------------------------
+  // The 90-degree buttons and shortcuts are presets on the per-page transform rotation.
   const handleRotationChange = useCallback((delta, target = 'primary') => {
-    const d = Number(delta || 0);
-    const update = (state) => ({
-      ...state,
-      rotation: normalizeRotationDegrees((Number(state.rotation) || 0) + d),
+    dispatchCompareTransform({
+      type: 'rotate',
+      target: target === 'compare' ? 'compare' : 'primary',
+      delta: Number(delta || 0),
     });
-    if (target === 'compare') {
-      setCompareImageProperties(update);
-      return;
-    }
-    setPrimaryImageProperties(update);
-  }, []);
+  }, [dispatchCompareTransform]);
 
   /** @param {{target:{value:*}}} e */
   const handleBrightnessChange = useCallback((e, target = 'primary') => {
@@ -1600,12 +1617,14 @@ export function useDocumentViewer() {
   }, []);
 
   const resetImageProperties = useCallback((target = 'primary') => {
-    if (target === 'compare') {
+    const normalizedTarget = target === 'compare' ? 'compare' : 'primary';
+    dispatchCompareTransform({ type: 'set', target: normalizedTarget, transform: { rotation: 0 } });
+    if (normalizedTarget === 'compare') {
       setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
       return;
     }
     setPrimaryImageProperties(DEFAULT_IMAGE_PROPERTIES);
-  }, []);
+  }, [dispatchCompareTransform]);
 
   const rotateLeftPage = useCallback((target = 'primary') => {
     handleRotationChange(-90, target);
@@ -1894,7 +1913,10 @@ export function useDocumentViewer() {
     hidePageFromSelection,
     hideDocumentFromSelection,
 
-    // per-pane post-zoom
+    // per-page compare transform (viewer context) and its ±0.1 pane-zoom presets
+    primaryTransform,
+    compareTransform,
+    dispatchCompareTransform,
     postZoomLeft,
     postZoomRight,
     bumpPostZoomLeft,

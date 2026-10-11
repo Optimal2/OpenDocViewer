@@ -575,6 +575,28 @@
     "factor": "Pane zoom factor",
     "groupLabel": "Per-pane zoom controls"
   },
+  "compareTransform": {
+    "toolbarPrimary": "Fine-tuning, left page",
+    "toolbarCompare": "Fine-tuning, right page",
+    "toggle": "Fine-tune",
+    "show": "Fine-tune zoom, position and rotation for this page",
+    "hide": "Hide fine-tuning for this page",
+    "summary": "{zoom} % · {rotation}°",
+    "zoomGroup": "Zoom",
+    "zoomField": "Page zoom in percent",
+    "zoomIn": "Zoom in 0.1 % (Shift: 1 %)",
+    "zoomOut": "Zoom out 0.1 % (Shift: 1 %)",
+    "moveGroup": "Position",
+    "movePad": "Move the page: drag it, or use the arrow keys here (Shift: 10 px)",
+    "dxField": "Horizontal offset in pixels",
+    "dyField": "Vertical offset in pixels",
+    "rotationGroup": "Rotation",
+    "rotationField": "Rotation in degrees",
+    "rotateCcw": "Rotate 0.1° counter-clockwise (Shift: 1°)",
+    "rotateCw": "Rotate 0.1° clockwise (Shift: 1°)",
+    "reset": "Reset zoom, position and rotation for this page",
+    "invalidNumber": "Enter a number, for example 12.5 or 12,5"
+  },
   "generic": {
     "loading": "Loading"
   },

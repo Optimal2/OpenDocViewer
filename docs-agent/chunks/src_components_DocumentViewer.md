@@ -1,6 +1,20 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 10. Line count: 5245. JSDoc symbol count: 121.
+File count: 11. Line count: 5792. JSDoc symbol count: 123.
+
+## src/components/DocumentViewer/CompareTransformControls.jsx
+
+Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page's free transform \(utils/compareTransform.js\): zoom \[−\] \[ 100,0 \] % \[\+\] 0.1 % steps \(Shift: 1
+
+Exports: `CompareTransformControls`
+
+Local imports: `src/utils/compareTransform.js`
+
+Symbols:
+
+- `toSignedRotation` (function) - Rotation shown signed in \(\-180, 180\] so a small counter\-clockwise tilt reads as −0,1 and not 359,9.
+- `TransformNumberField` (function) - Numeric text field with locale\-aware parsing; keeps a draft while focused.
+- `CompareTransformControls` (function) - No description.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -37,7 +51,7 @@ OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane
 
 Exports: `DocumentViewerRender`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/contexts/viewerContext.js`, `src/utils/documentMetadata.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/documentMetadata.js`
 
 Symbols:
 
@@ -52,7 +66,7 @@ Symbols:
 - `isAtScrollBottom` (function) - No description.
 - `preventDefaultIfCancelable` (function) - No description.
 - `DocumentViewerRender` (function) - DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.
-- `DocumentViewerRender~handlePaneWheelCapture` (constant) - No description.
+- `DocumentViewerRender~handleTransformWheel` (constant) - Ctrl/Cmd\+wheel over a pane whose fine\-tuning bar is expanded: ±1 % page scale per notch.
 
 ## src/components/DocumentViewer/DocumentViewerThumbnails.jsx
 
@@ -81,6 +95,22 @@ Symbols:
 - `PageNumberSetter` (typedef) - React\-like numeric/original page setter used by the toolbar adapter.
 - `DocumentViewerToolbarProps` (typedef) - Props consumed by DocumentViewerToolbar.
 - `DocumentViewerToolbar` (function) - Renders the toolbar for the document viewer by delegating to .
+
+## src/components/DocumentViewer/hooks/useCompareTransforms.js
+
+File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
+
+Exports: `useCompareTransforms`
+
+Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`
+
+Symbols:
+
+- `module:useCompareTransforms` (module) - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
+- `module:useCompareTransforms.useCompareTransforms` (function) - No description.
+- `module:useCompareTransforms.useCompareTransforms~bumpPostZoomLeft` (constant) - No description.
+- `module:useCompareTransforms.useCompareTransforms~bumpPostZoomRight` (constant) - No description.
+- `module:useCompareTransforms.useCompareTransforms~resetPostZoom` (constant) - Scale 1 on both pages \(fit and actual\-size presets\).
 
 ## src/components/DocumentViewer/hooks/useViewerEffects.js
 
@@ -122,22 +152,6 @@ Symbols:
 - `<anonymous>~onWindowBlur` (function) - No description.
 - `<anonymous>~onVisibilityChange` (function) - No description.
 
-## src/components/DocumentViewer/hooks/useViewerPostZoom.js
-
-File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &quot;post\-zoom&quot; state &amp; handlers used only in compare mode.
-
-Exports: `useViewerPostZoom`
-
-Symbols:
-
-- `module:useViewerPostZoom` (module) - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &quot;post\-zoom&quot; state &amp; handlers used only in compare mode.
-- `module:useViewerPostZoom~clamp` (function) - Clamp a numeric value to \[min, max\].
-- `module:useViewerPostZoom~round1` (function) - Round to one decimal place \(avoids float drift when stepping by 0.1\).
-- `module:useViewerPostZoom.useViewerPostZoom` (function) - Hook managing per\-pane post\-zoom factors for compare mode.
-- `module:useViewerPostZoom.useViewerPostZoom~resetPostZoom` (constant) - Reset both per\-pane factors to 1.0.
-- `module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomLeft` (constant) - Adjust left pane post\-zoom by ±0.1 steps.
-- `module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomRight` (constant) - Adjust right pane post\-zoom by ±0.1 steps.
-
 ## src/components/DocumentViewer/hooks/useViewerZoomEffects.js
 
 Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
@@ -159,7 +173,7 @@ Primary viewer\-state hook.
 
 Exports: `useDocumentViewer`
 
-Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/components/DocumentViewer/hooks/useViewerPostZoom.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
+Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 
 Symbols:
 
