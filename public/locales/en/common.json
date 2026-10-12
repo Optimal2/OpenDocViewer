@@ -749,7 +749,7 @@
       },
       "adjustments": {
         "title": "Image adjustments",
-        "body": "Rotation, brightness, contrast, and reset are always available in the toolbar. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
+        "body": "Outside compare mode, rotation, brightness, contrast, and reset are always in the toolbar. In compare mode, an installation can set compare.adjust.toolbarMode: 'hide'; they then give way while a page's Fine-tune panel is open, since that panel holds all of them. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
         "primary": "Adjustments target the active pane.",
         "compare": "Hold Shift in compare mode to temporarily target the opposite pane.",
         "reset": "Adjustments reset when you move to another page.",

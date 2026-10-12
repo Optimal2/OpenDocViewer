@@ -68,6 +68,18 @@ describe('help dialog entries for the compare views', () => {
     expect(fineTune).not.toMatch(/Fine-tune bar|en rad Finjustera/);
   });
 
+  it.each(['en', 'sv'])('%s: the adjustments entry qualifies the toolbar controls for compare.adjust.toolbarMode hide', (lng) => {
+    const body = locales[lng].help.sections.adjustments.body;
+    const toggle = locales[lng].compareTransform.toggle;
+    expect(body).toContain("compare.adjust.toolbarMode: 'hide'");
+    expect(body).toContain(toggle);
+    expect(body).toContain(lng === 'sv' ? 'Utanför jämförelsevyn finns' : 'Outside compare mode,');
+    // The old wording claimed the controls were always in the toolbar, also in compare mode.
+    expect(body).not.toMatch(/are always available in the toolbar|finns alltid tillgängliga i verktygsfältet/);
+    // The JSX fallback must match the English locale text.
+    if (lng === 'en') expect(source).toContain(`defaultValue: ${JSON.stringify(body)}`);
+  });
+
   it('the Swedish curtain entry names the toggle as shown in the UI', () => {
     expect(locales.sv.help.sections.compare.curtain).toContain('Horisontell');
     expect(locales.sv.help.sections.compare.curtain).toContain('Vertikal');

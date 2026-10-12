@@ -749,7 +749,7 @@
       },
       "adjustments": {
         "title": "Bildjusteringar",
-        "body": "Rotation, ljus, kontrast och återställning finns alltid tillgängliga i verktygsfältet. Ljus och kontrast öppnas från sina ikoner. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
+        "body": "Utanför jämförelsevyn finns rotation, ljus, kontrast och återställning alltid i verktygsfältet. I jämförelsevyn kan en installation ställa in compare.adjust.toolbarMode: 'hide'; då döljs de medan en sidas panel Finjustera är öppen, eftersom panelen innehåller allt det. Ljus och kontrast öppnas från sina ikoner. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
         "primary": "Justeringar avser den aktiva vyn.",
         "compare": "Håll nere Shift i jämförelsevy för att tillfälligt rikta justeringar mot motsatt vy.",
         "reset": "Justeringar återställs när du byter till en annan sida.",

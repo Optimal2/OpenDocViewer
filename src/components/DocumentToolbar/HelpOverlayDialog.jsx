@@ -172,7 +172,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.adjustments.title', { defaultValue: 'Image adjustments' })}</h3>
             <p>{t('help.sections.adjustments.body', {
-              defaultValue: 'Rotation, brightness, contrast, and reset are always available in the toolbar. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.',
+              defaultValue: "Outside compare mode, rotation, brightness, contrast, and reset are always in the toolbar. In compare mode, an installation can set compare.adjust.toolbarMode: 'hide'; they then give way while a page's Fine-tune panel is open, since that panel holds all of them. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
             })}</p>
             <ul>
               <li>{t('help.sections.adjustments.primary', {
