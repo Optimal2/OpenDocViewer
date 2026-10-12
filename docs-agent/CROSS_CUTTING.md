@@ -16,7 +16,8 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentToolbar/usePrintPipeline.js` (787 lines) - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` (671 lines) - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` (123 lines) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
-- `src/components/DocumentViewer/useDocumentViewer.js` (1989 lines) - Primary viewer\-state hook.
+- `src/components/DocumentViewer/useDocumentViewer.js` (1929 lines) - Primary viewer\-state hook.
+- `src/components/DocumentViewer/hooks/usePaneImageAdjustments.js` (152 lines) - File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per\-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the...
 - `src/hooks/useNavigationModifierState.js` (109 lines) - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` (362 lines) - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/hooks/usePageTimer.js` (149 lines) - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
@@ -27,7 +28,6 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` (162 lines) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/hooks/useAcceleratingHoldRepeat.js` (210 lines) - Reusable press\-and\-hold behavior for toolbar buttons.
 - `src/hooks/usePdfSignatureReports.js` (127 lines) - Browser PDF signature inspection and optional gateway trust enrichment.
-- `src/components/DocumentToolbar/hooks/usePrintRangeConfig.js` (163 lines) - Runtime\-configuration derivation for PrintRangeDialog.
 
 ### Workers
 

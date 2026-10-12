@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 19686. JSDoc symbol count: 792.
+File count: 51. Line count: 19696. JSDoc symbol count: 793.
 
 ## src/utils/compareCurtain.js
 
@@ -139,7 +139,7 @@ Symbols:
 
 File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
 
-Exports: `NEUTRAL_IMAGE_FILTER`, `normalizeGrayscale`, `normalizeInvert`, `needsCanvas`, `buildImageFilter`
+Exports: `NEUTRAL_IMAGE_FILTER`, `normalizeGrayscale`, `normalizeInvert`, `hasImageAdjustment`, `needsCanvas`, `buildImageFilter`
 
 Symbols:
 
@@ -148,6 +148,7 @@ Symbols:
 - `module:imageAdjustments~finiteOr` (function) - No description.
 - `module:imageAdjustments.normalizeGrayscale` (function) - Grayscale amount in percent, clamped to 0..100.
 - `module:imageAdjustments.normalizeInvert` (function) - Invert as a real boolean.
+- `module:imageAdjustments.hasImageAdjustment` (function) - Whether any colour adjustment \(brightness, contrast, grayscale, invert\) is off its neutral value.
 - `module:imageAdjustments.needsCanvas` (function) - Whether the page must be drawn on the canvas instead of the plain &lt;img&gt; .
 - `module:imageAdjustments.buildImageFilter` (function) - The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert.
 

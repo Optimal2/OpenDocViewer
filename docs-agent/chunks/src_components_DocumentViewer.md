@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 16. Line count: 7168. JSDoc symbol count: 143.
+File count: 17. Line count: 7445. JSDoc symbol count: 153.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -46,17 +46,18 @@ Symbols:
 
 ## src/components/DocumentViewer/CompareTransformControls.jsx
 
-Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page's free transform \(utils/compareTransform.js\): zoom \[−\] \[ 100,0 \] % \[\+\] 0.1 % steps \(Shift: 1
+Compare toolbar for one compared page: a disclosure button with a short summary, which expands into one panel for everything the page can be adjusted with \- its free transform \(utils/compareTransform.js\) and its image ad
 
 Exports: `CompareTransformControls`
 
-Local imports: `src/utils/compareTransform.js`
+Local imports: `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`
 
 Symbols:
 
 - `toSignedRotation` (function) - Rotation shown signed in \(\-180, 180\] so a small counter\-clockwise tilt reads as −0,1 and not 359,9.
 - `TransformNumberField` (function) - Numeric text field with locale\-aware parsing; keeps a draft while focused.
 - `CompareTransformControls` (function) - No description.
+- `CompareTransformControls~setImage` (function) - No description.
 
 ## src/components/DocumentViewer/compareViewKeys.js
 
@@ -183,6 +184,29 @@ Symbols:
 - `module:useCompareTransforms.useCompareTransforms~bumpPostZoomRight` (constant) - No description.
 - `module:useCompareTransforms.useCompareTransforms~resetPostZoom` (constant) - Scale 1 on both pages \(fit and actual\-size presets\).
 
+## src/components/DocumentViewer/hooks/usePaneImageAdjustments.js
+
+File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per\-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the...
+
+Exports: `DEFAULT_IMAGE_ADJUSTMENTS`, `usePaneImageAdjustments`
+
+Local imports: `src/utils/imageAdjustments.js`
+
+Symbols:
+
+- `module:usePaneImageAdjustments` (module) - File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per\-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the...
+- `module:usePaneImageAdjustments.DEFAULT_IMAGE_ADJUSTMENTS` (constant) - Neutral per\-page image adjustment state.
+- `module:usePaneImageAdjustments~normalizeTarget` (function) - No description.
+- `module:usePaneImageAdjustments~readPercent200` (function) - No description.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments` (function) - No description.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~patchPane` (constant) - No description.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~handleBrightnessChange` (constant) - No description.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~handleContrastChange` (constant) - No description.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~handleGrayscaleChange` (constant) - No description.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~handleInvertChange` (constant) - Accepts a checkbox event \( target.checked \), a \{ target: \{ value \} \} event or a plain value.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~clearImageAdjustments` (constant) - Image only; the transform is kept.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~resetPane` (constant) - Everything for one pane: identity transform \(no quarter turn either\) and neutral image.
+
 ## src/components/DocumentViewer/hooks/useViewerEffects.js
 
 File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
@@ -244,7 +268,7 @@ Primary viewer\-state hook.
 
 Exports: `useDocumentViewer`
 
-Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
+Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/usePaneImageAdjustments.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 
 Symbols:
 

@@ -194,6 +194,8 @@ function preventDefaultIfCancelable(event) {
  * @param {number} props.postZoomRight
  * @param {function(number): void} props.bumpPostZoomLeft
  * @param {function(number): void} props.bumpPostZoomRight
+ * @param {Object=} props.compareImageHandlers Image adjustment handlers for the per-page compare
+ *   panels (hooks/usePaneImageAdjustments.js).
  * @param {function(Object): void=} props.onPrimaryDisplayStateChange
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean=} props.onHidePageFromSelection
@@ -232,6 +234,7 @@ const DocumentViewerRender = ({
   primaryTransform = IDENTITY_COMPARE_TRANSFORM,
   compareTransform = IDENTITY_COMPARE_TRANSFORM,
   onCompareTransformAction,
+  compareImageHandlers,
   onPrimaryDisplayStateChange,
   selectionPanelEnabled = false,
   onHidePageFromSelection,
@@ -974,6 +977,8 @@ const DocumentViewerRender = ({
             <CompareTransformControls
               pane="primary"
               transform={primaryTransform}
+              imageProperties={primaryImageProperties}
+              imageHandlers={compareImageHandlers}
               expanded={transformBarsExpanded.primary}
               onExpandedChange={(expanded) => setTransformBarExpanded('primary', expanded)}
               onAction={onCompareTransformAction}
@@ -1035,6 +1040,8 @@ const DocumentViewerRender = ({
               <CompareTransformControls
                 pane="compare"
                 transform={compareTransform}
+                imageProperties={compareImageProperties}
+                imageHandlers={compareImageHandlers}
                 expanded={transformBarsExpanded.compare}
                 onExpandedChange={(expanded) => setTransformBarExpanded('compare', expanded)}
                 onAction={onCompareTransformAction}
@@ -1236,6 +1243,7 @@ DocumentViewerRender.propTypes = {
     rotation: PropTypes.number.isRequired,
   }),
   onCompareTransformAction: PropTypes.func,
+  compareImageHandlers: PropTypes.object,
   onPrimaryDisplayStateChange: PropTypes.func,
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,

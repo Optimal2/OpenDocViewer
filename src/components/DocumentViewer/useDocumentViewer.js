@@ -35,8 +35,8 @@ import {
   setDefaultZoomModePreference,
 } from '../../utils/viewerPreferences.js';
 import { splitTransformRotation } from '../../utils/compareTransform.js';
-import { normalizeGrayscale, normalizeInvert } from '../../utils/imageAdjustments.js';
 import { useCompareTransforms } from './hooks/useCompareTransforms.js';
+import { usePaneImageAdjustments } from './hooks/usePaneImageAdjustments.js';
 import { useCompareOverlay } from './hooks/useCompareOverlay.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 
@@ -97,16 +97,6 @@ const INITIAL_PRINT_PAGE_SEQUENCE = null;
 const INITIAL_ACTIVE_PANE = 'primary';
 /** @type {number|null} */
 const INITIAL_COMPARE_PAGE_NUMBER = null;
-
-/** Neutral per-page image adjustment state. */
-/** @type {ImageProperties} */
-const DEFAULT_IMAGE_PROPERTIES = Object.freeze({
-  rotation: 0,
-  brightness: 100,
-  contrast: 100,
-  grayscale: 0,
-  invert: false,
-});
 
 // The viewer API still exposes a container-click hook for shell components, but
 // this hook currently has no behavior. Keep the no-op at module scope so it is
@@ -861,11 +851,6 @@ export function useDocumentViewer() {
     totalPages,
   ]);
 
-  // Brightness/contrast/grayscale/invert stay local; rotation lives in the per-page compare transform (viewer
-  // context), whose whole quarter turn is what the canvas draws (docs-src/compare-transform.md).
-  const [primaryImageAdjustments, setPrimaryImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
-  const [compareImageAdjustments, setCompareImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
-
   // --- Per-page compare transform (stepless zoom, free pan, 0.1 degree rotation) -------
   const {
     primaryTransform,
@@ -877,6 +862,20 @@ export function useDocumentViewer() {
     bumpPostZoomRight,
     resetPostZoom,
   } = useCompareTransforms(isComparing);
+
+  // Brightness/contrast/grayscale/invert stay local; rotation lives in the per-page compare transform (viewer
+  // context), whose whole quarter turn is what the canvas draws (docs-src/compare-transform.md).
+  const {
+    primaryImageAdjustments,
+    compareImageAdjustments,
+    handleBrightnessChange,
+    handleContrastChange,
+    handleGrayscaleChange,
+    handleInvertChange,
+    clearImageAdjustments,
+    resetImageProperties,
+    compareImageHandlers,
+  } = usePaneImageAdjustments({ isComparing, dispatchCompareTransform });
 
   // --- Overlay view of the compare mode (both pages stacked, top page semi-transparent) -------
   const {
@@ -923,23 +922,23 @@ export function useDocumentViewer() {
   useEffect(() => {
     if (previousPrimaryOriginalPageRef.current === currentOriginalPageNumber) return;
     previousPrimaryOriginalPageRef.current = currentOriginalPageNumber;
-    setPrimaryImageProperties(DEFAULT_IMAGE_PROPERTIES);
+    clearImageAdjustments('primary');
     // A new page starts unrotated, as before; scale and pan persist like the old pane zoom did.
     dispatchCompareTransform({ type: 'set', target: 'primary', transform: { rotation: 0 } });
-  }, [currentOriginalPageNumber, dispatchCompareTransform]);
+  }, [clearImageAdjustments, currentOriginalPageNumber, dispatchCompareTransform]);
 
   useEffect(() => {
     if (!isComparing) {
       previousCompareOriginalPageRef.current = compareOriginalPageNumber;
-      setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
+      clearImageAdjustments('compare');
       dispatchCompareTransform({ type: 'reset', target: 'compare' });
       return;
     }
     if (previousCompareOriginalPageRef.current === compareOriginalPageNumber) return;
     previousCompareOriginalPageRef.current = compareOriginalPageNumber;
-    setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
+    clearImageAdjustments('compare');
     dispatchCompareTransform({ type: 'set', target: 'compare', transform: { rotation: 0 } });
-  }, [compareOriginalPageNumber, dispatchCompareTransform, isComparing]);
+  }, [clearImageAdjustments, compareOriginalPageNumber, dispatchCompareTransform, isComparing]);
 
   // --- Selection helpers ---------------------------------------------------------
   const toggleDraftSelectAll = useCallback((checked) => {
@@ -1615,67 +1614,7 @@ export function useDocumentViewer() {
     });
   }, [dispatchCompareTransform]);
 
-  /** @param {{target:{value:*}}} e */
-  const handleBrightnessChange = useCallback((e, target = 'primary') => {
-    const raw = Number(e && e.target ? e.target.value : undefined);
-    const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    const update = (state) => ({ ...state, brightness: v });
-    if (target === 'compare') {
-      setCompareImageProperties(update);
-      return;
-    }
-    setPrimaryImageProperties(update);
-  }, []);
-
-  /** @param {{target:{value:*}}} e */
-  const handleContrastChange = useCallback((e, target = 'primary') => {
-    const raw = Number(e && e.target ? e.target.value : undefined);
-    const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    const update = (state) => ({ ...state, contrast: v });
-    if (target === 'compare') {
-      setCompareImageProperties(update);
-      return;
-    }
-    setPrimaryImageProperties(update);
-  }, []);
-
-  /** @param {{target:{value:*}}} e */
-  const handleGrayscaleChange = useCallback((e, target = 'primary') => {
-    const grayscale = normalizeGrayscale(e && e.target ? e.target.value : undefined);
-    const update = (state) => ({ ...state, grayscale });
-    if (target === 'compare') {
-      setCompareImageProperties(update);
-      return;
-    }
-    setPrimaryImageProperties(update);
-  }, []);
-
-  /**
-   * Accepts a checkbox event (`target.checked`), a `{ target: { value } }` event or a plain value.
-   * @param {*} e
-   */
-  const handleInvertChange = useCallback((e, target = 'primary') => {
-    const source = e && e.target ? e.target : null;
-    const readsChecked = source && (source.type === 'checkbox' || !('value' in source));
-    const raw = source ? (readsChecked ? source.checked : source.value) : e;
-    const invert = normalizeInvert(raw);
-    const update = (state) => ({ ...state, invert });
-    if (target === 'compare') {
-      setCompareImageProperties(update);
-      return;
-    }
-    setPrimaryImageProperties(update);
-  }, []);
-
-  const resetImageProperties = useCallback((target = 'primary') => {
-    const normalizedTarget = target === 'compare' ? 'compare' : 'primary';
-    dispatchCompareTransform({ type: 'set', target: normalizedTarget, transform: { rotation: 0 } });
-    if (normalizedTarget === 'compare') {
-      setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
-      return;
-    }
-    setPrimaryImageProperties(DEFAULT_IMAGE_PROPERTIES);
-  }, [dispatchCompareTransform]);
+  // Brightness, contrast, grayscale, invert and the resets: hooks/usePaneImageAdjustments.js.
 
   const rotateLeftPage = useCallback((target = 'primary') => {
     handleRotationChange(-90, target);
@@ -1933,6 +1872,7 @@ export function useDocumentViewer() {
     handleGrayscaleChange,
     handleInvertChange,
     resetImageProperties,
+    compareImageHandlers,
     handleMouseDown,
     selectForCompare,
     setIsExpanded, // guarded setter

@@ -22,6 +22,18 @@ vi.mock('react-i18next', () => ({
 }));
 
 const IDENTITY = { scale: 1, dx: 0, dy: 0, rotation: 0 };
+const NEUTRAL_IMAGE = { rotation: 0, brightness: 100, contrast: 100, grayscale: 0, invert: false };
+
+function makeImageHandlers() {
+  return {
+    onBrightnessChange: vi.fn(),
+    onContrastChange: vi.fn(),
+    onGrayscaleChange: vi.fn(),
+    onInvertChange: vi.fn(),
+    onResetImage: vi.fn(),
+    onResetPane: vi.fn(),
+  };
+}
 
 async function renderBar(props) {
   const container = document.createElement('div');
@@ -29,13 +41,16 @@ async function renderBar(props) {
   const root = createRoot(container);
   const onAction = vi.fn();
   const onExpandedChange = vi.fn();
-  const allProps = { pane: 'compare', transform: IDENTITY, expanded: true, onAction, onExpandedChange, ...props };
+  const allProps = {
+    pane: 'compare', transform: IDENTITY, imageProperties: NEUTRAL_IMAGE, imageHandlers: makeImageHandlers(),
+    expanded: true, onAction, onExpandedChange, ...props,
+  };
   await act(() => root.render(createElement(CompareTransformControls, allProps)));
   const cleanup = async () => {
     await act(() => root.unmount());
     container.remove();
   };
-  return { container, root, onAction, onExpandedChange, cleanup };
+  return { container, root, onAction, onExpandedChange, imageHandlers: allProps.imageHandlers, cleanup };
 }
 
 /** @param {HTMLElement} container @param {string} label */
@@ -95,8 +110,10 @@ describe('CompareTransformControls', () => {
       { type: 'nudge', target: 'compare', field: 'rotation', delta: 0.1 },
       { type: 'nudge', target: 'compare', field: 'rotation', delta: -1 },
     ]);
-    // Reset is disabled at identity.
-    expect(byLabel(container, 'Reset zoom, position and rotation for this page').disabled).toBe(true);
+    // At identity with neutral image values every reset is disabled: nothing to clear.
+    expect(byLabel(container, 'Reset all (layout and image)').disabled).toBe(true);
+    expect(byLabel(container, 'Reset layout (zoom, position, rotation)').disabled).toBe(true);
+    expect(byLabel(container, 'Reset image (brightness, contrast, color)').disabled).toBe(true);
     await cleanup();
   });
 
@@ -181,6 +198,123 @@ describe('CompareTransformControls', () => {
       { type: 'nudge', target: 'compare', field: 'dx', delta: 1 },
       { type: 'nudge', target: 'compare', field: 'dy', delta: -10 },
     ]);
+    await cleanup();
+  });
+
+  it('collapsed: a one-character badge marks an active image adjustment; the summary text stays short', async () => {
+    const neutral = await renderBar({ expanded: false, transform: { scale: 1, dx: 0, dy: 0, rotation: 94.6 } });
+    expect(neutral.container.querySelector('.compare-transform-summary').textContent).toBe('100,0 % · 94,6°');
+    expect(neutral.container.querySelector('.compare-transform-badge')).toBe(null);
+    await neutral.cleanup();
+
+    const adjusted = await renderBar({ expanded: false, imageProperties: { ...NEUTRAL_IMAGE, invert: true } });
+    expect(adjusted.container.querySelector('.compare-transform-summary').textContent).toBe('100,0 % · 0,0°');
+    const badge = adjusted.container.querySelector('.compare-transform-badge');
+    expect(badge.getAttribute('title')).toBe('Image adjusted (brightness, contrast or color)');
+    expect(badge.querySelector('[aria-hidden="true"]').textContent).toBe('◐');
+    expect(adjusted.container.querySelector('.compare-transform-toggle').textContent)
+      .toContain('Image adjusted (brightness, contrast or color)');
+    await adjusted.cleanup();
+  });
+
+  it('expanded: every control shows its current value, image values included', async () => {
+    const { container, cleanup } = await renderBar({
+      transform: { scale: 1.015, dx: 1.5, dy: -2, rotation: 94.6 },
+      imageProperties: { rotation: 90, brightness: 120, contrast: 85, grayscale: 40, invert: true },
+    });
+    const value = (label) => /** @type {HTMLInputElement} */ (byLabel(container, label)).value;
+    expect(value('Page zoom in percent')).toBe('101,5');
+    expect(value('Horizontal offset in pixels')).toBe('1,5');
+    expect(value('Vertical offset in pixels')).toBe('−2,0');
+    expect(value('Rotation in degrees')).toBe('94,6');
+    expect(value('Brightness in percent (100 = unchanged)')).toBe('120');
+    expect(value('Contrast in percent (100 = unchanged)')).toBe('85');
+    expect(value('Grayscale in percent (0 = in color)')).toBe('40');
+    const invert = /** @type {HTMLInputElement} */ (byLabel(container, 'Invert colors'));
+    expect(invert.type).toBe('checkbox');
+    expect(invert.checked).toBe(true);
+    await cleanup();
+  });
+
+  it('image fields commit through the shared handlers with decimal comma, Enter, Escape and Arrow steps', async () => {
+    const { container, imageHandlers, cleanup } = await renderBar({
+      imageProperties: { ...NEUTRAL_IMAGE, brightness: 120 },
+    });
+    const brightness = byLabel(container, 'Brightness in percent (100 = unchanged)');
+    await typeInto(brightness, '130,5');
+    await press(brightness, 'Enter');
+    expect(imageHandlers.onBrightnessChange).toHaveBeenLastCalledWith({ target: { value: 130.5 } }, 'compare');
+    await press(brightness, 'ArrowUp', { shiftKey: true });
+    expect(imageHandlers.onBrightnessChange).toHaveBeenLastCalledWith({ target: { value: 130 } }, 'compare');
+
+    const contrast = byLabel(container, 'Contrast in percent (100 = unchanged)');
+    await press(contrast, 'ArrowDown');
+    expect(imageHandlers.onContrastChange).toHaveBeenLastCalledWith({ target: { value: 99 } }, 'compare');
+
+    const grayscale = byLabel(container, 'Grayscale in percent (0 = in color)');
+    await typeInto(grayscale, '25');
+    await press(grayscale, 'Escape');
+    expect(imageHandlers.onGrayscaleChange).not.toHaveBeenCalled();
+    await typeInto(grayscale, '25');
+    await press(grayscale, 'Enter');
+    expect(imageHandlers.onGrayscaleChange).toHaveBeenLastCalledWith({ target: { value: 25 } }, 'compare');
+
+    const invert = byLabel(container, 'Invert colors');
+    await act(() => invert.click());
+    expect(imageHandlers.onInvertChange).toHaveBeenCalledTimes(1);
+    expect(imageHandlers.onInvertChange.mock.calls[0][1]).toBe('compare');
+    await cleanup();
+  });
+
+  it('the 90 degree buttons sit with the rotation and dispatch rotate ±90 with a keep-fine-tuning tooltip', async () => {
+    const { container, onAction, cleanup } = await renderBar({ pane: 'primary', transform: { ...IDENTITY, rotation: 4.6 } });
+    const cw = byLabel(container, 'Rotate right 90°');
+    const ccw = byLabel(container, 'Rotate left 90°');
+    expect(cw.closest('[role="group"]').getAttribute('aria-label')).toBe('Rotation');
+    expect(ccw.closest('[role="group"]').getAttribute('aria-label')).toBe('Rotation');
+    expect(cw.getAttribute('title')).toBe('Rotates 90° and keeps the fine tuning (4.6° → 94.6°)');
+    expect(ccw.getAttribute('title')).toBe('Rotates −90° and keeps the fine tuning (4.6° → −85.4°)');
+    await act(() => cw.click());
+    await act(() => ccw.click());
+    expect(onAction.mock.calls.map(([action]) => action)).toEqual([
+      { type: 'rotate', target: 'primary', delta: 90 },
+      { type: 'rotate', target: 'primary', delta: -90 },
+    ]);
+    await cleanup();
+  });
+
+  it('three labelled resets: all (layout and image), layout only, image only', async () => {
+    const { container, onAction, imageHandlers, cleanup } = await renderBar({
+      transform: { scale: 1.2, dx: 3, dy: 0, rotation: 94.6 },
+      imageProperties: { ...NEUTRAL_IMAGE, grayscale: 50 },
+    });
+    const group = container.querySelector('.compare-transform-resets');
+    expect(group.getAttribute('role')).toBe('group');
+    expect([...group.querySelectorAll('button')].map((button) => button.textContent)).toEqual([
+      'Reset all (layout and image)',
+      'Reset layout (zoom, position, rotation)',
+      'Reset image (brightness, contrast, color)',
+    ]);
+    await act(() => byLabel(container, 'Reset layout (zoom, position, rotation)').click());
+    expect(onAction).toHaveBeenLastCalledWith({ type: 'reset', target: 'compare' });
+    expect(imageHandlers.onResetImage).not.toHaveBeenCalled();
+
+    await act(() => byLabel(container, 'Reset image (brightness, contrast, color)').click());
+    expect(imageHandlers.onResetImage).toHaveBeenCalledWith('compare');
+    expect(onAction).toHaveBeenCalledTimes(1);
+
+    await act(() => byLabel(container, 'Reset all (layout and image)').click());
+    expect(imageHandlers.onResetPane).toHaveBeenCalledWith('compare');
+    // No fourth, icon-only reset survives.
+    expect(container.querySelectorAll('button[aria-label*="Reset"]').length).toBe(3);
+    await cleanup();
+  });
+
+  it('only one part active: the matching partial reset and the full reset are enabled', async () => {
+    const { container, cleanup } = await renderBar({ imageProperties: { ...NEUTRAL_IMAGE, brightness: 110 } });
+    expect(byLabel(container, 'Reset all (layout and image)').disabled).toBe(false);
+    expect(byLabel(container, 'Reset layout (zoom, position, rotation)').disabled).toBe(true);
+    expect(byLabel(container, 'Reset image (brightness, contrast, color)').disabled).toBe(false);
     await cleanup();
   });
 

@@ -69,8 +69,8 @@ test('fine-tuning bar: numeric fields, fine buttons and arrow keys write the pag
   // The left page is untouched.
   expect(await stageTransform(page, 'primary')).toBe('');
 
-  // Reset.
-  await bar.getByRole('button', { name: 'Reset zoom, position and rotation for this page' }).click();
+  // The layout part of the reset: zoom, position and rotation (the image adjustments are a separate part).
+  await bar.getByRole('button', { name: 'Reset layout (zoom, position, rotation)' }).click();
   await expect.poll(() => stageTransform(page, 'compare')).toBe('');
 });
 

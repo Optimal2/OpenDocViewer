@@ -141,6 +141,7 @@ const DocumentViewer = () => {
     handleBrightnessChange,
     handleContrastChange,
     resetImageProperties,
+    compareImageHandlers,
     handleMouseDown,
     selectForCompare,
     setIsExpanded,
@@ -503,6 +504,7 @@ const DocumentViewer = () => {
           imagePropertiesB={compareImageProperties}
           transforms={compareTransforms}
           onTransformAction={dispatchCompareTransform}
+          imageHandlers={compareImageHandlers}
           overlay={compareOverlay}
           onOverlayAction={dispatchCompareOverlay}
           canResetToCompare={!!compareOverlaySnapshot}
@@ -744,6 +746,7 @@ const DocumentViewer = () => {
             primaryTransform={primaryTransform}
             compareTransform={compareTransform}
             onCompareTransformAction={dispatchCompareTransform}
+            compareImageHandlers={compareImageHandlers}
             onPrimaryDisplayStateChange={handlePrimaryDisplayStateChange}
             selectionPanelEnabled={selectionPanelEnabled}
             onHidePageFromSelection={hidePageFromSelection}

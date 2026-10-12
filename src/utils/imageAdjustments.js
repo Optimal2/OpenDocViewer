@@ -50,17 +50,27 @@ export function normalizeInvert(value) {
 }
 
 /**
+ * Whether any colour adjustment (brightness, contrast, grayscale, invert) is off its neutral value.
+ * Rotation is not part of it: it belongs to the page layout.
+ *
+ * @param {(Object|null|undefined)} properties
+ * @returns {boolean}
+ */
+export function hasImageAdjustment(properties) {
+  return finiteOr(properties?.brightness, 100) !== 100
+    || finiteOr(properties?.contrast, 100) !== 100
+    || normalizeGrayscale(properties?.grayscale) !== 0
+    || normalizeInvert(properties?.invert);
+}
+
+/**
  * Whether the page must be drawn on the canvas instead of the plain `<img>`.
  *
  * @param {(Object|null|undefined)} properties  { rotation, brightness, contrast, grayscale, invert }
  * @returns {boolean}
  */
 export function needsCanvas(properties) {
-  return finiteOr(properties?.rotation, 0) !== 0
-    || finiteOr(properties?.brightness, 100) !== 100
-    || finiteOr(properties?.contrast, 100) !== 100
-    || normalizeGrayscale(properties?.grayscale) !== 0
-    || normalizeInvert(properties?.invert);
+  return finiteOr(properties?.rotation, 0) !== 0 || hasImageAdjustment(properties);
 }
 
 /**

@@ -87,6 +87,8 @@ function measureStage(stage) {
  * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesB
  * @param {{ primary:Object, compare:Object }} props.transforms Per-page transforms (viewer context).
  * @param {function(Object): void} props.onTransformAction compareTransformReducer action dispatcher.
+ * @param {Object=} props.imageHandlers Image adjustment handlers for the per-page panels
+ *   (hooks/usePaneImageAdjustments.js `compareImageHandlers`).
  * @param {{ opacity:number, top:OverlayTarget }} props.overlay Overlay settings (viewer context).
  * @param {function(Object): void} props.onOverlayAction compareOverlayReducer action dispatcher.
  * @param {boolean} props.canResetToCompare
@@ -110,6 +112,7 @@ const CompareOverlayView = ({
   imagePropertiesB,
   transforms = INITIAL_COMPARE_TRANSFORM_STATE,
   onTransformAction,
+  imageHandlers,
   overlay,
   onOverlayAction,
   canResetToCompare,
@@ -478,6 +481,8 @@ const CompareOverlayView = ({
             <CompareTransformControls
               pane={target}
               transform={target === 'primary' ? transformA : transformB}
+              imageProperties={target === 'primary' ? imagePropertiesA : imagePropertiesB}
+              imageHandlers={imageHandlers}
               expanded={barsExpanded[target]}
               onExpandedChange={(expanded) => setBarsExpanded((current) => ({ ...current, [target]: expanded }))}
               onAction={onTransformAction}
@@ -535,6 +540,7 @@ CompareOverlayView.propTypes = {
   imagePropertiesB: imagePropertiesShape.isRequired,
   transforms: PropTypes.shape({ primary: transformShape, compare: transformShape }),
   onTransformAction: PropTypes.func.isRequired,
+  imageHandlers: PropTypes.object,
   overlay: PropTypes.shape({
     opacity: PropTypes.number.isRequired,
     top: PropTypes.oneOf(['primary', 'compare']).isRequired,

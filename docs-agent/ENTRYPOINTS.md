@@ -41,10 +41,10 @@
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 7 incoming local imports
 - `src/utils/viewerPreferences.js`: 7 incoming local imports
+- `src/utils/imageAdjustments.js`: 6 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
-- `src/utils/imageAdjustments.js`: 5 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports

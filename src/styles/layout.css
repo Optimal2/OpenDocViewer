@@ -1256,6 +1256,46 @@
   border-color: #c62828;
 }
 
+.compare-transform-field.is-image input { width: 4em; }
+
+.compare-transform-field-icon {
+  opacity: 0.8;
+}
+
+/* One character after the collapsed summary: an image adjustment is active on this page. */
+.compare-transform-badge {
+  color: var(--odv-transform-accent);
+  font-weight: 600;
+}
+
+.compare-transform-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.compare-transform-check input {
+  margin: 0;
+  accent-color: var(--odv-transform-accent);
+}
+
+.compare-transform-check input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--odv-transform-accent) 78%, var(--text-color) 22%);
+  outline-offset: 2px;
+}
+
+.compare-transform-bar .odv-btn.compare-transform-reset {
+  padding: 0 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.compare-transform-bar .odv-btn.compare-transform-reset.is-all:not(:disabled) {
+  border-color: var(--odv-transform-accent);
+  font-weight: 600;
+}
+
 /* Overlay view of the compare mode (CompareOverlayView.jsx): full surface, own toolbar. */
 .compare-overlay-view {
   display: flex;

@@ -150,6 +150,27 @@ describe('compareTransformReducer', () => {
     expect(run([{ type: 'resetAll' }], state)).toEqual(INITIAL_COMPARE_TRANSFORM_STATE);
   });
 
+  it('rotate +90 on a 4.6 degree fine tuning gives 94.6 (canvas 90 + CSS 4.6); −90 gives 274.6', () => {
+    const fine = run([{ type: 'set', target: 'compare', transform: { rotation: 4.6 } }]);
+    const turned = run([{ type: 'rotate', target: 'compare', delta: 90 }], fine);
+    expect(turned.compare.rotation).toBe(94.6);
+    expect(splitTransformRotation(turned.compare.rotation)).toEqual({ quarterTurn: 90, residual: 4.6 });
+    expect(run([{ type: 'rotate', target: 'compare', delta: -90 }], fine).compare.rotation).toBe(274.6);
+    expect(turned.primary).toBe(fine.primary);
+  });
+
+  it('reset clears zoom, position and the whole angle including the quarter turn (unlike resetAlignment)', () => {
+    const state = run([
+      { type: 'set', target: 'compare', transform: { scale: 1.5, dx: 12, dy: -3, rotation: 4.6 } },
+      { type: 'rotate', target: 'compare', delta: 90 },
+    ]);
+    expect(state.compare.rotation).toBe(94.6);
+    const reset = run([{ type: 'reset', target: 'compare' }], state);
+    expect(reset.compare).toEqual({ scale: 1, dx: 0, dy: 0, rotation: 0 });
+    expect(isIdentityCompareTransform(reset.compare)).toBe(true);
+    expect(run([{ type: 'resetAlignment' }], state).compare.rotation).toBe(90);
+  });
+
   it('resetAlignment keeps only the nearest quarter turn (used when compare mode toggles)', () => {
     const state = run([
       { type: 'set', target: 'primary', transform: { scale: 2, dx: 5, dy: 6, rotation: 91.5 } },

@@ -510,6 +510,17 @@ const DocumentToolbar = ({
   const editingGroupTitle = editingTargetMode === 'compare'
     ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page' })
     : t('toolbar.editingTargetPrimary', { defaultValue: 'Editing the primary / left page' });
+  // Fine tuning exists only in compare mode, so only there does the tooltip say the 90° step keeps it.
+  const rotateLeftTitle = isComparing
+    ? t('toolbar.rotateLeft90KeepsFine', { defaultValue: 'Rotates −90° and keeps the fine tuning (4.6° → −85.4°)' })
+    : t('toolbar.rotateLeft90');
+  const rotateRightTitle = isComparing
+    ? t('toolbar.rotateRight90KeepsFine', { defaultValue: 'Rotates 90° and keeps the fine tuning (4.6° → 94.6°)' })
+    : t('toolbar.rotateRight90');
+  // In compare mode the reset is the panel's full reset (hooks/usePaneImageAdjustments.js), so it says so.
+  const resetAdjustmentsLabel = isComparing
+    ? t('compareTransform.resetAll', { defaultValue: 'Reset all (layout and image)' })
+    : t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' });
   const activeDocumentNavigation = navigationTargetMode === 'compare'
     ? normalizedCompareDocumentNavigation
     : normalizedPrimaryDocumentNavigation;
@@ -1113,7 +1124,7 @@ const DocumentToolbar = ({
           type="button"
           onClick={(event) => handleRotationButtonClick(event, -90)}
           aria-label={t('toolbar.rotateLeft90')}
-          title={t('toolbar.rotateLeft90')}
+          title={rotateLeftTitle}
           className="odv-btn"
         >
           <span className="material-icons" aria-hidden="true">rotate_left</span>
@@ -1122,7 +1133,7 @@ const DocumentToolbar = ({
           type="button"
           onClick={(event) => handleRotationButtonClick(event, 90)}
           aria-label={t('toolbar.rotateRight90')}
-          title={t('toolbar.rotateRight90')}
+          title={rotateRightTitle}
           className="odv-btn"
         >
           <span className="material-icons" aria-hidden="true">rotate_right</span>
@@ -1268,8 +1279,8 @@ const DocumentToolbar = ({
         <button
           type="button"
           onClick={handleResetAdjustmentsClick}
-          aria-label={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-          title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+          aria-label={resetAdjustmentsLabel}
+          title={resetAdjustmentsLabel}
           className="odv-btn"
         >
           <span className="material-icons" aria-hidden="true">restart_alt</span>

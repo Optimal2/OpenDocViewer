@@ -255,3 +255,25 @@ describe.each(['overlay', 'curtain'])('%s view: print gating (4 combinations)', 
     await cleanup();
   });
 });
+
+describe('toolbar 90 degree buttons in compare mode', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('say in their tooltip that the quarter turn keeps the fine tuning, like the panel buttons', async () => {
+    const { container, cleanup } = await renderViewer();
+    const toolbar = container.querySelector('.harness-toolbar');
+    expect(toolbar.querySelector('[aria-label="toolbar.rotateRight90"]').getAttribute('title'))
+      .toBe('Rotates 90° and keeps the fine tuning (4.6° → 94.6°)');
+    expect(toolbar.querySelector('[aria-label="toolbar.rotateLeft90"]').getAttribute('title'))
+      .toBe('Rotates −90° and keeps the fine tuning (4.6° → −85.4°)');
+    // The toolbar reset is the panel's full reset in compare mode, and its label says so.
+    expect(toolbar.querySelector('[aria-label="Reset all (layout and image)"]')).not.toBeNull();
+    expect(toolbar.querySelector('[aria-label="Reset adjustments"]')).toBeNull();
+    await cleanup();
+  });
+});

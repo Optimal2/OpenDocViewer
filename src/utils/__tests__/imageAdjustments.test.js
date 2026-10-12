@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   NEUTRAL_IMAGE_FILTER,
   buildImageFilter,
+  hasImageAdjustment,
   needsCanvas,
   normalizeGrayscale,
   normalizeInvert,
@@ -49,6 +50,28 @@ describe('needsCanvas (the plain <img> fast path)', () => {
 
   it('treats non-finite numbers as neutral, as the canvas renderer does', () => {
     expect(needsCanvas({ ...NEUTRAL, brightness: Number.NaN, contrast: 'abc', grayscale: Infinity })).toBe(false);
+  });
+});
+
+describe('hasImageAdjustment (the compare panel badge and "Reset image")', () => {
+  it('is false for neutral values and ignores rotation, which belongs to the layout', () => {
+    expect(hasImageAdjustment(NEUTRAL)).toBe(false);
+    expect(hasImageAdjustment({ ...NEUTRAL, rotation: 90 })).toBe(false);
+    expect(hasImageAdjustment(null)).toBe(false);
+    expect(hasImageAdjustment({ ...NEUTRAL, invert: 'false' })).toBe(false);
+  });
+
+  it('is true as soon as one colour value is off neutral', () => {
+    expect(hasImageAdjustment({ ...NEUTRAL, brightness: 101 })).toBe(true);
+    expect(hasImageAdjustment({ ...NEUTRAL, contrast: 0 })).toBe(true);
+    expect(hasImageAdjustment({ ...NEUTRAL, grayscale: 1 })).toBe(true);
+    expect(hasImageAdjustment({ ...NEUTRAL, invert: true })).toBe(true);
+  });
+
+  it('needsCanvas is exactly rotation or an image adjustment', () => {
+    for (const properties of [NEUTRAL, { ...NEUTRAL, rotation: 90 }, { ...NEUTRAL, grayscale: 5 }, { ...NEUTRAL, invert: true }]) {
+      expect(needsCanvas(properties)).toBe(properties.rotation !== 0 || hasImageAdjustment(properties));
+    }
   });
 });
 
