@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 18. Line count: 7820. JSDoc symbol count: 102.
+File count: 18. Line count: 7830. JSDoc symbol count: 103.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -57,6 +57,7 @@ Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `
 
 Symbols:
 
+- `NOOP` (function) - Shared default for the optional callbacks.
 - `getCurrentPage` (function) - No description.
 - `normalizeSize` (function) - No description.
 - `hasUsableSize` (function) - No description.
@@ -68,7 +69,6 @@ Symbols:
 - `<anonymous>~clearLoadingOverlayTimer` (constant) - No description.
 - `<anonymous>~claimAssetRetry` (constant) - No description.
 - `<anonymous>~resolveCustomFitOptions` (constant) - No description.
-- `<anonymous>~drawImageOnCanvas` (constant) - No description.
 
 ## src/components/DocumentSelectionPanel.jsx
 

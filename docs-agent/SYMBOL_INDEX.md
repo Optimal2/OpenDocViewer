@@ -143,31 +143,32 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx:30</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:21</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:38</code> |  |
-| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:477</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
-| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:500</code> |  |
-| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:221</code> |  |
-| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:209</code> |  |
-| <code>DisplayedAsset</code> | typedef | <code>src/components/DocumentRender.jsx:77</code> |  |
-| <code>DocumentRender</code> | constant | <code>src/components/DocumentRender.jsx:103</code> |  |
-| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:390</code> |  |
-| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:722</code> |  |
-| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:464</code> |  |
-| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:445</code> |  |
-| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:454</code> |  |
-| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:432</code> | Returns the surface whose intrinsic size should drive fit calculations. |
-| <code>getCurrentPage</code> | function | <code>src/components/DocumentRender.jsx:45</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:926</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:859</code> |  |
-| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:523</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:954</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:802</code> |  |
-| <code>hasUsableSize</code> | function | <code>src/components/DocumentRender.jsx:65</code> |  |
-| <code>isBlobAssetUrl</code> | function | <code>src/components/DocumentRender.jsx:73</code> |  |
-| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:147</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
-| <code>normalizeSize</code> | function | <code>src/components/DocumentRender.jsx:54</code> |  |
-| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:885</code> |  |
-| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:202</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
-| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:261</code> |  |
+| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:487</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
+| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:510</code> |  |
+| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:231</code> |  |
+| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:219</code> |  |
+| <code>DisplayedAsset</code> | typedef | <code>src/components/DocumentRender.jsx:87</code> |  |
+| <code>DocumentRender</code> | constant | <code>src/components/DocumentRender.jsx:113</code> |  |
+| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:400</code> |  |
+| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:732</code> |  |
+| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:474</code> |  |
+| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:455</code> |  |
+| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:464</code> |  |
+| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:442</code> | Returns the surface whose intrinsic size should drive fit calculations. |
+| <code>getCurrentPage</code> | function | <code>src/components/DocumentRender.jsx:55</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:936</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:869</code> |  |
+| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:533</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:964</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:812</code> |  |
+| <code>hasUsableSize</code> | function | <code>src/components/DocumentRender.jsx:75</code> |  |
+| <code>isBlobAssetUrl</code> | function | <code>src/components/DocumentRender.jsx:83</code> |  |
+| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:157</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
+| <code>NOOP</code> | function | <code>src/components/DocumentRender.jsx:48</code> | Shared default for the optional callbacks. |
+| <code>normalizeSize</code> | function | <code>src/components/DocumentRender.jsx:64</code> |  |
+| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:895</code> |  |
+| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:212</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
+| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:271</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentSelectionPanel.jsx:89</code> |  |
 | <code>SelectionCheckboxRow</code> | function | <code>src/components/DocumentSelectionPanel.jsx:30</code> |  |
 | <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:161</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |

@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 18. Line count: 7820. JSDoc symbol count: 102.
+File count: 18. Line count: 7830. JSDoc symbol count: 103.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
@@ -62,7 +62,7 @@ File count: 19. Line count: 8000. JSDoc symbol count: 137.
 
 ## src/components/DocumentViewer
 
-File count: 17. Line count: 7523. JSDoc symbol count: 154.
+File count: 17. Line count: 7520. JSDoc symbol count: 154.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.

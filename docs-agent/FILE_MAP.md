@@ -22,7 +22,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentLoader/workerHandler.js</code> | 301 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
 | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx</code> | 177 | 1 | 2 | high | Session-wide document metadata matrix overlay. |
 | <code>src/components/DocumentMetadataOverlayDialog.jsx</code> | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
-| <code>src/components/DocumentRender.jsx</code> | 1145 | 3 | 25 | high | OpenDocViewer — Active page renderer. |
+| <code>src/components/DocumentRender.jsx</code> | 1155 | 3 | 26 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1592 | 2 | 28 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
@@ -45,8 +45,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 671 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 566 | 1 | 3 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
 | <code>src/components/DocumentViewer/CompareCurtainButton.jsx</code> | 55 | 2 | 1 | high | Entry to the curtain view \(CompareCurtainView.jsx\), shown in the compare toolbar and in the overlay view&#39;s toolbar. |
-| <code>src/components/DocumentViewer/CompareCurtainView.jsx</code> | 424 | 1 | 5 | high | Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, page B clipped to one side of a draggable border. |
-| <code>src/components/DocumentViewer/CompareOverlayView.jsx</code> | 559 | 1 | 5 | high | Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, so differences show through. |
+| <code>src/components/DocumentViewer/CompareCurtainView.jsx</code> | 422 | 1 | 5 | high | Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, page B clipped to one side of a draggable border. |
+| <code>src/components/DocumentViewer/CompareOverlayView.jsx</code> | 558 | 1 | 5 | high | Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, so differences show through. |
 | <code>src/components/DocumentViewer/CompareTransformControls.jsx</code> | 529 | 2 | 4 | high | Compare toolbar for one compared page: a disclosure button with a short summary, which expands into one panel for everything the page can be adjusted with - its free transform \(utils/compareTransform.js\) and its image ad |
 | <code>src/components/DocumentViewer/compareViewKeys.js</code> | 41 | 2 | 4 | high | File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full-surface compare views \(CompareOverlayView.jsx, CompareCurtainView.jsx\): which focused el... |
 | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx</code> | 238 | 1 | 3 | high | Per-pane “post-zoom” controls shown in comparison mode, tucked behind the pane marker ring at the top-left of each pane. |
