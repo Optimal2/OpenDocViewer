@@ -3,10 +3,12 @@
  * Curtain view of the compare mode (CompareCurtainView.jsx, utils/compareCurtain.js): the entry in
  * the compare toolbar stays disabled until the overlay view has calibrated the pages; opened from
  * the overlay view or the compare view it shows both calibrated pages with page B clipped to one
- * side of a draggable border, and Close returns to the view it was opened from.
+ * side of a draggable border, and Close returns to the view it was opened from. Both pages keep
+ * their image adjustments: the curtain draws the same colour as side by side.
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
+import { drawnPixelStats, expectSamePixels, setImageAdjustment } from './compareImageAdjust.mjs';
 
 const CURTAIN_READY = 'Curtain: show the calibrated pages with a draggable border';
 const CURTAIN_NEEDS_CALIBRATION = 'Curtain: open the overlay view first – it calibrates the two pages';
@@ -103,6 +105,38 @@ test('curtain view: disabled until calibrated, opened from overlay and compare, 
   await expect(curtain).toHaveCount(0);
   await expect(page.locator('.compare-overlay-view')).toHaveCount(0);
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toBeVisible();
+});
+
+test('curtain view: both pages show the same colour as side by side after calibration', async ({ page }) => {
+  await openCompare(page);
+  // Non-neutral and different per page, so a page drawn without its adjustment cannot match.
+  const adjustments = {
+    primary: { brightness: 120, contrast: 90, grayscale: 30, invert: true },
+    compare: { brightness: 80, contrast: 130, grayscale: 60, invert: false },
+  };
+  /** @type {Record<string, Object>} */
+  const side = {};
+  for (const pane of /** @type {const} */ (['primary', 'compare'])) {
+    const bar = page.locator(`.compare-transform-bar.is-${pane}`);
+    await bar.locator('.compare-transform-toggle').click();
+    await setImageAdjustment(bar, adjustments[pane]);
+    await expect(page.locator(`.document-pane-frame.is-${pane}-pane canvas`)).toHaveCount(1);
+  }
+  for (const pane of ['primary', 'compare']) {
+    side[pane] = await drawnPixelStats(page, `.document-pane-frame.is-${pane}-pane canvas`);
+  }
+  expect(side.primary).not.toEqual(side.compare);
+
+  // Calibrate in the overlay view, then open the curtain from there.
+  await page.getByRole('button', { name: 'Overlay the two pages (transparency)' }).click();
+  const overlay = page.locator('.compare-overlay-view');
+  await overlay.locator('.compare-transform-bar.is-compare').getByRole('spinbutton', { name: 'Rotation in degrees' }).fill('0.5');
+  await overlay.locator('.compare-transform-bar.is-compare').getByRole('spinbutton', { name: 'Rotation in degrees' }).press('Enter');
+  await overlay.getByRole('button', { name: CURTAIN_READY }).click();
+  await expect(page.locator('.compare-curtain-view')).toBeVisible();
+
+  await expectSamePixels(page, '.compare-curtain-layer.is-primary canvas', side.primary);
+  await expectSamePixels(page, '.compare-curtain-layer.is-compare canvas', side.compare);
 });
 
 test('curtain view: Print opens the one shared print dialog for the composed page', async ({ page }) => {

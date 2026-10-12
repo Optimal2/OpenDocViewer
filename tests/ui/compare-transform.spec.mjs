@@ -1,22 +1,40 @@
 // File: tests/ui/compare-transform.spec.mjs
 /**
  * Compare-view free transform (utils/compareTransform.js, docs-src/compare-transform.md): each
- * compared page gets a fine-tuning bar (only in compare mode) whose numeric fields, fine buttons,
- * arrow-key pan control, page drag and Ctrl+wheel write one transform per page. The renderer
- * applies it as a CSS transform on the page stage. The last test measures frame times for panning
- * and rotating a 300 dpi A4 raster with that same CSS path and logs the numbers.
+ * compared page gets one adjustment panel (only in compare mode) whose numeric fields, fine
+ * buttons, 90° quick buttons, arrow-key pan control, page drag and Ctrl+wheel write one transform
+ * per page, and whose image fields write the page's image adjustment. The renderer applies the
+ * transform as a CSS transform on the page stage. The main toolbar's reset and the panel's full
+ * reset are measured to end in the same state, and both compare.adjust.toolbarMode values are
+ * covered. The last test measures frame times for panning and rotating a 300 dpi A4 raster with
+ * that same CSS path and logs the numbers; keep it last.
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
 
-/** @param {import('@playwright/test').Page} page */
-async function openCompare(page) {
-  await loadSession(page);
+/** The panel's numeric fields by accessible name (English). */
+const PANEL_FIELDS = {
+  zoom: 'Page zoom in percent',
+  dx: 'Horizontal offset in pixels',
+  dy: 'Vertical offset in pixels',
+  rotation: 'Rotation in degrees',
+  brightness: 'Brightness in percent (100 = unchanged)',
+  contrast: 'Contrast in percent (100 = unchanged)',
+  grayscale: 'Grayscale in percent (0 = in color)',
+};
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {{ query?:string, siteConfig?:Object, showToRight?:RegExp }} [options] `query` and
+ *   `siteConfig` go to loadSession; `showToRight` matches the context-menu entry in that language.
+ */
+async function openCompare(page, { query = '', siteConfig = null, showToRight = /show to right/i } = {}) {
+  await loadSession(page, { query, siteConfig });
   await expect(page.locator('#thumbnail-1 .thumbnail-image-stage img')).toBeVisible();
   // Not in compare mode yet: no fine-tuning bar anywhere.
   await expect(page.locator('.compare-transform-bar')).toHaveCount(0);
   await page.locator('#thumbnail-2').click({ button: 'right' });
-  await page.locator('.odv-context-menu-item', { hasText: /show to right/i }).click();
+  await page.locator('.odv-context-menu-item', { hasText: showToRight }).click();
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toBeVisible();
 }
 
@@ -131,6 +149,216 @@ test('the 90 degree preset and the pane zoom preset write the same transform', a
   await frame.locator('.odv-pane-selector').click();
   await page.keyboard.press('Control+ArrowRight');
   await expect(rotation).toHaveValue('-179.9');
+});
+
+test('the panel 90° quick button keeps the fine rotation: 4,6° + 90° reads 94,6 (Swedish)', async ({ page }) => {
+  await openCompare(page, { query: 'lng=sv', showToRight: /visa till höger/i });
+  const bar = page.locator('.compare-transform-bar.is-compare');
+  await bar.locator('.compare-transform-toggle').click();
+  const rotation = bar.getByRole('spinbutton', { name: 'Rotation i grader' });
+  await rotation.fill('4,6');
+  await rotation.press('Enter');
+  await expect(rotation).toHaveValue('4,6');
+
+  // The clockwise quick button sits right of the field and adds a quarter turn on top of the fine part.
+  await bar.getByRole('button', { name: 'Rotera höger 90°' }).click();
+  await expect(rotation).toHaveValue('94,6');
+  await expect(bar.locator('.compare-transform-summary')).toHaveText('100,0 % · 94,6°');
+  // The canvas draws the quarter turn; the CSS keeps only the 4.6° residual.
+  await expect(page.locator('.document-pane-frame.is-compare-pane canvas')).toHaveCount(1);
+  await expect.poll(() => stageTransform(page, 'compare')).toBe('scale(1) translate(0px, 0px) rotate(4.6deg)');
+
+  // The counter-clockwise quick button takes it back to 4,6.
+  await bar.getByRole('button', { name: 'Rotera vänster 90°' }).click();
+  await expect(rotation).toHaveValue('4,6');
+});
+
+/**
+ * Everything a user can observe of the right (compared) page's adjustment: the stage CSS
+ * transform, which surface draws the page (canvas = an adjustment or quarter turn is active, plain
+ * img = the neutral fast path), every numeric field of the panel, the invert checkbox, the summary,
+ * the ◐ badge, the enabled state of the three resets, and the toolbar's mirrored state (value
+ * chips, is-active).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<Object>}
+ */
+async function captureCompareAdjustment(page) {
+  const bar = page.locator('.compare-transform-bar.is-compare');
+  const tools = page.locator('.toolbar .editing-tools');
+  /** @type {Record<string, string>} */
+  const fields = {};
+  for (const [key, name] of Object.entries(PANEL_FIELDS)) {
+    fields[key] = await bar.getByRole('spinbutton', { name }).inputValue();
+  }
+  /** @param {import('@playwright/test').Locator} locator */
+  const isActive = async (locator) => /\bis-active\b/.test(String(await locator.getAttribute('class')));
+  return {
+    stageTransform: await stageTransform(page, 'compare'),
+    canvasCount: await page.locator('.document-pane-frame.is-compare-pane canvas').count(),
+    fields,
+    invert: await bar.getByRole('checkbox', { name: 'Invert colors' }).isChecked(),
+    summary: await bar.locator('.compare-transform-summary').textContent(),
+    badgeCount: await bar.locator('.compare-transform-badge').count(),
+    resetsEnabled: {
+      all: await bar.getByRole('button', { name: 'Reset all (layout and image)' }).isEnabled(),
+      layout: await bar.getByRole('button', { name: 'Reset layout (zoom, position, rotation)' }).isEnabled(),
+      image: await bar.getByRole('button', { name: 'Reset image (brightness, contrast, color)' }).isEnabled(),
+    },
+    toolbar: {
+      brightnessActive: await isActive(tools.getByRole('button', { name: 'Adjust brightness' })),
+      contrastActive: await isActive(tools.getByRole('button', { name: 'Adjust contrast' })),
+      valueChips: await tools.locator('.toolbar-adjustment-value').count(),
+      resetActive: await isActive(tools.locator('.toolbar-reset-adjustments')),
+    },
+  };
+}
+
+/**
+ * Builds the same non-trivial adjustment on the right page every time - zoom, pan, a fine rotation,
+ * a 90° turn, brightness, contrast, grayscale and invert - and returns its capture.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<Object>}
+ */
+async function buildCompareAdjustment(page) {
+  const bar = page.locator('.compare-transform-bar.is-compare');
+  /** @param {keyof typeof PANEL_FIELDS} key @param {string} value */
+  const commit = async (key, value) => {
+    const input = bar.getByRole('spinbutton', { name: PANEL_FIELDS[key] });
+    await input.fill(value);
+    await input.press('Enter');
+  };
+  await commit('zoom', '103.5');
+  await commit('dx', '12');
+  await commit('dy', '-7');
+  await commit('rotation', '2.3');
+  await bar.getByRole('button', { name: 'Rotate right 90°' }).click();
+  await commit('brightness', '130');
+  await commit('contrast', '80');
+  await commit('grayscale', '40');
+  await bar.getByRole('checkbox', { name: 'Invert colors' }).check();
+  await expect(bar.getByRole('spinbutton', { name: PANEL_FIELDS.rotation })).toHaveValue('92.3');
+  await expect(bar.getByRole('spinbutton', { name: PANEL_FIELDS.grayscale })).toHaveValue('40');
+  await expect(page.locator('.document-pane-frame.is-compare-pane canvas')).toHaveCount(1);
+  return captureCompareAdjustment(page);
+}
+
+test('the toolbar reset and the panel full reset reach the same end state (both measured)', async ({ page }) => {
+  await openCompare(page);
+  const bar = page.locator('.compare-transform-bar.is-compare');
+  await bar.locator('.compare-transform-toggle').click();
+  // "Show to right" makes the right page the active pane, so the toolbar edits that page.
+  await expect(page.locator('.toolbar .editing-tools')).toHaveClass(/editing-target-compare/);
+
+  const startViaToolbar = await buildCompareAdjustment(page);
+  await page.locator('.toolbar .toolbar-reset-adjustments').click();
+  await expect(bar.getByRole('button', { name: 'Reset all (layout and image)' })).toBeDisabled();
+  await expect(page.locator('.document-pane-frame.is-compare-pane canvas')).toHaveCount(0);
+  const afterToolbar = await captureCompareAdjustment(page);
+
+  const startViaPanel = await buildCompareAdjustment(page);
+  await bar.getByRole('button', { name: 'Reset all (layout and image)' }).click();
+  await expect(bar.getByRole('button', { name: 'Reset all (layout and image)' })).toBeDisabled();
+  await expect(page.locator('.document-pane-frame.is-compare-pane canvas')).toHaveCount(0);
+  const afterPanel = await captureCompareAdjustment(page);
+
+  // Both runs started from the same, really adjusted state, so the equality below means something.
+  expect(startViaPanel).toEqual(startViaToolbar);
+  expect(startViaToolbar).toEqual({
+    stageTransform: 'scale(1.035) translate(12px, -7px) rotate(2.3deg)',
+    canvasCount: 1,
+    fields: { zoom: '103.5', dx: '12.0', dy: '-7.0', rotation: '92.3', brightness: '130', contrast: '80', grayscale: '40' },
+    invert: true,
+    summary: '103.5 % · 92.3°',
+    badgeCount: 1,
+    resetsEnabled: { all: true, layout: true, image: true },
+    toolbar: { brightnessActive: true, contrastActive: true, valueChips: 2, resetActive: true },
+  });
+
+  // The claim: the toolbar reset and the panel's full reset end in the same observable state ...
+  expect(afterToolbar).toEqual(afterPanel);
+  // ... and that state is the neutral page on the plain <img> fast path.
+  expect(afterPanel).toEqual({
+    stageTransform: '',
+    canvasCount: 0,
+    fields: { zoom: '100.0', dx: '0.0', dy: '0.0', rotation: '0.0', brightness: '100', contrast: '100', grayscale: '0' },
+    invert: false,
+    summary: '100.0 % · 0.0°',
+    badgeCount: 0,
+    resetsEnabled: { all: false, layout: false, image: false },
+    toolbar: { brightnessActive: false, contrastActive: false, valueChips: 0, resetActive: false },
+  });
+});
+
+test("toolbarMode 'mirror' (default): the toolbar keeps its controls and shows the panel's values", async ({ page }) => {
+  await openCompare(page);
+  const bar = page.locator('.compare-transform-bar.is-compare');
+  await bar.locator('.compare-transform-toggle').click();
+  const tools = page.locator('.toolbar .editing-tools');
+  const brightnessButton = tools.getByRole('button', { name: 'Adjust brightness' });
+  const resetButton = tools.locator('.toolbar-reset-adjustments');
+  // Panel expanded, controls still there.
+  await expect(brightnessButton).toBeVisible();
+  await expect(tools.getByRole('button', { name: 'Adjust contrast' })).toBeVisible();
+  await expect(tools.getByRole('button', { name: 'Rotate right 90°' })).toBeVisible();
+  await expect(resetButton).toBeVisible();
+  await expect(resetButton).not.toHaveClass(/is-active/);
+
+  const brightness = bar.getByRole('spinbutton', { name: PANEL_FIELDS.brightness });
+  await brightness.fill('135');
+  await brightness.press('Enter');
+  await expect(brightnessButton).toHaveClass(/is-active/);
+  await expect(brightnessButton.locator('.toolbar-adjustment-value')).toHaveText('135');
+  await expect(brightnessButton).toHaveAttribute('title', 'Adjust brightness (135 %)');
+  await expect(resetButton).toHaveClass(/is-active/);
+
+  // Grayscale has no toolbar control of its own, yet the toolbar reset is marked for it too.
+  await brightness.fill('100');
+  await brightness.press('Enter');
+  await expect(resetButton).not.toHaveClass(/is-active/);
+  const grayscale = bar.getByRole('spinbutton', { name: PANEL_FIELDS.grayscale });
+  await grayscale.fill('50');
+  await grayscale.press('Enter');
+  await expect(resetButton).toHaveClass(/is-active/);
+});
+
+test("toolbarMode 'hide': the toolbar controls give way while any panel is expanded", async ({ page }) => {
+  await openCompare(page, { siteConfig: { compare: { adjust: { toolbarMode: 'hide' } } } });
+  const tools = page.locator('.toolbar .editing-tools');
+  const coarse = [
+    tools.getByRole('button', { name: 'Rotate left 90°' }),
+    tools.getByRole('button', { name: 'Rotate right 90°' }),
+    tools.getByRole('button', { name: 'Adjust brightness' }),
+    tools.getByRole('button', { name: 'Adjust contrast' }),
+    tools.locator('.toolbar-reset-adjustments'),
+  ];
+  /** @param {number} count */
+  const expectCoarse = async (count) => {
+    for (const control of coarse) await expect(control).toHaveCount(count);
+  };
+  // Every panel collapsed: the controls are there.
+  await expectCoarse(1);
+
+  const primaryToggle = page.locator('.compare-transform-bar.is-primary .compare-transform-toggle');
+  const compareToggle = page.locator('.compare-transform-bar.is-compare .compare-transform-toggle');
+  await compareToggle.click();
+  await expectCoarse(0);
+  await primaryToggle.click();
+  await expectCoarse(0);
+  // One panel still expanded: still hidden.
+  await compareToggle.click();
+  await expectCoarse(0);
+  // Every panel collapsed again: back.
+  await primaryToggle.click();
+  await expectCoarse(1);
+
+  // Outside compare mode the key has no effect.
+  await primaryToggle.click();
+  await expectCoarse(0);
+  await page.locator('.compare-button').click();
+  await expect(page.locator('.document-pane-frame.is-compare-pane')).toHaveCount(0);
+  await expectCoarse(1);
 });
 
 test('frame times: panning and rotating a 300 dpi A4 raster through the stage CSS transform', async ({ page }, testInfo) => {

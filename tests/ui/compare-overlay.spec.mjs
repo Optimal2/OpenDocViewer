@@ -4,9 +4,14 @@
  * the toolbar only while two pages are compared, it stacks page A below page B with their own
  * transforms; the slider sets the top page's opacity, nudge mode moves the top page with the arrow
  * keys, and Close returns to the compare view with the calibration kept in the viewer context.
+ * The pages' image adjustments travel along: the overlay draws the same colour as side by side,
+ * "reset to compare" restores them, and the copied calibration carries them.
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
+import {
+  drawnPixelStats, expectSamePixels, readImageAdjustment, setImageAdjustment,
+} from './compareImageAdjust.mjs';
 
 /** @param {import('@playwright/test').Page} page */
 async function openCompare(page) {
@@ -146,6 +151,97 @@ test('overlay view: copy calibration writes { version, A, B } as JSON', async ({
     A: { scale: 0.999, dx: 0, dy: 0, rotation: 0, ...image },
     B: { scale: 1, dx: 0, dy: 0, rotation: 0, ...image },
   });
+});
+
+/** Non-neutral starting adjustments set in the compare view, one per page. */
+const START_A = { brightness: 120, contrast: 90, grayscale: 30, invert: true };
+const START_B = { brightness: 80, contrast: 130, grayscale: 60, invert: false };
+
+/**
+ * Expands both compare-view panels and sets START_A and START_B.
+ * @param {import('@playwright/test').Page} page
+ */
+async function adjustBothPagesInCompare(page) {
+  for (const [pane, values] of [['primary', START_A], ['compare', START_B]]) {
+    const bar = page.locator(`.compare-transform-bar.is-${pane}`);
+    await bar.locator('.compare-transform-toggle').click();
+    await setImageAdjustment(bar, values);
+    await expect(page.locator(`.document-pane-frame.is-${pane}-pane canvas`)).toHaveCount(1);
+  }
+}
+
+test('overlay view: copy calibration carries non-neutral image adjustments', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openCompare(page);
+  await adjustBothPagesInCompare(page);
+
+  await page.getByRole('button', { name: 'Overlay the two pages (transparency)' }).click();
+  const view = page.locator('.compare-overlay-view');
+  await view.getByRole('button', { name: 'Copy the calibration as JSON (for support)' }).click();
+  await expect(view.locator('.compare-overlay-status')).toHaveText('Calibration copied');
+  const text = await page.evaluate(() => navigator.clipboard.readText());
+  expect(JSON.parse(text)).toEqual({
+    version: 2,
+    A: { scale: 1, dx: 0, dy: 0, rotation: 0, ...START_A },
+    B: { scale: 1, dx: 0, dy: 0, rotation: 0, ...START_B },
+  });
+});
+
+test('overlay view: both pages show the same colour as side by side', async ({ page }) => {
+  await openCompare(page);
+  await adjustBothPagesInCompare(page);
+  const sideA = await drawnPixelStats(page, '.document-pane-frame.is-primary-pane canvas');
+  const sideB = await drawnPixelStats(page, '.document-pane-frame.is-compare-pane canvas');
+  // The two pages carry different adjustments, so their colour differs.
+  expect(sideA).not.toEqual(sideB);
+
+  await page.getByRole('button', { name: 'Overlay the two pages (transparency)' }).click();
+  await expect(page.locator('.compare-overlay-view')).toBeVisible();
+  await expectSamePixels(page, '.compare-overlay-layer.is-primary canvas', sideA);
+  await expectSamePixels(page, '.compare-overlay-layer.is-compare canvas', sideB);
+});
+
+test('overlay view: reset to compare restores the image adjustment of both pages', async ({ page }) => {
+  await openCompare(page);
+  await adjustBothPagesInCompare(page);
+  const compareBar = page.locator('.compare-transform-bar.is-compare');
+  await compareBar.getByRole('spinbutton', { name: 'Rotation in degrees' }).fill('0.5');
+  await compareBar.getByRole('spinbutton', { name: 'Rotation in degrees' }).press('Enter');
+
+  await page.getByRole('button', { name: 'Overlay the two pages (transparency)' }).click();
+  const view = page.locator('.compare-overlay-view');
+  const barA = view.locator('.compare-transform-bar.is-primary');
+  const barB = view.locator('.compare-transform-bar.is-compare');
+  expect(await readImageAdjustment(barA)).toEqual(START_A);
+  expect(await readImageAdjustment(barB)).toEqual(START_B);
+
+  // Change all four image fields on both pages, plus the layout of B.
+  const changedA = { brightness: 150, contrast: 60, grayscale: 0, invert: false };
+  const changedB = { brightness: 110, contrast: 105, grayscale: 100, invert: true };
+  await setImageAdjustment(barA, changedA);
+  await setImageAdjustment(barB, changedB);
+  await barB.getByRole('spinbutton', { name: 'Rotation in degrees' }).fill('-2');
+  await barB.getByRole('spinbutton', { name: 'Rotation in degrees' }).press('Enter');
+  expect(await readImageAdjustment(barA)).toEqual(changedA);
+  expect(await readImageAdjustment(barB)).toEqual(changedB);
+
+  // Reset restores the state from when the view was opened - not neutral values.
+  await view.getByRole('button', { name: 'Reset to the alignment from the compare view' }).click();
+  await expect(barB.getByRole('spinbutton', { name: 'Rotation in degrees' })).toHaveValue('0.5');
+  await expect.poll(() => readImageAdjustment(barA)).toEqual(START_A);
+  await expect.poll(() => readImageAdjustment(barB)).toEqual(START_B);
+  await expect.poll(() => layerTransform(page, 'compare')).toBe('scale(1) translate(0px, 0px) rotate(0.5deg)');
+
+  // Back in the compare view the restored adjustment is the pages' state.
+  await view.getByRole('button', { name: 'Close the overlay view and return to the compare view' }).click();
+  await expect(view).toHaveCount(0);
+  for (const [pane, values] of [['primary', START_A], ['compare', START_B]]) {
+    const bar = page.locator(`.compare-transform-bar.is-${pane}`);
+    if (await bar.locator('.compare-transform-toggle').getAttribute('aria-expanded') !== 'true') {
+      await bar.locator('.compare-transform-toggle').click();
+    }
+    expect(await readImageAdjustment(bar)).toEqual(values);
+  }
 });
 
 test('overlay button leaves with compare mode', async ({ page }) => {
