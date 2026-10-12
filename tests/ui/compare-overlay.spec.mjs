@@ -127,7 +127,7 @@ test('overlay view: open from compare, calibrate, close and reopen keep the cali
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toBeVisible();
 });
 
-test('overlay view: copy calibration writes { A, B } as JSON', async ({ page, context }) => {
+test('overlay view: copy calibration writes { version, A, B } as JSON', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await openCompare(page);
   const primaryBar = page.locator('.compare-transform-bar.is-primary');
@@ -140,9 +140,11 @@ test('overlay view: copy calibration writes { A, B } as JSON', async ({ page, co
   await view.getByRole('button', { name: 'Copy the calibration as JSON (for support)' }).click();
   await expect(view.locator('.compare-overlay-status')).toHaveText('Calibration copied');
   const text = await page.evaluate(() => navigator.clipboard.readText());
+  const image = { brightness: 100, contrast: 100, grayscale: 0, invert: false };
   expect(JSON.parse(text)).toEqual({
-    A: { scale: 0.999, dx: 0, dy: 0, rotation: 0 },
-    B: { scale: 1, dx: 0, dy: 0, rotation: 0 },
+    version: 2,
+    A: { scale: 0.999, dx: 0, dy: 0, rotation: 0, ...image },
+    B: { scale: 1, dx: 0, dy: 0, rotation: 0, ...image },
   });
 });
 

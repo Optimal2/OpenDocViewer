@@ -64,6 +64,22 @@ export function hasImageAdjustment(properties) {
 }
 
 /**
+ * The stored image adjustment of one page, normalized: brightness, contrast, grayscale and invert.
+ * Rotation is left out: it is derived from the compare transform's quarter turn, never stored here.
+ *
+ * @param {(Object|null|undefined)} properties
+ * @returns {{ brightness:number, contrast:number, grayscale:number, invert:boolean }}
+ */
+export function pickStoredImageAdjustments(properties) {
+  return {
+    brightness: finiteOr(properties?.brightness, 100),
+    contrast: finiteOr(properties?.contrast, 100),
+    grayscale: normalizeGrayscale(properties?.grayscale),
+    invert: normalizeInvert(properties?.invert),
+  };
+}
+
+/**
  * Whether the page must be drawn on the canvas instead of the plain `<img>`.
  *
  * @param {(Object|null|undefined)} properties  { rotation, brightness, contrast, grayscale, invert }

@@ -874,6 +874,7 @@ export function useDocumentViewer() {
     handleInvertChange,
     clearImageAdjustments,
     resetImageProperties,
+    restoreImageAdjustments,
     compareImageHandlers,
   } = usePaneImageAdjustments({ isComparing, dispatchCompareTransform });
 
@@ -888,7 +889,10 @@ export function useDocumentViewer() {
     compareCurtainOpen,
     openCompareCurtain,
     closeCompareCurtain,
-  } = useCompareOverlay(isComparing && compareOriginalPageNumber != null);
+  } = useCompareOverlay(isComparing && compareOriginalPageNumber != null, {
+    imageAdjustments: { primary: primaryImageAdjustments, compare: compareImageAdjustments },
+    onRestoreImageAdjustments: restoreImageAdjustments,
+  });
 
   const primaryQuarterTurn = splitTransformRotation(primaryTransform.rotation).quarterTurn;
   const compareQuarterTurn = splitTransformRotation(compareTransform.rotation).quarterTurn;

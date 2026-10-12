@@ -28,9 +28,14 @@ vi.mock('../pdfWorkerDispatcher.js', () => ({
 import logger from '../../logging/systemLogger.js';
 import { renderSingleDocument, renderMultiDocument } from '../printDom.js';
 import { makeBaseTokenContext } from '../printTemplate.js';
-import { handlePrintCompareCurtain, handlePrintCompareOverlay } from '../printCore.js';
+import { handlePrintCompareCurtain, handlePrintCompareOverlay, handlePrintCurrentComparison } from '../printCore.js';
 import { handlePdfCompareCurtain, handlePdfCompareOverlay } from '../printPdf.js';
 import * as printUtils from '../printUtils.js';
+import { buildImageFilter, needsCanvas } from '../imageAdjustments.js';
+import renderSource from '../../components/DocumentRender.jsx?raw';
+import paneRenderSource from '../../components/DocumentViewer/DocumentViewerRender.jsx?raw';
+import overlaySource from '../../components/DocumentViewer/CompareOverlayView.jsx?raw';
+import curtainSource from '../../components/DocumentViewer/CompareCurtainView.jsx?raw';
 
 const IDENTITY = { scale: 1, dx: 0, dy: 0, rotation: 0 };
 const IDENTITY_TRANSFORMS = { primary: IDENTITY, compare: IDENTITY };
@@ -54,6 +59,12 @@ function makeOutputCanvas() {
   const ctx = { globalAlpha: 1, fillStyle: '' };
   RECORDED.forEach((op) => {
     ctx[op] = (...args) => { log.push({ op, args, alpha: ctx.globalAlpha }); };
+  });
+  // A filter on the composed canvas would apply the colour a second time (or undo it); log it.
+  let filter = 'none';
+  Object.defineProperty(ctx, 'filter', {
+    get: () => filter,
+    set: (value) => { filter = value; log.push({ op: 'filter', args: [value], alpha: ctx.globalAlpha }); },
   });
   const canvas = {
     tagName: 'CANVAS',
@@ -311,6 +322,74 @@ describe('generated-PDF siblings', () => {
   ])('rejects the %s PDF when a canvas is missing', async (_name, handler, view) => {
     await expect(handler(renderRef(A), renderRef(null), view, {})).rejects.toThrow(/compare/);
     expect(created).toHaveLength(0);
+  });
+});
+
+// Grayscale and invert reach print through the EXISTING canvas: a page with any colour adjustment
+// is drawn on its canvas with the filter baked into the pixels, getActiveCanvas() returns that
+// canvas, and all three print paths read only that surface. These locks keep a later change from
+// printing the unfiltered page (the <img> or the asset URL) or filtering the composed page again.
+describe('grayscale and invert reach all three print paths through the filtered canvas', () => {
+  const COLOUR = { rotation: 0, brightness: 100, contrast: 100, grayscale: 100, invert: true };
+  // The pixels the viewer canvas holds after drawing with the colour filter.
+  const FILTERED_A = sourceCanvas('FILTERED-A', 200, 100);
+  const FILTERED_B = sourceCanvas('FILTERED-B', 200, 100);
+  /** A render handle whose canvas is filtered while its <img> still holds the original page. */
+  function filteredRenderRef(canvas) {
+    const img = { tagName: 'IMG', src: 'blob:original-unfiltered', currentSrc: 'blob:original-unfiltered', naturalWidth: 200, naturalHeight: 100 };
+    return { current: { getActiveCanvas: () => (needsCanvas(COLOUR) ? canvas : img) } };
+  }
+
+  it('the colour adjustment selects the canvas and is part of its filter', () => {
+    expect(needsCanvas({ grayscale: 1 })).toBe(true);
+    expect(needsCanvas({ invert: true })).toBe(true);
+    expect(buildImageFilter(COLOUR)).toBe('brightness(100%) contrast(100%) grayscale(100%) invert(100%)');
+  });
+
+  it('side by side: prints each pane\'s filtered canvas pixels', () => {
+    handlePrintCurrentComparison(filteredRenderRef(FILTERED_A), filteredRenderRef(FILTERED_B), {});
+    expect(renderMultiDocument).toHaveBeenCalledTimes(1);
+    expect(renderMultiDocument.mock.calls[0][1].dataUrls).toEqual([
+      'data:image/png;base64,FILTERED-A',
+      'data:image/png;base64,FILTERED-B',
+    ]);
+  });
+
+  it.each([
+    ['overlay', handlePrintCompareOverlay, { opacity: 50, top: 'compare', transforms: IDENTITY_TRANSFORMS }],
+    ['curtain', handlePrintCompareCurtain, { mode: 'vertical', position: 50, transforms: IDENTITY_TRANSFORMS }],
+  ])('%s: composes the filtered canvases and never sets a filter on the composed page', (_name, handler, view) => {
+    handler(filteredRenderRef(FILTERED_A), filteredRenderRef(FILTERED_B), view, {});
+    expect(created).toHaveLength(1);
+    const sources = draws(created[0]).map((entry) => entry.args[0]);
+    expect(sources).toHaveLength(2);
+    expect(sources).toEqual(expect.arrayContaining([FILTERED_A, FILTERED_B]));
+    expect(created[0].log.filter((entry) => entry.op === 'filter')).toEqual([]);
+    expect(renderSingleDocument.mock.calls[0][1].dataUrl).toBe('data:image/png;base64,COMPOSED');
+  });
+
+  it('the render surface: getActiveCanvas() is the canvas whenever the canvas is enabled', () => {
+    expect(renderSource).toMatch(/getActiveCanvas\(\)\s*\{\s*return isCanvasEnabled \? canvasRef\.current : imgRef\.current;/);
+  });
+
+  it('the canvas draw sizes the canvas, then sets the colour filter, then draws the page', () => {
+    // Assigning canvas.width/height resets the 2D state, ctx.filter included: the resize must come first.
+    const filterAt = renderSource.indexOf('ctx.filter = buildImageFilter(imageProperties);');
+    expect(filterAt).toBeGreaterThan(0);
+    const drawAt = renderSource.indexOf('ctx.drawImage(image,', filterAt);
+    expect(drawAt).toBeGreaterThan(filterAt);
+    const resize = 'canvas.height = requestedCanvasSize.height;';
+    const resizeAt = renderSource.lastIndexOf(resize, filterAt);
+    expect(resizeAt).toBeGreaterThan(0);
+    expect(renderSource.slice(resizeAt + resize.length, drawAt)).not.toMatch(/\bcanvas\.(?:width|height)\s*=[^=]/);
+  });
+
+  it('every compare view enables the canvas from the same image properties it draws with', () => {
+    expect(paneRenderSource).toMatch(/const primaryCanvasEnabled = needsCanvas\(primaryImageProperties\);/);
+    expect(paneRenderSource).toMatch(/const compareCanvasEnabled = needsCanvas\(compareImageProperties\);/);
+    expect(overlaySource).toMatch(/imageProperties=\{imageProperties\}\s*isCanvasEnabled=\{needsCanvas\(imageProperties\)\}/);
+    expect(curtainSource).toMatch(/imageProperties=\{imagePropertiesA\}\s*isCanvasEnabled=\{needsCanvas\(imagePropertiesA\)\}/);
+    expect(curtainSource).toMatch(/imageProperties=\{imagePropertiesB\}\s*isCanvasEnabled=\{needsCanvas\(imagePropertiesB\)\}/);
   });
 });
 

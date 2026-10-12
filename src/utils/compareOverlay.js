@@ -14,6 +14,7 @@
  */
 
 import { normalizeCompareTransform, resolveTransformKeyAction } from './compareTransform.js';
+import { pickStoredImageAdjustments } from './imageAdjustments.js';
 
 /**
  * @typedef {Object} CompareOverlayState
@@ -151,15 +152,29 @@ export function resolveOverlayNudgeKeyAction(event, top) {
 }
 
 /**
- * The calibration as JSON for support cases: `{ "A": transform, "B": transform }`, where A is the
- * primary (left) page and B the compare (right) page.
+ * Version of the calibration JSON. Version 1 (2026-10-11) had no `version` field and held the
+ * transform only; version 2 adds the stored image adjustment to each page.
+ */
+export const COMPARE_CALIBRATION_VERSION = 2;
+
+/**
+ * The calibration as JSON for support cases. Nothing reads it back; the text is for a person:
+ * `{ "version": 2, "A": page, "B": page }`, where A is the primary (left) page and B the compare
+ * (right) page. Each page holds the transform fields where version 1 had them (scale, dx, dy,
+ * rotation) followed by its image adjustment (brightness, contrast, grayscale, invert).
  *
  * @param {({ primary:Object, compare:Object }|null|undefined)} transforms
+ * @param {({ primary:Object, compare:Object }|null|undefined)=} imageAdjustments Missing pages read as neutral.
  * @returns {string}
  */
-export function serializeCompareCalibration(transforms) {
+export function serializeCompareCalibration(transforms, imageAdjustments) {
+  const page = (target) => ({
+    ...normalizeCompareTransform(transforms?.[target]),
+    ...pickStoredImageAdjustments(imageAdjustments?.[target]),
+  });
   return JSON.stringify({
-    A: normalizeCompareTransform(transforms?.primary),
-    B: normalizeCompareTransform(transforms?.compare),
+    version: COMPARE_CALIBRATION_VERSION,
+    A: page('primary'),
+    B: page('compare'),
   }, null, 2);
 }

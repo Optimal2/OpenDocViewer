@@ -5,7 +5,10 @@
  * Open/close state of the compare overlay view (CompareOverlayView.jsx). The calibration itself
  * stays in the viewer context: the per-page transforms (`compareTransforms`) and the overlay
  * settings (`compareOverlay`: top page and its opacity). Opening and closing the view therefore
- * never touches them; only "reset to compare" restores the transforms saved when the view opened.
+ * never touches them; only "reset to compare" restores what was saved when the view opened: the
+ * transforms of both pages and, when the caller passes them, both panes' stored image adjustment
+ * (brightness, contrast, grayscale, invert). The image rotation is not saved: it is derived from
+ * the transform's quarter turn and follows the restored transform.
  *
  * The curtain view (CompareCurtainView.jsx) shows the same calibration with a draggable border.
  * It opens only once a calibration exists (`compareOverlay.calibrated`, set when the overlay view
@@ -26,6 +29,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import ViewerContext from '../../../contexts/viewerContext.js';
 import { INITIAL_COMPARE_TRANSFORM_STATE } from '../../../utils/compareTransform.js';
 import { hasCompareCalibration } from '../../../utils/compareOverlay.js';
+import { pickStoredImageAdjustments } from '../../../utils/imageAdjustments.js';
 import {
   getRuntimeConfig,
   isCompareCurtainEnabled,
@@ -51,9 +55,12 @@ export function resolveShownCompareViews({ overlayOpen, curtainOpen }, cfg = get
 
 /**
  * @param {boolean} available True in compare mode with two pages shown.
+ * @param {Object=} images The panes' image adjustment (hooks/usePaneImageAdjustments.js).
+ * @param {{ primary:Object, compare:Object }=} images.imageAdjustments Current stored image fields per pane.
+ * @param {function({ primary:Object, compare:Object }): void=} images.onRestoreImageAdjustments
  * @returns {{
  *   compareOverlayOpen: boolean,
- *   compareOverlaySnapshot: (Object|null),
+ *   compareOverlaySnapshot: ({ transforms:Object, imageAdjustments:Object }|null),
  *   openCompareOverlay: function(): boolean,
  *   closeCompareOverlay: function(): void,
  *   resetCompareOverlayCalibration: function(): void,
@@ -63,7 +70,7 @@ export function resolveShownCompareViews({ overlayOpen, curtainOpen }, cfg = get
  *   closeCompareCurtain: function(): void
  * }}
  */
-export function useCompareOverlay(available) {
+export function useCompareOverlay(available, { imageAdjustments, onRestoreImageAdjustments } = {}) {
   const context = useContext(ViewerContext);
   const transforms = context?.compareTransforms || INITIAL_COMPARE_TRANSFORM_STATE;
   const dispatch = typeof context?.dispatchCompareTransform === 'function'
@@ -82,6 +89,10 @@ export function useCompareOverlay(available) {
   // Read at open time without making the callbacks depend on every transform change.
   const transformsRef = useRef(transforms);
   transformsRef.current = transforms;
+  const imageAdjustmentsRef = useRef(imageAdjustments);
+  imageAdjustmentsRef.current = imageAdjustments;
+  const restoreImageRef = useRef(onRestoreImageAdjustments);
+  restoreImageRef.current = onRestoreImageAdjustments;
   const availableRef = useRef(isAvailable);
   availableRef.current = isAvailable;
   const calibratedRef = useRef(calibrated);
@@ -97,7 +108,14 @@ export function useCompareOverlay(available) {
 
   const openCompareOverlay = useCallback(() => {
     if (!availableRef.current || !overlayEnabledRef.current) return false;
-    setSnapshot(transformsRef.current);
+    const images = imageAdjustmentsRef.current;
+    setSnapshot({
+      transforms: transformsRef.current,
+      imageAdjustments: {
+        primary: pickStoredImageAdjustments(images?.primary),
+        compare: pickStoredImageAdjustments(images?.compare),
+      },
+    });
     setOpen(true);
     dispatchOverlay({ type: 'markCalibrated' });
     return true;
@@ -108,7 +126,9 @@ export function useCompareOverlay(available) {
   }, []);
 
   const resetCompareOverlayCalibration = useCallback(() => {
-    if (snapshot) dispatch({ type: 'restore', state: snapshot });
+    if (!snapshot) return;
+    dispatch({ type: 'restore', state: snapshot.transforms });
+    if (typeof restoreImageRef.current === 'function') restoreImageRef.current(snapshot.imageAdjustments);
   }, [dispatch, snapshot]);
 
   const openCompareCurtain = useCallback(() => {

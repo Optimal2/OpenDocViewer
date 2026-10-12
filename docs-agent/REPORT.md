@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 148
-- Source lines: 59984
-- JSDoc symbols: 1636
+- Source lines: 60057
+- JSDoc symbols: 1639
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -16,8 +16,8 @@
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 12 incoming local imports
 - `src/utils/compareTransform.js`: 11 incoming local imports
+- `src/utils/imageAdjustments.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
-- `src/utils/imageAdjustments.js`: 7 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 7 incoming local imports
 - `src/utils/viewerPreferences.js`: 7 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
@@ -33,7 +33,7 @@
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2358 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2175 lines
-- `src/components/DocumentViewer/useDocumentViewer.js`: 1929 lines
+- `src/components/DocumentViewer/useDocumentViewer.js`: 1933 lines
 - `src/components/DocumentThumbnailList.jsx`: 1592 lines
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 1510 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines

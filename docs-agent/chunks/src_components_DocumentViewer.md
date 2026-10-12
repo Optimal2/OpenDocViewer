@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 17. Line count: 7481. JSDoc symbol count: 153.
+File count: 17. Line count: 7523. JSDoc symbol count: 154.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -160,7 +160,7 @@ File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state 
 
 Exports: `resolveShownCompareViews`, `useCompareOverlay`
 
-Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/utils/runtimeConfig.js`
+Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/utils/imageAdjustments.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -205,7 +205,7 @@ Symbols:
 - `module:usePaneImageAdjustments.usePaneImageAdjustments~handleGrayscaleChange` (constant) - No description.
 - `module:usePaneImageAdjustments.usePaneImageAdjustments~handleInvertChange` (constant) - Accepts a checkbox event \( target.checked \), a \{ target: \{ value \} \} event or a plain value.
 - `module:usePaneImageAdjustments.usePaneImageAdjustments~clearImageAdjustments` (constant) - Image only; the transform is kept.
-- `module:usePaneImageAdjustments.usePaneImageAdjustments~resetPane` (constant) - Everything for one pane: identity transform \(no quarter turn either\) and neutral image.
+- `module:usePaneImageAdjustments.usePaneImageAdjustments~restoreImageAdjustments` (constant) - Restore both panes' stored image fields \(brightness, contrast, grayscale, invert\) from a saved \{ primary, compare \} ; the transform, and with it the quarter turn, is not touched.
 
 ## src/components/DocumentViewer/hooks/useViewerEffects.js
 

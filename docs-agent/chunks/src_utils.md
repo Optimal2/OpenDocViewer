@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 19716. JSDoc symbol count: 796.
+File count: 51. Line count: 19747. JSDoc symbol count: 798.
 
 ## src/utils/compareCurtain.js
 
@@ -27,9 +27,9 @@ Symbols:
 
 File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi\-transparent.
 
-Exports: `COMPARE_OVERLAY_OPACITY`, `INITIAL_COMPARE_OVERLAY_STATE`, `clampOverlayOpacity`, `getOverlayBottomTarget`, `hasCompareCalibration`, `compareOverlayReducer`, `resolveOverlayOpacityKeyAction`, `resolveOverlayNudgeKeyAction`, `serializeCompareCalibration`
+Exports: `COMPARE_OVERLAY_OPACITY`, `INITIAL_COMPARE_OVERLAY_STATE`, `clampOverlayOpacity`, `getOverlayBottomTarget`, `hasCompareCalibration`, `compareOverlayReducer`, `resolveOverlayOpacityKeyAction`, `resolveOverlayNudgeKeyAction`, `COMPARE_CALIBRATION_VERSION`, `serializeCompareCalibration`
 
-Local imports: `src/utils/compareTransform.js`
+Local imports: `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`
 
 Symbols:
 
@@ -42,7 +42,8 @@ Symbols:
 - `module:compareOverlay.compareOverlayReducer` (function) - Reducer for the overlay settings.
 - `module:compareOverlay.resolveOverlayOpacityKeyAction` (function) - Map a key press on the opacity slider to a reducer action: Left/Down −1 %, Right/Up \+1 %, Shift ×10, Home 0 %, End 100 %.
 - `module:compareOverlay.resolveOverlayNudgeKeyAction` (function) - Nudge mode: arrow keys move the top page only \(1 px, Shift 10 px\), as on the move control.
-- `module:compareOverlay.serializeCompareCalibration` (function) - The calibration as JSON for support cases: \{ &quot;A&quot;: transform, &quot;B&quot;: transform \} , where A is the primary \(left\) page and B the compare \(right\) page.
+- `module:compareOverlay.COMPARE_CALIBRATION_VERSION` (constant) - Version of the calibration JSON.
+- `module:compareOverlay.serializeCompareCalibration` (function) - The calibration as JSON for support cases.
 
 ## src/utils/compareTransform.js
 
@@ -139,7 +140,7 @@ Symbols:
 
 File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
 
-Exports: `NEUTRAL_IMAGE_FILTER`, `normalizeGrayscale`, `normalizeInvert`, `hasImageAdjustment`, `needsCanvas`, `buildImageFilter`
+Exports: `NEUTRAL_IMAGE_FILTER`, `normalizeGrayscale`, `normalizeInvert`, `hasImageAdjustment`, `pickStoredImageAdjustments`, `needsCanvas`, `buildImageFilter`
 
 Symbols:
 
@@ -149,6 +150,7 @@ Symbols:
 - `module:imageAdjustments.normalizeGrayscale` (function) - Grayscale amount in percent, clamped to 0..100.
 - `module:imageAdjustments.normalizeInvert` (function) - Invert as a real boolean.
 - `module:imageAdjustments.hasImageAdjustment` (function) - Whether any colour adjustment \(brightness, contrast, grayscale, invert\) is off its neutral value.
+- `module:imageAdjustments.pickStoredImageAdjustments` (function) - The stored image adjustment of one page, normalized: brightness, contrast, grayscale and invert.
 - `module:imageAdjustments.needsCanvas` (function) - Whether the page must be drawn on the canvas instead of the plain &lt;img&gt; .
 - `module:imageAdjustments.buildImageFilter` (function) - The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert.
 

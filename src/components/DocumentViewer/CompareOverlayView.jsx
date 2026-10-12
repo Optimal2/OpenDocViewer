@@ -275,7 +275,7 @@ const CompareOverlayView = ({
   }, []);
 
   const handleCopy = async () => {
-    const json = serializeCompareCalibration(transforms);
+    const json = serializeCompareCalibration(transforms, { primary: imagePropertiesA, compare: imagePropertiesB });
     try {
       const clipboard = typeof navigator !== 'undefined' ? navigator.clipboard : undefined;
       if (!clipboard || typeof clipboard.writeText !== 'function') throw new Error('Clipboard unavailable');

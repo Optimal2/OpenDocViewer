@@ -218,17 +218,19 @@ describe('CompareOverlayView', () => {
     await cleanup();
   });
 
-  it('copy calibration writes { A, B } JSON to the clipboard and reports it', async () => {
+  it('copy calibration writes { version, A, B } JSON with each page\'s image adjustment and reports it', async () => {
     const writeText = vi.fn(async () => {});
     vi.stubGlobal('navigator', { ...window.navigator, clipboard: { writeText } });
     const { container, cleanup } = await renderView({
       transforms: { primary: { scale: 1.25, dx: 3, dy: -2, rotation: 0.5 }, compare: IDENTITY },
+      imagePropertiesB: { rotation: 0, brightness: 130, contrast: 70, grayscale: 40, invert: true },
     });
     await act(async () => { byLabel(container, 'Copy the calibration as JSON (for support)').click(); });
     expect(writeText).toHaveBeenCalledTimes(1);
     expect(JSON.parse(writeText.mock.calls[0][0])).toEqual({
-      A: { scale: 1.25, dx: 3, dy: -2, rotation: 0.5 },
-      B: IDENTITY,
+      version: 2,
+      A: { scale: 1.25, dx: 3, dy: -2, rotation: 0.5, brightness: 100, contrast: 100, grayscale: 0, invert: false },
+      B: { ...IDENTITY, brightness: 130, contrast: 70, grayscale: 40, invert: true },
     });
     expect(container.querySelector('.compare-overlay-status').textContent).toBe('Calibration copied');
     await cleanup();

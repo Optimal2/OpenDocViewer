@@ -6,6 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  COMPARE_CALIBRATION_VERSION,
   COMPARE_OVERLAY_OPACITY,
   INITIAL_COMPARE_OVERLAY_STATE,
   hasCompareCalibration,
@@ -102,18 +103,34 @@ describe('calibration presence', () => {
 });
 
 describe('calibration JSON', () => {
-  it('writes { A, B } with normalized transforms', () => {
-    const json = serializeCompareCalibration({
-      primary: { scale: 1.2345, dx: 3, dy: -2, rotation: -0.1 },
-      compare: { scale: 1, dx: 0, dy: 0, rotation: 0 },
-    });
+  const NEUTRAL_PAGE = { scale: 1, dx: 0, dy: 0, rotation: 0, brightness: 100, contrast: 100, grayscale: 0, invert: false };
+
+  it('writes { version: 2, A, B } with the normalized transform and image adjustment per page', () => {
+    const json = serializeCompareCalibration(
+      {
+        primary: { scale: 1.2345, dx: 3, dy: -2, rotation: -0.1 },
+        compare: { scale: 1, dx: 0, dy: 0, rotation: 0 },
+      },
+      {
+        primary: { rotation: 90, brightness: 120, contrast: 80, grayscale: 100, invert: true },
+        compare: { brightness: 100, contrast: 100, grayscale: 250, invert: 'false' },
+      }
+    );
     expect(JSON.parse(json)).toEqual({
-      A: { scale: 1.235, dx: 3, dy: -2, rotation: 359.9 },
-      B: { scale: 1, dx: 0, dy: 0, rotation: 0 },
+      version: 2,
+      A: { scale: 1.235, dx: 3, dy: -2, rotation: 359.9, brightness: 120, contrast: 80, grayscale: 100, invert: true },
+      B: { ...NEUTRAL_PAGE, grayscale: 100 },
     });
-    expect(JSON.parse(serializeCompareCalibration(null))).toEqual({
-      A: { scale: 1, dx: 0, dy: 0, rotation: 0 },
-      B: { scale: 1, dx: 0, dy: 0, rotation: 0 },
-    });
+    // The version comes first, so a support reader sees at once which shape the text has.
+    expect(Object.keys(JSON.parse(json))).toEqual(['version', 'A', 'B']);
+    expect(JSON.parse(serializeCompareCalibration(null))).toEqual({ version: 2, A: NEUTRAL_PAGE, B: NEUTRAL_PAGE });
+  });
+
+  it('keeps the transform fields of the old { A, B } text where they were (version 1 had no version field)', () => {
+    const page = JSON.parse(serializeCompareCalibration({ primary: { scale: 2, dx: 5, dy: 6, rotation: 1 } })).A;
+    expect(page).toMatchObject({ scale: 2, dx: 5, dy: 6, rotation: 1 });
+    // The quarter turn in the image properties is derived from the transform, never written twice.
+    expect(JSON.parse(serializeCompareCalibration(null, { primary: { rotation: 180 } })).A.rotation).toBe(0);
+    expect(COMPARE_CALIBRATION_VERSION).toBe(2);
   });
 });

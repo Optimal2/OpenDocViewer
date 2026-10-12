@@ -14,12 +14,18 @@
  *                                    toolbar and panel end in the same state; outside compare mode
  *                                    it keeps its earlier scope (rotation 0 and image neutral, a
  *                                    pane zoom or position stays).
+ * - `restoreImageAdjustments(state)` both panes' stored image fields from a saved
+ *                                    `{ primary, compare }` (the overlay view's "reset to compare").
  *
  * @module usePaneImageAdjustments
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { normalizeGrayscale, normalizeInvert } from '../../../utils/imageAdjustments.js';
+import {
+  normalizeGrayscale,
+  normalizeInvert,
+  pickStoredImageAdjustments,
+} from '../../../utils/imageAdjustments.js';
 
 /** Neutral per-page image adjustment state. */
 export const DEFAULT_IMAGE_ADJUSTMENTS = Object.freeze({
@@ -101,6 +107,17 @@ export function usePaneImageAdjustments({ isComparing, dispatchCompareTransform 
     setPrimaryImageAdjustments(DEFAULT_IMAGE_ADJUSTMENTS);
   }, []);
 
+  /**
+   * Restore both panes' stored image fields (brightness, contrast, grayscale, invert) from a saved
+   * `{ primary, compare }`; the transform, and with it the quarter turn, is not touched.
+   * @param {({ primary:Object, compare:Object }|null|undefined)} state
+   */
+  const restoreImageAdjustments = useCallback((state) => {
+    if (!state) return;
+    setPrimaryImageAdjustments((current) => ({ ...current, ...pickStoredImageAdjustments(state.primary) }));
+    setCompareImageAdjustments((current) => ({ ...current, ...pickStoredImageAdjustments(state.compare) }));
+  }, []);
+
   /** Everything for one pane: identity transform (no quarter turn either) and neutral image. */
   const resetPane = useCallback((target = 'primary') => {
     const normalizedTarget = normalizeTarget(target);
@@ -146,6 +163,7 @@ export function usePaneImageAdjustments({ isComparing, dispatchCompareTransform 
     clearImageAdjustments,
     resetPane,
     resetImageProperties,
+    restoreImageAdjustments,
     compareImageHandlers,
   };
 }

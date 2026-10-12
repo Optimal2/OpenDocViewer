@@ -387,27 +387,28 @@
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:26</code> | React-like numeric/original page setter used by the toolbar adapter. |
 | <code>RefLike</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:13</code> | Ref-like shape used for imperative handles. |
 | <code>SetBooleanState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:19</code> | State setter that accepts a boolean or an updater callback. |
-| <code>module:useCompareOverlay.resolveShownCompareViews</code> | function | <code>src/components/DocumentViewer/hooks/useCompareOverlay.js:45</code> | Render gate for the compare views: a view is shown only while it is open AND enabled in the runtime config, so a stale open flag can never surface a disabled view. |
+| <code>module:useCompareOverlay.resolveShownCompareViews</code> | function | <code>src/components/DocumentViewer/hooks/useCompareOverlay.js:49</code> | Render gate for the compare views: a view is shown only while it is open AND enabled in the runtime config, so a stale open flag can never surface a disabled view. |
 | <code>module:useCompareOverlay</code> | module | <code>src/components/DocumentViewer/hooks/useCompareOverlay.js:2</code> | File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\). |
-| <code>module:useCompareOverlay.useCompareOverlay</code> | function | <code>src/components/DocumentViewer/hooks/useCompareOverlay.js:66</code> |  |
+| <code>module:useCompareOverlay.useCompareOverlay</code> | function | <code>src/components/DocumentViewer/hooks/useCompareOverlay.js:73</code> |  |
 | <code>module:useCompareTransforms.useCompareTransforms~bumpPostZoomLeft</code> | constant | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:45</code> |  |
 | <code>module:useCompareTransforms.useCompareTransforms~bumpPostZoomRight</code> | constant | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:50</code> |  |
 | <code>module:useCompareTransforms.useCompareTransforms~resetPostZoom</code> | constant | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:55</code> | Scale 1 on both pages \(fit and actual-size presets\). |
 | <code>module:useCompareTransforms</code> | module | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:2</code> | File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer-side access to the free per-page compare transform kept in the viewer context \(utils/compareTransform.js,... |
 | <code>module:useCompareTransforms.useCompareTransforms</code> | function | <code>src/components/DocumentViewer/hooks/useCompareTransforms.js:34</code> |  |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~clearImageAdjustments</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:96</code> | Image only; the transform is kept. |
-| <code>module:usePaneImageAdjustments.DEFAULT_IMAGE_ADJUSTMENTS</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:25</code> | Neutral per-page image adjustment state. |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleBrightnessChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:70</code> |  |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleContrastChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:75</code> |  |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleGrayscaleChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:80</code> |  |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleInvertChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:88</code> | Accepts a checkbox event \( target.checked \), a { target: { value } } event or a plain value. |
-| <code>module:usePaneImageAdjustments~normalizeTarget</code> | function | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:37</code> |  |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~patchPane</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:60</code> |  |
-| <code>module:usePaneImageAdjustments~readPercent200</code> | function | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:45</code> |  |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~resetImageProperties</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:112</code> | The main toolbar reset: resetPane in compare mode, its earlier scope otherwise. |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~resetPane</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:105</code> | Everything for one pane: identity transform \(no quarter turn either\) and neutral image. |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~clearImageAdjustments</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:102</code> | Image only; the transform is kept. |
+| <code>module:usePaneImageAdjustments.DEFAULT_IMAGE_ADJUSTMENTS</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:31</code> | Neutral per-page image adjustment state. |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleBrightnessChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:76</code> |  |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleContrastChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:81</code> |  |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleGrayscaleChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:86</code> |  |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~handleInvertChange</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:94</code> | Accepts a checkbox event \( target.checked \), a { target: { value } } event or a plain value. |
+| <code>module:usePaneImageAdjustments~normalizeTarget</code> | function | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:43</code> |  |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~patchPane</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:66</code> |  |
+| <code>module:usePaneImageAdjustments~readPercent200</code> | function | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:51</code> |  |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~resetImageProperties</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:129</code> | The main toolbar reset: resetPane in compare mode, its earlier scope otherwise. |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~resetPane</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:122</code> | Everything for one pane: identity transform \(no quarter turn either\) and neutral image. |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments~restoreImageAdjustments</code> | constant | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:115</code> | Restore both panes&#39; stored image fields \(brightness, contrast, grayscale, invert\) from a saved { primary, compare } ; the transform, and with it the quarter turn, is not touched. |
 | <code>module:usePaneImageAdjustments</code> | module | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:2</code> | File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the... |
-| <code>module:usePaneImageAdjustments.usePaneImageAdjustments</code> | function | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:55</code> |  |
+| <code>module:usePaneImageAdjustments.usePaneImageAdjustments</code> | function | <code>src/components/DocumentViewer/hooks/usePaneImageAdjustments.js:61</code> |  |
 | <code>module:useViewerEffects.hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:89</code> | Determine whether a modal dialog is currently open. |
 | <code>module:useViewerEffects.isEditableTarget</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:74</code> | Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive. |
 | <code>module:useViewerEffects~KeyboardPrintShortcutBehavior</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:22</code> |  |
@@ -430,34 +431,34 @@
 | <code>&lt;anonymous&gt;~onWheelGlobal</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:105</code> |  |
 | <code>module:useViewerZoomEffects</code> | module | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:2</code> | Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer. |
 | <code>module:useViewerZoomEffects.useViewerZoomEffects</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:15</code> |  |
-| <code>useDocumentViewer~activateComparePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1558</code> | Open compare mode when needed and make the right pane the default target. |
-| <code>useDocumentViewer~activatePrimaryPane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1550</code> |  |
-| <code>useDocumentViewer~applyThumbnailWidth</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1633</code> | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |
+| <code>useDocumentViewer~activateComparePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1562</code> | Open compare mode when needed and make the right pane the default target. |
+| <code>useDocumentViewer~activatePrimaryPane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1554</code> |  |
+| <code>useDocumentViewer~applyThumbnailWidth</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1637</code> | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |
 | <code>buildDocumentSelectionModel</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:359</code> |  |
 | <code>buildImageRotationDependencyKey</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:142</code> |  |
 | <code>buildSelectionMaskFromPrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:265</code> | Build an inclusion mask from a print-page sequence. |
 | <code>buildVisibleDocumentNavigationModel</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:437</code> | Build the visible-document grouping used by document-level navigation. |
 | <code>clampPage</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:49</code> | Clamp a 1-based page number into \[1, total\]. |
-| <code>useDocumentViewer~closeCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1586</code> | Close compare mode without affecting the left page. |
+| <code>useDocumentViewer~closeCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1590</code> | Close compare mode without affecting the left page. |
 | <code>CustomFitSizeLimits</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:70</code> | Optional maximum percentage limits for the custom fit-to-size zoom mode. |
 | <code>findNearestVisiblePageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:302</code> | Resolve the nearest visible page number for a requested original page index. |
 | <code>useDocumentViewer~getDocumentNavigationState</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:735</code> | Resolve document-navigation state for the requested pane. |
 | <code>getPageDocumentNavigationMeta</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:411</code> |  |
-| <code>useDocumentViewer~goToFirstDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1312</code> | Jump to the first page of the first visible document. |
-| <code>useDocumentViewer~goToFirstPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1268</code> | Jump to the first visible page in the requested target pane. |
-| <code>useDocumentViewer~goToLastDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1324</code> | Jump to the first page of the last visible document. |
-| <code>useDocumentViewer~goToLastPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1277</code> | Jump to the last visible page in the requested target pane. |
-| <code>useDocumentViewer~goToNextDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1300</code> | Jump to the first page of the next visible document. |
-| <code>useDocumentViewer~goToNextPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1259</code> | Move one page forward in the requested target pane. |
-| <code>useDocumentViewer~goToPreviousDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1288</code> | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
-| <code>useDocumentViewer~goToPreviousPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1250</code> | Move one page backward in the requested target pane. |
-| <code>useDocumentViewer~handleCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1568</code> | Toggle compare mode. |
-| <code>useDocumentViewer~handlePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1166</code> | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
-| <code>useDocumentViewer~handlePrimaryDisplayStateChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1214</code> | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
-| <code>useDocumentViewer~handleVisiblePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1175</code> | Change the primary page by a visible page number from the thumbnail strip. |
+| <code>useDocumentViewer~goToFirstDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1316</code> | Jump to the first page of the first visible document. |
+| <code>useDocumentViewer~goToFirstPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1272</code> | Jump to the first visible page in the requested target pane. |
+| <code>useDocumentViewer~goToLastDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1328</code> | Jump to the first page of the last visible document. |
+| <code>useDocumentViewer~goToLastPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1281</code> | Jump to the last visible page in the requested target pane. |
+| <code>useDocumentViewer~goToNextDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1304</code> | Jump to the first page of the next visible document. |
+| <code>useDocumentViewer~goToNextPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1263</code> | Move one page forward in the requested target pane. |
+| <code>useDocumentViewer~goToPreviousDocument</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1292</code> | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
+| <code>useDocumentViewer~goToPreviousPage</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1254</code> | Move one page backward in the requested target pane. |
+| <code>useDocumentViewer~handleCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1572</code> | Toggle compare mode. |
+| <code>useDocumentViewer~handlePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1170</code> | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
+| <code>useDocumentViewer~handlePrimaryDisplayStateChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1218</code> | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
+| <code>useDocumentViewer~handleVisiblePageNumberChange</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1179</code> | Change the primary page by a visible page number from the thumbnail strip. |
 | <code>hasExcludedPages</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:175</code> | Return true when the normalized mask excludes at least one page from the current session. |
-| <code>useDocumentViewer~hideDocumentFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1041</code> | Immediately exclude every page that belongs to the same document as the provided original page index. |
-| <code>useDocumentViewer~hidePageFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1003</code> | Immediately exclude a page from the active selection and apply the filtered session. |
+| <code>useDocumentViewer~hideDocumentFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1045</code> | Immediately exclude every page that belongs to the same document as the provided original page index. |
+| <code>useDocumentViewer~hidePageFromSelection</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1007</code> | Immediately exclude a page from the active selection and apply the filtered session. |
 | <code>ImageProperties</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:82</code> | Image adjustment properties for canvas edit mode. |
 | <code>isNaturalPrintPageSequence</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:284</code> |  |
 | <code>masksEqual</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:192</code> | Compare two selection masks over the active page count. |
@@ -466,24 +467,24 @@
 | <code>normalizeRotationDegrees</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:65</code> | Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer. |
 | <code>normalizeSelectionMask</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:155</code> | Normalize a persisted/host-provided page-selection mask to the current page count. |
 | <code>normalizeViewerPaneTarget</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:501</code> | Normalize any pane key into the viewer&#39;s two supported navigation targets. |
-| <code>&lt;anonymous&gt;~onMove</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:1719</code> |  |
+| <code>&lt;anonymous&gt;~onMove</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:1723</code> |  |
 | <code>PrintPageSequence</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:80</code> |  |
 | <code>resolveDocumentSelectionPageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:342</code> | Resolve a page&#39;s 1-based page number within the current document-selection group. |
 | <code>resolveEffectiveCustomFitSizeLimits</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:115</code> | Resolve effective custom-fit limits from a preferred value set and runtime config. |
 | <code>useDocumentViewer~resolveNearestVisibleOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:813</code> |  |
 | <code>resolveOriginalIndexFromPrintPageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:207</code> | Convert a 1-based print/session page number to a zero-based original page index. |
 | <code>resolveProposedVisiblePageNumber</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:326</code> | Resolve either a direct visible-page value or a React setState-style updater function. |
-| <code>useDocumentViewer~resolveTargetOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1118</code> | Resolve the next original 1-based page number from a visible-page update. |
-| <code>useDocumentViewer~selectForCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1601</code> | Select a page for the right-hand compare pane. |
+| <code>useDocumentViewer~resolveTargetOriginalPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1122</code> | Resolve the next original 1-based page number from a visible-page update. |
+| <code>useDocumentViewer~selectForCompare</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1605</code> | Select a page for the right-hand compare pane. |
 | <code>SelectionMask</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:79</code> |  |
-| <code>useDocumentViewer~setActivePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1543</code> | Set the default pane for compare-aware navigation and editing actions. |
-| <code>useDocumentViewer~setComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1202</code> | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
-| <code>useDocumentViewer~setIsExpanded</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1531</code> | Setter for the editing controls visibility. |
-| <code>useDocumentViewer~setVisibleComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1188</code> | Change the compare page by a visible page number from the toolbar page field. |
-| <code>useDocumentViewer~setZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1438</code> | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
-| <code>useDocumentViewer~thumbnailSelectionPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1242</code> | The thumbnail pane should react immediately when the user changes page. |
-| <code>useDocumentViewer~toggleFitZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1515</code> | Toggle between the two fit modes from the page surface. |
-| <code>useDocumentViewer~updatePageTarget</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1141</code> | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
+| <code>useDocumentViewer~setActivePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1547</code> | Set the default pane for compare-aware navigation and editing actions. |
+| <code>useDocumentViewer~setComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1206</code> | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
+| <code>useDocumentViewer~setIsExpanded</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1535</code> | Setter for the editing controls visibility. |
+| <code>useDocumentViewer~setVisibleComparePageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1192</code> | Change the compare page by a visible page number from the toolbar page field. |
+| <code>useDocumentViewer~setZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1442</code> | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
+| <code>useDocumentViewer~thumbnailSelectionPageNumber</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1246</code> | The thumbnail pane should react immediately when the user changes page. |
+| <code>useDocumentViewer~toggleFitZoomMode</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1519</code> | Toggle between the two fit modes from the page surface. |
+| <code>useDocumentViewer~updatePageTarget</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1145</code> | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
 | <code>useDocumentViewer</code> | function | <code>src/components/DocumentViewer/useDocumentViewer.js:522</code> | Hook that centralizes viewer UI state and event handlers. |
 | <code>ViewerPageTarget</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:81</code> |  |
 | <code>ZoomMode</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:483</code> | Sticky zoom modes used by the viewer \(subset is used here\). |
@@ -851,16 +852,17 @@
 | <code>module:compareCurtain.resolveCurtainKeyAction</code> | function | <code>src/utils/compareCurtain.js:133</code> | Map a key press on the border to a reducer action: Left/Up −1 %, Right/Down +1 %, Shift ×10. |
 | <code>module:compareCurtain.selectCurtainPosition</code> | function | <code>src/utils/compareCurtain.js:75</code> | The border position of the current mode. |
 | <code>module:compareCurtain~withPosition</code> | function | <code>src/utils/compareCurtain.js:153</code> |  |
-| <code>module:compareOverlay.clampOverlayOpacity</code> | function | <code>src/utils/compareOverlay.js:48</code> | Clamp an opacity to whole percents in \[0, 100\]; non-numbers fall back to the default. |
-| <code>module:compareOverlay.COMPARE_OVERLAY_OPACITY</code> | constant | <code>src/utils/compareOverlay.js:27</code> | Opacity range and steps of the overlay slider \(percent\). |
+| <code>module:compareOverlay.clampOverlayOpacity</code> | function | <code>src/utils/compareOverlay.js:49</code> | Clamp an opacity to whole percents in \[0, 100\]; non-numbers fall back to the default. |
+| <code>module:compareOverlay.COMPARE_CALIBRATION_VERSION</code> | constant | <code>src/utils/compareOverlay.js:158</code> | Version of the calibration JSON. |
+| <code>module:compareOverlay.COMPARE_OVERLAY_OPACITY</code> | constant | <code>src/utils/compareOverlay.js:28</code> | Opacity range and steps of the overlay slider \(percent\). |
 | <code>module:compareOverlay</code> | module | <code>src/utils/compareOverlay.js:2</code> | File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi-transparent. |
-| <code>module:compareOverlay.compareOverlayReducer</code> | function | <code>src/utils/compareOverlay.js:90</code> | Reducer for the overlay settings. |
-| <code>module:compareOverlay~CompareOverlayState</code> | typedef | <code>src/utils/compareOverlay.js:18</code> |  |
-| <code>module:compareOverlay.getOverlayBottomTarget</code> | function | <code>src/utils/compareOverlay.js:62</code> | The page under the top page. |
-| <code>module:compareOverlay.hasCompareCalibration</code> | function | <code>src/utils/compareOverlay.js:73</code> | True when a calibration exists in the viewer context: the overlay view has been opened since compare mode started. |
-| <code>module:compareOverlay.resolveOverlayNudgeKeyAction</code> | function | <code>src/utils/compareOverlay.js:149</code> | Nudge mode: arrow keys move the top page only \(1 px, Shift 10 px\), as on the move control. |
-| <code>module:compareOverlay.resolveOverlayOpacityKeyAction</code> | function | <code>src/utils/compareOverlay.js:123</code> | Map a key press on the opacity slider to a reducer action: Left/Down −1 %, Right/Up +1 %, Shift ×10, Home 0 %, End 100 %. |
-| <code>module:compareOverlay.serializeCompareCalibration</code> | function | <code>src/utils/compareOverlay.js:160</code> | The calibration as JSON for support cases: { &amp;quot;A&amp;quot;: transform, &amp;quot;B&amp;quot;: transform } , where A is the primary \(left\) page and B the compare \(right\) page. |
+| <code>module:compareOverlay.compareOverlayReducer</code> | function | <code>src/utils/compareOverlay.js:91</code> | Reducer for the overlay settings. |
+| <code>module:compareOverlay~CompareOverlayState</code> | typedef | <code>src/utils/compareOverlay.js:19</code> |  |
+| <code>module:compareOverlay.getOverlayBottomTarget</code> | function | <code>src/utils/compareOverlay.js:63</code> | The page under the top page. |
+| <code>module:compareOverlay.hasCompareCalibration</code> | function | <code>src/utils/compareOverlay.js:74</code> | True when a calibration exists in the viewer context: the overlay view has been opened since compare mode started. |
+| <code>module:compareOverlay.resolveOverlayNudgeKeyAction</code> | function | <code>src/utils/compareOverlay.js:150</code> | Nudge mode: arrow keys move the top page only \(1 px, Shift 10 px\), as on the move control. |
+| <code>module:compareOverlay.resolveOverlayOpacityKeyAction</code> | function | <code>src/utils/compareOverlay.js:124</code> | Map a key press on the opacity slider to a reducer action: Left/Down −1 %, Right/Up +1 %, Shift ×10, Home 0 %, End 100 %. |
+| <code>module:compareOverlay.serializeCompareCalibration</code> | function | <code>src/utils/compareOverlay.js:170</code> | The calibration as JSON for support cases. |
 | <code>module:compareTransform~ARROW_PAN</code> | constant | <code>src/utils/compareTransform.js:328</code> | Arrow key → pan axis and direction. |
 | <code>module:compareTransform.buildCompareTransformCss</code> | function | <code>src/utils/compareTransform.js:177</code> | CSS transform the renderer applies to the page stage \(transform-origin: page centre\). |
 | <code>module:compareTransform.COMPARE_TRANSFORM_LIMITS</code> | constant | <code>src/utils/compareTransform.js:41</code> | Supported range. |
@@ -945,14 +947,15 @@
 | <code>createOpaqueId</code> | function | <code>src/utils/idUtils.js:56</code> | Create a prefixed opaque identifier. |
 | <code>createOpaqueIdFragment</code> | function | <code>src/utils/idUtils.js:27</code> | Create an opaque identifier fragment suitable for synthetic keys and document ids. |
 | <code>fallbackCounter</code> | member | <code>src/utils/idUtils.js:11</code> | OpenDocViewer — small opaque identifier helpers. |
-| <code>module:imageAdjustments.buildImageFilter</code> | function | <code>src/utils/imageAdjustments.js:84</code> | The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert. |
+| <code>module:imageAdjustments.buildImageFilter</code> | function | <code>src/utils/imageAdjustments.js:100</code> | The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert. |
 | <code>module:imageAdjustments~finiteOr</code> | function | <code>src/utils/imageAdjustments.js:24</code> |  |
 | <code>module:imageAdjustments.hasImageAdjustment</code> | function | <code>src/utils/imageAdjustments.js:59</code> | Whether any colour adjustment \(brightness, contrast, grayscale, invert\) is off its neutral value. |
 | <code>module:imageAdjustments</code> | module | <code>src/utils/imageAdjustments.js:2</code> | File: src/utils/imageAdjustments.js Per-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws. |
-| <code>module:imageAdjustments.needsCanvas</code> | function | <code>src/utils/imageAdjustments.js:72</code> | Whether the page must be drawn on the canvas instead of the plain &amp;lt;img&amp;gt; . |
+| <code>module:imageAdjustments.needsCanvas</code> | function | <code>src/utils/imageAdjustments.js:88</code> | Whether the page must be drawn on the canvas instead of the plain &amp;lt;img&amp;gt; . |
 | <code>module:imageAdjustments.NEUTRAL_IMAGE_FILTER</code> | constant | <code>src/utils/imageAdjustments.js:17</code> | The canvas filter for neutral values \(brightness and contrast at 100 %, nothing else\). |
 | <code>module:imageAdjustments.normalizeGrayscale</code> | function | <code>src/utils/imageAdjustments.js:36</code> | Grayscale amount in percent, clamped to 0..100. |
 | <code>module:imageAdjustments.normalizeInvert</code> | function | <code>src/utils/imageAdjustments.js:47</code> | Invert as a real boolean. |
+| <code>module:imageAdjustments.pickStoredImageAdjustments</code> | function | <code>src/utils/imageAdjustments.js:73</code> | The stored image adjustment of one page, normalized: brightness, contrast, grayscale and invert. |
 | <code>I18nLike</code> | typedef | <code>src/utils/localizedValue.js:17</code> | Minimal shape of an i18n instance used by this module. |
 | <code>I18nOptionsLike</code> | typedef | <code>src/utils/localizedValue.js:11</code> | A subset of the i18next options object we care about. |
 | <code>LocalizedString</code> | typedef | <code>src/utils/localizedValue.js:2</code> | Localized string resolver for admin-supplied config values. |
