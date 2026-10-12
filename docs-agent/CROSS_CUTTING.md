@@ -20,13 +20,13 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` (362 lines) - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/hooks/usePageTimer.js` (149 lines) - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` (311 lines) - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
+- `src/components/DocumentViewer/hooks/useCompareOverlay.js` (159 lines) - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
 - `src/hooks/usePageNavigation.js` (182 lines) - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/components/DocumentViewer/hooks/useCompareTransforms.js` (75 lines) - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` (162 lines) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/hooks/useAcceleratingHoldRepeat.js` (210 lines) - Reusable press\-and\-hold behavior for toolbar buttons.
 - `src/hooks/usePdfSignatureReports.js` (127 lines) - Browser PDF signature inspection and optional gateway trust enrichment.
 - `src/components/DocumentToolbar/hooks/usePrintRangeConfig.js` (160 lines) - Runtime\-configuration derivation for PrintRangeDialog.
-- `src/components/DocumentViewer/hooks/useCompareOverlay.js` (124 lines) - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
 
 ### Workers
 

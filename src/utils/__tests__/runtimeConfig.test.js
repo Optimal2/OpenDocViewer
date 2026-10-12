@@ -12,6 +12,10 @@ import {
   getRuntimeConfig,
   getKeyboardPrintShortcutBehavior,
   isDocumentMetadataUiEnabled,
+  isCompareOverlayEnabled,
+  isCompareOverlayPrintEnabled,
+  isCompareCurtainEnabled,
+  isCompareCurtainPrintEnabled,
   isPdfSignatureInspectionEnabled,
   getPdfSignatureInspectionStart,
   normalizePrintDefaultMode,
@@ -109,6 +113,57 @@ describe('runtimeConfig', () => {
 
     it('respects explicit false', () => {
       expect(isDocumentMetadataUiEnabled({ metadata: { enabled: false } })).toBe(false);
+    });
+  });
+
+  describe('compare view switches', () => {
+    /** Accessor and the path of the key it reads, e.g. ['overlay', 'print']. */
+    const SWITCHES = [
+      ['isCompareOverlayEnabled', isCompareOverlayEnabled, ['overlay']],
+      ['isCompareOverlayPrintEnabled', isCompareOverlayPrintEnabled, ['overlay', 'print']],
+      ['isCompareCurtainEnabled', isCompareCurtainEnabled, ['curtain']],
+      ['isCompareCurtainPrintEnabled', isCompareCurtainPrintEnabled, ['curtain', 'print']],
+    ];
+
+    /** Build `{ compare: { ...path: { enabled: value } } }`. */
+    const withValue = (path, value) => ({
+      compare: path.reduceRight((inner, key) => ({ [key]: inner }), { enabled: value }),
+    });
+
+    describe.each(SWITCHES)('%s', (_name, accessor, path) => {
+      it('returns true for an explicit true', () => {
+        expect(accessor(withValue(path, true))).toBe(true);
+      });
+
+      it('returns false only for an explicit false', () => {
+        expect(accessor(withValue(path, false))).toBe(false);
+      });
+
+      it('falls back to the base default (true) when the key or section is missing', () => {
+        expect(accessor({})).toBe(true);
+        expect(accessor({ compare: {} })).toBe(true);
+        expect(accessor({ compare: { overlay: {}, curtain: {} } })).toBe(true);
+        expect(accessor(null)).toBe(true);
+      });
+
+      it.each([
+        ['a string', 'false'],
+        ['another string', 'no'],
+        ['the number 0', 0],
+        ['the number 1', 1],
+        ['null', null],
+        ['an object', { value: false }],
+      ])('falls back to the base default (true) for %s', (_label, value) => {
+        expect(accessor(withValue(path, value))).toBe(true);
+      });
+    });
+
+    it('reads each key independently of the others', () => {
+      const cfg = { compare: { overlay: { enabled: true, print: { enabled: false } }, curtain: { enabled: false } } };
+      expect(isCompareOverlayEnabled(cfg)).toBe(true);
+      expect(isCompareOverlayPrintEnabled(cfg)).toBe(false);
+      expect(isCompareCurtainEnabled(cfg)).toBe(false);
+      expect(isCompareCurtainPrintEnabled(cfg)).toBe(true);
     });
   });
 

@@ -243,6 +243,47 @@ describe('CompareOverlayView', () => {
   });
 });
 
+describe('CompareOverlayView availability gating', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+
+  afterEach(() => {
+    delete window.__ODV_CONFIG__;
+    vi.unstubAllGlobals();
+  });
+
+  it('shows the curtain entry by default', async () => {
+    const { container, cleanup } = await renderView({ onOpenCurtain: () => {} });
+    expect(container.querySelector('.compare-overlay-curtain')).not.toBeNull();
+    await cleanup();
+  });
+
+  it('does not render the curtain entry when compare.curtain.enabled is false', async () => {
+    window.__ODV_CONFIG__ = { compare: { curtain: { enabled: false } } };
+    const { container, cleanup } = await renderView({ onOpenCurtain: () => {} });
+    expect(container.querySelector('.compare-overlay-curtain')).toBeNull();
+    expect(container.querySelector('.compare-curtain-button')).toBeNull();
+    await cleanup();
+  });
+
+  it('keeps the curtain entry for a non-boolean compare.curtain.enabled', async () => {
+    window.__ODV_CONFIG__ = { compare: { curtain: { enabled: 'false' } } };
+    const { container, cleanup } = await renderView({ onOpenCurtain: () => {} });
+    expect(container.querySelector('.compare-overlay-curtain')).not.toBeNull();
+    await cleanup();
+  });
+
+  it('gates the compare-toolbar entries on their own switch, never the compare button', () => {
+    expect(toolbarSource).toMatch(/showCompareOverlayEntry\s*=\s*canOpenCompareOverlay\s*&&\s*isCompareOverlayEnabled\(\)/);
+    expect(toolbarSource).toMatch(/showCompareCurtainEntry\s*=\s*canOpenCompareOverlay\s*&&\s*isCompareCurtainEnabled\(\)/);
+    expect(toolbarSource).toMatch(/\{showCompareOverlayEntry \? \(\s*<button[\s\S]*?compare-overlay-button/);
+    expect(toolbarSource).toMatch(/\{showCompareCurtainEntry \? \(\s*<CompareCurtainButton/);
+    // The compare button itself stays unconditional.
+    expect(toolbarSource).toMatch(/\{\/\* Compare mode \*\/\}\s*<button/);
+  });
+});
+
 describe('overlay view strings', () => {
   const source = overlaySource + toolbarSource;
   const keys = [...new Set([...source.matchAll(/t\('((?:compareOverlay|toolbar\.compareOverlay)\.[\w.]+)'/g)].map((m) => m[1]))];

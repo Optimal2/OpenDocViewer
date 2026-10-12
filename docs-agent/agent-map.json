@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 144,
-    "sourceLineCount": 58564,
-    "docletCount": 1577,
+    "sourceLineCount": 58671,
+    "docletCount": 1583,
     "documentedFileCount": 144,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -461,9 +461,9 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 119,
-      "lines": 630,
-      "incomingLocalImports": 16,
-      "doclets": 41,
+      "lines": 691,
+      "incomingLocalImports": 18,
+      "doclets": 46,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
@@ -707,6 +707,12 @@
             "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer."
           },
           {
+            "path": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
+            "score": 36,
+            "lines": 159,
+            "summary": "File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view (CompareOverlayView.jsx)."
+          },
+          {
             "path": "src/hooks/usePageNavigation.js",
             "score": 30,
             "lines": 182,
@@ -741,12 +747,6 @@
             "score": 20,
             "lines": 160,
             "summary": "Runtime-configuration derivation for PrintRangeDialog."
-          },
-          {
-            "path": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
-            "score": 20,
-            "lines": 124,
-            "summary": "File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view (CompareOverlayView.jsx)."
           }
         ]
       },
@@ -1084,7 +1084,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 17,
-      "lineCount": 7657,
+      "lineCount": 7663,
       "docletCount": 128,
       "importantFiles": [
         {
@@ -1108,7 +1108,7 @@
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
           "score": 55,
-          "lines": 2206,
+          "lines": 2212,
           "incomingLocalImports": 1,
           "doclets": 31,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -1164,8 +1164,8 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 16,
-      "lineCount": 6985,
-      "docletCount": 140,
+      "lineCount": 7025,
+      "docletCount": 141,
       "importantFiles": [
         {
           "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
@@ -1215,10 +1215,19 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewer.jsx",
           "score": 37,
-          "lines": 765,
+          "lines": 768,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
+          "score": 36,
+          "lines": 159,
+          "incomingLocalImports": 2,
+          "doclets": 3,
+          "summary": "File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view (CompareOverlayView.jsx).",
           "summaryConfidence": "high"
         },
         {
@@ -1228,15 +1237,6 @@
           "incomingLocalImports": 2,
           "doclets": 3,
           "summary": "Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page's free transform (utils/compareTransform.js): zoom [−] [ 100,0 ] % [+] 0.1 % steps (Shift: 1",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "score": 32,
-          "lines": 494,
-          "incomingLocalImports": 1,
-          "doclets": 5,
-          "summary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
           "summaryConfidence": "high"
         }
       ]
@@ -1549,8 +1549,8 @@
     {
       "name": "src/utils",
       "fileCount": 50,
-      "lineCount": 19132,
-      "docletCount": 759,
+      "lineCount": 19193,
+      "docletCount": 764,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1564,9 +1564,9 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 119,
-          "lines": 630,
-          "incomingLocalImports": 16,
-          "doclets": 41,
+          "lines": 691,
+          "incomingLocalImports": 18,
+          "doclets": 46,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
@@ -11240,7 +11240,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 2206,
+      "lines": 2212,
       "extension": ".jsx",
       "jsdocBlockCount": 44,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11391,7 +11391,9 @@
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
-            "getRuntimeConfig"
+            "getRuntimeConfig",
+            "isCompareCurtainEnabled",
+            "isCompareOverlayEnabled"
           ],
           "line": 33,
           "kind": "static"
@@ -11471,7 +11473,7 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 2205
+          "line": 2211
         }
       ],
       "declarations": [
@@ -11523,32 +11525,32 @@
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 413
+          "line": 418
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 421
+          "line": 426
         },
         {
           "name": "settingsDetail",
           "kind": "object",
-          "line": 951
+          "line": 956
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 1114
+          "line": 1119
         },
         {
           "name": "pdfOpts",
           "kind": "object",
-          "line": 1177
+          "line": 1182
         },
         {
           "name": "detail",
           "kind": "object",
-          "line": 1317
+          "line": 1322
         }
       ],
       "parseError": null,
@@ -11873,7 +11875,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 413,
+          "line": 418,
           "description": "",
           "params": [
             {
@@ -11893,7 +11895,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 421,
+          "line": 426,
           "description": "",
           "params": [
             {
@@ -11913,7 +11915,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 698,
+          "line": 703,
           "description": "Handle brightness slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11938,7 +11940,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 712,
+          "line": 717,
           "description": "Handle contrast slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11963,7 +11965,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 726,
+          "line": 731,
           "description": "",
           "params": [
             {
@@ -11994,7 +11996,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 734,
+          "line": 739,
           "description": "",
           "params": [
             {
@@ -12019,7 +12021,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 747,
+          "line": 752,
           "description": "",
           "params": [
             {
@@ -12044,7 +12046,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 756,
+          "line": 761,
           "description": "",
           "params": [
             {
@@ -12069,7 +12071,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 785,
+          "line": 790,
           "description": "Build a compact &quot;pages&quot; descriptor for logging.",
           "params": [
             {
@@ -12094,7 +12096,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 805,
+          "line": 810,
           "description": "Estimate the number of pages the user is about to print.",
           "params": [
             {
@@ -12119,7 +12121,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 827,
+          "line": 832,
           "description": "Resolve page metadata objects aligned with the printed page sequence.",
           "params": [
             {
@@ -12144,7 +12146,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 841,
+          "line": 846,
           "description": "",
           "params": [
             {
@@ -12169,7 +12171,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 877,
+          "line": 882,
           "description": "",
           "params": [
             {
@@ -12194,7 +12196,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 905,
+          "line": 910,
           "description": "Fire-and-forget user print log.",
           "params": [
             {
@@ -12219,7 +12221,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 1138,
+          "line": 1143,
           "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
           "params": [
             {
@@ -12244,7 +12246,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 1306,
+          "line": 1311,
           "description": "Handle the dialog submit event and dispatch the correct print action.",
           "params": [
             {
@@ -12394,7 +12396,9 @@
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
-            "getRuntimeConfig"
+            "getRuntimeConfig",
+            "isCompareCurtainEnabled",
+            "isCompareOverlayEnabled"
           ],
           "line": 33,
           "kind": "static",
@@ -17737,7 +17741,7 @@
     },
     {
       "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "lines": 494,
+      "lines": 496,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
@@ -17825,70 +17829,78 @@
           ],
           "line": 51,
           "kind": "static"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "isCompareCurtainEnabled"
+          ],
+          "line": 52,
+          "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "CompareOverlayView",
           "kind": "default",
-          "line": 493
+          "line": 495
         }
       ],
       "declarations": [
         {
           "name": "needsCanvas",
           "kind": "function",
-          "line": 63
+          "line": 64
         },
         {
           "name": "CompareOverlayView",
           "kind": "component",
-          "line": 90
+          "line": 91
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 145
+          "line": 146
         },
         {
           "name": "onWheel",
           "kind": "function",
-          "line": 171
+          "line": 172
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 190
+          "line": 191
         },
         {
           "name": "handlePointerMove",
           "kind": "function",
-          "line": 210
+          "line": 211
         },
         {
           "name": "finishDrag",
           "kind": "function",
-          "line": 229
+          "line": 230
         },
         {
           "name": "handleOpacityKeyDown",
           "kind": "function",
-          "line": 242
+          "line": 243
         },
         {
           "name": "handleCopy",
           "kind": "function",
-          "line": 259
+          "line": 260
         },
         {
           "name": "pageLabel",
           "kind": "function",
-          "line": 278
+          "line": 279
         },
         {
           "name": "renderLayer",
           "kind": "component",
-          "line": 292
+          "line": 293
         }
       ],
       "parseError": null,
@@ -17904,7 +17916,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 53,
+          "line": 54,
           "description": "",
           "params": [],
           "returns": [],
@@ -17917,7 +17929,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 63,
+          "line": 64,
           "description": "",
           "params": [
             {
@@ -17942,7 +17954,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 90,
+          "line": 91,
           "description": "",
           "params": [
             {
@@ -18069,7 +18081,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 145,
+          "line": 146,
           "description": "",
           "params": [
             {
@@ -18089,7 +18101,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 171,
+          "line": 172,
           "description": "",
           "params": [
             {
@@ -18166,6 +18178,15 @@
           "line": 51,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/compareViewKeys.js"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "isCompareCurtainEnabled"
+          ],
+          "line": 52,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
         }
       ],
       "packageImports": [
@@ -18881,7 +18902,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "lines": 765,
+      "lines": 768,
       "extension": ".jsx",
       "jsdocBlockCount": 8,
       "sourceSummary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
@@ -18989,11 +19010,19 @@
           "kind": "static"
         },
         {
+          "source": "./hooks/useCompareOverlay.js",
+          "specifiers": [
+            "resolveShownCompareViews"
+          ],
+          "line": 34,
+          "kind": "static"
+        },
+        {
           "source": "../../hooks/useNavigationModifierState.js",
           "specifiers": [
             "useNavigationModifierState"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -19001,7 +19030,7 @@
           "specifiers": [
             "DocumentMetadataOverlayDialog"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -19009,7 +19038,7 @@
           "specifiers": [
             "DocumentMetadataMatrixOverlayDialog"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -19017,7 +19046,7 @@
           "specifiers": [
             "SignatureDetailsDialog"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -19025,7 +19054,7 @@
           "specifiers": [
             "SignatureOverviewDialog"
           ],
-          "line": 38,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -19033,7 +19062,7 @@
           "specifiers": [
             "ViewerProblemNotice"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -19042,7 +19071,7 @@
             "buildDocumentMetadataMatrixView",
             "buildDocumentMetadataView"
           ],
-          "line": 40,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -19053,7 +19082,7 @@
             "getPageSignatureDocumentKey",
             "summarizeSignatureDocuments"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -19064,7 +19093,7 @@
             "getViewerEdgeScrollPageTurnConfig",
             "isDocumentMetadataUiEnabled"
           ],
-          "line": 47,
+          "line": 48,
           "kind": "static"
         }
       ],
@@ -19072,34 +19101,34 @@
         {
           "name": "DocumentViewer",
           "kind": "default",
-          "line": 764
+          "line": 767
         }
       ],
       "declarations": [
         {
           "name": "DocumentViewer",
           "kind": "component",
-          "line": 54
+          "line": 55
         },
         {
           "name": "isEditableTarget",
           "kind": "function",
-          "line": 331
+          "line": 334
         },
         {
           "name": "hasActiveModalDialog",
           "kind": "function",
-          "line": 338
+          "line": 341
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 342
+          "line": 345
         },
         {
           "name": "allowNativeContextMenu",
           "kind": "function",
-          "line": 430
+          "line": 433
         }
       ],
       "parseError": null,
@@ -19115,7 +19144,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 267,
+          "line": 270,
           "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
           "params": [
             {
@@ -19146,7 +19175,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 309,
+          "line": 312,
           "description": "Overview row activation: show the document's first page and keep the overview open.",
           "params": [],
           "returns": [],
@@ -19159,7 +19188,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 331,
+          "line": 334,
           "description": "",
           "params": [
             {
@@ -19179,7 +19208,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 338,
+          "line": 341,
           "description": "",
           "params": [],
           "returns": [
@@ -19197,7 +19226,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 342,
+          "line": 345,
           "description": "",
           "params": [
             {
@@ -19217,7 +19246,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 430,
+          "line": 433,
           "description": "",
           "params": [
             {
@@ -19329,11 +19358,20 @@
           "resolved": "src/components/DocumentViewer/useDocumentViewer.js"
         },
         {
+          "source": "./hooks/useCompareOverlay.js",
+          "specifiers": [
+            "resolveShownCompareViews"
+          ],
+          "line": 34,
+          "kind": "static",
+          "resolved": "src/components/DocumentViewer/hooks/useCompareOverlay.js"
+        },
+        {
           "source": "../../hooks/useNavigationModifierState.js",
           "specifiers": [
             "useNavigationModifierState"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static",
           "resolved": "src/hooks/useNavigationModifierState.js"
         },
@@ -19342,7 +19380,7 @@
           "specifiers": [
             "DocumentMetadataOverlayDialog"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static",
           "resolved": "src/components/DocumentMetadataOverlayDialog.jsx"
         },
@@ -19351,7 +19389,7 @@
           "specifiers": [
             "DocumentMetadataMatrixOverlayDialog"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static",
           "resolved": "src/components/DocumentMetadataMatrixOverlayDialog.jsx"
         },
@@ -19360,7 +19398,7 @@
           "specifiers": [
             "SignatureDetailsDialog"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static",
           "resolved": "src/components/SignatureDetailsDialog.jsx"
         },
@@ -19369,7 +19407,7 @@
           "specifiers": [
             "SignatureOverviewDialog"
           ],
-          "line": 38,
+          "line": 39,
           "kind": "static",
           "resolved": "src/components/SignatureOverviewDialog.jsx"
         },
@@ -19378,7 +19416,7 @@
           "specifiers": [
             "ViewerProblemNotice"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static",
           "resolved": "src/components/ViewerProblemNotice.jsx"
         },
@@ -19388,7 +19426,7 @@
             "buildDocumentMetadataMatrixView",
             "buildDocumentMetadataView"
           ],
-          "line": 40,
+          "line": 41,
           "kind": "static",
           "resolved": "src/utils/documentMetadata.js"
         },
@@ -19400,7 +19438,7 @@
             "getPageSignatureDocumentKey",
             "summarizeSignatureDocuments"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
         },
@@ -19412,7 +19450,7 @@
             "getViewerEdgeScrollPageTurnConfig",
             "isDocumentMetadataUiEnabled"
           ],
-          "line": 47,
+          "line": 48,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
@@ -20884,9 +20922,9 @@
     },
     {
       "path": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
-      "lines": 124,
+      "lines": 159,
       "extension": ".js",
-      "jsdocBlockCount": 3,
+      "jsdocBlockCount": 4,
       "sourceSummary": "Open/close state of the compare overlay view (CompareOverlayView.jsx).",
       "imports": [
         {
@@ -20899,7 +20937,7 @@
             "useRef",
             "useState"
           ],
-          "line": 19,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -20907,7 +20945,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 20,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -20915,7 +20953,7 @@
           "specifiers": [
             "INITIAL_COMPARE_TRANSFORM_STATE"
           ],
-          "line": 21,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -20923,27 +20961,47 @@
           "specifiers": [
             "hasCompareCalibration"
           ],
-          "line": 22,
+          "line": 28,
+          "kind": "static"
+        },
+        {
+          "source": "../../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig",
+            "isCompareCurtainEnabled",
+            "isCompareOverlayEnabled"
+          ],
+          "line": 29,
           "kind": "static"
         }
       ],
       "exports": [
         {
+          "name": "resolveShownCompareViews",
+          "kind": "function",
+          "line": 45
+        },
+        {
           "name": "useCompareOverlay",
           "kind": "function",
-          "line": 40
+          "line": 66
         }
       ],
       "declarations": [
         {
           "name": "NOOP_DISPATCH",
           "kind": "component",
-          "line": 24
+          "line": 35
+        },
+        {
+          "name": "resolveShownCompareViews",
+          "kind": "function",
+          "line": 45
         },
         {
           "name": "useCompareOverlay",
           "kind": "function",
-          "line": 40
+          "line": 66
         }
       ],
       "parseError": null,
@@ -20968,13 +21026,44 @@
           "examples": 0
         },
         {
+          "id": "module:useCompareOverlay.resolveShownCompareViews",
+          "name": "resolveShownCompareViews",
+          "longname": "module:useCompareOverlay.resolveShownCompareViews",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
+          "line": 45,
+          "description": "Render gate for the compare views: a view is shown only while it is open AND enabled in the runtime config, so a stale open flag can never surface a disabled view.",
+          "params": [
+            {
+              "name": "open",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "module:useCompareOverlay.useCompareOverlay",
           "name": "useCompareOverlay",
           "longname": "module:useCompareOverlay.useCompareOverlay",
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
-          "line": 40,
+          "line": 66,
           "description": "",
           "params": [
             {
@@ -21000,7 +21089,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 20,
+          "line": 26,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -21009,7 +21098,7 @@
           "specifiers": [
             "INITIAL_COMPARE_TRANSFORM_STATE"
           ],
-          "line": 21,
+          "line": 27,
           "kind": "static",
           "resolved": "src/utils/compareTransform.js"
         },
@@ -21018,9 +21107,20 @@
           "specifiers": [
             "hasCompareCalibration"
           ],
-          "line": 22,
+          "line": 28,
           "kind": "static",
           "resolved": "src/utils/compareOverlay.js"
+        },
+        {
+          "source": "../../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig",
+            "isCompareCurtainEnabled",
+            "isCompareOverlayEnabled"
+          ],
+          "line": 29,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
         }
       ],
       "packageImports": [
@@ -21034,12 +21134,12 @@
             "useRef",
             "useState"
           ],
-          "line": 19,
+          "line": 25,
           "kind": "static"
         }
       ],
-      "incomingLocalImports": 1,
-      "importanceScore": 20,
+      "incomingLocalImports": 2,
+      "importanceScore": 36,
       "summary": "File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view (CompareOverlayView.jsx).",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -59786,9 +59886,9 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 630,
+      "lines": 691,
       "extension": ".js",
-      "jsdocBlockCount": 44,
+      "jsdocBlockCount": 49,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
@@ -59808,89 +59908,109 @@
           "line": 149
         },
         {
+          "name": "isCompareOverlayEnabled",
+          "kind": "function",
+          "line": 174
+        },
+        {
+          "name": "isCompareOverlayPrintEnabled",
+          "kind": "function",
+          "line": 186
+        },
+        {
+          "name": "isCompareCurtainEnabled",
+          "kind": "function",
+          "line": 198
+        },
+        {
+          "name": "isCompareCurtainPrintEnabled",
+          "kind": "function",
+          "line": 210
+        },
+        {
           "name": "isSignatureThumbnailPageBadgeEnabled",
           "kind": "function",
-          "line": 161
+          "line": 222
         },
         {
           "name": "isPdfSignatureInspectionEnabled",
           "kind": "function",
-          "line": 175
+          "line": 236
         },
         {
           "name": "getPdfSignatureInspectionStart",
           "kind": "function",
-          "line": 188
+          "line": 249
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 201
+          "line": 262
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 370
+          "line": 431
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 387
+          "line": 448
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 398
+          "line": 459
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 416
+          "line": 477
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 442
+          "line": 503
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 455
+          "line": 516
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 469
+          "line": 530
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 493
+          "line": 554
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 518
+          "line": 579
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 542
+          "line": 603
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 560
+          "line": 621
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 601
+          "line": 662
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 618
+          "line": 679
         }
       ],
       "declarations": [
@@ -59910,134 +60030,159 @@
           "line": 149
         },
         {
-          "name": "isSignatureThumbnailPageBadgeEnabled",
+          "name": "readBooleanSwitch",
           "kind": "function",
           "line": 161
         },
         {
+          "name": "isCompareOverlayEnabled",
+          "kind": "function",
+          "line": 174
+        },
+        {
+          "name": "isCompareOverlayPrintEnabled",
+          "kind": "function",
+          "line": 186
+        },
+        {
+          "name": "isCompareCurtainEnabled",
+          "kind": "function",
+          "line": 198
+        },
+        {
+          "name": "isCompareCurtainPrintEnabled",
+          "kind": "function",
+          "line": 210
+        },
+        {
+          "name": "isSignatureThumbnailPageBadgeEnabled",
+          "kind": "function",
+          "line": 222
+        },
+        {
           "name": "isPdfSignatureInspectionEnabled",
           "kind": "function",
-          "line": 175
+          "line": 236
         },
         {
           "name": "getPdfSignatureInspectionStart",
           "kind": "function",
-          "line": 188
+          "line": 249
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 201
+          "line": 262
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 219
+          "line": 280
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 241
+          "line": 302
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 266
+          "line": 327
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 287
+          "line": 348
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 304
+          "line": 365
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 316
+          "line": 377
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 330
+          "line": 391
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 341
+          "line": 402
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 355
+          "line": 416
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 370
+          "line": 431
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 387
+          "line": 448
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 398
+          "line": 459
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 416
+          "line": 477
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 442
+          "line": 503
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 455
+          "line": 516
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 469
+          "line": 530
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 493
+          "line": 554
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 518
+          "line": 579
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 542
+          "line": 603
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 560
+          "line": 621
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 601
+          "line": 662
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 618
+          "line": 679
         }
       ],
       "parseError": null,
@@ -60271,13 +60416,144 @@
           "examples": 0
         },
         {
+          "id": "readBooleanSwitch",
+          "name": "readBooleanSwitch",
+          "longname": "readBooleanSwitch",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 161,
+          "description": "Read a strict boolean switch: only a real boolean counts, anything else (missing, strings such as &quot;false&quot;, numbers, null, objects) falls back to defaultValue .",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "defaultValue",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "isCompareOverlayEnabled",
+          "name": "isCompareOverlayEnabled",
+          "longname": "isCompareOverlayEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 174,
+          "description": "Resolve whether the compare overlay view is available ( compare.overlay.enabled ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "isCompareOverlayPrintEnabled",
+          "name": "isCompareOverlayPrintEnabled",
+          "longname": "isCompareOverlayPrintEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 186,
+          "description": "Resolve whether the compare overlay view offers its print action ( compare.overlay.print.enabled ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "isCompareCurtainEnabled",
+          "name": "isCompareCurtainEnabled",
+          "longname": "isCompareCurtainEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 198,
+          "description": "Resolve whether the compare curtain view is available ( compare.curtain.enabled ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "isCompareCurtainPrintEnabled",
+          "name": "isCompareCurtainPrintEnabled",
+          "longname": "isCompareCurtainPrintEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 210,
+          "description": "Resolve whether the compare curtain view offers its print action ( compare.curtain.print.enabled ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "isSignatureThumbnailPageBadgeEnabled",
           "name": "isSignatureThumbnailPageBadgeEnabled",
           "longname": "isSignatureThumbnailPageBadgeEnabled",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 161,
+          "line": 222,
           "description": "Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol.",
           "params": [
             {
@@ -60302,7 +60578,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 175,
+          "line": 236,
           "description": "Resolve whether PDF signature inspection runs at all ( pdfSignatures.enabled ).",
           "params": [
             {
@@ -60327,7 +60603,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 188,
+          "line": 249,
           "description": "Resolve when PDF signature inspection may start ( pdfSignatures.inspectAfter ): 'firstPage' (default) starts once the first page is shown, 'allPages' waits until every page of the...",
           "params": [
             {
@@ -60352,7 +60628,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 201,
+          "line": 262,
           "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
           "params": [
             {
@@ -60377,7 +60653,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 219,
+          "line": 280,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -60408,7 +60684,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 241,
+          "line": 302,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -60451,7 +60727,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 266,
+          "line": 327,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -60494,7 +60770,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 287,
+          "line": 348,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -60537,7 +60813,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 304,
+          "line": 365,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -60568,7 +60844,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 316,
+          "line": 377,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -60593,7 +60869,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 330,
+          "line": 391,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -60618,7 +60894,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 341,
+          "line": 402,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -60643,7 +60919,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 355,
+          "line": 416,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -60674,7 +60950,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 370,
+          "line": 431,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -60705,7 +60981,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 387,
+          "line": 448,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -60736,7 +61012,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 398,
+          "line": 459,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -60767,7 +61043,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 416,
+          "line": 477,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -60792,7 +61068,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 442,
+          "line": 503,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -60817,7 +61093,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 455,
+          "line": 516,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -60842,7 +61118,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 469,
+          "line": 530,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -60867,7 +61143,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 493,
+          "line": 554,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -60892,7 +61168,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 518,
+          "line": 579,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -60917,7 +61193,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 542,
+          "line": 603,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -60942,7 +61218,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 560,
+          "line": 621,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -60967,7 +61243,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 601,
+          "line": 662,
           "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
           "params": [
             {
@@ -60992,7 +61268,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 618,
+          "line": 679,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -61014,7 +61290,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 16,
+      "incomingLocalImports": 18,
       "importanceScore": 119,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -70909,7 +71185,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 1138,
+      "line": 1143,
       "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
       "params": [
         {
@@ -71028,7 +71304,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 698,
+      "line": 703,
       "description": "Handle brightness slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -71053,7 +71329,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 712,
+      "line": 717,
       "description": "Handle contrast slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -71078,7 +71354,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 734,
+      "line": 739,
       "description": "",
       "params": [
         {
@@ -71103,7 +71379,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 421,
+      "line": 426,
       "description": "",
       "params": [
         {
@@ -71123,7 +71399,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 413,
+      "line": 418,
       "description": "",
       "params": [
         {
@@ -71143,7 +71419,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 1306,
+      "line": 1311,
       "description": "Handle the dialog submit event and dispatch the correct print action.",
       "params": [
         {
@@ -71168,7 +71444,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 747,
+      "line": 752,
       "description": "",
       "params": [
         {
@@ -71193,7 +71469,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 726,
+      "line": 731,
       "description": "",
       "params": [
         {
@@ -71312,7 +71588,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 877,
+      "line": 882,
       "description": "",
       "params": [
         {
@@ -71425,7 +71701,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 827,
+      "line": 832,
       "description": "Resolve page metadata objects aligned with the printed page sequence.",
       "params": [
         {
@@ -71450,7 +71726,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 805,
+      "line": 810,
       "description": "Estimate the number of pages the user is about to print.",
       "params": [
         {
@@ -71475,7 +71751,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 841,
+      "line": 846,
       "description": "",
       "params": [
         {
@@ -71513,7 +71789,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 905,
+      "line": 910,
       "description": "Fire-and-forget user print log.",
       "params": [
         {
@@ -71538,7 +71814,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 756,
+      "line": 761,
       "description": "",
       "params": [
         {
@@ -71563,7 +71839,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 785,
+      "line": 790,
       "description": "Build a compact &quot;pages&quot; descriptor for logging.",
       "params": [
         {
@@ -74348,7 +74624,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 90,
+      "line": 91,
       "description": "",
       "params": [
         {
@@ -74475,7 +74751,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 63,
+      "line": 64,
       "description": "",
       "params": [
         {
@@ -74500,7 +74776,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 145,
+      "line": 146,
       "description": "",
       "params": [
         {
@@ -74520,7 +74796,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 171,
+      "line": 172,
       "description": "",
       "params": [
         {
@@ -74540,7 +74816,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 53,
+      "line": 54,
       "description": "",
       "params": [],
       "returns": [],
@@ -74862,7 +75138,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 430,
+      "line": 433,
       "description": "",
       "params": [
         {
@@ -74887,7 +75163,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 338,
+      "line": 341,
       "description": "",
       "params": [],
       "returns": [
@@ -74905,7 +75181,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 331,
+      "line": 334,
       "description": "",
       "params": [
         {
@@ -74925,7 +75201,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 309,
+      "line": 312,
       "description": "Overview row activation: show the document's first page and keep the overview open.",
       "params": [],
       "returns": [],
@@ -74938,7 +75214,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 342,
+      "line": 345,
       "description": "",
       "params": [
         {
@@ -74958,7 +75234,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 267,
+      "line": 270,
       "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
       "params": [
         {
@@ -75927,6 +76203,37 @@
       "examples": 0
     },
     {
+      "id": "module:useCompareOverlay.resolveShownCompareViews",
+      "name": "resolveShownCompareViews",
+      "longname": "module:useCompareOverlay.resolveShownCompareViews",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
+      "line": 45,
+      "description": "Render gate for the compare views: a view is shown only while it is open AND enabled in the runtime config, so a stale open flag can never surface a disabled view.",
+      "params": [
+        {
+          "name": "open",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "module:useCompareOverlay",
       "name": "useCompareOverlay",
       "longname": "module:useCompareOverlay",
@@ -75946,7 +76253,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
-      "line": 40,
+      "line": 66,
       "description": "",
       "params": [
         {
@@ -101574,7 +101881,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 241,
+      "line": 302,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -101655,7 +101962,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 618,
+      "line": 679,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -101680,7 +101987,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 188,
+      "line": 249,
       "description": "Resolve when PDF signature inspection may start ( pdfSignatures.inspectAfter ): 'firstPage' (default) starts once the first page is shown, 'allPages' waits until every page of the...",
       "params": [
         {
@@ -101705,7 +102012,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 493,
+      "line": 554,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -101730,7 +102037,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 518,
+      "line": 579,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -101773,7 +102080,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 601,
+      "line": 662,
       "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
       "params": [
         {
@@ -101798,7 +102105,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 201,
+      "line": 262,
       "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
       "params": [
         {
@@ -101823,7 +102130,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 469,
+      "line": 530,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -101848,7 +102155,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 455,
+      "line": 516,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -101873,7 +102180,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 442,
+      "line": 503,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -101898,7 +102205,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 542,
+      "line": 603,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -101923,7 +102230,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 560,
+      "line": 621,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -101936,6 +102243,106 @@
       "returns": [
         {
           "type": "ViewerProblemNoticeConfig",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "isCompareCurtainEnabled",
+      "name": "isCompareCurtainEnabled",
+      "longname": "isCompareCurtainEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 198,
+      "description": "Resolve whether the compare curtain view is available ( compare.curtain.enabled ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "isCompareCurtainPrintEnabled",
+      "name": "isCompareCurtainPrintEnabled",
+      "longname": "isCompareCurtainPrintEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 210,
+      "description": "Resolve whether the compare curtain view offers its print action ( compare.curtain.print.enabled ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "isCompareOverlayEnabled",
+      "name": "isCompareOverlayEnabled",
+      "longname": "isCompareOverlayEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 174,
+      "description": "Resolve whether the compare overlay view is available ( compare.overlay.enabled ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "isCompareOverlayPrintEnabled",
+      "name": "isCompareOverlayPrintEnabled",
+      "longname": "isCompareOverlayPrintEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 186,
+      "description": "Resolve whether the compare overlay view offers its print action ( compare.overlay.print.enabled ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
           "description": ""
         }
       ],
@@ -101973,7 +102380,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 175,
+      "line": 236,
       "description": "Resolve whether PDF signature inspection runs at all ( pdfSignatures.enabled ).",
       "params": [
         {
@@ -101998,7 +102405,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 161,
+      "line": 222,
       "description": "Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol.",
       "params": [
         {
@@ -102049,7 +102456,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 219,
+      "line": 280,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -102080,7 +102487,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 416,
+      "line": 477,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -102105,7 +102512,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 387,
+      "line": 448,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -102136,7 +102543,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 355,
+      "line": 416,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -102167,7 +102574,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 287,
+      "line": 348,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -102210,7 +102617,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 266,
+      "line": 327,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -102253,7 +102660,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 398,
+      "line": 459,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -102284,7 +102691,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 370,
+      "line": 431,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -102315,7 +102722,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 316,
+      "line": 377,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -102340,7 +102747,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 304,
+      "line": 365,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -102371,7 +102778,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 330,
+      "line": 391,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -102429,6 +102836,37 @@
       "examples": 0
     },
     {
+      "id": "readBooleanSwitch",
+      "name": "readBooleanSwitch",
+      "longname": "readBooleanSwitch",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 161,
+      "description": "Read a strict boolean switch: only a real boolean counts, anything else (missing, strings such as &quot;false&quot;, numbers, null, objects) falls back to defaultValue .",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "defaultValue",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "RESET_SESSION_TARGETS",
       "name": "RESET_SESSION_TARGETS",
       "longname": "RESET_SESSION_TARGETS",
@@ -102461,7 +102899,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 341,
+      "line": 402,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {

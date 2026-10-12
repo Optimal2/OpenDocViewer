@@ -30,7 +30,7 @@ import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import usePdfPrebuildAllPages from './usePdfPrebuildAllPages.js';
-import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { getRuntimeConfig, isCompareCurtainEnabled, isCompareOverlayEnabled } from '../../utils/runtimeConfig.js';
 import {
   clearPrintDefaultModePreference,
   getPrintDefaultModePreference,
@@ -378,6 +378,11 @@ const DocumentToolbar = ({
 }) => {
   const { t, i18n } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
+  // Compare-view entries: each view has its own runtime switch; compare mode itself has none.
+  const showCompareOverlayEntry = canOpenCompareOverlay && isCompareOverlayEnabled()
+    && typeof openCompareOverlay === 'function';
+  const showCompareCurtainEntry = canOpenCompareOverlay && isCompareCurtainEnabled()
+    && typeof openCompareCurtain === 'function';
   const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
@@ -1685,8 +1690,8 @@ const DocumentToolbar = ({
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
 
-      {/* Overlay view: only in compare mode with two pages shown */}
-      {canOpenCompareOverlay && typeof openCompareOverlay === 'function' ? (
+      {/* Overlay view: only in compare mode with two pages shown, unless compare.overlay.enabled is false */}
+      {showCompareOverlayEntry ? (
         <button
           type="button"
           onClick={() => openCompareOverlay()}
@@ -1698,8 +1703,9 @@ const DocumentToolbar = ({
         </button>
       ) : null}
 
-      {/* Curtain view: same condition; disabled with an explanation until the overlay view calibrated */}
-      {canOpenCompareOverlay && typeof openCompareCurtain === 'function' ? (
+      {/* Curtain view: same condition, unless compare.curtain.enabled is false; disabled with an
+          explanation until the overlay view calibrated (ready at once when the overlay is off) */}
+      {showCompareCurtainEntry ? (
         <CompareCurtainButton calibrated={compareCalibrated} onOpen={openCompareCurtain} />
       ) : null}
 

@@ -8,11 +8,12 @@
  * once a calibration exists and its Close returns to the view it was opened from.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { act, createElement, useMemo, useReducer } from 'react';
 import { createRoot } from 'react-dom/client';
 import ViewerContext from '../../contexts/viewerContext.js';
-import { useCompareOverlay } from '../DocumentViewer/hooks/useCompareOverlay.js';
+import { resolveShownCompareViews, useCompareOverlay } from '../DocumentViewer/hooks/useCompareOverlay.js';
+import viewerSource from '../DocumentViewer/DocumentViewer.jsx?raw';
 import { INITIAL_COMPARE_TRANSFORM_STATE, compareTransformReducer } from '../../utils/compareTransform.js';
 import { INITIAL_COMPARE_OVERLAY_STATE, compareOverlayReducer } from '../../utils/compareOverlay.js';
 
@@ -165,6 +166,99 @@ describe('useCompareOverlay', () => {
     expect(probe.hook.compareOverlaySnapshot).toEqual(atOverlayOpen);
     expect(probe.context.compareTransforms).toEqual(calibrated);
     await view.unmount();
+  });
+
+  describe('availability gating (compare.overlay.enabled / compare.curtain.enabled)', () => {
+    afterEach(() => {
+      delete window.__ODV_CONFIG__;
+    });
+
+    it('overlay disabled: the open action refuses and sets no calibration flag', async () => {
+      window.__ODV_CONFIG__ = { compare: { overlay: { enabled: false } } };
+      const view = await mount(true);
+      await run(() => expect(probe.hook.openCompareOverlay()).toBe(false));
+      expect(probe.hook.compareOverlayOpen).toBe(false);
+      expect(probe.hook.compareOverlaySnapshot).toBeNull();
+      expect(probe.context.compareOverlay.calibrated).toBe(false);
+      await view.unmount();
+    });
+
+    it('overlay disabled: the curtain still opens on the compare view\'s own calibration', async () => {
+      window.__ODV_CONFIG__ = { compare: { overlay: { enabled: false } } };
+      const view = await mount(true);
+      await run(() => probe.context.dispatchCompareTransform({ type: 'set', target: 'compare', transform: { dx: 9, rotation: 0.3 } }));
+      const transforms = probe.context.compareTransforms;
+      expect(probe.hook.compareCalibrated).toBe(true);
+      await run(() => expect(probe.hook.openCompareCurtain()).toBe(true));
+      expect(probe.hook.compareCurtainOpen).toBe(true);
+      expect(probe.context.compareTransforms).toEqual(transforms);
+      await run(() => probe.hook.closeCompareCurtain());
+      expect(probe.hook.compareCurtainOpen).toBe(false);
+      expect(probe.hook.compareOverlayOpen).toBe(false);
+      await view.unmount();
+    });
+
+    it('overlay disabled later: a stale open flag is not shown and the stored calibration is kept', async () => {
+      const view = await mount(true);
+      await run(() => probe.hook.openCompareOverlay());
+      await run(() => probe.context.dispatchCompareTransform({ type: 'set', target: 'compare', transform: { dy: 4 } }));
+      const calibrated = probe.context.compareTransforms;
+      expect(probe.hook.compareOverlayOpen).toBe(true);
+
+      window.__ODV_CONFIG__ = { compare: { overlay: { enabled: false } } };
+      await view.rerender(true);
+      expect(probe.hook.compareOverlayOpen).toBe(false);
+      expect(probe.context.compareTransforms).toEqual(calibrated);
+      expect(probe.context.compareOverlay.calibrated).toBe(true);
+      await run(() => expect(probe.hook.openCompareCurtain()).toBe(true));
+      expect(probe.hook.compareCurtainOpen).toBe(true);
+      await view.unmount();
+    });
+
+    it('curtain disabled: the open action refuses even with a calibration; the overlay is unaffected', async () => {
+      window.__ODV_CONFIG__ = { compare: { curtain: { enabled: false } } };
+      const view = await mount(true);
+      await run(() => expect(probe.hook.openCompareOverlay()).toBe(true));
+      expect(probe.hook.compareOverlayOpen).toBe(true);
+      expect(probe.hook.compareCalibrated).toBe(true);
+      await run(() => expect(probe.hook.openCompareCurtain()).toBe(false));
+      expect(probe.hook.compareCurtainOpen).toBe(false);
+      expect(probe.hook.compareOverlayOpen).toBe(true);
+      await view.unmount();
+    });
+
+    it('curtain disabled later: a stale open flag is not shown', async () => {
+      const view = await mount(true);
+      await run(() => probe.hook.openCompareOverlay());
+      await run(() => probe.hook.openCompareCurtain());
+      expect(probe.hook.compareCurtainOpen).toBe(true);
+
+      window.__ODV_CONFIG__ = { compare: { curtain: { enabled: false } } };
+      await view.rerender(true);
+      expect(probe.hook.compareCurtainOpen).toBe(false);
+      expect(probe.hook.compareOverlayOpen).toBe(true);
+      await view.unmount();
+    });
+  });
+
+  describe('resolveShownCompareViews (render gate)', () => {
+    it('passes the open flags through by default', () => {
+      expect(resolveShownCompareViews({ overlayOpen: true, curtainOpen: false }, {})).toEqual({ overlay: true, curtain: false });
+      expect(resolveShownCompareViews({ overlayOpen: false, curtainOpen: true }, {})).toEqual({ overlay: false, curtain: true });
+    });
+
+    it('refuses each view on its own switch, even with a stale open flag', () => {
+      const open = { overlayOpen: true, curtainOpen: true };
+      expect(resolveShownCompareViews(open, { compare: { overlay: { enabled: false } } })).toEqual({ overlay: false, curtain: true });
+      expect(resolveShownCompareViews(open, { compare: { curtain: { enabled: false } } })).toEqual({ overlay: true, curtain: false });
+      expect(resolveShownCompareViews(open, { compare: { overlay: { enabled: 'no' }, curtain: { enabled: 0 } } })).toEqual({ overlay: true, curtain: true });
+    });
+
+    it('is the gate DocumentViewer renders the views through', () => {
+      expect(viewerSource).toMatch(/resolveShownCompareViews\(/);
+      expect(viewerSource).toMatch(/\{shownCompareViews\.overlay \? \(\s*<CompareOverlayView/);
+      expect(viewerSource).toMatch(/\{shownCompareViews\.curtain \? \(\s*<CompareCurtainView/);
+    });
   });
 
   it('curtain closes with the overlay view when compare mode ends', async () => {

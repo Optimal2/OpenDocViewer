@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 16. Line count: 6985. JSDoc symbol count: 140.
+File count: 16. Line count: 7025. JSDoc symbol count: 141.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -34,7 +34,7 @@ Overlay view of the compare mode: the two compared pages stacked in one coordina
 
 Exports: `CompareOverlayView`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/components/DocumentViewer/CompareCurtainButton.jsx`, `src/components/DocumentViewer/compareViewKeys.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/components/DocumentViewer/CompareCurtainButton.jsx`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -91,7 +91,7 @@ OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(acti
 
 Exports: `DocumentViewer`
 
-Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`
+Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/hooks/useNavigationModifierState.js`
 
 Symbols:
 
@@ -157,13 +157,14 @@ Symbols:
 
 File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
 
-Exports: `useCompareOverlay`
+Exports: `resolveShownCompareViews`, `useCompareOverlay`
 
-Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`
+Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
 - `module:useCompareOverlay` (module) - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
+- `module:useCompareOverlay.resolveShownCompareViews` (function) - Render gate for the compare views: a view is shown only while it is open AND enabled in the runtime config, so a stale open flag can never surface a disabled view.
 - `module:useCompareOverlay.useCompareOverlay` (function) - No description.
 
 ## src/components/DocumentViewer/hooks/useCompareTransforms.js

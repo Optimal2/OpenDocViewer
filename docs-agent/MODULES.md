@@ -49,7 +49,7 @@ File count: 8. Line count: 4112. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 17. Line count: 7657. JSDoc symbol count: 128.
+File count: 17. Line count: 7663. JSDoc symbol count: 128.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -62,7 +62,7 @@ File count: 17. Line count: 7657. JSDoc symbol count: 128.
 
 ## src/components/DocumentViewer
 
-File count: 16. Line count: 6985. JSDoc symbol count: 140.
+File count: 16. Line count: 7025. JSDoc symbol count: 141.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
@@ -70,8 +70,8 @@ File count: 16. Line count: 6985. JSDoc symbol count: 140.
 - `src/components/DocumentViewer/compareViewKeys.js` - File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full\-surface compare views \(CompareOverlayView.jsx, CompareCurtainView.jsx\): which focused el...
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
+- `src/components/DocumentViewer/hooks/useCompareOverlay.js` - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
 - `src/components/DocumentViewer/CompareTransformControls.jsx` - Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page's free transform \(utils/compareTransform.js\): zoom \[−\] \[ 100,0 \] % \[\+\] 0.1 % steps \(Shift: 1
-- `src/components/DocumentViewer/CompareOverlayView.jsx` - Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, so differences show through.
 
 ## src/contexts
 
@@ -150,7 +150,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 50. Line count: 19132. JSDoc symbol count: 759.
+File count: 50. Line count: 19193. JSDoc symbol count: 764.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

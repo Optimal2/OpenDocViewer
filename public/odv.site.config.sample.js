@@ -171,6 +171,25 @@
     },
 
     // =========================================================================
+    // Compare views
+    // =========================================================================
+    // Per-site switches for the two compare views and their printing. The built-in default is
+    // true for every key; this sample shows them switched off. Only a literal false switches off.
+    //   enabled: false       -> the view is removed entirely.
+    //   print.enabled: false -> the view stays but its print action is removed.
+    // Compare mode itself and the side-by-side compare print are not affected.
+    compare: {
+      overlay: {
+        enabled: false,
+        print: { enabled: false }
+      },
+      curtain: {
+        enabled: false,
+        print: { enabled: false }
+      }
+    },
+
+    // =========================================================================
     // Print UI behavior
     // =========================================================================
     print: {

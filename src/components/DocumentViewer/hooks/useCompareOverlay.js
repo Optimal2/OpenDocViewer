@@ -13,6 +13,12 @@
  * open underneath (hidden), so Close returns to it with its "reset to compare" point intact;
  * opened from the compare view, Close returns to the compare view.
  *
+ * Availability (`compare.overlay.enabled` / `compare.curtain.enabled` in the runtime config): a
+ * disabled view's open action refuses and a stale open flag is never reported as open. The render
+ * in DocumentViewer.jsx gates once more through resolveShownCompareViews(). With the overlay view
+ * disabled the curtain needs no overlay calibration: it opens on the compare view's own per-page
+ * transforms, and a calibration flag already stored in the viewer context is left untouched.
+ *
  * @module useCompareOverlay
  */
 
@@ -20,8 +26,28 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import ViewerContext from '../../../contexts/viewerContext.js';
 import { INITIAL_COMPARE_TRANSFORM_STATE } from '../../../utils/compareTransform.js';
 import { hasCompareCalibration } from '../../../utils/compareOverlay.js';
+import {
+  getRuntimeConfig,
+  isCompareCurtainEnabled,
+  isCompareOverlayEnabled,
+} from '../../../utils/runtimeConfig.js';
 
 const NOOP_DISPATCH = () => {};
+
+/**
+ * Render gate for the compare views: a view is shown only while it is open AND enabled in the
+ * runtime config, so a stale open flag can never surface a disabled view.
+ *
+ * @param {{ overlayOpen: boolean, curtainOpen: boolean }} open
+ * @param {Object=} cfg
+ * @returns {{ overlay: boolean, curtain: boolean }}
+ */
+export function resolveShownCompareViews({ overlayOpen, curtainOpen }, cfg = getRuntimeConfig()) {
+  return {
+    overlay: !!overlayOpen && isCompareOverlayEnabled(cfg),
+    curtain: !!curtainOpen && isCompareCurtainEnabled(cfg),
+  };
+}
 
 /**
  * @param {boolean} available True in compare mode with two pages shown.
@@ -46,7 +72,11 @@ export function useCompareOverlay(available) {
   const dispatchOverlay = typeof context?.dispatchCompareOverlay === 'function'
     ? context.dispatchCompareOverlay
     : NOOP_DISPATCH;
-  const calibrated = hasCompareCalibration(context?.compareOverlay);
+  const overlayEnabled = isCompareOverlayEnabled();
+  const curtainEnabled = isCompareCurtainEnabled();
+  // Without the overlay view there is nothing to calibrate first: the curtain shows the compare
+  // view's own transforms. The stored flag is only read here, never cleared.
+  const calibrated = hasCompareCalibration(context?.compareOverlay) || !overlayEnabled;
   const isAvailable = !!available;
 
   // Read at open time without making the callbacks depend on every transform change.
@@ -56,13 +86,17 @@ export function useCompareOverlay(available) {
   availableRef.current = isAvailable;
   const calibratedRef = useRef(calibrated);
   calibratedRef.current = calibrated;
+  const overlayEnabledRef = useRef(overlayEnabled);
+  overlayEnabledRef.current = overlayEnabled;
+  const curtainEnabledRef = useRef(curtainEnabled);
+  curtainEnabledRef.current = curtainEnabled;
 
   const [open, setOpen] = useState(false);
   const [snapshot, setSnapshot] = useState(/** @type {(Object|null)} */ (null));
   const [curtainOpen, setCurtainOpen] = useState(false);
 
   const openCompareOverlay = useCallback(() => {
-    if (!availableRef.current) return false;
+    if (!availableRef.current || !overlayEnabledRef.current) return false;
     setSnapshot(transformsRef.current);
     setOpen(true);
     dispatchOverlay({ type: 'markCalibrated' });
@@ -78,7 +112,7 @@ export function useCompareOverlay(available) {
   }, [dispatch, snapshot]);
 
   const openCompareCurtain = useCallback(() => {
-    if (!availableRef.current || !calibratedRef.current) return false;
+    if (!availableRef.current || !curtainEnabledRef.current || !calibratedRef.current) return false;
     setCurtainOpen(true);
     return true;
   }, []);
@@ -96,10 +130,10 @@ export function useCompareOverlay(available) {
     dispatchOverlay({ type: 'clearCalibrated' });
   }, [dispatchOverlay, isAvailable]);
 
-  const curtainShown = curtainOpen && isAvailable;
+  const curtainShown = curtainOpen && isAvailable && curtainEnabled;
 
   return useMemo(() => ({
-    compareOverlayOpen: open && isAvailable && !curtainShown,
+    compareOverlayOpen: open && isAvailable && overlayEnabled && !curtainShown,
     compareOverlaySnapshot: snapshot,
     openCompareOverlay,
     closeCompareOverlay,
@@ -115,6 +149,7 @@ export function useCompareOverlay(available) {
     curtainShown,
     isAvailable,
     open,
+    overlayEnabled,
     openCompareCurtain,
     openCompareOverlay,
     resetCompareOverlayCalibration,

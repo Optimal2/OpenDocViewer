@@ -49,6 +49,7 @@ import {
 } from '../../utils/compareOverlay.js';
 import CompareCurtainButton from './CompareCurtainButton.jsx';
 import { hasActiveModalDialog, isOwnKeyTarget, shouldEscapeCloseView } from './compareViewKeys.js';
+import { isCompareCurtainEnabled } from '../../utils/runtimeConfig.js';
 
 /** @typedef {'primary'|'compare'} OverlayTarget */
 
@@ -396,7 +397,8 @@ const CompareOverlayView = ({
           <span className="material-icons" aria-hidden="true">content_copy</span>
         </button>
 
-        {typeof onOpenCurtain === 'function' ? (
+        {/* Curtain entry: hidden when compare.curtain.enabled is false */}
+        {typeof onOpenCurtain === 'function' && isCompareCurtainEnabled() ? (
           <CompareCurtainButton calibrated onOpen={onOpenCurtain} className="compare-overlay-curtain" showLabel />
         ) : null}
 

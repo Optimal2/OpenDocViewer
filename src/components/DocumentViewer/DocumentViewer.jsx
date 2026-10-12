@@ -31,6 +31,7 @@ import Resizer from '../Resizer.jsx';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
+import { resolveShownCompareViews } from './hooks/useCompareOverlay.js';
 import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
 import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
@@ -184,8 +185,10 @@ const DocumentViewer = () => {
     hidePageFromSelection,
     hideDocumentFromSelection,
   } = useDocumentViewer();
+  // Render gate: a view disabled in the runtime config is never shown, even with a stale open flag.
+  const shownCompareViews = resolveShownCompareViews({ overlayOpen: compareOverlayOpen, curtainOpen: compareCurtainOpen });
   // The overlay and curtain views replace the toolbar and the viewer surface while open.
-  const compareViewOpen = compareOverlayOpen || compareCurtainOpen;
+  const compareViewOpen = shownCompareViews.overlay || shownCompareViews.curtain;
 
   const isDocumentLoading = useMemo(() => {
     if (loadingRunActive) return true;
@@ -452,7 +455,7 @@ const DocumentViewer = () => {
       role="region"
       aria-label={t('viewer.aria.containerRegion')}
     >
-      {compareOverlayOpen ? (
+      {shownCompareViews.overlay ? (
         <CompareOverlayView
           pageNumberA={renderPageNumber}
           pageNumberB={renderComparePageNumber}
@@ -474,7 +477,7 @@ const DocumentViewer = () => {
         />
       ) : null}
 
-      {compareCurtainOpen ? (
+      {shownCompareViews.curtain ? (
         <CompareCurtainView
           pageNumberA={renderPageNumber}
           pageNumberB={renderComparePageNumber}

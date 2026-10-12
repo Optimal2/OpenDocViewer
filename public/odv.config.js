@@ -217,6 +217,27 @@
       }
     },
 
+    // ---- COMPARE VIEWS -------------------------------------------------------
+    // Switches for the two extra views of compare mode. A site file (odv.site.config.js) overrides
+    // them per installation. Only a literal `false` switches a key off; missing or non-boolean
+    // values fall back to `true` (runtime validation in isCompareOverlayEnabled() and siblings).
+    //   enabled: false       -> removes the view entirely (toolbar entry, open action and render).
+    //   print.enabled: false -> keeps the view but removes its print action.
+    // Compare mode itself and the side-by-side compare print are NOT affected by these keys.
+    // Switching the overlay off keeps the curtain available on the compare view's own calibration.
+    compare: {
+      // Overlay view: the two pages stacked with a transparency slider and free calibration.
+      overlay: {
+        enabled: true,
+        print: { enabled: true }
+      },
+      // Curtain view: the calibrated pages with a draggable border.
+      curtain: {
+        enabled: true,
+        print: { enabled: true }
+      }
+    },
+
     // ---- PRINT UI ------------------------------------------------------------
     print: {
       // Deprecated/no-op since PDF progress became the only print progress overlay.
