@@ -345,7 +345,6 @@ const CompareOverlayView = ({
           pageNumber={isA ? pageNumberA : pageNumberB}
           zoom={zoom}
           surfaceTransform={buildCompareTransformCss(isA ? transformA : transformB)}
-          initialRenderDone={() => {}}
           onRender={isA ? handleRenderedA : undefined}
           setZoom={setZoom}
           imageProperties={imageProperties}

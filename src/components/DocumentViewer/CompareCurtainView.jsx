@@ -236,7 +236,6 @@ const CompareCurtainView = ({
       pageNumber={pageNumberA}
       zoom={zoom}
       surfaceTransform={transformCssA}
-      initialRenderDone={() => {}}
       onRender={handleRenderedA}
       setZoom={setZoom}
       imageProperties={imagePropertiesA}
@@ -253,7 +252,6 @@ const CompareCurtainView = ({
       pageNumber={pageNumberB}
       zoom={zoom}
       surfaceTransform={transformCssB}
-      initialRenderDone={() => {}}
       setZoom={setZoom}
       imageProperties={imagePropertiesB}
       isCanvasEnabled={needsCanvas(imagePropertiesB)}

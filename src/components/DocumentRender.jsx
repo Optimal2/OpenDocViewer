@@ -38,6 +38,16 @@ import { clampRenderSurfaceSize } from '../utils/renderSurfaceBounds.js';
 import { buildImageFilter } from '../utils/imageAdjustments.js';
 
 /**
+ * Shared default for the optional callbacks. It must be one stable function: the canvas draw
+ * effect depends on `onRender` and `initialRenderDone` and sets state, so a fresh default per
+ * render (e.g. the overlay's and curtain's page B, which pass no `onRender`) redraws forever as
+ * soon as that page needs the canvas.
+ *
+ * @returns {void}
+ */
+const NOOP = () => {};
+
+/**
  * @param {Array<any>} allPages
  * @param {number} pageNumber
  * @returns {any}
@@ -104,8 +114,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   {
     pageNumber,
     zoom,
-    initialRenderDone = () => {},
-    onRender = () => {},
+    initialRenderDone = NOOP,
+    onRender = NOOP,
     setZoom,
     imageProperties,
     isCanvasEnabled,
@@ -114,7 +124,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     zoomMode = 'FIT_PAGE',
     customFitSizeLimits = null,
     onToggleFitZoomMode,
-    onDisplayStateChange = () => {},
+    onDisplayStateChange = NOOP,
     surfaceTransform = '',
   },
   ref
