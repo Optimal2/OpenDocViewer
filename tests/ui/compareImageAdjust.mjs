@@ -6,6 +6,16 @@
  */
 import { expect } from '@playwright/test';
 
+/**
+ * Two colour pages (public/sample.png and sample.jpg, served by the dev server: a black digit and
+ * a blue bar). The signed-PDF fixtures are monochrome, so grayscale would change no pixel there;
+ * colour-parity specs use this session.
+ */
+export const COLOUR_SESSION = {
+  session: { id: 'ui-compare-colour' },
+  documents: [{ documentId: 'colour', files: ['/sample.png', '/sample.jpg'] }],
+};
+
 /** The panel's image fields by accessible name (English). */
 export const IMAGE_FIELDS = {
   brightness: 'Brightness in percent (100 = unchanged)',

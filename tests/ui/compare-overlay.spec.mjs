@@ -10,12 +10,12 @@
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
 import {
-  drawnPixelStats, expectSamePixels, readImageAdjustment, setImageAdjustment,
+  COLOUR_SESSION, drawnPixelStats, expectSamePixels, readImageAdjustment, setImageAdjustment,
 } from './compareImageAdjust.mjs';
 
-/** @param {import('@playwright/test').Page} page */
-async function openCompare(page) {
-  await loadSession(page);
+/** @param {import('@playwright/test').Page} page @param {Object=} session Defaults to the signed-PDF fixtures. */
+async function openCompare(page, session = undefined) {
+  await loadSession(page, { session });
   await expect(page.locator('#thumbnail-1 .thumbnail-image-stage img')).toBeVisible();
   // Single-page view: no overlay button.
   await expect(page.locator('.compare-overlay-button')).toHaveCount(0);
@@ -188,7 +188,7 @@ test('overlay view: copy calibration carries non-neutral image adjustments', asy
 });
 
 test('overlay view: both pages show the same colour as side by side', async ({ page }) => {
-  await openCompare(page);
+  await openCompare(page, COLOUR_SESSION);
   await adjustBothPagesInCompare(page);
   const sideA = await drawnPixelStats(page, '.document-pane-frame.is-primary-pane canvas');
   const sideB = await drawnPixelStats(page, '.document-pane-frame.is-compare-pane canvas');

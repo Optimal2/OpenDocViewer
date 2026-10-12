@@ -8,14 +8,14 @@
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
-import { drawnPixelStats, expectSamePixels, setImageAdjustment } from './compareImageAdjust.mjs';
+import { COLOUR_SESSION, drawnPixelStats, expectSamePixels, setImageAdjustment } from './compareImageAdjust.mjs';
 
 const CURTAIN_READY = 'Curtain: show the calibrated pages with a draggable border';
 const CURTAIN_NEEDS_CALIBRATION = 'Curtain: open the overlay view first – it calibrates the two pages';
 
-/** @param {import('@playwright/test').Page} page */
-async function openCompare(page) {
-  await loadSession(page);
+/** @param {import('@playwright/test').Page} page @param {Object=} session Defaults to the signed-PDF fixtures. */
+async function openCompare(page, session = undefined) {
+  await loadSession(page, { session });
   await expect(page.locator('#thumbnail-1 .thumbnail-image-stage img')).toBeVisible();
   await expect(page.locator('.compare-curtain-button')).toHaveCount(0);
   await page.locator('#thumbnail-2').click({ button: 'right' });
@@ -108,7 +108,7 @@ test('curtain view: disabled until calibrated, opened from overlay and compare, 
 });
 
 test('curtain view: both pages show the same colour as side by side after calibration', async ({ page }) => {
-  await openCompare(page);
+  await openCompare(page, COLOUR_SESSION);
   // Non-neutral and different per page, so a page drawn without its adjustment cannot match.
   const adjustments = {
     primary: { brightness: 120, contrast: 90, grayscale: 30, invert: true },

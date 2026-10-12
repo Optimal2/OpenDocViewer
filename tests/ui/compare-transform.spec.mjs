@@ -178,13 +178,15 @@ test('the panel 90° quick button keeps the fine rotation: 4,6° + 90° reads 94
  * transform, which surface draws the page (canvas = an adjustment or quarter turn is active, plain
  * img = the neutral fast path), every numeric field of the panel, the invert checkbox, the summary,
  * the ◐ badge, the enabled state of the three resets, and the toolbar's mirrored state (value
- * chips, is-active).
+ * chips, is-active). The left page (kept adjusted on purpose, panel expanded) is captured too, so
+ * a reset that reaches the wrong page, or both pages, shows up as well.
  *
  * @param {import('@playwright/test').Page} page
  * @returns {Promise<Object>}
  */
 async function captureCompareAdjustment(page) {
   const bar = page.locator('.compare-transform-bar.is-compare');
+  const leftBar = page.locator('.compare-transform-bar.is-primary');
   const tools = page.locator('.toolbar .editing-tools');
   /** @type {Record<string, string>} */
   const fields = {};
@@ -211,7 +213,33 @@ async function captureCompareAdjustment(page) {
       valueChips: await tools.locator('.toolbar-adjustment-value').count(),
       resetActive: await isActive(tools.locator('.toolbar-reset-adjustments')),
     },
+    leftPage: {
+      stageTransform: await stageTransform(page, 'primary'),
+      canvasCount: await page.locator('.document-pane-frame.is-primary-pane canvas').count(),
+      brightness: await leftBar.getByRole('spinbutton', { name: PANEL_FIELDS.brightness }).inputValue(),
+    },
   };
+}
+
+/**
+ * The capture once a reset has landed: polls until it differs from `before` and two consecutive
+ * captures agree, so the equality assertions afterwards report the real end state of a divergence
+ * instead of timing out on a guess about what it should look like.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {Object} before The capture taken just before the reset.
+ * @returns {Promise<Object>}
+ */
+async function captureAfterReset(page, before) {
+  const beforeKey = JSON.stringify(before);
+  let previous = '';
+  await expect.poll(async () => {
+    const current = JSON.stringify(await captureCompareAdjustment(page));
+    const settled = current === previous && current !== beforeKey;
+    previous = current;
+    return settled;
+  }, { message: 'the reset changed the page and the state settled' }).toBe(true);
+  return JSON.parse(previous);
 }
 
 /**
@@ -251,17 +279,24 @@ test('the toolbar reset and the panel full reset reach the same end state (both 
   // "Show to right" makes the right page the active pane, so the toolbar edits that page.
   await expect(page.locator('.toolbar .editing-tools')).toHaveClass(/editing-target-compare/);
 
+  // The left page stays adjusted throughout; neither reset may touch it.
+  const leftBar = page.locator('.compare-transform-bar.is-primary');
+  await leftBar.locator('.compare-transform-toggle').click();
+  await leftBar.getByRole('spinbutton', { name: PANEL_FIELDS.zoom }).fill('98');
+  await leftBar.getByRole('spinbutton', { name: PANEL_FIELDS.zoom }).press('Enter');
+  await leftBar.getByRole('spinbutton', { name: PANEL_FIELDS.brightness }).fill('115');
+  await leftBar.getByRole('spinbutton', { name: PANEL_FIELDS.brightness }).press('Enter');
+  await expect(page.locator('.document-pane-frame.is-primary-pane canvas')).toHaveCount(1);
+
   const startViaToolbar = await buildCompareAdjustment(page);
   await page.locator('.toolbar .toolbar-reset-adjustments').click();
-  await expect(bar.getByRole('button', { name: 'Reset all (layout and image)' })).toBeDisabled();
-  await expect(page.locator('.document-pane-frame.is-compare-pane canvas')).toHaveCount(0);
-  const afterToolbar = await captureCompareAdjustment(page);
+  const afterToolbar = await captureAfterReset(page, startViaToolbar);
 
   const startViaPanel = await buildCompareAdjustment(page);
   await bar.getByRole('button', { name: 'Reset all (layout and image)' }).click();
-  await expect(bar.getByRole('button', { name: 'Reset all (layout and image)' })).toBeDisabled();
-  await expect(page.locator('.document-pane-frame.is-compare-pane canvas')).toHaveCount(0);
-  const afterPanel = await captureCompareAdjustment(page);
+  const afterPanel = await captureAfterReset(page, startViaPanel);
+
+  const leftPage = { stageTransform: 'scale(0.98) translate(0px, 0px) rotate(0deg)', canvasCount: 1, brightness: '115' };
 
   // Both runs started from the same, really adjusted state, so the equality below means something.
   expect(startViaPanel).toEqual(startViaToolbar);
@@ -274,6 +309,7 @@ test('the toolbar reset and the panel full reset reach the same end state (both 
     badgeCount: 1,
     resetsEnabled: { all: true, layout: true, image: true },
     toolbar: { brightnessActive: true, contrastActive: true, valueChips: 2, resetActive: true },
+    leftPage,
   });
 
   // The claim: the toolbar reset and the panel's full reset end in the same observable state ...
@@ -288,6 +324,7 @@ test('the toolbar reset and the panel full reset reach the same end state (both 
     badgeCount: 0,
     resetsEnabled: { all: false, layout: false, image: false },
     toolbar: { brightnessActive: false, contrastActive: false, valueChips: 0, resetActive: false },
+    leftPage,
   });
 });
 
