@@ -298,6 +298,47 @@ Users can override the default zoom mode and custom-size caps from the toolbar. 
 stored in viewer preferences and take precedence over `odv.site.config.js` until the user chooses
 the system default again.
 
+## Compare Views and Printing
+
+Deployments can control the overlay and curtain views independently of side-by-side compare mode.
+The four keys in `public/odv.config.js` all default to `true`:
+
+| Key | Default | Effect of `false` |
+| --- | --- | --- |
+| `compare.overlay.enabled` | `true` | Hides the overlay entry button and refuses opening/rendering the view. |
+| `compare.overlay.print.enabled` | `true` | Hides the overlay view's Print button. |
+| `compare.curtain.enabled` | `true` | Hides both curtain entry buttons and refuses opening/rendering the view. |
+| `compare.curtain.print.enabled` | `true` | Hides the curtain view's Print button. |
+
+`odv.site.config.js` overrides these defaults through the same deep merge as the `print` settings.
+Only a literal boolean `false` disables a key; missing or non-boolean values (including the string
+`'false'`) fall back to `true`. Disabling printing keeps the view available when its view key is
+enabled. Disabling a view also makes its print action inaccessible, regardless of its print key.
+These switches leave ordinary compare mode and its side-by-side print unchanged. With the overlay
+disabled, the curtain can use the compare view's own calibration without opening the overlay first.
+
+To turn all four switches off, paste this exact block from `public/odv.site.config.sample.js`
+inside the existing `window.__ODV_SITE_CONFIG__` object in `odv.site.config.js` (replace any existing
+`compare` block). Keep the trailing comma when another property follows:
+
+```js
+    compare: {
+      overlay: {
+        enabled: false,
+        print: { enabled: false }
+      },
+      curtain: {
+        enabled: false,
+        print: { enabled: false }
+      }
+    },
+```
+
+For a standalone installation without a site file, copy `public/odv.site.config.sample.js` next to
+the deployed `odv.config.js`, rename it to `odv.site.config.js`, and review its other overrides.
+The sample already contains the all-off block above. Reload the viewer after changing the file.
+See [Printing design notes](printing.md) for the composed-page output and shared print options.
+
 ## Print Default Page Mode
 
 Deployments can choose which page scope the print dialog should select by default:

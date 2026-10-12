@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 146,
-    "sourceLineCount": 59461,
+    "sourceLineCount": 59467,
     "docletCount": 1615,
     "documentedFileCount": 146,
     "lowConfidenceSummaryCount": 0,
@@ -1095,7 +1095,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 19,
-      "lineCount": 7930,
+      "lineCount": 7936,
       "docletCount": 137,
       "importantFiles": [
         {
@@ -12285,7 +12285,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
-      "lines": 227,
+      "lines": 233,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
       "sourceSummary": "Full-screen help overlay for OpenDocViewer.",

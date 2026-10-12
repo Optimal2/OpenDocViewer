@@ -32,6 +32,15 @@ const SECTIONS = {
 /** Collapse whitespace so headings broken over PDF text items still match. */
 const normalize = (text) => text.replace(/\s+/g, ' ').trim();
 
+const PRINT_HELP = {
+  en: ['Print the overlay view:', 'Print the curtain view:', 'one composed page', 'Print via PDF', 'Save PDF'],
+  sv: ['Skriv ut överlagringsvyn:', 'Skriv ut gardinvyn:', 'en sammansatt sida', 'Skriv ut via PDF', 'Spara PDF'],
+};
+const COMPARE_KEYS = [
+  'compare.overlay.enabled', 'compare.overlay.print.enabled',
+  'compare.curtain.enabled', 'compare.curtain.print.enabled',
+];
+
 describe('help dialog entries for the compare views', () => {
   const source = readText('src/components/DocumentToolbar/HelpOverlayDialog.jsx');
   const locales = {
@@ -39,7 +48,7 @@ describe('help dialog entries for the compare views', () => {
     sv: JSON.parse(readText('public/locales/sv/common.json')),
   };
 
-  it.each(['fineTune', 'overlay', 'curtain'])('help.sections.compare.%s is used and translated', (key) => {
+  it.each(['fineTune', 'overlay', 'curtain', 'overlayPrint', 'curtainPrint'])('help.sections.compare.%s is used and translated', (key) => {
     expect(source).toContain(`t('help.sections.compare.${key}'`);
     const en = locales.en.help.sections.compare[key];
     const sv = locales.sv.help.sections.compare[key];
@@ -62,6 +71,15 @@ describe('bundled "More features" guide', () => {
       for (const { id, heading } of sections) {
         expect(guide).toContain(`<h3 id="${id}">${heading}</h3>`);
         expect(main).toContain(`<h3 id="fler-${id}">${heading}</h3>`);
+      }
+    });
+
+    it(`${lng}: both HTML guides explain composed printing and all four site switches`, () => {
+      for (const name of ['manual-avancerat', 'manual']) {
+        const html = readText(`public/help/default/${name}.${lng}.html`);
+        for (const phrase of [...PRINT_HELP[lng], ...COMPARE_KEYS, 'odv.site.config.js']) {
+          expect(html).toContain(phrase);
+        }
       }
     });
   }
@@ -94,6 +112,9 @@ describe('bundled "More features" guide', () => {
         const text = await pdfText(`public/help/default/manual-avancerat.${lng}.pdf`);
         for (const { heading } of sections) {
           expect(text, heading).toContain(normalize(heading));
+        }
+        for (const phrase of [...PRINT_HELP[lng], ...COMPARE_KEYS, 'odv.site.config.js']) {
+          expect(text).toContain(phrase);
         }
       }, 120000);
     }

@@ -125,7 +125,13 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
                 defaultValue: 'Overlay: the stacked-layers button puts page B on top of page A. The slider sets the opacity of the top page; calibrate with the Fine-tune bars, drag or nudge mode. Close or Esc returns to the compare view and keeps the calibration.',
               })}</li>
               <li>{t('help.sections.compare.curtain', {
-                defaultValue: 'Curtain: shows the calibrated pages with a border you drag – page A on one side, page B on the other. Choose Horizontal or Vertical; arrow keys move the border 1 % (Shift: 10 %). Open it from the overlay view, or from the toolbar once the overlay view has calibrated the pages. Close or Esc returns to where you opened it.',
+                defaultValue: 'Curtain: shows the calibrated pages with a border you drag – page A on one side, page B on the other. Choose Horizontal or Vertical; arrow keys move the border 1 % (Shift: 10 %). Open it from the overlay view, or from the toolbar once the overlay view has calibrated the pages. If the overlay is disabled for this installation, the curtain uses the compare view calibration directly. Close or Esc returns to where you opened it.',
+              })}</li>
+              <li>{t('help.sections.compare.overlayPrint', {
+                defaultValue: 'Print in the overlay view: prints one composed page of the visible area with the current opacity, top page and both pages’ zoom, position and rotation. The usual print dialog offers the same options, direct print, Print via PDF and Save PDF. The button is only shown when printing is enabled for this view.',
+              })}</li>
+              <li>{t('help.sections.compare.curtainPrint', {
+                defaultValue: 'Print in the curtain view: prints one composed page of the visible area with the current border direction and position and both pages’ zoom, position and rotation. It uses the same print dialog and direct/PDF choices. The button is only shown when printing is enabled for this view.',
               })}</li>
             </ul>
           </section>

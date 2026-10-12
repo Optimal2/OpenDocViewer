@@ -718,7 +718,9 @@
         "body": "Jämförelsevy visar två sidor bredvid varandra. Vänster sida är huvudsidan och höger sida är jämförelsesidan.",
         "fineTune": "Finjustera: varje sida har en rad Finjustera för zoom (0,1 %), läge (px) och rotation (0,1°). Dra i sidan för att flytta den, Ctrl + mushjulet zoomar bara den sidan.",
         "overlay": "Överlagring: knappen med staplade lager lägger sida B ovanpå sida A. Reglaget styr hur synlig den översta sidan är; kalibrera med raderna Finjustera, genom att dra eller med knuffläget. Stäng eller Esc tar dig tillbaka till jämförelsevyn och kalibreringen sparas.",
-        "curtain": "Gardin: visar de kalibrerade sidorna med en gräns som du drar – sida A på ena sidan, sida B på den andra. Välj Horisontell eller Vertikal; piltangenterna flyttar gränsen 1 % (Shift: 10 %). Öppna den från överlagringsvyn, eller från verktygsfältet när överlagringsvyn har kalibrerat sidorna. Stäng eller Esc tar dig tillbaka dit du öppnade den."
+        "curtain": "Gardin: visar de kalibrerade sidorna med en gräns som du drar – sida A på ena sidan, sida B på den andra. Välj Horisontell eller Vertikal; piltangenterna flyttar gränsen 1 % (Shift: 10 %). Öppna den från överlagringsvyn, eller från verktygsfältet när överlagringsvyn har kalibrerat sidorna. Om överlagring är avstängd för installationen använder gardinen jämförelsevyns kalibrering direkt. Stäng eller Esc tar dig tillbaka dit du öppnade den.",
+        "overlayPrint": "Skriv ut i överlagringsvyn: skriver ut en sammansatt sida av den synliga ytan med aktuell genomskinlighet, översta sida och båda sidornas zoom, läge och rotation. Den vanliga utskriftsdialogen har samma alternativ, direktutskrift, Skriv ut via PDF och Spara PDF. Knappen visas bara när utskrift är aktiverad för vyn.",
+        "curtainPrint": "Skriv ut i gardinvyn: skriver ut en sammansatt sida av den synliga ytan med gränsens aktuella riktning och läge samt båda sidornas zoom, läge och rotation. Samma utskriftsdialog och val mellan direktutskrift och PDF används. Knappen visas bara när utskrift är aktiverad för vyn."
       },
       "thumbnails": {
         "title": "Miniatyrer och dokumentindelning",

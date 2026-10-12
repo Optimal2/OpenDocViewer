@@ -96,6 +96,13 @@ replaces the main toolbar and the viewer surface while open, like the print sele
 Close or Escape returns to the compare view (Escape also while the opacity slider has focus; text
 fields keep Escape to undo their typed value); leaving compare mode closes it.
 
+- Availability: `compare.overlay.enabled: false` hides the entry button, refuses the open action
+  in `useCompareOverlay` and prevents rendering through `resolveShownCompareViews`, even with a
+  stale open flag. It does not clear calibration or disable ordinary compare mode.
+- **Print** opens the shared print dialog for one composed page of the visible stage, with the
+  current top page, opacity and both pages' transforms. It uses the same options, direct/PDF
+  choice and user print log (`pageCount: 1`) as the toolbar. Setting
+  `compare.overlay.print.enabled: false` hides only this Print button.
 - Each layer is a `DocumentRender` with the page's own transform (`buildCompareTransformCss`) and
   the shared base zoom. The layer viewports do not scroll; pan and zoom go through the transforms,
   so both pages stay in the same coordinate space. In fit modes page A fits the overlay surface.
@@ -130,7 +137,15 @@ page B above, page B clipped to one side of the border.
   `hasCompareCalibration()` reads it. The transforms are never written by the curtain view.
 - Entry: `CompareCurtainButton.jsx`, in the overlay view's toolbar and in the compare toolbar next
   to the overlay button. Without a calibration the compare toolbar button is `aria-disabled` (still
-  focusable, so its tooltip explains that the overlay view calibrates first).
+  focusable, so its tooltip explains that the overlay view calibrates first). If the overlay is
+  disabled by config, the curtain instead uses the compare view's own calibration and does not
+  require opening the overlay first.
+- Availability: `compare.curtain.enabled: false` hides the entry buttons in both toolbars,
+  refuses the open action and prevents rendering even with a stale open flag.
+- **Print** opens the shared print dialog for one composed page of the visible stage, with the
+  current border orientation/position and both pages' transforms. It uses the same options,
+  direct/PDF choice and user print log (`pageCount: 1`) as the toolbar. Setting
+  `compare.curtain.print.enabled: false` hides only this Print button.
 - Return: `hooks/useCompareOverlay.js` holds `curtainOpen` next to the overlay's open flag. Opened
   from the overlay view, the overlay stays open but hidden (`compareOverlayOpen` is false while the
   curtain shows), so Close returns to it with its "reset to compare" snapshot intact; opened from
@@ -151,6 +166,11 @@ page B above, page B clipped to one side of the border.
 Tests: `src/utils/__tests__/compareCurtain.test.js`, `src/components/__tests__/compareCurtainView.test.jsx`,
 `src/components/__tests__/useCompareOverlay.test.jsx`, `src/__tests__/compareHelp.test.js`,
 `tests/ui/compare-curtain.spec.mjs`.
+
+All four `compare` switches default to `true`; `odv.site.config.js` overrides them. Only a literal
+`false` disables a key. See [Runtime configuration](runtime-configuration.md#compare-views-and-printing)
+for an all-off example and [Printing design notes](printing.md#overlay-and-curtain-print) for the
+shared output pipeline.
 
 ## Measurement
 

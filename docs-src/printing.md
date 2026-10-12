@@ -4,6 +4,11 @@ The print flow is deliberately separated from the main viewer UI because printin
 
 ## Responsibilities by module
 
+- `DocumentToolbar/usePrintPipeline.js`
+  - the single print pipeline owned by `DocumentViewer`: dialog target, options, user log,
+    direct/PDF dispatch, PDF cache and progress for the toolbar and both compare views
+- `DocumentToolbar/PrintPipelineDialogs.jsx`
+  - hosts that pipeline's print dialog and progress in the currently visible toolbar
 - `PrintRangeDialog.jsx`
   - modal UI for print mode and metadata
 - `usePrintRangeDialog.js`
@@ -71,6 +76,39 @@ submissions while the browser is still discovering new pages.
 3. compute a cleanup delay that scales with the page count
 4. render a multi-page document into the hidden iframe
 5. call `print()` and remove the iframe afterwards
+
+### Overlay and curtain print
+
+The **Print** button inside each compare view opens the same `PrintRangeDialog` as the main
+toolbar. Its target is fixed to **one composed page**, so page-method and page/scope choices are
+hidden. The shared options (reason, for-whom, configured header/footer metadata, copy watermark
+and PDF orientation) and the same **direct print / Print via PDF / Save PDF** decision remain.
+The normal loading and PDF-in-progress locks apply to these buttons too.
+
+- **Overlay:** `handlePrintCompareOverlay` composes both rendered pages with the current top
+  page and opacity, preserving each page's zoom, pan and rotation.
+- **Curtain:** `handlePrintCompareCurtain` composes both rendered pages with the current
+  horizontal/vertical border and its position, preserving both pages' transforms. Page B is
+  visible below a horizontal border or to the right of a vertical border.
+
+The view state is read when the dialog is submitted. Both paths use the visible stage dimensions
+and shared zoom, so the result captures the page content in the current visible window, without
+toolbar controls, slider, border handle or corner labels. This is a composed raster page, not two
+separate source pages. It goes through the single-page iframe path with the usual print options.
+For the PDF backend, `handlePdfCompareOverlay` / `handlePdfCompareCurtain` produce the same single
+composed page with the shared PDF output and progress flow; transient view compositions are not
+reused from the PDF cache. The existing side-by-side two-page print is unchanged.
+
+All targets use the same `userLog.submitPrint` call and row shape: `action`, `reason`, `forWhom`,
+`printFormat`, `printFormatValue`, `docId`, `fileName`, `pageCount`, `pages`, `copies`. For these
+two views, `pageCount` is **1**, `pages` identifies the compared source pages, `docId` and
+`fileName` are `null`, and `copies` is `1`. The action remains `print`, `print-pdf` or `download-pdf`
+according to the chosen output. Logging never blocks printing.
+
+Set `compare.overlay.print.enabled: false` or `compare.curtain.print.enabled: false` to hide
+that view's Print button. The corresponding `compare.overlay.enabled` / `compare.curtain.enabled`
+key controls the whole view. All four default to `true` and can be overridden in
+`odv.site.config.js`; see [Runtime configuration](runtime-configuration.md#compare-views-and-printing).
 
 ## Print progress overlays
 
