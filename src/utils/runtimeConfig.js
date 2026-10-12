@@ -9,6 +9,7 @@
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
 /** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 /** @typedef {'active'|'all'} PrintDefaultMode */
+/** @typedef {'mirror'|'hide'} CompareAdjustToolbarMode */
 /**
  * Session-reset target for the support/problem notice.
  *
@@ -28,6 +29,8 @@ const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
 const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
 /** Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. */
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
+/** Runtime validation values for CompareAdjustToolbarMode; the first one is the default. */
+export const COMPARE_ADJUST_TOOLBAR_MODES = Object.freeze(['mirror', 'hide']);
 /** Runtime validation values for ResetSessionTarget; the typedef documents the public contract. */
 const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', 'parent-or-current', 'none']);
 /** User-facing print default mode aliases mapped to persisted PrintDefaultMode values. */
@@ -209,6 +212,23 @@ export function isCompareCurtainEnabled(cfg = getRuntimeConfig()) {
  */
 export function isCompareCurtainPrintEnabled(cfg = getRuntimeConfig()) {
   return readBooleanSwitch(cfg?.compare?.curtain?.print?.enabled, true);
+}
+
+/**
+ * Resolve how the main toolbar's image controls behave in compare mode (`compare.adjust.toolbarMode`).
+ * Supported values:
+ * - `mirror`: the controls stay, change the same pane state as the pane panel and show its values
+ * - `hide`: the controls are hidden while a pane's adjustment panel is expanded
+ * Missing or non-matching values (non-strings, `'Hidden'`, `'mirrored'`, …) fall back to `mirror`.
+ * Outside compare mode the key has no effect.
+ *
+ * @param {Object=} cfg
+ * @returns {CompareAdjustToolbarMode}
+ */
+export function getCompareAdjustToolbarMode(cfg = getRuntimeConfig()) {
+  const value = cfg?.compare?.adjust?.toolbarMode;
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return COMPARE_ADJUST_TOOLBAR_MODES.includes(raw) ? /** @type {CompareAdjustToolbarMode} */ (raw) : 'mirror';
 }
 
 /**

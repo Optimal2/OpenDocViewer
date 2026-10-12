@@ -16,6 +16,8 @@ import {
   isCompareOverlayPrintEnabled,
   isCompareCurtainEnabled,
   isCompareCurtainPrintEnabled,
+  COMPARE_ADJUST_TOOLBAR_MODES,
+  getCompareAdjustToolbarMode,
   isPdfSignatureInspectionEnabled,
   getPdfSignatureInspectionStart,
   normalizePrintDefaultMode,
@@ -164,6 +166,47 @@ describe('runtimeConfig', () => {
       expect(isCompareOverlayPrintEnabled(cfg)).toBe(false);
       expect(isCompareCurtainEnabled(cfg)).toBe(false);
       expect(isCompareCurtainPrintEnabled(cfg)).toBe(true);
+    });
+  });
+
+  describe('getCompareAdjustToolbarMode', () => {
+    const withMode = (toolbarMode) => ({ compare: { adjust: { toolbarMode } } });
+
+    it('lists exactly the two valid values', () => {
+      expect(COMPARE_ADJUST_TOOLBAR_MODES).toEqual(['mirror', 'hide']);
+      expect(Object.isFrozen(COMPARE_ADJUST_TOOLBAR_MODES)).toBe(true);
+    });
+
+    it('returns the valid values, lower-cased and trimmed', () => {
+      expect(getCompareAdjustToolbarMode(withMode('mirror'))).toBe('mirror');
+      expect(getCompareAdjustToolbarMode(withMode('hide'))).toBe('hide');
+      expect(getCompareAdjustToolbarMode(withMode('HIDE'))).toBe('hide');
+      expect(getCompareAdjustToolbarMode(withMode(' Hide '))).toBe('hide');
+      expect(getCompareAdjustToolbarMode(withMode(' MIRROR'))).toBe('mirror');
+    });
+
+    it('falls back to mirror when the key or section is missing', () => {
+      expect(getCompareAdjustToolbarMode({})).toBe('mirror');
+      expect(getCompareAdjustToolbarMode({ compare: {} })).toBe('mirror');
+      expect(getCompareAdjustToolbarMode({ compare: { adjust: {} } })).toBe('mirror');
+      expect(getCompareAdjustToolbarMode(null)).toBe('mirror');
+      expect(getCompareAdjustToolbarMode(undefined)).toBe('mirror');
+    });
+
+    it.each([
+      ['undefined', undefined],
+      ['null', null],
+      ['a number', 1],
+      ['zero', 0],
+      ['a boolean', true],
+      ['an object', { value: 'hide' }],
+      ['an array', ['hide']],
+      ['an empty string', ''],
+      ['the string Hidden', 'Hidden'],
+      ['the string mirrored', 'mirrored'],
+      ['an unknown string', 'off'],
+    ])('falls back to mirror for %s', (_label, value) => {
+      expect(getCompareAdjustToolbarMode(withMode(value))).toBe('mirror');
     });
   });
 

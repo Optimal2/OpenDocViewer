@@ -208,6 +208,12 @@ const DocumentViewer = () => {
   const signatureOverviewOpenerRef = useRef(null);
   const [printSelectionZoomPercent] = useState(120);
   const [printSelectionToolbarState, setPrintSelectionToolbarState] = useState(null);
+  // Expanded per-pane adjustment panels: the renderer shows them, the main toolbar reads them for
+  // compare.adjust.toolbarMode 'hide'.
+  const [compareAdjustPanelsExpanded, setCompareAdjustPanelsExpanded] = useState({ primary: false, compare: false });
+  const setCompareAdjustPanelExpanded = useCallback((pane, expanded) => {
+    setCompareAdjustPanelsExpanded((current) => (current[pane] === expanded ? current : { ...current, [pane]: expanded }));
+  }, []);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
   const edgeScrollPageTurnConfig = useMemo(() => getViewerEdgeScrollPageTurnConfig(getRuntimeConfig()), []);
   const printSelectionWorkspaceConfig = useMemo(() => getPrintSelectionWorkspaceConfig(getRuntimeConfig()), []);
@@ -618,6 +624,7 @@ const DocumentViewer = () => {
         openCompareOverlay={openCompareOverlay}
         compareCalibrated={compareCalibrated}
         openCompareCurtain={openCompareCurtain}
+        compareAdjustPanelsExpanded={compareAdjustPanelsExpanded}
       />
       )}
 
@@ -753,6 +760,8 @@ const DocumentViewer = () => {
             onHideDocumentFromSelection={hideDocumentFromSelection}
             onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
             closeCompare={closeCompare}
+            transformBarsExpanded={compareAdjustPanelsExpanded}
+            onTransformBarExpandedChange={setCompareAdjustPanelExpanded}
           />
         )}
       </div>

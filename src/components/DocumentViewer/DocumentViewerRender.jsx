@@ -202,6 +202,10 @@ function preventDefaultIfCancelable(event) {
  * @param {function(number): boolean=} props.onHideDocumentFromSelection
  * @param {function(number): boolean=} [props.onOpenDocumentMetadata]
  * @param {function(): void=} props.closeCompare
+ * @param {{ primary:boolean, compare:boolean }=} props.transformBarsExpanded Expanded state of the two
+ *   per-pane panels when the parent owns it (the main toolbar reads it for compare.adjust.toolbarMode).
+ * @param {function(('primary'|'compare'), boolean): void=} props.onTransformBarExpandedChange Setter
+ *   paired with `transformBarsExpanded`; without both the renderer keeps the state itself.
  * @returns {React.ReactElement}
  */
 const DocumentViewerRender = ({
@@ -241,6 +245,8 @@ const DocumentViewerRender = ({
   onHideDocumentFromSelection,
   onOpenDocumentMetadata,
   closeCompare,
+  transformBarsExpanded: controlledTransformBarsExpanded,
+  onTransformBarExpandedChange,
 }) => {
   const { t } = useTranslation('common');
   const { bundle } = useContext(ViewerContext);
@@ -278,9 +284,14 @@ const DocumentViewerRender = ({
   );
   const [activePanPane, setActivePanPane] = useState(/** @type {(ViewerPaneKey|null)} */ (null));
   // Expanded fine-tuning bars; an expanded pane turns drag and Ctrl+wheel into transform changes.
-  const [transformBarsExpanded, setTransformBarsExpanded] = useState(
+  const [ownTransformBarsExpanded, setOwnTransformBarsExpanded] = useState(
     /** @type {Record<ViewerPaneKey, boolean>} */ ({ primary: false, compare: false })
   );
+  const isTransformBarStateControlled = !!controlledTransformBarsExpanded
+    && typeof onTransformBarExpandedChange === 'function';
+  const transformBarsExpanded = isTransformBarStateControlled
+    ? controlledTransformBarsExpanded
+    : ownTransformBarsExpanded;
   const transformDragRef = useRef(/** @type {(null|{
     pane: ViewerPaneKey,
     pointerId: number,
@@ -305,8 +316,12 @@ const DocumentViewerRender = ({
   }, []);
 
   const setTransformBarExpanded = useCallback((pane, expanded) => {
-    setTransformBarsExpanded((current) => (current[pane] === expanded ? current : { ...current, [pane]: expanded }));
-  }, []);
+    if (isTransformBarStateControlled) {
+      onTransformBarExpandedChange(pane, expanded);
+      return;
+    }
+    setOwnTransformBarsExpanded((current) => (current[pane] === expanded ? current : { ...current, [pane]: expanded }));
+  }, [isTransformBarStateControlled, onTransformBarExpandedChange]);
 
   /**
    * Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.
@@ -1250,6 +1265,11 @@ DocumentViewerRender.propTypes = {
   onHideDocumentFromSelection: PropTypes.func,
   onOpenDocumentMetadata: PropTypes.func,
   closeCompare: PropTypes.func,
+  transformBarsExpanded: PropTypes.shape({
+    primary: PropTypes.bool,
+    compare: PropTypes.bool,
+  }),
+  onTransformBarExpandedChange: PropTypes.func,
 };
 
 export default React.memo(DocumentViewerRender);

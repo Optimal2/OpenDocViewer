@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 19696. JSDoc symbol count: 793.
+File count: 51. Line count: 19716. JSDoc symbol count: 796.
 
 ## src/utils/compareCurtain.js
 
@@ -809,22 +809,22 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 
 - `KeyboardPrintShortcutBehavior` (typedef) - No description.
 - `ViewerDefaultZoomMode` (typedef) - No description.
 - `PrintDefaultMode` (typedef) - No description.
+- `CompareAdjustToolbarMode` (typedef) - No description.
 - `ResetSessionTarget` (typedef) - Session\-reset target for the support/problem notice.
 - `KEYBOARD_PRINT_SHORTCUT_BEHAVIORS` (constant) - Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract.
+- `COMPARE_ADJUST_TOOLBAR_MODES` (constant) - Runtime validation values for CompareAdjustToolbarMode; the first one is the default.
 - `RESET_SESSION_TARGETS` (constant) - Runtime validation values for ResetSessionTarget; the typedef documents the public contract.
 - `PRINT_DEFAULT_MODE_ALIASES` (constant) - User\-facing print default mode aliases mapped to persisted PrintDefaultMode values.
 - `DEFAULT_ZOOM_MODE_ALIAS_ENTRIES` (constant) - User\-facing zoom\-mode aliases mapped to ViewerDefaultZoomMode values.
 - `ViewerCustomFitSizeLimits` (typedef) - No description.
 - `PrintSelectionWorkspaceConfig` (typedef) - No description.
-- `ViewerEdgeScrollPageTurnConfig` (typedef) - No description.
-- `ViewerProblemNoticeConfig` (typedef) - No description.
 
 ## src/utils/sourceTempStore.js
 

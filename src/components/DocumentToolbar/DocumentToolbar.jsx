@@ -29,7 +29,13 @@ import { normalizeToolbarPageNumber } from './usePrintPipeline.js';
 import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
-import { getRuntimeConfig, isCompareCurtainEnabled, isCompareOverlayEnabled } from '../../utils/runtimeConfig.js';
+import {
+  getCompareAdjustToolbarMode,
+  getRuntimeConfig,
+  isCompareCurtainEnabled,
+  isCompareOverlayEnabled,
+} from '../../utils/runtimeConfig.js';
+import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
 import {
   clearPrintDefaultModePreference,
   getPrintDefaultModePreference,
@@ -142,6 +148,8 @@ import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../
  * @property {function(): void=} openCompareOverlay Opens the overlay view of the two compared pages.
  * @property {boolean=} compareCalibrated True when the overlay view has calibrated the two pages.
  * @property {function(): void=} openCompareCurtain Opens the curtain view of the calibrated pages.
+ * @property {{ primary:boolean, compare:boolean }=} compareAdjustPanelsExpanded Which compare panes have
+ *   their adjustment panel (CompareTransformControls) expanded; drives `compare.adjust.toolbarMode: 'hide'`.
  */
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
@@ -272,6 +280,7 @@ const DocumentToolbar = ({
   openCompareOverlay,
   compareCalibrated = false,
   openCompareCurtain,
+  compareAdjustPanelsExpanded = undefined,
 }) => {
   const { t } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
@@ -294,6 +303,17 @@ const DocumentToolbar = ({
   const isCtrlPressed = navigationModifierState.ctrl;
   const compareTargetAvailable = typeof setComparePageNumber === 'function' && totalPages > 0;
   const comparePaneVisible = compareTargetAvailable && isComparing && Number.isFinite(comparePageNumber);
+  // compare.adjust.toolbarMode 'hide': the coarse image controls give way while ANY shown pane's
+  // panel is expanded - not only the pane the toolbar targets, which flips with Shift and the active
+  // pane and would make the controls flicker. Outside compare mode the key has no effect.
+  const anyComparePanelExpanded = !!compareAdjustPanelsExpanded?.primary
+    || (comparePaneVisible && !!compareAdjustPanelsExpanded?.compare);
+  const hideCoarseAdjustments = !!isComparing && anyComparePanelExpanded
+    && getCompareAdjustToolbarMode() === 'hide';
+
+  useEffect(() => {
+    if (hideCoarseAdjustments) setOpenAdjustmentMenu(null);
+  }, [hideCoarseAdjustments]);
 
   useEffect(() => {
     if (!openAdjustmentMenu) return undefined;
@@ -665,6 +685,20 @@ const DocumentToolbar = ({
 
   const isBrightnessAdjusted = Number(editingProperties?.brightness ?? 100) !== 100;
   const isContrastAdjusted = Number(editingProperties?.contrast ?? 100) !== 100;
+  // In compare mode the toolbar mirrors the pane panel, so it shows the target pane's live values:
+  // a value chip on brightness/contrast, and the reset marked while anything it resets is set
+  // (including grayscale and invert, which have no toolbar control of their own).
+  const brightnessValue = Number(editingProperties?.brightness ?? 100);
+  const contrastValue = Number(editingProperties?.contrast ?? 100);
+  const brightnessTitle = isComparing
+    ? `${t('toolbar.adjustBrightness')} (${brightnessValue} %)`
+    : t('toolbar.adjustBrightness');
+  const contrastTitle = isComparing
+    ? `${t('toolbar.adjustContrast')} (${contrastValue} %)`
+    : t('toolbar.adjustContrast');
+  const isPaneAdjusted = !!isComparing && (
+    hasImageAdjustment(editingProperties) || (Number(editingProperties?.rotation) || 0) % 360 !== 0
+  );
   const enhancePdfResolutionTitle = isPdfResolutionPending
     ? t('toolbar.enhancePdfResolutionPending', { defaultValue: 'Increasing PDF page resolution…' })
     : isPdfResolutionBoosted
@@ -1114,12 +1148,14 @@ const DocumentToolbar = ({
 
       <div className="separator" />
 
-      {/* Editing controls are always visible. Canvas rendering activates only when a non-neutral adjustment exists. */}
+      {/* Editing controls are visible except in compare mode with toolbarMode 'hide' while a pane panel is
+          expanded. Canvas rendering activates only when a non-neutral adjustment exists. */}
       <div
         className={`zoom-fixed-group editing-tools ${editingTargetMode === 'compare' ? 'editing-target-compare' : 'editing-target-primary'}`}
         aria-label={t('toolbar.imageAdjustments')}
         title={editingGroupTitle}
       >
+        {hideCoarseAdjustments ? null : (<>
         <button
           type="button"
           onClick={(event) => handleRotationButtonClick(event, -90)}
@@ -1138,6 +1174,7 @@ const DocumentToolbar = ({
         >
           <span className="material-icons" aria-hidden="true">rotate_right</span>
         </button>
+        </>)}
 
         <button
           type="button"
@@ -1150,18 +1187,22 @@ const DocumentToolbar = ({
           <span className="material-icons" aria-hidden="true">high_quality</span>
         </button>
 
+        {hideCoarseAdjustments ? null : (<>
         <div className="toolbar-menu-shell toolbar-adjustment-shell">
           <button
             ref={brightnessButtonRef}
             type="button"
             onClick={() => toggleAdjustmentMenu('brightness')}
             aria-label={t('toolbar.adjustBrightness')}
-            title={t('toolbar.adjustBrightness')}
+            title={brightnessTitle}
             aria-haspopup="dialog"
             aria-expanded={openAdjustmentMenu === 'brightness'}
             className={`odv-btn toolbar-adjustment-button${isBrightnessAdjusted ? ' is-active' : ''}`}
           >
             <span className="material-icons" aria-hidden="true">brightness_6</span>
+            {isComparing && isBrightnessAdjusted ? (
+              <span className="toolbar-adjustment-value" aria-hidden="true">{brightnessValue}</span>
+            ) : null}
           </button>
 
           {openAdjustmentMenu === 'brightness' ? (
@@ -1219,12 +1260,15 @@ const DocumentToolbar = ({
             type="button"
             onClick={() => toggleAdjustmentMenu('contrast')}
             aria-label={t('toolbar.adjustContrast')}
-            title={t('toolbar.adjustContrast')}
+            title={contrastTitle}
             aria-haspopup="dialog"
             aria-expanded={openAdjustmentMenu === 'contrast'}
             className={`odv-btn toolbar-adjustment-button${isContrastAdjusted ? ' is-active' : ''}`}
           >
             <span className="material-icons" aria-hidden="true">tonality</span>
+            {isComparing && isContrastAdjusted ? (
+              <span className="toolbar-adjustment-value" aria-hidden="true">{contrastValue}</span>
+            ) : null}
           </button>
 
           {openAdjustmentMenu === 'contrast' ? (
@@ -1281,10 +1325,11 @@ const DocumentToolbar = ({
           onClick={handleResetAdjustmentsClick}
           aria-label={resetAdjustmentsLabel}
           title={resetAdjustmentsLabel}
-          className="odv-btn"
+          className={`odv-btn toolbar-reset-adjustments${isPaneAdjusted ? ' is-active' : ''}`}
         >
           <span className="material-icons" aria-hidden="true">restart_alt</span>
         </button>
+        </>)}
       </div>
 
       <div className="toolbar-spacer" />
@@ -1455,6 +1500,10 @@ DocumentToolbar.propTypes = {
   openCompareOverlay: PropTypes.func,
   compareCalibrated: PropTypes.bool,
   openCompareCurtain: PropTypes.func,
+  compareAdjustPanelsExpanded: PropTypes.shape({
+    primary: PropTypes.bool,
+    compare: PropTypes.bool,
+  }),
 };
 
 export default React.memo(DocumentToolbar);

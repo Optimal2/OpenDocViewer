@@ -111,6 +111,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void=} openCompareOverlay - Opens the overlay view of the two compared pages.
  * @property {boolean=} compareCalibrated - True when the overlay view has calibrated the two pages.
  * @property {function(): void=} openCompareCurtain - Opens the curtain view of the calibrated pages.
+ * @property {{ primary:boolean, compare:boolean }=} compareAdjustPanelsExpanded - Expanded state of the per-pane adjustment panels.
  */
 
 /**
@@ -194,6 +195,7 @@ const DocumentViewerToolbar = ({
   openCompareOverlay,
   compareCalibrated = false,
   openCompareCurtain,
+  compareAdjustPanelsExpanded = undefined,
 }) => {
   return (
     <DocumentToolbar
@@ -272,6 +274,7 @@ const DocumentViewerToolbar = ({
       openCompareOverlay={openCompareOverlay}
       compareCalibrated={compareCalibrated}
       openCompareCurtain={openCompareCurtain}
+      compareAdjustPanelsExpanded={compareAdjustPanelsExpanded}
     />
   );
 };
@@ -396,6 +399,10 @@ DocumentViewerToolbar.propTypes = {
   openCompareOverlay: PropTypes.func,
   compareCalibrated: PropTypes.bool,
   openCompareCurtain: PropTypes.func,
+  compareAdjustPanelsExpanded: PropTypes.shape({
+    primary: PropTypes.bool,
+    compare: PropTypes.bool,
+  }),
 };
 
 export default React.memo(DocumentViewerToolbar);

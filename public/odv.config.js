@@ -235,6 +235,18 @@
       curtain: {
         enabled: true,
         print: { enabled: true }
+      },
+      // Main-toolbar image controls (90° rotation, brightness, contrast, reset) in compare mode.
+      // Each compared page also has its own adjustment panel that holds the same controls and more.
+      //   toolbarMode: 'mirror' -> the toolbar controls stay, change the same page state as the
+      //                            panel and show that page's current values (default).
+      //   toolbarMode: 'hide'   -> the toolbar controls are hidden while a page's adjustment
+      //                            panel is expanded, and come back when every panel is collapsed.
+      // Missing or unknown values fall back to 'mirror' (runtime validation in
+      // getCompareAdjustToolbarMode()). A site file (odv.site.config.js) overrides it. Outside
+      // compare mode, and in the overlay and curtain views, this key has no effect.
+      adjust: {
+        toolbarMode: 'mirror'
       }
     },
 

@@ -7,6 +7,7 @@ import {
   isCompareCurtainPrintEnabled,
   isCompareOverlayEnabled,
   isCompareOverlayPrintEnabled,
+  getCompareAdjustToolbarMode,
 } from '../runtimeConfig.js';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -68,9 +69,50 @@ it('keeps the compare view switches on by default and deep-merges a single site 
   expect(base.compare).toEqual({
     overlay: { enabled: true, print: { enabled: true } },
     curtain: { enabled: true, print: { enabled: true } },
+    adjust: { toolbarMode: 'mirror' },
   });
   expect(base).toMatchObject({ overlay: true, overlayPrint: true, curtain: true, curtainPrint: true });
 
   const site = read({ compare: { overlay: { print: { enabled: false } } } });
   expect(site).toMatchObject({ overlay: true, overlayPrint: false, curtain: true, curtainPrint: true });
+});
+
+it('ships toolbarMode mirror and deep-merges a site file that sets only compare.adjust.toolbarMode', () => {
+  const read = (siteConfig) => {
+    const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+    try {
+      if (siteConfig) dom.window.__ODV_SITE_CONFIG__ = siteConfig;
+      dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
+      vi.stubGlobal('window', dom.window);
+      return {
+        compare: JSON.parse(JSON.stringify(dom.window.__ODV_CONFIG__.compare)),
+        toolbarMode: getCompareAdjustToolbarMode(),
+        overlay: isCompareOverlayEnabled(),
+        curtain: isCompareCurtainEnabled(),
+      };
+    } finally {
+      dom.window.close();
+    }
+  };
+
+  expect(read(null).toolbarMode).toBe('mirror');
+
+  const site = read({ compare: { adjust: { toolbarMode: 'hide' } } });
+  // The site override wins over the shipped default ...
+  expect(site.toolbarMode).toBe('hide');
+  // ... and the sibling compare keys survive untouched.
+  expect(site.compare).toEqual({
+    overlay: { enabled: true, print: { enabled: true } },
+    curtain: { enabled: true, print: { enabled: true } },
+    adjust: { toolbarMode: 'hide' },
+  });
+  expect(site).toMatchObject({ overlay: true, curtain: true });
+
+  // A site file that switches a view off keeps the shipped toolbarMode.
+  const viewOff = read({ compare: { curtain: { enabled: false } } });
+  expect(viewOff.toolbarMode).toBe('mirror');
+  expect(viewOff.compare.adjust).toEqual({ toolbarMode: 'mirror' });
+
+  // An invalid site value is kept in the merged config but read back fail-safe.
+  expect(read({ compare: { adjust: { toolbarMode: 'Hidden' } } }).toolbarMode).toBe('mirror');
 });
