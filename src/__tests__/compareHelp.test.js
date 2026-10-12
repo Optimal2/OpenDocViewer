@@ -57,6 +57,17 @@ describe('help dialog entries for the compare views', () => {
     expect(sv).not.toBe(en);
   });
 
+  it.each(['en', 'sv'])('%s: the fine-tune entry describes one panel with the three resets as labelled in the UI', (lng) => {
+    const fineTune = locales[lng].help.sections.compare.fineTune;
+    const panel = locales[lng].compareTransform;
+    for (const label of [panel.resetAll, panel.resetLayout, panel.resetImage, panel.toggle]) {
+      expect(fineTune).toContain(label);
+    }
+    expect(fineTune).toContain(lng === 'sv' ? '4,6° → 94,6°' : '4.6° → 94.6°');
+    // The old wording described a bar for zoom, position and rotation only.
+    expect(fineTune).not.toMatch(/Fine-tune bar|en rad Finjustera/);
+  });
+
   it('the Swedish curtain entry names the toggle as shown in the UI', () => {
     expect(locales.sv.help.sections.compare.curtain).toContain('Horisontell');
     expect(locales.sv.help.sections.compare.curtain).toContain('Vertikal');

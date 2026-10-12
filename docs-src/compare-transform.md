@@ -47,7 +47,8 @@ The state is plain JSON. A later view reads and writes it through the context:
   A calibrated fraction is kept (100.5 % → 110.5 %), so + then − returns to the calibrated value.
   The buttons disable at the transform limits (`COMPARE_TRANSFORM_LIMITS`, 10 %–800 %). Fit and
   actual-size modes dispatch `resetScale`, as the old pane zoom reset did.
-- The 90° toolbar buttons and Ctrl+Arrow shortcuts dispatch `rotate` (±90). A fine residual is kept.
+- The 90° toolbar buttons, the panel's 90° quick buttons and Ctrl+Arrow shortcuts dispatch
+  `rotate` (±90). A fine residual is kept.
 - Changing the page resets its rotation, as before; scale and offset persist like the old pane zoom.
   Entering or leaving compare mode keeps only the nearest quarter turn (`resetAlignment`).
 
@@ -68,17 +69,88 @@ The state is plain JSON. A later view reads and writes it through the context:
 - The stage transform does not grow the scrollable area to the top or left. Use the offset to reach
   those parts of a scaled-up page.
 
-## Controls (compare mode only)
+## One adjustment model per page (compare mode only)
 
-Each pane gets a fine-tuning bar above it (`CompareTransformControls.jsx`). The main toolbar is not
-changed, so nothing shifts for users who do not compare. The bar is collapsed by default and shows a
-summary (`100,0 % · 0,0°`). Expanded, it offers:
+Each compared page has exactly one adjustment state and one panel for it. The state is the page's
+transform above plus its image adjustment, held per pane by `hooks/usePaneImageAdjustments.js`
+and implemented in `src/utils/imageAdjustments.js`:
+
+```js
+imageProperties = {
+  rotation: 0,      // derived from the transform's quarter turn, never stored on its own
+  brightness: 100,  // percent, 100 = unchanged
+  contrast: 100,    // percent, 100 = unchanged
+  grayscale: 0,     // percent 0–100, 0 = in colour
+  invert: false,    // boolean
+}
+```
+
+`needsCanvas` decides whether a page is drawn on the canvas at all and `buildImageFilter` builds
+the canvas filter (`brightness() contrast()`, then `grayscale()` and `invert()` only when set). With
+all-neutral values the page keeps the plain `<img>` fast path, and the neutral filter string is the
+one used before grayscale and invert existed, so neutral pages draw the same pixels as before
+(`tests/ui/image-filter-neutrality.spec.mjs`).
+
+### The panel
+
+`CompareTransformControls.jsx` renders one panel above each compared page. It is collapsed by
+default and shows a summary (`100,0 % · 0,0°`), followed by a one-character `◐` badge while the
+image is adjusted. Expanded, it holds everything the page can be adjusted with:
 
 - Zoom: numeric field in percent (0.1 %), −/+ buttons (0.1 %, Shift 1 %), Ctrl+wheel over the page
   (1 % per notch).
 - Position: drag the page, arrow keys on the move control (1 px, Shift 10 px), numeric X/Y fields.
-- Rotation: numeric field in degrees (0.1°, shown signed), −/+ buttons (0.1°, Shift 1°).
-- Reset for the page.
+- Rotation: numeric field in degrees (0.1°, shown signed), −/+ buttons (0.1°, Shift 1°), and a 90°
+  quick button on each side of the field. A quarter turn is added to the whole rotation and keeps
+  the fine part, so 4,6° followed by the clockwise quick button reads 94,6° (and the
+  counter-clockwise one −85,4°): the canvas draws the new quarter turn and the CSS keeps the 4,6°
+  residual.
+- Image: brightness and contrast in percent (0–200, 100 = unchanged), grayscale in percent
+  (0–100, 0 = in colour), and an Invert checkbox. Steps 1 %, Shift 10 %.
+- Three labelled resets:
+  - **Reset all (layout and image)** / *Återställ allt (läge och bild)* — `resetPane`: identity
+    transform (zoom 100 %, no offset, rotation 0 including the quarter turn) and neutral image.
+  - **Reset layout (zoom, position, rotation)** / *Återställ läge (zoom, position, rotation)* —
+    the transform only; brightness, contrast, grayscale and invert stay.
+  - **Reset image (brightness, contrast, color)** / *Återställ bild (ljus, kontrast, färg)* —
+    the image only; zoom, position and rotation stay.
+
+  Each reset is disabled while there is nothing for it to clear.
+
+### The main toolbar
+
+The main toolbar's coarse image controls (90° buttons, brightness, contrast, reset) change the same
+page state as the panel; they are not a second model. Which page they target follows the active
+pane (and Shift), as before.
+
+- In compare mode the toolbar reset is `resetPane`, the panel's full reset, and its label says so
+  (`Reset all (layout and image)`). Both reach the same end state;
+  `tests/ui/compare-transform.spec.mjs` measures both from the same starting state and asserts the
+  two captures are equal.
+- Outside compare mode the toolbar reset keeps its earlier, narrower scope: rotation 0 and neutral
+  image, zoom and position kept.
+
+`compare.adjust.toolbarMode` decides what the toolbar does with these controls in compare mode
+(read by `getCompareAdjustToolbarMode`, see
+[Runtime configuration](runtime-configuration.md#compare-views-and-printing)):
+
+- `'mirror'` (default; also used for any missing or unknown value): the controls stay and show the
+  target page's live values — a value chip on brightness and contrast when they are off 100 %, and
+  the reset marked `is-active` while there is anything to reset, including grayscale and invert,
+  which have no toolbar control of their own.
+- `'hide'`: the controls are hidden while ANY shown page's panel is expanded and come back when
+  every panel is collapsed. Outside compare mode the key has no effect, and the overlay and curtain
+  views only ever have the panel.
+
+### Where the adjustment travels
+
+- The overlay and curtain views draw each page with the same image adjustment as side by side
+  (`tests/ui/compare-overlay.spec.mjs` and `compare-curtain.spec.mjs` compare the canvas pixels).
+- "Copy calibration" in the overlay view includes the image fields (see below).
+- All print paths of the compare views read the filtered canvas (`getActiveCanvas()`), so the
+  printed page shows the same adjustment as the screen (`src/utils/__tests__/printCompareCompose.test.js`).
+
+### Input behaviour
 
 Numeric fields accept a decimal comma or point (`parseLocaleNumber`), commit on Enter or blur,
 revert on Escape, and step with ArrowUp/ArrowDown (Shift ×10). The move control carries
@@ -116,10 +188,14 @@ fields keep Escape to undo their typed value); leaving compare mode closes it.
   page (1 px, Shift 10 px). Slider keys: Left/Right 1 %, Shift 10 %, Home/End to the bounds.
 - Persistence: the transforms and the overlay settings live in the viewer context, so closing and
   reopening the view (or a later curtain view) keeps them. `hooks/useCompareOverlay.js` only holds
-  the open flag and a snapshot of `compareTransforms` taken when the view opens; "reset to compare"
-  dispatches `{ type: 'restore', state: snapshot }`.
-- "Copy calibration" writes `serializeCompareCalibration(compareTransforms)` to the clipboard:
-  `{ "A": transform, "B": transform }` with normalized values, for support cases.
+  the open flag and a snapshot taken when the view opens:
+  `{ transforms, imageAdjustments: { primary, compare } }`. "Reset to compare" restores all of it
+  for both pages — the transforms (`{ type: 'restore' }`) and the brightness, contrast, grayscale
+  and invert of each page — not only the layout.
+- "Copy calibration" writes `serializeCompareCalibration(transforms, imageAdjustments)` to the
+  clipboard: `{ "version": 2, "A": {...transform, ...image}, "B": {...} }` with normalized values,
+  for support cases. `COMPARE_CALIBRATION_VERSION` is 2; text without `version` is the older
+  transform-only form (implicitly version 1). Nothing parses it back.
 - While the view is open, the viewer's keyboard navigation is suspended (`interactionSuspended`)
   so arrow keys never change pages behind it.
 

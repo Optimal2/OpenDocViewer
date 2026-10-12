@@ -339,6 +339,31 @@ the deployed `odv.config.js`, rename it to `odv.site.config.js`, and review its 
 The sample already contains the all-off block above. Reload the viewer after changing the file.
 See [Printing design notes](printing.md) for the composed-page output and shared print options.
 
+### Toolbar image controls in compare mode
+
+In compare mode each compared page has one adjustment panel (zoom, position, rotation,
+brightness, contrast, grayscale, invert and its resets). `compare.adjust.toolbarMode` decides what
+the main toolbar's coarse image controls (the 90° buttons, brightness, contrast and reset) do
+meanwhile:
+
+| Key | Default | Values |
+| --- | --- | --- |
+| `compare.adjust.toolbarMode` | `'mirror'` | `'mirror'`: the toolbar controls stay, change the same page state as the panel and show the target page's current values (a value chip on brightness and contrast, the reset marked while there is anything to reset). `'hide'`: the toolbar controls are hidden while any shown page's panel is expanded and return when every panel is collapsed. |
+
+`getCompareAdjustToolbarMode()` validates the value at runtime: it is trimmed and lower-cased, and
+a missing or unknown value falls back to `'mirror'`. `odv.site.config.js` overrides the default
+through the same deep merge as the switches above. The key has no effect outside compare mode, and
+none in the overlay and curtain views, which only have the panel. For example:
+
+```js
+    compare: {
+      adjust: { toolbarMode: 'hide' }
+    },
+```
+
+See [Compare view: free per-page transform](compare-transform.md#the-main-toolbar) for the
+adjustment model and the resets.
+
 ## Print Default Page Mode
 
 Deployments can choose which page scope the print dialog should select by default:

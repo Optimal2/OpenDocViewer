@@ -119,19 +119,19 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
             })}</p>
             <ul>
               <li>{t('help.sections.compare.fineTune', {
-                defaultValue: 'Fine-tune: each page has a Fine-tune bar for zoom (0.1 %), position (px) and rotation (0.1°). Drag the page to move it, Ctrl + wheel zooms only that page.',
+                defaultValue: 'Fine-tune: each page has one Fine-tune panel with everything for that page – zoom (0.1 %), position (px), rotation (0.1°, with a 90° button on each side that keeps the fine tuning: 4.6° → 94.6°), brightness, contrast, grayscale and Invert. Drag the page to move it, Ctrl + wheel zooms only that page; ◐ after the summary means the image is adjusted. The panel has three resets: Reset all (layout and image), Reset layout (zoom, position, rotation) and Reset image (brightness, contrast, color). In compare mode the toolbar’s reset button does the same as Reset all; depending on the installation, the toolbar’s image buttons show the page’s values or give way while a panel is open.',
               })}</li>
               <li>{t('help.sections.compare.overlay', {
-                defaultValue: 'Overlay: the stacked-layers button puts page B on top of page A. The slider sets the opacity of the top page; calibrate with the Fine-tune bars, drag or nudge mode. Close or Esc returns to the compare view and keeps the calibration.',
+                defaultValue: 'Overlay: the stacked-layers button puts page B on top of page A, with the same brightness, contrast and colour as side by side. The slider sets the opacity of the top page; calibrate with the Fine-tune panels, drag or nudge mode. Reset to the alignment from the compare view restores both pages’ layout and image. Close or Esc returns to the compare view and keeps the calibration.',
               })}</li>
               <li>{t('help.sections.compare.curtain', {
                 defaultValue: 'Curtain: shows the calibrated pages with a border you drag – page A on one side, page B on the other. Choose Horizontal or Vertical; arrow keys move the border 1 % (Shift: 10 %). Open it from the overlay view, or from the toolbar once the overlay view has calibrated the pages. If the overlay is disabled for this installation, the curtain uses the compare view calibration directly. Close or Esc returns to where you opened it.',
               })}</li>
               <li>{t('help.sections.compare.overlayPrint', {
-                defaultValue: 'Print in the overlay view: prints one composed page of the visible area with the current opacity, top page and both pages’ zoom, position and rotation. The usual print dialog offers the same options, direct print, Print via PDF and Save PDF. The button is only shown when printing is enabled for this view.',
+                defaultValue: 'Print in the overlay view: prints one composed page of the visible area with the current opacity, top page and both pages’ zoom, position, rotation and image adjustment. The usual print dialog offers the same options, direct print, Print via PDF and Save PDF. The button is only shown when printing is enabled for this view.',
               })}</li>
               <li>{t('help.sections.compare.curtainPrint', {
-                defaultValue: 'Print in the curtain view: prints one composed page of the visible area with the current border direction and position and both pages’ zoom, position and rotation. It uses the same print dialog and direct/PDF choices. The button is only shown when printing is enabled for this view.',
+                defaultValue: 'Print in the curtain view: prints one composed page of the visible area with the current border direction and position and both pages’ zoom, position, rotation and image adjustment. It uses the same print dialog and direct/PDF choices. The button is only shown when printing is enabled for this view.',
               })}</li>
             </ul>
           </section>
