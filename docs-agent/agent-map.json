@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60063,
+    "sourceLineCount": 60101,
     "docletCount": 1640,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
@@ -477,7 +477,7 @@
       "path": "src/utils/compareTransform.js",
       "score": 116,
       "lines": 353,
-      "incomingLocalImports": 11,
+      "incomingLocalImports": 12,
       "doclets": 24,
       "summary": "File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page ( primary = lef...",
       "summaryConfidence": "high"
@@ -1102,7 +1102,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 19,
-      "lineCount": 8000,
+      "lineCount": 8020,
       "docletCount": 137,
       "importantFiles": [
         {
@@ -1135,7 +1135,7 @@
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
           "score": 49,
-          "lines": 1510,
+          "lines": 1530,
           "incomingLocalImports": 1,
           "doclets": 18,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -1182,7 +1182,7 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 17,
-      "lineCount": 7518,
+      "lineCount": 7536,
       "docletCount": 154,
       "importantFiles": [
         {
@@ -1251,7 +1251,7 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewer.jsx",
           "score": 37,
-          "lines": 809,
+          "lines": 810,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
@@ -1592,7 +1592,7 @@
           "path": "src/utils/compareTransform.js",
           "score": 116,
           "lines": 353,
-          "incomingLocalImports": 11,
+          "incomingLocalImports": 12,
           "doclets": 24,
           "summary": "File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page ( primary = lef...",
           "summaryConfidence": "high"
@@ -11298,7 +11298,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 1510,
+      "lines": 1530,
       "extension": ".jsx",
       "jsdocBlockCount": 25,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11449,13 +11449,22 @@
           "kind": "static"
         },
         {
+          "source": "../../utils/compareTransform.js",
+          "specifiers": [
+            "isIdentityCompareTransform",
+            "selectCompareTransform"
+          ],
+          "line": 39,
+          "kind": "static"
+        },
+        {
           "source": "../../utils/viewerPreferences.js",
           "specifiers": [
             "clearPrintDefaultModePreference",
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -11463,7 +11472,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 44,
+          "line": 45,
           "kind": "static"
         },
         {
@@ -11471,7 +11480,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 45,
+          "line": 46,
           "kind": "static"
         },
         {
@@ -11479,7 +11488,7 @@
           "specifiers": [
             "SignatureOverviewButton"
           ],
-          "line": 46,
+          "line": 47,
           "kind": "static"
         },
         {
@@ -11487,7 +11496,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 47,
+          "line": 48,
           "kind": "static"
         },
         {
@@ -11496,7 +11505,7 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 48,
+          "line": 49,
           "kind": "static"
         },
         {
@@ -11505,7 +11514,7 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 49,
+          "line": 50,
           "kind": "static"
         }
       ],
@@ -11513,49 +11522,49 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 1509
+          "line": 1529
         }
       ],
       "declarations": [
         {
           "name": "thumbnailPercentToSliderValue",
           "kind": "function",
-          "line": 163
+          "line": 165
         },
         {
           "name": "thumbnailSliderValueToPercent",
           "kind": "function",
-          "line": 171
+          "line": 173
         },
         {
           "name": "makePdfResolutionPageKey",
           "kind": "function",
-          "line": 185
+          "line": 187
         },
         {
           "name": "isPdfPage",
           "kind": "function",
-          "line": 195
+          "line": 197
         },
         {
           "name": "DocumentToolbar",
           "kind": "component",
-          "line": 208
+          "line": 210
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 325
+          "line": 328
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 333
+          "line": 336
         },
         {
           "name": "detail",
           "kind": "object",
-          "line": 767
+          "line": 773
         }
       ],
       "parseError": null,
@@ -11571,7 +11580,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 51,
+          "line": 52,
           "description": "Mutable ref-like object used by the toolbar.",
           "params": [],
           "returns": [],
@@ -11584,7 +11593,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 57,
+          "line": 58,
           "description": "Editable image state shown by the toolbar.",
           "params": [],
           "returns": [],
@@ -11597,7 +11606,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 65,
+          "line": 66,
           "description": "React-like numeric page setter used by the toolbar.",
           "params": [
             {
@@ -11622,7 +11631,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 72,
+          "line": 73,
           "description": "Zoom display state used by the newer toolbar UX paths.",
           "params": [],
           "returns": [],
@@ -11635,7 +11644,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 79,
+          "line": 80,
           "description": "Props for {@link DocumentToolbar}.",
           "params": [],
           "returns": [],
@@ -11648,7 +11657,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 156,
+          "line": 158,
           "description": "Range (±) around 100% where sliders snap back to the neutral value.",
           "params": [],
           "returns": [],
@@ -11661,7 +11670,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 158,
+          "line": 160,
           "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
           "params": [],
           "returns": [],
@@ -11674,7 +11683,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 185,
+          "line": 187,
           "description": "",
           "params": [
             {
@@ -11699,7 +11708,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 195,
+          "line": 197,
           "description": "",
           "params": [
             {
@@ -11724,7 +11733,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 208,
+          "line": 210,
           "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
           "params": [
             {
@@ -11749,7 +11758,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 325,
+          "line": 328,
           "description": "",
           "params": [
             {
@@ -11769,7 +11778,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 333,
+          "line": 336,
           "description": "",
           "params": [
             {
@@ -11789,7 +11798,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 616,
+          "line": 619,
           "description": "Handle brightness slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11814,7 +11823,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 630,
+          "line": 633,
           "description": "Handle contrast slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11839,7 +11848,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 644,
+          "line": 647,
           "description": "",
           "params": [
             {
@@ -11870,7 +11879,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 652,
+          "line": 655,
           "description": "",
           "params": [
             {
@@ -11895,7 +11904,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 665,
+          "line": 668,
           "description": "",
           "params": [
             {
@@ -11920,7 +11929,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 674,
+          "line": 677,
           "description": "",
           "params": [
             {
@@ -12071,13 +12080,23 @@
           "resolved": "src/utils/imageAdjustments.js"
         },
         {
+          "source": "../../utils/compareTransform.js",
+          "specifiers": [
+            "isIdentityCompareTransform",
+            "selectCompareTransform"
+          ],
+          "line": 39,
+          "kind": "static",
+          "resolved": "src/utils/compareTransform.js"
+        },
+        {
           "source": "../../utils/viewerPreferences.js",
           "specifiers": [
             "clearPrintDefaultModePreference",
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
@@ -12086,7 +12105,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 44,
+          "line": 45,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -12095,7 +12114,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 45,
+          "line": 46,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -12104,7 +12123,7 @@
           "specifiers": [
             "SignatureOverviewButton"
           ],
-          "line": 46,
+          "line": 47,
           "kind": "static",
           "resolved": "src/components/SignatureOverviewButton.jsx"
         },
@@ -12113,7 +12132,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 47,
+          "line": 48,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/CompareCurtainButton.jsx"
         },
@@ -12123,7 +12142,7 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 48,
+          "line": 49,
           "kind": "static",
           "resolved": "src/utils/pdfBenchmark.js"
         },
@@ -12133,7 +12152,7 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 49,
+          "line": 50,
           "kind": "static",
           "resolved": "src/utils/renderDecodeBenchmark.js"
         }
@@ -19621,7 +19640,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "lines": 809,
+      "lines": 810,
       "extension": ".jsx",
       "jsdocBlockCount": 8,
       "sourceSummary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
@@ -19836,7 +19855,7 @@
         {
           "name": "DocumentViewer",
           "kind": "default",
-          "line": 808
+          "line": 809
         }
       ],
       "declarations": [
@@ -21520,7 +21539,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-      "lines": 409,
+      "lines": 426,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
       "sourceSummary": "Toolbar adapter for the document viewer.",
@@ -21554,14 +21573,14 @@
         {
           "name": "DocumentViewerToolbar",
           "kind": "default",
-          "line": 408
+          "line": 425
         }
       ],
       "declarations": [
         {
           "name": "DocumentViewerToolbar",
           "kind": "component",
-          "line": 122
+          "line": 123
         }
       ],
       "parseError": null,
@@ -21653,7 +21672,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-          "line": 122,
+          "line": 123,
           "description": "Renders the toolbar for the document viewer by delegating to .",
           "params": [
             {
@@ -39920,7 +39939,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 11,
+      "incomingLocalImports": 12,
       "importanceScore": 116,
       "summary": "File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page ( primary = lef...",
       "summaryConfidence": "high",
@@ -73625,7 +73644,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 51,
+      "line": 52,
       "description": "Mutable ref-like object used by the toolbar.",
       "params": [],
       "returns": [],
@@ -73638,7 +73657,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 208,
+      "line": 210,
       "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
       "params": [
         {
@@ -73663,7 +73682,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 79,
+      "line": 80,
       "description": "Props for {@link DocumentToolbar}.",
       "params": [],
       "returns": [],
@@ -73676,7 +73695,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 616,
+      "line": 619,
       "description": "Handle brightness slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -73701,7 +73720,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 630,
+      "line": 633,
       "description": "Handle contrast slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -73726,7 +73745,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 652,
+      "line": 655,
       "description": "",
       "params": [
         {
@@ -73751,7 +73770,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 333,
+      "line": 336,
       "description": "",
       "params": [
         {
@@ -73771,7 +73790,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 325,
+      "line": 328,
       "description": "",
       "params": [
         {
@@ -73791,7 +73810,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 665,
+      "line": 668,
       "description": "",
       "params": [
         {
@@ -73816,7 +73835,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 644,
+      "line": 647,
       "description": "",
       "params": [
         {
@@ -73847,7 +73866,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 57,
+      "line": 58,
       "description": "Editable image state shown by the toolbar.",
       "params": [],
       "returns": [],
@@ -73860,7 +73879,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 195,
+      "line": 197,
       "description": "",
       "params": [
         {
@@ -73885,7 +73904,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 185,
+      "line": 187,
       "description": "",
       "params": [
         {
@@ -73910,7 +73929,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 158,
+      "line": 160,
       "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
       "params": [],
       "returns": [],
@@ -73923,7 +73942,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 65,
+      "line": 66,
       "description": "React-like numeric page setter used by the toolbar.",
       "params": [
         {
@@ -73948,7 +73967,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 156,
+      "line": 158,
       "description": "Range (±) around 100% where sliders snap back to the neutral value.",
       "params": [],
       "returns": [],
@@ -73961,7 +73980,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 674,
+      "line": 677,
       "description": "",
       "params": [
         {
@@ -73986,7 +74005,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 72,
+      "line": 73,
       "description": "Zoom display state used by the newer toolbar UX paths.",
       "params": [],
       "returns": [],
@@ -78848,7 +78867,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-      "line": 122,
+      "line": 123,
       "description": "Renders the toolbar for the document viewer by delegating to .",
       "params": [
         {

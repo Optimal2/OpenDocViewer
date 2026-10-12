@@ -5615,7 +5615,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 51,
+    "line": 52,
     "description": "Mutable ref-like object used by the toolbar.",
     "params": [],
     "returns": [],
@@ -5628,7 +5628,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 208,
+    "line": 210,
     "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
     "params": [
       {
@@ -5653,7 +5653,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 79,
+    "line": 80,
     "description": "Props for {@link DocumentToolbar}.",
     "params": [],
     "returns": [],
@@ -5666,7 +5666,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 616,
+    "line": 619,
     "description": "Handle brightness slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5691,7 +5691,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 630,
+    "line": 633,
     "description": "Handle contrast slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5716,7 +5716,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 652,
+    "line": 655,
     "description": "",
     "params": [
       {
@@ -5741,7 +5741,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 333,
+    "line": 336,
     "description": "",
     "params": [
       {
@@ -5761,7 +5761,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 325,
+    "line": 328,
     "description": "",
     "params": [
       {
@@ -5781,7 +5781,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 665,
+    "line": 668,
     "description": "",
     "params": [
       {
@@ -5806,7 +5806,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 644,
+    "line": 647,
     "description": "",
     "params": [
       {
@@ -5837,7 +5837,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 57,
+    "line": 58,
     "description": "Editable image state shown by the toolbar.",
     "params": [],
     "returns": [],
@@ -5850,7 +5850,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 195,
+    "line": 197,
     "description": "",
     "params": [
       {
@@ -5875,7 +5875,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 185,
+    "line": 187,
     "description": "",
     "params": [
       {
@@ -5900,7 +5900,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 158,
+    "line": 160,
     "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
     "params": [],
     "returns": [],
@@ -5913,7 +5913,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 65,
+    "line": 66,
     "description": "React-like numeric page setter used by the toolbar.",
     "params": [
       {
@@ -5938,7 +5938,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 156,
+    "line": 158,
     "description": "Range (±) around 100% where sliders snap back to the neutral value.",
     "params": [],
     "returns": [],
@@ -5951,7 +5951,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 674,
+    "line": 677,
     "description": "",
     "params": [
       {
@@ -5976,7 +5976,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 72,
+    "line": 73,
     "description": "Zoom display state used by the newer toolbar UX paths.",
     "params": [],
     "returns": [],
@@ -10838,7 +10838,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-    "line": 122,
+    "line": 123,
     "description": "Renders the toolbar for the document viewer by delegating to .",
     "params": [
       {

@@ -95,6 +95,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {{ shift:boolean, ctrl:boolean }} navigationModifierState
  * @property {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} primaryImageProperties
  * @property {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} compareImageProperties
+ * @property {{ primary:Object, compare:Object }=} compareTransforms
  * @property {function(number, string=): void} handleRotationChange
  * @property {function(*, string=): void} handleBrightnessChange
  * @property {function(*, string=): void} handleContrastChange
@@ -167,6 +168,7 @@ const DocumentViewerToolbar = ({
   navigationModifierState,
   primaryImageProperties,
   compareImageProperties,
+  compareTransforms = undefined,
   handleRotationChange,
   handleBrightnessChange,
   handleContrastChange,
@@ -258,6 +260,7 @@ const DocumentViewerToolbar = ({
       navigationModifierState={navigationModifierState}
       primaryImageProperties={primaryImageProperties}
       compareImageProperties={compareImageProperties}
+      compareTransforms={compareTransforms}
       handleRotationChange={handleRotationChange}
       handleBrightnessChange={handleBrightnessChange}
       handleContrastChange={handleContrastChange}
@@ -357,6 +360,20 @@ DocumentViewerToolbar.propTypes = {
     grayscale: PropTypes.number,
     invert: PropTypes.bool,
   }).isRequired,
+  compareTransforms: PropTypes.shape({
+    primary: PropTypes.shape({
+      scale: PropTypes.number,
+      dx: PropTypes.number,
+      dy: PropTypes.number,
+      rotation: PropTypes.number,
+    }),
+    compare: PropTypes.shape({
+      scale: PropTypes.number,
+      dx: PropTypes.number,
+      dy: PropTypes.number,
+      rotation: PropTypes.number,
+    }),
+  }),
   handleRotationChange: PropTypes.func.isRequired,
   handleBrightnessChange: PropTypes.func.isRequired,
   handleContrastChange: PropTypes.func.isRequired,

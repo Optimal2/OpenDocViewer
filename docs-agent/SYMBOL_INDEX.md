@@ -202,24 +202,24 @@
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:46</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:70</code> |  |
 | <code>resolveAboutInfo</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:17</code> |  |
-| <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:51</code> | Mutable ref-like object used by the toolbar. |
-| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:208</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
-| <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:79</code> | Props for {@link DocumentToolbar}. |
-| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:616</code> | Handle brightness slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:630</code> | Handle contrast slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:652</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:333</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:325</code> |  |
-| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:665</code> |  |
-| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:644</code> |  |
-| <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:57</code> | Editable image state shown by the toolbar. |
-| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:195</code> |  |
-| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:185</code> |  |
-| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:158</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
-| <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:65</code> | React-like numeric page setter used by the toolbar. |
-| <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:156</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
-| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:674</code> |  |
-| <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:72</code> | Zoom display state used by the newer toolbar UX paths. |
+| <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:52</code> | Mutable ref-like object used by the toolbar. |
+| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:210</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:80</code> | Props for {@link DocumentToolbar}. |
+| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:619</code> | Handle brightness slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:633</code> | Handle contrast slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:655</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:336</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:328</code> |  |
+| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:668</code> |  |
+| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:647</code> |  |
+| <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:58</code> | Editable image state shown by the toolbar. |
+| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:197</code> |  |
+| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:187</code> |  |
+| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:160</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
+| <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:66</code> | React-like numeric page setter used by the toolbar. |
+| <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:158</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
+| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:677</code> |  |
+| <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:73</code> | Zoom display state used by the newer toolbar UX paths. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:30</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:22</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:19</code> |  |
@@ -383,7 +383,7 @@
 | <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:43</code> |  |
 | <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:39</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
-| <code>DocumentViewerToolbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:122</code> | Renders the toolbar for the document viewer by delegating to . |
+| <code>DocumentViewerToolbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:123</code> | Renders the toolbar for the document viewer by delegating to . |
 | <code>DocumentViewerToolbarProps</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:36</code> | Props consumed by DocumentViewerToolbar. |
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:26</code> | React-like numeric/original page setter used by the toolbar adapter. |
 | <code>RefLike</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:13</code> | Ref-like shape used for imperative handles. |

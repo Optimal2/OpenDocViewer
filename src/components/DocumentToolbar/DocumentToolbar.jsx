@@ -36,6 +36,7 @@ import {
   isCompareOverlayEnabled,
 } from '../../utils/runtimeConfig.js';
 import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
+import { isIdentityCompareTransform, selectCompareTransform } from '../../utils/compareTransform.js';
 import {
   clearPrintDefaultModePreference,
   getPrintDefaultModePreference,
@@ -116,6 +117,7 @@ import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../
  * @property {{ shift:boolean, ctrl:boolean }=} navigationModifierState
  * @property {ImageProperties} primaryImageProperties
  * @property {ImageProperties} compareImageProperties
+ * @property {{ primary:Object, compare:Object }=} compareTransforms
  * @property {function(number, ('primary'|'compare')=): void} handleRotationChange
  * @property {function({ target: { value: number } }, ('primary'|'compare')=): void} handleBrightnessChange
  * @property {function({ target: { value: number } }, ('primary'|'compare')=): void} handleContrastChange
@@ -245,6 +247,7 @@ const DocumentToolbar = ({
   navigationModifierState = { shift: false, ctrl: false },
   primaryImageProperties,
   compareImageProperties,
+  compareTransforms = undefined,
   handleRotationChange,
   handleBrightnessChange,
   handleContrastChange,
@@ -698,6 +701,9 @@ const DocumentToolbar = ({
     : t('toolbar.adjustContrast');
   const isPaneAdjusted = !!isComparing && (
     hasImageAdjustment(editingProperties) || (Number(editingProperties?.rotation) || 0) % 360 !== 0
+    // The compare-mode reset is the panel's full reset, so the marker lights while the target
+    // pane's transform is non-identity; a missing prop reads as identity.
+    || !isIdentityCompareTransform(selectCompareTransform(compareTransforms, editingTargetMode))
   );
   const enhancePdfResolutionTitle = isPdfResolutionPending
     ? t('toolbar.enhancePdfResolutionPending', { defaultValue: 'Increasing PDF page resolution…' })
@@ -1450,6 +1456,20 @@ DocumentToolbar.propTypes = {
     grayscale: PropTypes.number,
     invert: PropTypes.bool,
   }).isRequired,
+  compareTransforms: PropTypes.shape({
+    primary: PropTypes.shape({
+      scale: PropTypes.number,
+      dx: PropTypes.number,
+      dy: PropTypes.number,
+      rotation: PropTypes.number,
+    }),
+    compare: PropTypes.shape({
+      scale: PropTypes.number,
+      dx: PropTypes.number,
+      dy: PropTypes.number,
+      rotation: PropTypes.number,
+    }),
+  }),
   handleRotationChange: PropTypes.func.isRequired,
   handleBrightnessChange: PropTypes.func.isRequired,
   handleContrastChange: PropTypes.func.isRequired,

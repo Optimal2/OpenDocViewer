@@ -86,6 +86,7 @@ function Viewer({ isComparing, expose }) {
   const compareImageProperties = { ...adjustments.compareImageAdjustments, rotation: 0 };
   expose.adjustments = adjustments;
   expose.transforms = transforms;
+  expose.dispatch = dispatch;
 
   const panel = (pane) => createElement(CompareTransformControls, {
     pane,
@@ -122,6 +123,7 @@ function Viewer({ isComparing, expose }) {
       comparePageNumberDisplay: isComparing ? 2 : null,
       primaryImageProperties,
       compareImageProperties,
+      compareTransforms: transforms,
       handleRotationChange: (delta, target) => dispatch({ type: 'rotate', target, delta }),
       handleBrightnessChange: adjustments.handleBrightnessChange,
       handleContrastChange: adjustments.handleContrastChange,
@@ -234,6 +236,33 @@ describe('compare.adjust.toolbarMode = mirror (default)', () => {
     await act(() => { resetButton().click(); });
     expect(expose.adjustments.primaryImageAdjustments).toMatchObject({ contrast: 100, grayscale: 0, invert: false });
     expect(expose.transforms.primary.rotation).toBe(0);
+    await cleanup();
+  });
+
+  it('marks the toolbar reset while only the pane transform is set', async () => {
+    const { container, expose, cleanup } = await renderViewer();
+    const resetButton = () => container.querySelector(COARSE.reset);
+
+    // No image adjustment: the marker starts off.
+    expect(resetButton().classList.contains('is-active')).toBe(false);
+
+    // A pane-only scale lights the marker; back to identity clears it.
+    await act(() => { expose.dispatch({ type: 'set', target: 'primary', transform: { scale: 1.5 } }); });
+    expect(resetButton().classList.contains('is-active')).toBe(true);
+    await act(() => { expose.dispatch({ type: 'reset', target: 'primary' }); });
+    expect(resetButton().classList.contains('is-active')).toBe(false);
+
+    // A pane-only pan offset lights the marker; back to identity clears it.
+    await act(() => { expose.dispatch({ type: 'set', target: 'primary', transform: { dx: 12, dy: -7 } }); });
+    expect(resetButton().classList.contains('is-active')).toBe(true);
+    await act(() => { expose.dispatch({ type: 'reset', target: 'primary' }); });
+    expect(resetButton().classList.contains('is-active')).toBe(false);
+
+    // A pane-only fine rotation lights the marker; the toolbar reset clears it.
+    await act(() => { expose.dispatch({ type: 'set', target: 'primary', transform: { rotation: 4.6 } }); });
+    expect(resetButton().classList.contains('is-active')).toBe(true);
+    await act(() => { resetButton().click(); });
+    expect(resetButton().classList.contains('is-active')).toBe(false);
     await cleanup();
   });
 

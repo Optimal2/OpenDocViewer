@@ -37,7 +37,7 @@
 - `src/utils/runtimeConfig.js`: 20 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 12 incoming local imports
-- `src/utils/compareTransform.js`: 11 incoming local imports
+- `src/utils/compareTransform.js`: 12 incoming local imports
 - `src/utils/imageAdjustments.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 7 incoming local imports

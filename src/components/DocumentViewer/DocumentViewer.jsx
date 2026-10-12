@@ -592,6 +592,7 @@ const DocumentViewer = () => {
         comparePageNumberDisplay={renderComparePageNumber}
         primaryImageProperties={primaryImageProperties}
         compareImageProperties={compareImageProperties}
+        compareTransforms={compareTransforms}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}
