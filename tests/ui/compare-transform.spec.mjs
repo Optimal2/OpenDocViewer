@@ -398,6 +398,49 @@ test("toolbarMode 'hide': the toolbar controls give way while any panel is expan
   await expectCoarse(1);
 });
 
+test('dragging an adjusted page moves the stage without redrawing either page canvas', async ({ page }) => {
+  // Count every drawImage onto a page canvas. The draw effect in DocumentRender.jsx depends on
+  // its callback props, so a fresh function passed on every viewer render redraws the canvas on
+  // each drag step; the drag only changes the stage CSS transform and must draw nothing.
+  await page.addInitScript(() => {
+    const original = CanvasRenderingContext2D.prototype.drawImage;
+    window.__odvPageDraws = 0;
+    CanvasRenderingContext2D.prototype.drawImage = function drawImage(...args) {
+      if (this.canvas?.closest?.('.document-pane-frame')) window.__odvPageDraws += 1;
+      return original.apply(this, args);
+    };
+  });
+  await openCompare(page);
+  // Both pages adjusted, so both are drawn on a canvas.
+  for (const pane of ['primary', 'compare']) {
+    const paneBar = page.locator(`.compare-transform-bar.is-${pane}`);
+    await paneBar.locator('.compare-transform-toggle').click();
+    const brightness = paneBar.getByRole('spinbutton', { name: PANEL_FIELDS.brightness });
+    await brightness.fill('120');
+    await brightness.press('Enter');
+    await expect(page.locator(`.document-pane-frame.is-${pane}-pane canvas`).first()).toBeVisible();
+  }
+  await page.waitForTimeout(500);
+
+  const bar = page.locator('.compare-transform-bar.is-compare');
+  const box = await page.locator('.document-pane-frame.is-compare-pane').boundingBox();
+  const startX = box.x + box.width / 2;
+  const startY = box.y + box.height / 2;
+  await page.evaluate(() => { window.__odvPageDraws = 0; });
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(startX + 40, startY + 25, { steps: 8 });
+  await page.mouse.up();
+  await expect(bar.getByRole('spinbutton', { name: PANEL_FIELDS.dx })).toHaveValue('40.0');
+  // Read right after the drag has committed (two frames), so no unrelated later redraw can land in the count.
+  const draws = await page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve(window.__odvPageDraws)));
+  }));
+  // eslint-disable-next-line no-console
+  console.log(`[compare-transform redraws] 8-step drag of an adjusted page, page-canvas draws: ${draws}`);
+  expect(draws).toBe(0);
+});
+
 test('frame times: panning and rotating a 300 dpi A4 raster through the stage CSS transform', async ({ page }, testInfo) => {
   await openCompare(page);
   const result = await page.evaluate(async () => {

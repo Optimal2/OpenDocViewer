@@ -1034,7 +1034,6 @@ const DocumentViewerRender = ({
               pageNumber={pageNumber}
               zoom={zoom}
               surfaceTransform={primarySurfaceTransform}
-              initialRenderDone={() => {}}
               onRender={handlePrimaryRendered}
               setZoom={setZoom}
               imageProperties={primaryImageProperties}
@@ -1095,7 +1094,6 @@ const DocumentViewerRender = ({
                 pageNumber={comparePageNumber}
                 zoom={zoom}
                 surfaceTransform={compareSurfaceTransform}
-                initialRenderDone={() => {}}
                 onRender={handleCompareRendered}
                 setZoom={setZoom}
                 imageProperties={compareImageProperties}

@@ -41,7 +41,8 @@ import { buildImageFilter } from '../utils/imageAdjustments.js';
  * Shared default for the optional callbacks. It must be one stable function: the canvas draw
  * effect depends on `onRender` and `initialRenderDone` and sets state, so a fresh default per
  * render (e.g. the overlay's and curtain's page B, which pass no `onRender`) redraws forever as
- * soon as that page needs the canvas.
+ * soon as that page needs the canvas. Callers pass these props stable or not at all; an inline
+ * `() => {}` redraws the canvas on every parent render (tests/ui/compare-transform.spec.mjs).
  *
  * @returns {void}
  */
