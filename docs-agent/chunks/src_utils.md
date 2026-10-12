@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 50. Line count: 19603. JSDoc symbol count: 785.
+File count: 51. Line count: 19686. JSDoc symbol count: 792.
 
 ## src/utils/compareCurtain.js
 
@@ -134,6 +134,22 @@ Symbols:
 - `bytesToHex` (function) - No description.
 - `createOpaqueIdFragment` (function) - Create an opaque identifier fragment suitable for synthetic keys and document ids.
 - `createOpaqueId` (function) - Create a prefixed opaque identifier.
+
+## src/utils/imageAdjustments.js
+
+File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
+
+Exports: `NEUTRAL_IMAGE_FILTER`, `normalizeGrayscale`, `normalizeInvert`, `needsCanvas`, `buildImageFilter`
+
+Symbols:
+
+- `module:imageAdjustments` (module) - File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
+- `module:imageAdjustments.NEUTRAL_IMAGE_FILTER` (constant) - The canvas filter for neutral values \(brightness and contrast at 100 %, nothing else\).
+- `module:imageAdjustments~finiteOr` (function) - No description.
+- `module:imageAdjustments.normalizeGrayscale` (function) - Grayscale amount in percent, clamped to 0..100.
+- `module:imageAdjustments.normalizeInvert` (function) - Invert as a real boolean.
+- `module:imageAdjustments.needsCanvas` (function) - Whether the page must be drawn on the canvas instead of the plain &lt;img&gt; .
+- `module:imageAdjustments.buildImageFilter` (function) - The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert.
 
 ## src/utils/localizedValue.js
 

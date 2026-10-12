@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 16. Line count: 7138. JSDoc symbol count: 143.
+File count: 16. Line count: 7168. JSDoc symbol count: 143.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -18,12 +18,11 @@ Curtain view of the compare mode: the two calibrated pages in one coordinate spa
 
 Exports: `CompareCurtainView`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/utils/compareTransform.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
 - `CurtainMode` (typedef) - No description.
-- `needsCanvas` (function) - No description.
 - `applyCurtainStyles` (function) - Write the clip and the grab bar position straight to the DOM \(drag path, no React render\).
 - `measureStage` (function) - The stage's visible size in CSS px, so the printed page shows the same window as the screen.
 - `CompareCurtainView` (function) - No description.
@@ -35,12 +34,11 @@ Overlay view of the compare mode: the two compared pages stacked in one coordina
 
 Exports: `CompareOverlayView`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/components/DocumentViewer/CompareCurtainButton.jsx`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/compareOverlay.js`, `src/components/DocumentViewer/CompareCurtainButton.jsx`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
 - `OverlayTarget` (typedef) - No description.
-- `needsCanvas` (function) - No description.
 - `measureStage` (function) - The stage's visible size in CSS px, so the printed page shows the same window as the screen.
 - `CompareOverlayView` (function) - No description.
 - `<anonymous>~onKeyDown` (function) - No description.
@@ -110,7 +108,7 @@ OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane
 
 Exports: `DocumentViewerRender`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/documentMetadata.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/documentMetadata.js`
 
 Symbols:
 
@@ -246,7 +244,7 @@ Primary viewer\-state hook.
 
 Exports: `useDocumentViewer`
 
-Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
+Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 
 Symbols:
 

@@ -43,6 +43,7 @@ import {
   buildCompareTransformCss,
   selectCompareTransform,
 } from '../../utils/compareTransform.js';
+import { needsCanvas } from '../../utils/imageAdjustments.js';
 import {
   COMPARE_OVERLAY_OPACITY,
   clampOverlayOpacity,
@@ -59,16 +60,6 @@ import { isCompareCurtainEnabled, isCompareOverlayPrintEnabled } from '../../uti
 const TARGETS = /** @type {Array<OverlayTarget>} */ (['primary', 'compare']);
 const DRAG_THRESHOLD_PX = 3;
 const COPY_STATUS_MS = 4000;
-
-/**
- * @param {{ rotation:number, brightness:number, contrast:number }} properties
- * @returns {boolean}
- */
-function needsCanvas(properties) {
-  return Number(properties?.rotation || 0) !== 0
-    || Number(properties?.brightness ?? 100) !== 100
-    || Number(properties?.contrast ?? 100) !== 100;
-}
 
 /**
  * The stage's visible size in CSS px, so the printed page shows the same window as the screen.
@@ -92,8 +83,8 @@ function measureStage(stage) {
  * @param {function(number): void} props.setZoom
  * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
  * @param {Object=} props.customFitSizeLimits
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imagePropertiesA
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imagePropertiesB
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesA
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesB
  * @param {{ primary:Object, compare:Object }} props.transforms Per-page transforms (viewer context).
  * @param {function(Object): void} props.onTransformAction compareTransformReducer action dispatcher.
  * @param {{ opacity:number, top:OverlayTarget }} props.overlay Overlay settings (viewer context).
@@ -528,6 +519,8 @@ const imagePropertiesShape = PropTypes.shape({
   rotation: PropTypes.number.isRequired,
   brightness: PropTypes.number.isRequired,
   contrast: PropTypes.number.isRequired,
+  grayscale: PropTypes.number,
+  invert: PropTypes.bool,
 });
 
 CompareOverlayView.propTypes = {

@@ -93,8 +93,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {(number|null)} comparePageNumber - Current visible compare-page ordinal.
  * @property {(number|null)} comparePageNumberDisplay - Current original session compare-page number.
  * @property {{ shift:boolean, ctrl:boolean }} navigationModifierState
- * @property {{ rotation:number, brightness:number, contrast:number }} primaryImageProperties
- * @property {{ rotation:number, brightness:number, contrast:number }} compareImageProperties
+ * @property {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} primaryImageProperties
+ * @property {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} compareImageProperties
  * @property {function(number, string=): void} handleRotationChange
  * @property {function(*, string=): void} handleBrightnessChange
  * @property {function(*, string=): void} handleContrastChange
@@ -344,11 +344,15 @@ DocumentViewerToolbar.propTypes = {
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
+    grayscale: PropTypes.number,
+    invert: PropTypes.bool,
   }).isRequired,
   compareImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
+    grayscale: PropTypes.number,
+    invert: PropTypes.bool,
   }).isRequired,
   handleRotationChange: PropTypes.func.isRequired,
   handleBrightnessChange: PropTypes.func.isRequired,

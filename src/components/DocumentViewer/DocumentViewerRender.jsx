@@ -33,6 +33,7 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
 import CompareTransformControls from './CompareTransformControls.jsx';
 import ViewerContext from '../../contexts/viewerContext.js';
 import { IDENTITY_COMPARE_TRANSFORM, buildCompareTransformCss } from '../../utils/compareTransform.js';
+import { needsCanvas } from '../../utils/imageAdjustments.js';
 import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
 
 /**
@@ -174,8 +175,8 @@ function preventDefaultIfCancelable(event) {
  * @param {ViewerPaneKey=} props.activePane
  * @param {ViewerPaneKey=} props.effectivePane
  * @param {function(ViewerPaneKey): void=} props.onSetActivePane
- * @param {{ rotation:number, brightness:number, contrast:number }} props.primaryImageProperties
- * @param {{ rotation:number, brightness:number, contrast:number }} props.compareImageProperties
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.primaryImageProperties
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.compareImageProperties
  * @param {RefLike} props.documentRenderRef
  * @param {(number|null)} props.comparePageNumber
  * @param {number} props.primaryVisiblePageNumber
@@ -326,12 +327,8 @@ const DocumentViewerRender = ({
     return true;
   }, [isTransformPaneActive]);
 
-  const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
-    || Number(primaryImageProperties?.brightness ?? 100) !== 100
-    || Number(primaryImageProperties?.contrast ?? 100) !== 100;
-  const compareCanvasEnabled = Number(compareImageProperties?.rotation || 0) !== 0
-    || Number(compareImageProperties?.brightness ?? 100) !== 100
-    || Number(compareImageProperties?.contrast ?? 100) !== 100;
+  const primaryCanvasEnabled = needsCanvas(primaryImageProperties);
+  const compareCanvasEnabled = needsCanvas(compareImageProperties);
 
   const handlePrimaryRendered = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') {
@@ -1190,11 +1187,15 @@ DocumentViewerRender.propTypes = {
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
+    grayscale: PropTypes.number,
+    invert: PropTypes.bool,
   }).isRequired,
   compareImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
+    grayscale: PropTypes.number,
+    invert: PropTypes.bool,
   }).isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),

@@ -3668,7 +3668,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 480,
+    "line": 477,
     "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
     "params": [
       {
@@ -3693,7 +3693,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 503,
+    "line": 500,
     "description": "",
     "params": [],
     "returns": [
@@ -3711,7 +3711,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 220,
+    "line": 221,
     "description": "",
     "params": [
       {
@@ -3742,7 +3742,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 208,
+    "line": 209,
     "description": "",
     "params": [],
     "returns": [
@@ -3760,7 +3760,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 76,
+    "line": 77,
     "description": "",
     "params": [],
     "returns": [],
@@ -3773,7 +3773,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 102,
+    "line": 103,
     "description": "",
     "params": [
       {
@@ -3882,7 +3882,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 389,
+    "line": 390,
     "description": "",
     "params": [
       {
@@ -3907,7 +3907,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 725,
+    "line": 722,
     "description": "",
     "params": [
       {
@@ -3938,7 +3938,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 467,
+    "line": 464,
     "description": "",
     "params": [
       {
@@ -3963,7 +3963,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 448,
+    "line": 445,
     "description": "",
     "params": [],
     "returns": [
@@ -3981,7 +3981,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 457,
+    "line": 454,
     "description": "",
     "params": [],
     "returns": [
@@ -3999,7 +3999,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 435,
+    "line": 432,
     "description": "Returns the surface whose intrinsic size should drive fit calculations.",
     "params": [],
     "returns": [
@@ -4017,7 +4017,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 44,
+    "line": 45,
     "description": "",
     "params": [
       {
@@ -4048,7 +4048,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 929,
+    "line": 926,
     "description": "",
     "params": [
       {
@@ -4079,7 +4079,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 862,
+    "line": 859,
     "description": "",
     "params": [
       {
@@ -4110,7 +4110,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 526,
+    "line": 523,
     "description": "",
     "params": [
       {
@@ -4135,7 +4135,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 957,
+    "line": 954,
     "description": "",
     "params": [],
     "returns": [
@@ -4153,7 +4153,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 805,
+    "line": 802,
     "description": "",
     "params": [
       {
@@ -4178,7 +4178,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 64,
+    "line": 65,
     "description": "",
     "params": [
       {
@@ -4203,7 +4203,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 72,
+    "line": 73,
     "description": "",
     "params": [
       {
@@ -4228,7 +4228,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 146,
+    "line": 147,
     "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
     "params": [],
     "returns": [],
@@ -4241,7 +4241,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 53,
+    "line": 54,
     "description": "",
     "params": [
       {
@@ -4266,7 +4266,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 888,
+    "line": 885,
     "description": "",
     "params": [
       {
@@ -4303,7 +4303,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 201,
+    "line": 202,
     "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
     "params": [],
     "returns": [
@@ -4321,7 +4321,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 260,
+    "line": 261,
     "description": "",
     "params": [
       {
@@ -9046,7 +9046,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-    "line": 76,
+    "line": 67,
     "description": "Write the clip and the grab bar position straight to the DOM (drag path, no React render).",
     "params": [
       {
@@ -9089,7 +9089,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-    "line": 116,
+    "line": 107,
     "description": "",
     "params": [
       {
@@ -9198,7 +9198,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-    "line": 55,
+    "line": 56,
     "description": "",
     "params": [],
     "returns": [],
@@ -9211,7 +9211,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-    "line": 91,
+    "line": 82,
     "description": "The stage's visible size in CSS px, so the printed page shows the same window as the screen.",
     "params": [
       {
@@ -9230,38 +9230,13 @@
     "examples": 0
   },
   {
-    "id": "needsCanvas",
-    "name": "needsCanvas",
-    "longname": "needsCanvas",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-    "line": 61,
-    "description": "",
-    "params": [
-      {
-        "name": "properties",
-        "type": "Object",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "<anonymous>~onKeyDown",
     "name": "onKeyDown",
     "longname": "<anonymous>~onKeyDown",
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-    "line": 157,
+    "line": 148,
     "description": "",
     "params": [
       {
@@ -9281,7 +9256,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 110,
+    "line": 101,
     "description": "",
     "params": [
       {
@@ -9426,7 +9401,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 79,
+    "line": 70,
     "description": "The stage's visible size in CSS px, so the printed page shows the same window as the screen.",
     "params": [
       {
@@ -9445,38 +9420,13 @@
     "examples": 0
   },
   {
-    "id": "needsCanvas",
-    "name": "needsCanvas",
-    "longname": "needsCanvas",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 67,
-    "description": "",
-    "params": [
-      {
-        "name": "properties",
-        "type": "Object",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "<anonymous>~onKeyDown",
     "name": "onKeyDown",
     "longname": "<anonymous>~onKeyDown",
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 169,
+    "line": 160,
     "description": "",
     "params": [
       {
@@ -9496,7 +9446,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 195,
+    "line": 186,
     "description": "",
     "params": [
       {
@@ -9516,7 +9466,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-    "line": 57,
+    "line": 58,
     "description": "",
     "params": [],
     "returns": [],
@@ -9965,7 +9915,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 204,
+    "line": 205,
     "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
     "params": [
       {
@@ -10182,7 +10132,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 58,
+    "line": 59,
     "description": "",
     "params": [
       {
@@ -10213,7 +10163,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 128,
+    "line": 129,
     "description": "",
     "params": [
       {
@@ -10244,7 +10194,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 801,
+    "line": 798,
     "description": "",
     "params": [
       {
@@ -10264,7 +10214,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 827,
+    "line": 824,
     "description": "",
     "params": [
       {
@@ -10301,7 +10251,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 462,
+    "line": 459,
     "description": "",
     "params": [
       {
@@ -10332,7 +10282,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 795,
+    "line": 792,
     "description": "",
     "params": [
       {
@@ -10352,7 +10302,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 313,
+    "line": 314,
     "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
     "params": [
       {
@@ -10383,7 +10333,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 148,
+    "line": 149,
     "description": "",
     "params": [
       {
@@ -10408,7 +10358,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 140,
+    "line": 141,
     "description": "",
     "params": [
       {
@@ -10433,7 +10383,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 79,
+    "line": 80,
     "description": "",
     "params": [
       {
@@ -10458,7 +10408,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 90,
+    "line": 91,
     "description": "",
     "params": [
       {
@@ -10483,7 +10433,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 101,
+    "line": 102,
     "description": "",
     "params": [
       {
@@ -10514,7 +10464,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 159,
+    "line": 160,
     "description": "",
     "params": [
       {
@@ -10539,7 +10489,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 905,
+    "line": 902,
     "description": "",
     "params": [
       {
@@ -10564,7 +10514,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 928,
+    "line": 925,
     "description": "",
     "params": [
       {
@@ -10589,7 +10539,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 42,
+    "line": 43,
     "description": "",
     "params": [],
     "returns": [],
@@ -10602,7 +10552,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 38,
+    "line": 39,
     "description": "",
     "params": [],
     "returns": [],
@@ -11506,7 +11456,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1550,
+    "line": 1559,
     "description": "Open compare mode when needed and make the right pane the default target.",
     "params": [],
     "returns": [
@@ -11524,7 +11474,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1542,
+    "line": 1551,
     "description": "",
     "params": [],
     "returns": [
@@ -11542,7 +11492,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1657,
+    "line": 1694,
     "description": "Mouse down handler for the thumbnail resizer; listens for mousemove/up on window.",
     "params": [
       {
@@ -11567,7 +11517,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 360,
+    "line": 369,
     "description": "",
     "params": [
       {
@@ -11592,7 +11542,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 143,
+    "line": 152,
     "description": "",
     "params": [
       {
@@ -11623,7 +11573,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 266,
+    "line": 275,
     "description": "Build an inclusion mask from a print-page sequence.",
     "params": [
       {
@@ -11654,7 +11604,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 438,
+    "line": 447,
     "description": "Build the visible-document grouping used by document-level navigation.",
     "params": [
       {
@@ -11685,7 +11635,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 48,
+    "line": 49,
     "description": "Clamp a 1-based page number into [1, total].",
     "params": [
       {
@@ -11716,7 +11666,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1578,
+    "line": 1587,
     "description": "Close compare mode without affecting the left page.",
     "params": [],
     "returns": [
@@ -11734,7 +11684,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 69,
+    "line": 70,
     "description": "Optional maximum percentage limits for the custom fit-to-size zoom mode.",
     "params": [],
     "returns": [],
@@ -11747,7 +11697,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 303,
+    "line": 312,
     "description": "Resolve the nearest visible page number for a requested original page index.",
     "params": [
       {
@@ -11778,7 +11728,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 736,
+    "line": 745,
     "description": "Resolve document-navigation state for the requested pane.",
     "params": [
       {
@@ -11803,7 +11753,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 412,
+    "line": 421,
     "description": "",
     "params": [
       {
@@ -11828,7 +11778,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1304,
+    "line": 1313,
     "description": "Jump to the first page of the first visible document.",
     "params": [
       {
@@ -11853,7 +11803,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1260,
+    "line": 1269,
     "description": "Jump to the first visible page in the requested target pane.",
     "params": [
       {
@@ -11878,7 +11828,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1316,
+    "line": 1325,
     "description": "Jump to the first page of the last visible document.",
     "params": [
       {
@@ -11903,7 +11853,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1269,
+    "line": 1278,
     "description": "Jump to the last visible page in the requested target pane.",
     "params": [
       {
@@ -11928,7 +11878,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1292,
+    "line": 1301,
     "description": "Jump to the first page of the next visible document.",
     "params": [
       {
@@ -11953,7 +11903,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1251,
+    "line": 1260,
     "description": "Move one page forward in the requested target pane.",
     "params": [
       {
@@ -11978,7 +11928,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1280,
+    "line": 1289,
     "description": "Jump to the first page of the previous visible document (or to the current document start when the active pane already points inside the first visible document).",
     "params": [
       {
@@ -12003,7 +11953,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1242,
+    "line": 1251,
     "description": "Move one page backward in the requested target pane.",
     "params": [
       {
@@ -12028,7 +11978,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1610,
+    "line": 1619,
     "description": "",
     "params": [
       {
@@ -12048,7 +11998,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1560,
+    "line": 1569,
     "description": "Toggle compare mode.",
     "params": [],
     "returns": [],
@@ -12061,12 +12011,52 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1622,
+    "line": 1631,
     "description": "",
     "params": [
       {
         "name": "e",
         "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "useDocumentViewer~handleGrayscaleChange",
+    "name": "handleGrayscaleChange",
+    "longname": "useDocumentViewer~handleGrayscaleChange",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentViewer/useDocumentViewer.js",
+    "line": 1643,
+    "description": "",
+    "params": [
+      {
+        "name": "e",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "useDocumentViewer~handleInvertChange",
+    "name": "handleInvertChange",
+    "longname": "useDocumentViewer~handleInvertChange",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentViewer/useDocumentViewer.js",
+    "line": 1657,
+    "description": "Accepts a checkbox event ( target.checked ), a { target: { value } } event or a plain value.",
+    "params": [
+      {
+        "name": "e",
+        "type": "*",
         "optional": false,
         "description": ""
       }
@@ -12081,7 +12071,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1158,
+    "line": 1167,
     "description": "Change the primary page using an original page number (or a visible-page updater function when called from navigation helpers).",
     "params": [
       {
@@ -12106,7 +12096,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1206,
+    "line": 1215,
     "description": "Keep requested-page state and the actually displayed page synchronized for diagnostics.",
     "params": [
       {
@@ -12131,7 +12121,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1167,
+    "line": 1176,
     "description": "Change the primary page by a visible page number from the thumbnail strip.",
     "params": [
       {
@@ -12156,7 +12146,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 176,
+    "line": 185,
     "description": "Return true when the normalized mask excludes at least one page from the current session.",
     "params": [
       {
@@ -12187,7 +12177,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1033,
+    "line": 1042,
     "description": "Immediately exclude every page that belongs to the same document as the provided original page index.",
     "params": [
       {
@@ -12212,7 +12202,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 995,
+    "line": 1004,
     "description": "Immediately exclude a page from the active selection and apply the filtered session.",
     "params": [
       {
@@ -12237,7 +12227,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 81,
+    "line": 82,
     "description": "Image adjustment properties for canvas edit mode.",
     "params": [],
     "returns": [],
@@ -12250,7 +12240,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 285,
+    "line": 294,
     "description": "",
     "params": [
       {
@@ -12281,7 +12271,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 193,
+    "line": 202,
     "description": "Compare two selection masks over the active page count.",
     "params": [
       {
@@ -12318,7 +12308,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 224,
+    "line": 233,
     "description": "Normalize a zero-based original page index and reject invalid/out-of-range values.",
     "params": [
       {
@@ -12349,7 +12339,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 238,
+    "line": 247,
     "description": "",
     "params": [
       {
@@ -12380,7 +12370,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 64,
+    "line": 65,
     "description": "Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer.",
     "params": [
       {
@@ -12405,7 +12395,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 156,
+    "line": 165,
     "description": "Normalize a persisted/host-provided page-selection mask to the current page count.",
     "params": [
       {
@@ -12436,7 +12426,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 502,
+    "line": 511,
     "description": "Normalize any pane key into the viewer's two supported navigation targets.",
     "params": [
       {
@@ -12461,7 +12451,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1743,
+    "line": 1780,
     "description": "",
     "params": [
       {
@@ -12481,7 +12471,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 79,
+    "line": 80,
     "description": "",
     "params": [],
     "returns": [],
@@ -12494,7 +12484,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 343,
+    "line": 352,
     "description": "Resolve a page's 1-based page number within the current document-selection group.",
     "params": [
       {
@@ -12531,7 +12521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 116,
+    "line": 125,
     "description": "Resolve effective custom-fit limits from a preferred value set and runtime config.",
     "params": [
       {
@@ -12568,7 +12558,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 814,
+    "line": 823,
     "description": "",
     "params": [
       {
@@ -12593,7 +12583,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 208,
+    "line": 217,
     "description": "Convert a 1-based print/session page number to a zero-based original page index.",
     "params": [
       {
@@ -12624,7 +12614,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 327,
+    "line": 336,
     "description": "Resolve either a direct visible-page value or a React setState-style updater function.",
     "params": [
       {
@@ -12661,7 +12651,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1110,
+    "line": 1119,
     "description": "Resolve the next original 1-based page number from a visible-page update.",
     "params": [
       {
@@ -12692,7 +12682,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1593,
+    "line": 1602,
     "description": "Select a page for the right-hand compare pane.",
     "params": [
       {
@@ -12729,7 +12719,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 78,
+    "line": 79,
     "description": "",
     "params": [],
     "returns": [],
@@ -12742,7 +12732,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1535,
+    "line": 1544,
     "description": "Set the default pane for compare-aware navigation and editing actions.",
     "params": [
       {
@@ -12767,7 +12757,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1194,
+    "line": 1203,
     "description": "Change the compare page using an original page number (or a visible-page updater function when called from compare navigation helpers).",
     "params": [
       {
@@ -12792,7 +12782,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1523,
+    "line": 1532,
     "description": "Setter for the editing controls visibility.",
     "params": [
       {
@@ -12812,7 +12802,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1180,
+    "line": 1189,
     "description": "Change the compare page by a visible page number from the toolbar page field.",
     "params": [
       {
@@ -12837,7 +12827,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1430,
+    "line": 1439,
     "description": "Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM').",
     "params": [],
     "returns": [],
@@ -12850,7 +12840,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1234,
+    "line": 1243,
     "description": "The thumbnail pane should react immediately when the user changes page.",
     "params": [],
     "returns": [],
@@ -12863,7 +12853,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1507,
+    "line": 1516,
     "description": "Toggle between the two fit modes from the page surface.",
     "params": [],
     "returns": [],
@@ -12876,7 +12866,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1133,
+    "line": 1142,
     "description": "Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number.",
     "params": [
       {
@@ -12907,7 +12897,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 523,
+    "line": 532,
     "description": "Hook that centralizes viewer UI state and event handlers.",
     "params": [],
     "returns": [
@@ -12925,7 +12915,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 80,
+    "line": 81,
     "description": "",
     "params": [],
     "returns": [],
@@ -12938,7 +12928,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 484,
+    "line": 493,
     "description": "Sticky zoom modes used by the viewer (subset is used here).",
     "params": [],
     "returns": [],
@@ -12951,7 +12941,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 489,
+    "line": 498,
     "description": "Zoom state (mode + current numeric scale).",
     "params": [],
     "returns": [],
@@ -23343,6 +23333,163 @@
     "description": "OpenDocViewer — small opaque identifier helpers.",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments.buildImageFilter",
+    "name": "buildImageFilter",
+    "longname": "module:imageAdjustments.buildImageFilter",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/imageAdjustments.js",
+    "line": 74,
+    "description": "The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert.",
+    "params": [
+      {
+        "name": "properties",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments~finiteOr",
+    "name": "finiteOr",
+    "longname": "module:imageAdjustments~finiteOr",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/imageAdjustments.js",
+    "line": 24,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments",
+    "name": "imageAdjustments",
+    "longname": "module:imageAdjustments",
+    "kind": "module",
+    "scope": null,
+    "file": "src/utils/imageAdjustments.js",
+    "line": 2,
+    "description": "File: src/utils/imageAdjustments.js Per-pane pixel adjustments (brightness, contrast, grayscale, invert) and the quarter turn the canvas draws.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments.needsCanvas",
+    "name": "needsCanvas",
+    "longname": "module:imageAdjustments.needsCanvas",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/imageAdjustments.js",
+    "line": 58,
+    "description": "Whether the page must be drawn on the canvas instead of the plain &lt;img&gt; .",
+    "params": [
+      {
+        "name": "properties",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": "{ rotation, brightness, contrast, grayscale, invert }"
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments.NEUTRAL_IMAGE_FILTER",
+    "name": "NEUTRAL_IMAGE_FILTER",
+    "longname": "module:imageAdjustments.NEUTRAL_IMAGE_FILTER",
+    "kind": "constant",
+    "scope": "static",
+    "file": "src/utils/imageAdjustments.js",
+    "line": 17,
+    "description": "The canvas filter for neutral values (brightness and contrast at 100 %, nothing else).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments.normalizeGrayscale",
+    "name": "normalizeGrayscale",
+    "longname": "module:imageAdjustments.normalizeGrayscale",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/imageAdjustments.js",
+    "line": 36,
+    "description": "Grayscale amount in percent, clamped to 0..100.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:imageAdjustments.normalizeInvert",
+    "name": "normalizeInvert",
+    "longname": "module:imageAdjustments.normalizeInvert",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/imageAdjustments.js",
+    "line": 47,
+    "description": "Invert as a real boolean.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {

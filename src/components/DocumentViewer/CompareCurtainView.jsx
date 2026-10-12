@@ -39,6 +39,7 @@ import {
   buildCompareTransformCss,
   selectCompareTransform,
 } from '../../utils/compareTransform.js';
+import { needsCanvas } from '../../utils/imageAdjustments.js';
 import {
   COMPARE_CURTAIN_POSITION,
   INITIAL_COMPARE_CURTAIN_STATE,
@@ -53,16 +54,6 @@ import { hasActiveModalDialog, shouldEscapeCloseView } from './compareViewKeys.j
 import { isCompareCurtainPrintEnabled } from '../../utils/runtimeConfig.js';
 
 /** @typedef {('horizontal'|'vertical')} CurtainMode */
-
-/**
- * @param {{ rotation:number, brightness:number, contrast:number }} properties
- * @returns {boolean}
- */
-function needsCanvas(properties) {
-  return Number(properties?.rotation || 0) !== 0
-    || Number(properties?.brightness ?? 100) !== 100
-    || Number(properties?.contrast ?? 100) !== 100;
-}
 
 /**
  * Write the clip and the grab bar position straight to the DOM (drag path, no React render).
@@ -104,8 +95,8 @@ function measureStage(stage) {
  * @param {function(number): void} props.setZoom
  * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
  * @param {Object=} props.customFitSizeLimits
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imagePropertiesA
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imagePropertiesB
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesA
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesB
  * @param {{ primary:Object, compare:Object }} props.transforms Calibrated per-page transforms (viewer context).
  * @param {function(): void} props.onClose
  * @param {function(Object): *=} props.onPrint Opens the shared print dialog for this view (usePrintPipeline).
@@ -408,6 +399,8 @@ const imagePropertiesShape = PropTypes.shape({
   rotation: PropTypes.number.isRequired,
   brightness: PropTypes.number.isRequired,
   contrast: PropTypes.number.isRequired,
+  grayscale: PropTypes.number,
+  invert: PropTypes.bool,
 });
 
 CompareCurtainView.propTypes = {

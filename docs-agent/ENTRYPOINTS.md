@@ -44,6 +44,7 @@
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
+- `src/utils/imageAdjustments.js`: 5 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
@@ -52,4 +53,3 @@
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
 - `src/components/DocumentRender.jsx`: 3 incoming local imports
 - `src/contexts/themeContext.js`: 3 incoming local imports
-- `src/utils/documentMetadata.js`: 3 incoming local imports

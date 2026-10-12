@@ -35,6 +35,7 @@ import {
 } from '../utils/zoomUtils.js';
 import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
 import { clampRenderSurfaceSize } from '../utils/renderSurfaceBounds.js';
+import { buildImageFilter } from '../utils/imageAdjustments.js';
 
 /**
  * @param {Array<any>} allPages
@@ -87,7 +88,7 @@ function isBlobAssetUrl(url) {
  * @param {function(): void=} props.initialRenderDone
  * @param {function(): void=} props.onRender
  * @param {function(number): void} props.setZoom
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
+ * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imageProperties
  * @param {boolean} props.isCanvasEnabled
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
@@ -394,10 +395,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     const sourceWidth = Math.max(1, Number(image.naturalWidth || currentPage?.realWidth || 0) || 1);
     const sourceHeight = Math.max(1, Number(image.naturalHeight || currentPage?.realHeight || 0) || 1);
     const rotation = normalizedRotation;
-    const brightnessRaw = Number(imageProperties?.brightness ?? 100);
-    const contrastRaw = Number(imageProperties?.contrast ?? 100);
-    const brightness = Number.isFinite(brightnessRaw) ? brightnessRaw : 100;
-    const contrast = Number.isFinite(contrastRaw) ? contrastRaw : 100;
     const rotated = rotation === 90 || rotation === 270;
     const requestedCanvasSize = clampRenderSurfaceSize(
       rotated ? sourceHeight : sourceWidth,
@@ -414,7 +411,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate((rotation * Math.PI) / 180);
-    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+    ctx.filter = buildImageFilter(imageProperties);
     ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
     ctx.restore();
     setCanvasRenderSize({
