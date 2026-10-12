@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 144
-- Source lines: 58671
-- JSDoc symbols: 1583
+- Source lines: 59081
+- JSDoc symbols: 1604
 - Files with JSDoc: 144
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -43,7 +43,7 @@ Source commit: not embedded
 - `src/utils/pdfSignatureDocuments.js` - Per\-document aggregation of PDF signature reports.
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
-- `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
+- `src/utils/compareOverlay.js` - File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi\-transparent.
 
 ## Agent Notes
 

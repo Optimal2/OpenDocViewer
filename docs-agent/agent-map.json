@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 144,
-    "sourceLineCount": 58671,
-    "docletCount": 1583,
+    "sourceLineCount": 59081,
+    "docletCount": 1604,
     "documentedFileCount": 144,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -471,7 +471,7 @@
       "path": "src/utils/compareTransform.js",
       "score": 116,
       "lines": 353,
-      "incomingLocalImports": 10,
+      "incomingLocalImports": 11,
       "doclets": 24,
       "summary": "File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page ( primary = lef...",
       "summaryConfidence": "high"
@@ -506,9 +506,9 @@
     {
       "path": "src/utils/printPdf.js",
       "score": 97,
-      "lines": 2297,
+      "lines": 2358,
       "incomingLocalImports": 3,
-      "doclets": 92,
+      "doclets": 95,
       "summary": "OpenDocViewer — Generated PDF print backend.",
       "summaryConfidence": "high"
     },
@@ -546,6 +546,15 @@
       "incomingLocalImports": 8,
       "doclets": 6,
       "summary": "Localized string resolver for admin-supplied config values.",
+      "summaryConfidence": "high"
+    },
+    {
+      "path": "src/utils/compareOverlay.js",
+      "score": 87,
+      "lines": 166,
+      "incomingLocalImports": 4,
+      "doclets": 10,
+      "summary": "File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi-transparent.",
       "summaryConfidence": "high"
     },
     {
@@ -618,15 +627,6 @@
       "incomingLocalImports": 6,
       "doclets": 4,
       "summary": "Browser measurements and diagnostic state kept outside the pure PDF resolution policy.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/compareOverlay.js",
-      "score": 79,
-      "lines": 166,
-      "incomingLocalImports": 3,
-      "doclets": 10,
-      "summary": "File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi-transparent.",
       "summaryConfidence": "high"
     }
   ],
@@ -1549,8 +1549,8 @@
     {
       "name": "src/utils",
       "fileCount": 50,
-      "lineCount": 19193,
-      "docletCount": 764,
+      "lineCount": 19603,
+      "docletCount": 785,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1574,7 +1574,7 @@
           "path": "src/utils/compareTransform.js",
           "score": 116,
           "lines": 353,
-          "incomingLocalImports": 10,
+          "incomingLocalImports": 11,
           "doclets": 24,
           "summary": "File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page ( primary = lef...",
           "summaryConfidence": "high"
@@ -1600,9 +1600,9 @@
         {
           "path": "src/utils/printPdf.js",
           "score": 97,
-          "lines": 2297,
+          "lines": 2358,
           "incomingLocalImports": 3,
-          "doclets": 92,
+          "doclets": 95,
           "summary": "OpenDocViewer — Generated PDF print backend.",
           "summaryConfidence": "high"
         },
@@ -37584,8 +37584,8 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 63,
+      "incomingLocalImports": 2,
+      "importanceScore": 71,
       "summary": "File: src/utils/compareCurtain.js Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A (left/primary) below and page B (right/compare) above,...",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -37938,8 +37938,8 @@
         }
       ],
       "packageImports": [],
-      "incomingLocalImports": 3,
-      "importanceScore": 79,
+      "incomingLocalImports": 4,
+      "importanceScore": 87,
       "summary": "File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi-transparent.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -38714,7 +38714,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 10,
+      "incomingLocalImports": 11,
       "importanceScore": 116,
       "summary": "File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page ( primary = lef...",
       "summaryConfidence": "high",
@@ -50683,9 +50683,9 @@
     },
     {
       "path": "src/utils/printCore.js",
-      "lines": 588,
+      "lines": 909,
       "extension": ".js",
-      "jsdocBlockCount": 40,
+      "jsdocBlockCount": 56,
       "sourceSummary": "Core print coordinator for the frontend.",
       "imports": [
         {
@@ -50720,120 +50720,222 @@
           ],
           "line": 20,
           "kind": "static"
+        },
+        {
+          "source": "./compareTransform.js",
+          "specifiers": [
+            "normalizeCompareTransform",
+            "selectCompareTransform",
+            "splitTransformRotation"
+          ],
+          "line": 21,
+          "kind": "static"
+        },
+        {
+          "source": "./compareOverlay.js",
+          "specifiers": [
+            "clampOverlayOpacity",
+            "getOverlayBottomTarget"
+          ],
+          "line": 22,
+          "kind": "static"
+        },
+        {
+          "source": "./compareCurtain.js",
+          "specifiers": [
+            "clampCurtainPosition"
+          ],
+          "line": 23,
+          "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "handlePrint",
           "kind": "function",
-          "line": 270
+          "line": 273
         },
         {
           "name": "handlePrintCurrentComparison",
           "kind": "function",
-          "line": 339
+          "line": 342
+        },
+        {
+          "name": "composeCompareOverlayCanvas",
+          "kind": "function",
+          "line": 567
+        },
+        {
+          "name": "composeCompareCurtainCanvas",
+          "kind": "function",
+          "line": 590
+        },
+        {
+          "name": "handlePrintCompareOverlay",
+          "kind": "function",
+          "line": 682
+        },
+        {
+          "name": "handlePrintCompareCurtain",
+          "kind": "function",
+          "line": 698
         },
         {
           "name": "handlePrintAll",
           "kind": "function",
-          "line": 443
+          "line": 764
         },
         {
           "name": "handlePrintSequence",
           "kind": "function",
-          "line": 516
+          "line": 837
         },
         {
           "name": "handlePrintRange",
           "kind": "function",
-          "line": 585
+          "line": 906
         }
       ],
       "declarations": [
         {
           "name": "resolveIframeCleanupDelay",
           "kind": "function",
-          "line": 28
+          "line": 31
         },
         {
           "name": "normalizePageContexts",
           "kind": "function",
-          "line": 33
+          "line": 36
         },
         {
           "name": "isVisiblyMeasurable",
           "kind": "function",
-          "line": 103
+          "line": 106
         },
         {
           "name": "pickLargestVisibleElement",
           "kind": "function",
-          "line": 120
+          "line": 123
         },
         {
           "name": "getPrintableDataUrl",
           "kind": "function",
-          "line": 145
+          "line": 148
         },
         {
           "name": "resolveOrientation",
           "kind": "function",
-          "line": 180
+          "line": 183
         },
         {
           "name": "getODVConfig",
           "kind": "function",
-          "line": 194
+          "line": 197
         },
         {
           "name": "resolveActiveNode",
           "kind": "function",
-          "line": 217
+          "line": 220
         },
         {
           "name": "createHiddenIframe",
           "kind": "function",
-          "line": 235
+          "line": 238
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 250
+          "line": 253
         },
         {
           "name": "handlePrint",
           "kind": "function",
-          "line": 270
+          "line": 273
         },
         {
           "name": "handlePrintCurrentComparison",
           "kind": "function",
-          "line": 339
+          "line": 342
         },
         {
-          "name": "collectAllPrintableDataUrlsFromDom",
+          "name": "surfaceSize",
           "kind": "function",
-          "line": 390
+          "line": 429
         },
         {
-          "name": "resolveAllPageDataUrls",
+          "name": "placeComposedPage",
           "kind": "function",
-          "line": 409
+          "line": 447
         },
         {
-          "name": "handlePrintAll",
+          "name": "placedPageBounds",
           "kind": "function",
-          "line": 443
+          "line": 467
         },
         {
-          "name": "handlePrintSequence",
+          "name": "resolveComposeFrame",
+          "kind": "function",
+          "line": 490
+        },
+        {
+          "name": "drawComposedPage",
           "kind": "function",
           "line": 516
         },
         {
+          "name": "beginComposedPage",
+          "kind": "function",
+          "line": 538
+        },
+        {
+          "name": "composeCompareOverlayCanvas",
+          "kind": "function",
+          "line": 567
+        },
+        {
+          "name": "composeCompareCurtainCanvas",
+          "kind": "function",
+          "line": 590
+        },
+        {
+          "name": "printComposedComparison",
+          "kind": "function",
+          "line": 625
+        },
+        {
+          "name": "handlePrintCompareOverlay",
+          "kind": "function",
+          "line": 682
+        },
+        {
+          "name": "handlePrintCompareCurtain",
+          "kind": "function",
+          "line": 698
+        },
+        {
+          "name": "collectAllPrintableDataUrlsFromDom",
+          "kind": "function",
+          "line": 711
+        },
+        {
+          "name": "resolveAllPageDataUrls",
+          "kind": "function",
+          "line": 730
+        },
+        {
+          "name": "handlePrintAll",
+          "kind": "function",
+          "line": 764
+        },
+        {
+          "name": "handlePrintSequence",
+          "kind": "function",
+          "line": 837
+        },
+        {
           "name": "handlePrintRange",
           "kind": "function",
-          "line": 585
+          "line": 906
         }
       ],
       "parseError": null,
@@ -50849,7 +50951,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 37,
+          "line": 40,
           "description": "Options for single-page printing.",
           "params": [],
           "returns": [],
@@ -50862,7 +50964,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 50,
+          "line": 53,
           "description": "A 1-based inclusive page range.",
           "params": [],
           "returns": [],
@@ -50875,7 +50977,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 57,
+          "line": 60,
           "description": "Options for printing multiple pages (all/range/sequence).",
           "params": [],
           "returns": [],
@@ -50888,7 +50990,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 70,
+          "line": 73,
           "description": "Internal: candidate node for &quot;largest visible&quot; heuristics.",
           "params": [],
           "returns": [],
@@ -50901,7 +51003,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 77,
+          "line": 80,
           "description": "Print header config (runtime) consumed by the print overlay logic.",
           "params": [],
           "returns": [],
@@ -50914,7 +51016,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 89,
+          "line": 92,
           "description": "Return type for the hidden-iframe factory.",
           "params": [],
           "returns": [],
@@ -50927,7 +51029,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 103,
+          "line": 106,
           "description": "Check whether a candidate element is both present in layout and not hidden by basic CSS visibility.",
           "params": [
             {
@@ -50952,7 +51054,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 120,
+          "line": 123,
           "description": "Best-effort: pick the largest visible or inside a container (or document).",
           "params": [
             {
@@ -50977,7 +51079,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 145,
+          "line": 148,
           "description": "Safely derive a printable data URL from an element that is either a or an .",
           "params": [
             {
@@ -51002,7 +51104,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 180,
+          "line": 183,
           "description": "Compute page orientation from dimensions when options.orientation === 'auto'.",
           "params": [
             {
@@ -51039,7 +51141,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 194,
+          "line": 197,
           "description": "Read runtime configuration from the globals populated by public/odv.config.js .",
           "params": [],
           "returns": [
@@ -51057,7 +51159,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 217,
+          "line": 220,
           "description": "Attempt to resolve the currently active visual node to print.",
           "params": [
             {
@@ -51088,7 +51190,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 235,
+          "line": 238,
           "description": "Create the temporary hidden iframe used as the print document host.",
           "params": [
             {
@@ -51113,7 +51215,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 270,
+          "line": 273,
           "description": "Handles the print functionality for the CURRENT page/image.",
           "params": [
             {
@@ -51144,7 +51246,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 339,
+          "line": 342,
           "description": "Print both currently visible compare panes as a two-page print job.",
           "params": [
             {
@@ -51175,13 +51277,471 @@
           "examples": 0
         },
         {
+          "id": "CompareOverlayPrintView",
+          "name": "CompareOverlayPrintView",
+          "longname": "CompareOverlayPrintView",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 390,
+          "description": "View state of the overlay view needed to print it (utils/compareOverlay.js).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "CompareCurtainPrintView",
+          "name": "CompareCurtainPrintView",
+          "longname": "CompareCurtainPrintView",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 400,
+          "description": "View state of the curtain view needed to print it (utils/compareCurtain.js).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "ComposedPagePlacement",
+          "name": "ComposedPagePlacement",
+          "longname": "ComposedPagePlacement",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 410,
+          "description": "One page placed in the shared page-pixel space of a composed compare page.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "surfaceSize",
+          "name": "surfaceSize",
+          "longname": "surfaceSize",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 429,
+          "description": "Intrinsic pixel size of a rendered page surface (the canvas already carries the quarter turn).",
+          "params": [
+            {
+              "name": "node",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "placeComposedPage",
+          "name": "placeComposedPage",
+          "longname": "placeComposedPage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 447,
+          "description": "Placement of one page in the shared page-pixel space.",
+          "params": [
+            {
+              "name": "node",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "transform",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "zoom",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "ComposedPagePlacement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "placedPageBounds",
+          "name": "placedPageBounds",
+          "longname": "placedPageBounds",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 467,
+          "description": "",
+          "params": [
+            {
+              "name": "page",
+              "type": "ComposedPagePlacement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "resolveComposeFrame",
+          "name": "resolveComposeFrame",
+          "longname": "resolveComposeFrame",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 490,
+          "description": "The area of the composed page in page pixels: the visible stage when its size is known (both pages share the stage's top-left as origin), otherwise the union of both transformed p...",
+          "params": [
+            {
+              "name": "pages",
+              "type": "Array.<ComposedPagePlacement>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "zoom",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "stage",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "drawComposedPage",
+          "name": "drawComposedPage",
+          "longname": "drawComposedPage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 516,
+          "description": "Draw one placed page onto the composed canvas.",
+          "params": [
+            {
+              "name": "ctx",
+              "type": "CanvasRenderingContext2D",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "page",
+              "type": "ComposedPagePlacement",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "frame",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "k",
+              "type": "number",
+              "optional": false,
+              "description": "Output pixels per page pixel."
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "beginComposedPage",
+          "name": "beginComposedPage",
+          "longname": "beginComposedPage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 538,
+          "description": "Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint a white sheet.",
+          "params": [
+            {
+              "name": "primaryNode",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "compareNode",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "view",
+              "type": "CompareOverlayPrintView|CompareCurtainPrintView",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "composeCompareOverlayCanvas",
+          "name": "composeCompareOverlayCanvas",
+          "longname": "composeCompareOverlayCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 567,
+          "description": "Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view's opacity, each page with its own compare transform.",
+          "params": [
+            {
+              "name": "primaryNode",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": "Page A surface."
+            },
+            {
+              "name": "compareNode",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": "Page B surface."
+            },
+            {
+              "name": "view",
+              "type": "CompareOverlayPrintView",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "HTMLCanvasElement|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "composeCompareCurtainCanvas",
+          "name": "composeCompareCurtainCanvas",
+          "longname": "composeCompareCurtainCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 590,
+          "description": "Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border (below a horizontal border, right of a vertical one), each page with its own compa...",
+          "params": [
+            {
+              "name": "primaryNode",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": "Page A surface."
+            },
+            {
+              "name": "compareNode",
+              "type": "HTMLCanvasElement|HTMLImageElement",
+              "optional": false,
+              "description": "Page B surface."
+            },
+            {
+              "name": "view",
+              "type": "CompareCurtainPrintView",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "HTMLCanvasElement|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "printComposedComparison",
+          "name": "printComposedComparison",
+          "longname": "printComposedComparison",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 625,
+          "description": "Shared body of the overlay and curtain print (after their invoked log line): one composed page through the single-page print document, with the same config and base token context...",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "optional": false,
+              "description": "Calling function, for the log lines."
+            },
+            {
+              "name": "compose",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "primaryRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "compareRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "view",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options",
+              "type": "PrintOptions",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "handlePrintCompareOverlay",
+          "name": "handlePrintCompareOverlay",
+          "longname": "handlePrintCompareOverlay",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 682,
+          "description": "Print the overlay view as ONE page: page B over page A (or the other way round after a swap) at the current opacity, each page with its own compare transform.",
+          "params": [
+            {
+              "name": "primaryRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page A (left) render handle."
+            },
+            {
+              "name": "compareRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page B (right) render handle."
+            },
+            {
+              "name": "view",
+              "type": "CompareOverlayPrintView",
+              "optional": false,
+              "description": "Current overlay settings and calibration."
+            },
+            {
+              "name": "options",
+              "type": "PrintOptions",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "handlePrintCompareCurtain",
+          "name": "handlePrintCompareCurtain",
+          "longname": "handlePrintCompareCurtain",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 698,
+          "description": "Print the curtain view as ONE page: page A with page B clipped at the current border, each page with its own compare transform.",
+          "params": [
+            {
+              "name": "primaryRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page A (left) render handle."
+            },
+            {
+              "name": "compareRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page B (right) render handle."
+            },
+            {
+              "name": "view",
+              "type": "CompareCurtainPrintView",
+              "optional": false,
+              "description": "Current border orientation/position and calibration."
+            },
+            {
+              "name": "options",
+              "type": "PrintOptions",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "collectAllPrintableDataUrlsFromDom",
           "name": "collectAllPrintableDataUrlsFromDom",
           "longname": "collectAllPrintableDataUrlsFromDom",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 390,
+          "line": 711,
           "description": "Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list.",
           "params": [
             {
@@ -51206,7 +51766,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 409,
+          "line": 730,
           "description": "Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.",
           "params": [
             {
@@ -51237,7 +51797,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 443,
+          "line": 764,
           "description": "Print all available pages in viewer order.",
           "params": [
             {
@@ -51268,7 +51828,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 516,
+          "line": 837,
           "description": "Print an explicit page sequence such as 3,1,2 .",
           "params": [
             {
@@ -51305,7 +51865,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 585,
+          "line": 906,
           "description": "Print an inclusive page range.",
           "params": [
             {
@@ -51380,11 +51940,41 @@
           "line": 20,
           "kind": "static",
           "resolved": "src/utils/printSanitize.js"
+        },
+        {
+          "source": "./compareTransform.js",
+          "specifiers": [
+            "normalizeCompareTransform",
+            "selectCompareTransform",
+            "splitTransformRotation"
+          ],
+          "line": 21,
+          "kind": "static",
+          "resolved": "src/utils/compareTransform.js"
+        },
+        {
+          "source": "./compareOverlay.js",
+          "specifiers": [
+            "clampOverlayOpacity",
+            "getOverlayBottomTarget"
+          ],
+          "line": 22,
+          "kind": "static",
+          "resolved": "src/utils/compareOverlay.js"
+        },
+        {
+          "source": "./compareCurtain.js",
+          "specifiers": [
+            "clampCurtainPosition"
+          ],
+          "line": 23,
+          "kind": "static",
+          "resolved": "src/utils/compareCurtain.js"
         }
       ],
       "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 61,
+      "incomingLocalImports": 2,
+      "importanceScore": 77,
       "summary": "Core print coordinator for the frontend.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -52482,9 +53072,9 @@
     },
     {
       "path": "src/utils/printPdf.js",
-      "lines": 2297,
+      "lines": 2358,
       "extension": ".js",
-      "jsdocBlockCount": 100,
+      "jsdocBlockCount": 103,
       "sourceSummary": "OpenDocViewer — Generated PDF print backend.",
       "imports": [
         {
@@ -52564,9 +53154,18 @@
           "kind": "static"
         },
         {
+          "source": "./printCore.js",
+          "specifiers": [
+            "composeCompareCurtainCanvas",
+            "composeCompareOverlayCanvas"
+          ],
+          "line": 22,
+          "kind": "static"
+        },
+        {
           "source": "jspdf",
           "specifiers": [],
-          "line": 1644,
+          "line": 1645,
           "kind": "dynamic"
         }
       ],
@@ -52574,564 +53173,589 @@
         {
           "name": "createPrintPdfBlob",
           "kind": "function",
-          "line": 1662
+          "line": 1663
         },
         {
           "name": "downloadPdfBlob",
           "kind": "function",
-          "line": 1814
+          "line": 1815
         },
         {
           "name": "printPdfBlob",
           "kind": "function",
-          "line": 1834
+          "line": 1835
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2128
+          "line": 2129
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2152
+          "line": 2153
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2163
+          "line": 2164
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2256
+          "line": 2257
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2279
+          "line": 2280
+        },
+        {
+          "name": "handlePdfCompareOverlay",
+          "kind": "function",
+          "line": 2341
+        },
+        {
+          "name": "handlePdfCompareCurtain",
+          "kind": "function",
+          "line": 2355
         }
       ],
       "declarations": [
         {
           "name": "escapeRegExp",
           "kind": "function",
-          "line": 28
+          "line": 29
         },
         {
           "name": "asNumber",
           "kind": "function",
-          "line": 216
+          "line": 217
         },
         {
           "name": "normalizeQuality",
           "kind": "function",
-          "line": 228
+          "line": 229
         },
         {
           "name": "clamp01",
           "kind": "function",
-          "line": 241
+          "line": 242
         },
         {
           "name": "createAbortError",
           "kind": "function",
-          "line": 248
+          "line": 249
         },
         {
           "name": "throwIfAborted",
           "kind": "function",
-          "line": 265
+          "line": 266
         },
         {
           "name": "yieldToBrowser",
           "kind": "function",
-          "line": 275
+          "line": 276
         },
         {
           "name": "isBoldFontWeight",
           "kind": "function",
-          "line": 292
+          "line": 293
         },
         {
           "name": "parseTextStyleDeclarations",
           "kind": "function",
-          "line": 304
+          "line": 305
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 305
+          "line": 306
         },
         {
           "name": "parseTemplateCssClassSelector",
           "kind": "function",
-          "line": 334
+          "line": 335
         },
         {
           "name": "elementMatchesClassSelectorPart",
           "kind": "function",
-          "line": 358
+          "line": 359
         },
         {
           "name": "templateCssRuleMatchesElement",
           "kind": "function",
-          "line": 367
+          "line": 368
         },
         {
           "name": "parseTemplateCssStyleRules",
           "kind": "function",
-          "line": 397
+          "line": 398
         },
         {
           "name": "getElementStyleHints",
           "kind": "function",
-          "line": 419
+          "line": 420
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 420
+          "line": 421
         },
         {
           "name": "isBlockNode",
           "kind": "function",
-          "line": 435
+          "line": 436
         },
         {
           "name": "stripDisallowedTemplateElements",
           "kind": "function",
-          "line": 447
+          "line": 448
         },
         {
           "name": "sanitizeTemplateHtmlForPdf",
           "kind": "function",
-          "line": 484
+          "line": 485
         },
         {
           "name": "sanitizeParsedTemplateDocument",
           "kind": "function",
-          "line": 498
+          "line": 499
         },
         {
           "name": "richLineHasText",
           "kind": "function",
-          "line": 513
+          "line": 514
         },
         {
           "name": "richLineIsEmpty",
           "kind": "function",
-          "line": 521
+          "line": 522
         },
         {
           "name": "swapRichLineBufferContents",
           "kind": "function",
-          "line": 533
+          "line": 534
         },
         {
           "name": "ensureWritableRichLine",
           "kind": "function",
-          "line": 544
+          "line": 545
         },
         {
           "name": "appendRichLineBreak",
           "kind": "function",
-          "line": 552
+          "line": 553
         },
         {
           "name": "appendRichText",
           "kind": "function",
-          "line": 562
+          "line": 563
         },
         {
           "name": "appendRichColumnLine",
           "kind": "function",
-          "line": 591
+          "line": 592
         },
         {
           "name": "flattenRichLines",
           "kind": "function",
-          "line": 611
+          "line": 612
         },
         {
           "name": "htmlToRichLines",
           "kind": "function",
-          "line": 635
+          "line": 636
         },
         {
           "name": "walk",
           "kind": "function",
-          "line": 650
+          "line": 651
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 666
+          "line": 667
         },
         {
           "name": "renderOverlayRichLines",
           "kind": "function",
-          "line": 730
+          "line": 731
         },
         {
           "name": "loadImage",
           "kind": "function",
-          "line": 746
+          "line": 747
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 757
+          "line": 758
         },
         {
           "name": "onAbort",
           "kind": "function",
-          "line": 766
+          "line": 767
         },
         {
           "name": "describeImageSource",
           "kind": "function",
-          "line": 796
+          "line": 797
         },
         {
           "name": "sanitizeDiagnosticText",
           "kind": "function",
-          "line": 809
+          "line": 810
         },
         {
           "name": "describeValueType",
           "kind": "function",
-          "line": 822
+          "line": 823
         },
         {
           "name": "loadImagesConcurrently",
           "kind": "function",
-          "line": 837
+          "line": 838
         },
         {
           "name": "takeNextIndex",
           "kind": "function",
-          "line": 848
+          "line": 849
         },
         {
           "name": "reportImageLoaded",
           "kind": "function",
-          "line": 852
+          "line": 853
         },
         {
           "name": "loadNext",
           "kind": "function",
-          "line": 857
+          "line": 858
         },
         {
           "name": "inferImageFormat",
           "kind": "function",
-          "line": 878
+          "line": 879
         },
         {
           "name": "imageExtensionFromUrl",
           "kind": "function",
-          "line": 893
+          "line": 894
         },
         {
           "name": "imageToJpegDataUrl",
           "kind": "function",
-          "line": 914
+          "line": 915
         },
         {
           "name": "getImageDimension",
           "kind": "function",
-          "line": 940
+          "line": 941
         },
         {
           "name": "imageFormatAttempts",
           "kind": "function",
-          "line": 951
+          "line": 952
         },
         {
           "name": "addImageWithFallback",
           "kind": "function",
-          "line": 967
+          "line": 968
         },
         {
           "name": "normalizePdfOrientationMode",
           "kind": "function",
-          "line": 999
+          "line": 1000
         },
         {
           "name": "resolvePdfOrientationMode",
           "kind": "function",
-          "line": 1009
+          "line": 1010
         },
         {
           "name": "pageFormatForImage",
           "kind": "function",
-          "line": 1028
+          "line": 1029
         },
         {
           "name": "createJsPdfOptions",
           "kind": "function",
-          "line": 1040
+          "line": 1041
         },
         {
           "name": "normalizeRichSegments",
           "kind": "function",
-          "line": 1056
+          "line": 1057
         },
         {
           "name": "getRichLineColumns",
           "kind": "function",
-          "line": 1073
+          "line": 1074
         },
         {
           "name": "normalizeRichLine",
           "kind": "function",
-          "line": 1097
+          "line": 1098
         },
         {
           "name": "segmentFontStyle",
           "kind": "function",
-          "line": 1109
+          "line": 1110
         },
         {
           "name": "measureRichSegment",
           "kind": "function",
-          "line": 1122
+          "line": 1123
         },
         {
           "name": "measureRichSegments",
           "kind": "function",
-          "line": 1134
+          "line": 1135
         },
         {
           "name": "createDefaultSegment",
           "kind": "function",
-          "line": 1143
+          "line": 1144
         },
         {
           "name": "fitRichSegmentTextToWidth",
           "kind": "function",
-          "line": 1154
+          "line": 1155
         },
         {
           "name": "fitRichSegmentsToWidth",
           "kind": "function",
-          "line": 1184
+          "line": 1185
         },
         {
           "name": "layoutRichColumns",
           "kind": "function",
-          "line": 1228
+          "line": 1229
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 1282
+          "line": 1283
         },
         {
           "name": "wrapRichLines",
           "kind": "function",
-          "line": 1309
+          "line": 1310
         },
         {
           "name": "nextSegment",
           "kind": "object",
-          "line": 1330
+          "line": 1331
         },
         {
           "name": "drawRichSegments",
           "kind": "function",
-          "line": 1359
+          "line": 1360
         },
         {
           "name": "drawRichTextBlock",
           "kind": "function",
-          "line": 1382
+          "line": 1383
         },
         {
           "name": "drawWatermark",
           "kind": "function",
-          "line": 1414
+          "line": 1415
         },
         {
           "name": "drawWatermarkImage",
           "kind": "function",
-          "line": 1461
+          "line": 1462
         },
         {
           "name": "makeTokenContext",
           "kind": "function",
-          "line": 1495
+          "line": 1496
         },
         {
           "name": "reportProgress",
           "kind": "function",
-          "line": 1510
+          "line": 1511
         },
         {
           "name": "resolvePdfImageLoadConcurrency",
           "kind": "function",
-          "line": 1523
+          "line": 1524
         },
         {
           "name": "resolvePdfWorkerPlan",
           "kind": "function",
-          "line": 1536
+          "line": 1537
         },
         {
           "name": "buildPdfPagePlans",
           "kind": "function",
-          "line": 1559
+          "line": 1560
         },
         {
           "name": "createPrintPdfBlobInWorker",
           "kind": "function",
-          "line": 1580
+          "line": 1581
         },
         {
           "name": "pdfCfg",
           "kind": "object",
-          "line": 1581
+          "line": 1582
         },
         {
           "name": "calculateOverlayReserve",
           "kind": "function",
-          "line": 1604
+          "line": 1605
         },
         {
           "name": "resolveJsPdfConstructor",
           "kind": "function",
-          "line": 1616
+          "line": 1617
         },
         {
           "name": "describeModuleExports",
           "kind": "function",
-          "line": 1629
+          "line": 1630
         },
         {
           "name": "loadJsPdf",
           "kind": "function",
-          "line": 1642
+          "line": 1643
         },
         {
           "name": "createPrintPdfBlob",
           "kind": "function",
-          "line": 1662
+          "line": 1663
         },
         {
           "name": "downloadPdfBlob",
           "kind": "function",
-          "line": 1814
+          "line": 1815
         },
         {
           "name": "printPdfBlob",
           "kind": "function",
-          "line": 1834
+          "line": 1835
         },
         {
           "name": "addCleanupListener",
           "kind": "function",
-          "line": 1860
+          "line": 1861
         },
         {
           "name": "handler",
           "kind": "function",
-          "line": 1862
+          "line": 1863
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 1880
+          "line": 1881
         },
         {
           "name": "settleResolve",
           "kind": "function",
-          "line": 1906
+          "line": 1907
         },
         {
           "name": "settleReject",
           "kind": "function",
-          "line": 1911
+          "line": 1912
         },
         {
           "name": "tryWindowFallback",
           "kind": "function",
-          "line": 1917
+          "line": 1918
         },
         {
           "name": "invokePrint",
           "kind": "function",
-          "line": 1961
+          "line": 1962
         },
         {
           "name": "selectPageContexts",
           "kind": "function",
-          "line": 2025
+          "line": 2026
         },
         {
           "name": "executeOutputAction",
           "kind": "function",
-          "line": 2035
+          "line": 2036
         },
         {
           "name": "warnDeprecatedPrintableUrlExportAlias",
           "kind": "function",
-          "line": 2051
+          "line": 2052
         },
         {
           "name": "getSelectedPrintableDataUrls",
           "kind": "function",
-          "line": 2070
+          "line": 2071
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2128
+          "line": 2129
         },
         {
           "name": "pageNumberToIndex",
           "kind": "function",
-          "line": 2139
+          "line": 2140
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2152
+          "line": 2153
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2163
+          "line": 2164
         },
         {
           "name": "printableSourceFromElement",
           "kind": "function",
-          "line": 2179
+          "line": 2180
         },
         {
           "name": "canvasToPngDataUrl",
           "kind": "function",
-          "line": 2206
+          "line": 2207
         },
         {
           "name": "canvasToBlob",
           "kind": "function",
-          "line": 2220
+          "line": 2221
         },
         {
           "name": "blobToDataUrl",
           "kind": "function",
-          "line": 2235
+          "line": 2236
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2256
+          "line": 2257
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2279
+          "line": 2280
+        },
+        {
+          "name": "pdfComposedComparison",
+          "kind": "function",
+          "line": 2310
+        },
+        {
+          "name": "handlePdfCompareOverlay",
+          "kind": "function",
+          "line": 2341
+        },
+        {
+          "name": "handlePdfCompareCurtain",
+          "kind": "function",
+          "line": 2355
         }
       ],
       "parseError": null,
@@ -53147,7 +53771,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 28,
+          "line": 29,
           "description": "Escape regular-expression metacharacters in literal text.",
           "params": [
             {
@@ -53172,7 +53796,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 156,
+          "line": 157,
           "description": "",
           "params": [],
           "returns": [],
@@ -53185,7 +53809,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 175,
+          "line": 176,
           "description": "",
           "params": [],
           "returns": [],
@@ -53198,7 +53822,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 185,
+          "line": 186,
           "description": "",
           "params": [],
           "returns": [],
@@ -53211,7 +53835,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 191,
+          "line": 192,
           "description": "",
           "params": [],
           "returns": [],
@@ -53224,7 +53848,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 199,
+          "line": 200,
           "description": "",
           "params": [],
           "returns": [],
@@ -53237,7 +53861,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 207,
+          "line": 208,
           "description": "",
           "params": [],
           "returns": [],
@@ -53250,7 +53874,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 216,
+          "line": 217,
           "description": "Convert a value to a finite number for PDF layout calculations.",
           "params": [
             {
@@ -53275,7 +53899,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 228,
+          "line": 229,
           "description": "Normalize canvas/PDF image quality to the browser-supported 0..1 range.",
           "params": [
             {
@@ -53312,7 +53936,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 241,
+          "line": 242,
           "description": "Clamp a numeric value to the inclusive 0..1 range.",
           "params": [
             {
@@ -53337,7 +53961,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 248,
+          "line": 249,
           "description": "",
           "params": [],
           "returns": [
@@ -53355,7 +53979,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 265,
+          "line": 266,
           "description": "Stop PDF generation as soon as the caller cancels the operation.",
           "params": [
             {
@@ -53380,7 +54004,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 275,
+          "line": 276,
           "description": "Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread.",
           "params": [
             {
@@ -53405,7 +54029,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 292,
+          "line": 293,
           "description": "Check whether a CSS font-weight value should be treated as bold text.",
           "params": [
             {
@@ -53430,7 +54054,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 304,
+          "line": 305,
           "description": "",
           "params": [
             {
@@ -53455,7 +54079,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 334,
+          "line": 335,
           "description": "Parse a supported class-only selector into descendant selector parts.",
           "params": [
             {
@@ -53480,7 +54104,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 358,
+          "line": 359,
           "description": "",
           "params": [
             {
@@ -53511,7 +54135,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 367,
+          "line": 368,
           "description": "",
           "params": [
             {
@@ -53542,7 +54166,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 397,
+          "line": 398,
           "description": "Parse only the small CSS subset used by trusted print header/footer templates.",
           "params": [
             {
@@ -53567,7 +54191,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 419,
+          "line": 420,
           "description": "",
           "params": [
             {
@@ -53598,7 +54222,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 435,
+          "line": 436,
           "description": "Check whether an HTML node name should be treated as block-level in PDF text flow.",
           "params": [
             {
@@ -53623,7 +54247,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 447,
+          "line": 448,
           "description": "Remove elements that are never meaningful in generated PDF header/footer text.",
           "params": [
             {
@@ -53648,7 +54272,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 484,
+          "line": 485,
           "description": "Keep generated-PDF print templates inside the small rich-text subset consumed below.",
           "params": [
             {
@@ -53673,7 +54297,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 498,
+          "line": 499,
           "description": "Keep only the attributes used by the generated-PDF rich text subset.",
           "params": [
             {
@@ -53698,7 +54322,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 513,
+          "line": 514,
           "description": "",
           "params": [
             {
@@ -53723,7 +54347,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 521,
+          "line": 522,
           "description": "",
           "params": [
             {
@@ -53748,7 +54372,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 533,
+          "line": 534,
           "description": "Replace one line buffer with another while preserving the original array object.",
           "params": [
             {
@@ -53779,7 +54403,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 544,
+          "line": 545,
           "description": "",
           "params": [
             {
@@ -53804,7 +54428,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 552,
+          "line": 553,
           "description": "",
           "params": [
             {
@@ -53829,7 +54453,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 562,
+          "line": 563,
           "description": "",
           "params": [
             {
@@ -53866,7 +54490,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 591,
+          "line": 592,
           "description": "",
           "params": [
             {
@@ -53897,7 +54521,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 611,
+          "line": 612,
           "description": "",
           "params": [
             {
@@ -53922,7 +54546,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 635,
+          "line": 636,
           "description": "Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF.",
           "params": [
             {
@@ -53953,7 +54577,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/printPdf.js",
-          "line": 650,
+          "line": 651,
           "description": "",
           "params": [
             {
@@ -53984,7 +54608,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 730,
+          "line": 731,
           "description": "",
           "params": [
             {
@@ -54027,7 +54651,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 746,
+          "line": 747,
           "description": "",
           "params": [
             {
@@ -54058,7 +54682,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 796,
+          "line": 797,
           "description": "",
           "params": [
             {
@@ -54083,7 +54707,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 809,
+          "line": 810,
           "description": "",
           "params": [
             {
@@ -54108,7 +54732,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 822,
+          "line": 823,
           "description": "",
           "params": [
             {
@@ -54133,7 +54757,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 837,
+          "line": 838,
           "description": "",
           "params": [
             {
@@ -54176,7 +54800,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 878,
+          "line": 879,
           "description": "",
           "params": [
             {
@@ -54201,7 +54825,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 893,
+          "line": 894,
           "description": "",
           "params": [
             {
@@ -54226,7 +54850,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 914,
+          "line": 915,
           "description": "Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly.",
           "params": [
             {
@@ -54257,7 +54881,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 940,
+          "line": 941,
           "description": "",
           "params": [
             {
@@ -54288,7 +54912,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 951,
+          "line": 952,
           "description": "",
           "params": [
             {
@@ -54313,7 +54937,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 967,
+          "line": 968,
           "description": "",
           "params": [
             {
@@ -54374,7 +54998,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 999,
+          "line": 1000,
           "description": "",
           "params": [
             {
@@ -54405,7 +55029,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1009,
+          "line": 1010,
           "description": "",
           "params": [
             {
@@ -54430,7 +55054,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1028,
+          "line": 1029,
           "description": "",
           "params": [
             {
@@ -54467,7 +55091,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1040,
+          "line": 1041,
           "description": "",
           "params": [
             {
@@ -54504,7 +55128,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1056,
+          "line": 1057,
           "description": "",
           "params": [
             {
@@ -54529,7 +55153,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1073,
+          "line": 1074,
           "description": "",
           "params": [
             {
@@ -54554,7 +55178,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1097,
+          "line": 1098,
           "description": "",
           "params": [
             {
@@ -54579,7 +55203,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1109,
+          "line": 1110,
           "description": "",
           "params": [
             {
@@ -54604,7 +55228,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1122,
+          "line": 1123,
           "description": "",
           "params": [
             {
@@ -54641,7 +55265,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1134,
+          "line": 1135,
           "description": "",
           "params": [
             {
@@ -54678,7 +55302,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1143,
+          "line": 1144,
           "description": "",
           "params": [
             {
@@ -54703,7 +55327,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1154,
+          "line": 1155,
           "description": "",
           "params": [
             {
@@ -54746,7 +55370,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1184,
+          "line": 1185,
           "description": "",
           "params": [
             {
@@ -54789,7 +55413,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1228,
+          "line": 1229,
           "description": "",
           "params": [
             {
@@ -54832,7 +55456,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1309,
+          "line": 1310,
           "description": "",
           "params": [
             {
@@ -54881,7 +55505,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1359,
+          "line": 1360,
           "description": "",
           "params": [
             {
@@ -54924,7 +55548,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1382,
+          "line": 1383,
           "description": "",
           "params": [
             {
@@ -54991,7 +55615,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1414,
+          "line": 1415,
           "description": "",
           "params": [
             {
@@ -55034,7 +55658,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1461,
+          "line": 1462,
           "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
           "params": [
             {
@@ -55077,7 +55701,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1495,
+          "line": 1496,
           "description": "",
           "params": [
             {
@@ -55102,7 +55726,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1510,
+          "line": 1511,
           "description": "",
           "params": [
             {
@@ -55133,7 +55757,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1523,
+          "line": 1524,
           "description": "",
           "params": [
             {
@@ -55158,7 +55782,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1536,
+          "line": 1537,
           "description": "Resolve the generated-PDF worker plan.",
           "params": [
             {
@@ -55189,7 +55813,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1559,
+          "line": 1560,
           "description": "",
           "params": [
             {
@@ -55220,7 +55844,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1580,
+          "line": 1581,
           "description": "",
           "params": [
             {
@@ -55263,7 +55887,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1604,
+          "line": 1605,
           "description": "",
           "params": [
             {
@@ -55306,7 +55930,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1616,
+          "line": 1617,
           "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
           "params": [
             {
@@ -55331,7 +55955,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1629,
+          "line": 1630,
           "description": "",
           "params": [
             {
@@ -55356,7 +55980,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1642,
+          "line": 1643,
           "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
           "params": [],
           "returns": [
@@ -55374,7 +55998,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1662,
+          "line": 1663,
           "description": "Build a PDF blob from page image URLs and print metadata.",
           "params": [
             {
@@ -55405,7 +56029,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1814,
+          "line": 1815,
           "description": "",
           "params": [
             {
@@ -55436,7 +56060,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1834,
+          "line": 1835,
           "description": "Print a generated PDF through a hidden iframe.",
           "params": [
             {
@@ -55461,7 +56085,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2025,
+          "line": 2026,
           "description": "",
           "params": [
             {
@@ -55492,7 +56116,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2035,
+          "line": 2036,
           "description": "",
           "params": [
             {
@@ -55529,7 +56153,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2051,
+          "line": 2052,
           "description": "",
           "params": [
             {
@@ -55554,7 +56178,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2070,
+          "line": 2071,
           "description": "Read printable page image URLs from the document renderer.",
           "params": [
             {
@@ -55591,7 +56215,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2128,
+          "line": 2129,
           "description": "Collect printable page image URLs without creating or opening a PDF.",
           "params": [
             {
@@ -55628,7 +56252,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2139,
+          "line": 2140,
           "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
           "params": [
             {
@@ -55659,7 +56283,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2152,
+          "line": 2153,
           "description": "",
           "params": [
             {
@@ -55696,7 +56320,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2163,
+          "line": 2164,
           "description": "",
           "params": [
             {
@@ -55733,7 +56357,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2179,
+          "line": 2180,
           "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
           "params": [
             {
@@ -55758,7 +56382,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2206,
+          "line": 2207,
           "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
           "params": [
             {
@@ -55783,7 +56407,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2220,
+          "line": 2221,
           "description": "",
           "params": [
             {
@@ -55814,7 +56438,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2235,
+          "line": 2236,
           "description": "",
           "params": [
             {
@@ -55839,7 +56463,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2256,
+          "line": 2257,
           "description": "Generate/print/download a PDF from the currently rendered active page surface.",
           "params": [
             {
@@ -55870,7 +56494,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2279,
+          "line": 2280,
           "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
           "params": [
             {
@@ -55884,6 +56508,147 @@
               "type": "Object",
               "optional": false,
               "description": ""
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<(Blob|void)>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "pdfComposedComparison",
+          "name": "pdfComposedComparison",
+          "longname": "pdfComposedComparison",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printPdf.js",
+          "line": 2310,
+          "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
+          "params": [
+            {
+              "name": "viewName",
+              "type": "string",
+              "optional": false,
+              "description": "overlay or curtain , for the error messages."
+            },
+            {
+              "name": "compose",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "primaryRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "compareRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "view",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<(Blob|void)>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "handlePdfCompareOverlay",
+          "name": "handlePdfCompareOverlay",
+          "longname": "handlePdfCompareOverlay",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printPdf.js",
+          "line": 2341,
+          "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
+          "params": [
+            {
+              "name": "primaryRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page A (left) render handle."
+            },
+            {
+              "name": "compareRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page B (right) render handle."
+            },
+            {
+              "name": "view",
+              "type": "Object",
+              "optional": false,
+              "description": "{ opacity, top, transforms, zoom?, stage? } (see CompareOverlayPrintView)."
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<(Blob|void)>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "handlePdfCompareCurtain",
+          "name": "handlePdfCompareCurtain",
+          "longname": "handlePdfCompareCurtain",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printPdf.js",
+          "line": 2355,
+          "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
+          "params": [
+            {
+              "name": "primaryRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page A (left) render handle."
+            },
+            {
+              "name": "compareRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": "Page B (right) render handle."
+            },
+            {
+              "name": "view",
+              "type": "Object",
+              "optional": false,
+              "description": "{ mode, position, transforms, zoom?, stage? } (see CompareCurtainPrintView)."
             },
             {
               "name": "options",
@@ -55969,6 +56734,16 @@
           "line": 21,
           "kind": "static",
           "resolved": "src/utils/pdfWorkerDispatcher.js"
+        },
+        {
+          "source": "./printCore.js",
+          "specifiers": [
+            "composeCompareCurtainCanvas",
+            "composeCompareOverlayCanvas"
+          ],
+          "line": 22,
+          "kind": "static",
+          "resolved": "src/utils/printCore.js"
         }
       ],
       "packageImports": [
@@ -55991,7 +56766,7 @@
         {
           "source": "jspdf",
           "specifiers": [],
-          "line": 1644,
+          "line": 1645,
           "kind": "dynamic"
         }
       ],
@@ -57290,9 +58065,9 @@
     },
     {
       "path": "src/utils/printUtils.js",
-      "lines": 110,
+      "lines": 138,
       "extension": ".js",
-      "jsdocBlockCount": 14,
+      "jsdocBlockCount": 18,
       "sourceSummary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
       "imports": [
         {
@@ -57301,6 +58076,8 @@
             "handlePrint",
             "handlePrintAll",
             "handlePrintCurrentComparison",
+            "handlePrintCompareOverlay",
+            "handlePrintCompareCurtain",
             "handlePrintRange",
             "handlePrintSequence"
           ],
@@ -57321,6 +58098,8 @@
             "handlePdfOutput",
             "handlePdfCurrent",
             "handlePdfCurrentComparison",
+            "handlePdfCompareOverlay",
+            "handlePdfCompareCurtain",
             "createPrintPdfBlob",
             "printPdfBlob",
             "downloadPdfBlob"
@@ -57349,63 +58128,87 @@
           "line": 33
         },
         {
-          "name": "handlePrintRange",
+          "name": "handlePrintCompareOverlay",
           "kind": "named",
           "source": null,
           "line": 38
         },
         {
-          "name": "handlePrintSequence",
+          "name": "handlePrintCompareCurtain",
           "kind": "named",
           "source": null,
           "line": 43
         },
         {
-          "name": "parsePrintSequence",
+          "name": "handlePrintRange",
           "kind": "named",
           "source": null,
           "line": 48
         },
         {
-          "name": "handlePdfOutput",
+          "name": "handlePrintSequence",
           "kind": "named",
           "source": null,
           "line": 53
         },
         {
-          "name": "handlePdfCurrent",
+          "name": "parsePrintSequence",
           "kind": "named",
           "source": null,
           "line": 58
         },
         {
-          "name": "handlePdfCurrentComparison",
+          "name": "handlePdfOutput",
           "kind": "named",
           "source": null,
           "line": 63
         },
         {
-          "name": "createPrintPdfBlob",
+          "name": "handlePdfCurrent",
           "kind": "named",
           "source": null,
           "line": 68
         },
         {
-          "name": "printPdfBlob",
+          "name": "handlePdfCurrentComparison",
           "kind": "named",
           "source": null,
           "line": 73
         },
         {
-          "name": "downloadPdfBlob",
+          "name": "handlePdfCompareOverlay",
           "kind": "named",
           "source": null,
           "line": 78
         },
         {
+          "name": "handlePdfCompareCurtain",
+          "kind": "named",
+          "source": null,
+          "line": 83
+        },
+        {
+          "name": "createPrintPdfBlob",
+          "kind": "named",
+          "source": null,
+          "line": 88
+        },
+        {
+          "name": "printPdfBlob",
+          "kind": "named",
+          "source": null,
+          "line": 93
+        },
+        {
+          "name": "downloadPdfBlob",
+          "kind": "named",
+          "source": null,
+          "line": 98
+        },
+        {
           "name": "default",
           "kind": "default",
-          "line": 96
+          "line": 120
         }
       ],
       "declarations": [],
@@ -57468,13 +58271,39 @@
           "examples": 0
         },
         {
+          "id": "module:handlePrintCompareOverlay",
+          "name": "handlePrintCompareOverlay",
+          "longname": "module:handlePrintCompareOverlay",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 38,
+          "description": "Print the overlay view of the compare mode as one composed page through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePrintCompareCurtain",
+          "name": "handlePrintCompareCurtain",
+          "longname": "module:handlePrintCompareCurtain",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 43,
+          "description": "Print the curtain view of the compare mode as one composed page through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "module:handlePrintRange",
           "name": "handlePrintRange",
           "longname": "module:handlePrintRange",
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 38,
+          "line": 48,
           "description": "Print a specific page range through the HTML path.",
           "params": [],
           "returns": [],
@@ -57487,7 +58316,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 43,
+          "line": 53,
           "description": "Print a parsed custom page sequence through the HTML path.",
           "params": [],
           "returns": [],
@@ -57500,7 +58329,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 48,
+          "line": 58,
           "description": "Parse a user-entered &quot;Custom pages&quot; string into a page sequence.",
           "params": [],
           "returns": [],
@@ -57513,7 +58342,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 53,
+          "line": 63,
           "description": "Generate a PDF for the current selection/range and open the print dialog.",
           "params": [],
           "returns": [],
@@ -57526,7 +58355,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 58,
+          "line": 68,
           "description": "Generate a PDF for the current page and open the print dialog.",
           "params": [],
           "returns": [],
@@ -57539,8 +58368,34 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 63,
+          "line": 73,
           "description": "Generate a PDF for the current comparison pane and open the print dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePdfCompareOverlay",
+          "name": "handlePdfCompareOverlay",
+          "longname": "module:handlePdfCompareOverlay",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 78,
+          "description": "Generate a one-page PDF of the overlay view of the compare mode and open the print dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePdfCompareCurtain",
+          "name": "handlePdfCompareCurtain",
+          "longname": "module:handlePdfCompareCurtain",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 83,
+          "description": "Generate a one-page PDF of the curtain view of the compare mode and open the print dialog.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -57552,7 +58407,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 68,
+          "line": 88,
           "description": "Create a printable PDF blob from the current print job.",
           "params": [],
           "returns": [],
@@ -57565,7 +58420,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 73,
+          "line": 93,
           "description": "Print a generated PDF blob.",
           "params": [],
           "returns": [],
@@ -57578,7 +58433,7 @@
           "kind": "module",
           "scope": null,
           "file": "src/utils/printUtils.js",
-          "line": 78,
+          "line": 98,
           "description": "Download a generated PDF blob.",
           "params": [],
           "returns": [],
@@ -57591,7 +58446,7 @@
           "kind": "namespace",
           "scope": "static",
           "file": "src/utils/printUtils.js",
-          "line": 80,
+          "line": 100,
           "description": "Default print utilities namespace.",
           "params": [],
           "returns": [],
@@ -57606,6 +58461,8 @@
             "handlePrint",
             "handlePrintAll",
             "handlePrintCurrentComparison",
+            "handlePrintCompareOverlay",
+            "handlePrintCompareCurtain",
             "handlePrintRange",
             "handlePrintSequence"
           ],
@@ -57628,6 +58485,8 @@
             "handlePdfOutput",
             "handlePdfCurrent",
             "handlePdfCurrentComparison",
+            "handlePdfCompareOverlay",
+            "handlePdfCompareCurtain",
             "createPrintPdfBlob",
             "printPdfBlob",
             "downloadPdfBlob"
@@ -57639,7 +58498,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 2,
-      "importanceScore": 70,
+      "importanceScore": 71,
       "summary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -95176,13 +96035,50 @@
       "examples": 0
     },
     {
+      "id": "beginComposedPage",
+      "name": "beginComposedPage",
+      "longname": "beginComposedPage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 538,
+      "description": "Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint a white sheet.",
+      "params": [
+        {
+          "name": "primaryNode",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "compareNode",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "view",
+          "type": "CompareOverlayPrintView|CompareCurtainPrintView",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "collectAllPrintableDataUrlsFromDom",
       "name": "collectAllPrintableDataUrlsFromDom",
       "longname": "collectAllPrintableDataUrlsFromDom",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 390,
+      "line": 711,
       "description": "Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list.",
       "params": [
         {
@@ -95201,13 +96097,126 @@
       "examples": 0
     },
     {
+      "id": "CompareCurtainPrintView",
+      "name": "CompareCurtainPrintView",
+      "longname": "CompareCurtainPrintView",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 400,
+      "description": "View state of the curtain view needed to print it (utils/compareCurtain.js).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "CompareOverlayPrintView",
+      "name": "CompareOverlayPrintView",
+      "longname": "CompareOverlayPrintView",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 390,
+      "description": "View state of the overlay view needed to print it (utils/compareOverlay.js).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "composeCompareCurtainCanvas",
+      "name": "composeCompareCurtainCanvas",
+      "longname": "composeCompareCurtainCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 590,
+      "description": "Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border (below a horizontal border, right of a vertical one), each page with its own compa...",
+      "params": [
+        {
+          "name": "primaryNode",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": "Page A surface."
+        },
+        {
+          "name": "compareNode",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": "Page B surface."
+        },
+        {
+          "name": "view",
+          "type": "CompareCurtainPrintView",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "HTMLCanvasElement|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "composeCompareOverlayCanvas",
+      "name": "composeCompareOverlayCanvas",
+      "longname": "composeCompareOverlayCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 567,
+      "description": "Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view's opacity, each page with its own compare transform.",
+      "params": [
+        {
+          "name": "primaryNode",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": "Page A surface."
+        },
+        {
+          "name": "compareNode",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": "Page B surface."
+        },
+        {
+          "name": "view",
+          "type": "CompareOverlayPrintView",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "HTMLCanvasElement|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "ComposedPagePlacement",
+      "name": "ComposedPagePlacement",
+      "longname": "ComposedPagePlacement",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 410,
+      "description": "One page placed in the shared page-pixel space of a composed compare page.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createHiddenIframe",
       "name": "createHiddenIframe",
       "longname": "createHiddenIframe",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 235,
+      "line": 238,
       "description": "Create the temporary hidden iframe used as the print document host.",
       "params": [
         {
@@ -95226,13 +96235,56 @@
       "examples": 0
     },
     {
+      "id": "drawComposedPage",
+      "name": "drawComposedPage",
+      "longname": "drawComposedPage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 516,
+      "description": "Draw one placed page onto the composed canvas.",
+      "params": [
+        {
+          "name": "ctx",
+          "type": "CanvasRenderingContext2D",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "page",
+          "type": "ComposedPagePlacement",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "frame",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "k",
+          "type": "number",
+          "optional": false,
+          "description": "Output pixels per page pixel."
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "getODVConfig",
       "name": "getODVConfig",
       "longname": "getODVConfig",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 194,
+      "line": 197,
       "description": "Read runtime configuration from the globals populated by public/odv.config.js .",
       "params": [],
       "returns": [
@@ -95250,7 +96302,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 145,
+      "line": 148,
       "description": "Safely derive a printable data URL from an element that is either a or an .",
       "params": [
         {
@@ -95275,7 +96327,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 270,
+      "line": 273,
       "description": "Handles the print functionality for the CURRENT page/image.",
       "params": [
         {
@@ -95306,7 +96358,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 443,
+      "line": 764,
       "description": "Print all available pages in viewer order.",
       "params": [
         {
@@ -95331,13 +96383,99 @@
       "examples": 0
     },
     {
+      "id": "handlePrintCompareCurtain",
+      "name": "handlePrintCompareCurtain",
+      "longname": "handlePrintCompareCurtain",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 698,
+      "description": "Print the curtain view as ONE page: page A with page B clipped at the current border, each page with its own compare transform.",
+      "params": [
+        {
+          "name": "primaryRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page A (left) render handle."
+        },
+        {
+          "name": "compareRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page B (right) render handle."
+        },
+        {
+          "name": "view",
+          "type": "CompareCurtainPrintView",
+          "optional": false,
+          "description": "Current border orientation/position and calibration."
+        },
+        {
+          "name": "options",
+          "type": "PrintOptions",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "handlePrintCompareOverlay",
+      "name": "handlePrintCompareOverlay",
+      "longname": "handlePrintCompareOverlay",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 682,
+      "description": "Print the overlay view as ONE page: page B over page A (or the other way round after a swap) at the current opacity, each page with its own compare transform.",
+      "params": [
+        {
+          "name": "primaryRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page A (left) render handle."
+        },
+        {
+          "name": "compareRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page B (right) render handle."
+        },
+        {
+          "name": "view",
+          "type": "CompareOverlayPrintView",
+          "optional": false,
+          "description": "Current overlay settings and calibration."
+        },
+        {
+          "name": "options",
+          "type": "PrintOptions",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "handlePrintCurrentComparison",
       "name": "handlePrintCurrentComparison",
       "longname": "handlePrintCurrentComparison",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 339,
+      "line": 342,
       "description": "Print both currently visible compare panes as a two-page print job.",
       "params": [
         {
@@ -95374,7 +96512,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 585,
+      "line": 906,
       "description": "Print an inclusive page range.",
       "params": [
         {
@@ -95417,7 +96555,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 516,
+      "line": 837,
       "description": "Print an explicit page sequence such as 3,1,2 .",
       "params": [
         {
@@ -95454,7 +96592,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 89,
+      "line": 92,
       "description": "Return type for the hidden-iframe factory.",
       "params": [],
       "returns": [],
@@ -95467,7 +96605,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 103,
+      "line": 106,
       "description": "Check whether a candidate element is both present in layout and not hidden by basic CSS visibility.",
       "params": [
         {
@@ -95492,7 +96630,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 50,
+      "line": 53,
       "description": "A 1-based inclusive page range.",
       "params": [],
       "returns": [],
@@ -95505,7 +96643,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 120,
+      "line": 123,
       "description": "Best-effort: pick the largest visible or inside a container (or document).",
       "params": [
         {
@@ -95524,13 +96662,75 @@
       "examples": 0
     },
     {
+      "id": "placeComposedPage",
+      "name": "placeComposedPage",
+      "longname": "placeComposedPage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 447,
+      "description": "Placement of one page in the shared page-pixel space.",
+      "params": [
+        {
+          "name": "node",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "transform",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "zoom",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "ComposedPagePlacement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "placedPageBounds",
+      "name": "placedPageBounds",
+      "longname": "placedPageBounds",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 467,
+      "description": "",
+      "params": [
+        {
+          "name": "page",
+          "type": "ComposedPagePlacement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "PrintAllOptions",
       "name": "PrintAllOptions",
       "longname": "PrintAllOptions",
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 57,
+      "line": 60,
       "description": "Options for printing multiple pages (all/range/sequence).",
       "params": [],
       "returns": [],
@@ -95543,10 +96743,65 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 70,
+      "line": 73,
       "description": "Internal: candidate node for &quot;largest visible&quot; heuristics.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "printComposedComparison",
+      "name": "printComposedComparison",
+      "longname": "printComposedComparison",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 625,
+      "description": "Shared body of the overlay and curtain print (after their invoked log line): one composed page through the single-page print document, with the same config and base token context...",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "optional": false,
+          "description": "Calling function, for the log lines."
+        },
+        {
+          "name": "compose",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "primaryRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "compareRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "view",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options",
+          "type": "PrintOptions",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -95556,7 +96811,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 77,
+      "line": 80,
       "description": "Print header config (runtime) consumed by the print overlay logic.",
       "params": [],
       "returns": [],
@@ -95569,7 +96824,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 37,
+      "line": 40,
       "description": "Options for single-page printing.",
       "params": [],
       "returns": [],
@@ -95582,7 +96837,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 217,
+      "line": 220,
       "description": "Attempt to resolve the currently active visual node to print.",
       "params": [
         {
@@ -95613,7 +96868,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 409,
+      "line": 730,
       "description": "Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.",
       "params": [
         {
@@ -95638,13 +96893,50 @@
       "examples": 0
     },
     {
+      "id": "resolveComposeFrame",
+      "name": "resolveComposeFrame",
+      "longname": "resolveComposeFrame",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 490,
+      "description": "The area of the composed page in page pixels: the visible stage when its size is known (both pages share the stage's top-left as origin), otherwise the union of both transformed p...",
+      "params": [
+        {
+          "name": "pages",
+          "type": "Array.<ComposedPagePlacement>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "zoom",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "stage",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "resolveOrientation",
       "name": "resolveOrientation",
       "longname": "resolveOrientation",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 180,
+      "line": 183,
       "description": "Compute page orientation from dimensions when options.orientation === 'auto'.",
       "params": [
         {
@@ -95669,6 +96961,31 @@
       "returns": [
         {
           "type": "'portrait'|'landscape'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "surfaceSize",
+      "name": "surfaceSize",
+      "longname": "surfaceSize",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 429,
+      "description": "Intrinsic pixel size of a rendered page surface (the canvas already carries the quarter turn).",
+      "params": [
+        {
+          "name": "node",
+          "type": "HTMLCanvasElement|HTMLImageElement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
           "description": ""
         }
       ],
@@ -96453,7 +97770,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 967,
+      "line": 968,
       "description": "",
       "params": [
         {
@@ -96514,7 +97831,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 591,
+      "line": 592,
       "description": "",
       "params": [
         {
@@ -96545,7 +97862,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 552,
+      "line": 553,
       "description": "",
       "params": [
         {
@@ -96570,7 +97887,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 562,
+      "line": 563,
       "description": "",
       "params": [
         {
@@ -96607,7 +97924,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 216,
+      "line": 217,
       "description": "Convert a value to a finite number for PDF layout calculations.",
       "params": [
         {
@@ -96632,7 +97949,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2235,
+      "line": 2236,
       "description": "",
       "params": [
         {
@@ -96657,7 +97974,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1559,
+      "line": 1560,
       "description": "",
       "params": [
         {
@@ -96688,7 +98005,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1604,
+      "line": 1605,
       "description": "",
       "params": [
         {
@@ -96731,7 +98048,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2220,
+      "line": 2221,
       "description": "",
       "params": [
         {
@@ -96762,7 +98079,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2206,
+      "line": 2207,
       "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
       "params": [
         {
@@ -96787,7 +98104,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 241,
+      "line": 242,
       "description": "Clamp a numeric value to the inclusive 0..1 range.",
       "params": [
         {
@@ -96812,7 +98129,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2128,
+      "line": 2129,
       "description": "Collect printable page image URLs without creating or opening a PDF.",
       "params": [
         {
@@ -96849,7 +98166,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 248,
+      "line": 249,
       "description": "",
       "params": [],
       "returns": [
@@ -96867,7 +98184,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1143,
+      "line": 1144,
       "description": "",
       "params": [
         {
@@ -96892,7 +98209,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1040,
+      "line": 1041,
       "description": "",
       "params": [
         {
@@ -96929,7 +98246,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2152,
+      "line": 2153,
       "description": "",
       "params": [
         {
@@ -96966,7 +98283,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1662,
+      "line": 1663,
       "description": "Build a PDF blob from page image URLs and print metadata.",
       "params": [
         {
@@ -96997,7 +98314,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1580,
+      "line": 1581,
       "description": "",
       "params": [
         {
@@ -97040,7 +98357,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 796,
+      "line": 797,
       "description": "",
       "params": [
         {
@@ -97065,7 +98382,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1629,
+      "line": 1630,
       "description": "",
       "params": [
         {
@@ -97090,7 +98407,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 822,
+      "line": 823,
       "description": "",
       "params": [
         {
@@ -97115,7 +98432,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1814,
+      "line": 1815,
       "description": "",
       "params": [
         {
@@ -97146,7 +98463,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1359,
+      "line": 1360,
       "description": "",
       "params": [
         {
@@ -97189,7 +98506,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1382,
+      "line": 1383,
       "description": "",
       "params": [
         {
@@ -97256,7 +98573,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1414,
+      "line": 1415,
       "description": "",
       "params": [
         {
@@ -97299,7 +98616,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1461,
+      "line": 1462,
       "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
       "params": [
         {
@@ -97342,7 +98659,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 358,
+      "line": 359,
       "description": "",
       "params": [
         {
@@ -97373,7 +98690,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 544,
+      "line": 545,
       "description": "",
       "params": [
         {
@@ -97398,7 +98715,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 28,
+      "line": 29,
       "description": "Escape regular-expression metacharacters in literal text.",
       "params": [
         {
@@ -97423,7 +98740,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2035,
+      "line": 2036,
       "description": "",
       "params": [
         {
@@ -97460,7 +98777,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1184,
+      "line": 1185,
       "description": "",
       "params": [
         {
@@ -97503,7 +98820,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1154,
+      "line": 1155,
       "description": "",
       "params": [
         {
@@ -97546,7 +98863,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 611,
+      "line": 612,
       "description": "",
       "params": [
         {
@@ -97571,7 +98888,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 419,
+      "line": 420,
       "description": "",
       "params": [
         {
@@ -97602,7 +98919,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 940,
+      "line": 941,
       "description": "",
       "params": [
         {
@@ -97633,7 +98950,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1073,
+      "line": 1074,
       "description": "",
       "params": [
         {
@@ -97658,7 +98975,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2070,
+      "line": 2071,
       "description": "Read printable page image URLs from the document renderer.",
       "params": [
         {
@@ -97689,13 +99006,99 @@
       "examples": 0
     },
     {
+      "id": "handlePdfCompareCurtain",
+      "name": "handlePdfCompareCurtain",
+      "longname": "handlePdfCompareCurtain",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printPdf.js",
+      "line": 2355,
+      "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
+      "params": [
+        {
+          "name": "primaryRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page A (left) render handle."
+        },
+        {
+          "name": "compareRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page B (right) render handle."
+        },
+        {
+          "name": "view",
+          "type": "Object",
+          "optional": false,
+          "description": "{ mode, position, transforms, zoom?, stage? } (see CompareCurtainPrintView)."
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<(Blob|void)>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "handlePdfCompareOverlay",
+      "name": "handlePdfCompareOverlay",
+      "longname": "handlePdfCompareOverlay",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printPdf.js",
+      "line": 2341,
+      "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
+      "params": [
+        {
+          "name": "primaryRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page A (left) render handle."
+        },
+        {
+          "name": "compareRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": "Page B (right) render handle."
+        },
+        {
+          "name": "view",
+          "type": "Object",
+          "optional": false,
+          "description": "{ opacity, top, transforms, zoom?, stage? } (see CompareOverlayPrintView)."
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<(Blob|void)>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "handlePdfCurrent",
       "name": "handlePdfCurrent",
       "longname": "handlePdfCurrent",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2256,
+      "line": 2257,
       "description": "Generate/print/download a PDF from the currently rendered active page surface.",
       "params": [
         {
@@ -97726,7 +99129,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2279,
+      "line": 2280,
       "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
       "params": [
         {
@@ -97763,7 +99166,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2163,
+      "line": 2164,
       "description": "",
       "params": [
         {
@@ -97800,7 +99203,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 635,
+      "line": 636,
       "description": "Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF.",
       "params": [
         {
@@ -97831,7 +99234,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 893,
+      "line": 894,
       "description": "",
       "params": [
         {
@@ -97856,7 +99259,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 951,
+      "line": 952,
       "description": "",
       "params": [
         {
@@ -97881,7 +99284,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 914,
+      "line": 915,
       "description": "Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly.",
       "params": [
         {
@@ -97912,7 +99315,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 878,
+      "line": 879,
       "description": "",
       "params": [
         {
@@ -97937,7 +99340,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 435,
+      "line": 436,
       "description": "Check whether an HTML node name should be treated as block-level in PDF text flow.",
       "params": [
         {
@@ -97962,7 +99365,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 292,
+      "line": 293,
       "description": "Check whether a CSS font-weight value should be treated as bold text.",
       "params": [
         {
@@ -97987,7 +99390,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1228,
+      "line": 1229,
       "description": "",
       "params": [
         {
@@ -98030,7 +99433,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 746,
+      "line": 747,
       "description": "",
       "params": [
         {
@@ -98061,7 +99464,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 837,
+      "line": 838,
       "description": "",
       "params": [
         {
@@ -98104,7 +99507,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1642,
+      "line": 1643,
       "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
       "params": [],
       "returns": [
@@ -98122,7 +99525,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1495,
+      "line": 1496,
       "description": "",
       "params": [
         {
@@ -98147,7 +99550,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1122,
+      "line": 1123,
       "description": "",
       "params": [
         {
@@ -98184,7 +99587,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1134,
+      "line": 1135,
       "description": "",
       "params": [
         {
@@ -98221,7 +99624,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 999,
+      "line": 1000,
       "description": "",
       "params": [
         {
@@ -98252,7 +99655,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 228,
+      "line": 229,
       "description": "Normalize canvas/PDF image quality to the browser-supported 0..1 range.",
       "params": [
         {
@@ -98289,7 +99692,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1097,
+      "line": 1098,
       "description": "",
       "params": [
         {
@@ -98314,7 +99717,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1056,
+      "line": 1057,
       "description": "",
       "params": [
         {
@@ -98339,7 +99742,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1028,
+      "line": 1029,
       "description": "",
       "params": [
         {
@@ -98376,7 +99779,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2139,
+      "line": 2140,
       "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
       "params": [
         {
@@ -98407,7 +99810,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 334,
+      "line": 335,
       "description": "Parse a supported class-only selector into descendant selector parts.",
       "params": [
         {
@@ -98432,7 +99835,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 397,
+      "line": 398,
       "description": "Parse only the small CSS subset used by trusted print header/footer templates.",
       "params": [
         {
@@ -98457,7 +99860,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 304,
+      "line": 305,
       "description": "",
       "params": [
         {
@@ -98476,13 +99879,68 @@
       "examples": 0
     },
     {
+      "id": "pdfComposedComparison",
+      "name": "pdfComposedComparison",
+      "longname": "pdfComposedComparison",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printPdf.js",
+      "line": 2310,
+      "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
+      "params": [
+        {
+          "name": "viewName",
+          "type": "string",
+          "optional": false,
+          "description": "overlay or curtain , for the error messages."
+        },
+        {
+          "name": "compose",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "primaryRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "compareRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "view",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<(Blob|void)>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "PdfPrintOptions",
       "name": "PdfPrintOptions",
       "longname": "PdfPrintOptions",
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 156,
+      "line": 157,
       "description": "",
       "params": [],
       "returns": [],
@@ -98495,7 +99953,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 199,
+      "line": 200,
       "description": "",
       "params": [],
       "returns": [],
@@ -98508,7 +99966,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 207,
+      "line": 208,
       "description": "",
       "params": [],
       "returns": [],
@@ -98521,7 +99979,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 191,
+      "line": 192,
       "description": "",
       "params": [],
       "returns": [],
@@ -98534,7 +99992,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 185,
+      "line": 186,
       "description": "",
       "params": [],
       "returns": [],
@@ -98547,7 +100005,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 175,
+      "line": 176,
       "description": "",
       "params": [],
       "returns": [],
@@ -98560,7 +100018,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2179,
+      "line": 2180,
       "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
       "params": [
         {
@@ -98585,7 +100043,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1834,
+      "line": 1835,
       "description": "Print a generated PDF through a hidden iframe.",
       "params": [
         {
@@ -98610,7 +100068,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 730,
+      "line": 731,
       "description": "",
       "params": [
         {
@@ -98653,7 +100111,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1510,
+      "line": 1511,
       "description": "",
       "params": [
         {
@@ -98684,7 +100142,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1616,
+      "line": 1617,
       "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
       "params": [
         {
@@ -98709,7 +100167,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1523,
+      "line": 1524,
       "description": "",
       "params": [
         {
@@ -98734,7 +100192,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1009,
+      "line": 1010,
       "description": "",
       "params": [
         {
@@ -98759,7 +100217,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1536,
+      "line": 1537,
       "description": "Resolve the generated-PDF worker plan.",
       "params": [
         {
@@ -98790,7 +100248,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 513,
+      "line": 514,
       "description": "",
       "params": [
         {
@@ -98815,7 +100273,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 521,
+      "line": 522,
       "description": "",
       "params": [
         {
@@ -98840,7 +100298,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 809,
+      "line": 810,
       "description": "",
       "params": [
         {
@@ -98865,7 +100323,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 498,
+      "line": 499,
       "description": "Keep only the attributes used by the generated-PDF rich text subset.",
       "params": [
         {
@@ -98890,7 +100348,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 484,
+      "line": 485,
       "description": "Keep generated-PDF print templates inside the small rich-text subset consumed below.",
       "params": [
         {
@@ -98915,7 +100373,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1109,
+      "line": 1110,
       "description": "",
       "params": [
         {
@@ -98940,7 +100398,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2025,
+      "line": 2026,
       "description": "",
       "params": [
         {
@@ -98971,7 +100429,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 447,
+      "line": 448,
       "description": "Remove elements that are never meaningful in generated PDF header/footer text.",
       "params": [
         {
@@ -98996,7 +100454,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 533,
+      "line": 534,
       "description": "Replace one line buffer with another while preserving the original array object.",
       "params": [
         {
@@ -99027,7 +100485,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 367,
+      "line": 368,
       "description": "",
       "params": [
         {
@@ -99058,7 +100516,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 265,
+      "line": 266,
       "description": "Stop PDF generation as soon as the caller cancels the operation.",
       "params": [
         {
@@ -99083,7 +100541,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/printPdf.js",
-      "line": 650,
+      "line": 651,
       "description": "",
       "params": [
         {
@@ -99114,7 +100572,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2051,
+      "line": 2052,
       "description": "",
       "params": [
         {
@@ -99139,7 +100597,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1309,
+      "line": 1310,
       "description": "",
       "params": [
         {
@@ -99188,7 +100646,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 275,
+      "line": 276,
       "description": "Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread.",
       "params": [
         {
@@ -100196,7 +101654,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 68,
+      "line": 88,
       "description": "Create a printable PDF blob from the current print job.",
       "params": [],
       "returns": [],
@@ -100209,7 +101667,7 @@
       "kind": "namespace",
       "scope": "static",
       "file": "src/utils/printUtils.js",
-      "line": 80,
+      "line": 100,
       "description": "Default print utilities namespace.",
       "params": [],
       "returns": [],
@@ -100222,8 +101680,34 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 78,
+      "line": 98,
       "description": "Download a generated PDF blob.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePdfCompareCurtain",
+      "name": "handlePdfCompareCurtain",
+      "longname": "module:handlePdfCompareCurtain",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 83,
+      "description": "Generate a one-page PDF of the curtain view of the compare mode and open the print dialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePdfCompareOverlay",
+      "name": "handlePdfCompareOverlay",
+      "longname": "module:handlePdfCompareOverlay",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 78,
+      "description": "Generate a one-page PDF of the overlay view of the compare mode and open the print dialog.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -100235,7 +101719,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 58,
+      "line": 68,
       "description": "Generate a PDF for the current page and open the print dialog.",
       "params": [],
       "returns": [],
@@ -100248,7 +101732,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 63,
+      "line": 73,
       "description": "Generate a PDF for the current comparison pane and open the print dialog.",
       "params": [],
       "returns": [],
@@ -100261,7 +101745,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 53,
+      "line": 63,
       "description": "Generate a PDF for the current selection/range and open the print dialog.",
       "params": [],
       "returns": [],
@@ -100294,6 +101778,32 @@
       "examples": 0
     },
     {
+      "id": "module:handlePrintCompareCurtain",
+      "name": "handlePrintCompareCurtain",
+      "longname": "module:handlePrintCompareCurtain",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 43,
+      "description": "Print the curtain view of the compare mode as one composed page through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePrintCompareOverlay",
+      "name": "handlePrintCompareOverlay",
+      "longname": "module:handlePrintCompareOverlay",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 38,
+      "description": "Print the overlay view of the compare mode as one composed page through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:handlePrintCurrentComparison",
       "name": "handlePrintCurrentComparison",
       "longname": "module:handlePrintCurrentComparison",
@@ -100313,7 +101823,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 38,
+      "line": 48,
       "description": "Print a specific page range through the HTML path.",
       "params": [],
       "returns": [],
@@ -100326,7 +101836,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 43,
+      "line": 53,
       "description": "Print a parsed custom page sequence through the HTML path.",
       "params": [],
       "returns": [],
@@ -100339,7 +101849,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 48,
+      "line": 58,
       "description": "Parse a user-entered &quot;Custom pages&quot; string into a page sequence.",
       "params": [],
       "returns": [],
@@ -100352,7 +101862,7 @@
       "kind": "module",
       "scope": null,
       "file": "src/utils/printUtils.js",
-      "line": 73,
+      "line": 93,
       "description": "Print a generated PDF blob.",
       "params": [],
       "returns": [],

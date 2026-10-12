@@ -12,9 +12,9 @@
  * @module printUtils
  */
 
-import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from './printCore.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintCompareOverlay, handlePrintCompareCurtain, handlePrintRange, handlePrintSequence } from './printCore.js';
 import { parsePrintSequence } from './printParse.js';
-import { handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob } from './printPdf.js';
+import { handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, handlePdfCompareOverlay, handlePdfCompareCurtain, createPrintPdfBlob, printPdfBlob, downloadPdfBlob } from './printPdf.js';
 
 /**
  * Print the current selection/range through the HTML path.
@@ -31,6 +31,16 @@ export { handlePrintAll };
  * @exports handlePrintCurrentComparison
  */
 export { handlePrintCurrentComparison };
+/**
+ * Print the overlay view of the compare mode as one composed page through the HTML path.
+ * @exports handlePrintCompareOverlay
+ */
+export { handlePrintCompareOverlay };
+/**
+ * Print the curtain view of the compare mode as one composed page through the HTML path.
+ * @exports handlePrintCompareCurtain
+ */
+export { handlePrintCompareCurtain };
 /**
  * Print a specific page range through the HTML path.
  * @exports handlePrintRange
@@ -62,6 +72,16 @@ export { handlePdfCurrent };
  */
 export { handlePdfCurrentComparison };
 /**
+ * Generate a one-page PDF of the overlay view of the compare mode and open the print dialog.
+ * @exports handlePdfCompareOverlay
+ */
+export { handlePdfCompareOverlay };
+/**
+ * Generate a one-page PDF of the curtain view of the compare mode and open the print dialog.
+ * @exports handlePdfCompareCurtain
+ */
+export { handlePdfCompareCurtain };
+/**
  * Create a printable PDF blob from the current print job.
  * @exports createPrintPdfBlob
  */
@@ -83,12 +103,16 @@ export { downloadPdfBlob };
  * @property {function(...*):*} handlePrint
  * @property {function(...*):*} handlePrintAll
  * @property {function(...*):*} handlePrintCurrentComparison
+ * @property {function(...*):*} handlePrintCompareOverlay
+ * @property {function(...*):*} handlePrintCompareCurtain
  * @property {function(...*):*} handlePrintRange
  * @property {function(...*):*} handlePrintSequence
  * @property {function(string, number):Object} parsePrintSequence
  * @property {function(...*):*} handlePdfOutput
  * @property {function(...*):*} handlePdfCurrent
  * @property {function(...*):*} handlePdfCurrentComparison
+ * @property {function(...*):*} handlePdfCompareOverlay
+ * @property {function(...*):*} handlePdfCompareCurtain
  * @property {function(...*):Blob} createPrintPdfBlob
  * @property {function(Blob):void} printPdfBlob
  * @property {function(Blob, string):void} downloadPdfBlob
@@ -97,12 +121,16 @@ export default {
   handlePrint,
   handlePrintAll,
   handlePrintCurrentComparison,
+  handlePrintCompareOverlay,
+  handlePrintCompareCurtain,
   handlePrintRange,
   handlePrintSequence,
   parsePrintSequence,
   handlePdfOutput,
   handlePdfCurrent,
   handlePdfCurrentComparison,
+  handlePdfCompareOverlay,
+  handlePdfCompareCurtain,
   createPrintPdfBlob,
   printPdfBlob,
   downloadPdfBlob,

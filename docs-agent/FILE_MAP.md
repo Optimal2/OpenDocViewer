@@ -94,9 +94,9 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/PerformanceMonitor.jsx</code> | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | <code>src/schemas/portableBundle.js</code> | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
 | <code>src/types/jsdoc-types.js</code> | 101 | 0 | 13 | high | Centralized JSDoc-only type and callback definitions. |
-| <code>src/utils/compareCurtain.js</code> | 187 | 1 | 13 | high | File: src/utils/compareCurtain.js Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above,... |
-| <code>src/utils/compareOverlay.js</code> | 166 | 3 | 10 | high | File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi-transparent. |
-| <code>src/utils/compareTransform.js</code> | 353 | 10 | 24 | high | File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary = lef... |
+| <code>src/utils/compareCurtain.js</code> | 187 | 2 | 13 | high | File: src/utils/compareCurtain.js Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above,... |
+| <code>src/utils/compareOverlay.js</code> | 166 | 4 | 10 | high | File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi-transparent. |
+| <code>src/utils/compareTransform.js</code> | 353 | 11 | 24 | high | File: src/utils/compareTransform.js Free per-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary = lef... |
 | <code>src/utils/documentLoadingConfig.js</code> | 1099 | 14 | 34 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
 | <code>src/utils/documentMetadata.js</code> | 404 | 3 | 18 | high | Helpers for resolving document-level metadata from the normalized portable bundle. |
 | <code>src/utils/i18nVersion.js</code> | 69 | 1 | 4 | high | Cache-busting version token for the locale files \( locales/&amp;lt;lng&amp;gt;/common.json?v=&amp;lt;token&amp;gt; \). |
@@ -125,13 +125,13 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfSignatureStatus.js</code> | 348 | 7 | 22 | high | Signature UI status helpers for browser integrity and gateway trust. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
-| <code>src/utils/printCore.js</code> | 588 | 1 | 20 | high | Core print coordinator for the frontend. |
+| <code>src/utils/printCore.js</code> | 909 | 2 | 34 | high | Core print coordinator for the frontend. |
 | <code>src/utils/printDom.js</code> | 473 | 1 | 19 | high | OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\). |
 | <code>src/utils/printParse.js</code> | 100 | 1 | 3 | high | OpenDocViewer — Print Sequence Parser Parse a user-entered &quot;Custom pages&quot; string into a sequence of page indices. |
-| <code>src/utils/printPdf.js</code> | 2297 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |
+| <code>src/utils/printPdf.js</code> | 2358 | 3 | 95 | high | OpenDocViewer — Generated PDF print backend. |
 | <code>src/utils/printSanitize.js</code> | 23 | 4 | 1 | high | OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules. |
 | <code>src/utils/printTemplate.js</code> | 809 | 3 | 34 | high | OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates. |
-| <code>src/utils/printUtils.js</code> | 110 | 2 | 14 | high | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
+| <code>src/utils/printUtils.js</code> | 138 | 2 | 18 | high | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
 | <code>src/utils/printWatermark.js</code> | 80 | 2 | 5 | high | OpenDocViewer — Print watermark mode helpers. |
 | <code>src/utils/publicAssetUrl.js</code> | 29 | 6 | 1 | high | Resolve a public asset path against the viewer base URL. |
 | <code>src/utils/reloadCacheCrypto.js</code> | 165 | 2 | 3 | high | Short-lived reload-cache key helpers. |

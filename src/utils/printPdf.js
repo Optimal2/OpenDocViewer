@@ -19,6 +19,7 @@ import { isSafeImageSrc } from './printSanitize.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
 import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
 import { createPdfWithWorkerDispatcher, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
+import { composeCompareCurtainCanvas, composeCompareOverlayCanvas } from './printCore.js';
 
 /**
  * Escape regular-expression metacharacters in literal text.
@@ -2293,4 +2294,64 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
   throwIfAborted(options.signal);
   if (options.deferOutput === true) return blob;
   await executeOutputAction(blob, options, urls.length);
+}
+
+/**
+ * Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then
+ * generated/printed/downloaded like the single active page.
+ * @param {string} viewName `overlay` or `curtain`, for the error messages.
+ * @param {function(*, *, Object):(HTMLCanvasElement|null)} compose
+ * @param {{ current: * }} primaryRenderRef
+ * @param {{ current: * }} compareRenderRef
+ * @param {Object} view
+ * @param {Object} options
+ * @returns {Promise<Blob|void>}
+ */
+async function pdfComposedComparison(viewName, compose, primaryRenderRef, compareRenderRef, view, options) {
+  throwIfAborted(options.signal);
+  const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
+  const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
+  if (!primaryNode || !compareNode) {
+    const missing = [];
+    if (!primaryNode) missing.push('primary');
+    if (!compareNode) missing.push('compare');
+    throw new Error(`Both compared pages are required for the generated PDF of the ${viewName} view. Missing surface(s): ${missing.join(', ')}.`);
+  }
+  const composed = compose(primaryNode, compareNode, view);
+  const src = composed ? await printableSourceFromElement(composed) : null;
+  if (!src) {
+    throw new Error(`Unable to compose the compared pages of the ${viewName} view into one printable page. ${SAFE_IMAGE_SOURCE_HINT}`);
+  }
+  const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
+  throwIfAborted(options.signal);
+  if (options.deferOutput === true) return blob;
+  await executeOutputAction(blob, options, 1);
+}
+
+/**
+ * Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the
+ * current opacity, each page with its own compare transform. Generated-PDF sibling of
+ * `handlePrintCompareOverlay` (printCore.js).
+ * @param {{ current: * }} primaryRenderRef Page A (left) render handle.
+ * @param {{ current: * }} compareRenderRef Page B (right) render handle.
+ * @param {Object} view `{ opacity, top, transforms, zoom?, stage? }` (see CompareOverlayPrintView).
+ * @param {Object=} options
+ * @returns {Promise<Blob|void>}
+ */
+export async function handlePdfCompareOverlay(primaryRenderRef, compareRenderRef, view, options = {}) {
+  return pdfComposedComparison('overlay', composeCompareOverlayCanvas, primaryRenderRef, compareRenderRef, view, options);
+}
+
+/**
+ * Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the
+ * current border, each page with its own compare transform. Generated-PDF sibling of
+ * `handlePrintCompareCurtain` (printCore.js).
+ * @param {{ current: * }} primaryRenderRef Page A (left) render handle.
+ * @param {{ current: * }} compareRenderRef Page B (right) render handle.
+ * @param {Object} view `{ mode, position, transforms, zoom?, stage? }` (see CompareCurtainPrintView).
+ * @param {Object=} options
+ * @returns {Promise<Blob|void>}
+ */
+export async function handlePdfCompareCurtain(primaryRenderRef, compareRenderRef, view, options = {}) {
+  return pdfComposedComparison('curtain', composeCompareCurtainCanvas, primaryRenderRef, compareRenderRef, view, options);
 }

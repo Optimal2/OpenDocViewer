@@ -18,6 +18,9 @@ import logger from '../logging/systemLogger.js';
 import { renderSingleDocument, renderMultiDocument } from './printDom.js';
 import { makeBaseTokenContext } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
+import { normalizeCompareTransform, selectCompareTransform, splitTransformRotation } from './compareTransform.js';
+import { clampOverlayOpacity, getOverlayBottomTarget } from './compareOverlay.js';
+import { clampCurtainPosition } from './compareCurtain.js';
 
 // Hidden print-iframe cleanup timing (milliseconds). Kept near the top so maintainers can tune print cleanup without hunting for call-site literals.
 const DEFAULT_IFRAME_CLEANUP_MS = 2000;
@@ -378,6 +381,324 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
     tokenContext,
     pageContexts: normalizePageContexts(pageContexts).slice(0, dataUrls.length),
   });
+}
+
+// Longest side of a composed overlay/curtain page in canvas pixels. Larger frames (pages zoomed far
+// apart) are scaled down; 8192 px still exceeds 600 dpi on A4.
+const MAX_COMPOSED_PAGE_DIMENSION = 8192;
+
+/**
+ * View state of the overlay view needed to print it (utils/compareOverlay.js).
+ * @typedef {Object} CompareOverlayPrintView
+ * @property {number} opacity                                  Opacity of the top page in percent, 0–100.
+ * @property {('primary'|'compare')} top                        The page drawn on top.
+ * @property {{ primary:Object, compare:Object }} transforms    Per-page compare transforms (utils/compareTransform.js).
+ * @property {number} [zoom=1]                                  Shared base zoom (CSS px per page pixel).
+ * @property {{ width:number, height:number }} [stage]          Visible stage in CSS px; when given, the composed page is that window.
+ */
+
+/**
+ * View state of the curtain view needed to print it (utils/compareCurtain.js).
+ * @typedef {Object} CompareCurtainPrintView
+ * @property {('horizontal'|'vertical')} mode                   Orientation of the border.
+ * @property {number} position                                  Border position in percent of the stage.
+ * @property {{ primary:Object, compare:Object }} transforms    Per-page compare transforms (utils/compareTransform.js).
+ * @property {number} [zoom=1]                                  Shared base zoom (CSS px per page pixel).
+ * @property {{ width:number, height:number }} [stage]          Visible stage in CSS px; when given, the composed page is that window.
+ */
+
+/**
+ * One page placed in the shared page-pixel space of a composed compare page.
+ * @typedef {Object} ComposedPagePlacement
+ * @property {(HTMLCanvasElement|HTMLImageElement)} node   The rendered page surface.
+ * @property {number} width                                Surface width in page pixels.
+ * @property {number} height                               Surface height in page pixels.
+ * @property {number} cx                                   Transform origin (page centre), x.
+ * @property {number} cy                                   Transform origin (page centre), y.
+ * @property {number} scale                                Compare transform scale.
+ * @property {number} ox                                   Pan in page pixels (dx / zoom).
+ * @property {number} oy                                   Pan in page pixels (dy / zoom).
+ * @property {number} angle                                Residual rotation in radians.
+ */
+
+/**
+ * Intrinsic pixel size of a rendered page surface (the canvas already carries the quarter turn).
+ * @param {(HTMLCanvasElement|HTMLImageElement)} node
+ * @returns {{ width:number, height:number }}
+ */
+function surfaceSize(node) {
+  if ((node?.tagName || '').toLowerCase() === 'canvas') {
+    return { width: Number(node.width) || 0, height: Number(node.height) || 0 };
+  }
+  const img = /** @type {HTMLImageElement} */ (node);
+  return { width: Number(img?.naturalWidth) || 0, height: Number(img?.naturalHeight) || 0 };
+}
+
+/**
+ * Placement of one page in the shared page-pixel space. The viewer applies
+ * `scale(s) translate(dx, dy) rotate(residual)` around the page centre on a stage zoomed by the base
+ * zoom, so in page pixels a point p maps to `c + s × (R(p − c) + d / zoom)`.
+ *
+ * @param {(HTMLCanvasElement|HTMLImageElement)} node
+ * @param {*} transform
+ * @param {number} zoom
+ * @returns {ComposedPagePlacement}
+ */
+function placeComposedPage(node, transform, zoom) {
+  const { width, height } = surfaceSize(node);
+  const t = normalizeCompareTransform(transform);
+  return {
+    node,
+    width,
+    height,
+    cx: width / 2,
+    cy: height / 2,
+    scale: t.scale,
+    ox: t.dx / zoom,
+    oy: t.dy / zoom,
+    angle: (splitTransformRotation(t.rotation).residual * Math.PI) / 180,
+  };
+}
+
+/**
+ * @param {ComposedPagePlacement} page
+ * @returns {{ minX:number, minY:number, maxX:number, maxY:number }}
+ */
+function placedPageBounds(page) {
+  const cos = Math.cos(page.angle);
+  const sin = Math.sin(page.angle);
+  const xs = [];
+  const ys = [];
+  [[0, 0], [page.width, 0], [0, page.height], [page.width, page.height]].forEach(([x, y]) => {
+    const rx = (x - page.cx) * cos - (y - page.cy) * sin + page.ox;
+    const ry = (x - page.cx) * sin + (y - page.cy) * cos + page.oy;
+    xs.push(page.cx + page.scale * rx);
+    ys.push(page.cy + page.scale * ry);
+  });
+  return { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) };
+}
+
+/**
+ * The area of the composed page in page pixels: the visible stage when its size is known (both
+ * pages share the stage's top-left as origin), otherwise the union of both transformed pages.
+ *
+ * @param {Array<ComposedPagePlacement>} pages
+ * @param {number} zoom
+ * @param {*} stage
+ * @returns {{ x:number, y:number, width:number, height:number }}
+ */
+function resolveComposeFrame(pages, zoom, stage) {
+  const stageWidth = Number(stage?.width) || 0;
+  const stageHeight = Number(stage?.height) || 0;
+  if (stageWidth > 0 && stageHeight > 0) {
+    return { x: 0, y: 0, width: stageWidth / zoom, height: stageHeight / zoom };
+  }
+  const bounds = pages.map(placedPageBounds);
+  const minX = Math.min(...bounds.map((b) => b.minX));
+  const minY = Math.min(...bounds.map((b) => b.minY));
+  return {
+    x: minX,
+    y: minY,
+    width: Math.max(...bounds.map((b) => b.maxX)) - minX,
+    height: Math.max(...bounds.map((b) => b.maxY)) - minY,
+  };
+}
+
+/**
+ * Draw one placed page onto the composed canvas.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {ComposedPagePlacement} page
+ * @param {{ x:number, y:number }} frame
+ * @param {number} k Output pixels per page pixel.
+ * @returns {void}
+ */
+function drawComposedPage(ctx, page, frame, k) {
+  ctx.save();
+  // `+ 0` keeps a zero frame origin from becoming a negative zero.
+  ctx.setTransform(k, 0, 0, k, -frame.x * k + 0, -frame.y * k + 0);
+  ctx.translate(page.cx, page.cy);
+  ctx.scale(page.scale, page.scale);
+  ctx.translate(page.ox, page.oy);
+  ctx.rotate(page.angle);
+  ctx.translate(-page.cx, -page.cy);
+  ctx.drawImage(page.node, 0, 0, page.width, page.height);
+  ctx.restore();
+}
+
+/**
+ * Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint
+ * a white sheet. Returns null when a surface has no size or no 2D context is available.
+ *
+ * @param {(HTMLCanvasElement|HTMLImageElement)} primaryNode
+ * @param {(HTMLCanvasElement|HTMLImageElement)} compareNode
+ * @param {(CompareOverlayPrintView|CompareCurtainPrintView)} view
+ * @returns {({ canvas:HTMLCanvasElement, ctx:CanvasRenderingContext2D, frame:Object, k:number, primary:Object, compare:Object }|null)}
+ */
+function beginComposedPage(primaryNode, compareNode, view) {
+  const zoom = Number(view?.zoom) > 0 ? Number(view.zoom) : 1;
+  const primary = placeComposedPage(primaryNode, selectCompareTransform(view?.transforms, 'primary'), zoom);
+  const compare = placeComposedPage(compareNode, selectCompareTransform(view?.transforms, 'compare'), zoom);
+  if (!primary.width || !primary.height || !compare.width || !compare.height) return null;
+
+  const frame = resolveComposeFrame([primary, compare], zoom, view?.stage);
+  if (!(frame.width > 0) || !(frame.height > 0)) return null;
+  const k = Math.min(1, MAX_COMPOSED_PAGE_DIMENSION / Math.max(frame.width, frame.height));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(frame.width * k));
+  canvas.height = Math.max(1, Math.round(frame.height * k));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  return { canvas, ctx, frame, k, primary, compare };
+}
+
+/**
+ * Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view's
+ * opacity, each page with its own compare transform.
+ *
+ * @param {(HTMLCanvasElement|HTMLImageElement)} primaryNode Page A surface.
+ * @param {(HTMLCanvasElement|HTMLImageElement)} compareNode Page B surface.
+ * @param {CompareOverlayPrintView} view
+ * @returns {(HTMLCanvasElement|null)}
+ */
+export function composeCompareOverlayCanvas(primaryNode, compareNode, view) {
+  const page = beginComposedPage(primaryNode, compareNode, view);
+  if (!page) return null;
+  const top = view?.top === 'primary' ? 'primary' : 'compare';
+  const { ctx, frame, k } = page;
+  ctx.globalAlpha = 1;
+  drawComposedPage(ctx, page[getOverlayBottomTarget(top)], frame, k);
+  ctx.globalAlpha = clampOverlayOpacity(view?.opacity) / 100;
+  drawComposedPage(ctx, page[top], frame, k);
+  ctx.globalAlpha = 1;
+  return page.canvas;
+}
+
+/**
+ * Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border
+ * (below a horizontal border, right of a vertical one), each page with its own compare transform.
+ * The border position is a percentage of the composed page, as it is of the stage on screen.
+ *
+ * @param {(HTMLCanvasElement|HTMLImageElement)} primaryNode Page A surface.
+ * @param {(HTMLCanvasElement|HTMLImageElement)} compareNode Page B surface.
+ * @param {CompareCurtainPrintView} view
+ * @returns {(HTMLCanvasElement|null)}
+ */
+export function composeCompareCurtainCanvas(primaryNode, compareNode, view) {
+  const page = beginComposedPage(primaryNode, compareNode, view);
+  if (!page) return null;
+  const { canvas, ctx, frame, k } = page;
+  const share = clampCurtainPosition(view?.position) / 100;
+  drawComposedPage(ctx, page.primary, frame, k);
+
+  ctx.save();
+  ctx.beginPath();
+  if (view?.mode === 'horizontal') {
+    const y = canvas.height * share;
+    ctx.rect(0, y, canvas.width, canvas.height - y);
+  } else {
+    const x = canvas.width * share;
+    ctx.rect(x, 0, canvas.width - x, canvas.height);
+  }
+  ctx.clip();
+  drawComposedPage(ctx, page.compare, frame, k);
+  ctx.restore();
+  return canvas;
+}
+
+/**
+ * Shared body of the overlay and curtain print (after their `invoked` log line): one composed page
+ * through the single-page print document, with the same config and base token context as the
+ * side-by-side compare print.
+ *
+ * @param {string} name Calling function, for the log lines.
+ * @param {function(*, *, Object):(HTMLCanvasElement|null)} compose
+ * @param {{ current: (DocumentRenderHandle|null) }} primaryRenderRef
+ * @param {{ current: (DocumentRenderHandle|null) }} compareRenderRef
+ * @param {Object} view
+ * @param {PrintOptions} options
+ * @returns {void}
+ */
+function printComposedComparison(name, compose, primaryRenderRef, compareRenderRef, view, options) {
+  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null, pageContexts = [] } = options;
+  const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
+  const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
+  if (!primaryNode || !compareNode) {
+    logger.error('Compare view print requested without two active render surfaces', { name });
+    return;
+  }
+
+  if (!getPrintableDataUrl(primaryNode).dataUrl || !getPrintableDataUrl(compareNode).dataUrl) {
+    logger.error('Unable to derive printable data URLs for both compared pages', { name });
+    return;
+  }
+
+  const composed = compose(primaryNode, compareNode, view);
+  const { dataUrl } = composed ? getPrintableDataUrl(composed) : { dataUrl: null };
+  if (!dataUrl) {
+    logger.error('Unable to compose the compared pages into one printable page', { name });
+    return;
+  }
+
+  const odv = getODVConfig();
+  const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+
+  const { frame, cleanup } = createHiddenIframe(
+    resolveIframeCleanupDelay(DEFAULT_IFRAME_CLEANUP_MS, printDelayMs)
+  );
+  const doc = frame.contentDocument || frame.contentWindow?.document;
+  if (!doc) {
+    logger.error('Failed to get iframe document for compare view printing', { name });
+    cleanup();
+    return;
+  }
+
+  renderSingleDocument(doc, {
+    dataUrl,
+    orientation: resolveOrientation(composed.width, composed.height, options.orientation || 'auto'),
+    printDelayMs,
+    printHeaderCfg: odv.printHeader || {},
+    printFooterCfg: odv.printFooter || {},
+    printFormatCfg: odv.print?.format || {},
+    tokenContext,
+    pageContexts: normalizePageContexts(pageContexts).slice(0, 1),
+  });
+}
+
+/**
+ * Print the overlay view as ONE page: page B over page A (or the other way round after a swap) at
+ * the current opacity, each page with its own compare transform.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} primaryRenderRef Page A (left) render handle.
+ * @param {{ current: (DocumentRenderHandle|null) }} compareRenderRef Page B (right) render handle.
+ * @param {CompareOverlayPrintView} view Current overlay settings and calibration.
+ * @param {PrintOptions} [options]
+ * @returns {void}
+ */
+export function handlePrintCompareOverlay(primaryRenderRef, compareRenderRef, view, options = {}) {
+  logger.info('handlePrintCompareOverlay invoked');
+
+  printComposedComparison('handlePrintCompareOverlay', composeCompareOverlayCanvas, primaryRenderRef, compareRenderRef, view, options);
+}
+
+/**
+ * Print the curtain view as ONE page: page A with page B clipped at the current border, each page
+ * with its own compare transform.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} primaryRenderRef Page A (left) render handle.
+ * @param {{ current: (DocumentRenderHandle|null) }} compareRenderRef Page B (right) render handle.
+ * @param {CompareCurtainPrintView} view Current border orientation/position and calibration.
+ * @param {PrintOptions} [options]
+ * @returns {void}
+ */
+export function handlePrintCompareCurtain(primaryRenderRef, compareRenderRef, view, options = {}) {
+  logger.info('handlePrintCompareCurtain invoked');
+
+  printComposedComparison('handlePrintCompareCurtain', composeCompareCurtainCanvas, primaryRenderRef, compareRenderRef, view, options);
 }
 
 /**

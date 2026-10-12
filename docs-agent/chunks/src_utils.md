@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 50. Line count: 19193. JSDoc symbol count: 764.
+File count: 50. Line count: 19603. JSDoc symbol count: 785.
 
 ## src/utils/compareCurtain.js
 
@@ -571,9 +571,9 @@ Symbols:
 
 Core print coordinator for the frontend.
 
-Exports: `handlePrint`, `handlePrintCurrentComparison`, `handlePrintAll`, `handlePrintSequence`, `handlePrintRange`
+Exports: `handlePrint`, `handlePrintCurrentComparison`, `composeCompareOverlayCanvas`, `composeCompareCurtainCanvas`, `handlePrintCompareOverlay`, `handlePrintCompareCurtain`, `handlePrintAll`, `handlePrintSequence`, `handlePrintRange`
 
-Local imports: `src/logging/systemLogger.js`, `src/utils/printDom.js`, `src/utils/printTemplate.js`, `src/utils/printSanitize.js`
+Local imports: `src/logging/systemLogger.js`, `src/utils/printDom.js`, `src/utils/printTemplate.js`, `src/utils/printSanitize.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/utils/compareCurtain.js`
 
 Symbols:
 
@@ -629,9 +629,9 @@ Symbols:
 
 OpenDocViewer — Generated PDF print backend.
 
-Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`
+Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `handlePdfCompareOverlay`, `handlePdfCompareCurtain`
 
-Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`
+Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/printCore.js`
 
 Symbols:
 
@@ -683,7 +683,7 @@ Symbols:
 
 OpenDocViewer — Print Utilities Facade Re\-export the stable print API and parser from the internal modules.
 
-Exports: `handlePrint`, `handlePrintAll`, `handlePrintCurrentComparison`, `handlePrintRange`, `handlePrintSequence`, `parsePrintSequence`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `createPrintPdfBlob`, `printPdfBlob`, `downloadPdfBlob`, `default`
+Exports: `handlePrint`, `handlePrintAll`, `handlePrintCurrentComparison`, `handlePrintCompareOverlay`, `handlePrintCompareCurtain`, `handlePrintRange`, `handlePrintSequence`, `parsePrintSequence`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `handlePdfCompareOverlay`, `handlePdfCompareCurtain`, `createPrintPdfBlob`, `printPdfBlob`, `downloadPdfBlob`, `default`
 
 Local imports: `src/utils/printCore.js`, `src/utils/printParse.js`, `src/utils/printPdf.js`
 
@@ -693,14 +693,14 @@ Symbols:
 - `module:handlePrint` (module) - Print the current selection/range through the HTML path.
 - `module:handlePrintAll` (module) - Print all pages through the HTML path.
 - `module:handlePrintCurrentComparison` (module) - Print the current comparison pane through the HTML path.
+- `module:handlePrintCompareOverlay` (module) - Print the overlay view of the compare mode as one composed page through the HTML path.
+- `module:handlePrintCompareCurtain` (module) - Print the curtain view of the compare mode as one composed page through the HTML path.
 - `module:handlePrintRange` (module) - Print a specific page range through the HTML path.
 - `module:handlePrintSequence` (module) - Print a parsed custom page sequence through the HTML path.
 - `module:parsePrintSequence` (module) - Parse a user\-entered &quot;Custom pages&quot; string into a page sequence.
 - `module:handlePdfOutput` (module) - Generate a PDF for the current selection/range and open the print dialog.
 - `module:handlePdfCurrent` (module) - Generate a PDF for the current page and open the print dialog.
 - `module:handlePdfCurrentComparison` (module) - Generate a PDF for the current comparison pane and open the print dialog.
-- `module:createPrintPdfBlob` (module) - Create a printable PDF blob from the current print job.
-- `module:printPdfBlob` (module) - Print a generated PDF blob.
 
 ## src/utils/printWatermark.js
 
