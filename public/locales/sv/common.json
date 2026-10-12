@@ -265,6 +265,8 @@
     },
     "summaryActiveOnly": "Endast den aktiva sidan ({page}) kan skrivas ut just nu.",
     "summaryCompareBoth": "Förbered båda jämförelsesidorna ({primary} och {compare}).",
+    "summaryCompareOverlay": "Förbered överlagringsvyn av sidorna {primary} och {compare} som en sida.",
+    "summaryCompareCurtain": "Förbered gardinvyn av sidorna {primary} och {compare} som en sida.",
     "summaryActive": "Förbered den aktiva sidan ({page}).",
     "summaryAll": "Förbered {count} sidor.",
     "summaryRange": "Förbered sidorna {from}–{to}.",
@@ -616,7 +618,9 @@
     "copyFailed": "Det gick inte att kopiera kalibreringen",
     "close": "Stäng överlagringsvyn och gå tillbaka till jämförelsevyn",
     "closeShort": "Stäng",
-    "stage": "Sidorna lagda på varandra. Dra för att flytta den översta sidan; Ctrl+hjul zoomar den."
+    "stage": "Sidorna lagda på varandra. Dra för att flytta den översta sidan; Ctrl+hjul zoomar den.",
+    "print": "Skriv ut överlagringsvyn som en sida",
+    "printShort": "Skriv ut"
   },
   "compareCurtain": {
     "region": "Gardinvy: sida A och sida B på var sin sida om en gräns",
@@ -632,7 +636,9 @@
     "close": "Stäng gardinvyn och gå tillbaka",
     "closeShort": "Stäng",
     "open": "Gardin: visa de kalibrerade sidorna med en gräns du kan dra",
-    "needsCalibration": "Gardin: öppna överlagringsvyn först – den kalibrerar de två sidorna"
+    "needsCalibration": "Gardin: öppna överlagringsvyn först – den kalibrerar de två sidorna",
+    "print": "Skriv ut gardinvyn som en sida",
+    "printShort": "Skriv ut"
   },
   "generic": {
     "loading": "Laddar"

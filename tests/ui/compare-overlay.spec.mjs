@@ -153,3 +153,36 @@ test('overlay button leaves with compare mode', async ({ page }) => {
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toHaveCount(0);
   await expect(page.locator('.compare-overlay-button')).toHaveCount(0);
 });
+
+test('overlay view: Print opens the one shared print dialog for the composed page', async ({ page }) => {
+  await openCompare(page);
+  await page.getByRole('button', { name: 'Overlay the two pages (transparency)' }).click();
+  const view = page.locator('.compare-overlay-view');
+  await expect(view).toBeVisible();
+
+  const print = view.getByRole('button', { name: 'Print the overlay view as one page' });
+  await expect(print).toBeEnabled();
+  await expect(print).toHaveAttribute('title', 'Print the overlay view as one page');
+  await print.click();
+
+  // The same dialog as the toolbar's, in its compare-view mode: one page, no page or scope choice.
+  const dialog = page.locator('.odv-prd-backdrop');
+  await expect(dialog).toHaveCount(1);
+  await expect(view.locator('.odv-prd-backdrop')).toBeVisible();
+  await expect(dialog.locator('.odv-prd-summary')).toHaveText('Prepare the overlay view of pages 1 and 2 as one page.');
+  await expect(dialog.locator('input[name="activeScope"]')).toHaveCount(0);
+  await expect(dialog.locator('#odv-prd-pages-header')).toHaveCount(0);
+
+  // Cancel keeps the view.
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(view).toBeVisible();
+
+  // Back in the compare view the toolbar opens the same dialog for the side-by-side print.
+  await view.getByRole('button', { name: 'Close the overlay view and return to the compare view' }).click();
+  await expect(view).toHaveCount(0);
+  await page.locator('.toolbar .toolbar-split-main').first().click();
+  await expect(page.locator('.odv-prd-backdrop')).toHaveCount(1);
+  await expect(page.locator('.odv-prd-backdrop input[name="activeScope"]')).toHaveCount(2);
+  await expect(page.locator('.odv-prd-backdrop .odv-prd-summary')).not.toContainText('overlay view');
+});

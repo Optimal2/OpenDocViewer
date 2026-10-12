@@ -55,8 +55,9 @@ test('curtain view: disabled until calibrated, opened from overlay and compare, 
   await expect(curtain.locator('.compare-curtain-label.is-primary')).toHaveText('A · page 1');
   await expect(curtain.locator('.compare-curtain-label.is-compare')).toHaveText('B · page 2');
 
-  // Only the direction toggle and Close in the toolbar.
-  await expect(curtain.locator('.compare-curtain-toolbar button')).toHaveCount(3);
+  // Only the direction toggle, Print and Close in the toolbar.
+  await expect(curtain.locator('.compare-curtain-toolbar button')).toHaveCount(4);
+  await expect(curtain.getByRole('button', { name: 'Print the curtain view as one page' })).toBeEnabled();
   expect(await clipOfB(page)).toBe('inset(0% 0% 0% 50%)');
 
   // Keyboard on the border (focused on open): Right +1 %, Shift+Left −10 %.
@@ -102,4 +103,24 @@ test('curtain view: disabled until calibrated, opened from overlay and compare, 
   await expect(curtain).toHaveCount(0);
   await expect(page.locator('.compare-overlay-view')).toHaveCount(0);
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toBeVisible();
+});
+
+test('curtain view: Print opens the one shared print dialog for the composed page', async ({ page }) => {
+  await openCompare(page);
+  await page.getByRole('button', { name: 'Overlay the two pages (transparency)' }).click();
+  await page.locator('.compare-overlay-view').getByRole('button', { name: CURTAIN_READY }).click();
+  const curtain = page.locator('.compare-curtain-view');
+  await expect(curtain).toBeVisible();
+
+  await curtain.getByRole('button', { name: 'Print the curtain view as one page' }).click();
+  const dialog = page.locator('.odv-prd-backdrop');
+  await expect(dialog).toHaveCount(1);
+  await expect(curtain.locator('.odv-prd-backdrop')).toBeVisible();
+  await expect(dialog.locator('.odv-prd-summary')).toHaveText('Prepare the curtain view of pages 1 and 2 as one page.');
+  await expect(dialog.locator('input[name="activeScope"]')).toHaveCount(0);
+
+  // Escape closes the dialog first; the curtain view stays.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(curtain).toBeVisible();
 });

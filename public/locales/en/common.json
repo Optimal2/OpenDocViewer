@@ -265,6 +265,8 @@
     },
     "summaryActiveOnly": "Only the active page ({page}) is currently available for printing.",
     "summaryCompareBoth": "Prepare both compare pages ({primary} and {compare}).",
+    "summaryCompareOverlay": "Prepare the overlay view of pages {primary} and {compare} as one page.",
+    "summaryCompareCurtain": "Prepare the curtain view of pages {primary} and {compare} as one page.",
     "summaryActive": "Prepare the active page ({page}).",
     "summaryAll": "Prepare {count} pages.",
     "summaryRange": "Prepare pages {from}–{to}.",
@@ -616,7 +618,9 @@
     "copyFailed": "Could not copy the calibration",
     "close": "Close the overlay view and return to the compare view",
     "closeShort": "Close",
-    "stage": "Overlaid pages. Drag to move the top page; Ctrl+wheel zooms it."
+    "stage": "Overlaid pages. Drag to move the top page; Ctrl+wheel zooms it.",
+    "print": "Print the overlay view as one page",
+    "printShort": "Print"
   },
   "compareCurtain": {
     "region": "Curtain view: page A and page B on either side of a border",
@@ -632,7 +636,9 @@
     "close": "Close the curtain view and go back",
     "closeShort": "Close",
     "open": "Curtain: show the calibrated pages with a draggable border",
-    "needsCalibration": "Curtain: open the overlay view first – it calibrates the two pages"
+    "needsCalibration": "Curtain: open the overlay view first – it calibrates the two pages",
+    "print": "Print the curtain view as one page",
+    "printShort": "Print"
   },
   "generic": {
     "loading": "Loading"

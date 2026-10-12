@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 17. Line count: 7663. JSDoc symbol count: 128.
+File count: 19. Line count: 7930. JSDoc symbol count: 137.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -22,14 +22,10 @@ Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, 
 
 Exports: `DocumentToolbar`
 
-Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/components/DocumentToolbar/PageNavigationButtons.jsx`, `src/components/DocumentToolbar/ZoomButtons.jsx`, `src/components/DocumentToolbar/SplitToolbarButton.jsx`, `src/components/DocumentToolbar/LanguageMenuButton.jsx`, `src/components/DocumentToolbar/ThemeMenuButton.jsx`, `src/utils/printUtils.js`, `src/components/DocumentToolbar/PrintRangeDialog.jsx`, `src/components/DocumentToolbar/HelpMenuButton.jsx`, `src/components/DocumentToolbar/ManualOverlayDialog.jsx`, `src/components/DocumentToolbar/AboutOverlayDialog.jsx`
+Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/components/DocumentToolbar/PageNavigationButtons.jsx`, `src/components/DocumentToolbar/ZoomButtons.jsx`, `src/components/DocumentToolbar/SplitToolbarButton.jsx`, `src/components/DocumentToolbar/LanguageMenuButton.jsx`, `src/components/DocumentToolbar/ThemeMenuButton.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/DocumentToolbar/HelpMenuButton.jsx`, `src/components/DocumentToolbar/ManualOverlayDialog.jsx`, `src/components/DocumentToolbar/AboutOverlayDialog.jsx`
 
 Symbols:
 
-- `isPdfAbortError` (function) - No description.
-- `formatPdfProgressBody` (function) - No description.
-- `getPdfProgressPercent` (function) - No description.
-- `PrintSubmitDetail` (typedef) - Detail payload emitted by the print dialog.
 - `AnyRef` (typedef) - Mutable ref\-like object used by the toolbar.
 - `ImageProperties` (typedef) - Editable image state shown by the toolbar.
 - `PageNumberSetter` (typedef) - React\-like numeric page setter used by the toolbar.
@@ -37,7 +33,11 @@ Symbols:
 - `DocumentToolbarProps` (typedef) - Props for \{@link DocumentToolbar\}.
 - `SLIDER_CENTER_RANGE` (constant) - Range \(±\) around 100% where sliders snap back to the neutral value.
 - `ONE_TO_ONE_EPS` (constant) - Epsilon for considering zoom ≈ 100% \(0.5%\).
-- `normalizeToolbarPageNumber` (function) - Clamp a page number into the valid viewer range while preserving a safe fallback.
+- `makePdfResolutionPageKey` (function) - No description.
+- `isPdfPage` (function) - No description.
+- `DocumentToolbar` (function) - Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
+- `<anonymous>~handlePointerDown` (function) - No description.
+- `<anonymous>~handleEscape` (function) - No description.
 
 ## src/components/DocumentToolbar/HelpMenuButton.jsx
 
@@ -134,6 +134,20 @@ Symbols:
 
 - `resolvePrintFieldLabel` (function) - No description.
 
+## src/components/DocumentToolbar/PrintPipelineDialogs.jsx
+
+The dialogs of the ONE print pipeline \(usePrintPipeline.js\): the print dialog and the generated\-PDF progress \(modal, or a dock while working in the background\).
+
+Exports: `PrintPipelineDialogs`
+
+Local imports: `src/components/DocumentToolbar/PrintRangeDialog.jsx`
+
+Symbols:
+
+- `formatPdfProgressBody` (function) - No description.
+- `getPdfProgressPercent` (function) - No description.
+- `module.exports` (function) - No description.
+
 ## src/components/DocumentToolbar/PrintRangeDialog.jsx
 
 Unified print dialog with a single print\-method selector and shared print\-details section.
@@ -223,6 +237,29 @@ Symbols:
 - `runLimited` (function) - Run async work with bounded concurrency.
 - `createSessionPageNumbers` (function) - No description.
 - `module.exports` (function) - No description.
+
+## src/components/DocumentToolbar/usePrintPipeline.js
+
+File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
+
+Exports: `EMPTY_PDF_PROGRESS`, `isComposedCompareDetail`, `normalizeToolbarPageNumber`, `usePrintPipeline`
+
+Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/utils/printUtils.js`, `src/components/DocumentToolbar/usePdfPrebuildAllPages.js`, `src/utils/runtimeConfig.js`, `src/utils/pdfPrintCacheKey.js`
+
+Symbols:
+
+- `module:usePrintPipeline` (module) - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
+- `module:usePrintPipeline~COMPOSED_VIEW_PRINTERS` (constant) - Compare views that print as one composed page, with their print helpers.
+- `module:usePrintPipeline~isPdfAbortError` (function) - No description.
+- `module:usePrintPipeline.isComposedCompareDetail` (function) - True for the dialog detail of a compare\-view print \( activeScope compare\-overlay / compare\-curtain \): both compared pages composed onto one page.
+- `module:usePrintPipeline.normalizeToolbarPageNumber` (function) - Clamp a page number to the visible page range.
+- `module:usePrintPipeline~PrintSubmitDetail` (typedef) - Detail payload emitted by the print dialog.
+- `module:usePrintPipeline~ComposedPrintTarget` (typedef) - A compare view asking the shared dialog to print it as one page.
+- `module:usePrintPipeline~PrintPipelineParams` (typedef) - No description.
+- `module:usePrintPipeline` (function) - The single print pipeline shared by the toolbar and the compare views.
+- `module:usePrintPipeline~usePrintPipeline~toPagesString` (constant) - Build a compact &quot;pages&quot; descriptor for logging.
+- `module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount` (constant) - Estimate the number of pages the user is about to print.
+- `module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts` (constant) - Resolve page metadata objects aligned with the printed page sequence.
 
 ## src/components/DocumentToolbar/usePrintRangeDialog.js
 

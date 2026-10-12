@@ -27,6 +27,8 @@ import DocumentViewerRender from './DocumentViewerRender.jsx';
 import CompareOverlayView from './CompareOverlayView.jsx';
 import CompareCurtainView from './CompareCurtainView.jsx';
 import PrintSelectionWorkspace from '../PrintSelectionWorkspace.jsx';
+import PrintPipelineDialogs from '../DocumentToolbar/PrintPipelineDialogs.jsx';
+import usePrintPipeline from '../DocumentToolbar/usePrintPipeline.js';
 import Resizer from '../Resizer.jsx';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
@@ -412,6 +414,39 @@ const DocumentViewer = () => {
     return basePane === 'compare' ? 'primary' : 'compare';
   }, [activePane, isComparing, navigationModifierState.shift]);
 
+  // The ONE print pipeline: the toolbar and both compare views open the same dialog and submit
+  // through the same path. It lives here so it stays mounted while a compare view replaces the toolbar.
+  const printPipeline = usePrintPipeline({
+    printEnabled: printEnabled && !printSelectionWorkspaceOpen,
+    isDocumentLoading,
+    memoryPressureStage,
+    pageNumber,
+    pageNumberDisplay,
+    totalPages,
+    totalPagesDisplay,
+    comparePageNumber,
+    comparePageNumberDisplay: renderComparePageNumber,
+    setComparePageNumber,
+    isComparing,
+    sessionTotalPages: totalPagesDisplay,
+    allPages: allPages || [],
+    bundle: bundle || null,
+    hasActiveSelection: hasPrintableSelection,
+    visibleOriginalPageNumbers: effectivePrintSelectionPageNumbers,
+    selectionIncludedCount: effectivePrintSelectionPageNumbers.length,
+    printSelectionSequenceLocked: hasPrintableSelection,
+    documentRenderRef,
+    compareRef,
+    viewerContainerRef,
+    isPrintDialogOpen,
+    openPrintDialog,
+    closePrintDialog,
+  });
+  const { openComposedPrintDialog } = printPipeline;
+  // The compare views host the print dialog while they replace the toolbar (only one is shown).
+  const comparePrintDialogs = <PrintPipelineDialogs pipeline={printPipeline} />;
+  const comparePrintDisabled = !printPipeline.toolbarPrintEnabled || printPipeline.isPdfOutputLocked;
+
   const prevPageDisabled = pageNumber <= 1;
   const nextPageDisabled = pageNumber >= totalPages;
   const firstPageDisabled = pageNumber <= 1;
@@ -474,6 +509,9 @@ const DocumentViewer = () => {
           onResetToCompare={resetCompareOverlayCalibration}
           onClose={closeCompareOverlay}
           onOpenCurtain={openCompareCurtain}
+          onPrint={printEnabled ? openComposedPrintDialog : undefined}
+          printDisabled={comparePrintDisabled}
+          printDialogs={comparePrintDialogs}
         />
       ) : null}
 
@@ -490,6 +528,9 @@ const DocumentViewer = () => {
           imagePropertiesB={compareImageProperties}
           transforms={compareTransforms}
           onClose={closeCompareCurtain}
+          onPrint={printEnabled ? openComposedPrintDialog : undefined}
+          printDisabled={comparePrintDisabled}
+          printDialogs={comparePrintDialogs}
         />
       ) : null}
 
@@ -497,7 +538,6 @@ const DocumentViewer = () => {
       <DocumentViewerToolbar
         runtimeStatusLedState={viewerRuntimeStatus.ledState}
         runtimeStatusLedTitle={viewerRuntimeStatus.title}
-        memoryPressureStage={memoryPressureStage}
         pageNumber={pageNumber}
         pageNumberDisplay={pageNumberDisplay}
         setPageNumber={setPageNumber}
@@ -505,7 +545,6 @@ const DocumentViewer = () => {
         setComparePageNumber={setComparePageNumber}
         setVisibleComparePageNumber={setVisibleComparePageNumber}
         totalPages={totalPages}
-        totalPagesDisplay={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
         pageLoadState={pageLoadState}
 
@@ -530,21 +569,12 @@ const DocumentViewer = () => {
         setCustomFitSizeLimits={setCustomFitSizeLimits}
         setDefaultZoomModePreference={setDefaultZoomModePreference}
 
-        isPrintDialogOpen={isPrintDialogOpen}
-        openPrintDialog={openPrintDialog}
-        closePrintDialog={closePrintDialog}
-        printEnabled={printEnabled && !printSelectionWorkspaceOpen}
-        hasActiveSelection={hasPrintableSelection}
-        visibleOriginalPageNumbers={effectivePrintSelectionPageNumbers}
-        selectionIncludedCount={effectivePrintSelectionPageNumbers.length}
         printSelectionSequenceLocked={hasPrintableSelection}
         printSelectionWorkspaceEnabled={printSelectionWorkspaceConfig.enabled}
         printSelectionWorkspaceActive={printSelectionWorkspaceOpen}
         printSelectionWorkspaceToolbarState={printSelectionToolbarState}
         canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
         openPrintSelectionWorkspace={openPrintSelectionWorkspace}
-        sessionTotalPages={totalPagesDisplay}
-        bundle={bundle || null}
         allPages={allPages || []}
 
         isComparing={isComparing}
@@ -562,8 +592,7 @@ const DocumentViewer = () => {
         setIsExpanded={setIsExpanded}
 
         documentRenderRef={documentRenderRef}
-        compareRef={compareRef}
-        viewerContainerRef={viewerContainerRef}
+        printPipeline={printPipeline}
 
         prevPageDisabled={prevPageDisabled}
         nextPageDisabled={nextPageDisabled}

@@ -24,6 +24,9 @@
  *   context, so it survives closing and reopening the view.
  * - "Curtain" opens the curtain view (CompareCurtainView.jsx) with this calibration; its Close
  *   returns here.
+ * - "Print" opens the viewer's one print dialog (DocumentToolbar/usePrintPipeline.js) for this view
+ *   and prints both pages composed onto ONE page with the current opacity, top page, transforms,
+ *   zoom and stage size. Hidden when compare.overlay.print.enabled is false.
  *
  * Design note: docs-src/compare-transform.md (section "Overlay view").
  *
@@ -49,7 +52,7 @@ import {
 } from '../../utils/compareOverlay.js';
 import CompareCurtainButton from './CompareCurtainButton.jsx';
 import { hasActiveModalDialog, isOwnKeyTarget, shouldEscapeCloseView } from './compareViewKeys.js';
-import { isCompareCurtainEnabled } from '../../utils/runtimeConfig.js';
+import { isCompareCurtainEnabled, isCompareOverlayPrintEnabled } from '../../utils/runtimeConfig.js';
 
 /** @typedef {'primary'|'compare'} OverlayTarget */
 
@@ -65,6 +68,19 @@ function needsCanvas(properties) {
   return Number(properties?.rotation || 0) !== 0
     || Number(properties?.brightness ?? 100) !== 100
     || Number(properties?.contrast ?? 100) !== 100;
+}
+
+/**
+ * The stage's visible size in CSS px, so the printed page shows the same window as the screen.
+ *
+ * @param {(HTMLElement|null)} stage
+ * @returns {({ width:number, height:number }|undefined)}
+ */
+function measureStage(stage) {
+  const rect = stage?.getBoundingClientRect?.();
+  const width = Number(rect?.width) || 0;
+  const height = Number(rect?.height) || 0;
+  return width > 0 && height > 0 ? { width, height } : undefined;
 }
 
 /**
@@ -86,6 +102,9 @@ function needsCanvas(properties) {
  * @param {function(): void} props.onResetToCompare
  * @param {function(): void} props.onClose
  * @param {function(): void=} props.onOpenCurtain Opens the curtain view with this calibration.
+ * @param {function(Object): *=} props.onPrint Opens the shared print dialog for this view (usePrintPipeline).
+ * @param {boolean=} props.printDisabled True while printing is unavailable (loading, PDF in progress).
+ * @param {React.ReactNode=} props.printDialogs The shared print dialog host, rendered in this toolbar.
  * @returns {React.ReactElement}
  */
 const CompareOverlayView = ({
@@ -106,6 +125,9 @@ const CompareOverlayView = ({
   onResetToCompare,
   onClose,
   onOpenCurtain,
+  onPrint,
+  printDisabled = false,
+  printDialogs = null,
 }) => {
   const { t } = useTranslation('common');
   const top = overlay?.top === 'primary' ? 'primary' : 'compare';
@@ -123,6 +145,7 @@ const CompareOverlayView = ({
   const stageRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const layerRefs = useRef(/** @type {Record<OverlayTarget, (HTMLDivElement|null)>} */ ({ primary: null, compare: null }));
   const renderRefA = useRef(/** @type {any} */ (null));
+  const renderRefB = useRef(/** @type {any} */ (null));
   const copyTimerRef = useRef(0);
   const dragRef = useRef(/** @type {(null|{
     pointerId: number,
@@ -137,8 +160,8 @@ const CompareOverlayView = ({
   })} */ (null));
 
   // Window listeners read the latest props without re-subscribing on every transform change.
-  const latestRef = useRef({ top, transforms, onTransformAction, onClose, nudgeMode });
-  latestRef.current = { top, transforms, onTransformAction, onClose, nudgeMode };
+  const latestRef = useRef({ top, opacity, zoom, transforms, onTransformAction, onClose, nudgeMode });
+  latestRef.current = { top, opacity, zoom, transforms, onTransformAction, onClose, nudgeMode };
 
   // Escape closes the view; in nudge mode the arrow keys move the top page.
   useEffect(() => {
@@ -269,6 +292,25 @@ const CompareOverlayView = ({
     }
   };
 
+  // The shared pipeline reads the view state when the dialog is submitted, not when it opens.
+  const handlePrint = () => {
+    onPrint({
+      view: 'overlay',
+      primaryRenderRef: renderRefA,
+      compareRenderRef: renderRefB,
+      getView: () => {
+        const latest = latestRef.current;
+        return {
+          opacity: latest.opacity,
+          top: latest.top,
+          transforms: latest.transforms,
+          zoom: latest.zoom,
+          stage: measureStage(stageRef.current),
+        };
+      },
+    });
+  };
+
   // Fit modes follow the overlay's own surface; page A sets the shared base zoom for both layers.
   const handleRenderedA = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') renderRefA.current?.fitToScreen?.();
@@ -289,6 +331,8 @@ const CompareOverlayView = ({
   const resetLabel = t('compareOverlay.resetToCompare', { defaultValue: 'Reset to the alignment from the compare view' });
   const copyLabel = t('compareOverlay.copy', { defaultValue: 'Copy the calibration as JSON (for support)' });
   const closeLabel = t('compareOverlay.close', { defaultValue: 'Close the overlay view and return to the compare view' });
+  const printLabel = t('compareOverlay.print', { defaultValue: 'Print the overlay view as one page' });
+  const showPrint = typeof onPrint === 'function' && isCompareOverlayPrintEnabled();
 
   const renderLayer = (target) => {
     const isTop = target === top;
@@ -303,7 +347,7 @@ const CompareOverlayView = ({
         data-odv-overlay-page={isA ? 'A' : 'B'}
       >
         <DocumentRender
-          ref={isA ? renderRefA : undefined}
+          ref={isA ? renderRefA : renderRefB}
           pageNumber={isA ? pageNumberA : pageNumberB}
           zoom={zoom}
           surfaceTransform={buildCompareTransformCss(isA ? transformA : transformB)}
@@ -402,6 +446,21 @@ const CompareOverlayView = ({
           <CompareCurtainButton calibrated onOpen={onOpenCurtain} className="compare-overlay-curtain" showLabel />
         ) : null}
 
+        {/* Print entry: hidden when compare.overlay.print.enabled is false */}
+        {showPrint ? (
+          <button
+            type="button"
+            className="odv-btn compare-overlay-print"
+            title={printLabel}
+            aria-label={printLabel}
+            disabled={printDisabled}
+            onClick={handlePrint}
+          >
+            <span className="material-icons" aria-hidden="true">print</span>
+            <span>{t('compareOverlay.printShort', { defaultValue: 'Print' })}</span>
+          </button>
+        ) : null}
+
         <span className="compare-overlay-status" role="status" aria-live="polite">
           {copyStatus === 'copied' ? t('compareOverlay.copied', { defaultValue: 'Calibration copied' }) : null}
           {copyStatus === 'failed' ? t('compareOverlay.copyFailed', { defaultValue: 'Could not copy the calibration' }) : null}
@@ -417,6 +476,8 @@ const CompareOverlayView = ({
           <span className="material-icons" aria-hidden="true">close</span>
           <span>{t('compareOverlay.closeShort', { defaultValue: 'Close' })}</span>
         </button>
+
+        {printDialogs}
       </div>
 
       <div className="compare-overlay-calibration">
@@ -490,6 +551,9 @@ CompareOverlayView.propTypes = {
   onResetToCompare: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onOpenCurtain: PropTypes.func,
+  onPrint: PropTypes.func,
+  printDisabled: PropTypes.bool,
+  printDialogs: PropTypes.node,
 };
 
 export default React.memo(CompareOverlayView);

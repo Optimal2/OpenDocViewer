@@ -201,43 +201,30 @@
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:46</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:70</code> |  |
 | <code>resolveAboutInfo</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:17</code> |  |
-| <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:110</code> | Mutable ref-like object used by the toolbar. |
-| <code>DocumentToolbar~dispatchPrintRequest</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:1143</code> | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
-| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:291</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
-| <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:138</code> | Props for {@link DocumentToolbar}. |
-| <code>formatPdfProgressBody</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:66</code> |  |
-| <code>getPdfProgressPercent</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:83</code> |  |
-| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:703</code> | Handle brightness slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:717</code> | Handle contrast slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:739</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:426</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:418</code> |  |
-| <code>DocumentToolbar~handlePrintSubmit</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:1311</code> | Handle the dialog submit event and dispatch the correct print action. |
-| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:752</code> |  |
-| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:731</code> |  |
-| <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:116</code> | Editable image state shown by the toolbar. |
-| <code>isPdfAbortError</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:57</code> |  |
-| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:278</code> |  |
-| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:268</code> |  |
-| <code>DocumentToolbar~makePrintOptions</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:882</code> |  |
-| <code>normalizeToolbarPageNumber</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:256</code> | Clamp a page number into the valid viewer range while preserving a safe fallback. |
-| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:225</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
-| <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:124</code> | React-like numeric page setter used by the toolbar. |
-| <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:90</code> | Detail payload emitted by the print dialog. |
-| <code>DocumentToolbar~resolvePrintPageContexts</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:832</code> | Resolve page metadata objects aligned with the printed page sequence. |
-| <code>DocumentToolbar~resolvePrintPageCount</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:810</code> | Estimate the number of pages the user is about to print. |
-| <code>DocumentToolbar~resolvePrintPageNumbers</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:846</code> |  |
-| <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:223</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
-| <code>DocumentToolbar~submitUserPrintLog</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:910</code> | Fire-and-forget user print log. |
-| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:761</code> |  |
-| <code>DocumentToolbar~toPagesString</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:790</code> | Build a compact &amp;quot;pages&amp;quot; descriptor for logging. |
-| <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:131</code> | Zoom display state used by the newer toolbar UX paths. |
+| <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:45</code> | Mutable ref-like object used by the toolbar. |
+| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:200</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:73</code> | Props for {@link DocumentToolbar}. |
+| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:585</code> | Handle brightness slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:599</code> | Handle contrast slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:621</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:313</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:305</code> |  |
+| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:634</code> |  |
+| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:613</code> |  |
+| <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:51</code> | Editable image state shown by the toolbar. |
+| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:187</code> |  |
+| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:177</code> |  |
+| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:150</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
+| <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:59</code> | React-like numeric page setter used by the toolbar. |
+| <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:148</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
+| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:643</code> |  |
+| <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:66</code> | Zoom display state used by the newer toolbar UX paths. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:30</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:22</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:19</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:29</code> |  |
 | <code>module:usePrintRangeConfig</code> | module | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:2</code> | Runtime-configuration derivation for PrintRangeDialog. |
-| <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:29</code> |  |
+| <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:30</code> |  |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:61</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:53</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:80</code> |  |
@@ -282,6 +269,9 @@
 | <code>ManualOverlayDialog~setManualFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:672</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the dialog or the page behind... |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/PrintPipelineDialogs.jsx:51</code> |  |
+| <code>formatPdfProgressBody</code> | function | <code>src/components/DocumentToolbar/PrintPipelineDialogs.jsx:22</code> |  |
+| <code>getPdfProgressPercent</code> | function | <code>src/components/DocumentToolbar/PrintPipelineDialogs.jsx:39</code> |  |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx:14</code> | Structured payload returned to the caller on submit. |
 | <code>module:printRangeDialogHelpers.buildSelectedOptionDetails</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:101</code> | Build token-friendly details for the selected option without forcing templates to use list indexes. |
 | <code>module:printRangeDialogHelpers.ensureODVPrintCSS</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:140</code> | Ensure base print CSS is injected once per document. |
@@ -308,35 +298,56 @@
 | <code>normalizePdfOrientation</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:51</code> |  |
 | <code>runLimited</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:103</code> | Run async work with bounded concurrency. |
 | <code>throwIfAborted</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:32</code> |  |
-| <code>usePrintRangeController~composePrintFormat</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:365</code> |  |
-| <code>usePrintRangeController~composeReason</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:384</code> |  |
-| <code>usePrintRangeController~composeSubmitDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:427</code> | Compose and validate the print payload for the current dialog state. |
-| <code>usePrintRangeController~extras</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:407</code> |  |
-| <code>usePrintRangeController~makeDescendingSequence</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:279</code> |  |
-| <code>usePrintRangeController~onDialogKeyDown</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:267</code> |  |
+| <code>module:usePrintPipeline~COMPOSED_VIEW_PRINTERS</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:41</code> | Compare views that print as one composed page, with their print helpers. |
+| <code>module:usePrintPipeline~ComposedPrintTarget</code> | typedef | <code>src/components/DocumentToolbar/usePrintPipeline.js:100</code> | A compare view asking the shared dialog to print it as one page. |
+| <code>module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:517</code> | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
+| <code>module:usePrintPipeline~usePrintPipeline~handlePrintSubmit</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:711</code> | Handle the dialog submit event and dispatch the correct print action. |
+| <code>module:usePrintPipeline.isComposedCompareDetail</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:60</code> | True for the dialog detail of a compare-view print \( activeScope compare-overlay / compare-curtain \): both compared pages composed onto one page. |
+| <code>module:usePrintPipeline~isPdfAbortError</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:50</code> |  |
+| <code>module:usePrintPipeline~usePrintPipeline~makePrintOptions</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:295</code> |  |
+| <code>module:usePrintPipeline</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:143</code> | The single print pipeline shared by the toolbar and the compare views. |
+| <code>module:usePrintPipeline.normalizeToolbarPageNumber</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:72</code> | Clamp a page number to the visible page range. |
+| <code>module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:737</code> | Compare-view entry: the same dialog, printing the view as one composed page. |
+| <code>module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:727</code> | Toolbar entry: the dialog for the viewer&#39;s own pages. |
+| <code>module:usePrintPipeline~PrintPipelineParams</code> | typedef | <code>src/components/DocumentToolbar/usePrintPipeline.js:109</code> |  |
+| <code>module:usePrintPipeline~PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/usePrintPipeline.js:80</code> | Detail payload emitted by the print dialog. |
+| <code>module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:245</code> | Resolve page metadata objects aligned with the printed page sequence. |
+| <code>module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:223</code> | Estimate the number of pages the user is about to print. |
+| <code>module:usePrintPipeline~usePrintPipeline~resolvePrintPageNumbers</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:259</code> |  |
+| <code>module:usePrintPipeline~usePrintPipeline~submitUserPrintLog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:323</code> | Fire-and-forget user print log. |
+| <code>module:usePrintPipeline~usePrintPipeline~toPagesString</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:202</code> | Build a compact &amp;quot;pages&amp;quot; descriptor for logging. |
+| <code>module:usePrintPipeline</code> | module | <code>src/components/DocumentToolbar/usePrintPipeline.js:2</code> | File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF... |
+| <code>usePrintRangeController~composePrintFormat</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:368</code> |  |
+| <code>usePrintRangeController~composeReason</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:387</code> |  |
+| <code>usePrintRangeController~composeSubmitDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:430</code> | Compose and validate the print payload for the current dialog state. |
+| <code>usePrintRangeController~extras</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:410</code> |  |
+| <code>usePrintRangeController~makeDescendingSequence</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:282</code> |  |
+| <code>usePrintRangeController~onDialogKeyDown</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:270</code> |  |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:27</code> | Structured payload returned to the caller on submit. |
-| <code>usePrintRangeController~restoreFromDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:518</code> | Restore the dialog state from the latest successfully prepared print. |
-| <code>usePrintRangeController~submitPdfDownload</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:507</code> |  |
-| <code>usePrintRangeController~submitPrintDirect</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:499</code> |  |
-| <code>usePrintRangeController~submitPrintPdf</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:502</code> |  |
-| <code>usePrintRangeController~submitWithBackend</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:486</code> |  |
-| <code>usePrintRangeController</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:63</code> | Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog. |
-| <code>usePrintRangeController~validateRange</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:288</code> |  |
-| <code>usePrintRangeController~validateUserFields</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:300</code> |  |
+| <code>usePrintRangeController~restoreFromDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:521</code> | Restore the dialog state from the latest successfully prepared print. |
+| <code>usePrintRangeController~submitPdfDownload</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:510</code> |  |
+| <code>usePrintRangeController~submitPrintDirect</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:502</code> |  |
+| <code>usePrintRangeController~submitPrintPdf</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:505</code> |  |
+| <code>usePrintRangeController~submitWithBackend</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:489</code> |  |
+| <code>usePrintRangeController</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:64</code> | Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog. |
+| <code>usePrintRangeController~validateRange</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:291</code> |  |
+| <code>usePrintRangeController~validateUserFields</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:303</code> |  |
 | <code>AdvancedCustomSizeDisclosure</code> | function | <code>src/components/DocumentToolbar/ZoomButtons.jsx:85</code> | &amp;quot;Advanced&amp;quot; disclosure for the secondary custom-size fields \(window height, actual size\). |
 | <code>BASIC_CUSTOM_SIZE_FIELDS</code> | constant | <code>src/components/DocumentToolbar/ZoomButtons.jsx:71</code> | Fields shown by default \(window width\) vs. |
 | <code>parsePercentInput</code> | function | <code>src/components/DocumentToolbar/ZoomButtons.jsx:146</code> | Parse a percent-like string safely. |
 | <code>CompareCurtainButton</code> | function | <code>src/components/DocumentViewer/CompareCurtainButton.jsx:25</code> |  |
-| <code>applyCurtainStyles</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:72</code> | Write the clip and the grab bar position straight to the DOM \(drag path, no React render\). |
-| <code>CompareCurtainView</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:96</code> |  |
-| <code>CurtainMode</code> | typedef | <code>src/components/DocumentViewer/CompareCurtainView.jsx:51</code> |  |
-| <code>needsCanvas</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:57</code> |  |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:130</code> |  |
-| <code>CompareOverlayView</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:91</code> |  |
-| <code>needsCanvas</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:64</code> |  |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:146</code> |  |
-| <code>&lt;anonymous&gt;~onWheel</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:172</code> |  |
-| <code>OverlayTarget</code> | typedef | <code>src/components/DocumentViewer/CompareOverlayView.jsx:54</code> |  |
+| <code>applyCurtainStyles</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:76</code> | Write the clip and the grab bar position straight to the DOM \(drag path, no React render\). |
+| <code>CompareCurtainView</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:116</code> |  |
+| <code>CurtainMode</code> | typedef | <code>src/components/DocumentViewer/CompareCurtainView.jsx:55</code> |  |
+| <code>measureStage</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:91</code> | The stage&#39;s visible size in CSS px, so the printed page shows the same window as the screen. |
+| <code>needsCanvas</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:61</code> |  |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/CompareCurtainView.jsx:157</code> |  |
+| <code>CompareOverlayView</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:110</code> |  |
+| <code>measureStage</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:79</code> | The stage&#39;s visible size in CSS px, so the printed page shows the same window as the screen. |
+| <code>needsCanvas</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:67</code> |  |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:169</code> |  |
+| <code>&lt;anonymous&gt;~onWheel</code> | function | <code>src/components/DocumentViewer/CompareOverlayView.jsx:195</code> |  |
+| <code>OverlayTarget</code> | typedef | <code>src/components/DocumentViewer/CompareOverlayView.jsx:57</code> |  |
 | <code>CompareTransformControls</code> | function | <code>src/components/DocumentViewer/CompareTransformControls.jsx:162</code> |  |
 | <code>toSignedRotation</code> | function | <code>src/components/DocumentViewer/CompareTransformControls.jsx:37</code> | Rotation shown signed in \(-180, 180\] so a small counter-clockwise tilt reads as −0,1 and not 359,9. |
 | <code>TransformNumberField</code> | function | <code>src/components/DocumentViewer/CompareTransformControls.jsx:59</code> | Numeric text field with locale-aware parsing; keeps a draft while focused. |
@@ -347,12 +358,12 @@
 | <code>COLLAPSE_DELAY_MS</code> | constant | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:39</code> | Delay before the zone collapses after the pointer/focus has left, so it does not flicker. |
 | <code>CompareZoomOverlay</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:57</code> | CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state. |
 | <code>isKeyboardFocus</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:45</code> |  |
-| <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:433</code> |  |
-| <code>&lt;anonymous&gt;~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:341</code> |  |
-| <code>&lt;anonymous&gt;~isEditableTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:334</code> |  |
-| <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:312</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:345</code> |  |
-| <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:270</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
+| <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:468</code> |  |
+| <code>&lt;anonymous&gt;~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:343</code> |  |
+| <code>&lt;anonymous&gt;~isEditableTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:336</code> |  |
+| <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:314</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:347</code> |  |
+| <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:272</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
 | <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:204</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
 | <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:58</code> |  |
 | <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:128</code> |  |
@@ -372,7 +383,7 @@
 | <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:42</code> |  |
 | <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:38</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
-| <code>DocumentViewerToolbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:133</code> | Renders the toolbar for the document viewer by delegating to . |
+| <code>DocumentViewerToolbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:121</code> | Renders the toolbar for the document viewer by delegating to . |
 | <code>DocumentViewerToolbarProps</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:36</code> | Props consumed by DocumentViewerToolbar. |
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:26</code> | React-like numeric/original page setter used by the toolbar adapter. |
 | <code>RefLike</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:13</code> | Ref-like shape used for imperative handles. |

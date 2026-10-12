@@ -38,11 +38,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @typedef {Object} DocumentViewerToolbarProps
  * @property {'off'|'pending'|'ready'|'active'|'warning'|'error'} runtimeStatusLedState
  * @property {string} runtimeStatusLedTitle
- * @property {'normal'|'soft'|'hard'} memoryPressureStage
  * @property {number} pageNumber - Current visible page ordinal.
  * @property {number} pageNumberDisplay - Current original session page number.
  * @property {number} totalPages - Total visible pages.
- * @property {number} totalPagesDisplay - Total original session pages.
  * @property {boolean} isDocumentLoading
  * @property {Object=} pageLoadState
  * @property {PageNumberSetter} setPageNumber
@@ -77,24 +75,14 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function({ widthFactorPercent:*, heightFactorPercent:*, actualSizeFactorPercent:* }): void} setCustomFitSizeLimits
  * @property {function((string|null)): void} setDefaultZoomModePreference
  * @property {function(number): void} setZoom
- * @property {RefLike} viewerContainerRef
  * @property {RefLike} documentRenderRef
- * @property {RefLike} compareRef
- * @property {boolean} isPrintDialogOpen
- * @property {function(): void} openPrintDialog
- * @property {function(): void} closePrintDialog
- * @property {boolean} printEnabled
- * @property {boolean} hasActiveSelection
- * @property {Array<number>} visibleOriginalPageNumbers
- * @property {number} selectionIncludedCount
+ * @property {Object} printPipeline The shared print pipeline (DocumentToolbar/usePrintPipeline.js).
  * @property {boolean=} printSelectionSequenceLocked
  * @property {boolean=} printSelectionWorkspaceEnabled
  * @property {boolean=} printSelectionWorkspaceActive
  * @property {Object|null=} printSelectionWorkspaceToolbarState
  * @property {boolean=} canOpenPrintSelectionWorkspace
  * @property {function(): void=} openPrintSelectionWorkspace
- * @property {number} sessionTotalPages
- * @property {Object|null} bundle
  * @property {Array<*>} allPages
  * @property {boolean} documentNavigationEnabled
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }} primaryDocumentNavigation
@@ -133,11 +121,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 const DocumentViewerToolbar = ({
   runtimeStatusLedState,
   runtimeStatusLedTitle,
-  memoryPressureStage,
   pageNumber,
   pageNumberDisplay,
   totalPages,
-  totalPagesDisplay,
   isDocumentLoading,
   pageLoadState,
   setPageNumber,
@@ -172,7 +158,6 @@ const DocumentViewerToolbar = ({
   setCustomFitSizeLimits,
   setDefaultZoomModePreference,
   setZoom,
-  viewerContainerRef,
   handleCompare,
   isComparing,
   activePane,
@@ -186,22 +171,13 @@ const DocumentViewerToolbar = ({
   handleContrastChange,
   resetImageProperties,
   documentRenderRef,
-  compareRef,
-  isPrintDialogOpen,
-  openPrintDialog,
-  closePrintDialog,
-  printEnabled,
-  hasActiveSelection,
-  visibleOriginalPageNumbers,
-  selectionIncludedCount,
+  printPipeline,
   printSelectionSequenceLocked = false,
   printSelectionWorkspaceEnabled = false,
   printSelectionWorkspaceActive = false,
   printSelectionWorkspaceToolbarState = null,
   canOpenPrintSelectionWorkspace = false,
   openPrintSelectionWorkspace,
-  sessionTotalPages,
-  bundle,
   allPages,
   documentNavigationEnabled,
   primaryDocumentNavigation,
@@ -223,11 +199,9 @@ const DocumentViewerToolbar = ({
     <DocumentToolbar
       runtimeStatusLedState={runtimeStatusLedState}
       runtimeStatusLedTitle={runtimeStatusLedTitle}
-      memoryPressureStage={memoryPressureStage}
       pageNumber={pageNumber}
       pageNumberDisplay={pageNumberDisplay}
       totalPages={totalPages}
-      totalPagesDisplay={totalPagesDisplay}
       isDocumentLoading={isDocumentLoading}
       pageLoadState={pageLoadState}
       setPageNumber={setPageNumber}
@@ -262,23 +236,14 @@ const DocumentViewerToolbar = ({
       setCustomFitWidthFactorPercent={setCustomFitWidthFactorPercent}
       setCustomFitSizeLimits={setCustomFitSizeLimits}
       setDefaultZoomModePreference={setDefaultZoomModePreference}
-      viewerContainerRef={viewerContainerRef}
       documentRenderRef={documentRenderRef}
-      isPrintDialogOpen={isPrintDialogOpen}
-      openPrintDialog={openPrintDialog}
-      closePrintDialog={closePrintDialog}
-      printEnabled={printEnabled}
-      hasActiveSelection={hasActiveSelection}
-      visibleOriginalPageNumbers={visibleOriginalPageNumbers}
-      selectionIncludedCount={selectionIncludedCount}
+      printPipeline={printPipeline}
       printSelectionSequenceLocked={printSelectionSequenceLocked}
       printSelectionWorkspaceEnabled={printSelectionWorkspaceEnabled}
       printSelectionWorkspaceActive={printSelectionWorkspaceActive}
       printSelectionWorkspaceToolbarState={printSelectionWorkspaceToolbarState}
       canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
       openPrintSelectionWorkspace={openPrintSelectionWorkspace}
-      sessionTotalPages={sessionTotalPages}
-      bundle={bundle || null}
       allPages={allPages || []}
       documentNavigationEnabled={documentNavigationEnabled}
       primaryDocumentNavigation={primaryDocumentNavigation}
@@ -301,7 +266,6 @@ const DocumentViewerToolbar = ({
       nextPageDisabled={nextPageDisabled}
       firstPageDisabled={firstPageDisabled}
       lastPageDisabled={lastPageDisabled}
-      compareRef={compareRef}
       signatureSummary={signatureSummary}
       onOpenSignatureOverview={onOpenSignatureOverview}
       canOpenCompareOverlay={canOpenCompareOverlay}
@@ -315,11 +279,9 @@ const DocumentViewerToolbar = ({
 DocumentViewerToolbar.propTypes = {
   runtimeStatusLedState: PropTypes.oneOf(['off', 'pending', 'ready', 'active', 'warning', 'error']).isRequired,
   runtimeStatusLedTitle: PropTypes.string.isRequired,
-  memoryPressureStage: PropTypes.oneOf(['normal', 'soft', 'hard']).isRequired,
   pageNumber: PropTypes.number.isRequired,
   pageNumberDisplay: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  totalPagesDisplay: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool.isRequired,
   pageLoadState: PropTypes.object,
   setPageNumber: PropTypes.func.isRequired,
@@ -369,7 +331,6 @@ DocumentViewerToolbar.propTypes = {
   setCustomFitSizeLimits: PropTypes.func.isRequired,
   setDefaultZoomModePreference: PropTypes.func.isRequired,
   setZoom: PropTypes.func.isRequired,
-  viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   activePane: PropTypes.oneOf(['primary', 'compare']).isRequired,
@@ -394,22 +355,13 @@ DocumentViewerToolbar.propTypes = {
   handleContrastChange: PropTypes.func.isRequired,
   resetImageProperties: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
-  compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
-  isPrintDialogOpen: PropTypes.bool.isRequired,
-  openPrintDialog: PropTypes.func.isRequired,
-  closePrintDialog: PropTypes.func.isRequired,
-  printEnabled: PropTypes.bool.isRequired,
-  hasActiveSelection: PropTypes.bool.isRequired,
-  visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number).isRequired,
-  selectionIncludedCount: PropTypes.number.isRequired,
+  printPipeline: PropTypes.object.isRequired,
   printSelectionSequenceLocked: PropTypes.bool,
   printSelectionWorkspaceEnabled: PropTypes.bool,
   printSelectionWorkspaceActive: PropTypes.bool,
   printSelectionWorkspaceToolbarState: PropTypes.object,
   canOpenPrintSelectionWorkspace: PropTypes.bool,
   openPrintSelectionWorkspace: PropTypes.func,
-  sessionTotalPages: PropTypes.number.isRequired,
-  bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),
   documentNavigationEnabled: PropTypes.bool.isRequired,
   primaryDocumentNavigation: PropTypes.shape({

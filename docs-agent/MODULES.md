@@ -49,20 +49,20 @@ File count: 8. Line count: 4112. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 17. Line count: 7663. JSDoc symbol count: 128.
+File count: 19. Line count: 7930. JSDoc symbol count: 137.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
+- `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
-- `src/components/DocumentToolbar/LanguageMenuButton.jsx` - Compact language selector for the toolbar.
-- `src/components/DocumentToolbar/ZoomButtons.jsx` - Zoom control cluster: \[ \- \] \[ % editable \] \[ \+ \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] \- When the field is NOT focused, it renders like “100%”.
+- `src/components/DocumentToolbar/PrintPipelineDialogs.jsx` - The dialogs of the ONE print pipeline \(usePrintPipeline.js\): the print dialog and the generated\-PDF progress \(modal, or a dock while working in the background\).
 
 ## src/components/DocumentViewer
 
-File count: 16. Line count: 7025. JSDoc symbol count: 141.
+File count: 16. Line count: 7138. JSDoc symbol count: 143.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
@@ -71,7 +71,7 @@ File count: 16. Line count: 7025. JSDoc symbol count: 141.
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
 - `src/components/DocumentViewer/hooks/useCompareOverlay.js` - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
-- `src/components/DocumentViewer/CompareTransformControls.jsx` - Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page's free transform \(utils/compareTransform.js\): zoom \[−\] \[ 100,0 \] % \[\+\] 0.1 % steps \(Shift: 1
+- `src/components/DocumentViewer/CompareOverlayView.jsx` - Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, so differences show through.
 
 ## src/contexts
 

@@ -57,6 +57,7 @@ export {
  * @param {boolean=} params.selectionSequenceLocked
  * @param {number=} params.selectionIncludedCount
  * @param {number=} params.sessionTotalPages
+ * @param {('overlay'|'curtain'|null)=} params.composedView Compare view printed as one composed page.
  * @param {function(string, Object=): string} params.t
  * @param {any} params.i18n
  */
@@ -72,6 +73,7 @@ export function usePrintRangeController({
   selectionSequenceLocked = false,
   selectionIncludedCount = 0,
   sessionTotalPages = totalPages,
+  composedView = null,
   t,
   i18n,
 }) {
@@ -119,6 +121,7 @@ export function usePrintRangeController({
     hasActiveSelection,
     selectionSequenceLocked,
     selectionIncludedCount,
+    composedView,
     t,
     i18n,
   });
@@ -654,6 +657,7 @@ export function usePrintRangeController({
     extraPlaceholder,
     optionLabel,
     loadingHint,
+    composedView,
     extraSuffix,
     submit,
     submitPrintDirect,

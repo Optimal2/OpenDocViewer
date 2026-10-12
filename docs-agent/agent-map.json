@@ -87,15 +87,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 144,
-    "sourceLineCount": 59081,
-    "docletCount": 1604,
-    "documentedFileCount": 144,
+    "fileCount": 146,
+    "sourceLineCount": 59461,
+    "docletCount": 1615,
+    "documentedFileCount": 146,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 23,
     "devDependencyCount": 21,
-    "estimatedSourceTokens": 4676
+    "estimatedSourceTokens": 4789
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -103,7 +103,7 @@
   "packageUsage": [
     {
       "packageName": "react",
-      "importCount": 64,
+      "importCount": 66,
       "dynamicImportCount": 0,
       "files": [
         "src/ErrorBoundary.jsx",
@@ -127,12 +127,14 @@
         "src/components/DocumentToolbar/LanguageMenuButton.jsx",
         "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
         "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+        "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
         "src/components/DocumentToolbar/PrintRangeDialog.jsx",
         "src/components/DocumentToolbar/SplitToolbarButton.jsx",
         "src/components/DocumentToolbar/ThemeMenuButton.jsx",
         "src/components/DocumentToolbar/ThemeToggleButton.jsx",
         "src/components/DocumentToolbar/ZoomButtons.jsx",
         "src/components/DocumentToolbar/usePdfPrebuildAllPages.js",
+        "src/components/DocumentToolbar/usePrintPipeline.js",
         "src/components/DocumentToolbar/usePrintRangeDialog.js",
         "src/components/DocumentViewer/CompareCurtainButton.jsx",
         "src/components/DocumentViewer/CompareCurtainView.jsx",
@@ -173,8 +175,58 @@
       ]
     },
     {
+      "packageName": "react-i18next",
+      "importCount": 43,
+      "dynamicImportCount": 0,
+      "files": [
+        "src/PerformanceMonitor.jsx",
+        "src/app/AppBootstrap.jsx",
+        "src/components/DocumentConsumerWrapper.jsx",
+        "src/components/DocumentLoader/DemoControls.jsx",
+        "src/components/DocumentLoader/DocumentLoader.js",
+        "src/components/DocumentLoader/LoadPressureDialog.jsx",
+        "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
+        "src/components/DocumentMetadataOverlayDialog.jsx",
+        "src/components/DocumentRender.jsx",
+        "src/components/DocumentSelectionPanel.jsx",
+        "src/components/DocumentThumbnailList.jsx",
+        "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
+        "src/components/DocumentToolbar/DocumentToolbar.jsx",
+        "src/components/DocumentToolbar/HelpMenuButton.jsx",
+        "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
+        "src/components/DocumentToolbar/LanguageMenuButton.jsx",
+        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+        "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+        "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+        "src/components/DocumentToolbar/PrintRangeDialog.jsx",
+        "src/components/DocumentToolbar/ThemeMenuButton.jsx",
+        "src/components/DocumentToolbar/ThemeToggleButton.jsx",
+        "src/components/DocumentToolbar/ZoomButtons.jsx",
+        "src/components/DocumentToolbar/usePrintPipeline.js",
+        "src/components/DocumentViewer/CompareCurtainButton.jsx",
+        "src/components/DocumentViewer/CompareCurtainView.jsx",
+        "src/components/DocumentViewer/CompareOverlayView.jsx",
+        "src/components/DocumentViewer/CompareTransformControls.jsx",
+        "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+        "src/components/DocumentViewer/DocumentViewer.jsx",
+        "src/components/DocumentViewer/DocumentViewerRender.jsx",
+        "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
+        "src/components/ImageRenderer.jsx",
+        "src/components/LoadingMessage.jsx",
+        "src/components/LoadingSpinner.jsx",
+        "src/components/PrintSelectionWorkspace.jsx",
+        "src/components/Resizer.jsx",
+        "src/components/SignatureDetailsDialog.jsx",
+        "src/components/SignatureOverviewButton.jsx",
+        "src/components/SignatureOverviewDialog.jsx",
+        "src/components/SignatureStatusBadge.jsx",
+        "src/components/ViewerProblemNotice.jsx",
+        "src/i18n.js"
+      ]
+    },
+    {
       "packageName": "prop-types",
-      "importCount": 41,
+      "importCount": 42,
       "dynamicImportCount": 0,
       "files": [
         "src/PerformanceMonitor.jsx",
@@ -193,6 +245,7 @@
         "src/components/DocumentToolbar/LanguageMenuButton.jsx",
         "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
         "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+        "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
         "src/components/DocumentToolbar/PrintRangeDialog.jsx",
         "src/components/DocumentToolbar/SplitToolbarButton.jsx",
         "src/components/DocumentToolbar/ThemeMenuButton.jsx",
@@ -218,54 +271,6 @@
         "src/components/SignatureTime.jsx",
         "src/components/ViewerProblemNotice.jsx",
         "src/components/common/StatusLed.jsx"
-      ]
-    },
-    {
-      "packageName": "react-i18next",
-      "importCount": 41,
-      "dynamicImportCount": 0,
-      "files": [
-        "src/PerformanceMonitor.jsx",
-        "src/app/AppBootstrap.jsx",
-        "src/components/DocumentConsumerWrapper.jsx",
-        "src/components/DocumentLoader/DemoControls.jsx",
-        "src/components/DocumentLoader/DocumentLoader.js",
-        "src/components/DocumentLoader/LoadPressureDialog.jsx",
-        "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
-        "src/components/DocumentMetadataOverlayDialog.jsx",
-        "src/components/DocumentRender.jsx",
-        "src/components/DocumentSelectionPanel.jsx",
-        "src/components/DocumentThumbnailList.jsx",
-        "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-        "src/components/DocumentToolbar/DocumentToolbar.jsx",
-        "src/components/DocumentToolbar/HelpMenuButton.jsx",
-        "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
-        "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-        "src/components/DocumentToolbar/PageNavigationButtons.jsx",
-        "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-        "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-        "src/components/DocumentToolbar/ThemeToggleButton.jsx",
-        "src/components/DocumentToolbar/ZoomButtons.jsx",
-        "src/components/DocumentViewer/CompareCurtainButton.jsx",
-        "src/components/DocumentViewer/CompareCurtainView.jsx",
-        "src/components/DocumentViewer/CompareOverlayView.jsx",
-        "src/components/DocumentViewer/CompareTransformControls.jsx",
-        "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-        "src/components/DocumentViewer/DocumentViewer.jsx",
-        "src/components/DocumentViewer/DocumentViewerRender.jsx",
-        "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
-        "src/components/ImageRenderer.jsx",
-        "src/components/LoadingMessage.jsx",
-        "src/components/LoadingSpinner.jsx",
-        "src/components/PrintSelectionWorkspace.jsx",
-        "src/components/Resizer.jsx",
-        "src/components/SignatureDetailsDialog.jsx",
-        "src/components/SignatureOverviewButton.jsx",
-        "src/components/SignatureOverviewDialog.jsx",
-        "src/components/SignatureStatusBadge.jsx",
-        "src/components/ViewerProblemNotice.jsx",
-        "src/i18n.js"
       ]
     },
     {
@@ -462,7 +467,7 @@
       "path": "src/utils/runtimeConfig.js",
       "score": 119,
       "lines": 691,
-      "incomingLocalImports": 18,
+      "incomingLocalImports": 20,
       "doclets": 46,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
@@ -498,7 +503,7 @@
       "path": "src/logging/systemLogger.js",
       "score": 102,
       "lines": 471,
-      "incomingLocalImports": 35,
+      "incomingLocalImports": 36,
       "doclets": 31,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high"
@@ -665,9 +670,15 @@
         "role": "hook",
         "files": [
           {
+            "path": "src/components/DocumentToolbar/usePrintPipeline.js",
+            "score": 66,
+            "lines": 787,
+            "summary": "File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF..."
+          },
+          {
             "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
             "score": 57,
-            "lines": 667,
+            "lines": 671,
             "summary": "Hook + helpers for PrintRangeDialog."
           },
           {
@@ -745,7 +756,7 @@
           {
             "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
             "score": 20,
-            "lines": 160,
+            "lines": 163,
             "summary": "Runtime-configuration derivation for PrintRangeDialog."
           }
         ]
@@ -1083,9 +1094,9 @@
     },
     {
       "name": "src/components/DocumentToolbar",
-      "fileCount": 17,
-      "lineCount": 7663,
-      "docletCount": 128,
+      "fileCount": 19,
+      "lineCount": 7930,
+      "docletCount": 137,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1097,9 +1108,18 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "score": 66,
+          "lines": 787,
+          "incomingLocalImports": 2,
+          "doclets": 19,
+          "summary": "File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF...",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
           "score": 57,
-          "lines": 667,
+          "lines": 671,
           "incomingLocalImports": 1,
           "doclets": 15,
           "summary": "Hook + helpers for PrintRangeDialog.",
@@ -1107,10 +1127,10 @@
         },
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "score": 55,
-          "lines": 2212,
+          "score": 49,
+          "lines": 1446,
           "incomingLocalImports": 1,
-          "doclets": 31,
+          "doclets": 18,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
           "summaryConfidence": "high"
         },
@@ -1142,21 +1162,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-          "score": 26,
-          "lines": 154,
-          "incomingLocalImports": 1,
-          "doclets": 4,
-          "summary": "Compact language selector for the toolbar.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentToolbar/ZoomButtons.jsx",
-          "score": 26,
-          "lines": 566,
-          "incomingLocalImports": 1,
+          "path": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+          "score": 31,
+          "lines": 220,
+          "incomingLocalImports": 2,
           "doclets": 3,
-          "summary": "Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.",
+          "summary": "The dialogs of the ONE print pipeline (usePrintPipeline.js): the print dialog and the generated-PDF progress (modal, or a dock while working in the background).",
           "summaryConfidence": "high"
         }
       ]
@@ -1164,8 +1175,8 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 16,
-      "lineCount": 7025,
-      "docletCount": 141,
+      "lineCount": 7138,
+      "docletCount": 143,
       "importantFiles": [
         {
           "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
@@ -1215,7 +1226,7 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewer.jsx",
           "score": 37,
-          "lines": 768,
+          "lines": 797,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
@@ -1231,12 +1242,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/components/DocumentViewer/CompareTransformControls.jsx",
-          "score": 33,
-          "lines": 361,
-          "incomingLocalImports": 2,
-          "doclets": 3,
-          "summary": "Compare toolbar for one compared page: a disclosure button with a short summary, which expands into fine controls for the page's free transform (utils/compareTransform.js): zoom [−] [ 100,0 ] % [+] 0.1 % steps (Shift: 1",
+          "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
+          "score": 35,
+          "lines": 560,
+          "incomingLocalImports": 1,
+          "doclets": 6,
+          "summary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
           "summaryConfidence": "high"
         }
       ]
@@ -1479,16 +1490,16 @@
           "path": "src/logging/systemLogger.js",
           "score": 102,
           "lines": 471,
-          "incomingLocalImports": 35,
+          "incomingLocalImports": 36,
           "doclets": 31,
           "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
           "summaryConfidence": "high"
         },
         {
           "path": "src/logging/userLogger.js",
-          "score": 39,
+          "score": 47,
           "lines": 308,
-          "incomingLocalImports": 1,
+          "incomingLocalImports": 2,
           "doclets": 17,
           "summary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
           "summaryConfidence": "high"
@@ -1565,7 +1576,7 @@
           "path": "src/utils/runtimeConfig.js",
           "score": 119,
           "lines": 691,
-          "incomingLocalImports": 18,
+          "incomingLocalImports": 20,
           "doclets": 46,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
@@ -11240,9 +11251,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 2212,
+      "lines": 1446,
       "extension": ".jsx",
-      "jsdocBlockCount": 44,
+      "jsdocBlockCount": 25,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
       "imports": [
         {
@@ -11332,26 +11343,17 @@
           "kind": "static"
         },
         {
-          "source": "../../utils/printUtils.js",
+          "source": "./PrintPipelineDialogs.jsx",
           "specifiers": [
-            "handlePrint",
-            "handlePrintAll",
-            "handlePrintCurrentComparison",
-            "handlePrintRange",
-            "handlePrintSequence",
-            "handlePdfOutput",
-            "handlePdfCurrent",
-            "handlePdfCurrentComparison",
-            "downloadPdfBlob",
-            "printPdfBlob"
+            "PrintPipelineDialogs"
           ],
           "line": 27,
           "kind": "static"
         },
         {
-          "source": "./PrintRangeDialog.jsx",
+          "source": "./usePrintPipeline.js",
           "specifiers": [
-            "PrintRangeDialog"
+            "normalizeToolbarPageNumber"
           ],
           "line": 28,
           "kind": "static"
@@ -11381,21 +11383,13 @@
           "kind": "static"
         },
         {
-          "source": "./usePdfPrebuildAllPages.js",
-          "specifiers": [
-            "usePdfPrebuildAllPages"
-          ],
-          "line": 32,
-          "kind": "static"
-        },
-        {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig",
             "isCompareCurtainEnabled",
             "isCompareOverlayEnabled"
           ],
-          "line": 33,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -11405,7 +11399,7 @@
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 34,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -11413,7 +11407,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 39,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -11421,7 +11415,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 40,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -11429,7 +11423,7 @@
           "specifiers": [
             "SignatureOverviewButton"
           ],
-          "line": 41,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -11437,7 +11431,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 42,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -11446,7 +11440,7 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 43,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -11455,17 +11449,7 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 44,
-          "kind": "static"
-        },
-        {
-          "source": "../../utils/pdfPrintCacheKey.js",
-          "specifiers": [
-            "canReuseGeneratedPdfPrint",
-            "getPdfPrintCacheKey",
-            "getPdfPrintCacheKeyOptions"
-          ],
-          "line": 45,
+          "line": 43,
           "kind": "static"
         }
       ],
@@ -11473,84 +11457,49 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 2211
+          "line": 1445
         }
       ],
       "declarations": [
         {
-          "name": "isPdfAbortError",
-          "kind": "function",
-          "line": 57
-        },
-        {
-          "name": "formatPdfProgressBody",
-          "kind": "function",
-          "line": 66
-        },
-        {
-          "name": "getPdfProgressPercent",
-          "kind": "function",
-          "line": 83
-        },
-        {
           "name": "thumbnailPercentToSliderValue",
           "kind": "function",
-          "line": 230
+          "line": 155
         },
         {
           "name": "thumbnailSliderValueToPercent",
           "kind": "function",
-          "line": 238
-        },
-        {
-          "name": "normalizeToolbarPageNumber",
-          "kind": "function",
-          "line": 256
+          "line": 163
         },
         {
           "name": "makePdfResolutionPageKey",
           "kind": "function",
-          "line": 268
+          "line": 177
         },
         {
           "name": "isPdfPage",
           "kind": "function",
-          "line": 278
+          "line": 187
         },
         {
           "name": "DocumentToolbar",
           "kind": "component",
-          "line": 291
+          "line": 200
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 418
+          "line": 305
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 426
-        },
-        {
-          "name": "settingsDetail",
-          "kind": "object",
-          "line": 956
-        },
-        {
-          "name": "onKeyDown",
-          "kind": "function",
-          "line": 1119
-        },
-        {
-          "name": "pdfOpts",
-          "kind": "object",
-          "line": 1182
+          "line": 313
         },
         {
           "name": "detail",
           "kind": "object",
-          "line": 1322
+          "line": 722
         }
       ],
       "parseError": null,
@@ -11560,107 +11509,13 @@
       },
       "doclets": [
         {
-          "id": "isPdfAbortError",
-          "name": "isPdfAbortError",
-          "longname": "isPdfAbortError",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 57,
-          "description": "",
-          "params": [
-            {
-              "name": "error",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "boolean",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "formatPdfProgressBody",
-          "name": "formatPdfProgressBody",
-          "longname": "formatPdfProgressBody",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 66,
-          "description": "",
-          "params": [
-            {
-              "name": "t",
-              "type": "function",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "progress",
-              "type": "Object",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "getPdfProgressPercent",
-          "name": "getPdfProgressPercent",
-          "longname": "getPdfProgressPercent",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 83,
-          "description": "",
-          "params": [
-            {
-              "name": "progress",
-              "type": "Object",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "number",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "PrintSubmitDetail",
-          "name": "PrintSubmitDetail",
-          "longname": "PrintSubmitDetail",
-          "kind": "typedef",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 90,
-          "description": "Detail payload emitted by the print dialog.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
           "id": "AnyRef",
           "name": "AnyRef",
           "longname": "AnyRef",
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 110,
+          "line": 45,
           "description": "Mutable ref-like object used by the toolbar.",
           "params": [],
           "returns": [],
@@ -11673,7 +11528,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 116,
+          "line": 51,
           "description": "Editable image state shown by the toolbar.",
           "params": [],
           "returns": [],
@@ -11686,7 +11541,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 124,
+          "line": 59,
           "description": "React-like numeric page setter used by the toolbar.",
           "params": [
             {
@@ -11711,7 +11566,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 131,
+          "line": 66,
           "description": "Zoom display state used by the newer toolbar UX paths.",
           "params": [],
           "returns": [],
@@ -11724,7 +11579,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 138,
+          "line": 73,
           "description": "Props for {@link DocumentToolbar}.",
           "params": [],
           "returns": [],
@@ -11737,7 +11592,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 223,
+          "line": 148,
           "description": "Range (±) around 100% where sliders snap back to the neutral value.",
           "params": [],
           "returns": [],
@@ -11750,47 +11605,10 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 225,
+          "line": 150,
           "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
           "params": [],
           "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "normalizeToolbarPageNumber",
-          "name": "normalizeToolbarPageNumber",
-          "longname": "normalizeToolbarPageNumber",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 256,
-          "description": "Clamp a page number into the valid viewer range while preserving a safe fallback.",
-          "params": [
-            {
-              "name": "value",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "totalPages",
-              "type": "number",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "fallbackPage",
-              "type": "number",
-              "optional": true,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "number",
-              "description": ""
-            }
-          ],
           "examples": 0
         },
         {
@@ -11800,7 +11618,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 268,
+          "line": 177,
           "description": "",
           "params": [
             {
@@ -11825,7 +11643,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 278,
+          "line": 187,
           "description": "",
           "params": [
             {
@@ -11850,7 +11668,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 291,
+          "line": 200,
           "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
           "params": [
             {
@@ -11875,7 +11693,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 418,
+          "line": 305,
           "description": "",
           "params": [
             {
@@ -11895,7 +11713,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 426,
+          "line": 313,
           "description": "",
           "params": [
             {
@@ -11915,7 +11733,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 703,
+          "line": 585,
           "description": "Handle brightness slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11940,7 +11758,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 717,
+          "line": 599,
           "description": "Handle contrast slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11965,7 +11783,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 731,
+          "line": 613,
           "description": "",
           "params": [
             {
@@ -11996,7 +11814,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 739,
+          "line": 621,
           "description": "",
           "params": [
             {
@@ -12021,7 +11839,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 752,
+          "line": 634,
           "description": "",
           "params": [
             {
@@ -12046,212 +11864,12 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 761,
+          "line": 643,
           "description": "",
           "params": [
             {
               "name": "menuKey",
               "type": "'brightness'|'contrast'",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "void",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~toPagesString",
-          "name": "toPagesString",
-          "longname": "DocumentToolbar~toPagesString",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 790,
-          "description": "Build a compact &quot;pages&quot; descriptor for logging.",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string|null",
-              "description": "A string like &quot;all&quot;, &quot;3&quot;, &quot;2-5&quot;, or &quot;7,6,5&quot;."
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~resolvePrintPageCount",
-          "name": "resolvePrintPageCount",
-          "longname": "DocumentToolbar~resolvePrintPageCount",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 810,
-          "description": "Estimate the number of pages the user is about to print.",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "number|null",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~resolvePrintPageContexts",
-          "name": "resolvePrintPageContexts",
-          "longname": "DocumentToolbar~resolvePrintPageContexts",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 832,
-          "description": "Resolve page metadata objects aligned with the printed page sequence.",
-          "params": [
-            {
-              "name": "pageNumbers",
-              "type": "Array.<number>",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "Array.<*>",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~resolvePrintPageNumbers",
-          "name": "resolvePrintPageNumbers",
-          "longname": "DocumentToolbar~resolvePrintPageNumbers",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 846,
-          "description": "",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "Array.<number>",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~makePrintOptions",
-          "name": "makePrintOptions",
-          "longname": "DocumentToolbar~makePrintOptions",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 882,
-          "description": "",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "Object",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~submitUserPrintLog",
-          "name": "submitUserPrintLog",
-          "longname": "DocumentToolbar~submitUserPrintLog",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 910,
-          "description": "Fire-and-forget user print log.",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "void",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~dispatchPrintRequest",
-          "name": "dispatchPrintRequest",
-          "longname": "DocumentToolbar~dispatchPrintRequest",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 1143,
-          "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "void",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "DocumentToolbar~handlePrintSubmit",
-          "name": "handlePrintSubmit",
-          "longname": "DocumentToolbar~handlePrintSubmit",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 1311,
-          "description": "Handle the dialog submit event and dispatch the correct print action.",
-          "params": [
-            {
-              "name": "detail",
-              "type": "PrintSubmitDetail",
               "optional": false,
               "description": ""
             }
@@ -12331,31 +11949,22 @@
           "resolved": "src/components/DocumentToolbar/ThemeMenuButton.jsx"
         },
         {
-          "source": "../../utils/printUtils.js",
+          "source": "./PrintPipelineDialogs.jsx",
           "specifiers": [
-            "handlePrint",
-            "handlePrintAll",
-            "handlePrintCurrentComparison",
-            "handlePrintRange",
-            "handlePrintSequence",
-            "handlePdfOutput",
-            "handlePdfCurrent",
-            "handlePdfCurrentComparison",
-            "downloadPdfBlob",
-            "printPdfBlob"
+            "PrintPipelineDialogs"
           ],
           "line": 27,
           "kind": "static",
-          "resolved": "src/utils/printUtils.js"
+          "resolved": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx"
         },
         {
-          "source": "./PrintRangeDialog.jsx",
+          "source": "./usePrintPipeline.js",
           "specifiers": [
-            "PrintRangeDialog"
+            "normalizeToolbarPageNumber"
           ],
           "line": 28,
           "kind": "static",
-          "resolved": "src/components/DocumentToolbar/PrintRangeDialog.jsx"
+          "resolved": "src/components/DocumentToolbar/usePrintPipeline.js"
         },
         {
           "source": "./HelpMenuButton.jsx",
@@ -12385,22 +11994,13 @@
           "resolved": "src/components/DocumentToolbar/AboutOverlayDialog.jsx"
         },
         {
-          "source": "./usePdfPrebuildAllPages.js",
-          "specifiers": [
-            "usePdfPrebuildAllPages"
-          ],
-          "line": 32,
-          "kind": "static",
-          "resolved": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js"
-        },
-        {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig",
             "isCompareCurtainEnabled",
             "isCompareOverlayEnabled"
           ],
-          "line": 33,
+          "line": 32,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
@@ -12411,7 +12011,7 @@
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 34,
+          "line": 33,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
@@ -12420,7 +12020,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 39,
+          "line": 38,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -12429,7 +12029,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 40,
+          "line": 39,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -12438,7 +12038,7 @@
           "specifiers": [
             "SignatureOverviewButton"
           ],
-          "line": 41,
+          "line": 40,
           "kind": "static",
           "resolved": "src/components/SignatureOverviewButton.jsx"
         },
@@ -12447,7 +12047,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 42,
+          "line": 41,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/CompareCurtainButton.jsx"
         },
@@ -12457,7 +12057,7 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 43,
+          "line": 42,
           "kind": "static",
           "resolved": "src/utils/pdfBenchmark.js"
         },
@@ -12467,20 +12067,9 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 44,
+          "line": 43,
           "kind": "static",
           "resolved": "src/utils/renderDecodeBenchmark.js"
-        },
-        {
-          "source": "../../utils/pdfPrintCacheKey.js",
-          "specifiers": [
-            "canReuseGeneratedPdfPrint",
-            "getPdfPrintCacheKey",
-            "getPdfPrintCacheKeyOptions"
-          ],
-          "line": 45,
-          "kind": "static",
-          "resolved": "src/utils/pdfPrintCacheKey.js"
         }
       ],
       "packageImports": [
@@ -12516,7 +12105,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 55,
+      "importanceScore": 49,
       "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -12849,7 +12438,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
-      "lines": 160,
+      "lines": 163,
       "extension": ".js",
       "jsdocBlockCount": 2,
       "sourceSummary": "Runtime-configuration derivation for PrintRangeDialog.",
@@ -12895,14 +12484,14 @@
         {
           "name": "usePrintRangeConfig",
           "kind": "function",
-          "line": 29
+          "line": 30
         }
       ],
       "declarations": [
         {
           "name": "usePrintRangeConfig",
           "kind": "function",
-          "line": 29
+          "line": 30
         }
       ],
       "parseError": null,
@@ -12933,7 +12522,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
-          "line": 29,
+          "line": 30,
           "description": "",
           "params": [
             {
@@ -12965,6 +12554,12 @@
               "type": "number",
               "optional": true,
               "description": ""
+            },
+            {
+              "name": "params.composedView",
+              "type": "'overlay'|'curtain'|null",
+              "optional": true,
+              "description": "Compare view printed as one composed page."
             },
             {
               "name": "params.t",
@@ -14799,8 +14394,210 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+      "lines": 220,
+      "extension": ".jsx",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "The dialogs of the ONE print pipeline (usePrintPipeline.js): the print dialog and the generated-PDF progress (modal, or a dock while working in the background).",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ],
+          "line": 12,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 13,
+          "kind": "static"
+        },
+        {
+          "source": "react-i18next",
+          "specifiers": [
+            "useTranslation"
+          ],
+          "line": 14,
+          "kind": "static"
+        },
+        {
+          "source": "./PrintRangeDialog.jsx",
+          "specifiers": [
+            "PrintRangeDialog"
+          ],
+          "line": 15,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "PrintPipelineDialogs",
+          "kind": "default",
+          "line": 51
+        }
+      ],
+      "declarations": [
+        {
+          "name": "formatPdfProgressBody",
+          "kind": "function",
+          "line": 22
+        },
+        {
+          "name": "getPdfProgressPercent",
+          "kind": "function",
+          "line": 39
+        },
+        {
+          "name": "PrintPipelineDialogs",
+          "kind": "component",
+          "line": 51
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "formatPdfProgressBody",
+          "name": "formatPdfProgressBody",
+          "longname": "formatPdfProgressBody",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+          "line": 22,
+          "description": "",
+          "params": [
+            {
+              "name": "t",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "progress",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "getPdfProgressPercent",
+          "name": "getPdfProgressPercent",
+          "longname": "getPdfProgressPercent",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+          "line": 39,
+          "description": "",
+          "params": [
+            {
+              "name": "progress",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module.exports",
+          "name": "exports",
+          "longname": "module.exports",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+          "line": 51,
+          "description": "",
+          "params": [
+            {
+              "name": "props",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.pipeline",
+              "type": "Object",
+              "optional": false,
+              "description": "The instance returned by usePrintPipeline()."
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentToolbar",
+      "localImports": [
+        {
+          "source": "./PrintRangeDialog.jsx",
+          "specifiers": [
+            "PrintRangeDialog"
+          ],
+          "line": 15,
+          "kind": "static",
+          "resolved": "src/components/DocumentToolbar/PrintRangeDialog.jsx"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ],
+          "line": 12,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 13,
+          "kind": "static"
+        },
+        {
+          "source": "react-i18next",
+          "specifiers": [
+            "useTranslation"
+          ],
+          "line": 14,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 31,
+      "summary": "The dialogs of the ONE print pipeline (usePrintPipeline.js): the print dialog and the generated-PDF progress (modal, or a dock while working in the background).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-      "lines": 547,
+      "lines": 566,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
       "sourceSummary": "Unified print dialog with a single print-method selector and shared print-details section.",
@@ -16332,8 +16129,688 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "lines": 787,
+      "extension": ".js",
+      "jsdocBlockCount": 27,
+      "sourceSummary": "The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF decision, the PDF caches and the PDF progress state.",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback",
+            "useEffect",
+            "useMemo",
+            "useRef",
+            "useState"
+          ],
+          "line": 22,
+          "kind": "static"
+        },
+        {
+          "source": "react-i18next",
+          "specifiers": [
+            "useTranslation"
+          ],
+          "line": 23,
+          "kind": "static"
+        },
+        {
+          "source": "../../logging/userLogger.js",
+          "specifiers": [
+            "userLog"
+          ],
+          "line": 24,
+          "kind": "static"
+        },
+        {
+          "source": "../../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 25,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/printUtils.js",
+          "specifiers": [
+            "handlePrint",
+            "handlePrintAll",
+            "handlePrintCurrentComparison",
+            "handlePrintCompareOverlay",
+            "handlePrintCompareCurtain",
+            "handlePrintRange",
+            "handlePrintSequence",
+            "handlePdfOutput",
+            "handlePdfCurrent",
+            "handlePdfCurrentComparison",
+            "handlePdfCompareOverlay",
+            "handlePdfCompareCurtain",
+            "downloadPdfBlob",
+            "printPdfBlob"
+          ],
+          "line": 26,
+          "kind": "static"
+        },
+        {
+          "source": "./usePdfPrebuildAllPages.js",
+          "specifiers": [
+            "usePdfPrebuildAllPages"
+          ],
+          "line": 27,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig"
+          ],
+          "line": 28,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/pdfPrintCacheKey.js",
+          "specifiers": [
+            "canReuseGeneratedPdfPrint",
+            "getPdfPrintCacheKey",
+            "getPdfPrintCacheKeyOptions"
+          ],
+          "line": 29,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "EMPTY_PDF_PROGRESS",
+          "kind": "variable",
+          "line": 35
+        },
+        {
+          "name": "isComposedCompareDetail",
+          "kind": "function",
+          "line": 60
+        },
+        {
+          "name": "normalizeToolbarPageNumber",
+          "kind": "function",
+          "line": 72
+        },
+        {
+          "name": "usePrintPipeline",
+          "kind": "default",
+          "line": 143
+        }
+      ],
+      "declarations": [
+        {
+          "name": "isPdfAbortError",
+          "kind": "function",
+          "line": 50
+        },
+        {
+          "name": "isComposedCompareDetail",
+          "kind": "function",
+          "line": 60
+        },
+        {
+          "name": "normalizeToolbarPageNumber",
+          "kind": "function",
+          "line": 72
+        },
+        {
+          "name": "usePrintPipeline",
+          "kind": "function",
+          "line": 143
+        },
+        {
+          "name": "settingsDetail",
+          "kind": "object",
+          "line": 369
+        },
+        {
+          "name": "onKeyDown",
+          "kind": "function",
+          "line": 486
+        },
+        {
+          "name": "pdfOpts",
+          "kind": "object",
+          "line": 560
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:usePrintPipeline",
+          "name": "usePrintPipeline",
+          "longname": "module:usePrintPipeline",
+          "kind": "module",
+          "scope": null,
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 2,
+          "description": "File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF...",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~COMPOSED_VIEW_PRINTERS",
+          "name": "COMPOSED_VIEW_PRINTERS",
+          "longname": "module:usePrintPipeline~COMPOSED_VIEW_PRINTERS",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 41,
+          "description": "Compare views that print as one composed page, with their print helpers.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~isPdfAbortError",
+          "name": "isPdfAbortError",
+          "longname": "module:usePrintPipeline~isPdfAbortError",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 50,
+          "description": "",
+          "params": [
+            {
+              "name": "error",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline.isComposedCompareDetail",
+          "name": "isComposedCompareDetail",
+          "longname": "module:usePrintPipeline.isComposedCompareDetail",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 60,
+          "description": "True for the dialog detail of a compare-view print ( activeScope compare-overlay / compare-curtain ): both compared pages composed onto one page.",
+          "params": [
+            {
+              "name": "detail",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline.normalizeToolbarPageNumber",
+          "name": "normalizeToolbarPageNumber",
+          "longname": "module:usePrintPipeline.normalizeToolbarPageNumber",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 72,
+          "description": "Clamp a page number to the visible page range.",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "totalPages",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "fallbackPage",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~PrintSubmitDetail",
+          "name": "PrintSubmitDetail",
+          "longname": "module:usePrintPipeline~PrintSubmitDetail",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 80,
+          "description": "Detail payload emitted by the print dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~ComposedPrintTarget",
+          "name": "ComposedPrintTarget",
+          "longname": "module:usePrintPipeline~ComposedPrintTarget",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 100,
+          "description": "A compare view asking the shared dialog to print it as one page.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~PrintPipelineParams",
+          "name": "PrintPipelineParams",
+          "longname": "module:usePrintPipeline~PrintPipelineParams",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 109,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline",
+          "name": "module:usePrintPipeline",
+          "longname": "module:usePrintPipeline",
+          "kind": "function",
+          "scope": null,
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 143,
+          "description": "The single print pipeline shared by the toolbar and the compare views.",
+          "params": [
+            {
+              "name": "params",
+              "type": "PrintPipelineParams",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": "Dialog props, submit/open actions, PDF progress state and toolbar print state."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~toPagesString",
+          "name": "toPagesString",
+          "longname": "module:usePrintPipeline~usePrintPipeline~toPagesString",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 202,
+          "description": "Build a compact &quot;pages&quot; descriptor for logging.",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string|null",
+              "description": "A string like &quot;all&quot;, &quot;3&quot;, &quot;2-5&quot;, or &quot;7,6,5&quot;."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount",
+          "name": "resolvePrintPageCount",
+          "longname": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 223,
+          "description": "Estimate the number of pages the user is about to print.",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts",
+          "name": "resolvePrintPageContexts",
+          "longname": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 245,
+          "description": "Resolve page metadata objects aligned with the printed page sequence.",
+          "params": [
+            {
+              "name": "pageNumbers",
+              "type": "Array.<number>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<*>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageNumbers",
+          "name": "resolvePrintPageNumbers",
+          "longname": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageNumbers",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 259,
+          "description": "",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<number>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~makePrintOptions",
+          "name": "makePrintOptions",
+          "longname": "module:usePrintPipeline~usePrintPipeline~makePrintOptions",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 295,
+          "description": "",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~submitUserPrintLog",
+          "name": "submitUserPrintLog",
+          "longname": "module:usePrintPipeline~usePrintPipeline~submitUserPrintLog",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 323,
+          "description": "Fire-and-forget user print log.",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest",
+          "name": "dispatchPrintRequest",
+          "longname": "module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 517,
+          "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "composed",
+              "type": "Object|null",
+              "optional": true,
+              "description": "Compare-view print: the view and its state at submit time."
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~handlePrintSubmit",
+          "name": "handlePrintSubmit",
+          "longname": "module:usePrintPipeline~usePrintPipeline~handlePrintSubmit",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 711,
+          "description": "Handle the dialog submit event and dispatch the correct print action.",
+          "params": [
+            {
+              "name": "detail",
+              "type": "PrintSubmitDetail",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog",
+          "name": "openToolbarPrintDialog",
+          "longname": "module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 727,
+          "description": "Toolbar entry: the dialog for the viewer's own pages.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog",
+          "name": "openComposedPrintDialog",
+          "longname": "module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+          "line": 737,
+          "description": "Compare-view entry: the same dialog, printing the view as one composed page.",
+          "params": [
+            {
+              "name": "target",
+              "type": "ComposedPrintTarget",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": "False when printing is unavailable or the target is unknown."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentToolbar",
+      "localImports": [
+        {
+          "source": "../../logging/userLogger.js",
+          "specifiers": [
+            "userLog"
+          ],
+          "line": 24,
+          "kind": "static",
+          "resolved": "src/logging/userLogger.js"
+        },
+        {
+          "source": "../../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 25,
+          "kind": "static",
+          "resolved": "src/logging/systemLogger.js"
+        },
+        {
+          "source": "../../utils/printUtils.js",
+          "specifiers": [
+            "handlePrint",
+            "handlePrintAll",
+            "handlePrintCurrentComparison",
+            "handlePrintCompareOverlay",
+            "handlePrintCompareCurtain",
+            "handlePrintRange",
+            "handlePrintSequence",
+            "handlePdfOutput",
+            "handlePdfCurrent",
+            "handlePdfCurrentComparison",
+            "handlePdfCompareOverlay",
+            "handlePdfCompareCurtain",
+            "downloadPdfBlob",
+            "printPdfBlob"
+          ],
+          "line": 26,
+          "kind": "static",
+          "resolved": "src/utils/printUtils.js"
+        },
+        {
+          "source": "./usePdfPrebuildAllPages.js",
+          "specifiers": [
+            "usePdfPrebuildAllPages"
+          ],
+          "line": 27,
+          "kind": "static",
+          "resolved": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig"
+          ],
+          "line": 28,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "../../utils/pdfPrintCacheKey.js",
+          "specifiers": [
+            "canReuseGeneratedPdfPrint",
+            "getPdfPrintCacheKey",
+            "getPdfPrintCacheKeyOptions"
+          ],
+          "line": 29,
+          "kind": "static",
+          "resolved": "src/utils/pdfPrintCacheKey.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback",
+            "useEffect",
+            "useMemo",
+            "useRef",
+            "useState"
+          ],
+          "line": 22,
+          "kind": "static"
+        },
+        {
+          "source": "react-i18next",
+          "specifiers": [
+            "useTranslation"
+          ],
+          "line": 23,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 66,
+      "summary": "File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF...",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
       "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "lines": 667,
+      "lines": 671,
       "extension": ".js",
       "jsdocBlockCount": 22,
       "sourceSummary": "Hook + helpers for PrintRangeDialog.",
@@ -16410,39 +16887,39 @@
         {
           "name": "usePrintRangeController",
           "kind": "function",
-          "line": 63
+          "line": 64
         }
       ],
       "declarations": [
         {
           "name": "usePrintRangeController",
           "kind": "function",
-          "line": 63
+          "line": 64
         },
         {
           "name": "isInside",
           "kind": "function",
-          "line": 231
+          "line": 234
         },
         {
           "name": "isBackdrop",
           "kind": "function",
-          "line": 232
+          "line": 235
         },
         {
           "name": "blockPointer",
           "kind": "function",
-          "line": 233
+          "line": 236
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 250
+          "line": 253
         },
         {
           "name": "common",
           "kind": "object",
-          "line": 436
+          "line": 439
         }
       ],
       "parseError": null,
@@ -16473,7 +16950,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 63,
+          "line": 64,
           "description": "Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog.",
           "params": [
             {
@@ -16549,6 +17026,12 @@
               "description": ""
             },
             {
+              "name": "params.composedView",
+              "type": "'overlay'|'curtain'|null",
+              "optional": true,
+              "description": "Compare view printed as one composed page."
+            },
+            {
               "name": "params.t",
               "type": "function",
               "optional": false,
@@ -16571,7 +17054,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 267,
+          "line": 270,
           "description": "",
           "params": [
             {
@@ -16596,7 +17079,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 279,
+          "line": 282,
           "description": "",
           "params": [
             {
@@ -16627,7 +17110,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 288,
+          "line": 291,
           "description": "",
           "params": [],
           "returns": [
@@ -16645,7 +17128,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 300,
+          "line": 303,
           "description": "",
           "params": [],
           "returns": [
@@ -16663,7 +17146,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 365,
+          "line": 368,
           "description": "",
           "params": [],
           "returns": [
@@ -16681,7 +17164,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 384,
+          "line": 387,
           "description": "",
           "params": [],
           "returns": [
@@ -16699,7 +17182,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 407,
+          "line": 410,
           "description": "",
           "params": [],
           "returns": [
@@ -16717,7 +17200,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 427,
+          "line": 430,
           "description": "Compose and validate the print payload for the current dialog state.",
           "params": [
             {
@@ -16742,7 +17225,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 486,
+          "line": 489,
           "description": "",
           "params": [
             {
@@ -16767,7 +17250,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 499,
+          "line": 502,
           "description": "",
           "params": [],
           "returns": [
@@ -16785,7 +17268,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 502,
+          "line": 505,
           "description": "",
           "params": [],
           "returns": [
@@ -16803,7 +17286,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 507,
+          "line": 510,
           "description": "",
           "params": [],
           "returns": [
@@ -16821,7 +17304,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 518,
+          "line": 521,
           "description": "Restore the dialog state from the latest successfully prepared print.",
           "params": [
             {
@@ -17318,9 +17801,9 @@
     },
     {
       "path": "src/components/DocumentViewer/CompareCurtainView.jsx",
-      "lines": 363,
+      "lines": 431,
       "extension": ".jsx",
-      "jsdocBlockCount": 11,
+      "jsdocBlockCount": 13,
       "sourceSummary": "Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A (left/primary) below and page B (right/compare) above, page B clipped to one side of a draggable border.",
       "imports": [
         {
@@ -17333,7 +17816,7 @@
             "useReducer",
             "useRef"
           ],
-          "line": 30,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -17341,7 +17824,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 31,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -17349,7 +17832,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 32,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -17357,7 +17840,7 @@
           "specifiers": [
             "DocumentRender"
           ],
-          "line": 33,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -17367,7 +17850,7 @@
             "buildCompareTransformCss",
             "selectCompareTransform"
           ],
-          "line": 34,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -17382,7 +17865,7 @@
             "resolveCurtainKeyAction",
             "selectCurtainPosition"
           ],
-          "line": 39,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -17391,7 +17874,15 @@
             "hasActiveModalDialog",
             "shouldEscapeCloseView"
           ],
-          "line": 49,
+          "line": 52,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "isCompareCurtainPrintEnabled"
+          ],
+          "line": 53,
           "kind": "static"
         }
       ],
@@ -17399,59 +17890,69 @@
         {
           "name": "CompareCurtainView",
           "kind": "default",
-          "line": 362
+          "line": 430
         }
       ],
       "declarations": [
         {
           "name": "needsCanvas",
           "kind": "function",
-          "line": 57
+          "line": 61
         },
         {
           "name": "applyCurtainStyles",
           "kind": "function",
-          "line": 72
+          "line": 76
+        },
+        {
+          "name": "measureStage",
+          "kind": "function",
+          "line": 91
         },
         {
           "name": "CompareCurtainView",
           "kind": "component",
-          "line": 96
+          "line": 116
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 130
+          "line": 157
         },
         {
           "name": "positionFromEvent",
           "kind": "function",
-          "line": 146
+          "line": 173
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 152
+          "line": 179
         },
         {
           "name": "handlePointerMove",
           "kind": "function",
-          "line": 161
+          "line": 188
         },
         {
           "name": "finishDrag",
           "kind": "function",
-          "line": 169
+          "line": 196
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 181
+          "line": 208
+        },
+        {
+          "name": "handlePrint",
+          "kind": "function",
+          "line": 216
         },
         {
           "name": "renderModeButton",
           "kind": "component",
-          "line": 240
+          "line": 288
         }
       ],
       "parseError": null,
@@ -17467,7 +17968,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-          "line": 51,
+          "line": 55,
           "description": "",
           "params": [],
           "returns": [],
@@ -17480,7 +17981,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-          "line": 57,
+          "line": 61,
           "description": "",
           "params": [
             {
@@ -17505,7 +18006,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-          "line": 72,
+          "line": 76,
           "description": "Write the clip and the grab bar position straight to the DOM (drag path, no React render).",
           "params": [
             {
@@ -17542,13 +18043,38 @@
           "examples": 0
         },
         {
+          "id": "measureStage",
+          "name": "measureStage",
+          "longname": "measureStage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+          "line": 91,
+          "description": "The stage's visible size in CSS px, so the printed page shows the same window as the screen.",
+          "params": [
+            {
+              "name": "stage",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object|undefined",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "CompareCurtainView",
           "name": "CompareCurtainView",
           "longname": "CompareCurtainView",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-          "line": 96,
+          "line": 116,
           "description": "",
           "params": [
             {
@@ -17622,6 +18148,24 @@
               "type": "function",
               "optional": false,
               "description": ""
+            },
+            {
+              "name": "props.onPrint",
+              "type": "function",
+              "optional": false,
+              "description": "Opens the shared print dialog for this view (usePrintPipeline)."
+            },
+            {
+              "name": "props.printDisabled",
+              "type": "boolean",
+              "optional": true,
+              "description": "True while printing is unavailable (loading, PDF in progress)."
+            },
+            {
+              "name": "props.printDialogs",
+              "type": "React.ReactNode",
+              "optional": true,
+              "description": "The shared print dialog host, rendered in this toolbar."
             }
           ],
           "returns": [
@@ -17639,7 +18183,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-          "line": 130,
+          "line": 157,
           "description": "",
           "params": [
             {
@@ -17660,7 +18204,7 @@
           "specifiers": [
             "DocumentRender"
           ],
-          "line": 33,
+          "line": 36,
           "kind": "static",
           "resolved": "src/components/DocumentRender.jsx"
         },
@@ -17671,7 +18215,7 @@
             "buildCompareTransformCss",
             "selectCompareTransform"
           ],
-          "line": 34,
+          "line": 37,
           "kind": "static",
           "resolved": "src/utils/compareTransform.js"
         },
@@ -17687,7 +18231,7 @@
             "resolveCurtainKeyAction",
             "selectCurtainPosition"
           ],
-          "line": 39,
+          "line": 42,
           "kind": "static",
           "resolved": "src/utils/compareCurtain.js"
         },
@@ -17697,9 +18241,18 @@
             "hasActiveModalDialog",
             "shouldEscapeCloseView"
           ],
-          "line": 49,
+          "line": 52,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/compareViewKeys.js"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "isCompareCurtainPrintEnabled"
+          ],
+          "line": 53,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
         }
       ],
       "packageImports": [
@@ -17712,48 +18265,6 @@
             "useMemo",
             "useReducer",
             "useRef"
-          ],
-          "line": 30,
-          "kind": "static"
-        },
-        {
-          "source": "prop-types",
-          "specifiers": [
-            "PropTypes"
-          ],
-          "line": 31,
-          "kind": "static"
-        },
-        {
-          "source": "react-i18next",
-          "specifiers": [
-            "useTranslation"
-          ],
-          "line": 32,
-          "kind": "static"
-        }
-      ],
-      "incomingLocalImports": 1,
-      "importanceScore": 31,
-      "summary": "Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A (left/primary) below and page B (right/compare) above, page B clipped to one side of a draggable border.",
-      "summaryConfidence": "high",
-      "summarySource": "leading-jsdoc"
-    },
-    {
-      "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "lines": 496,
-      "extension": ".jsx",
-      "jsdocBlockCount": 13,
-      "sourceSummary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
-      "imports": [
-        {
-          "source": "react",
-          "specifiers": [
-            "React",
-            "useCallback",
-            "useEffect",
-            "useRef",
-            "useState"
           ],
           "line": 33,
           "kind": "static"
@@ -17773,13 +18284,55 @@
           ],
           "line": 35,
           "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 1,
+      "importanceScore": 34,
+      "summary": "Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A (left/primary) below and page B (right/compare) above, page B clipped to one side of a draggable border.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
+      "lines": 560,
+      "extension": ".jsx",
+      "jsdocBlockCount": 15,
+      "sourceSummary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useCallback",
+            "useEffect",
+            "useRef",
+            "useState"
+          ],
+          "line": 36,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 37,
+          "kind": "static"
+        },
+        {
+          "source": "react-i18next",
+          "specifiers": [
+            "useTranslation"
+          ],
+          "line": 38,
+          "kind": "static"
         },
         {
           "source": "../DocumentRender.jsx",
           "specifiers": [
             "DocumentRender"
           ],
-          "line": 36,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -17787,7 +18340,7 @@
           "specifiers": [
             "CompareTransformControls"
           ],
-          "line": 37,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -17797,7 +18350,7 @@
             "buildCompareTransformCss",
             "selectCompareTransform"
           ],
-          "line": 38,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -17809,7 +18362,7 @@
             "resolveOverlayOpacityKeyAction",
             "serializeCompareCalibration"
           ],
-          "line": 43,
+          "line": 46,
           "kind": "static"
         },
         {
@@ -17817,7 +18370,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 50,
+          "line": 53,
           "kind": "static"
         },
         {
@@ -17827,15 +18380,16 @@
             "isOwnKeyTarget",
             "shouldEscapeCloseView"
           ],
-          "line": 51,
+          "line": 54,
           "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
-            "isCompareCurtainEnabled"
+            "isCompareCurtainEnabled",
+            "isCompareOverlayPrintEnabled"
           ],
-          "line": 52,
+          "line": 55,
           "kind": "static"
         }
       ],
@@ -17843,64 +18397,74 @@
         {
           "name": "CompareOverlayView",
           "kind": "default",
-          "line": 495
+          "line": 559
         }
       ],
       "declarations": [
         {
           "name": "needsCanvas",
           "kind": "function",
-          "line": 64
+          "line": 67
+        },
+        {
+          "name": "measureStage",
+          "kind": "function",
+          "line": 79
         },
         {
           "name": "CompareOverlayView",
           "kind": "component",
-          "line": 91
+          "line": 110
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 146
+          "line": 169
         },
         {
           "name": "onWheel",
           "kind": "function",
-          "line": 172
+          "line": 195
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 191
+          "line": 214
         },
         {
           "name": "handlePointerMove",
           "kind": "function",
-          "line": 211
+          "line": 234
         },
         {
           "name": "finishDrag",
           "kind": "function",
-          "line": 230
+          "line": 253
         },
         {
           "name": "handleOpacityKeyDown",
           "kind": "function",
-          "line": 243
+          "line": 266
         },
         {
           "name": "handleCopy",
           "kind": "function",
-          "line": 260
+          "line": 283
+        },
+        {
+          "name": "handlePrint",
+          "kind": "function",
+          "line": 296
         },
         {
           "name": "pageLabel",
           "kind": "function",
-          "line": 279
+          "line": 321
         },
         {
           "name": "renderLayer",
           "kind": "component",
-          "line": 293
+          "line": 337
         }
       ],
       "parseError": null,
@@ -17916,7 +18480,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 54,
+          "line": 57,
           "description": "",
           "params": [],
           "returns": [],
@@ -17929,7 +18493,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 64,
+          "line": 67,
           "description": "",
           "params": [
             {
@@ -17948,13 +18512,38 @@
           "examples": 0
         },
         {
+          "id": "measureStage",
+          "name": "measureStage",
+          "longname": "measureStage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
+          "line": 79,
+          "description": "The stage's visible size in CSS px, so the printed page shows the same window as the screen.",
+          "params": [
+            {
+              "name": "stage",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object|undefined",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "CompareOverlayView",
           "name": "CompareOverlayView",
           "longname": "CompareOverlayView",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 91,
+          "line": 110,
           "description": "",
           "params": [
             {
@@ -18064,6 +18653,24 @@
               "type": "function",
               "optional": false,
               "description": "Opens the curtain view with this calibration."
+            },
+            {
+              "name": "props.onPrint",
+              "type": "function",
+              "optional": false,
+              "description": "Opens the shared print dialog for this view (usePrintPipeline)."
+            },
+            {
+              "name": "props.printDisabled",
+              "type": "boolean",
+              "optional": true,
+              "description": "True while printing is unavailable (loading, PDF in progress)."
+            },
+            {
+              "name": "props.printDialogs",
+              "type": "React.ReactNode",
+              "optional": true,
+              "description": "The shared print dialog host, rendered in this toolbar."
             }
           ],
           "returns": [
@@ -18081,7 +18688,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 146,
+          "line": 169,
           "description": "",
           "params": [
             {
@@ -18101,7 +18708,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-          "line": 172,
+          "line": 195,
           "description": "",
           "params": [
             {
@@ -18122,7 +18729,7 @@
           "specifiers": [
             "DocumentRender"
           ],
-          "line": 36,
+          "line": 39,
           "kind": "static",
           "resolved": "src/components/DocumentRender.jsx"
         },
@@ -18131,7 +18738,7 @@
           "specifiers": [
             "CompareTransformControls"
           ],
-          "line": 37,
+          "line": 40,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/CompareTransformControls.jsx"
         },
@@ -18142,7 +18749,7 @@
             "buildCompareTransformCss",
             "selectCompareTransform"
           ],
-          "line": 38,
+          "line": 41,
           "kind": "static",
           "resolved": "src/utils/compareTransform.js"
         },
@@ -18155,7 +18762,7 @@
             "resolveOverlayOpacityKeyAction",
             "serializeCompareCalibration"
           ],
-          "line": 43,
+          "line": 46,
           "kind": "static",
           "resolved": "src/utils/compareOverlay.js"
         },
@@ -18164,7 +18771,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 50,
+          "line": 53,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/CompareCurtainButton.jsx"
         },
@@ -18175,16 +18782,17 @@
             "isOwnKeyTarget",
             "shouldEscapeCloseView"
           ],
-          "line": 51,
+          "line": 54,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/compareViewKeys.js"
         },
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
-            "isCompareCurtainEnabled"
+            "isCompareCurtainEnabled",
+            "isCompareOverlayPrintEnabled"
           ],
-          "line": 52,
+          "line": 55,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
@@ -18199,7 +18807,7 @@
             "useRef",
             "useState"
           ],
-          "line": 33,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -18207,7 +18815,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 34,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -18215,12 +18823,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 35,
+          "line": 38,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 32,
+      "importanceScore": 35,
       "summary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -18902,7 +19510,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "lines": 768,
+      "lines": 797,
       "extension": ".jsx",
       "jsdocBlockCount": 8,
       "sourceSummary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
@@ -18978,11 +19586,27 @@
           "kind": "static"
         },
         {
+          "source": "../DocumentToolbar/PrintPipelineDialogs.jsx",
+          "specifiers": [
+            "PrintPipelineDialogs"
+          ],
+          "line": 30,
+          "kind": "static"
+        },
+        {
+          "source": "../DocumentToolbar/usePrintPipeline.js",
+          "specifiers": [
+            "usePrintPipeline"
+          ],
+          "line": 31,
+          "kind": "static"
+        },
+        {
           "source": "../Resizer.jsx",
           "specifiers": [
             "Resizer"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -18990,7 +19614,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -18998,7 +19622,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -19006,7 +19630,7 @@
           "specifiers": [
             "useDocumentViewer"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -19014,7 +19638,7 @@
           "specifiers": [
             "resolveShownCompareViews"
           ],
-          "line": 34,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -19022,7 +19646,7 @@
           "specifiers": [
             "useNavigationModifierState"
           ],
-          "line": 35,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -19030,7 +19654,7 @@
           "specifiers": [
             "DocumentMetadataOverlayDialog"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -19038,7 +19662,7 @@
           "specifiers": [
             "DocumentMetadataMatrixOverlayDialog"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -19046,7 +19670,7 @@
           "specifiers": [
             "SignatureDetailsDialog"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -19054,7 +19678,7 @@
           "specifiers": [
             "SignatureOverviewDialog"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -19062,7 +19686,7 @@
           "specifiers": [
             "ViewerProblemNotice"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -19071,7 +19695,7 @@
             "buildDocumentMetadataMatrixView",
             "buildDocumentMetadataView"
           ],
-          "line": 41,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -19082,7 +19706,7 @@
             "getPageSignatureDocumentKey",
             "summarizeSignatureDocuments"
           ],
-          "line": 42,
+          "line": 44,
           "kind": "static"
         },
         {
@@ -19093,7 +19717,7 @@
             "getViewerEdgeScrollPageTurnConfig",
             "isDocumentMetadataUiEnabled"
           ],
-          "line": 48,
+          "line": 50,
           "kind": "static"
         }
       ],
@@ -19101,34 +19725,34 @@
         {
           "name": "DocumentViewer",
           "kind": "default",
-          "line": 767
+          "line": 796
         }
       ],
       "declarations": [
         {
           "name": "DocumentViewer",
           "kind": "component",
-          "line": 55
+          "line": 57
         },
         {
           "name": "isEditableTarget",
           "kind": "function",
-          "line": 334
+          "line": 336
         },
         {
           "name": "hasActiveModalDialog",
           "kind": "function",
-          "line": 341
+          "line": 343
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 345
+          "line": 347
         },
         {
           "name": "allowNativeContextMenu",
           "kind": "function",
-          "line": 433
+          "line": 468
         }
       ],
       "parseError": null,
@@ -19144,7 +19768,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 270,
+          "line": 272,
           "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
           "params": [
             {
@@ -19175,7 +19799,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 312,
+          "line": 314,
           "description": "Overview row activation: show the document's first page and keep the overview open.",
           "params": [],
           "returns": [],
@@ -19188,7 +19812,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 334,
+          "line": 336,
           "description": "",
           "params": [
             {
@@ -19208,7 +19832,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 341,
+          "line": 343,
           "description": "",
           "params": [],
           "returns": [
@@ -19226,7 +19850,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 345,
+          "line": 347,
           "description": "",
           "params": [
             {
@@ -19246,7 +19870,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "line": 433,
+          "line": 468,
           "description": "",
           "params": [
             {
@@ -19322,11 +19946,29 @@
           "resolved": "src/components/PrintSelectionWorkspace.jsx"
         },
         {
+          "source": "../DocumentToolbar/PrintPipelineDialogs.jsx",
+          "specifiers": [
+            "PrintPipelineDialogs"
+          ],
+          "line": 30,
+          "kind": "static",
+          "resolved": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx"
+        },
+        {
+          "source": "../DocumentToolbar/usePrintPipeline.js",
+          "specifiers": [
+            "usePrintPipeline"
+          ],
+          "line": 31,
+          "kind": "static",
+          "resolved": "src/components/DocumentToolbar/usePrintPipeline.js"
+        },
+        {
           "source": "../Resizer.jsx",
           "specifiers": [
             "Resizer"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static",
           "resolved": "src/components/Resizer.jsx"
         },
@@ -19335,7 +19977,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -19344,7 +19986,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -19353,7 +19995,7 @@
           "specifiers": [
             "useDocumentViewer"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/useDocumentViewer.js"
         },
@@ -19362,7 +20004,7 @@
           "specifiers": [
             "resolveShownCompareViews"
           ],
-          "line": 34,
+          "line": 36,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useCompareOverlay.js"
         },
@@ -19371,7 +20013,7 @@
           "specifiers": [
             "useNavigationModifierState"
           ],
-          "line": 35,
+          "line": 37,
           "kind": "static",
           "resolved": "src/hooks/useNavigationModifierState.js"
         },
@@ -19380,7 +20022,7 @@
           "specifiers": [
             "DocumentMetadataOverlayDialog"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static",
           "resolved": "src/components/DocumentMetadataOverlayDialog.jsx"
         },
@@ -19389,7 +20031,7 @@
           "specifiers": [
             "DocumentMetadataMatrixOverlayDialog"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static",
           "resolved": "src/components/DocumentMetadataMatrixOverlayDialog.jsx"
         },
@@ -19398,7 +20040,7 @@
           "specifiers": [
             "SignatureDetailsDialog"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static",
           "resolved": "src/components/SignatureDetailsDialog.jsx"
         },
@@ -19407,7 +20049,7 @@
           "specifiers": [
             "SignatureOverviewDialog"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static",
           "resolved": "src/components/SignatureOverviewDialog.jsx"
         },
@@ -19416,7 +20058,7 @@
           "specifiers": [
             "ViewerProblemNotice"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static",
           "resolved": "src/components/ViewerProblemNotice.jsx"
         },
@@ -19426,7 +20068,7 @@
             "buildDocumentMetadataMatrixView",
             "buildDocumentMetadataView"
           ],
-          "line": 41,
+          "line": 43,
           "kind": "static",
           "resolved": "src/utils/documentMetadata.js"
         },
@@ -19438,7 +20080,7 @@
             "getPageSignatureDocumentKey",
             "summarizeSignatureDocuments"
           ],
-          "line": 42,
+          "line": 44,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
         },
@@ -19450,7 +20092,7 @@
             "getViewerEdgeScrollPageTurnConfig",
             "isDocumentMetadataUiEnabled"
           ],
-          "line": 48,
+          "line": 50,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
@@ -20732,7 +21374,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-      "lines": 446,
+      "lines": 398,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
       "sourceSummary": "Toolbar adapter for the document viewer.",
@@ -20766,14 +21408,14 @@
         {
           "name": "DocumentViewerToolbar",
           "kind": "default",
-          "line": 445
+          "line": 397
         }
       ],
       "declarations": [
         {
           "name": "DocumentViewerToolbar",
           "kind": "component",
-          "line": 133
+          "line": 121
         }
       ],
       "parseError": null,
@@ -20865,7 +21507,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-          "line": 133,
+          "line": 121,
           "description": "Renders the toolbar for the document viewer by delegating to .",
           "params": [
             {
@@ -35200,7 +35842,7 @@
           "kind": "static"
         }
       ],
-      "incomingLocalImports": 35,
+      "incomingLocalImports": 36,
       "importanceScore": 102,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high",
@@ -35531,8 +36173,8 @@
       "moduleKey": "src/logging",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 39,
+      "incomingLocalImports": 2,
+      "importanceScore": 47,
       "summary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -62149,7 +62791,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 18,
+      "incomingLocalImports": 20,
       "importanceScore": 119,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -72031,35 +72673,10 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 110,
+      "line": 45,
       "description": "Mutable ref-like object used by the toolbar.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "DocumentToolbar~dispatchPrintRequest",
-      "name": "dispatchPrintRequest",
-      "longname": "DocumentToolbar~dispatchPrintRequest",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 1143,
-      "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "void",
-          "description": ""
-        }
-      ],
       "examples": 0
     },
     {
@@ -72069,7 +72686,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 291,
+      "line": 200,
       "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
       "params": [
         {
@@ -72094,66 +72711,10 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 138,
+      "line": 73,
       "description": "Props for {@link DocumentToolbar}.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "formatPdfProgressBody",
-      "name": "formatPdfProgressBody",
-      "longname": "formatPdfProgressBody",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 66,
-      "description": "",
-      "params": [
-        {
-          "name": "t",
-          "type": "function",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "progress",
-          "type": "Object",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "getPdfProgressPercent",
-      "name": "getPdfProgressPercent",
-      "longname": "getPdfProgressPercent",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 83,
-      "description": "",
-      "params": [
-        {
-          "name": "progress",
-          "type": "Object",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "number",
-          "description": ""
-        }
-      ],
       "examples": 0
     },
     {
@@ -72163,7 +72724,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 703,
+      "line": 585,
       "description": "Handle brightness slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -72188,7 +72749,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 717,
+      "line": 599,
       "description": "Handle contrast slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -72213,7 +72774,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 739,
+      "line": 621,
       "description": "",
       "params": [
         {
@@ -72238,7 +72799,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 426,
+      "line": 313,
       "description": "",
       "params": [
         {
@@ -72258,7 +72819,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 418,
+      "line": 305,
       "description": "",
       "params": [
         {
@@ -72272,38 +72833,13 @@
       "examples": 0
     },
     {
-      "id": "DocumentToolbar~handlePrintSubmit",
-      "name": "handlePrintSubmit",
-      "longname": "DocumentToolbar~handlePrintSubmit",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 1311,
-      "description": "Handle the dialog submit event and dispatch the correct print action.",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "void",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "DocumentToolbar~handleResetAdjustmentsClick",
       "name": "handleResetAdjustmentsClick",
       "longname": "DocumentToolbar~handleResetAdjustmentsClick",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 752,
+      "line": 634,
       "description": "",
       "params": [
         {
@@ -72328,7 +72864,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 731,
+      "line": 613,
       "description": "",
       "params": [
         {
@@ -72359,35 +72895,10 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 116,
+      "line": 51,
       "description": "Editable image state shown by the toolbar.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "isPdfAbortError",
-      "name": "isPdfAbortError",
-      "longname": "isPdfAbortError",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 57,
-      "description": "",
-      "params": [
-        {
-          "name": "error",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "boolean",
-          "description": ""
-        }
-      ],
       "examples": 0
     },
     {
@@ -72397,7 +72908,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 278,
+      "line": 187,
       "description": "",
       "params": [
         {
@@ -72422,7 +72933,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 268,
+      "line": 177,
       "description": "",
       "params": [
         {
@@ -72441,75 +72952,13 @@
       "examples": 0
     },
     {
-      "id": "DocumentToolbar~makePrintOptions",
-      "name": "makePrintOptions",
-      "longname": "DocumentToolbar~makePrintOptions",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 882,
-      "description": "",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "Object",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "normalizeToolbarPageNumber",
-      "name": "normalizeToolbarPageNumber",
-      "longname": "normalizeToolbarPageNumber",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 256,
-      "description": "Clamp a page number into the valid viewer range while preserving a safe fallback.",
-      "params": [
-        {
-          "name": "value",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "totalPages",
-          "type": "number",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "fallbackPage",
-          "type": "number",
-          "optional": true,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "number",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "ONE_TO_ONE_EPS",
       "name": "ONE_TO_ONE_EPS",
       "longname": "ONE_TO_ONE_EPS",
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 225,
+      "line": 150,
       "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
       "params": [],
       "returns": [],
@@ -72522,7 +72971,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 124,
+      "line": 59,
       "description": "React-like numeric page setter used by the toolbar.",
       "params": [
         {
@@ -72541,129 +72990,16 @@
       "examples": 0
     },
     {
-      "id": "PrintSubmitDetail",
-      "name": "PrintSubmitDetail",
-      "longname": "PrintSubmitDetail",
-      "kind": "typedef",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 90,
-      "description": "Detail payload emitted by the print dialog.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "DocumentToolbar~resolvePrintPageContexts",
-      "name": "resolvePrintPageContexts",
-      "longname": "DocumentToolbar~resolvePrintPageContexts",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 832,
-      "description": "Resolve page metadata objects aligned with the printed page sequence.",
-      "params": [
-        {
-          "name": "pageNumbers",
-          "type": "Array.<number>",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "Array.<*>",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "DocumentToolbar~resolvePrintPageCount",
-      "name": "resolvePrintPageCount",
-      "longname": "DocumentToolbar~resolvePrintPageCount",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 810,
-      "description": "Estimate the number of pages the user is about to print.",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "number|null",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "DocumentToolbar~resolvePrintPageNumbers",
-      "name": "resolvePrintPageNumbers",
-      "longname": "DocumentToolbar~resolvePrintPageNumbers",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 846,
-      "description": "",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "Array.<number>",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "SLIDER_CENTER_RANGE",
       "name": "SLIDER_CENTER_RANGE",
       "longname": "SLIDER_CENTER_RANGE",
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 223,
+      "line": 148,
       "description": "Range (±) around 100% where sliders snap back to the neutral value.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "DocumentToolbar~submitUserPrintLog",
-      "name": "submitUserPrintLog",
-      "longname": "DocumentToolbar~submitUserPrintLog",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 910,
-      "description": "Fire-and-forget user print log.",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "void",
-          "description": ""
-        }
-      ],
       "examples": 0
     },
     {
@@ -72673,7 +73009,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 761,
+      "line": 643,
       "description": "",
       "params": [
         {
@@ -72692,38 +73028,13 @@
       "examples": 0
     },
     {
-      "id": "DocumentToolbar~toPagesString",
-      "name": "toPagesString",
-      "longname": "DocumentToolbar~toPagesString",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 790,
-      "description": "Build a compact &quot;pages&quot; descriptor for logging.",
-      "params": [
-        {
-          "name": "detail",
-          "type": "PrintSubmitDetail",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string|null",
-          "description": "A string like &quot;all&quot;, &quot;3&quot;, &quot;2-5&quot;, or &quot;7,6,5&quot;."
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "ZoomState",
       "name": "ZoomState",
       "longname": "ZoomState",
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 131,
+      "line": 66,
       "description": "Zoom display state used by the newer toolbar UX paths.",
       "params": [],
       "returns": [],
@@ -72846,7 +73157,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
-      "line": 29,
+      "line": 30,
       "description": "",
       "params": [
         {
@@ -72878,6 +73189,12 @@
           "type": "number",
           "optional": true,
           "description": ""
+        },
+        {
+          "name": "params.composedView",
+          "type": "'overlay'|'curtain'|null",
+          "optional": true,
+          "description": "Compare view printed as one composed page."
         },
         {
           "name": "params.t",
@@ -74060,6 +74377,93 @@
       "examples": 0
     },
     {
+      "id": "module.exports",
+      "name": "exports",
+      "longname": "module.exports",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+      "line": 51,
+      "description": "",
+      "params": [
+        {
+          "name": "props",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.pipeline",
+          "type": "Object",
+          "optional": false,
+          "description": "The instance returned by usePrintPipeline()."
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "formatPdfProgressBody",
+      "name": "formatPdfProgressBody",
+      "longname": "formatPdfProgressBody",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+      "line": 22,
+      "description": "",
+      "params": [
+        {
+          "name": "t",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "progress",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "getPdfProgressPercent",
+      "name": "getPdfProgressPercent",
+      "longname": "getPdfProgressPercent",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+      "line": 39,
+      "description": "",
+      "params": [
+        {
+          "name": "progress",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "PrintSubmitDetail",
       "name": "PrintSubmitDetail",
       "longname": "PrintSubmitDetail",
@@ -74787,13 +75191,434 @@
       "examples": 0
     },
     {
+      "id": "module:usePrintPipeline~COMPOSED_VIEW_PRINTERS",
+      "name": "COMPOSED_VIEW_PRINTERS",
+      "longname": "module:usePrintPipeline~COMPOSED_VIEW_PRINTERS",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 41,
+      "description": "Compare views that print as one composed page, with their print helpers.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~ComposedPrintTarget",
+      "name": "ComposedPrintTarget",
+      "longname": "module:usePrintPipeline~ComposedPrintTarget",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 100,
+      "description": "A compare view asking the shared dialog to print it as one page.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest",
+      "name": "dispatchPrintRequest",
+      "longname": "module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 517,
+      "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "composed",
+          "type": "Object|null",
+          "optional": true,
+          "description": "Compare-view print: the view and its state at submit time."
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~handlePrintSubmit",
+      "name": "handlePrintSubmit",
+      "longname": "module:usePrintPipeline~usePrintPipeline~handlePrintSubmit",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 711,
+      "description": "Handle the dialog submit event and dispatch the correct print action.",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline.isComposedCompareDetail",
+      "name": "isComposedCompareDetail",
+      "longname": "module:usePrintPipeline.isComposedCompareDetail",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 60,
+      "description": "True for the dialog detail of a compare-view print ( activeScope compare-overlay / compare-curtain ): both compared pages composed onto one page.",
+      "params": [
+        {
+          "name": "detail",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~isPdfAbortError",
+      "name": "isPdfAbortError",
+      "longname": "module:usePrintPipeline~isPdfAbortError",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 50,
+      "description": "",
+      "params": [
+        {
+          "name": "error",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~makePrintOptions",
+      "name": "makePrintOptions",
+      "longname": "module:usePrintPipeline~usePrintPipeline~makePrintOptions",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 295,
+      "description": "",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline",
+      "name": "module:usePrintPipeline",
+      "longname": "module:usePrintPipeline",
+      "kind": "function",
+      "scope": null,
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 143,
+      "description": "The single print pipeline shared by the toolbar and the compare views.",
+      "params": [
+        {
+          "name": "params",
+          "type": "PrintPipelineParams",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": "Dialog props, submit/open actions, PDF progress state and toolbar print state."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline.normalizeToolbarPageNumber",
+      "name": "normalizeToolbarPageNumber",
+      "longname": "module:usePrintPipeline.normalizeToolbarPageNumber",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 72,
+      "description": "Clamp a page number to the visible page range.",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "totalPages",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "fallbackPage",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog",
+      "name": "openComposedPrintDialog",
+      "longname": "module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 737,
+      "description": "Compare-view entry: the same dialog, printing the view as one composed page.",
+      "params": [
+        {
+          "name": "target",
+          "type": "ComposedPrintTarget",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": "False when printing is unavailable or the target is unknown."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog",
+      "name": "openToolbarPrintDialog",
+      "longname": "module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 727,
+      "description": "Toolbar entry: the dialog for the viewer's own pages.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~PrintPipelineParams",
+      "name": "PrintPipelineParams",
+      "longname": "module:usePrintPipeline~PrintPipelineParams",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 109,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~PrintSubmitDetail",
+      "name": "PrintSubmitDetail",
+      "longname": "module:usePrintPipeline~PrintSubmitDetail",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 80,
+      "description": "Detail payload emitted by the print dialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts",
+      "name": "resolvePrintPageContexts",
+      "longname": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 245,
+      "description": "Resolve page metadata objects aligned with the printed page sequence.",
+      "params": [
+        {
+          "name": "pageNumbers",
+          "type": "Array.<number>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<*>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount",
+      "name": "resolvePrintPageCount",
+      "longname": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 223,
+      "description": "Estimate the number of pages the user is about to print.",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageNumbers",
+      "name": "resolvePrintPageNumbers",
+      "longname": "module:usePrintPipeline~usePrintPipeline~resolvePrintPageNumbers",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 259,
+      "description": "",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<number>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~submitUserPrintLog",
+      "name": "submitUserPrintLog",
+      "longname": "module:usePrintPipeline~usePrintPipeline~submitUserPrintLog",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 323,
+      "description": "Fire-and-forget user print log.",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline~usePrintPipeline~toPagesString",
+      "name": "toPagesString",
+      "longname": "module:usePrintPipeline~usePrintPipeline~toPagesString",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 202,
+      "description": "Build a compact &quot;pages&quot; descriptor for logging.",
+      "params": [
+        {
+          "name": "detail",
+          "type": "PrintSubmitDetail",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string|null",
+          "description": "A string like &quot;all&quot;, &quot;3&quot;, &quot;2-5&quot;, or &quot;7,6,5&quot;."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintPipeline",
+      "name": "usePrintPipeline",
+      "longname": "module:usePrintPipeline",
+      "kind": "module",
+      "scope": null,
+      "file": "src/components/DocumentToolbar/usePrintPipeline.js",
+      "line": 2,
+      "description": "File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF...",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "usePrintRangeController~composePrintFormat",
       "name": "composePrintFormat",
       "longname": "usePrintRangeController~composePrintFormat",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 365,
+      "line": 368,
       "description": "",
       "params": [],
       "returns": [
@@ -74811,7 +75636,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 384,
+      "line": 387,
       "description": "",
       "params": [],
       "returns": [
@@ -74829,7 +75654,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 427,
+      "line": 430,
       "description": "Compose and validate the print payload for the current dialog state.",
       "params": [
         {
@@ -74854,7 +75679,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 407,
+      "line": 410,
       "description": "",
       "params": [],
       "returns": [
@@ -74872,7 +75697,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 279,
+      "line": 282,
       "description": "",
       "params": [
         {
@@ -74903,7 +75728,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 267,
+      "line": 270,
       "description": "",
       "params": [
         {
@@ -74941,7 +75766,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 518,
+      "line": 521,
       "description": "Restore the dialog state from the latest successfully prepared print.",
       "params": [
         {
@@ -74966,7 +75791,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 507,
+      "line": 510,
       "description": "",
       "params": [],
       "returns": [
@@ -74984,7 +75809,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 499,
+      "line": 502,
       "description": "",
       "params": [],
       "returns": [
@@ -75002,7 +75827,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 502,
+      "line": 505,
       "description": "",
       "params": [],
       "returns": [
@@ -75020,7 +75845,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 486,
+      "line": 489,
       "description": "",
       "params": [
         {
@@ -75045,7 +75870,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 63,
+      "line": 64,
       "description": "Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog.",
       "params": [
         {
@@ -75121,6 +75946,12 @@
           "description": ""
         },
         {
+          "name": "params.composedView",
+          "type": "'overlay'|'curtain'|null",
+          "optional": true,
+          "description": "Compare view printed as one composed page."
+        },
+        {
           "name": "params.t",
           "type": "function",
           "optional": false,
@@ -75143,7 +75974,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 288,
+      "line": 291,
       "description": "",
       "params": [],
       "returns": [
@@ -75161,7 +75992,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 300,
+      "line": 303,
       "description": "",
       "params": [],
       "returns": [
@@ -75291,7 +76122,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-      "line": 72,
+      "line": 76,
       "description": "Write the clip and the grab bar position straight to the DOM (drag path, no React render).",
       "params": [
         {
@@ -75334,7 +76165,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-      "line": 96,
+      "line": 116,
       "description": "",
       "params": [
         {
@@ -75408,6 +76239,24 @@
           "type": "function",
           "optional": false,
           "description": ""
+        },
+        {
+          "name": "props.onPrint",
+          "type": "function",
+          "optional": false,
+          "description": "Opens the shared print dialog for this view (usePrintPipeline)."
+        },
+        {
+          "name": "props.printDisabled",
+          "type": "boolean",
+          "optional": true,
+          "description": "True while printing is unavailable (loading, PDF in progress)."
+        },
+        {
+          "name": "props.printDialogs",
+          "type": "React.ReactNode",
+          "optional": true,
+          "description": "The shared print dialog host, rendered in this toolbar."
         }
       ],
       "returns": [
@@ -75425,10 +76274,35 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-      "line": 51,
+      "line": 55,
       "description": "",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "measureStage",
+      "name": "measureStage",
+      "longname": "measureStage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
+      "line": 91,
+      "description": "The stage's visible size in CSS px, so the printed page shows the same window as the screen.",
+      "params": [
+        {
+          "name": "stage",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object|undefined",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -75438,7 +76312,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-      "line": 57,
+      "line": 61,
       "description": "",
       "params": [
         {
@@ -75463,7 +76337,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/CompareCurtainView.jsx",
-      "line": 130,
+      "line": 157,
       "description": "",
       "params": [
         {
@@ -75483,7 +76357,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 91,
+      "line": 110,
       "description": "",
       "params": [
         {
@@ -75593,11 +76467,54 @@
           "type": "function",
           "optional": false,
           "description": "Opens the curtain view with this calibration."
+        },
+        {
+          "name": "props.onPrint",
+          "type": "function",
+          "optional": false,
+          "description": "Opens the shared print dialog for this view (usePrintPipeline)."
+        },
+        {
+          "name": "props.printDisabled",
+          "type": "boolean",
+          "optional": true,
+          "description": "True while printing is unavailable (loading, PDF in progress)."
+        },
+        {
+          "name": "props.printDialogs",
+          "type": "React.ReactNode",
+          "optional": true,
+          "description": "The shared print dialog host, rendered in this toolbar."
         }
       ],
       "returns": [
         {
           "type": "React.ReactElement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "measureStage",
+      "name": "measureStage",
+      "longname": "measureStage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
+      "line": 79,
+      "description": "The stage's visible size in CSS px, so the printed page shows the same window as the screen.",
+      "params": [
+        {
+          "name": "stage",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object|undefined",
           "description": ""
         }
       ],
@@ -75610,7 +76527,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 64,
+      "line": 67,
       "description": "",
       "params": [
         {
@@ -75635,7 +76552,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 146,
+      "line": 169,
       "description": "",
       "params": [
         {
@@ -75655,7 +76572,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 172,
+      "line": 195,
       "description": "",
       "params": [
         {
@@ -75675,7 +76592,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "line": 54,
+      "line": 57,
       "description": "",
       "params": [],
       "returns": [],
@@ -75997,7 +76914,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 433,
+      "line": 468,
       "description": "",
       "params": [
         {
@@ -76022,7 +76939,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 341,
+      "line": 343,
       "description": "",
       "params": [],
       "returns": [
@@ -76040,7 +76957,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 334,
+      "line": 336,
       "description": "",
       "params": [
         {
@@ -76060,7 +76977,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 312,
+      "line": 314,
       "description": "Overview row activation: show the document's first page and keep the overview open.",
       "params": [],
       "returns": [],
@@ -76073,7 +76990,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 345,
+      "line": 347,
       "description": "",
       "params": [
         {
@@ -76093,7 +77010,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-      "line": 270,
+      "line": 272,
       "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
       "params": [
         {
@@ -76967,7 +77884,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-      "line": 133,
+      "line": 121,
       "description": "Renders the toolbar for the document viewer by delegating to .",
       "params": [
         {

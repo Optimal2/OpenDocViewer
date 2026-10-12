@@ -19,7 +19,7 @@ import { resolvePrintFieldLabel } from './printFieldLabels.js';
  * @property {number} [to]
  * @property {Array.<number>} [sequence]
  * @property {'selection'|'session'} [allScope]
- * @property {'primary'|'compare-both'} [activeScope]
+ * @property {'primary'|'compare-both'|'compare-overlay'|'compare-curtain'} [activeScope]
  * @property {string|null} [reason]
  * @property {string|null} [forWhom]
  * @property {string|null} [printFormat]
@@ -47,6 +47,7 @@ export default function PrintRangeDialog({
   selectionSequenceLocked = false,
   selectionIncludedCount = 0,
   sessionTotalPages = totalPages,
+  composedView = null,
 }) {
   const { t, i18n } = useTranslation('common');
   const ctrl = usePrintRangeController({
@@ -61,6 +62,7 @@ export default function PrintRangeDialog({
     selectionSequenceLocked,
     selectionIncludedCount,
     sessionTotalPages,
+    composedView,
     t,
     i18n,
   });
@@ -81,6 +83,21 @@ export default function PrintRangeDialog({
   }, [ctrl.selectionSequenceLocked, t]);
 
   const summaryText = useMemo(() => {
+    if (ctrl.composedView) {
+      const comparePage = Number.isFinite(comparePageNumber) ? Math.max(1, Number(comparePageNumber)) : activePageNumber;
+      return ctrl.composedView === 'curtain'
+        ? t('printDialog.summaryCompareCurtain', {
+          primary: activePageNumber,
+          compare: comparePage,
+          defaultValue: `Prepare the curtain view of pages ${activePageNumber} and ${comparePage} as one page.`,
+        })
+        : t('printDialog.summaryCompareOverlay', {
+          primary: activePageNumber,
+          compare: comparePage,
+          defaultValue: `Prepare the overlay view of pages ${activePageNumber} and ${comparePage} as one page.`,
+        });
+    }
+
     if (ctrl.restrictToActivePage) {
       return t('printDialog.summaryActiveOnly', {
         page: activePageNumber,
@@ -128,6 +145,7 @@ export default function PrintRangeDialog({
     activePageNumber,
     comparePageNumber,
     ctrl.activeScope,
+    ctrl.composedView,
     ctrl.allScope,
     ctrl.canPrintSelectionScope,
     ctrl.fromValue,
@@ -223,7 +241,7 @@ export default function PrintRangeDialog({
                 {summaryText}
               </div>
             </div>
-            {ctrl.restrictToActivePage ? (
+            {ctrl.restrictToActivePage && !ctrl.composedView ? (
               <div className="odv-prd-hint" role="note">{ctrl.loadingHint}</div>
             ) : null}
           </section>
@@ -539,6 +557,7 @@ PrintRangeDialog.propTypes = {
   activePageNumber: PropTypes.number,
   comparePageNumber: PropTypes.number,
   isComparing: PropTypes.bool,
+  composedView: PropTypes.oneOf(['overlay', 'curtain', null]),
   hasActiveSelection: PropTypes.bool,
   selectionSequenceLocked: PropTypes.bool,
   selectionIncludedCount: PropTypes.number,

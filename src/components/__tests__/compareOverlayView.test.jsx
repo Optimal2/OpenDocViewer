@@ -301,3 +301,60 @@ describe('overlay view strings', () => {
     }
   });
 });
+
+describe('CompareOverlayView print button', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+  afterEach(() => {
+    delete window.__ODV_CONFIG__;
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('is absent without a print handler', async () => {
+    const { container, cleanup } = await renderView();
+    expect(container.querySelector('.compare-overlay-print')).toBeNull();
+    await cleanup();
+  });
+
+  it('hands the shared pipeline both pages and the CURRENT view state, including zoom and stage', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      /** @type {DOMRect} */ ({ x: 0, y: 0, top: 0, left: 0, right: 640, bottom: 480, width: 640, height: 480, toJSON: () => ({}) })
+    );
+    const onPrint = vi.fn();
+    const transforms = { primary: IDENTITY, compare: { scale: 1.1, dx: 3, dy: -1, rotation: 0.4 } };
+    const { container, cleanup } = await renderView({ onPrint, zoom: 1.5, transforms });
+    const button = byLabel(container, 'Print the overlay view as one page');
+    expect(button.classList.contains('compare-overlay-print')).toBe(true);
+    expect(button.getAttribute('title')).toBe('Print the overlay view as one page');
+    expect(button.textContent).toContain('Print');
+
+    // The slider moves after the button rendered: the print reads the state at print time.
+    await press(container.querySelector('.compare-overlay-opacity'), 'ArrowLeft', { shiftKey: true });
+    await act(() => { button.click(); });
+    expect(onPrint).toHaveBeenCalledTimes(1);
+    const target = onPrint.mock.calls[0][0];
+    expect(target.view).toBe('overlay');
+    expect(target.primaryRenderRef.current.getAttribute('data-page')).toBe('1');
+    expect(target.compareRenderRef.current.getAttribute('data-page')).toBe('2');
+    expect(target.getView()).toEqual({ opacity: 40, top: 'compare', transforms, zoom: 1.5, stage: { width: 640, height: 480 } });
+    await cleanup();
+  });
+
+  it('is absent when compare.overlay.print.enabled is false; disabled while printing is unavailable', async () => {
+    window.__ODV_CONFIG__ = { compare: { overlay: { print: { enabled: false } } } };
+    const hidden = await renderView({ onPrint: () => {} });
+    expect(hidden.container.querySelector('.compare-overlay-print')).toBeNull();
+    await hidden.cleanup();
+
+    delete window.__ODV_CONFIG__;
+    const onPrint = vi.fn();
+    const busy = await renderView({ onPrint, printDisabled: true });
+    const button = /** @type {HTMLButtonElement} */ (busy.container.querySelector('.compare-overlay-print'));
+    expect(button.disabled).toBe(true);
+    await act(() => { button.click(); });
+    expect(onPrint).not.toHaveBeenCalled();
+    await busy.cleanup();
+  });
+});

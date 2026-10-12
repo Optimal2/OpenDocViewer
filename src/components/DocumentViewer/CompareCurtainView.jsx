@@ -21,6 +21,9 @@
  *   while the view is open.
  * - The calibration (per-page transforms) is read from the viewer context and never changed here.
  * - Escape or Close returns to the view the curtain was opened from (hooks/useCompareOverlay.js).
+ * - "Print" opens the viewer's one print dialog (DocumentToolbar/usePrintPipeline.js) for this view
+ *   and prints both pages composed onto ONE page with the current border, transforms, zoom and
+ *   stage size. Hidden when compare.curtain.print.enabled is false.
  *
  * Design note: docs-src/compare-transform.md (section "Curtain view").
  *
@@ -47,6 +50,7 @@ import {
   selectCurtainPosition,
 } from '../../utils/compareCurtain.js';
 import { hasActiveModalDialog, shouldEscapeCloseView } from './compareViewKeys.js';
+import { isCompareCurtainPrintEnabled } from '../../utils/runtimeConfig.js';
 
 /** @typedef {('horizontal'|'vertical')} CurtainMode */
 
@@ -79,6 +83,19 @@ function applyCurtainStyles(layer, handle, mode, position) {
 }
 
 /**
+ * The stage's visible size in CSS px, so the printed page shows the same window as the screen.
+ *
+ * @param {(HTMLElement|null)} stage
+ * @returns {({ width:number, height:number }|undefined)}
+ */
+function measureStage(stage) {
+  const rect = stage?.getBoundingClientRect?.();
+  const width = Number(rect?.width) || 0;
+  const height = Number(rect?.height) || 0;
+  return width > 0 && height > 0 ? { width, height } : undefined;
+}
+
+/**
  * @param {Object} props
  * @param {number} props.pageNumberA Original page number of page A (primary/left).
  * @param {number} props.pageNumberB Original page number of page B (compare/right).
@@ -91,6 +108,9 @@ function applyCurtainStyles(layer, handle, mode, position) {
  * @param {{ rotation:number, brightness:number, contrast:number }} props.imagePropertiesB
  * @param {{ primary:Object, compare:Object }} props.transforms Calibrated per-page transforms (viewer context).
  * @param {function(): void} props.onClose
+ * @param {function(Object): *=} props.onPrint Opens the shared print dialog for this view (usePrintPipeline).
+ * @param {boolean=} props.printDisabled True while printing is unavailable (loading, PDF in progress).
+ * @param {React.ReactNode=} props.printDialogs The shared print dialog host, rendered in this toolbar.
  * @returns {React.ReactElement}
  */
 const CompareCurtainView = ({
@@ -105,6 +125,9 @@ const CompareCurtainView = ({
   imagePropertiesB,
   transforms = INITIAL_COMPARE_TRANSFORM_STATE,
   onClose,
+  onPrint,
+  printDisabled = false,
+  printDialogs = null,
 }) => {
   const { t } = useTranslation('common');
   const [curtain, dispatchCurtain] = useReducer(compareCurtainReducer, INITIAL_COMPARE_CURTAIN_STATE);
@@ -119,10 +142,14 @@ const CompareCurtainView = ({
   const layerBRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const handleRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const renderRefA = useRef(/** @type {any} */ (null));
+  const renderRefB = useRef(/** @type {any} */ (null));
   const dragRef = useRef(/** @type {(null|{ pointerId:number, mode:CurtainMode, position:number })} */ (null));
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  // The shared pipeline reads the view state when the dialog is submitted, not when it opens.
+  const latestRef = useRef({ mode, position, transforms, zoom });
+  latestRef.current = { mode, position, transforms, zoom };
 
   // Escape closes the view (also from a slider; text fields keep Escape for themselves).
   useEffect(() => {
@@ -186,6 +213,24 @@ const CompareCurtainView = ({
     dispatchCurtain(action);
   };
 
+  const handlePrint = () => {
+    onPrint({
+      view: 'curtain',
+      primaryRenderRef: renderRefA,
+      compareRenderRef: renderRefB,
+      getView: () => {
+        const latest = latestRef.current;
+        return {
+          mode: latest.mode,
+          position: latest.position,
+          transforms: latest.transforms,
+          zoom: latest.zoom,
+          stage: measureStage(stageRef.current),
+        };
+      },
+    });
+  };
+
   // Fit modes follow the curtain's own surface; page A sets the shared base zoom for both layers.
   const handleRenderedA = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') renderRefA.current?.fitToScreen?.();
@@ -213,6 +258,7 @@ const CompareCurtainView = ({
 
   const pageB = useMemo(() => (
     <DocumentRender
+      ref={renderRefB}
       pageNumber={pageNumberB}
       zoom={zoom}
       surfaceTransform={transformCssB}
@@ -229,6 +275,8 @@ const CompareCurtainView = ({
   const sideLabelA = t('compareCurtain.sideA', { page: pageNumberA, defaultValue: 'A · page {page}' });
   const sideLabelB = t('compareCurtain.sideB', { page: pageNumberB, defaultValue: 'B · page {page}' });
   const closeLabel = t('compareCurtain.close', { defaultValue: 'Close the curtain view and go back' });
+  const printLabel = t('compareCurtain.print', { defaultValue: 'Print the curtain view as one page' });
+  const showPrint = typeof onPrint === 'function' && isCompareCurtainPrintEnabled();
   const borderLabel = mode === 'horizontal'
     ? t('compareCurtain.borderHorizontal', {
       defaultValue: 'Border between page A (above) and page B (below). Arrow keys move it 1 %, Shift 10 %.',
@@ -273,6 +321,21 @@ const CompareCurtainView = ({
           {renderModeButton('vertical', t('compareCurtain.vertical', { defaultValue: 'Vertical' }))}
         </div>
 
+        {/* Print entry: hidden when compare.curtain.print.enabled is false */}
+        {showPrint ? (
+          <button
+            type="button"
+            className="odv-btn compare-curtain-print"
+            title={printLabel}
+            aria-label={printLabel}
+            disabled={printDisabled}
+            onClick={handlePrint}
+          >
+            <span className="material-icons" aria-hidden="true">print</span>
+            <span>{t('compareCurtain.printShort', { defaultValue: 'Print' })}</span>
+          </button>
+        ) : null}
+
         <button
           type="button"
           className="odv-btn compare-curtain-close"
@@ -283,6 +346,8 @@ const CompareCurtainView = ({
           <span className="material-icons" aria-hidden="true">close</span>
           <span>{t('compareCurtain.closeShort', { defaultValue: 'Close' })}</span>
         </button>
+
+        {printDialogs}
       </div>
 
       <div
@@ -357,6 +422,9 @@ CompareCurtainView.propTypes = {
   imagePropertiesB: imagePropertiesShape.isRequired,
   transforms: PropTypes.shape({ primary: transformShape, compare: transformShape }),
   onClose: PropTypes.func.isRequired,
+  onPrint: PropTypes.func,
+  printDisabled: PropTypes.bool,
+  printDialogs: PropTypes.node,
 };
 
 export default React.memo(CompareCurtainView);

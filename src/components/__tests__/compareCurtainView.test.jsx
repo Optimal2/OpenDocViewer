@@ -331,3 +331,54 @@ describe('curtain view strings', () => {
     expect(lookup(sv, 'compareCurtain.title')).toBe('Gardin');
   });
 });
+
+describe('CompareCurtainView print button', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+  afterEach(() => {
+    delete window.__ODV_CONFIG__;
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('with a print handler the toolbar has the direction toggle, Print and Close', async () => {
+    const { container, cleanup } = await renderCurtain({ onPrint: () => {} });
+    const toolbar = container.querySelector('.compare-curtain-toolbar');
+    const controls = [...toolbar.querySelectorAll('button, input, select, textarea')];
+    expect(controls.map((control) => control.textContent)).toEqual(['Horizontal', 'Vertical', 'printPrint', 'closeClose']);
+    await cleanup();
+  });
+
+  it('hands the shared pipeline both pages and the CURRENT border, zoom and stage', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      /** @type {DOMRect} */ ({ x: 0, y: 0, top: 0, left: 0, right: 900, bottom: 600, width: 900, height: 600, toJSON: () => ({}) })
+    );
+    const onPrint = vi.fn();
+    const transforms = { primary: { scale: 1.2, dx: 0, dy: 0, rotation: 0 }, compare: IDENTITY };
+    const { container, cleanup } = await renderCurtain({ onPrint, zoom: 0.75, transforms });
+    await act(() => { modeButton(container, 'Horizontal').click(); });
+    await press(handle(container), 'ArrowDown', { shiftKey: true });
+    const button = /** @type {HTMLButtonElement} */ (container.querySelector('[aria-label="Print the curtain view as one page"]'));
+    expect(button.classList.contains('compare-curtain-print')).toBe(true);
+    expect(button.getAttribute('title')).toBe('Print the curtain view as one page');
+    await act(() => { button.click(); });
+    expect(onPrint).toHaveBeenCalledTimes(1);
+    const target = onPrint.mock.calls[0][0];
+    expect(target.view).toBe('curtain');
+    expect(target.primaryRenderRef.current.getAttribute('data-page')).toBe('3');
+    expect(target.compareRenderRef.current.getAttribute('data-page')).toBe('7');
+    const view = target.getView();
+    expect(view).toEqual({ mode: 'horizontal', position: view.position, transforms, zoom: 0.75, stage: { width: 900, height: 600 } });
+    expect(view.position).toBe(Number(handle(container).getAttribute('aria-valuenow')));
+    expect(view.position).not.toBe(50);
+    await cleanup();
+  });
+
+  it('is absent when compare.curtain.print.enabled is false', async () => {
+    window.__ODV_CONFIG__ = { compare: { curtain: { print: { enabled: false } } } };
+    const { container, cleanup } = await renderCurtain({ onPrint: () => {} });
+    expect(container.querySelector('.compare-curtain-print')).toBeNull();
+    await cleanup();
+  });
+});

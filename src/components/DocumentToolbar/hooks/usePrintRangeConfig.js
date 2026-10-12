@@ -22,6 +22,7 @@ import {
  * @param {boolean=} params.hasActiveSelection
  * @param {boolean=} params.selectionSequenceLocked
  * @param {number=} params.selectionIncludedCount
+ * @param {('overlay'|'curtain'|null)=} params.composedView Compare view printed as one composed page.
  * @param {function(string, Object=): string} params.t
  * @param {*} params.i18n
  * @returns {Object}
@@ -31,6 +32,7 @@ export function usePrintRangeConfig({
   hasActiveSelection,
   selectionSequenceLocked,
   selectionIncludedCount,
+  composedView = null,
   t,
   i18n,
 }) {
@@ -100,7 +102,8 @@ export function usePrintRangeConfig({
   const showReason = showReasonWhen === 'always' || (showReasonWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showUserSection = !!(showReason || showForWhom || showPrintFormatCheckbox || showPdfOrientation);
-  const restrictToActivePage = !!isDocumentLoading;
+  // A compare-view print is one composed page: the page/scope choices do not apply.
+  const restrictToActivePage = !!isDocumentLoading || !!composedView;
   const configuredDefaultPrintMode = getPrintDefaultMode(cfg);
   const userDefaultPrintMode = getPrintDefaultModePreference();
   const defaultPrintMode = restrictToActivePage ? 'active' : (userDefaultPrintMode || configuredDefaultPrintMode);

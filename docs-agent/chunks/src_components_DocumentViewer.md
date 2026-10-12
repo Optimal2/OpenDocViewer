@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 16. Line count: 7025. JSDoc symbol count: 141.
+File count: 16. Line count: 7138. JSDoc symbol count: 143.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -18,13 +18,14 @@ Curtain view of the compare mode: the two calibrated pages in one coordinate spa
 
 Exports: `CompareCurtainView`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/utils/compareTransform.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/utils/compareTransform.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
 - `CurtainMode` (typedef) - No description.
 - `needsCanvas` (function) - No description.
 - `applyCurtainStyles` (function) - Write the clip and the grab bar position straight to the DOM \(drag path, no React render\).
+- `measureStage` (function) - The stage's visible size in CSS px, so the printed page shows the same window as the screen.
 - `CompareCurtainView` (function) - No description.
 - `<anonymous>~onKeyDown` (function) - No description.
 
@@ -40,6 +41,7 @@ Symbols:
 
 - `OverlayTarget` (typedef) - No description.
 - `needsCanvas` (function) - No description.
+- `measureStage` (function) - The stage's visible size in CSS px, so the printed page shows the same window as the screen.
 - `CompareOverlayView` (function) - No description.
 - `<anonymous>~onKeyDown` (function) - No description.
 - `<anonymous>~onWheel` (function) - No description.
@@ -91,7 +93,7 @@ OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(acti
 
 Exports: `DocumentViewer`
 
-Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/hooks/useNavigationModifierState.js`
+Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`
 
 Symbols:
 
