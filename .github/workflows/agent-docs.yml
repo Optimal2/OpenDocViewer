@@ -56,6 +56,8 @@ jobs:
         working-directory: OpenDocViewer
         run: npm run doc:agent -- --agentdocmap-root ../AgentDocMap
 
+      # Shared with scripts/local-ci.ps1 step 4: rejects modified, deleted,
+      # staged and untracked (including gitignored) files under docs-agent.
       - name: Verify committed agent documentation is current
         working-directory: OpenDocViewer
-        run: git diff --exit-code -- docs-agent
+        run: node scripts/verify-agent-docs-fresh.mjs

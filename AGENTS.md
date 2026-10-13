@@ -22,7 +22,9 @@ Before making changes:
   APIs, dependencies, or module responsibilities, regenerate `docs-agent/` with
   `npm run doc:agent` before committing. Include the generated `docs-agent/`
   diff when it changes; if it stays clean, mention that the command was run.
-  CI validates this with `git diff --exit-code -- docs-agent`.
+  CI validates this with `node scripts/verify-agent-docs-fresh.mjs` (modified,
+  deleted, staged and untracked files under `docs-agent/` all fail; see
+  `docs-src/agent-documentation.md`), and so does `scripts/local-ci.ps1`.
 - When a task produces repository changes, validate them, commit with a focused message, and push unless the user asks not to or the worktree contains unrelated user changes.
 
 ## Release workflow — do not change the trigger

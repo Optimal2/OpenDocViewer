@@ -77,7 +77,39 @@ commit the pin together with the regenerated `docs-agent/`.
 - Run `npm run doc:agent` during release preparation.
 - The release helper includes `npm run doc:agent` in pre-release validation.
 - The GitHub "Agent Documentation" workflow regenerates `docs-agent/` and fails
-  if the committed packet is stale.
+  if the committed packet is stale. `scripts/local-ci.ps1` step 4 (the pre-push
+  gate) does the same with the same comparison script.
+
+## Freshness Comparison
+
+Both gates run `npm run doc:agent` and then
+`node scripts/verify-agent-docs-fresh.mjs`. AgentDocMap deletes and rewrites
+`docs-agent/` on every run, so after regeneration the directory holds exactly
+what the pinned generator emits. The script then requires that `docs-agent/`
+is identical in the working tree, the index and `HEAD`, and rejects:
+
+| State under `docs-agent/` after regeneration | Query | Rejected because |
+| --- | --- | --- |
+| Tracked file with different content (`M`) | `git diff HEAD` | `HEAD` is stale. |
+| File in `HEAD` that the generator no longer writes (`D`) | `git diff HEAD` | `HEAD` keeps an obsolete file. |
+| Any staged change, including fresh output staged on a stale `HEAD` | `git diff --cached HEAD` | The gate checks `HEAD`, which is what gets pushed; staged content is not. |
+| Untracked file, for example new generator output never added | `git ls-files --others` | `HEAD` lacks a file the generator writes. |
+| Gitignored file | `git ls-files --others` (no exclude rules) | Generator output that git ignores could never be committed; since the directory is regenerated from scratch, an ignored file there is generator output. |
+
+Line endings follow git's normal normalisation: LF output in a
+`core.autocrlf=true` checkout is not a difference, exactly as with `git diff`.
+Files outside `docs-agent/`, staged or not, are never considered.
+
+Why the two sides are equivalent: a fresh CI checkout has index = `HEAD` and no
+untracked files before generation. There the staged query is always empty and
+the other two reduce to "generator output = `HEAD`". Locally, comparing every
+query against `HEAD` (instead of the index, as the earlier
+`git diff --exit-code -- docs-agent` did) gives the same verdict for the same
+`HEAD`, whatever is staged. The only extra local rejection is a staged
+`docs-agent/` change on a fresh `HEAD`, which CI never sees because it is not
+pushed; commit or unstage it. Deleting a tracked file by hand is not a
+rejectable state on its own: the generator writes it back before the
+comparison runs. `scripts/verify-agent-docs-fresh.test.mjs` pins these rules.
 
 Do not put private deployment values, customer-specific notes, credentials, or
 protected payload examples in generated public agent documentation.

@@ -15,7 +15,8 @@
          (run with -Strict, so Check 15 - shared-script drift against the
          OpenModulePlatform checkout - fails when it cannot run)
       4. Verify generated agent documentation is fresh: npm run doc:agent,
-         then fail if docs-agent differs from the committed output
+         then fail unless scripts/verify-agent-docs-fresh.mjs finds docs-agent
+         identical in the working tree, the index and HEAD (shared with CI)
 
     Exit code 0 if all steps pass, 1 if any fail.
 
@@ -236,8 +237,11 @@ try {
     # --- Step 4: Agent documentation freshness ---------------------------------
     # The shared generator first checks the known JSDoc exclusions against both
     # path separator forms, then regenerates docs-agent (as in agent-docs.yml).
-    # Git compares tracked output with the index, which equals HEAD in CI;
-    # staged changes and untracked output are not checked by this diff.
+    # The comparison is scripts/verify-agent-docs-fresh.mjs, the same script
+    # agent-docs.yml runs: docs-agent in the working tree and the index must
+    # equal HEAD, and no untracked (or gitignored) file may exist there, so a
+    # staged change cannot move the comparison base as `git diff` let it.
+    # Staged or untracked files outside docs-agent are not considered.
     # The generator enforces scripts/agent-docs-environment.json, the pin CI
     # reads too: AgentDocMap revision and installed dependencies must match,
     # the collation is forced to the pinned locale and verified, and Node runs
@@ -255,12 +259,12 @@ try {
             if ($LASTEXITCODE -ne 0) {
                 throw "npm run doc:agent exited with code $LASTEXITCODE"
             }
-            & git diff --exit-code -- docs-agent
+            & node scripts/verify-agent-docs-fresh.mjs
             if ($LASTEXITCODE -eq 0) {
                 $agentDocsPassed = $true
             }
             else {
-                Write-Host "docs-agent is stale: regenerated output differs from the committed files. Run 'npm run doc:agent' and commit the result." -ForegroundColor Red
+                Write-Host "docs-agent is stale or has staged/untracked files (listed above). Run 'npm run doc:agent', 'git add docs-agent' and commit the result." -ForegroundColor Red
             }
         }
         finally {
