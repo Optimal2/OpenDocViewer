@@ -52,7 +52,7 @@ for (const directory of EXCLUDED_DIRECTORIES) {
 
 test('a hand-written segment outside the declared directories is rejected in any separator form', () => {
   for (const segment of ['coverage/', 'coverage[\\\\]', 'coverage[/\\\\]', '(?<=coverage)[/]']) {
-    const extended = config.source.excludePattern.replace('|\\.test', `|${segment}|\\.test`);
+    const extended = config.source.excludePattern.replace('|\\.test\\.', `|${segment}|\\.test\\.`);
     assert.notEqual(extended, config.source.excludePattern);
     assert.throws(() => validateAgentDocsExclusions(withPattern(extended)), /derived from EXCLUDED_DIRECTORIES/);
   }
@@ -107,15 +107,17 @@ test('exclusions that match the checkout prefix are rejected', () => {
   }
 });
 
-// A trailing "." or negated class depends on what comes after the fragment,
-// which the corpus cannot enumerate and the pattern cannot anchor against: a
-// pattern ending in "." matches "example.js." on every consumer but "example.js"
-// on JSDoc and "example.js/" on AgentDocMap, an asymmetry no corpus can prove
-// beyond its cases. The grammar now rejects this by construction; the corpus
-// still catches "." or a negated class at the LEADING edge.
+// A trailing UNESCAPED "." or negated class depends on what comes after the
+// fragment, which the corpus cannot enumerate and the pattern cannot anchor
+// against: a pattern ending in "." matches "example.js." on every consumer but
+// "example.js" on JSDoc and "example.js/" on AgentDocMap, an asymmetry no
+// corpus can prove beyond its cases. The grammar rejects the UNESCAPED tail
+// and the negated class by construction; an ESCAPED "\." matches a literal
+// dot (which can never be "/" or "\") and is therefore safe at the tail. The
+// corpus still catches "." or a negated class at the LEADING edge.
 test('fragments whose edges reach outside the file name are rejected', () => {
-  // Trailing "." or negated class — rejected by the grammar directly.
-  for (const filePattern of ['\\.jsx.', '\\.min\\.js.', '\\.test\\.', '\\.jsx[^y]', 'test[^x]']) {
+  // Trailing unescaped "." or negated class — rejected by the grammar directly.
+  for (const filePattern of ['\\.jsx.', '\\.min\\.js.', '\\.jsx[^y]', 'test[^x]']) {
     assert.throws(() => assertFilePatternGrammar(filePattern), /does not fit the file-pattern grammar/, filePattern);
     assert.throws(
       () => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile(filePattern, 'example.jsx')),
@@ -136,6 +138,35 @@ test('fragments whose edges reach outside the file name are rejected', () => {
       filePattern,
     );
   }
+});
+
+// Pin the escaped-vs-unescaped distinction at the tail. The grammar's tail
+// rule reads `readAtom`'s `escaped` flag, so a literal "\." (matches a dot,
+// can never be a separator) is accepted where an unescaped "." (matches any
+// character, separators included) is rejected. Drop the `!lastAtom.escaped`
+// condition and the "ACCEPTED" half of this test goes red; weaken the rejection
+// for the unescaped "." half and the suite no longer protects against the
+// asymmetry the rule was built to close.
+test('the tail rule distinguishes an escaped "\." from an unescaped "."', () => {
+  for (const filePattern of ['\\.test\\.', '\\.spec\\.', '[A-Za-z0-9_]+\\.stories\\.']) {
+    assert.doesNotThrow(() => assertFilePatternGrammar(filePattern), filePattern);
+    assert.doesNotThrow(
+      () => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile(filePattern, 'example.jsx')),
+      filePattern,
+    );
+  }
+  for (const filePattern of ['\\.test.', '\\.spec.', 'foo\\.stories.']) {
+    assert.throws(
+      () => assertFilePatternGrammar(filePattern),
+      /it ends with "\.", which matches a separator/,
+      filePattern,
+    );
+  }
+  // A negated class at the tail stays rejected regardless of the "." condition.
+  assert.throws(
+    () => assertFilePatternGrammar('\\.jsx[^y]'),
+    /it ends with a negated character class/,
+  );
 });
 
 test('a fragment must exclude its declared example on its own', () => {
@@ -257,15 +288,18 @@ test('the guard rejects a jsdoc.json built from a separator-escaping file patter
 
 // None of these is anchored, so each one can only be read as "contains". That
 // is the price of "$" being inert in AgentDocMap: "\.min\.js" also matches
-// "a.min.json". Fragments must not end with "." or a negated class — that rule
-// is verified separately — so the trailing dot has been dropped here.
+// "a.min.json". Fragments must not end with an UNESCAPED "." or a negated
+// class — that rule is verified separately — so the trailing dot has been
+// dropped here. An escaped "\." is allowed at the tail, and the canonical
+// fragments below rely on that: "\.test\.", "\.spec\." and
+// "[A-Za-z0-9_]+\.stories\." all keep their trailing literal dot.
 test('accepted file patterns exclude their example and behave identically in every representation', () => {
   const samples = ['src/a.test.js', 'src/a.spec.js', 'src/a.min.js', 'src/Card.stories.jsx', 'src/types.d.ts', 'src/x/b.mock.js', 'src/x/b.js'];
   for (const [filePattern, example] of [
-    ['\\.test', 'a.test.js'],
-    ['\\.spec', 'a.spec.js'],
+    ['\\.test\\.', 'a.test.js'],
+    ['\\.spec\\.', 'a.spec.js'],
     ['\\.min\\.js', 'a.min.js'],
-    ['[A-Za-z0-9_]+\\.stories', 'Card.stories.jsx'],
+    ['[A-Za-z0-9_]+\\.stories\\.', 'Card.stories.jsx'],
     ['(?:\\.d)?\\.ts', 'types.d.ts'],
     ['[^_]\\.mock\\.js', 'b.mock.js'],
   ]) {
@@ -311,7 +345,7 @@ test('equal but incorrect results cannot silently remove or broaden exclusions',
 
 test('the filename exclusion is checked independently of excluded directories', () => {
   const missingTestFiles = structuredClone(config);
-  missingTestFiles.source.excludePattern = missingTestFiles.source.excludePattern.replace('|\\.test', '');
+  missingTestFiles.source.excludePattern = missingTestFiles.source.excludePattern.replace('|\\.test\\.', '');
   assert.throws(() => validateAgentDocsExclusions(missingTestFiles), /example\.test\.js/);
 });
 

@@ -17,12 +17,15 @@
 //     which has no anchors: "^" depends on the native path prefix, and "$"
 //     never matches before AgentDocMap's trailing slash. The grammar is
 //     deliberately stricter than separator parity requires;
-//   - the LAST atom of every file-name fragment is neither "." nor a negated
-//     character class. A trailing "." or negated class depends on what comes
-//     after the fragment, which the corpus cannot enumerate and the pattern
-//     cannot anchor against: a pattern ending in "." matches "example.test."
-//     on every consumer but "example.test" on JSDoc and "example.test/" on
-//     AgentDocMap, an asymmetry no corpus can prove beyond its cases;
+//   - the LAST atom of every file-name fragment is neither an UNESCAPED "."
+//     nor a negated character class. A trailing unescaped "." or negated
+//     class depends on what comes after the fragment, which the corpus
+//     cannot enumerate and the pattern cannot anchor against: a pattern
+//     ending in "." matches "example.test." on every consumer but
+//     "example.test" on JSDoc and "example.test/" on AgentDocMap, an
+//     asymmetry no corpus can prove beyond its cases. An escaped "\."
+//     matches a LITERAL dot, which can never be "/" or "\", so it is as
+//     safe as any other literal and the tail rule does not apply to it;
 //   - every declared directory, every fragment's declared example file and two
 //     ordinary files get the expected verdict in four representations of the
 //     same file (see probeRepresentations): relative, AgentDocMap's relative +
@@ -36,13 +39,19 @@
 // four representations of each path and the fragment must agree across all
 // four. A prefix word unique to a fifth checkout (a GitHub Windows runner under
 // D:\\a\\<repo>\\<repo>\\) still slips past. Today's workflows all run
-// ubuntu-latest, so no CI branch needs a fifth representation today.
+// ubuntu-latest, so no CI branch needs a fifth representation today. Finally,
+// an unescaped "." anywhere in the MIDDLE of a fragment can still match a
+// separator in an absolute representation (e.g. ".test." on the substring
+// "/.test." inside an absolute path); the leading and trailing atoms are the
+// only ones the tail rule covers, and the corpus catches the middle case only
+// for the four probe representations.
 export const EXCLUDED_DIRECTORIES = ['node_modules', 'docs', '__tests__'];
 
 // File-name fragments are raw regex text. Each one declares an example file
 // name that it must exclude, so the probe sees the fragment's own verdict.
-// The last atom must NOT be "." or a negated class: see the header above.
-export const EXCLUDED_FILES = [{ pattern: '\\.test', example: 'example.test.js' }];
+// The last atom must NOT be an UNESCAPED "." or a negated class: see the
+// header above. An escaped "\." matches a literal dot and is not a hazard.
+export const EXCLUDED_FILES = [{ pattern: '\\.test\\.', example: 'example.test.js' }];
 
 const SEPARATOR_CLASS = '[/\\\\]';
 
@@ -161,7 +170,7 @@ export function assertFilePatternGrammar(filePattern) {
   if (lastAtomIsNegatedClass) {
     fail('it ends with a negated character class, which matches a separator and depends on what follows the file name');
   }
-  if (lastAtom !== null && lastAtom.char === '.') {
+  if (lastAtom !== null && lastAtom.char === '.' && !lastAtom.escaped) {
     fail('it ends with ".", which matches a separator and depends on what follows the file name');
   }
 
