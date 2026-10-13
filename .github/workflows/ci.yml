@@ -82,3 +82,52 @@ jobs:
 
       - name: Build docs
         run: npm run doc
+
+  lockstep:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenDocViewer
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # WHY THIS STEP EXISTS: commit 18d2bc84 landed on main with broken
+      # version lockstep (manifest definitionVersion 2.0.123 vs module
+      # definition 2.0.122, component 2.4.165 above compatibleArtifacts
+      # maxVersion 2.4.164) while every workflow was green, because the
+      # validator (scripts/omp/validate-component-versions.ps1) ran only in
+      # the local pre-push gate (scripts/local-ci.ps1 step 3). Any path that
+      # bypasses that gate - a too-narrow commit scope, a push from another
+      # machine, or a commit through the GitHub web UI or API - could land
+      # broken lockstep with green CI, and a package built from such a tree
+      # is mislabelled against the platform version matrix.
+      #
+      # PLATFORM DEPENDENCY DECISION (option b): single checkout, no platform
+      # repository, OMP_ALLOW_MISSING_PLATFORM=1, so Check 15 (shared-script
+      # drift) reports NOT VERIFIED and stays local-only (local-ci.ps1 step 3
+      # runs it for real against the sibling checkout). The windows-latest +
+      # platform-checkout variant was measured and rejected: the canonical
+      # Test-HasWebProject scan descends into the nested platform/ checkout,
+      # finds the platform's own Web-SDK example projects, concludes this
+      # repository "has web projects", and fails Check 15 permanently on a
+      # tree with zero .csproj files (CI run 38338605038). Fixing that scan
+      # means changing the canonical shared script in OpenModulePlatform plus
+      # every consumer, which is out of scope - and the helper itself is one
+      # of the byte-identical files Check 15 guards, so it must not be edited
+      # here. The ubuntu-latest + named-root variant cannot work either: the
+      # hardcoded backslash separator (helpers.ps1:139) never resolves on
+      # Linux and a named-but-unresolvable root is a hard error. Every other
+      # check - including the Check 4 / Check 10 lockstep checks this gate
+      # exists for - runs for real: they read only files on disk.
+      - name: Validate version lockstep
+        shell: pwsh
+        env:
+          OMP_ALLOW_MISSING_PLATFORM: '1'
+        run: |
+          $base = 'origin/main'
+          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+            git fetch origin $env:GITHUB_BASE_REF --no-tags
+            $base = "origin/$env:GITHUB_BASE_REF"
+          }
+          & scripts/omp/validate-component-versions.ps1 -Strict -BaseCommit $base
