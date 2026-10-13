@@ -4,7 +4,7 @@
  * Proof tests for the generalised elementAttributeBlock helper.
  * Each test corresponds to a measured hole from the previous review.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { elementAttributeBlock, elementAttributeValue, toolbarAttributeBlock } from './toolbarAttributeBlock.js';
 
 const toolbarSource = `import x from 'y';
@@ -303,10 +303,8 @@ describe('elementAttributeBlock', () => {
   });
 
   it('FP1: a regex literal containing "//" in the same file does NOT confuse the scan', () => {
-    // A regex literal like `/^https:\\/\\//` is tokenised as a single template
-    // (slash is not a delimiter outside a literal context) so the helper walks
-    // past it without dropping the toolbar element.
-    // `/^https:\/\//` really contains "//" (the escaped slash, then the closing slash).
+    // `/^https:\/\//` really contains "//" (the escaped slash, then the closing
+    // slash). The parser reads it as one regular-expression token, never as a comment.
     const source = `const RE = /^https:\\/\\//;
 export function V() {
   return (
@@ -338,18 +336,9 @@ export function V() {
   });
 
   it('FP2: an apostrophe as the first char of JSX text is plain text, not a string delimiter', () => {
-    // The apostrophe immediately after the `>` of `<span>` is JSX text,
-    // not a string delimiter. The full JSX-text cache must classify
-    // the position as JSX_TEXT so the apostrophe is NOT treated as
-    // opening a string (which would walk to EOF without closing and
-    // corrupt the helper's state for the rest of the source — the
-    // helper would fail to find `<DocumentViewerToolbar`).
-    //
-    // The previous narrow check recognised only the OPENING apostrophe
-    // of the JSX text, not a CLOSING one in mid-text. The full cache
-    // walks the body of the opening tag and records the JSX text run
-    // starts, so the apostrophe inside `<span>...<\/span>` is treated
-    // as text and never opens a string.
+    // The apostrophe after the `>` of `<span>` is JSX text, not a string
+    // delimiter. aa2c5fe6 counted it as one, the odd parity hid every later
+    // element and the lock went red with "found 0".
     const source = `export function V() {
   return (
     <div>
@@ -430,9 +419,8 @@ export function V() {
     // Old scanElementBody assumed a nested same-name element was a pair tag
     // and required `</Name>`. `<T a><T b/></T>` then failed to find a body,
     // so the outer `<T>` was either discarded (found 0) or, with selfClosing
-    // requested, the helper silently returned the CHILD's block. The fix:
-    // the body scan now tries self-closing first for nested same-name
-    // elements, so the outer block is found AND properly closed.
+    // requested, the helper silently returned the CHILD's block. A same-name
+    // descendant now belongs to the outer element's block.
     const source = `export function V() {
   return (
     <T a={1}>
@@ -472,8 +460,8 @@ export function V() {
 
   it('a closing tag with whitespace/newline is consumed in full', () => {
     // Old scanElementBody used `nextClose + name.length + 3` which truncated
-    // `</T >` and `</T\\n>` to the next character past the `T`. The new
-    // helper advances past the actual closing tag's `>`.
+    // `</T >` and `</T\\n>` to the next character past the `T`. The block now
+    // ends at the element's own end, after the closing tag's `>`.
     const source = `export function V() {
   return (
     <Container a={1}>
@@ -529,10 +517,8 @@ export function V() {
   });
 
   it('deeply nested elements do not raise RangeError', () => {
-    // 5000 levels of pair-tag nesting would trip the old recursive scan with
-    // `RangeError: Maximum call stack size exceeded`. The iterative scan
-    // reports the depth bound instead. We use a depth comfortably under the
-    // cap so the test asserts that legitimate deep nesting still resolves.
+    // Legitimate deep nesting still resolves: the same-name descendants belong
+    // to the outermost element and the tree walk is iterative.
     const depth = 500;
     const open = Array.from({ length: depth }, () => '<Container>').join('');
     const close = Array.from({ length: depth }, () => '</Container>').join('');
@@ -645,8 +631,11 @@ export function V() {
   });
 
   it('pathological nesting gives the intended clear error, never a bare RangeError', () => {
-    // 20 000 levels overflow the parser's own recursion; 5 000 still parse. The
-    // helper must turn the overflow into its usual "found 0; ... discarded" form.
+    // Whether 20 000 levels overflow the parser's recursion depends on the
+    // runner's stack size: a forks worker overflows, a threads worker parses it
+    // (measured). So the source either resolves or fails in the usual
+    // "found 0; ... discarded" form - never as a bare RangeError. The overflow
+    // branch itself is pinned deterministically by the next test.
     const depth = 20000;
     const open = Array.from({ length: depth }, () => '<Container>').join('');
     const close = Array.from({ length: depth }, () => '</Container>').join('');
@@ -656,15 +645,100 @@ export function V() {
   );
 }
 `;
+    let block;
     let thrown;
     try {
-      elementAttributeBlock(source, 'Wrapper', { selfClosing: false });
+      block = elementAttributeBlock(source, 'Wrapper', { selfClosing: false });
     } catch (error) {
       thrown = error;
     }
-    expect(thrown).toBeDefined();
+    if (thrown === undefined) {
+      expect(block).toMatch(/^<Wrapper a=\{1\}>/);
+      return;
+    }
     expect(thrown).not.toBeInstanceOf(RangeError);
     expect(thrown.message).toMatch(/expected exactly one pair-tag <Wrapper \.\.\.> element, found 0; 1 candidate\(s\) discarded \(the source nests too deeply to parse/);
+  });
+
+  it('a parser stack overflow is reported as the usual discard, never a bare RangeError', async () => {
+    vi.resetModules();
+    vi.doMock('@babel/core', () => ({
+      parseSync: () => { throw new RangeError('Maximum call stack size exceeded'); },
+    }));
+    try {
+      const fresh = await import('./toolbarAttributeBlock.js');
+      let thrown;
+      try {
+        fresh.elementAttributeBlock('<Wrapper a={1}><Wrapper.Inner /></Wrapper>', 'Wrapper', { selfClosing: false });
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeDefined();
+      expect(thrown).not.toBeInstanceOf(RangeError);
+      expect(thrown.message).toBe('expected exactly one pair-tag <Wrapper ...> element, found 0; 1 candidate(s) discarded '
+        + '(the source nests too deeply to parse (Maximum call stack size exceeded))');
+    } finally {
+      vi.doUnmock('@babel/core');
+      vi.resetModules();
+    }
+  });
+
+  // === Mutation-proof cases: each one is the only test that goes red when the
+  // named rule of the helper is broken (measured with a mutation sweep). ======
+
+  it('returns exactly the element\'s own source text, nothing before or after it', () => {
+    // Rule: only comments INSIDE the element are removed; comments elsewhere in
+    // the file never shift or pad the returned block.
+    const source = `// leading line comment
+/* leading block comment */
+export function V() {
+  return (
+    <div>
+      {/* before */}
+      <Foo a={1} b="x" />
+      {/* after */}
+    </div>
+  );
+}
+// trailing comment
+`;
+    expect(elementAttributeBlock(source, 'Foo')).toBe('<Foo a={1} b="x" />');
+  });
+
+  it('a block comment between two attributes never glues them into one token', () => {
+    // Rule: a removed block comment leaves one space, so `keep/* c */other`
+    // still has a `keep` shorthand and an `other` attribute, not `keepother`.
+    const source = 'export const v = <Foo keep/* c */other={1} />;\n';
+    const block = elementAttributeBlock(source, 'Foo');
+    expect(block).toMatch(/\bkeep\b/);
+    expect(block).toMatch(/\bother=\{1\}/);
+  });
+
+  it('a namespaced element <Foo:bar/> does NOT match <Foo/>', () => {
+    const source = 'export const v = <Foo:bar prop={1} />;\n';
+    expect(() => elementAttributeBlock(source, 'Foo')).toThrow(/expected exactly one self-closing <Foo \.\.\.> element, found 0/);
+  });
+
+  it('FN3: the default (self-closing) request never returns a nested same-name child of a pair-tag parent', () => {
+    // On aa2c5fe6 this returned the CHILD's block `<T leaf={2} />`
+    // as "exactly one", so a prop moved into the child kept the lock green.
+    const source = 'export const v = <T a={1} p={2}><T leaf={2} /></T>;\n';
+    expect(() => elementAttributeBlock(source, 'T'))
+      .toThrow(/found 0; 1 candidate\(s\) exist but in pair-tag form/);
+  });
+
+  it('"found N" names the offset of every match, so the duplicates can be found', () => {
+    const source = 'export const v = <div><Foo a={1} /><Foo b={2} /></div>;\n';
+    expect(() => elementAttributeBlock(source, 'Foo'))
+      .toThrow(/found 2 \(at offsets 22, 35\)/);
+  });
+
+  it('the discard count of an unparseable source counts only exact `<Name` candidates', () => {
+    // `<Foo.Bar`, `<Foo:x`, `<FooV2` and `<Foo$` are other elements, not
+    // discarded `<Foo>` candidates.
+    const source = 'export const v = <div><Foo.Bar /><Foo:x /><FooV2 /><Foo$ /><Foo a={1} /></div\n';
+    expect(() => elementAttributeBlock(source, 'Foo'))
+      .toThrow(/found 0; 1 candidate\(s\) discarded \(the source does not parse/);
   });
 });
 
@@ -696,5 +770,11 @@ describe('elementAttributeValue', () => {
   it('F6: a missing or commented-out attribute is not present', () => {
     expect(elementAttributeValue(withButton(''), 'CompareCurtainButton', 'calibrated').present).toBe(false);
     expect(elementAttributeValue(withButton('/* calibrated */'), 'CompareCurtainButton', 'calibrated').present).toBe(false);
+  });
+
+  it('F6: only the exact attribute name counts (calibratedLegacy is not calibrated)', () => {
+    const result = elementAttributeValue(withButton('calibratedLegacy'), 'CompareCurtainButton', 'calibrated');
+    expect(result.present).toBe(false);
+    expect(result.value).toBeUndefined();
   });
 });
