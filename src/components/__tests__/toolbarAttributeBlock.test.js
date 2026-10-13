@@ -5,7 +5,7 @@
  * Each test corresponds to a measured hole from the previous review.
  */
 import { describe, it, expect } from 'vitest';
-import { elementAttributeBlock, toolbarAttributeBlock } from './toolbarAttributeBlock.js';
+import { elementAttributeBlock, elementAttributeValue, toolbarAttributeBlock } from './toolbarAttributeBlock.js';
 
 const toolbarSource = `import x from 'y';
 export function DocumentViewer() {
@@ -58,7 +58,25 @@ describe('elementAttributeBlock', () => {
     expect(block).not.toMatch(/compareTransforms=\{compareTransforms\}/);
   });
 
-  it('HOLE 1: JSX block comment also strips the prop', () => {
+  it('HOLE 1: a block comment in the attribute list also strips the prop', () => {
+    const mutated = `export function V() {
+  return (
+    <DocumentViewerToolbar
+      /* compareTransforms={compareTransforms} */
+      onFoo={bar}
+    />
+  );
+}
+`;
+    const block = toolbarAttributeBlock(mutated);
+    expect(block).not.toMatch(/compareTransforms=\{compareTransforms\}/);
+    expect(block).toMatch(/onFoo=\{bar\}/);
+  });
+
+  it('HOLE 1: a `{/* ... */}` container in the attribute list is not JSX and fails loudly', () => {
+    // An attribute list only takes `{...spread}` in braces; `{/* prop */}` is a
+    // syntax error that the build rejects too. The previous hand-written scanner
+    // accepted it silently; now the lock goes red with the parser's reason.
     const mutated = `export function V() {
   return (
     <DocumentViewerToolbar
@@ -68,8 +86,8 @@ describe('elementAttributeBlock', () => {
   );
 }
 `;
-    const block = toolbarAttributeBlock(mutated);
-    expect(block).not.toMatch(/compareTransforms=\{compareTransforms\}/);
+    expect(() => toolbarAttributeBlock(mutated))
+      .toThrow(/found 0; 1 candidate\(s\) discarded \(the source does not parse at offset \d+/);
   });
 
   it('HOLE 2: < inside an attribute value does NOT break the helper (legitimate comparison stays GREEN)', () => {
@@ -288,7 +306,8 @@ describe('elementAttributeBlock', () => {
     // A regex literal like `/^https:\\/\\//` is tokenised as a single template
     // (slash is not a delimiter outside a literal context) so the helper walks
     // past it without dropping the toolbar element.
-    const source = `const RE = /^https:\\/\\/odv\\b/;
+    // `/^https:\/\//` really contains "//" (the escaped slash, then the closing slash).
+    const source = `const RE = /^https:\\/\\//;
 export function V() {
   return (
     <DocumentViewerToolbar
@@ -466,6 +485,8 @@ export function V() {
     const block = elementAttributeBlock(source, 'Container', { selfClosing: false });
     expect(block).toMatch(/a=\{1\}/);
     expect(block).toMatch(/<Child \/>/);
+    // The block must END with the whole closing tag, not stop at `</Container`.
+    expect(block.trimEnd()).toMatch(/<\/Container >$/);
   });
 
   it('member expression: <Foo.Bar/> does NOT match <Foo/>', () => {
@@ -523,5 +544,157 @@ export function V() {
 `;
     const block = elementAttributeBlock(source, 'Container', { selfClosing: false });
     expect(block).toMatch(/a=\{1\}/);
+  });
+
+  // === HOLD points from the closeout of odv-elementblock-hjalparen-stangs-mot-parsningshal ===
+  // Each case below was measured RED (or silently wrong) against the hand-written
+  // scanner of 1b8a8820; the parser-based helper must keep them as stated.
+
+  it('HOLD 2: a template literal with ${...} in the locked element\'s own attributes stays GREEN', () => {
+    const source = `export function V() {
+  return (
+    <DocumentViewerToolbar
+      aria={\`\${t('viewer.aria.toolbar')} x\`}
+      printPipeline={printPipeline}
+    />
+  );
+}
+`;
+    const block = toolbarAttributeBlock(source);
+    expect(block).toMatch(/printPipeline=\{printPipeline\}/);
+    expect(block).toMatch(/aria=\{`\$\{t\('viewer\.aria\.toolbar'\)\} x`\}/);
+  });
+
+  it('HOLD 3: an apostrophe after a JSX body that starts with `{` is text, not a string', () => {
+    const source = `export function V() {
+  return (
+    <div>
+      <div>{name}'s</div>
+      <Foo keep={k} />
+    </div>
+  );
+}
+`;
+    expect(elementAttributeBlock(source, 'Foo')).toMatch(/keep=\{k\}/);
+  });
+
+  it('HOLD 3: a backtick in JSX text is text, not a template literal', () => {
+    const source = `export function V() {
+  return (
+    <div>
+      <p>a lone backtick \` here</p>
+      <Foo keep={k} />
+    </div>
+  );
+}
+`;
+    expect(elementAttributeBlock(source, 'Foo')).toMatch(/keep=\{k\}/);
+  });
+
+  it('F1: a "//" in an attribute string AFTER a JSX text run is not a comment', () => {
+    // The 1b8a8820 JSX-text lookup had no upper bound: everything after the first
+    // text run counted as text, so the quote did not open a string and the "//"
+    // started a comment that swallowed the rest of the opening tag.
+    const source = `export function V() {
+  return (
+    <div>
+      <div>hello</div>
+      <Foo help="https://x" keep={k} />
+    </div>
+  );
+}
+`;
+    const block = elementAttributeBlock(source, 'Foo');
+    expect(block).toMatch(/help="https:\/\/x"/);
+    expect(block).toMatch(/keep=\{k\}/);
+  });
+
+  it('F1: an element written inside a string after a JSX text run is not a candidate', () => {
+    const source = `export function V() {
+  return (
+    <div>
+      <div>hello</div>
+      {"<Foo fake />"}
+      <Foo keep={k} />
+    </div>
+  );
+}
+`;
+    const block = elementAttributeBlock(source, 'Foo');
+    expect(block).toMatch(/keep=\{k\}/);
+    expect(block).not.toMatch(/fake/);
+  });
+
+  it('HOLD 4: a broken parent never lets its same-name child pass as "exactly one"', () => {
+    // 1b8a8820 discarded the unterminated parent and returned the CHILD's block
+    // `<T leaf={2}/>` as the one match, because the discard was only reported
+    // when nothing matched. Now the unparseable source discards every candidate
+    // and names the reason.
+    expect(() => elementAttributeBlock('<T printPipeline={P}><T leaf={2}/>', 'T'))
+      .toThrow(/found 0; 2 candidate\(s\) discarded \(the source does not parse at offset \d+: /);
+  });
+
+  it('HOLD 4: a JSX body starting with `{` gives a reason, never a bare "found 0"', () => {
+    // On 1b8a8820 the apostrophe case above failed as a bare "found 0" without
+    // any reason. Every failure now names its cause.
+    const broken = `export function V() {
+  return <div>{name}'s</div><Foo keep={k} /;
+}
+`;
+    expect(() => elementAttributeBlock(broken, 'Foo')).toThrow(/candidate\(s\) discarded \(the source does not parse at offset \d+/);
+  });
+
+  it('pathological nesting gives the intended clear error, never a bare RangeError', () => {
+    // 20 000 levels overflow the parser's own recursion; 5 000 still parse. The
+    // helper must turn the overflow into its usual "found 0; ... discarded" form.
+    const depth = 20000;
+    const open = Array.from({ length: depth }, () => '<Container>').join('');
+    const close = Array.from({ length: depth }, () => '</Container>').join('');
+    const source = `export function V() {
+  return (
+    <Wrapper a={1}>${open}<Child />${close}</Wrapper>
+  );
+}
+`;
+    let thrown;
+    try {
+      elementAttributeBlock(source, 'Wrapper', { selfClosing: false });
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeDefined();
+    expect(thrown).not.toBeInstanceOf(RangeError);
+    expect(thrown.message).toMatch(/expected exactly one pair-tag <Wrapper \.\.\.> element, found 0; 1 candidate\(s\) discarded \(the source nests too deeply to parse/);
+  });
+});
+
+describe('elementAttributeValue', () => {
+  const withButton = (attribute) => `export function V() {
+  return (
+    <div>
+      <CompareCurtainButton ${attribute} onOpen={open} />
+    </div>
+  );
+}
+`;
+
+  it('F6: the boolean shorthand and ={true} are both true', () => {
+    expect(elementAttributeValue(withButton('calibrated'), 'CompareCurtainButton', 'calibrated').value).toBe(true);
+    expect(elementAttributeValue(withButton('calibrated={true}'), 'CompareCurtainButton', 'calibrated').value).toBe(true);
+    expect(elementAttributeValue(withButton('calibrated={ true }'), 'CompareCurtainButton', 'calibrated').value).toBe(true);
+  });
+
+  it('F6: false, undefined, a negation and a spaced assignment are not true', () => {
+    for (const attribute of ['calibrated={false}', 'calibrated = {undefined}', 'calibrated={!true}', 'calibrated = {isCal && false}']) {
+      const result = elementAttributeValue(withButton(attribute), 'CompareCurtainButton', 'calibrated');
+      expect(result.present, attribute).toBe(true);
+      expect(result.value, attribute).not.toBe(true);
+    }
+    expect(elementAttributeValue(withButton('calibrated = {undefined}'), 'CompareCurtainButton', 'calibrated').expression).toBe('undefined');
+  });
+
+  it('F6: a missing or commented-out attribute is not present', () => {
+    expect(elementAttributeValue(withButton(''), 'CompareCurtainButton', 'calibrated').present).toBe(false);
+    expect(elementAttributeValue(withButton('/* calibrated */'), 'CompareCurtainButton', 'calibrated').present).toBe(false);
   });
 });

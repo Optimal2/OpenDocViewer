@@ -14,7 +14,7 @@ import CompareCurtainView from '../DocumentViewer/CompareCurtainView.jsx';
 import CompareOverlayView from '../DocumentViewer/CompareOverlayView.jsx';
 import CompareCurtainButton from '../DocumentViewer/CompareCurtainButton.jsx';
 import buttonSource from '../DocumentViewer/CompareCurtainButton.jsx?raw';
-import { elementAttributeBlock } from './toolbarAttributeBlock.js';
+import { elementAttributeBlock, elementAttributeValue } from './toolbarAttributeBlock.js';
 import { INITIAL_COMPARE_OVERLAY_STATE } from '../../utils/compareOverlay.js';
 import en from '../../../public/locales/en/common.json';
 import sv from '../../../public/locales/sv/common.json';
@@ -309,14 +309,12 @@ describe('CompareCurtainButton (entry from the compare and overlay toolbars)', (
     const compareToolbarButton = elementAttributeBlock(toolbarSource, 'CompareCurtainButton');
     expect(compareToolbarButton).toMatch(/calibrated=\{compareCalibrated\}/);
     // The overlay's curtain button is meant to be ALWAYS calibrated, so we
-    // lock the boolean shorthand value `calibrated` (no `={...}` form). A
-    // future change to `calibrated={false}` would disable the button
-    // permanently (CompareCurtainButton.jsx ignores clicks when not
-    // calibrated) and the lock MUST catch it.
-    const overlayToolbarButton = elementAttributeBlock(overlaySource, 'CompareCurtainButton');
-    expect(overlayToolbarButton).toMatch(/\bcalibrated(\s|\/?>)/);
-    expect(overlayToolbarButton).not.toMatch(/calibrated\s*=\s*\{false\}/);
-    expect(overlayToolbarButton).not.toMatch(/calibrated\s*=\s*\{[^}]*!\s*1?\s*\}/);
+    // lock the attribute's VALUE, read from the syntax tree: the shorthand
+    // `calibrated` and `calibrated={true}` pass; `calibrated={false}`,
+    // `calibrated = {undefined}`, `calibrated={!x}` or a missing attribute
+    // would disable the button permanently (CompareCurtainButton.jsx ignores
+    // clicks when not calibrated) and the lock MUST catch them.
+    expect(elementAttributeValue(overlaySource, 'CompareCurtainButton', 'calibrated').value).toBe(true);
   });
 });
 
