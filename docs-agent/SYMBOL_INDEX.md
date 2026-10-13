@@ -29,6 +29,7 @@
 | <code>OpenDocViewer~resizeRaf</code> | constant | <code>src/app/OpenDocViewer.jsx:93</code> | rAF-throttled resize handler: Avoids re-render spam during window drags. |
 | <code>OpenDocViewer~showPerf</code> | constant | <code>src/app/OpenDocViewer.jsx:134</code> | Decide if the Performance HUD should render: Runtime flag \(config/env/meta\) OR explicit URL opt-in: ?perf=1 \(handy during support sessions\) |
 | <code>SourceItem</code> | typedef | <code>src/app/OpenDocViewer.jsx:25</code> | Item in the explicit source list mode. |
+| <code>toolbarAttributeBlock</code> | function | <code>src/components/__tests__/toolbarAttributeBlock.js:16</code> |  |
 | <code>CanvasRenderer</code> | constant | <code>src/components/CanvasRenderer.jsx:40</code> | CanvasRenderer component. |
 | <code>module.exports</code> | function | <code>src/components/common/StatusLed.jsx:17</code> |  |
 | <code>DocumentConsumerWrapper</code> | function | <code>src/components/DocumentConsumerWrapper.jsx:66</code> | DocumentConsumerWrapper Wraps DocumentLoader + DocumentViewer and switches between full viewer and a thumbnail-only presentation on small/mobile layouts. |

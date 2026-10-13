@@ -87,17 +87,18 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 148,
+    "fileCount": 149,
     "sourceLineCount": 60101,
-    "docletCount": 1640,
-    "documentedFileCount": 148,
-    "lowConfidenceSummaryCount": 0,
+    "docletCount": 1641,
+    "documentedFileCount": 149,
+    "lowConfidenceSummaryCount": 1,
     "parseErrorCount": 0,
     "packageDependencyCount": 23,
     "devDependencyCount": 21,
-    "estimatedSourceTokens": 4894
+    "estimatedSourceTokens": 4917
   },
   "recommendations": [
+    "1 files have low-confidence summaries; inspect REPORT.md before relying on them for task planning.",
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
   ],
   "packageUsage": [
@@ -999,6 +1000,23 @@
           "doclets": 3,
           "summary": "Signature overview dialog, opened from the toolbar overview button.",
           "summaryConfidence": "high"
+        }
+      ]
+    },
+    {
+      "name": "src/components/__tests__",
+      "fileCount": 1,
+      "lineCount": 0,
+      "docletCount": 1,
+      "importantFiles": [
+        {
+          "path": "src/components/__tests__/toolbarAttributeBlock.js",
+          "score": 3,
+          "lines": null,
+          "incomingLocalImports": 0,
+          "doclets": 1,
+          "summary": "No summary available from JSDoc or exports.",
+          "summaryConfidence": "low"
         }
       ]
     },
@@ -3130,6 +3148,47 @@
       "summary": "src/app/OpenDocViewer.jsx Main application shell for the viewer.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/components/__tests__/toolbarAttributeBlock.js",
+      "lines": null,
+      "extension": ".js",
+      "jsdocBlockCount": 0,
+      "imports": [],
+      "exports": [],
+      "declarations": [],
+      "parseError": null,
+      "doclets": [
+        {
+          "id": "toolbarAttributeBlock",
+          "name": "toolbarAttributeBlock",
+          "longname": "toolbarAttributeBlock",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/__tests__/toolbarAttributeBlock.js",
+          "line": 16,
+          "description": "",
+          "params": [
+            {
+              "name": "viewerSource",
+              "type": "string",
+              "optional": false,
+              "description": "the DocumentViewer.jsx source text @returns {string}"
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "sourceSummary": null,
+      "moduleKey": "src/components/__tests__",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 0,
+      "importanceScore": 3,
+      "summary": "No summary available from JSDoc or exports.",
+      "summaryConfidence": "low",
+      "summarySource": "none"
     },
     {
       "path": "src/components/CanvasRenderer.jsx",
@@ -68483,6 +68542,26 @@
       "line": 25,
       "description": "Item in the explicit source list mode.",
       "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "toolbarAttributeBlock",
+      "name": "toolbarAttributeBlock",
+      "longname": "toolbarAttributeBlock",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/__tests__/toolbarAttributeBlock.js",
+      "line": 16,
+      "description": "",
+      "params": [
+        {
+          "name": "viewerSource",
+          "type": "string",
+          "optional": false,
+          "description": "the DocumentViewer.jsx source text @returns {string}"
+        }
+      ],
       "returns": [],
       "examples": 0
     },

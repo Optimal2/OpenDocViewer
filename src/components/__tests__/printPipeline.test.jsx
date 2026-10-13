@@ -20,6 +20,7 @@ import toolbarSource from '../DocumentToolbar/DocumentToolbar.jsx?raw';
 import pipelineSource from '../DocumentToolbar/usePrintPipeline.js?raw';
 import dialogsSource from '../DocumentToolbar/PrintPipelineDialogs.jsx?raw';
 import viewerSource from '../DocumentViewer/DocumentViewer.jsx?raw';
+import { toolbarAttributeBlock } from './toolbarAttributeBlock.js';
 import overlaySource from '../DocumentViewer/CompareOverlayView.jsx?raw';
 import curtainSource from '../DocumentViewer/CompareCurtainView.jsx?raw';
 import dialogSource from '../DocumentToolbar/PrintRangeDialog.jsx?raw';
@@ -353,7 +354,9 @@ describe('one pipeline, not two (static locks)', () => {
   it('DocumentViewer owns the one instance and hands it to the toolbar and both views', () => {
     expect(count(viewerSource, /usePrintPipeline\(/g)).toBe(1);
     expect(viewerSource).toMatch(/<PrintPipelineDialogs pipeline=\{printPipeline\} \/>/);
-    expect(viewerSource).toMatch(/<DocumentViewerToolbar[\s\S]*?printPipeline=\{printPipeline\}/);
+    // Anchored to the toolbar element's OWN attribute block: deleting the prop here, or
+    // moving it to a later element, turns this red (see toolbarAttributeBlock.js).
+    expect(toolbarAttributeBlock(viewerSource)).toMatch(/printPipeline=\{printPipeline\}/);
     expect(viewerSource).toMatch(/<CompareOverlayView[\s\S]*?onPrint=\{printEnabled \? openComposedPrintDialog : undefined\}[\s\S]*?printDialogs=\{comparePrintDialogs\}/);
     expect(viewerSource).toMatch(/<CompareCurtainView[\s\S]*?onPrint=\{printEnabled \? openComposedPrintDialog : undefined\}[\s\S]*?printDialogs=\{comparePrintDialogs\}/);
     for (const source of [toolbarSource, overlaySource, curtainSource]) {
