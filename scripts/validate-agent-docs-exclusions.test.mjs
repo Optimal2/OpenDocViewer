@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import { test } from 'vitest';
 import {
   EXCLUDED_DIRECTORIES,
+  EXCLUDED_FILE_PATTERNS,
+  assertSeparatorAgnosticFilePattern,
   buildExcludePattern,
   validateAgentDocsExclusions,
 } from './validate-agent-docs-exclusions.mjs';
@@ -65,8 +67,83 @@ test('the pattern builder refuses separators in declared names and file patterns
   assert.throws(() => buildExcludePattern(['build/output']), /single, non-empty directory name/);
   assert.throws(() => buildExcludePattern(['build\\output']), /single, non-empty directory name/);
   assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, ['coverage/']), /must not reference a path separator/);
-  assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, ['coverage\\\\']), /must not reference a path separator/);
+  assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, ['coverage\\\\']), /not separator-agnostic/);
 });
+
+// Each of these was (or could be) green under a "no literal / or \\\\" check while
+// excluding a path on one platform only, or depending on the native path prefix.
+const separatorDependentFilePatterns = [
+  'coverage\\x2F',
+  'coverage\\x5C',
+  '\\x2Fsecret',
+  '\\x5Csecret',
+  '\\u002Fsecret',
+  '\\57secret',
+  '\\Wsecret',
+  'coverage\\/',
+  'secret[/]',
+  'secret[\\\\]',
+  'secret[/\\\\]',
+  'secret[\\\\/]',
+  'secret[\\x2F]',
+  'secret[.-0]',
+  'secret[A-z]',
+  '[^/]secret',
+  '^src',
+  '(?<=coverage).',
+  'secret)|(.',
+];
+
+test('file patterns that can tell the separators apart are rejected in any spelling', () => {
+  for (const filePattern of separatorDependentFilePatterns) {
+    const filePatterns = [...EXCLUDED_FILE_PATTERNS, filePattern];
+    assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, filePatterns), /not separator-agnostic/, filePattern);
+    assert.throws(() => assertSeparatorAgnosticFilePattern(filePattern), /not separator-agnostic/, filePattern);
+  }
+});
+
+test('the guard rejects a jsdoc.json built from a separator-escaping file pattern', () => {
+  for (const filePattern of ['\\x2Fsecret', '\\x5Csecret']) {
+    const filePatterns = [...EXCLUDED_FILE_PATTERNS, filePattern];
+    const pattern = `${config.source.excludePattern.slice(0, -1)}|${filePattern})`;
+    assert.throws(() => validateAgentDocsExclusions(withPattern(pattern), { filePatterns }), /not separator-agnostic/);
+  }
+});
+
+test('separator-agnostic file patterns are accepted and behave identically on both platforms', () => {
+  const samples = ['src/a.test.js', 'src/a.spec.js', 'src/a.min.js', 'src/Card.stories.jsx', 'src/types.d.ts', 'src/x/b.mock.js', 'src/x/b.js'];
+  for (const filePattern of ['\\.test\\.', '\\.spec\\.', '\\.min\\.js$', '[A-Za-z0-9_]+\\.stories\\.', '(?:\\.d)?\\.ts$', '[^_]\\.mock\\.js$']) {
+    const filePatterns = [...EXCLUDED_FILE_PATTERNS, filePattern];
+    const pattern = buildExcludePattern(EXCLUDED_DIRECTORIES, filePatterns);
+    assert.doesNotThrow(() => validateAgentDocsExclusions(withPattern(pattern), { filePatterns }));
+    const fragment = new RegExp(filePattern);
+    for (const sample of samples) {
+      assert.equal(fragment.test(sample), fragment.test(sample.replaceAll('/', '\\')), `${filePattern} on ${sample}`);
+    }
+  }
+});
+
+// Kills the mutation that drops escapeRegExp from the directory segments: the
+// declared name must match literally, not as a regular expression. "a.b" would
+// silently over-exclude, "c++" would not even compile.
+for (const [directory, lookalike] of [
+  ['a.b', 'aXb'],
+  ['c++', 'ccc'],
+]) {
+  test(`the declared directory ${directory} is matched literally, not as a regular expression`, () => {
+    const directories = [...EXCLUDED_DIRECTORIES, directory];
+    const pattern = buildExcludePattern(directories);
+    assert.doesNotThrow(() => validateAgentDocsExclusions(withPattern(pattern), { directories }));
+    const exclude = new RegExp(pattern);
+    for (const [relativePath, expected] of [
+      [`src/${directory}/x.js`, true],
+      [`src/${lookalike}/x.js`, false],
+    ]) {
+      assert.equal(exclude.test(relativePath), expected, relativePath);
+      assert.equal(exclude.test(relativePath.replaceAll('/', '\\')), expected, relativePath);
+    }
+  });
+}
 
 test('equal but incorrect results cannot silently remove or broaden exclusions', () => {
   for (const excludePattern of ['never-match', '.*']) {
