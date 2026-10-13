@@ -126,6 +126,12 @@ test('verifyAgentDocMapDependencies compares node_modules with package-lock.json
   writeJson(hidden, { packages: { 'node_modules/jsdoc': { version: '4.0.5', integrity: 'sha512-a' } } });
   assert.equal(verifyAgentDocMapDependencies(root), 1);
 
+  // This is a metadata check, not an integrity check of installed package bytes.
+  const installedFile = path.join(root, 'node_modules', 'jsdoc', 'jsdoc.js');
+  fs.mkdirSync(path.dirname(installedFile), { recursive: true });
+  fs.writeFileSync(installedFile, '// locally patched dependency\n');
+  assert.equal(verifyAgentDocMapDependencies(root), 1, 'unchanged metadata cannot detect patched file contents');
+
   writeJson(hidden, { packages: { 'node_modules/jsdoc': { version: '4.0.4', integrity: 'sha512-b' }, 'node_modules/extra': { version: '1.0.0' } } });
   assert.throws(() => verifyAgentDocMapDependencies(root), /installed 4\.0\.4, locked 4\.0\.5[\s\S]*extra: installed but not in package-lock\.json/);
 });

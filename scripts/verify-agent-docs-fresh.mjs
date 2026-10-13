@@ -3,8 +3,9 @@
 // and of scripts/local-ci.ps1 step 4, so both sides apply the same rule.
 //
 // The rule: after regeneration, docs-agent/ in the working tree, in the index and
-// in HEAD must be the same set of files with the same content. Three git queries
-// cover it, and each one names a state a plain `git diff -- docs-agent` misses:
+// in HEAD must be the same set of files with the same bytes. Three git queries
+// cover staged/path changes; a raw blob comparison also bypasses clean filters
+// and the stat cache. Masking index flags are rejected before comparing.
 //
 //   staged    `git diff --cached HEAD`  index differs from HEAD (any staged change);
 //   worktree  `git diff HEAD`           working tree differs from HEAD (modified,
@@ -19,14 +20,16 @@
 // See docs-src/agent-documentation.md ("Freshness comparison").
 
 import path from 'node:path';
+import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const DOCS_DIR = 'docs-agent';
 
 function git(repoRoot, args) {
-  // core.safecrlf=false silences the autocrlf "LF will be replaced" warnings; the
-  // comparisons themselves still normalise line endings the way git always does.
+  // Silence checkout-conversion warnings. Raw blob checks below, not Git's
+  // filtered diff or stat cache, enforce byte equality with HEAD.
   const result = spawnSync('git', ['-c', 'core.quotepath=off', '-c', 'core.safecrlf=false', ...args], {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -58,9 +61,45 @@ function parseNameStatus(output) {
  */
 export function findAgentDocsDrift(repoRoot, docsDir = DOCS_DIR) {
   const pathspec = ['--', docsDir];
+  const masked = git(repoRoot, ['ls-files', '-v', '-z', ...pathspec])
+    .split('\0')
+    .filter((entry) => entry && (entry[0] === 'S' || /[a-z]/.test(entry[0])));
+  if (masked.length > 0) {
+    throw new Error(
+      `Unsupported index flags under ${docsDir}/ (skip-worktree or assume-unchanged):\n` +
+        masked.map((entry) => `  ${entry}`).join('\n') +
+        '\nClear these flags with git update-index --no-skip-worktree / --no-assume-unchanged before checking freshness.',
+    );
+  }
+  const worktree = parseNameStatus(git(repoRoot, ['diff', '--no-renames', '--name-status', '-z', 'HEAD', ...pathspec]));
+  const objectFormat = git(repoRoot, ['rev-parse', '--show-object-format']).trim();
+  for (const entry of git(repoRoot, ['ls-tree', '-r', '-z', 'HEAD', ...pathspec]).split('\0').filter(Boolean)) {
+    const tab = entry.indexOf('\t');
+    const [mode, type, oid] = entry.slice(0, tab).split(' ');
+    const file = entry.slice(tab + 1);
+    // Generated docs must be ordinary files, never links or submodules.
+    if (type !== 'blob' || !['100644', '100755'].includes(mode)) {
+      throw new Error(`Unsupported generated documentation entry: ${file} (${mode} ${type}).`);
+    }
+    let status;
+    try {
+      const diskPath = path.join(repoRoot, file);
+      if (!fs.lstatSync(diskPath).isFile()) {
+        status = 'M';
+      } else {
+        const bytes = fs.readFileSync(diskPath);
+        const actual = createHash(objectFormat).update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+        if (actual !== oid) status = 'M';
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') throw error;
+      status = 'D';
+    }
+    if (status && !worktree.some((change) => change.path === file)) worktree.push({ status, path: file });
+  }
   return {
     staged: parseNameStatus(git(repoRoot, ['diff', '--cached', '--no-renames', '--name-status', '-z', 'HEAD', ...pathspec])),
-    worktree: parseNameStatus(git(repoRoot, ['diff', '--no-renames', '--name-status', '-z', 'HEAD', ...pathspec])),
+    worktree,
     untracked: git(repoRoot, ['ls-files', '--others', '-z', ...pathspec])
       .split('\0')
       .filter((entry) => entry !== ''),
@@ -114,11 +153,13 @@ function main() {
   return 1;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try {
+// Imports are intentionally quiet (the tests use the exported helpers). Resolve
+// both spellings so a junction, symlink or subst entry cannot skip the CLI.
+try {
+  if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
     process.exitCode = main();
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error);
-    process.exitCode = 2;
   }
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error);
+  process.exitCode = 2;
 }

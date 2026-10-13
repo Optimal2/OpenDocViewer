@@ -200,8 +200,11 @@ export function verifyAgentDocMapRevision(agentDocMapRoot, revision) {
 }
 
 /**
- * Fails unless node_modules matches package-lock.json (npm's hidden lockfile
- * node_modules/.package-lock.json is compared entry by entry).
+ * Fails unless node_modules metadata matches package-lock.json (npm's hidden
+ * lockfile node_modules/.package-lock.json is compared entry by entry).
+ * This does NOT hash installed file contents: patched, missing or linked package
+ * files can pass while lock metadata stays unchanged. Use a clean npm ci install
+ * to reproduce CI; the freshness gate checks output, not dependency integrity.
  * @param {string} agentDocMapRoot
  * @returns {number} number of verified packages
  */

@@ -129,13 +129,72 @@ test('staged, modified and untracked files outside docs-agent are not rejected',
   assert.ok(isFresh(findAgentDocsDrift(root)));
 });
 
-test('LF output in a CRLF (core.autocrlf=true) checkout is fresh, as git diff already treats it', () => {
+test('LF output regenerated in a CRLF checkout is fresh', () => {
   const { root, git } = repoWithPacket({ autocrlf: 'true' });
   fs.rmSync(path.join(root, 'docs-agent'), { recursive: true });
   git('checkout', '--', 'docs-agent');
   assert.match(fs.readFileSync(path.join(root, 'docs-agent/REPORT.md'), 'utf8'), /\r\n/, 'checkout wrote CRLF');
   write(root, 'docs-agent/REPORT.md', 'fresh report\nsecond line\n');
+  write(root, 'docs-agent/chunks/src.md', 'fresh chunk\n');
   assert.ok(isFresh(findAgentDocsDrift(root)));
+});
+
+for (const autocrlf of ['true', 'false']) {
+  for (const attributes of ['', 'docs-agent/** text eol=lf\n']) {
+    test(`raw CRLF is rejected with autocrlf=${autocrlf}, attributes=${Boolean(attributes)}, even after a filtered diff`, () => {
+      const { root, git } = repoWithPacket({ autocrlf });
+      if (attributes) write(root, '.gitattributes', attributes);
+      write(root, 'docs-agent/REPORT.md', 'fresh report\r\nsecond line\r\n');
+      git('diff', '--name-status', 'HEAD', '--', 'docs-agent');
+      const drift = findAgentDocsDrift(root);
+      assert.deepEqual(drift.worktree, [{ status: 'M', path: 'docs-agent/REPORT.md' }]);
+      assert.ok(!isFresh(drift));
+    });
+  }
+}
+
+for (const flags of [['assume-unchanged'], ['skip-worktree'], ['assume-unchanged', 'skip-worktree']]) {
+  test(`index flags ${flags.join(' + ')} are rejected with or without disk edits`, () => {
+    const { root, git } = repoWithPacket();
+    for (const flag of flags) git('update-index', `--${flag}`, 'docs-agent/REPORT.md');
+    assert.throws(() => findAgentDocsDrift(root), /Unsupported index flags[\s\S]*docs-agent\/REPORT.md[\s\S]*--no-skip-worktree/);
+    write(root, 'docs-agent/REPORT.md', 'masked disk edit\n');
+    assert.throws(() => findAgentDocsDrift(root), /Unsupported index flags/);
+    for (const flag of flags) git('update-index', `--no-${flag}`, 'docs-agent/REPORT.md');
+    assert.ok(!isFresh(findAgentDocsDrift(root)), 'an ordinary edit is still rejected');
+  });
+}
+
+test('masking flags outside docs-agent do not affect freshness', () => {
+  const { root, git } = repoWithPacket();
+  git('update-index', '--assume-unchanged', 'src/app.js');
+  git('update-index', '--skip-worktree', 'src/app.js');
+  write(root, 'src/app.js', 'masked outside edit\n');
+  assert.ok(isFresh(findAgentDocsDrift(root)));
+});
+
+test('the CLI runs through a directory junction/symlink, reporting both stale and fresh states', () => {
+  const { root } = repoWithPacket();
+  write(root, 'scripts/verify-agent-docs-fresh.mjs', fs.readFileSync(new URL('./verify-agent-docs-fresh.mjs', import.meta.url)));
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-agent-docs-link-'));
+  tempRoots.push(parent);
+  const link = path.join(parent, 'linked-repo');
+  fs.symlinkSync(root, link, process.platform === 'win32' ? 'junction' : 'dir');
+  try {
+    write(root, 'docs-agent/NEW.md', 'untracked\n');
+    for (const base of [root, link]) {
+      const result = spawnSync(process.execPath, [path.join(base, 'scripts/verify-agent-docs-fresh.mjs')], { encoding: 'utf8' });
+      assert.equal(result.status, 1, `must run and reject: ${result.stdout}${result.stderr}`);
+      assert.match(result.stderr, /Untracked files[\s\S]*docs-agent\/NEW.md/);
+    }
+    fs.unlinkSync(path.join(root, 'docs-agent/NEW.md'));
+    const result = spawnSync(process.execPath, [path.join(link, 'scripts/verify-agent-docs-fresh.mjs')], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /docs-agent\/ is fresh/);
+  } finally {
+    // Remove the link itself, never recursively traverse the fixture repository.
+    fs.unlinkSync(link);
+  }
 });
 
 test('both freshness gates run the shared comparison after regeneration', () => {
