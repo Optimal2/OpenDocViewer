@@ -1,24 +1,46 @@
-// JSDoc sees native paths; AgentDocMap's inventory sees slash-normalized paths.
-// Keep the repository's exclusion contract consistent in both representations.
+// Two consumers apply jsdoc.json's source.excludePattern, and neither tests the
+// short relative path a quick check would use:
+//   - JSDoc (`jsdoc -X -c jsdoc.json` inside AgentDocMap, and `npm run doc`)
+//     tests the ABSOLUTE NATIVE path, so the checkout prefix is part of the
+//     input: /home/runner/work/<repo>/<repo>/ on GitHub Actions, a drive and
+//     user folder on Windows;
+//   - AgentDocMap's file inventory tests `${relative}/`: relative, slash-
+//     normalized and WITH a trailing slash.
 //
-// jsdoc.json is static JSON, so source.excludePattern cannot be computed there.
-// Instead the excluded directories are declared here and the committed pattern
-// must equal the one derived from them. Every directory segment is emitted with
-// a separator-agnostic class. File-name fragments stay raw regex text, so each
-// one is checked against a small grammar whose atoms all treat "/" and "\"
-// alike (see assertSeparatorAgnosticFilePattern). Together this guarantees that
-// no slash-only or backslash-only exclusion, however it is spelled, can be added
-// to jsdoc.json without also failing this guard.
+// jsdoc.json is static JSON, so the pattern cannot be computed there. Instead
+// the excluded directories and file-name fragments are declared here and the
+// committed pattern must equal the one derived from them. That guarantees:
+//   - every directory segment is the escaped name followed by [/\\], so it
+//     matches "/" and "\" alike;
+//   - every file-name fragment fits a small allowlist grammar (see
+//     assertFilePatternGrammar) whose atoms all treat "/" and "\" alike and
+//     which has no anchors: "^" depends on the native path prefix, and "$"
+//     never matches before AgentDocMap's trailing slash. The grammar is
+//     deliberately stricter than separator parity requires;
+//   - every declared directory, every fragment's declared example file and two
+//     ordinary files get the expected verdict in four representations of the
+//     same file (see probeRepresentations): relative, AgentDocMap's relative +
+//     "/", Linux absolute and Windows absolute, under checkout prefixes that
+//     contain the usual words (home, runner, work, Users, the repository name).
+// It does NOT guarantee anything about checkout prefixes it does not probe: a
+// fragment or directory name that equals a word of some other clone path (a
+// user name, a custom folder) still excludes everything there.
 export const EXCLUDED_DIRECTORIES = ['node_modules', 'docs', '__tests__'];
 
-// File-name fragments are raw regex text and must not depend on path separators.
-export const EXCLUDED_FILE_PATTERNS = ['\\.test\\.'];
+// File-name fragments are raw regex text. Each one declares an example file
+// name that it must exclude, so the probe sees the fragment's own verdict.
+export const EXCLUDED_FILES = [{ pattern: '\\.test\\.', example: 'example.test.js' }];
 
 const SEPARATOR_CLASS = '[/\\\\]';
 
+const LINUX_CHECKOUT = '/home/runner/work/OpenDocViewer/OpenDocViewer/';
+const WINDOWS_CHECKOUT = 'C:\\Users\\runner\\work\\OpenDocViewer\\OpenDocViewer\\';
+
 // Regex syntax characters that a fragment may escape to stand for themselves.
-// "/" and "\" are deliberately absent, and every other escape (\x2F, \,
-// \57, \W, \1, ...) is rejected, so no escape can name a single separator.
+// "/" and "\" are absent, so no escape can name a single separator (\x2F, \57,
+// \u005C, ...). Separator-agnostic class escapes such as \W, \d, \w, \s, \S and
+// \b are rejected too: not because they tell the separators apart, but because
+// the allowlist admits nothing it does not need.
 const ESCAPABLE_IN_FILE_PATTERN = new Set(['.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '-']);
 const RANGE_KINDS = [/[a-z]/, /[A-Z]/, /[0-9]/];
 
@@ -27,17 +49,33 @@ function escapeRegExp(value) {
 }
 
 /**
+ * The same repository file as each consumer presents it to the exclude pattern.
+ *
+ * @param {string} relativePath slash-separated path relative to the repository root
+ * @returns {Array<[string, string]>} [representation name, path] pairs
+ */
+export function probeRepresentations(relativePath) {
+  return [
+    ['relative', relativePath],
+    ['AgentDocMap relative + "/"', `${relativePath}/`],
+    ['Linux absolute', `${LINUX_CHECKOUT}${relativePath}`],
+    ['Windows absolute', `${WINDOWS_CHECKOUT}${relativePath.replaceAll('/', '\\')}`],
+  ];
+}
+
+/**
  * Accept a file-name fragment only when it is built from atoms that match "/"
  * and "\" either both or neither: literal non-separator characters, escaped
- * syntax characters, ".", groups, alternation, quantifiers, "$", and character
- * classes of literals or same-kind ranges (a-z, A-Z, 0-9). The fragment must
- * also compile on its own, so it cannot break out of its alternation branch.
+ * syntax characters, ".", groups, alternation, quantifiers and character
+ * classes of literals or same-kind ranges (a-z, A-Z, 0-9). Anchors are
+ * rejected. The fragment must also compile on its own, so it cannot break out
+ * of its alternation branch.
  *
  * @param {string} filePattern
  */
-export function assertSeparatorAgnosticFilePattern(filePattern) {
+export function assertFilePatternGrammar(filePattern) {
   const fail = (reason) => {
-    throw new Error(`Excluded file pattern "${filePattern}" is not separator-agnostic: ${reason}.`);
+    throw new Error(`Excluded file pattern "${filePattern}" does not fit the file-pattern grammar: ${reason}.`);
   };
   if (typeof filePattern !== 'string' || filePattern.length === 0) fail('it must be a non-empty string');
 
@@ -47,7 +85,7 @@ export function assertSeparatorAgnosticFilePattern(filePattern) {
     if (char !== '\\') return { char, next: index + 1, escaped: false };
     const escaped = filePattern[index + 1];
     if (!ESCAPABLE_IN_FILE_PATTERN.has(escaped)) {
-      fail(`"\\${escaped ?? ''}" may name a path separator; only regex syntax characters may be escaped`);
+      fail(`only regex syntax characters may be escaped, and "\\${escaped ?? ''}" is not one`);
     }
     return { char: escaped, next: index + 2, escaped: true };
   };
@@ -59,8 +97,8 @@ export function assertSeparatorAgnosticFilePattern(filePattern) {
     if (char === '[') {
       index += filePattern[index + 1] === '^' ? 2 : 1;
       let members = 0;
-      while (filePattern[index] !== ']') {
-        if (index >= filePattern.length) fail('a character class is not terminated');
+      // Bounded by the length, so a missing "]" ends the scan instead of looping.
+      while (index < filePattern.length && filePattern[index] !== ']') {
         const from = readAtom(index);
         index = from.next;
         if (filePattern[index] === '-' && index + 1 < filePattern.length && filePattern[index + 1] !== ']') {
@@ -71,6 +109,9 @@ export function assertSeparatorAgnosticFilePattern(filePattern) {
         }
         members += 1;
       }
+      if (index >= filePattern.length) fail('a character class is not terminated');
+      // JavaScript reads "[]" as a class that matches nothing and "[^]" as one
+      // that matches anything, separators included.
       if (members === 0) fail('a character class is empty');
       index += 1;
       continue;
@@ -83,6 +124,8 @@ export function assertSeparatorAgnosticFilePattern(filePattern) {
       if (depth < 0) fail('it closes a group it did not open');
     } else if (char === '^') {
       fail('"^" anchors to the native path prefix, which differs per platform');
+    } else if (char === '$') {
+      fail('"$" never matches in AgentDocMap, which tests the relative path with a trailing "/"');
     }
     index = readAtom(index).next;
   }
@@ -95,50 +138,61 @@ export function assertSeparatorAgnosticFilePattern(filePattern) {
   }
 }
 
-export function buildExcludePattern(directories = EXCLUDED_DIRECTORIES, filePatterns = EXCLUDED_FILE_PATTERNS) {
+export function buildExcludePattern(directories = EXCLUDED_DIRECTORIES, files = EXCLUDED_FILES) {
   for (const directory of directories) {
     if (typeof directory !== 'string' || directory.length === 0 || /[/\\]/.test(directory)) {
       throw new Error(`Excluded directory "${directory}" must be a single, non-empty directory name.`);
     }
   }
-  for (const filePattern of filePatterns) {
-    assertSeparatorAgnosticFilePattern(filePattern);
+  for (const { pattern: filePattern, example } of files) {
+    assertFilePatternGrammar(filePattern);
+    if (typeof example !== 'string' || example.length === 0 || /[/\\]/.test(example)) {
+      throw new Error(`Excluded file pattern "${filePattern}" must declare an example file name without a path separator.`);
+    }
   }
   const segments = directories.map((directory) => `${escapeRegExp(directory)}${SEPARATOR_CLASS}`);
-  return `(${[...segments, ...filePatterns].join('|')})`;
+  return `(${[...segments, ...files.map((file) => file.pattern)].join('|')})`;
 }
 
-export function validateAgentDocsExclusions(
-  config,
-  { directories = EXCLUDED_DIRECTORIES, filePatterns = EXCLUDED_FILE_PATTERNS } = {},
-) {
+export function validateAgentDocsExclusions(config, { directories = EXCLUDED_DIRECTORIES, files = EXCLUDED_FILES } = {}) {
   const pattern = config?.source?.excludePattern;
   if (typeof pattern !== 'string' || pattern.length === 0) {
     throw new Error('jsdoc.json must declare source.excludePattern.');
   }
 
+  const derived = buildExcludePattern(directories, files);
   const exclude = new RegExp(pattern);
   const cases = [
     ...directories.map((directory) => [`src/${directory}/nested/example.js`, true]),
-    ['src/utils/example.test.js', true],
+    ...files.map(({ example }) => [`src/utils/${example}`, true]),
     ['src/utils/example.js', false],
     ['server/example.js', false],
   ];
 
   for (const [relativePath, expected] of cases) {
-    for (const candidate of [relativePath, relativePath.replaceAll('/', '\\')]) {
+    for (const [representation, candidate] of probeRepresentations(relativePath)) {
       if (exclude.test(candidate) !== expected) {
         throw new Error(
-          `jsdoc.json source.excludePattern must ${expected ? 'exclude' : 'include'} "${candidate}" on both platforms. Use separator-agnostic directory patterns such as docs[/\\\\].`,
+          `jsdoc.json source.excludePattern must ${expected ? 'exclude' : 'include'} "${relativePath}" in every representation, but not in the ${representation} form ${JSON.stringify(candidate)}. JSDoc tests absolute native paths and AgentDocMap tests "<relative>/"; use separator-agnostic directory patterns such as docs[/\\\\] and file patterns that cannot match the checkout prefix.`,
         );
       }
     }
   }
 
-  const derived = buildExcludePattern(directories, filePatterns);
+  for (const { pattern: filePattern, example } of files) {
+    const fragment = new RegExp(filePattern);
+    for (const [representation, candidate] of probeRepresentations(`src/utils/${example}`)) {
+      if (!fragment.test(candidate)) {
+        throw new Error(
+          `Excluded file pattern "${filePattern}" must match its example "${example}" in every representation, but not in the ${representation} form ${JSON.stringify(candidate)}.`,
+        );
+      }
+    }
+  }
+
   if (pattern !== derived) {
     throw new Error(
-      `jsdoc.json source.excludePattern must be derived from EXCLUDED_DIRECTORIES in scripts/validate-agent-docs-exclusions.mjs. Expected ${JSON.stringify(derived)}, found ${JSON.stringify(pattern)}. Declare new directories there instead of editing the pattern by hand.`,
+      `jsdoc.json source.excludePattern must be derived from EXCLUDED_DIRECTORIES and EXCLUDED_FILES in scripts/validate-agent-docs-exclusions.mjs. Expected ${JSON.stringify(derived)}, found ${JSON.stringify(pattern)}. Declare new exclusions there instead of editing the pattern by hand.`,
     );
   }
 }
