@@ -17,22 +17,32 @@
 //     which has no anchors: "^" depends on the native path prefix, and "$"
 //     never matches before AgentDocMap's trailing slash. The grammar is
 //     deliberately stricter than separator parity requires;
+//   - the LAST atom of every file-name fragment is neither "." nor a negated
+//     character class. A trailing "." or negated class depends on what comes
+//     after the fragment, which the corpus cannot enumerate and the pattern
+//     cannot anchor against: a pattern ending in "." matches "example.test."
+//     on every consumer but "example.test" on JSDoc and "example.test/" on
+//     AgentDocMap, an asymmetry no corpus can prove beyond its cases;
 //   - every declared directory, every fragment's declared example file and two
 //     ordinary files get the expected verdict in four representations of the
 //     same file (see probeRepresentations): relative, AgentDocMap's relative +
 //     "/", Linux absolute and Windows absolute, under checkout prefixes that
 //     contain the usual words (home, runner, work, Users, the repository name).
+// The trailing-atom rule removes the cause; the corpus catches what remains.
 // It does NOT guarantee anything about checkout prefixes it does not probe: a
 // fragment or directory name that equals a word of some other clone path (a
-// user name, a custom folder) still excludes everything there. Nor does it
-// prove a fragment for files other than the ones it probes: "." or a negated
-// class at the edge of a fragment matches a separator and can still reach
-// outside the file name of a path that is not probed.
+// user name, a custom folder) still excludes everything there. It also does
+// not prove a fragment for file names outside the corpus: the corpus tests
+// four representations of each path and the fragment must agree across all
+// four. A prefix word unique to a fifth checkout (a GitHub Windows runner under
+// D:\\a\\<repo>\\<repo>\\) still slips past. Today's workflows all run
+// ubuntu-latest, so no CI branch needs a fifth representation today.
 export const EXCLUDED_DIRECTORIES = ['node_modules', 'docs', '__tests__'];
 
 // File-name fragments are raw regex text. Each one declares an example file
 // name that it must exclude, so the probe sees the fragment's own verdict.
-export const EXCLUDED_FILES = [{ pattern: '\\.test\\.', example: 'example.test.js' }];
+// The last atom must NOT be "." or a negated class: see the header above.
+export const EXCLUDED_FILES = [{ pattern: '\\.test', example: 'example.test.js' }];
 
 const SEPARATOR_CLASS = '[/\\\\]';
 
@@ -95,10 +105,17 @@ export function assertFilePatternGrammar(filePattern) {
 
   let depth = 0;
   let index = 0;
+  // The fragment's last atom must not depend on what comes after it: a trailing
+  // "." or negated class matches a separator and can reach outside the file name
+  // of a path the corpus does not probe (e.g. "src/App.jsx" vs "src/App.jsx/").
+  // Track whether the final meaningful atom is "." or a negated class.
+  let lastAtom = null;
+  let lastAtomIsNegatedClass = false;
   while (index < filePattern.length) {
     const char = filePattern[index];
     if (char === '[') {
-      index += filePattern[index + 1] === '^' ? 2 : 1;
+      const negated = filePattern[index + 1] === '^';
+      index += negated ? 2 : 1;
       let members = 0;
       // Bounded by the length, so a missing "]" ends the scan instead of looping.
       while (index < filePattern.length && filePattern[index] !== ']') {
@@ -116,7 +133,12 @@ export function assertFilePatternGrammar(filePattern) {
       // JavaScript reads "[]" as a class that matches nothing and "[^]" as one
       // that matches anything, separators included.
       if (members === 0) fail('a character class is empty');
+      // A negated class is the last meaningful atom only when it is the final
+      // class in the fragment AND the trailing quantifier (if any) is absent.
+      // recordLastAtom sees the class before any trailing "*", "+" or "?".
       index += 1;
+      lastAtom = null;
+      lastAtomIsNegatedClass = negated;
       continue;
     }
     if (char === '(') {
@@ -130,9 +152,18 @@ export function assertFilePatternGrammar(filePattern) {
     } else if (char === '$') {
       fail('"$" never matches in AgentDocMap, which tests the relative path with a trailing "/"');
     }
-    index = readAtom(index).next;
+    const atom = readAtom(index);
+    lastAtom = atom;
+    lastAtomIsNegatedClass = false;
+    index = atom.next;
   }
   if (depth !== 0) fail('it leaves a group open');
+  if (lastAtomIsNegatedClass) {
+    fail('it ends with a negated character class, which matches a separator and depends on what follows the file name');
+  }
+  if (lastAtom !== null && lastAtom.char === '.') {
+    fail('it ends with ".", which matches a separator and depends on what follows the file name');
+  }
 
   try {
     new RegExp(filePattern);

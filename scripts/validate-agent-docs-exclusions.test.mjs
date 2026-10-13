@@ -52,7 +52,7 @@ for (const directory of EXCLUDED_DIRECTORIES) {
 
 test('a hand-written segment outside the declared directories is rejected in any separator form', () => {
   for (const segment of ['coverage/', 'coverage[\\\\]', 'coverage[/\\\\]', '(?<=coverage)[/]']) {
-    const extended = config.source.excludePattern.replace('|\\.test\\.', `|${segment}|\\.test\\.`);
+    const extended = config.source.excludePattern.replace('|\\.test', `|${segment}|\\.test`);
     assert.notEqual(extended, config.source.excludePattern);
     assert.throws(() => validateAgentDocsExclusions(withPattern(extended)), /derived from EXCLUDED_DIRECTORIES/);
   }
@@ -82,7 +82,7 @@ test('the pattern builder refuses separators in declared names, file patterns an
   assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile('coverage/', 'coverage.js')), /must not reference a path separator/);
   assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile('coverage\\\\', 'coverage.js')), /does not fit the file-pattern grammar/);
   for (const example of ['src/a.spec.js', 'src\\a.spec.js', '', undefined]) {
-    assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile('\\.spec\\.', example)), /must declare an example file name/);
+    assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile('\\.spec', example)), /must declare an example file name/);
   }
 });
 
@@ -107,16 +107,28 @@ test('exclusions that match the checkout prefix are rejected', () => {
   }
 });
 
-// "." and negated classes match a separator, so at the edge of a fragment they
-// can reach outside the file name: before "src" in an absolute path, or onto
-// AgentDocMap's trailing "/".
+// A trailing "." or negated class depends on what comes after the fragment,
+// which the corpus cannot enumerate and the pattern cannot anchor against: a
+// pattern ending in "." matches "example.js." on every consumer but "example.js"
+// on JSDoc and "example.js/" on AgentDocMap, an asymmetry no corpus can prove
+// beyond its cases. The grammar now rejects this by construction; the corpus
+// still catches "." or a negated class at the LEADING edge.
 test('fragments whose edges reach outside the file name are rejected', () => {
+  // Trailing "." or negated class — rejected by the grammar directly.
+  for (const filePattern of ['\\.jsx.', '\\.min\\.js.', '\\.test\\.', '\\.jsx[^y]', 'test[^x]']) {
+    assert.throws(() => assertFilePatternGrammar(filePattern), /does not fit the file-pattern grammar/, filePattern);
+    assert.throws(
+      () => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile(filePattern, 'example.jsx')),
+      /does not fit the file-pattern grammar/,
+      filePattern,
+    );
+  }
+  // Leading "." or negated class — still caught by the corpus, not by the grammar.
   for (const [filePattern, example] of [
     ['.src', 'example.src.js'],
     ['[^x]src', 'example.src.js'],
-    ['\\.js.', 'example.js.map'],
-    ['\\.min\\.js.', 'a.min.js'],
   ]) {
+    assert.doesNotThrow(() => assertFilePatternGrammar(filePattern), filePattern);
     const files = withFile(filePattern, example);
     assert.throws(
       () => validateAgentDocsExclusions(withPattern(buildExcludePattern(EXCLUDED_DIRECTORIES, files)), { files }),
@@ -127,10 +139,10 @@ test('fragments whose edges reach outside the file name are rejected', () => {
 });
 
 test('a fragment must exclude its declared example on its own', () => {
-  const files = withFile('\\.spec\\.', 'example.test.js');
+  const files = withFile('\\.spec', 'example.test.js');
   assert.throws(
     () => validateAgentDocsExclusions(withPattern(buildExcludePattern(EXCLUDED_DIRECTORIES, files)), { files }),
-    /"\\\.spec\\\." must match its example "example\.test\.js" in every representation, but not in the relative form/,
+    /"\\\.spec" must match its example "example\.test\.js" in every representation, but not in the relative form/,
   );
 });
 
@@ -245,14 +257,15 @@ test('the guard rejects a jsdoc.json built from a separator-escaping file patter
 
 // None of these is anchored, so each one can only be read as "contains". That
 // is the price of "$" being inert in AgentDocMap: "\.min\.js" also matches
-// "a.min.json".
+// "a.min.json". Fragments must not end with "." or a negated class — that rule
+// is verified separately — so the trailing dot has been dropped here.
 test('accepted file patterns exclude their example and behave identically in every representation', () => {
   const samples = ['src/a.test.js', 'src/a.spec.js', 'src/a.min.js', 'src/Card.stories.jsx', 'src/types.d.ts', 'src/x/b.mock.js', 'src/x/b.js'];
   for (const [filePattern, example] of [
-    ['\\.test\\.', 'a.test.js'],
-    ['\\.spec\\.', 'a.spec.js'],
+    ['\\.test', 'a.test.js'],
+    ['\\.spec', 'a.spec.js'],
     ['\\.min\\.js', 'a.min.js'],
-    ['[A-Za-z0-9_]+\\.stories\\.', 'Card.stories.jsx'],
+    ['[A-Za-z0-9_]+\\.stories', 'Card.stories.jsx'],
     ['(?:\\.d)?\\.ts', 'types.d.ts'],
     ['[^_]\\.mock\\.js', 'b.mock.js'],
   ]) {
@@ -298,7 +311,7 @@ test('equal but incorrect results cannot silently remove or broaden exclusions',
 
 test('the filename exclusion is checked independently of excluded directories', () => {
   const missingTestFiles = structuredClone(config);
-  missingTestFiles.source.excludePattern = missingTestFiles.source.excludePattern.replace('|\\.test\\.', '');
+  missingTestFiles.source.excludePattern = missingTestFiles.source.excludePattern.replace('|\\.test', '');
   assert.throws(() => validateAgentDocsExclusions(missingTestFiles), /example\.test\.js/);
 });
 
