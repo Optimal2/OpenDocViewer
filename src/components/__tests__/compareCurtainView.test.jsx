@@ -305,12 +305,18 @@ describe('CompareCurtainButton (entry from the compare and overlay toolbars)', (
     // source file. The old `<CompareCurtainButton[\s\S]*?calibrated` idiom
     // stayed green when the prop was commented out or moved to a later
     // element in the same file. elementAttributeBlock fails loudly on >1
-    // match, requires a word boundary, and strips JS comments before scanning.
+    // match, requires a word boundary, and tracks comment/string spans.
     const compareToolbarButton = elementAttributeBlock(toolbarSource, 'CompareCurtainButton');
     expect(compareToolbarButton).toMatch(/calibrated=\{compareCalibrated\}/);
+    // The overlay's curtain button is meant to be ALWAYS calibrated, so we
+    // lock the boolean shorthand value `calibrated` (no `={...}` form). A
+    // future change to `calibrated={false}` would disable the button
+    // permanently (CompareCurtainButton.jsx ignores clicks when not
+    // calibrated) and the lock MUST catch it.
     const overlayToolbarButton = elementAttributeBlock(overlaySource, 'CompareCurtainButton');
-    expect(overlayToolbarButton).toMatch(/calibrated\b/);
-    expect(overlayToolbarButton).toMatch(/calibrated/);
+    expect(overlayToolbarButton).toMatch(/\bcalibrated(\s|\/?>)/);
+    expect(overlayToolbarButton).not.toMatch(/calibrated\s*=\s*\{false\}/);
+    expect(overlayToolbarButton).not.toMatch(/calibrated\s*=\s*\{[^}]*!\s*1?\s*\}/);
   });
 });
 
