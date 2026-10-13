@@ -259,12 +259,37 @@ try {
             if ($LASTEXITCODE -ne 0) {
                 throw "npm run doc:agent exited with code $LASTEXITCODE"
             }
-            & node scripts/verify-agent-docs-fresh.mjs
-            if ($LASTEXITCODE -eq 0) {
+            # Capture the gate's stderr so the message below can name the
+            # specific cause (stale docs-agent vs. sparse-checkout vs. manual
+            # index flag vs. path resolution). The gate prints its reason to
+            # stderr; stdout stays empty on failure.
+            $global:LASTEXITCODE = 0
+            $agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1
+            $agentDocsExit = $global:LASTEXITCODE
+            if ($agentDocsExit -eq 0) {
                 $agentDocsPassed = $true
             }
             else {
-                Write-Host "docs-agent is stale or has staged/untracked files (listed above). Run 'npm run doc:agent', 'git add docs-agent' and commit the result." -ForegroundColor Red
+                # Pick the message that actually applies. The gate throws
+                # specific text for each cause, so the substring match is
+                # safe and never false-positives on a stale-docs-agent run.
+                $remedy = $null
+                if ($agentDocsOutput -match '(?m)^\s*Failed to run git\b|^\s*git .* exited with code\b|^\s*Failed to run git\b') {
+                    $remedy = "docs-agent gate could not run a git query (see output above). Resolve the git error before re-running."
+                }
+                elseif ($agentDocsOutput -match '(?s)cone sparse-checkout') {
+                    $remedy = "docs-agent is hidden by a cone sparse-checkout. Edit .git/info/sparse-checkout (or run 'git sparse-checkout reapply') so docs-agent is materialised, then re-run."
+                }
+                elseif ($agentDocsOutput -match '(?s)skip-worktree or assume-unchanged') {
+                    $remedy = "docs-agent has a manual --skip-worktree / --assume-unchanged index bit. Clear it with 'git update-index --no-skip-worktree -- <file>' and 'git update-index --no-assume-unchanged -- <file>' for the listed files, then re-run."
+                }
+                elseif ($agentDocsOutput -match '(?s)is stale:') {
+                    $remedy = "docs-agent is stale or has staged/untracked files (listed above). Run 'npm run doc:agent', 'git add docs-agent' and commit the result."
+                }
+                else {
+                    $remedy = "docs-agent gate failed for an unknown reason (see output above). Re-read the gate's stderr before re-running."
+                }
+                Write-Host $remedy -ForegroundColor Red
             }
         }
         finally {

@@ -3,3 +3,14 @@
 # scripts/omp/validate-component-versions.ps1. Pin LF so git checkouts are
 # deterministic on every platform regardless of core.autocrlf.
 *.sql text eol=lf
+
+# docs-agent/ is generated output that scripts/verify-agent-docs-fresh.mjs
+# compares byte-for-byte against HEAD. The comparison is raw: it bypasses
+# clean filters and the stat cache, so any CRLF a Windows checkout writes
+# would turn the gate red on an otherwise fresh tree even when no generator
+# was rerun. Pin LF so git itself writes LF on every platform regardless of
+# core.autocrlf, which makes the comparison regeneration-independent and
+# closes the "opposite verdicts for the same HEAD" failure class the gate
+# exists to remove. All 30 HEAD blobs are already LF; renormalization is a
+# no-op (proved in the commit that introduced this line).
+docs-agent/** text eol=lf

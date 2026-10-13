@@ -96,3 +96,6 @@ private-configs/
 # Playwright browser UI test output (npm run test:ui)
 test-results/
 playwright-report/
+
+# Local scratch dir for one-off reproduction / break-it scripts
+scratch/

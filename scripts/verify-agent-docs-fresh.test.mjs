@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { afterEach, test } from 'vitest';
-import { findAgentDocsDrift, formatDrift, isFresh } from './verify-agent-docs-fresh.mjs';
+import { findAgentDocsDrift, formatDrift, isFresh, STATUS_LEGEND } from './verify-agent-docs-fresh.mjs';
 
 const tempRoots = [];
 
@@ -210,4 +210,99 @@ test('both freshness gates run the shared comparison after regeneration', () => 
     assert.ok(verifyAt > generateAt, `${name} runs the shared comparison after regeneration`);
     assert.doesNotMatch(source, /git diff --exit-code -- docs-agent/, `${name} no longer uses the index-relative diff`);
   }
+});
+
+test('a cone sparse-checkout is rejected with a sparse-checkout remedy, distinct from a manual flag', () => {
+  const { root, git } = repoWithPacket();
+  git('config', 'core.sparseCheckout', 'true');
+  // The cone pattern excludes docs-agent entirely. Use a wildcard that
+  // matches every file except docs-agent; the S flag then lands on the
+  // docs-agent/REPORT.md entry, which is what the gate inspects.
+  const sparseDir = path.join(root, '.git', 'info');
+  fs.mkdirSync(sparseDir, { recursive: true });
+  fs.writeFileSync(path.join(sparseDir, 'sparse-checkout'), '/*\n!/docs-agent/**\n');
+  git('read-tree', '-mu', 'HEAD');
+  assert.match(git('ls-files', '-v', '--', 'docs-agent'), /^S docs-agent\/REPORT\.md/m, 'sparse-checkout set the S flag');
+  // Sparse-checkout cause: the message names the cone, not the manual bit.
+  assert.throws(() => findAgentDocsDrift(root), /cone sparse-checkout[\s\S]*docs-agent\/REPORT\.md[\s\S]*sparse-checkout reapply/);
+  // And it does NOT advise `git update-index --no-skip-worktree`, which
+  // would be the wrong fix for a cone-derived S flag.
+  let message = '';
+  try {
+    findAgentDocsDrift(root);
+  } catch (error) {
+    message = error.message;
+  }
+  assert.doesNotMatch(message, /--no-skip-worktree/, 'no manual-bit advice for a cone sparse-checkout');
+  // Clear sparse-checkout and re-set the S flag manually: the gate must now
+  // give the manual-bit advice and the cone advice must be gone.
+  git('config', '--unset', 'core.sparseCheckout');
+  git('update-index', '--skip-worktree', 'docs-agent/REPORT.md');
+  assert.throws(() => findAgentDocsDrift(root), /skip-worktree or assume-unchanged[\s\S]*--no-skip-worktree/);
+  let manualMessage = '';
+  try {
+    findAgentDocsDrift(root);
+  } catch (error) {
+    manualMessage = error.message;
+  }
+  assert.doesNotMatch(manualMessage, /cone sparse-checkout/, 'no cone advice for a manual bit');
+});
+
+test('a non-regular entry on disk (symlink) is reported as T, not M', () => {
+  const { root } = repoWithPacket();
+  // Replace the tracked file with a directory so isFile() returns false
+  // without needing symlink privileges. The byte comparison throws ENOTDIR
+  // (Windows) or ENOENT (Linux), which both map to D; isFile() returning
+  // false on a directory maps to T. Use a directory for cross-platform.
+  fs.rmSync(path.join(root, 'docs-agent/REPORT.md'));
+  fs.mkdirSync(path.join(root, 'docs-agent/REPORT.md'));
+  const drift = findAgentDocsDrift(root);
+  assert.ok(drift.worktree.some((entry) => entry.status === 'T' && entry.path === 'docs-agent/REPORT.md'));
+  assert.match(formatDrift(drift), /T = .*type change/);
+});
+
+test('the report legend names every status letter the comparison can emit', () => {
+  for (const letter of ['M', 'D', 'A', 'T', 'U', 'X']) {
+    assert.ok(STATUS_LEGEND[letter], `${letter} must be in STATUS_LEGEND`);
+    assert.match(formatDrift({ staged: [], worktree: [{ status: letter, path: 'docs-agent/x' }], untracked: [] }), new RegExp(`\\b${letter} = `));
+  }
+  // The untracked row reports '?'.
+  assert.match(formatDrift({ staged: [], worktree: [], untracked: ['docs-agent/x'] }), /\? = /);
+});
+
+test('a plain import leaves process.exitCode untouched when argv[1] cannot be realpathed', async () => {
+  const { root } = repoWithPacket();
+  // Write the script into the scratch repo so the import can resolve it.
+  write(root, 'scripts/verify-agent-docs-fresh.mjs', fs.readFileSync(new URL('./verify-agent-docs-fresh.mjs', import.meta.url)));
+  // Inline a tiny importer that mirrors what a host process does.
+  const importer = path.join(root, 'scratch-importer.mjs');
+  write(
+    root,
+    'scratch-importer.mjs',
+    "process.argv[1] = 'C:/this/path/does/not/exist/script.js';\n" +
+      "import('./scripts/verify-agent-docs-fresh.mjs').then(() => {\n" +
+      "  console.log('exitCode=' + process.exitCode);\n" +
+      '}).catch((e) => {\n' +
+      "  console.log('caught=' + e.message);\n" +
+      '});\n',
+  );
+  const result = spawnSync(process.execPath, [importer], { cwd: root, encoding: 'utf8' });
+  // The whole point: import is quiet AND the process exits 0 (no exitCode
+  // mutation, no top-level throw, the unset exitCode defaults to 0).
+  assert.equal(result.status, 0, `expected exit 0, got ${result.status}\nstdout=${result.stdout}\nstderr=${result.stderr}`);
+  assert.match(result.stdout, /exitCode=(?:undefined|0)/);
+  assert.equal(result.stderr, '', 'no stderr from a quiet import');
+});
+
+test('a thrown main() still exits 2 with a diagnostic on stderr', () => {
+  const { root } = repoWithPacket();
+  // Build a copy of the script where the documented main() throws: easier
+  // than stripping the realpath, and exercises the catch that sets
+  // process.exitCode = 2.
+  const original = fs.readFileSync(new URL('./verify-agent-docs-fresh.mjs', import.meta.url), 'utf8');
+  const driver = path.join(root, 'driver.mjs');
+  write(root, 'driver.mjs', original.replace('const drift = findAgentDocsDrift(repoRoot);', 'throw new Error("synthetic main() throw");'));
+  const result = spawnSync(process.execPath, [driver], { cwd: root, encoding: 'utf8' });
+  assert.equal(result.status, 2, `synthetic throw must exit 2; got ${result.status}\nstdout=${result.stdout}\nstderr=${result.stderr}`);
+  assert.match(result.stderr, /synthetic main\(\) throw/);
 });
