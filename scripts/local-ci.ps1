@@ -234,9 +234,12 @@ try {
     Write-Host ""
 
     # --- Step 4: Agent documentation freshness ---------------------------------
-    # Regenerates docs-agent with AgentDocMap and fails if the committed output
-    # drifts from what the generator produces (mirrors the agent-docs.yml
-    # workflow). Requires the AgentDocMap repository next to OpenDocViewer.
+    # The shared generator first checks the known JSDoc exclusions against both
+    # path separator forms, then regenerates docs-agent (as in agent-docs.yml).
+    # Git compares tracked output with the index, which equals HEAD in CI;
+    # staged changes and untracked output are not checked by this diff.
+    # Node, AgentDocMap revision/dependencies and locale must still agree for
+    # identical output. AGENTDOCMAP_ROOT can select the tool in a worktree.
     $agentDocsPassed = $false
     try {
         Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan

@@ -7,6 +7,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolveAgentDocMapRoot as resolveAgentDocMapRootFromDisk } from './resolve-agentdocmap-root.mjs';
+import { validateAgentDocsExclusions } from './validate-agent-docs-exclusions.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
@@ -83,6 +84,7 @@ function main() {
   const agentDocMapRoot = resolveAgentDocMapRoot(options.agentDocMapRoot);
   const targetPath = resolveTargetPath(options.target);
   const outPath = resolveOutputPath(options.out);
+  validateAgentDocsExclusions(JSON.parse(fs.readFileSync(path.join(targetPath, 'jsdoc.json'), 'utf8')));
   const cliPath = path.join(agentDocMapRoot, 'src', 'cli.js');
   const args = [
     cliPath,
