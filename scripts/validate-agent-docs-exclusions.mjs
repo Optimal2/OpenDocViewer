@@ -24,7 +24,10 @@
 //     contain the usual words (home, runner, work, Users, the repository name).
 // It does NOT guarantee anything about checkout prefixes it does not probe: a
 // fragment or directory name that equals a word of some other clone path (a
-// user name, a custom folder) still excludes everything there.
+// user name, a custom folder) still excludes everything there. Nor does it
+// prove a fragment for files other than the ones it probes: "." or a negated
+// class at the edge of a fragment matches a separator and can still reach
+// outside the file name of a path that is not probed.
 export const EXCLUDED_DIRECTORIES = ['node_modules', 'docs', '__tests__'];
 
 // File-name fragments are raw regex text. Each one declares an example file
