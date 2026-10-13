@@ -45,16 +45,29 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref_name }}
 
+      # scripts/agent-docs-environment.json pins Node, the AgentDocMap revision
+      # and the collation for `npm run doc:agent` (see agent-docs.yml).
+      - name: Read agent-docs environment pin
+        id: pin
+        run: |
+          pin=scripts/agent-docs-environment.json
+          {
+            echo "node=$(jq -er '.node' "$pin")"
+            echo "agentdocmap-repository=$(jq -er '.agentDocMap.repository' "$pin")"
+            echo "agentdocmap-revision=$(jq -er '.agentDocMap.revision' "$pin")"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Check out AgentDocMap
         uses: actions/checkout@v6
         with:
-          repository: Optimal2/AgentDocMap
+          repository: ${{ steps.pin.outputs.agentdocmap-repository }}
+          ref: ${{ steps.pin.outputs.agentdocmap-revision }}
           path: _tools/AgentDocMap
 
       - name: Use Node
         uses: actions/setup-node@v6
         with:
-          node-version: '22.23.3'
+          node-version: ${{ steps.pin.outputs.node }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
           registry-url: 'https://registry.npmjs.org'

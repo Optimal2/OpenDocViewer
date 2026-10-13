@@ -238,8 +238,14 @@ try {
     # path separator forms, then regenerates docs-agent (as in agent-docs.yml).
     # Git compares tracked output with the index, which equals HEAD in CI;
     # staged changes and untracked output are not checked by this diff.
-    # Node, AgentDocMap revision/dependencies and locale must still agree for
-    # identical output. AGENTDOCMAP_ROOT can select the tool in a worktree.
+    # The generator enforces scripts/agent-docs-environment.json, the pin CI
+    # reads too: AgentDocMap revision and installed dependencies must match,
+    # the collation is forced to the pinned locale and verified, and Node runs
+    # at the pinned version. Unlike CI, an ambient Node of another version is
+    # tolerated: the generator prints a NOTE and runs AgentDocMap with the
+    # pinned binary (ODV_AGENT_DOCS_NODE, fnm or nvm), and fails with an
+    # install hint when none is found. AGENTDOCMAP_ROOT can select the tool in
+    # a worktree.
     $agentDocsPassed = $false
     try {
         Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan

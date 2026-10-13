@@ -44,6 +44,32 @@ If AgentDocMap is elsewhere:
 npm run doc:agent -- --agentdocmap-root <path-to-AgentDocMap>
 ```
 
+## Pinned Environment
+
+The same input must give the same bytes in CI and locally, so
+`scripts/agent-docs-environment.json` pins the three things that otherwise
+change the output. The Agent Documentation and Release workflows read it, and
+`scripts/generate-agent-docs.mjs` (also used by `scripts/local-ci.ps1` step 4)
+enforces it before AgentDocMap runs:
+
+- `node`: the exact Node version. CI must run it. Locally a different ambient
+  Node is allowed: the generator prints a `NOTE` and runs AgentDocMap with the
+  pinned binary from `ODV_AGENT_DOCS_NODE`, fnm, or nvm, and fails with an
+  install hint (`fnm install <version>`) when none is found.
+- `agentDocMap.revision`: the AgentDocMap commit. The checkout must be at this
+  commit without tracked modifications, and `node_modules` must match its
+  `package-lock.json` (run `npm ci` in AgentDocMap when it does not).
+- `collation`: AgentDocMap sorts paths and names with `localeCompare()` and no
+  locale, which follows the OS (sv-SE on a Swedish Windows desktop, en-US on a
+  `C.UTF-8` Linux runner). On Windows the OS locale cannot be overridden by
+  environment variables, so `scripts/agent-docs-collation-shim.mjs` is preloaded
+  into AgentDocMap and its JSDoc child and makes locale-less `localeCompare()`
+  use the pinned locale. It then sorts `probe` and fails unless the result
+  equals `expectedOrder`.
+
+To upgrade AgentDocMap or Node, change the pin, run `npm run doc:agent`, and
+commit the pin together with the regenerated `docs-agent/`.
+
 ## Release And CI Expectations
 
 - Update `docs-agent/` when source structure, public JSDoc, package

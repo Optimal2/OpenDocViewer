@@ -1,0 +1,13 @@
+{
+  "$comment": "Single source of truth for the environment that generates docs-agent/. Read by .github/workflows/agent-docs.yml, .github/workflows/release.yml and scripts/generate-agent-docs.mjs (used by scripts/local-ci.ps1 step 4). Change a value here, never in a workflow. See docs-src/agent-documentation.md.",
+  "node": "22.23.3",
+  "agentDocMap": {
+    "repository": "Optimal2/AgentDocMap",
+    "revision": "f17676c9656b7a721cb9ba74a14a91197de35fb0"
+  },
+  "collation": {
+    "locale": "en-US",
+    "probe": ["z", "å", "ä", "ö", "ü", "v", "w", "aa", "þ", "th", "đ", "e", "A", "a", "_x", "-x", "x", "1", "ø", "æ"],
+    "expectedOrder": ["_x", "-x", "1", "a", "A", "å", "ä", "aa", "æ", "đ", "e", "ö", "ø", "th", "ü", "v", "w", "x", "z", "þ"]
+  }
+}

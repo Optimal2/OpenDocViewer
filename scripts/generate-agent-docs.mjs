@@ -8,6 +8,13 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolveAgentDocMapRoot as resolveAgentDocMapRootFromDisk } from './resolve-agentdocmap-root.mjs';
 import { validateAgentDocsExclusions } from './validate-agent-docs-exclusions.mjs';
+import {
+  collationChildEnv,
+  readEnvironmentPin,
+  resolvePinnedNode,
+  verifyAgentDocMapDependencies,
+  verifyAgentDocMapRevision,
+} from './agent-docs-environment.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
@@ -67,6 +74,11 @@ Options:
   --project-name <name>     Project name used in generated docs.
   --generated-at <text>     Stable generated label. Defaults to committed-docs.
   --source-metadata <mode>  AgentDocMap source metadata mode. Defaults to none.
+
+The Node version, AgentDocMap revision and collation are pinned in
+scripts/agent-docs-environment.json. Outside CI, a different ambient Node is
+allowed: AgentDocMap then runs with the pinned Node found through
+ODV_AGENT_DOCS_NODE, fnm or nvm.
 `);
 }
 
@@ -85,6 +97,19 @@ function main() {
   const targetPath = resolveTargetPath(options.target);
   const outPath = resolveOutputPath(options.out);
   validateAgentDocsExclusions(JSON.parse(fs.readFileSync(path.join(targetPath, 'jsdoc.json'), 'utf8')));
+  const pin = readEnvironmentPin();
+  const node = resolvePinnedNode(pin.node);
+  const revision = verifyAgentDocMapRevision(agentDocMapRoot, pin.agentDocMap.revision);
+  const packageCount = verifyAgentDocMapDependencies(agentDocMapRoot);
+  const ambientLocale = new Intl.Collator().resolvedOptions().locale;
+  console.log(
+    `Agent-docs environment (pinned in scripts/agent-docs-environment.json): Node ${node.version} (${node.source}), ` +
+      `AgentDocMap ${revision} with ${packageCount} locked packages, collation ${pin.collation.locale} ` +
+      `(ambient ${ambientLocale}, forced by the collation shim).`,
+  );
+  if (node.note) {
+    console.log(`NOTE: ${node.note}`);
+  }
   const cliPath = path.join(agentDocMapRoot, 'src', 'cli.js');
   const args = [
     cliPath,
@@ -100,10 +125,11 @@ function main() {
     '--source-metadata',
     options.sourceMetadata,
   ];
-  const commandSummary = formatCommand([process.execPath, ...args]);
+  const commandSummary = formatCommand([node.path, ...args]);
 
-  const result = spawnSync(process.execPath, args, {
+  const result = spawnSync(node.path, args, {
     cwd: agentDocMapRoot,
+    env: collationChildEnv(pin.collation),
     stdio: 'inherit',
   });
 
