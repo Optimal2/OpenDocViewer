@@ -9,7 +9,9 @@
  * for its reset marker, and a missing `compareTransforms` prop silently reads as the identity
  * transform (compareTransform.js) — so deleting the adapter's `compareTransforms={compareTransforms}`
  * forwarding leaves every direct-DocumentToolbar test green while the real app loses the marker.
- * This file is the net for that failure mode.
+ * This file is the net for that failure mode. It also clicks the reset button through the
+ * adapter (asserting the target pane's resulting transform state) and source-locks the UPPER
+ * link (DocumentViewer.jsx -> DocumentViewerToolbar.jsx) for compareTransforms/resetImageProperties.
  *
  * The pane state (hooks/usePaneImageAdjustments.js + compareTransformReducer) is wired exactly the
  * way compareAdjustToolbarMode.test.jsx wires it; only the render target changes.
@@ -36,7 +38,8 @@ vi.mock('react-i18next', () => ({
 const { default: DocumentViewerToolbar } = await import('../DocumentViewer/DocumentViewerToolbar.jsx');
 const { default: usePrintPipeline } = await import('../DocumentToolbar/usePrintPipeline.js');
 const { usePaneImageAdjustments } = await import('../DocumentViewer/hooks/usePaneImageAdjustments.js');
-const { INITIAL_COMPARE_TRANSFORM_STATE, compareTransformReducer } = await import('../../utils/compareTransform.js');
+const { INITIAL_COMPARE_TRANSFORM_STATE, compareTransformReducer, isIdentityCompareTransform } = await import('../../utils/compareTransform.js');
+import viewerSource from '../DocumentViewer/DocumentViewer.jsx?raw';
 
 const noop = () => {};
 const documentRenderRef = { current: null };
@@ -214,5 +217,39 @@ describe('DocumentViewerToolbar adapter prop chain', () => {
     await act(() => { expose.dispatch({ type: 'set', target: 'primary', transform: { scale: 2 } }); });
     expect(isResetMarked(container)).toBe(false);
     await cleanup();
+  });
+
+  it('resets the target pane transform when the reset button is clicked through the adapter', async () => {
+    const { container, expose, cleanup } = await renderViewer({ activePane: 'compare' });
+    const resetButton = () => container.querySelector(RESET);
+
+    // Both panes non-identity: the click must reset the EDITING TARGET pane's transform state
+    // (not merely call a spy) while the other pane is untouched.
+    await act(() => {
+      expose.dispatch({ type: 'set', target: 'compare', transform: { dx: 12, dy: -7 } });
+      expose.dispatch({ type: 'set', target: 'primary', transform: { scale: 2 } });
+    });
+    expect(isResetMarked(container)).toBe(true);
+    await act(() => { resetButton().click(); });
+    expect(isIdentityCompareTransform(expose.transforms.compare)).toBe(true);
+    expect(isResetMarked(container)).toBe(false);
+    expect(isIdentityCompareTransform(expose.transforms.primary)).toBe(false);
+    await cleanup();
+  });
+});
+
+describe('DocumentViewer -> DocumentViewerToolbar upper link (source lock)', () => {
+  // Rendering the full DocumentViewer here is deliberately avoided: it needs ViewerContext plus
+  // the whole useDocumentViewer hook (workers, canvas, thumbnails). The lower link is locked
+  // behaviourally above; this source assertion locks the upper link in the printPipeline.test.jsx
+  // idiom. It sees TEXT, not behaviour: it cannot see a prop that is forwarded but computed
+  // wrong — that computation (ViewerContext compareTransforms) is covered by the reducer/hook
+  // unit tests instead.
+  it('forwards compareTransforms to the toolbar adapter', () => {
+    expect(viewerSource).toMatch(/<DocumentViewerToolbar[\s\S]*?compareTransforms=\{compareTransforms\}/);
+  });
+
+  it('forwards resetImageProperties to the toolbar adapter', () => {
+    expect(viewerSource).toMatch(/<DocumentViewerToolbar[\s\S]*?resetImageProperties=\{resetImageProperties\}/);
   });
 });
