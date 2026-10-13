@@ -148,13 +148,14 @@ export default defineConfig(({ mode }) => {
     // tool into `_tools/` for `doc:agent`; without this exclude, `npm test` (vitest) also ran that
     // tool's tests, which fail in CI (`spawnSync node ENOENT`) and broke the v2.7.0 release publish.
     // Keep `_tools/**` out of the ODV test scan. See AGENTS.md ("Release workflow — do not change the trigger").
-    // 2026-10-13: 37 full-suite runs, 1/2/4/8/12/default workers, Node 25.6.0 and 22.23.3.
+    // 2026-10-13 baseline: 37 full-suite runs, 1/2/4/8/12/default workers, Node 25.6.0 and 22.23.3.
     // Default (availableParallelism() - 1, ~23 forks on 24 cores) was fastest: ~31-82 s versus
     // 178-296 s with one worker. Leave maxWorkers UNSET. One of 21 Node 25.6.0 runs reproduced
     // [vitest-pool-runner]: Timeout waiting for worker to respond; 23 of 69 files never started,
     // yet "2317 passed" appeared. Use the process EXIT CODE, never the Tests line: Errors is separate.
     // Node 25.6.0 is outside the installed toolchain's engine range; CI-pinned Node 22.23.3 had
-    // none in 16 runs, including full-CPU load. Use CI's Node locally; one event is not a rate.
+    // none in those 16 runs, including full-CPU load. Use CI's Node locally; one event is not a rate.
+    // Later validation also reproduced on Node 22.23.3: the engine mismatch is not a proven cause.
     // Numeric maxWorkers replaces the default: 8 RAISES a 2-4 core CI runner from 1-3 workers to 8.
     // Any local cap must be environment-gated; leave .github/workflows/** unchanged.
     // Internal worker-start limits (60 s worker response, 90 s pool runner start) are separate
