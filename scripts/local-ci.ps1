@@ -262,10 +262,26 @@ try {
             # Capture the gate's stderr so the message below can name the
             # specific cause (stale docs-agent vs. sparse-checkout vs. manual
             # index flag vs. path resolution). The gate prints its reason to
-            # stderr; stdout stays empty on failure.
+            # stderr; stdout stays empty on failure. We ALSO echo the captured
+            # output to the console on both branches: on failure so the drift
+            # list, status-letter legend, and the cause-specific match are
+            # visible above the remedy line, and on success so the operator
+            # sees the gate's own "is fresh" confirmation instead of step 4
+            # silently going green. 2>&1 can mix ErrorRecord objects into the
+            # captured array; render them as their text so the console never
+            # prints PowerShell object noise.
             $global:LASTEXITCODE = 0
             $agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1
             $agentDocsExit = $global:LASTEXITCODE
+            foreach ($line in @($agentDocsOutput)) {
+                if ($null -eq $line) { continue }
+                if ($line -is [System.Management.Automation.ErrorRecord]) {
+                    Write-Host $line.ToString()
+                }
+                else {
+                    Write-Host $line
+                }
+            }
             if ($agentDocsExit -eq 0) {
                 $agentDocsPassed = $true
             }
@@ -275,7 +291,7 @@ try {
                 # safe and never false-positives on a stale-docs-agent run.
                 $remedy = $null
                 if ($agentDocsOutput -match '(?m)^\s*Failed to run git\b|^\s*git .* exited with code\b|^\s*Failed to run git\b') {
-                    $remedy = "docs-agent gate could not run a git query (see output above). Resolve the git error before re-running."
+                    $remedy = "docs-agent gate could not run a git query (see gate output above). Resolve the git error before re-running."
                 }
                 elseif ($agentDocsOutput -match '(?s)cone sparse-checkout') {
                     $remedy = "docs-agent is hidden by a cone sparse-checkout. Edit .git/info/sparse-checkout (or run 'git sparse-checkout reapply') so docs-agent is materialised, then re-run."
@@ -284,10 +300,10 @@ try {
                     $remedy = "docs-agent has a manual --skip-worktree / --assume-unchanged index bit. Clear it with 'git update-index --no-skip-worktree -- <file>' and 'git update-index --no-assume-unchanged -- <file>' for the listed files, then re-run."
                 }
                 elseif ($agentDocsOutput -match '(?s)is stale:') {
-                    $remedy = "docs-agent is stale or has staged/untracked files (listed above). Run 'npm run doc:agent', 'git add docs-agent' and commit the result."
+                    $remedy = "docs-agent is stale or has staged/untracked files (see gate output above). Run 'npm run doc:agent', 'git add docs-agent' and commit the result."
                 }
                 else {
-                    $remedy = "docs-agent gate failed for an unknown reason (see output above). Re-read the gate's stderr before re-running."
+                    $remedy = "docs-agent gate failed for an unknown reason (see gate output above). Re-read the gate's stderr before re-running."
                 }
                 Write-Host $remedy -ForegroundColor Red
             }
