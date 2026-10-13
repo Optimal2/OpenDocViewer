@@ -2,11 +2,11 @@
 
 ## Coverage
 
-- Files: 149
+- Files: 148
 - Source lines: 60101
-- JSDoc symbols: 1641
+- JSDoc symbols: 1640
 - Files without JSDoc doclets: 0
-- Low-confidence summaries: 1
+- Low-confidence summaries: 0
 - Parse errors: 0
 
 ## Import Hubs
@@ -46,10 +46,5 @@
 - `src/utils/pdfBenchmark.js`: 965 lines
 
 ## Next Iteration Signals
-
-- Low-confidence summaries are generated from source shape rather than primary JSDoc.
-
-Low-confidence summaries:
-- `src/components/__tests__/toolbarAttributeBlock.js`: No summary available from JSDoc or exports.
 
 - Compare this report after each generator change to confirm signal quality improved.

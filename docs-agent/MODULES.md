@@ -28,12 +28,6 @@ File count: 18. Line count: 7831. JSDoc symbol count: 103.
 - `src/components/ViewerProblemNotice.jsx` - OpenDocViewer — configurable viewer\-level problem notice.
 - `src/components/SignatureOverviewDialog.jsx` - Signature overview dialog, opened from the toolbar overview button.
 
-## src/components/\_\_tests\_\_
-
-File count: 1. Line count: 0. JSDoc symbol count: 1.
-
-- `src/components/__tests__/toolbarAttributeBlock.js` - No summary available from JSDoc or exports.
-
 ## src/components/common
 
 File count: 1. Line count: 36. JSDoc symbol count: 1.

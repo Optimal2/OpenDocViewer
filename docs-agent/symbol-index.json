@@ -458,26 +458,6 @@
     "examples": 0
   },
   {
-    "id": "toolbarAttributeBlock",
-    "name": "toolbarAttributeBlock",
-    "longname": "toolbarAttributeBlock",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/__tests__/toolbarAttributeBlock.js",
-    "line": 16,
-    "description": "",
-    "params": [
-      {
-        "name": "viewerSource",
-        "type": "string",
-        "optional": false,
-        "description": "the DocumentViewer.jsx source text @returns {string}"
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "CanvasRenderer",
     "name": "CanvasRenderer",
     "longname": "CanvasRenderer",
