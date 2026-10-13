@@ -20,7 +20,7 @@ import toolbarSource from '../DocumentToolbar/DocumentToolbar.jsx?raw';
 import pipelineSource from '../DocumentToolbar/usePrintPipeline.js?raw';
 import dialogsSource from '../DocumentToolbar/PrintPipelineDialogs.jsx?raw';
 import viewerSource from '../DocumentViewer/DocumentViewer.jsx?raw';
-import { toolbarAttributeBlock } from './toolbarAttributeBlock.js';
+import { toolbarAttributeBlock, elementAttributeBlock } from './toolbarAttributeBlock.js';
 import overlaySource from '../DocumentViewer/CompareOverlayView.jsx?raw';
 import curtainSource from '../DocumentViewer/CompareCurtainView.jsx?raw';
 import dialogSource from '../DocumentToolbar/PrintRangeDialog.jsx?raw';
@@ -357,8 +357,17 @@ describe('one pipeline, not two (static locks)', () => {
     // Anchored to the toolbar element's OWN attribute block: deleting the prop here, or
     // moving it to a later element, turns this red (see toolbarAttributeBlock.js).
     expect(toolbarAttributeBlock(viewerSource)).toMatch(/printPipeline=\{printPipeline\}/);
-    expect(viewerSource).toMatch(/<CompareOverlayView[\s\S]*?onPrint=\{printEnabled \? openComposedPrintDialog : undefined\}[\s\S]*?printDialogs=\{comparePrintDialogs\}/);
-    expect(viewerSource).toMatch(/<CompareCurtainView[\s\S]*?onPrint=\{printEnabled \? openComposedPrintDialog : undefined\}[\s\S]*?printDialogs=\{comparePrintDialogs\}/);
+    // Both props on the same CompareOverlayView element. The old
+    // `<Element[\s\S]*?onPrint[\s\S]*?printDialogs` idiom stayed green when
+    // onPrint and printDialogs sat on two different elements, or when either
+    // prop was commented out. elementAttributeBlock requires exactly one
+    // uncommented match and returns the element's own attribute block.
+    const compareOverlayBlock = elementAttributeBlock(viewerSource, 'CompareOverlayView');
+    expect(compareOverlayBlock).toMatch(/onPrint=\{printEnabled \? openComposedPrintDialog : undefined\}/);
+    expect(compareOverlayBlock).toMatch(/printDialogs=\{comparePrintDialogs\}/);
+    const compareCurtainBlock = elementAttributeBlock(viewerSource, 'CompareCurtainView');
+    expect(compareCurtainBlock).toMatch(/onPrint=\{printEnabled \? openComposedPrintDialog : undefined\}/);
+    expect(compareCurtainBlock).toMatch(/printDialogs=\{comparePrintDialogs\}/);
     for (const source of [toolbarSource, overlaySource, curtainSource]) {
       expect(source).not.toMatch(/usePrintPipeline\(/);
     }

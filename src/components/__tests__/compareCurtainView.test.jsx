@@ -14,6 +14,7 @@ import CompareCurtainView from '../DocumentViewer/CompareCurtainView.jsx';
 import CompareOverlayView from '../DocumentViewer/CompareOverlayView.jsx';
 import CompareCurtainButton from '../DocumentViewer/CompareCurtainButton.jsx';
 import buttonSource from '../DocumentViewer/CompareCurtainButton.jsx?raw';
+import { elementAttributeBlock } from './toolbarAttributeBlock.js';
 import { INITIAL_COMPARE_OVERLAY_STATE } from '../../utils/compareOverlay.js';
 import en from '../../../public/locales/en/common.json';
 import sv from '../../../public/locales/sv/common.json';
@@ -300,8 +301,16 @@ describe('CompareCurtainButton (entry from the compare and overlay toolbars)', (
   });
 
   it('is wired into the compare toolbar and the overlay toolbar', () => {
-    expect(toolbarSource).toMatch(/<CompareCurtainButton[\s\S]*?calibrated=\{compareCalibrated\}/);
-    expect(overlaySource).toMatch(/<CompareCurtainButton[\s\S]*?calibrated\b/);
+    // Anchored to the CompareCurtainButton element's OWN attribute block in each
+    // source file. The old `<CompareCurtainButton[\s\S]*?calibrated` idiom
+    // stayed green when the prop was commented out or moved to a later
+    // element in the same file. elementAttributeBlock fails loudly on >1
+    // match, requires a word boundary, and strips JS comments before scanning.
+    const compareToolbarButton = elementAttributeBlock(toolbarSource, 'CompareCurtainButton');
+    expect(compareToolbarButton).toMatch(/calibrated=\{compareCalibrated\}/);
+    const overlayToolbarButton = elementAttributeBlock(overlaySource, 'CompareCurtainButton');
+    expect(overlayToolbarButton).toMatch(/calibrated\b/);
+    expect(overlayToolbarButton).toMatch(/calibrated/);
   });
 });
 
