@@ -11,91 +11,74 @@
 // Phase 2's rule: the gate output is written to the console BEFORE the
 // remedy, on both the success path (so step 4 visibly goes green) and the
 // failure path (so the drift list, legend and "is stale:" footer reach the
-// console). The test is anchored to the step-4 block — a unique substring of
-// the capture-and-render region — rather than to a line number, so a
+// console). The test is anchored to the step-4 block â€” a unique substring of
+// the capture-and-render region â€” rather than to a line number, so a
 // surrounding comment edit does not silently break the lock.
 //
-// Design choice (step-4 remedy lock): SOURCE-TEXT lock, not execution.
-// Executing step 4 would mean running `npm run doc:agent` plus the freshness
-// gate under five forced failure causes from vitest -- slow, needing a real
-// git worktree per cause, and three causes (cone sparse-checkout, index bit,
-// git-query failure) cannot be provoked without mutating the developer's
-// `.git`. A source-text lock stays hermetic and fast; its cost is that it
-// must model composition, which `composedBranchRemedy` below does: it folds
-// every `$remedy = "..."` / `$remedy += "..."` contribution in a branch body
-// and resolves `$variable` interpolation against literals in the step-4
-// block, in source order.
+// Design choice (step-4 remedy lock): PARSER-BASED ALLOWLIST, not execution
+// and not a spelling denylist. Executing step 4 would mean running
+// `npm run doc:agent` plus the freshness gate under five forced failure
+// causes from vitest -- slow, needing a real git worktree per cause, and
+// three causes (cone sparse-checkout, index bit, git-query failure) cannot
+// be provoked without mutating the developer's `.git`. Two earlier rounds
+// (phases 5-6, 2026-10-14) enumerated forbidden spellings of a `$remedy`
+// write (regex denylist: `+=`, `-f`, `${variable:remedy}`, `New-Variable`,
+// aliases, [ref], ...) and both were beaten by new spellings, because
+// PowerShell has several independent axes to the same variable. This lock
+// therefore inverts the design: scripts/parse-local-ci-ast.ps1 parses the
+// guarded script with PowerShell's own parser
+// ([System.Management.Automation.Language.Parser]::ParseFile via pwsh,
+// AST emitted as JSON) and the validator below accepts ONLY the listed
+// shapes inside the step-4 remedy region. Anything not on the allowlist
+// is RED with a named reason ("step-4 allowlist violation: ...").
 //
-// Fail-closed contract (phase 5, 2026-10-14): anything the lock cannot
-// follow fails the test with a NAMED reason under "remedy composed from an
-// unresolvable variable" -- it never passes silently. The three composition
-// forms measured silent-green on commit 1e21de71 are closed by rules 1-3:
-//   1. After a parsed literal's closing quote an ALLOWLIST decides: only
-//      end of line, ';', '}' or a '#' comment may follow. Every PowerShell
-//      operator (-f, -replace, -join, -split, '+', ...), pipeline or method
-//      call is rejected -- an allowlist, not a denylist. The same check
-//      applies to `$remedy` assignments and to the `$variable` assignments
-//      that interpolation resolves, so `$hint = "a" + "b"` is unresolvable,
-//      not "the first operand".
-//   2. A branch body containing ANY control flow (if/elseif/else/foreach/
-//      for/while/switch/do/until/try/catch/finally) is refused: which text
-//      step 4 would then print depends on a runtime condition the lock
-//      cannot evaluate. A second `$remedy =` reset inside one branch is
-//      refused for the same reason ("more than one '$remedy =' reset").
-//   3. The fallback boundary is the bare `else {` AFTER the last real
-//      condition ('is stale:'), never lastIndexOf('else {'), so a nested
-//      if/else inside the fallback arm cannot move segment boundaries --
-//      and rule 2 refuses such a body outright.
-//   4. Every `$remedy` write in the step-4 block must live inside one of
-//      the five branch bodies or be the `$remedy = $null` initialiser. A
-//      write between the if/else chain and `Write-Host $remedy` would
-//      override every branch at runtime while the per-branch fold never
-//      saw it.
-//   5. Non-literal assignments (here-strings, command calls), $(...)
-//      subexpressions, Set-Variable remedy, and variables with no literal
-//      assignment in the step-4 block are refused.
-//   6. Indirect writes to the remedy variable fail closed wherever they
-//      appear in the step-4 block, not only when spelled `$remedy =`/`+=`
-//      (HOLD fix, 2026-10-14 -- measured silent-green on 8c273a0d while pwsh
-//      printed the foreign text): braced assignments `${...} =`/`+=`
-//      (including `${remedy}`, `${variable:remedy}` and computed
-//      `${variable:$x}`), scoped assignments `$scope:name =`/`+=`
-//      (global/script/local/private/...), ANY variable cmdlet
-//      (Set-Variable/New-Variable/Clear-Variable/Remove-Variable, named,
-//      positional or with a dynamic `-Name` -- the target cannot be proven
-//      not to be `remedy`), the variable provider via *-Item cmdlets,
-//      Invoke-Expression/iex, the PSVariable API, `(Get-Variable ...).Value
-//      =`, and `-OutVariable` (including its `+` append form). Any of these
-//      fails with "indirect $remedy write via ..." under the same
-//      unresolvable prefix; aliases spelled `set`/`sv`/`nv` followed by
-//      `remedy` are refused the same way.
-// Named gaps that remain, by construction (each is a gap, not a silent
-// pass the header claims to cover):
-//   a. Output channel: the lock models the `Write-Host $remedy` line only.
-//      A remedy printed through a DIFFERENT output statement (a second
-//      Write-Host of another variable, a bare string-literal statement,
-//      Write-Warning, a file or event-log write) is outside the model --
-//      step 4's remedy path is locked, not every conceivable output
-//      channel.
-//   b. Dynamically assembled code/names: a command name, variable name or
-//      scriptblock assembled at runtime and then invoked (`& $sb`,
-//      `. $sb`, `& ("Set-"+"Variable") ...`, a dot-sourced or imported
-//      file, Start-Job/Invoke-Command payloads) carries no literal token
-//      the source-text lock can see, so it is not modelled. Likewise a
-//      variable-provider path or reflection type name built from pieces
-//      (e.g. `"vari"+"able:remedy"`) is not modelled beyond the literal
-//      `variable:` forms rule 6 refuses.
-//   c. Block comments `<# ... #>`: the stripping view blanks `#` line
-//      comments and literals but does not model PowerShell block
-//      comments, which can therefore cause a false RED (never a silent
-//      green remedy) if a block comment contains a refused token.
+// The step-4 remedy region is the statement block that holds the
+// `$remedy = $null` initialiser, the cause-routing if/elseif/else chain
+// and the final `Write-Host $remedy` call. Inside that region, and ONLY
+// there, the allowlist is exactly:
+//   1. `$remedy = $null` -- one plain, unqualified, non-splatted
+//      assignment with the Equals operator, as the first statement.
+//   2. One if/elseif/else chain with four `-match` clauses (each condition
+//      is `$<plain variable> -match '<string constant>'`) and one bare
+//      else. That yields the five cause branches.
+//   3. Inside each branch body: zero or more helper assignments
+//      `$<plain name> = <string>` (Equals only), followed by exactly one
+//      `$remedy = <string>` (Equals only; `+=` and every other operator
+//      are not on the list). A <string> is a single- or double-quoted
+//      constant, or an expandable string whose ONLY embedded expressions
+//      are plain, unqualified, non-splatted variables approved earlier in
+//      the SAME branch (a helper assigned above in that branch). No
+//      subexpression, no operator, no here-string, no command.
+//   4. `Write-Host $remedy`, optionally with `-ForegroundColor <constant>`,
+//      as the last statement -- the region's only command invocation.
+// Every other statement, expression or reference inside the region --
+// any other command or alias, pipeline, scope-qualified or provider
+// variable path ($script:remedy, ${variable:remedy}, ${remedy}), [ref],
+// member assignment, splatting, dot-sourcing, call operator, increment,
+// or a second remedy assignment -- is RED. Code that step 4 legitimately
+// needs beyond these shapes must live OUTSIDE the remedy region; inside
+// the region there are no exceptions and no denylist to keep current.
+// Comments never reach the AST, so code hidden after `#>` on a block-
+// comment line is parsed as the statement it is and judged by the same
+// list.
+//
+// Scope boundary (the claim is exactly this, no more): the lock judges
+// the remedy region only. Statements elsewhere in local-ci.ps1, and any
+// other output channel outside `Write-Host $remedy`, are out of scope by
+// construction. If pwsh (or Windows PowerShell) is unavailable the test
+// FAILS with a named reason; it never skips, because a skipped parser is
+// a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
+// job in ci.yml already runs under `shell: pwsh`.
 //
 // This test is reachable from `npm test` (vitest) so CI's `npm test` step
 // enforces it without a separate PowerShell harness.
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { test } from 'vitest';
-import { URL } from 'node:url';
+import { URL, fileURLToPath } from 'node:url';
 
 const localCiPath = new URL('./local-ci.ps1', import.meta.url);
 const source = fs.readFileSync(localCiPath, 'utf8');
@@ -215,7 +198,7 @@ function findBalancedBackward(source, closeAt, closeChar, openChar) {
       continue;
     }
     if (c === '\n' && source[i + 1] === '/') {
-      // Not reliable enough — fall back to skipping past the open quote
+      // Not reliable enough â€” fall back to skipping past the open quote
       // when we encounter a quote mark.
       i--; continue;
     }
@@ -256,7 +239,7 @@ test('local-ci step 4 echoes the captured gate output before the remedy on failu
   // Write-Host (which prints the step header) is allowed to come first.
   assert.ok(
     writeHostLines.some((line) => /\bWrite-Host\s+\$line\b/.test(line)),
-    'step 4 must Write-Host the captured $line (gate output) — otherwise the drift list is invisible above the remedy'
+    'step 4 must Write-Host the captured $line (gate output) â€” otherwise the drift list is invisible above the remedy'
   );
   // The remedy line still ends the failure branch.
   assert.ok(
@@ -269,12 +252,12 @@ test('the captured gate output is rendered as a Write-Host loop, not silently di
   const step4Block = enclosingBlock(source, '[4/4] Verifying generated agent documentation is fresh');
   // The fix renders ErrorRecord objects as their text. Without the loop,
   // PowerShell renders captured ErrorRecord arrays as object noise on the
-  // console — a different regression from "silently swallow", but the same
+  // console â€” a different regression from "silently swallow", but the same
   // diagnostic loss. Both regressions are caught by the same anchor.
   assert.match(
     step4Block,
     /foreach\s*\(\s*\$line\s+in\s+@\(\s*\$agentDocsOutput\s*\)\s*\)/,
-    'step 4 must iterate $agentDocsOutput and Write-Host each line — otherwise the gate output never reaches the console'
+    'step 4 must iterate $agentDocsOutput and Write-Host each line â€” otherwise the gate output never reaches the console'
   );
   assert.match(
     step4Block,
@@ -310,326 +293,207 @@ test('the four-way cause routing from phase 1 is still wired in step 4', () => {
   assert.match(step4Block, /unknown reason/, 'the unknown-reason fallback must remain');
 });
 
-const UNRESOLVABLE = 'remedy composed from an unresolvable variable';
-
-function failUnresolvable(detail) {
-  assert.fail(`${UNRESOLVABLE}: ${detail}`);
+const VIOLATION = 'step-4 allowlist violation';
+function violate(detail) {
+  assert.fail(`${VIOLATION}: ${detail}`);
 }
 
-// Parse a PowerShell string literal starting at `quoteAt` (index of the
-// opening quote). Double-quoted literals resolve `$name` / `${name}`
-// interpolation via `resolveVar(name)`; `$(...)` is unresolvable.
-// Single-quoted literals have no interpolation ('' is an escaped quote).
-function parsePsLiteral(text, quoteAt, resolveVar) {
-  const quote = text[quoteAt];
-  assert.ok(quote === '"' || quote === "'", `expected string literal at ${quoteAt}`);
-  let value = '';
-  let i = quoteAt + 1;
-  while (i < text.length) {
-    const c = text[i];
-    if (quote === "'") {
-      if (c === "'" && text[i + 1] === "'") { value += "'"; i += 2; continue; }
-      if (c === "'") return { value, end: i + 1 };
-      value += c; i++; continue;
+const parserScriptPath = fileURLToPath(new URL('./parse-local-ci-ast.ps1', import.meta.url));
+
+// Parse PowerShell source text with PowerShell's own parser (pwsh, falling
+// back to Windows PowerShell). FAILS loudly when no PowerShell is available:
+// a skipped parser would be a silent green.
+function parsePowerShell(sourceText) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-step4-ast-'));
+  try {
+    const snippet = path.join(dir, 'snippet.ps1');
+    fs.writeFileSync(snippet, sourceText, 'utf8');
+    let lastError = null;
+    for (const exe of ['pwsh', 'powershell']) {
+      const res = spawnSync(exe, ['-NoProfile', '-File', parserScriptPath, '-Path', snippet], { encoding: 'utf8' });
+      if (res.error) { lastError = res.error; continue; }
+      assert.equal(res.status, 0, `PowerShell AST parser exited ${res.status}: ${res.stderr}`);
+      return JSON.parse(res.stdout);
     }
-    if (c === '`') { value += text[i + 1] ?? ''; i += 2; continue; }
-    if (c === '"' && text[i + 1] === '"') { value += '"'; i += 2; continue; }
-    if (c === '"') return { value, end: i + 1 };
-    if (c === '$') {
-      if (text[i + 1] === '(') failUnresolvable('subexpression $(...) in remedy literal');
-      const braced = /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}/.exec(text.slice(i));
-      const plain = braced ?? /^\$([A-Za-z_][A-Za-z0-9_]*)/.exec(text.slice(i));
-      if (!plain) { value += c; i++; continue; }
-      value += resolveVar(plain[1]);
-      i += plain[0].length; continue;
-    }
-    value += c; i++;
+    violate(`PowerShell (pwsh/powershell) is unavailable, so the step-4 allowlist parser cannot run (${lastError?.message ?? 'not found'}); refusing to skip`);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
   }
-  failUnresolvable('unterminated string literal in remedy composition');
 }
 
-// Resolve `$name` to the composed literal assigned to it anywhere in the
-// step-4 block (`=` resets, `+=` appends, in source order). Fails closed
-// when the variable has no literal assignment, a non-literal assignment,
-// a trailing operator/expression after any assigned literal, or a cyclic
-// reference. Matches are located in the stripped view (literals/comments
-// blanked) so a `$name` mention inside a string or comment is never read
-// as an assignment; the literal itself is then parsed from the raw text at
-// the same offset.
-function resolveStep4Variable(step4Block, name, seen = new Set()) {
-  const key = name.toLowerCase();
-  if (key === 'remedy' || seen.has(key)) failUnresolvable(`$${name}`);
-  seen.add(key);
-  const bare = stripLiteralsAndComments(step4Block);
-  const re = new RegExp(`\\$${name}(?![A-Za-z0-9_])`, 'gi');
-  let composed = null;
-  let m;
-  while ((m = re.exec(bare)) !== null) {
-    const rest = step4Block.slice(m.index + m[0].length);
-    const op = /^\s*(\+?=)\s*/.exec(rest);
-    if (!op) continue; // a use, not an assignment
-    const litAt = m.index + m[0].length + op[0].length;
-    const ch = step4Block[litAt];
-    if (ch !== '"' && ch !== "'") failUnresolvable(`$${name} is assigned a non-literal value`);
-    const { value, end } = parsePsLiteral(step4Block, litAt, (n) => resolveStep4Variable(step4Block, n, new Set(seen)));
-    assertLiteralTail(bare, end, `$${name} ${op[1]} literal`);
-    composed = op[1] === '+=' ? (composed ?? '') + value : value;
-    re.lastIndex = end;
+function buildTree(parsed) {
+  assert.deepEqual(parsed.parseErrors, [], `guarded script must parse cleanly: ${parsed.parseErrors.join('; ')}`);
+  const byId = new Map(parsed.nodes.map((n) => [n.id, n]));
+  const children = new Map();
+  for (const n of parsed.nodes) {
+    if (!children.has(n.parentId)) children.set(n.parentId, []);
+    children.get(n.parentId).push(n);
   }
-  if (composed === null) failUnresolvable(`$${name} has no literal assignment in the step-4 block`);
-  return composed;
+  for (const list of children.values()) list.sort((a, b) => a.start - b.start || a.end - b.end);
+  return { byId, kids: (n) => children.get(n.id) ?? [] };
 }
 
-const BRANCH_NEEDLES = ['Failed to run git', 'cone sparse-checkout', 'skip-worktree or assume-unchanged', 'is stale:', null];
+function describe(node) {
+  const text = node.text.replace(/\s+/g, ' ').trim();
+  return `${node.type} '${text.length > 60 ? text.slice(0, 60) + '...' : text}'`;
+}
 
-// PowerShell-aware forward brace matcher: braces inside '...' / "..." literals
-// and '#' line comments do not count. PowerShell escapes are a doubled quote
-// ('' or "") or a backtick inside double-quoted literals, so no backslash
-// handling is needed.
-function psMatchingClose(text, openAt) {
-  let depth = 0;
-  let quote = '';
-  let i = openAt;
-  while (i < text.length) {
-    const c = text[i];
-    if (quote) {
-      if (c === '`' && quote === '"') { i += 2; continue; }
-      if (c === quote && text[i + 1] === quote) { i += 2; continue; }
-      if (c === quote) { quote = ''; i++; continue; }
-      i++; continue;
-    }
-    if (c === '#') { while (i < text.length && text[i] !== '\n') i++; continue; }
-    if (c === '"' || c === "'") { quote = c; i++; continue; }
-    if (c === '{') { depth++; i++; continue; }
-    if (c === '}') {
-      depth--;
-      if (depth === 0) return i;
-      i++; continue;
-    }
-    i++;
+function isPlainVariable(node, name) {
+  return node.type === 'VariableExpressionAst' && !node.splatted
+    && node.userPath !== null && node.userPath.toLowerCase() === name.toLowerCase()
+    && node.text === `$${name}`;
+}
+
+// Unwrap the CommandExpressionAst the parser puts around a plain value.
+function unwrap(node, tree) {
+  if (node.type !== 'CommandExpressionAst') return node;
+  const inner = tree.kids(node);
+  assert.equal(inner.length, 1, `unexpected ${describe(node)}`);
+  return inner[0];
+}
+
+// Evaluate an allowlisted string: a string constant, or an expandable
+// string whose only embedded expressions are approved variables.
+function evalString(node, tree, approved, context) {
+  const inner = unwrap(node, tree);
+  if (inner.type === 'StringConstantExpressionAst') {
+    if (/here/i.test(inner.stringConstantType ?? '')) violate(`${context} uses a here-string, which is not on the allowlist`);
+    return inner.value;
   }
-  return -1;
-}
-
-// Length-preserving blanking of string literals and '#' line comments, so
-// keyword/assignment scans never fire on text PowerShell would treat as
-// literal content or commentary. Offsets in the output map 1:1 to `text`.
-function stripLiteralsAndComments(text) {
-  let out = '';
-  let i = 0;
-  while (i < text.length) {
-    const c = text[i];
-    if (c === '#') {
-      while (i < text.length && text[i] !== '\n') { out += ' '; i++; }
-      continue;
-    }
-    if (c === '"' || c === "'") {
-      const q = c;
-      out += ' '; i++;
-      while (i < text.length) {
-        if (text[i] === '`' && q === '"') { out += '  '; i += 2; continue; }
-        if (text[i] === q && text[i + 1] === q) { out += '  '; i += 2; continue; }
-        if (text[i] === q) { out += ' '; i++; break; }
-        out += text[i] === '\n' ? '\n' : ' '; i++;
+  if (inner.type === 'ExpandableStringExpressionAst') {
+    let out = inner.value;
+    for (const nested of tree.kids(inner)) {
+      if (nested.type !== 'VariableExpressionAst') violate(`${context} embeds ${describe(nested)} in an expandable string; only approved variables may be embedded`);
+      if (nested.splatted) violate(`${context} embeds a splatted variable in an expandable string`);
+      const name = (nested.userPath ?? '').toLowerCase();
+      if (nested.userPath === null || nested.userPath.includes(':') || nested.text !== `$${nested.userPath}` || !approved.has(name)) {
+        violate(`${context} embeds variable '${nested.text}', which is not a plain helper variable approved earlier in the same branch`);
       }
-      continue;
+      out = out.replace(nested.text, approved.get(name));
     }
-    out += c; i++;
+    return out;
   }
-  return out;
+  violate(`${context} is ${describe(inner)}, not a constant or expandable string on the allowlist`);
 }
 
-// Allowlist of what may follow a parsed literal's closing quote: end of the
-// text, end of the line, ';', '}' or a '#' comment. ANYTHING else -- every
-// PowerShell operator (-f, -replace, -join, -split, '+', ...), a pipeline, a
-// method call -- means the emitted value is not the literal the lock just
-// parsed, so the composition is unresolvable, not "the first operand".
-// `bare` is the stripLiteralsAndComments view of the same text (same length,
-// same offsets), so a trailing '# comment' arrives here already blanked to
-// whitespace and passes via the end-of-line rule.
-function assertLiteralTail(bare, end, what) {
-  let i = end;
-  while (i < bare.length && (bare[i] === ' ' || bare[i] === '\t')) i++;
-  if (i >= bare.length) return;
-  const c = bare[i];
-  if (c === '\r' || c === '\n' || c === ';' || c === '}' || c === '#') return;
-  const tail = bare.slice(i, i + 24).split(/\r?\n/)[0].trim();
-  failUnresolvable(
-    `${what} is followed by '${tail}' -- only end of line, ';', '}' or a '#' comment ` +
-    "may follow a remedy literal's closing quote (an allowlist; every operator such as -f, -replace, -join or '+' is rejected)"
-  );
-}
+const BRANCH_KEYS = [
+  ['Failed to run git', 'gitQuery'],
+  ['cone sparse-checkout', 'cone'],
+  ['skip-worktree or assume-unchanged', 'indexBit'],
+  ['is stale:', 'stale'],
+];
 
-// Returns the {start, end} offsets of one branch's slice of the step-4 block:
-// from the branch's condition needle to the next branch's condition (or, for
-// the fallback, to the `Write-Host $remedy` line). The fallback is located by
-// searching FORWARDS for the bare `else {` after the last real condition
-// ('is stale:'), never by lastIndexOf('else {') -- the latter silently
-// retargets the boundary to a nested if/else added inside the fallback arm
-// (measured 2026-10-14) and made every remedy write before the nested `else`
-// leak into the stale branch's segment.
-function branchSegmentRange(step4Block, conditionNeedle) {
-  const starts = BRANCH_NEEDLES.map((needle) => {
-    if (needle === null) {
-      const staleAt = step4Block.indexOf('is stale:');
-      assert.ok(staleAt >= 0, "step-4 condition not found: 'is stale:'");
-      const elseMatch = /\belse\s*\{/.exec(step4Block.slice(staleAt));
-      assert.ok(elseMatch, 'the unknown-reason else branch is missing');
-      return staleAt + elseMatch.index;
-    }
-    const at = step4Block.indexOf(needle);
-    assert.ok(at >= 0, `step-4 condition not found: ${needle}`);
-    return at;
-  });
-  const idx = BRANCH_NEEDLES.indexOf(conditionNeedle);
-  const start = starts[idx];
-  const end = idx + 1 < starts.length ? starts[idx + 1] : step4Block.indexOf('Write-Host $remedy', start);
-  assert.ok(end > start, `cannot bound step-4 branch: ${conditionNeedle ?? 'else'}`);
-  return { start, end };
-}
-
-// The branch body is the {...} block opened by the branch condition.
-// Composing over the raw segment instead would drag the NEXT branch's
-// `elseif (...)` header into the analysis.
-function branchBodyRange(step4Block, segRange, conditionNeedle) {
-  const openAt = step4Block.indexOf('{', segRange.start);
-  assert.ok(openAt >= 0 && openAt < segRange.end, `branch has no body block: ${conditionNeedle ?? 'else'}`);
-  const closeAt = psMatchingClose(step4Block, openAt);
-  assert.ok(closeAt > openAt, `unterminated branch body: ${conditionNeedle ?? 'else'}`);
-  return { start: openAt + 1, end: closeAt };
-}
-
-// Indirect writes to the remedy variable (rule 6): a write that is not
-// spelled `$remedy =`/`+=` is invisible to the fold and to the stray-write
-// guard below, yet pwsh executes it exactly the same (measured 2026-10-14
-// on 8c273a0d: exit 0 from this lock, `STALE-advice: npm run doc:agent`
-// printed). Fail closed on every spelling the lock cannot fold, wherever
-// it appears in the step-4 block -- including a dynamic target name, which
-// cannot be proven not to be `remedy`. Scans the stripped view so a token
-// inside a literal or '#' comment is never read as code.
-function assertNoIndirectRemedyWrites(step4Block) {
-  const bare = stripLiteralsAndComments(step4Block);
-  const checks = [
-    [/\$(?:\{[^}\r\n]*\})\s*\+?=/, 'braced variable assignment (${...} =)'],
-    [/\$[A-Za-z_][A-Za-z0-9_]*:[A-Za-z_][A-Za-z0-9_]*\s*\+?=/, 'scoped variable assignment ($scope:name =)'],
-    [/\b(?:Set-Variable|New-Variable|Clear-Variable|Remove-Variable)\b/i, 'variable cmdlet (Set-Variable/New-Variable/Clear-Variable/Remove-Variable; any target fails because a dynamic -Name cannot be proven not to be remedy)'],
-    [/\b(?:Set-Item|New-Item|Clear-Item|Remove-Item)\b/i, 'variable provider (*-Item cmdlet)'],
-    [/\bInvoke-Expression\b|\biex\b/i, 'Invoke-Expression'],
-    [/\bPSVariable\b/, 'PSVariable API'],
-    [/\bGet-Variable\b[^\r\n;]*\.Value\s*\+?=/i, '(Get-Variable ...).Value assignment'],
-    [/-OutVariable\b/i, '-OutVariable'],
-    [/(?:^|[;{}\r\n])\s*(?:set|sv|nv|nsv)\s+(?:-[A-Za-z]+\s+)*remedy\b/im, 'variable cmdlet alias (set/sv/nv)'],
-  ];
-  for (const [re, label] of checks) {
-    const m = re.exec(bare);
-    if (m) {
-      failUnresolvable(
-        `indirect $remedy write via ${label} at offset ${m.index} ('${bare.slice(m.index, m.index + 40).split(/\r?\n/)[0].trim()}') -- ` +
-        'the lock only folds literal $remedy =/+= assignments, so any other write form fails closed rather than passing silently'
-      );
+// Validate one branch body and return its composed remedy text.
+function evalBranchBody(bodyBlock, tree, label) {
+  const approved = new Map();
+  let remedy = null;
+  for (const stmt of tree.kids(bodyBlock)) {
+    if (stmt.type !== 'AssignmentStatementAst') violate(`branch '${label}' contains ${describe(stmt)}; only plain '$name = <string>' assignments are allowed inside a branch`);
+    const [left, right] = tree.kids(stmt);
+    if (!left || left.type !== 'VariableExpressionAst') violate(`branch '${label}' contains an assignment whose left side is ${left ? describe(left) : 'missing'}; only a plain variable may be assigned`);
+    if (left.splatted) violate(`branch '${label}' assigns a splatted variable '${left.text}'`);
+    if (left.userPath === null || left.userPath.includes(':') || left.text !== `$${left.userPath}`) violate(`branch '${label}' assigns '${left.text}', a scope-qualified, provider or braced variable path, which is not on the allowlist`);
+    if (stmt.operator !== 'Equals') violate(`branch '${label}' uses operator '${stmt.operator}' on '${left.text}'; only '=' is on the allowlist`);
+    const value = evalString(right, tree, approved, `branch '${label}' assignment to '${left.text}'`);
+    if (left.userPath.toLowerCase() === 'remedy') {
+      if (remedy !== null) violate(`branch '${label}' assigns $remedy more than once; exactly one '$remedy = <string>' per branch is on the allowlist`);
+      remedy = value;
+    } else {
+      approved.set(left.userPath.toLowerCase(), value);
     }
   }
+  if (remedy === null) violate(`branch '${label}' has no '$remedy = <string>' assignment`);
+  return remedy;
 }
 
-// Every `$remedy` write in the step-4 block must live inside one of the five
-// branch bodies or be the `$remedy = $null` initialiser. A write between the
-// if/else chain and `Write-Host $remedy` would override or append to EVERY
-// branch at runtime while the per-branch fold never sees it.
-function assertNoStrayRemedyWrites(step4Block) {
-  assertNoIndirectRemedyWrites(step4Block);
-  const bare = stripLiteralsAndComments(step4Block);
-  const ranges = BRANCH_NEEDLES.map((needle) => branchBodyRange(step4Block, branchSegmentRange(step4Block, needle), needle));
-  const re = /\$remedy(?![A-Za-z0-9_])\s*\+?=/g;
-  let m;
-  while ((m = re.exec(bare)) !== null) {
-    if (ranges.some((r) => m.index >= r.start && m.index < r.end)) continue;
-    if (/^\$remedy(?![A-Za-z0-9_])\s*=\s*\$null\b/.test(bare.slice(m.index))) continue;
-    failUnresolvable(
-      `a $remedy write outside the five branch bodies (offset ${m.index}) would apply to ` +
-      'every branch at runtime while the per-branch fold only sees branch bodies'
-    );
-  }
+function evalCondition(pipeline, tree) {
+  const elements = tree.kids(pipeline);
+  if (elements.length !== 1) violate(`branch condition ${describe(pipeline)} must be a single -match expression`);
+  const binary = unwrap(elements[0], tree);
+  if (binary.type !== 'BinaryExpressionAst' || !/^(I?Match)$/i.test(binary.operator ?? '')) violate(`branch condition is ${describe(binary)}; only '$<variable> -match <string constant>' is on the allowlist`);
+  const [left, right] = tree.kids(binary);
+  if (!left || left.type !== 'VariableExpressionAst' || left.splatted || left.userPath === null || left.userPath.includes(':') || left.text !== `$${left.userPath}`) violate(`branch condition's left side is not a plain variable`);
+  const pattern = unwrap(right, tree);
+  if (pattern.type !== 'StringConstantExpressionAst') violate(`branch condition's pattern is ${describe(pattern)}, not a string constant`);
+  return pattern.value;
 }
 
-/**
- * Returns the COMPOSED remedy a single step-4 branch actually emits: every
- * `$remedy = "..."` (reset) and `$remedy += "..."` (append) contribution in
- * the branch BODY, in source order, with `$variable` interpolation resolved
- * against literals in the step-4 block. `conditionNeedle` is a literal
- * substring of the branch's `-match '...'` condition, or null for the
- * trailing bare `else {` fallback. Anything the fold cannot follow fails the
- * test with a named reason instead of returning a partial string: control
- * flow inside the body, a second `=` reset, a trailing operator after any
- * literal, a non-literal assignment, a $(...) subexpression, an unresolved
- * variable, or Set-Variable.
- */
-function composedBranchRemedy(step4Block, conditionNeedle) {
-  assertNoStrayRemedyWrites(step4Block);
-  const label = conditionNeedle ?? 'else';
-  const segRange = branchSegmentRange(step4Block, conditionNeedle);
-  const bodyRange = branchBodyRange(step4Block, segRange, conditionNeedle);
-  const body = step4Block.substring(bodyRange.start, bodyRange.end);
-  const bare = stripLiteralsAndComments(body);
-  const cf = /\b(if|elseif|else|foreach|for|while|switch|do|until|try|catch|finally)\s*[\({]/.exec(bare);
-  if (cf) {
-    failUnresolvable(
-      `control flow ('${cf[1]}') inside the '${label}' branch body -- which remedy text step 4 ` +
-      'prints would depend on a runtime condition the lock cannot follow'
-    );
+function evalOutput(pipeline, tree) {
+  const elements = tree.kids(pipeline);
+  if (elements.length !== 1 || elements[0].type !== 'CommandAst') violate(`the output statement must be a single Write-Host command, got ${describe(pipeline)}`);
+  const cmd = elements[0];
+  if (cmd.invocationOperator !== 'Unknown') violate(`the output command uses invocation operator '${cmd.invocationOperator}'; call and dot-source operators are not on the allowlist`);
+  if ((cmd.commandName ?? '').toLowerCase() !== 'write-host') violate(`command '${cmd.commandName}' is not on the allowlist; the region's only command is Write-Host`);
+  const parts = tree.kids(cmd);
+  if (parts.length < 2 || parts[0].type !== 'StringConstantExpressionAst') violate(`malformed Write-Host output call`);
+  if (!isPlainVariable(parts[1], 'remedy')) violate(`Write-Host must print the plain variable $remedy, got ${describe(parts[1])}`);
+  let i = 2;
+  if (i < parts.length) {
+    const param = parts[i];
+    if (param.type !== 'CommandParameterAst' || (param.parameterName ?? '').toLowerCase() !== 'foregroundcolor') violate(`Write-Host parameter '${param.text}' is not on the allowlist; only -ForegroundColor may follow $remedy`);
+    const arg = tree.kids(param)[0] ?? parts[i + 1];
+    if (!arg || arg.type !== 'StringConstantExpressionAst') violate(`-ForegroundColor must take a constant argument`);
+    i += tree.kids(param).length > 0 ? 1 : 2;
   }
-  if (/\bSet-Variable\b[^\n]*\bremedy\b/i.test(bare)) failUnresolvable('Set-Variable remedy in branch');
-  let composed = null;
-  let resets = 0;
-  const re = /\$remedy(?![A-Za-z0-9_])/g;
-  let m;
-  while ((m = re.exec(bare)) !== null) {
-    const rest = body.slice(m.index + m[0].length);
-    const op = /^\s*(\+?=)\s*/.exec(rest);
-    if (!op) failUnresolvable(`non-assignment use of $remedy near: ${body.slice(m.index, m.index + 40)}`);
-    const litAt = m.index + m[0].length + op[0].length;
-    const ch = body[litAt];
-    if (ch !== '"' && ch !== "'") failUnresolvable(`$remedy ${op[1]} non-literal near: ${body.slice(m.index, m.index + 40)}`);
-    const { value, end } = parsePsLiteral(body, litAt, (n) => resolveStep4Variable(step4Block, n));
-    assertLiteralTail(bare, end, `$remedy ${op[1]} literal`);
-    if (op[1] === '=') {
-      resets += 1;
-      if (resets > 1) {
-        failUnresolvable(
-          `more than one '$remedy =' reset in the '${label}' branch -- the emitted remedy would ` +
-          'depend on control flow the lock cannot follow'
-        );
-      }
-    }
-    composed = op[1] === '+=' ? (composed ?? '') + value : value;
-    re.lastIndex = end;
+  if (i !== parts.length) violate(`Write-Host output call has extra elements beyond '$remedy [-ForegroundColor <constant>]'`);
+}
+
+// Validate the remedy region in source text and return the five remedies.
+function step4Remedies(sourceText) {
+  const tree = buildTree(parsePowerShell(sourceText));
+  const all = [...tree.byId.values()];
+  const isRemedyAssign = (n) => n.type === 'AssignmentStatementAst' && tree.kids(n)[0] && isPlainVariable(tree.kids(n)[0], 'remedy');
+  const init = all.find((n) => isRemedyAssign(n) && (() => { const r = unwrap(tree.kids(n)[1], tree); return r.type === 'VariableExpressionAst' && (r.userPath ?? '').toLowerCase() === 'null'; })());
+  let regionBlock; let statements;
+  if (init) {
+    regionBlock = tree.byId.get(init.parentId);
+    statements = tree.kids(regionBlock);
+  } else {
+    const chain = all.find((n) => n.type === 'IfStatementAst' && tree.kids(n).some((b) => b.type === 'StatementBlockAst' && tree.kids(b).some(isRemedyAssign)));
+    if (!chain) violate(`no step-4 remedy region found (no '$remedy = $null' initialiser and no remedy if/else chain)`);
+    regionBlock = tree.byId.get(chain.parentId);
+    const siblings = tree.kids(regionBlock);
+    statements = siblings.slice(siblings.indexOf(chain));
   }
-  assert.ok(composed !== null, `no $remedy assignment in branch: ${label}`);
-  return composed;
+  let idx = 0;
+  if (init) {
+    if (statements[0] !== init) violate(`'$remedy = $null' must be the first statement of the remedy region`);
+    if (init.operator !== 'Equals') violate(`'$remedy = $null' must use '='`);
+    idx = 1;
+  }
+  const chain = statements[idx];
+  if (!chain || chain.type !== 'IfStatementAst') violate(`the remedy region's second statement must be the cause-routing if/else chain, got ${chain ? describe(chain) : 'end of region'}`);
+  idx += 1;
+  const output = statements[idx];
+  if (!output || output.type !== 'PipelineAst') violate(`the remedy region must end with 'Write-Host $remedy', got ${output ? describe(output) : 'end of region'}`);
+  idx += 1;
+  if (idx !== statements.length) violate(`the remedy region contains ${describe(statements[idx])} after 'Write-Host $remedy'; nothing may follow the output call inside the region`);
+  evalOutput(output, tree);
+  if (chain.clauseCount !== 4 || !chain.hasElse) violate(`the cause-routing chain must have exactly four -match clauses and one bare else, got ${chain.clauseCount} clause(s), else=${chain.hasElse}`);
+  const chainParts = tree.kids(chain);
+  const expectedParts = chain.clauseCount * 2 + 1;
+  if (chainParts.length !== expectedParts) violate(`malformed if/else chain (${chainParts.length} parts, expected ${expectedParts})`);
+  const remedies = {};
+  for (let c = 0; c < chain.clauseCount; c++) {
+    const pattern = evalCondition(chainParts[c * 2], tree);
+    const key = BRANCH_KEYS.find(([needle]) => pattern.includes(needle))?.[1];
+    if (!key) violate(`branch condition pattern '${pattern}' does not name a known step-4 cause`);
+    if (remedies[key] !== undefined) violate(`duplicate step-4 branch for '${key}'`);
+    remedies[key] = evalBranchBody(chainParts[c * 2 + 1], tree, key);
+  }
+  remedies.fallback = evalBranchBody(chainParts[chainParts.length - 1], tree, 'fallback');
+  for (const key of ['gitQuery', 'cone', 'indexBit', 'stale', 'fallback']) assert.ok(remedies[key] !== undefined, `missing step-4 branch: ${key}`);
+  return remedies;
 }
 
 test('each step-4 cause branch assigns its OWN remedy text and no other branch\'s', () => {
-  // Lock the remedy text PER BRANCH. The routing test above only proves the
-  // four match fragments exist SOMEWHERE in the block; it stayed green when
-  // two remedies were swapped and when "run npm run doc:agent" was put back
-  // into the index-bit branch (measured). Swapped remedies are wrong advice:
-  // a skip-worktree bit is not fixed by regenerating docs, and a stale packet
-  // is not fixed by clearing index bits.
-  const step4Block = enclosingBlock(source, '$remedy = $null');
+  const remedies = step4Remedies(source);
   const signatures = {
     gitQuery: 'could not run a git query',
     cone: 'sparse-checkout reapply',
     indexBit: '--no-skip-worktree',
     stale: 'npm run doc:agent',
     fallback: 'unknown reason',
-  };
-  const remedies = {
-    gitQuery: composedBranchRemedy(step4Block, 'Failed to run git'),
-    cone: composedBranchRemedy(step4Block, 'cone sparse-checkout'),
-    indexBit: composedBranchRemedy(step4Block, 'skip-worktree or assume-unchanged'),
-    stale: composedBranchRemedy(step4Block, 'is stale:'),
-    // The fallback has no -match condition; null selects the trailing
-    // bare `else {` arm.
-    fallback: composedBranchRemedy(step4Block, null),
   };
   for (const [branch, remedy] of Object.entries(remedies)) {
     assert.ok(remedy.includes(signatures[branch]), `${branch} branch must assign its own remedy ("${signatures[branch]}"), got: ${remedy}`);
@@ -640,111 +504,61 @@ test('each step-4 cause branch assigns its OWN remedy text and no other branch\'
   }
 });
 
-test('composedBranchRemedy folds += appends, resolves interpolation, and fails closed on unresolvable composition', () => {
-  const synthetic = [
-    `if ($x -match 'Failed to run git') { $remedy = "could not run a git query" }`,
-    `elseif ($x -match 'cone sparse-checkout') { $remedy = "sparse-checkout reapply"; $remedy += " --no-skip-worktree" }`,
-    `elseif ($x -match 'skip-worktree or assume-unchanged') { $remedy = "clear --no-skip-worktree" }`,
-    `elseif ($x -match 'is stale:') { $hint = "npm run doc:agent"; $remedy = "stale; run $hint" }`,
-    `else { $remedy = "unknown reason" }`,
-    `Write-Host $remedy`,
-  ].join('\n');
-  assert.equal(composedBranchRemedy(synthetic, 'cone sparse-checkout'), 'sparse-checkout reapply --no-skip-worktree');
-  assert.equal(composedBranchRemedy(synthetic, 'is stale:'), 'stale; run npm run doc:agent');
-  const unresolvable = synthetic.replace('$hint = "npm run doc:agent"; ', '');
-  assert.throws(() => composedBranchRemedy(unresolvable, 'is stale:'), /remedy composed from an unresolvable variable/);
+const SYNTHETIC = [
+  `if ($x -match 'Failed to run git') { $remedy = "could not run a git query" }`,
+  `elseif ($x -match 'cone sparse-checkout') { $remedy = "sparse-checkout reapply" }`,
+  `elseif ($x -match 'skip-worktree or assume-unchanged') { $remedy = "clear --no-skip-worktree" }`,
+  `elseif ($x -match 'is stale:') { $hint = "npm run doc:agent"; $remedy = "stale; run $hint" }`,
+  `else { $remedy = "unknown reason" }`,
+  `Write-Host $remedy`,
+].join('\n');
 
-  // Fail-closed forms measured silent-green on commit 1e21de71 (phase 5,
-  // 2026-10-14): each must throw the NAMED unresolvable reason, never pass.
-  // (1) A format operator after the literal -- the foreign signature hides in
-  // the -f ARGUMENT the old lock never looked at. The same allowlist rejects
-  // -replace/-join/-split/'+' and every other operator.
-  const withFormatOperator = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply {0}" -f "--no-skip-worktree";'
-  );
-  assert.throws(() => composedBranchRemedy(withFormatOperator, 'cone sparse-checkout'), /only end of line, ';', '}' or a '#' comment may follow/);
-  // (2) Concatenation inside a RESOLVED variable -- the old lock resolved
-  // only the first operand of `$hint`.
-  const withConcatenatedVariable = synthetic.replace(
-    '$hint = "npm run doc:agent"',
-    '$hint = "npm run" + " doc:agent"'
-  );
-  assert.throws(() => composedBranchRemedy(withConcatenatedVariable, 'is stale:'), /only end of line, ';', '}' or a '#' comment may follow/);
-  // (3) Nested reassignment within one branch -- the old fold took the last
-  // `=` in source order while the runtime value depends on the condition.
-  const withNestedReset = synthetic.replace(
-    '$remedy = "clear --no-skip-worktree"',
-    '$remedy = "WRONG"\n  if ($y) { $remedy = "clear --no-skip-worktree" }'
-  );
-  assert.throws(() => composedBranchRemedy(withNestedReset, 'skip-worktree or assume-unchanged'), /control flow \('if'\) inside the 'skip-worktree or assume-unchanged' branch body/);
-  // (4) A nested if/else inside the fallback arm must not move the segment
-  // boundary (forward search, not lastIndexOf) and the body itself is
-  // refused as control-flow-dependent.
-  const withNestedElseInFallback = synthetic.replace(
-    'else { $remedy = "unknown reason" }',
-    'else { $remedy = "unknown reason"\n  if ($z) { $remedy = "x" } else { $remedy = "y" } }'
-  );
-  assert.throws(() => composedBranchRemedy(withNestedElseInFallback, null), /control flow \('if'\) inside the 'else' branch body/);
-  // (5) A `$remedy` write BETWEEN the if/else chain and `Write-Host $remedy`
-  // would rewrite every branch at runtime while the per-branch fold never
-  // sees it.
-  const withStrayWrite = synthetic + '\n$remedy += " npm run doc:agent"';
-  assert.throws(() => composedBranchRemedy(withStrayWrite, 'is stale:'), /write outside the five branch bodies/);
-  // (6) INDIRECT writes to the remedy variable (HOLD 2026-10-14): a write
-  // that is not spelled `$remedy =`/`+=` was invisible to both the fold and
-  // the stray-write guard, so the suite stayed green while pwsh printed the
-  // foreign text (measured: exit 0, `STALE-advice: npm run doc:agent`).
-  // Braced variable syntax in the cone branch.
-  const withBracedWrite = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; ${variable:remedy} = "npm run doc:agent";'
-  );
-  assert.throws(() => composedBranchRemedy(withBracedWrite, 'cone sparse-checkout'), /remedy composed from an unresolvable variable: indirect \$remedy write via braced variable assignment/);
-  // Braced plain name and scoped syntax are the same variable.
-  const withBracedPlainWrite = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; ${remedy} = "npm run doc:agent";'
-  );
-  assert.throws(() => composedBranchRemedy(withBracedPlainWrite, 'cone sparse-checkout'), /indirect \$remedy write via braced variable assignment/);
-  const withScopedWrite = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; $script:remedy = "npm run doc:agent";'
-  );
-  assert.throws(() => composedBranchRemedy(withScopedWrite, 'cone sparse-checkout'), /indirect \$remedy write via scoped variable assignment/);
-  // New-Variable (named and positional) overwrites with -Force / creates it.
-  const withNewVariable = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; New-Variable -Name remedy -Value "npm run doc:agent" -Force;'
-  );
-  assert.throws(() => composedBranchRemedy(withNewVariable, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
-  const withNewVariablePositional = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; New-Variable remedy "npm run doc:agent" -Force;'
-  );
-  assert.throws(() => composedBranchRemedy(withNewVariablePositional, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
-  // Set-Variable, both spellings checked explicitly (named and positional).
-  const withSetVariableNamed = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; Set-Variable -Name remedy -Value "npm run doc:agent";'
-  );
-  assert.throws(() => composedBranchRemedy(withSetVariableNamed, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
-  const withSetVariablePositional = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; Set-Variable remedy "npm run doc:agent";'
-  );
-  assert.throws(() => composedBranchRemedy(withSetVariablePositional, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
-  // A dynamic target name cannot be proven not to be `remedy`, so any
-  // variable cmdlet fails closed, not just one naming remedy literally.
-  const withDynamicVariableCmdlet = synthetic.replace(
-    '$remedy = "sparse-checkout reapply";',
-    '$remedy = "sparse-checkout reapply"; $n = "remedy"; Set-Variable -Name $n -Value "npm run doc:agent";'
-  );
-  assert.throws(() => composedBranchRemedy(withDynamicVariableCmdlet, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
-  // Indirect writes between the chain and Write-Host are stray too: asking
-  // for any branch must fail, not only the branch the text sits in.
-  const withStrayBracedWrite = synthetic + '\n${variable:remedy} = "npm run doc:agent"';
-  assert.throws(() => composedBranchRemedy(withStrayBracedWrite, 'is stale:'), /indirect \$remedy write via braced variable assignment/);
-  const withStrayNewVariable = synthetic + '\nNew-Variable -Name remedy -Value "npm run doc:agent" -Force';
-  assert.throws(() => composedBranchRemedy(withStrayNewVariable, 'is stale:'), /indirect \$remedy write via variable cmdlet/);
+test('step-4 allowlist accepts the plain synthetic chain and resolves same-branch helpers', () => {
+  const remedies = step4Remedies(SYNTHETIC);
+  assert.equal(remedies.cone, 'sparse-checkout reapply');
+  assert.equal(remedies.stale, 'stale; run npm run doc:agent');
+  assert.equal(remedies.fallback, 'unknown reason');
+});
+
+test('step-4 allowlist rejects every non-allowlisted spelling with a named reason', () => {
+  const cone = '$remedy = "sparse-checkout reapply"';
+  const cases = [
+    // Composition forms from the first review (silent-green on 1e21de71).
+    ['postfix -f operator', SYNTHETIC.replace(cone, '$remedy = "sparse-checkout reapply {0}" -f "--no-skip-worktree"')],
+    ['postfix -replace operator', SYNTHETIC.replace(cone, '$remedy = "sparse-checkout reapply" -replace "x", "y"')],
+    ['concatenation inside a resolved variable', SYNTHETIC.replace('$hint = "npm run doc:agent"', '$hint = "npm run" + " doc:agent"')],
+    ['nested reassignment inside a branch', SYNTHETIC.replace('$remedy = "clear --no-skip-worktree"', '$remedy = "WRONG"\n  if ($y) { $remedy = "clear --no-skip-worktree" }')],
+    ['nested if/else inside the fallback arm', SYNTHETIC.replace('else { $remedy = "unknown reason" }', 'else { $remedy = "unknown reason"\n  if ($z) { $remedy = "x" } else { $remedy = "y" } }')],
+    ['stray write between chain and Write-Host', SYNTHETIC + '\n$remedy = "npm run doc:agent"'],
+    ['+= append in a branch', SYNTHETIC.replace(cone, cone + '; $remedy += " --no-skip-worktree"')],
+    // Indirect-write spellings from the HOLD rounds (silent-green on 8c273a0d / 5d9a98a9).
+    ['braced provider path ${variable:remedy}', SYNTHETIC.replace(cone, cone + '; ${variable:remedy} = "npm run doc:agent"')],
+    ['braced plain name ${remedy}', SYNTHETIC.replace(cone, cone + '; ${remedy} = "npm run doc:agent"')],
+    ['scoped $script:remedy', SYNTHETIC.replace(cone, cone + '; $script:remedy = "npm run doc:agent"')],
+    ['New-Variable named', SYNTHETIC.replace(cone, cone + '; New-Variable -Name remedy -Value "npm run doc:agent" -Force')],
+    ['New-Variable positional', SYNTHETIC.replace(cone, cone + '; New-Variable remedy "npm run doc:agent" -Force')],
+    ['Set-Variable named', SYNTHETIC.replace(cone, cone + '; Set-Variable -Name remedy -Value "npm run doc:agent"')],
+    ['Set-Variable positional', SYNTHETIC.replace(cone, cone + '; Set-Variable remedy "npm run doc:agent"')],
+    ['dynamic Set-Variable name', SYNTHETIC.replace(cone, cone + '; $n = "remedy"; Set-Variable -Name $n -Value "npm run doc:agent"')],
+    ['alias clv (Clear-Variable)', SYNTHETIC.replace(cone, cone + '; clv remedy -Force')],
+    ['alias rv (Remove-Variable)', SYNTHETIC.replace(cone, cone + '; rv remedy -Force')],
+    ['-OutVariable via its -ov alias', SYNTHETIC.replace(cone, cone + '; Write-Output "x" -ov remedy')],
+    ['Tee-Object -Variable', SYNTHETIC.replace(cone, cone + '; "x" | Tee-Object -Variable remedy')],
+    ['Set-Content on variable: provider path', SYNTHETIC.replace(cone, cone + '; Set-Content -Path variable:remedy -Value "npm run doc:agent"')],
+    ['quoted command name & "Set-Variable"', SYNTHETIC.replace(cone, cone + '; & "Set-Variable" -Name remedy -Value "npm run doc:agent"')],
+    ['two-statement [ref] split', SYNTHETIC.replace(cone, cone + '; $rf = [ref]$remedy; $rf.Value = "npm run doc:agent"')],
+    ['code after #> on a block-comment line', SYNTHETIC.replace(cone, cone + '\n<# keep #> $remedy = "npm run doc:agent"')],
+    ['(Get-Variable remedy).Value assignment', SYNTHETIC.replace(cone, cone + '; (Get-Variable remedy).Value = "npm run doc:agent"')],
+    ['cross-branch helper interpolation', SYNTHETIC.replace('$remedy = "sparse-checkout reapply"', '$remedy = "sparse-checkout reapply $hint"')],
+    ['unresolved helper interpolation', SYNTHETIC.replace('$hint = "npm run doc:agent"; ', '')],
+    // New spellings added by this round (not in either review).
+    ['NEW: post-increment $remedy++', SYNTHETIC.replace(cone, cone + '; $remedy++')],
+    ['NEW: splatted output Write-Host @remedy', SYNTHETIC.replace('Write-Host $remedy', 'Write-Host @remedy')],
+    ['NEW: dot-sourced scriptblock in a branch', SYNTHETIC.replace(cone, cone + '; . $sb')],
+    ['NEW: here-string remedy', SYNTHETIC.replace(cone, "$remedy = @'\nnpm run doc:agent\n'@")],
+    ['NEW: method-call remedy', SYNTHETIC.replace(cone, '$remedy = "x".Replace("x", "npm run doc:agent")')],
+  ];
+  for (const [name, snippet] of cases) {
+    assert.throws(() => step4Remedies(snippet), /step-4 allowlist violation:/, `case must be RED: ${name}`);
+  }
 });
