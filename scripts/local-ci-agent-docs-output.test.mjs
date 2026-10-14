@@ -15,6 +15,21 @@
 // the capture-and-render region — rather than to a line number, so a
 // surrounding comment edit does not silently break the lock.
 //
+// Design choice (step-4 remedy lock): SOURCE-TEXT lock, not execution.
+// Executing step 4 would mean running `npm run doc:agent` plus the freshness
+// gate under five forced failure causes from vitest -- slow, needing a real
+// git worktree per cause, and three causes (cone sparse-checkout, index bit,
+// git-query failure) cannot be provoked without mutating the developer's
+// `.git`. A source-text lock stays hermetic and fast; its cost is that it
+// must model composition, which `composedBranchRemedy` below now does: it
+// folds every `$remedy = "..."` / `$remedy += "..."` contribution in a
+// branch and resolves `$variable` interpolation against literals in the
+// step-4 block, failing closed ("remedy composed from an unresolvable
+// variable") on anything it cannot follow. What this lock can NOT catch:
+// a remedy composed in a helper function outside the step-4 block,
+// `Set-Variable remedy`, or any non-literal construction it rejects -- the
+// last two fail the test rather than passing silently, by design.
+//
 // This test is reachable from `npm test` (vitest) so CI's `npm test` step
 // enforces it without a separate PowerShell harness.
 import assert from 'node:assert/strict';
@@ -235,22 +250,122 @@ test('the four-way cause routing from phase 1 is still wired in step 4', () => {
   assert.match(step4Block, /unknown reason/, 'the unknown-reason fallback must remain');
 });
 
+const UNRESOLVABLE = 'remedy composed from an unresolvable variable';
+
+function failUnresolvable(detail) {
+  assert.fail(`${UNRESOLVABLE}: ${detail}`);
+}
+
+// Parse a PowerShell string literal starting at `quoteAt` (index of the
+// opening quote). Double-quoted literals resolve `$name` / `${name}`
+// interpolation via `resolveVar(name)`; `$(...)` is unresolvable.
+// Single-quoted literals have no interpolation ('' is an escaped quote).
+function parsePsLiteral(text, quoteAt, resolveVar) {
+  const quote = text[quoteAt];
+  assert.ok(quote === '"' || quote === "'", `expected string literal at ${quoteAt}`);
+  let value = '';
+  let i = quoteAt + 1;
+  while (i < text.length) {
+    const c = text[i];
+    if (quote === "'") {
+      if (c === "'" && text[i + 1] === "'") { value += "'"; i += 2; continue; }
+      if (c === "'") return { value, end: i + 1 };
+      value += c; i++; continue;
+    }
+    if (c === '`') { value += text[i + 1] ?? ''; i += 2; continue; }
+    if (c === '"' && text[i + 1] === '"') { value += '"'; i += 2; continue; }
+    if (c === '"') return { value, end: i + 1 };
+    if (c === '$') {
+      if (text[i + 1] === '(') failUnresolvable('subexpression $(...) in remedy literal');
+      const braced = /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}/.exec(text.slice(i));
+      const plain = braced ?? /^\$([A-Za-z_][A-Za-z0-9_]*)/.exec(text.slice(i));
+      if (!plain) { value += c; i++; continue; }
+      value += resolveVar(plain[1]);
+      i += plain[0].length; continue;
+    }
+    value += c; i++;
+  }
+  failUnresolvable('unterminated string literal in remedy composition');
+}
+
+// Resolve `$name` to the composed literal assigned to it anywhere in the
+// step-4 block (`=` resets, `+=` appends, in source order). Fails closed
+// when the variable has no literal assignment, a non-literal assignment,
+// or a cyclic reference.
+function resolveStep4Variable(step4Block, name, seen = new Set()) {
+  const key = name.toLowerCase();
+  if (key === 'remedy' || seen.has(key)) failUnresolvable(`$${name}`);
+  seen.add(key);
+  const re = new RegExp(`\\$${name}(?![A-Za-z0-9_])`, 'gi');
+  let composed = null;
+  let m;
+  while ((m = re.exec(step4Block)) !== null) {
+    const rest = step4Block.slice(m.index + m[0].length);
+    const op = /^\s*(\+?=)\s*/.exec(rest);
+    if (!op) continue; // a use, not an assignment
+    const litAt = m.index + m[0].length + op[0].length;
+    const ch = step4Block[litAt];
+    if (ch !== '"' && ch !== "'") failUnresolvable(`$${name} is assigned a non-literal value`);
+    const { value, end } = parsePsLiteral(step4Block, litAt, (n) => resolveStep4Variable(step4Block, n, new Set(seen)));
+    composed = op[1] === '+=' ? (composed ?? '') + value : value;
+    re.lastIndex = end;
+  }
+  if (composed === null) failUnresolvable(`$${name} has no literal assignment in the step-4 block`);
+  return composed;
+}
+
+const BRANCH_NEEDLES = ['Failed to run git', 'cone sparse-checkout', 'skip-worktree or assume-unchanged', 'is stale:', null];
+
+function branchSegment(step4Block, conditionNeedle) {
+  const starts = BRANCH_NEEDLES.map((needle) => {
+    if (needle === null) {
+      const at = step4Block.lastIndexOf('else {');
+      assert.ok(at >= 0, 'the unknown-reason else branch is missing');
+      return at;
+    }
+    const at = step4Block.indexOf(needle);
+    assert.ok(at >= 0, `step-4 condition not found: ${needle}`);
+    return at;
+  });
+  const idx = BRANCH_NEEDLES.indexOf(conditionNeedle);
+  const start = starts[idx];
+  const end = idx + 1 < starts.length ? starts[idx + 1] : step4Block.indexOf('Write-Host $remedy', start);
+  assert.ok(end > start, `cannot bound step-4 branch: ${conditionNeedle ?? 'else'}`);
+  return step4Block.substring(start, end);
+}
+
 /**
- * Returns the remedy STRING a single step-4 branch assigns. `conditionNeedle`
- * is a literal substring of that branch's `-match '...'` condition; the
- * remedy is the first `$remedy = "..."` AFTER the condition, so the pair
- * (condition -> assignment) is checked, not the block as a whole. A swapped
- * or edited remedy is attributed to exactly one branch.
+ * Returns the COMPOSED remedy a single step-4 branch actually emits: every
+ * `$remedy = "..."` (resets) and `$remedy += "..."` (appends) contribution
+ * between the branch's condition and the next branch, in source order, with
+ * `$variable` interpolation resolved against literals in the step-4 block.
+ * `conditionNeedle` is a literal substring of the branch's `-match '...'`
+ * condition, or null for the trailing bare `else {` fallback. Any
+ * contribution that cannot be followed (non-literal assignment,
+ * subexpression, unresolved variable, Set-Variable) fails the test instead
+ * of returning a partial string.
  */
-function branchRemedy(step4Block, conditionNeedle) {
-  const conditionAt = step4Block.indexOf(conditionNeedle);
-  assert.ok(conditionAt >= 0, `step-4 condition not found: ${conditionNeedle}`);
-  const assignAt = step4Block.indexOf('$remedy = "', conditionAt);
-  assert.ok(assignAt >= 0, `no $remedy assignment after condition: ${conditionNeedle}`);
-  const valueStart = assignAt + '$remedy = "'.length;
-  const valueEnd = step4Block.indexOf('"', valueStart);
-  assert.ok(valueEnd > valueStart, `unterminated remedy string after condition: ${conditionNeedle}`);
-  return step4Block.substring(valueStart, valueEnd);
+function composedBranchRemedy(step4Block, conditionNeedle) {
+  const segment = branchSegment(step4Block, conditionNeedle);
+  if (/\bSet-Variable\b[^\n]*\bremedy\b/i.test(segment)) failUnresolvable('Set-Variable remedy in branch');
+  let composed = null;
+  const re = /\$remedy(?![A-Za-z0-9_])/g;
+  let m;
+  while ((m = re.exec(segment)) !== null) {
+    const rest = segment.slice(m.index + m[0].length);
+    const op = /^\s*(\+?=)\s*/.exec(rest);
+    if (!op) failUnresolvable(`non-assignment use of $remedy near: ${segment.slice(m.index, m.index + 40)}`);
+    const litAt = m.index + m[0].length + op[0].length;
+    const ch = segment[litAt];
+    if (ch !== '"' && ch !== "'") failUnresolvable(`$remedy ${op[1]} non-literal near: ${segment.slice(m.index, m.index + 40)}`);
+    const { value, end } = parsePsLiteral(segment, litAt, (n) => resolveStep4Variable(step4Block, n));
+    const after = segment.slice(end).trimStart();
+    if (after.startsWith('+')) failUnresolvable('string concatenation after remedy literal');
+    composed = op[1] === '+=' ? (composed ?? '') + value : value;
+    re.lastIndex = end;
+  }
+  assert.ok(composed !== null, `no $remedy assignment in branch: ${conditionNeedle ?? 'else'}`);
+  return composed;
 }
 
 test('each step-4 cause branch assigns its OWN remedy text and no other branch\'s', () => {
@@ -269,19 +384,14 @@ test('each step-4 cause branch assigns its OWN remedy text and no other branch\'
     fallback: 'unknown reason',
   };
   const remedies = {
-    gitQuery: branchRemedy(step4Block, 'Failed to run git'),
-    cone: branchRemedy(step4Block, 'cone sparse-checkout'),
-    indexBit: branchRemedy(step4Block, 'skip-worktree or assume-unchanged'),
-    stale: branchRemedy(step4Block, 'is stale:'),
+    gitQuery: composedBranchRemedy(step4Block, 'Failed to run git'),
+    cone: composedBranchRemedy(step4Block, 'cone sparse-checkout'),
+    indexBit: composedBranchRemedy(step4Block, 'skip-worktree or assume-unchanged'),
+    stale: composedBranchRemedy(step4Block, 'is stale:'),
+    // The fallback has no -match condition; null selects the trailing
+    // bare `else {` arm.
+    fallback: composedBranchRemedy(step4Block, null),
   };
-  // The fallback has no -match condition; its remedy is the assignment inside
-  // the trailing bare `else {`.
-  const elseAt = step4Block.lastIndexOf('else {');
-  assert.ok(elseAt >= 0, 'the unknown-reason else branch is missing');
-  const fallbackAssignAt = step4Block.indexOf('$remedy = "', elseAt);
-  assert.ok(fallbackAssignAt >= 0, 'no $remedy assignment in the unknown-reason else branch');
-  const fallbackStart = fallbackAssignAt + '$remedy = "'.length;
-  remedies.fallback = step4Block.substring(fallbackStart, step4Block.indexOf('"', fallbackStart));
   for (const [branch, remedy] of Object.entries(remedies)) {
     assert.ok(remedy.includes(signatures[branch]), `${branch} branch must assign its own remedy ("${signatures[branch]}"), got: ${remedy}`);
     for (const [other, signature] of Object.entries(signatures)) {
@@ -289,4 +399,19 @@ test('each step-4 cause branch assigns its OWN remedy text and no other branch\'
       assert.ok(!remedy.includes(signature), `${branch} branch must NOT contain the ${other} remedy ("${signature}"), got: ${remedy}`);
     }
   }
+});
+
+test('composedBranchRemedy folds += appends, resolves interpolation, and fails closed on unresolvable composition', () => {
+  const synthetic = [
+    `if ($x -match 'Failed to run git') { $remedy = "could not run a git query" }`,
+    `elseif ($x -match 'cone sparse-checkout') { $remedy = "sparse-checkout reapply"; $remedy += " --no-skip-worktree" }`,
+    `elseif ($x -match 'skip-worktree or assume-unchanged') { $remedy = "clear --no-skip-worktree" }`,
+    `elseif ($x -match 'is stale:') { $hint = "npm run doc:agent"; $remedy = "stale; run $hint" }`,
+    `else { $remedy = "unknown reason" }`,
+    `Write-Host $remedy`,
+  ].join('\n');
+  assert.equal(composedBranchRemedy(synthetic, 'cone sparse-checkout'), 'sparse-checkout reapply --no-skip-worktree');
+  assert.equal(composedBranchRemedy(synthetic, 'is stale:'), 'stale; run npm run doc:agent');
+  const unresolvable = synthetic.replace('$hint = "npm run doc:agent"; ', '');
+  assert.throws(() => composedBranchRemedy(unresolvable, 'is stale:'), /remedy composed from an unresolvable variable/);
 });
