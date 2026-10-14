@@ -306,3 +306,22 @@ test('a thrown main() still exits 2 with a diagnostic on stderr', () => {
   assert.equal(result.status, 2, `synthetic throw must exit 2; got ${result.status}\nstdout=${result.stdout}\nstderr=${result.stderr}`);
   assert.match(result.stderr, /synthetic main\(\) throw/);
 });
+
+test('an unrealpathable MODULE path exits 2 with a diagnostic, never a silent 0', () => {
+  const { root } = repoWithPacket();
+  // Same mutation technique as the main() test above: read the real script,
+  // break exactly one substring, run the copy. Here the module path is made
+  // unrealpathable. The split CLI guard must surface the diagnostic on
+  // stderr and exit 2. If the two realpathSync calls are ever merged back
+  // into ONE try block, the module-path throw lands in the shared
+  // "not the CLI" catch, main() never runs, and the process exits 0 with
+  // empty stderr -- this assertion then turns red.
+  const original = fs.readFileSync(new URL('./verify-agent-docs-fresh.mjs', import.meta.url), 'utf8');
+  const mutated = original.replace('fs.realpathSync(modulePath)', 'fs.realpathSync(modulePath + ".unrealpathable")');
+  assert.notEqual(mutated, original, 'the module-path realpath call must exist exactly as written');
+  const driver = path.join(root, 'driver.mjs');
+  write(root, 'driver.mjs', mutated);
+  const result = spawnSync(process.execPath, [driver], { cwd: root, encoding: 'utf8' });
+  assert.equal(result.status, 2, `module-path realpath failure must exit 2; got ${result.status}\nstdout=${result.stdout}\nstderr=${result.stderr}`);
+  assert.match(result.stderr, /cannot realpath the module path/);
+});

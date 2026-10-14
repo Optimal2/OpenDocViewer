@@ -218,26 +218,42 @@ function main() {
 }
 
 // Imports must stay quiet for helper consumers (the vitest suite imports the
-// exported helpers). Two things can fail here, with two different outcomes:
+// exported helpers). Two things can fail here, with two different outcomes,
+// so the two realpath calls sit in SEPARATE try blocks:
 //
 //   1. process.argv[1] is set to a path that does not realpath. The HOST
 //      process is not the CLI (e.g. an embedded consumer that sets argv[1] to
-//      its own entry point), so this is a non-event. Swallow it.
+//      its own entry point), so this is a non-event. Swallow it: no stderr,
+//      no exitCode change, main() simply does not run.
 //   2. The MODULE path itself cannot be realpathed (broken install, removed
 //      file). The CLI guard cannot make its comparison, so surface the
-//      diagnostic and exit 2.
+//      diagnostic on stderr and set exit code 2. This failure is never
+//      silent: it prints and sets the exit code even on a plain import,
+//      because an importable module whose own path does not realpath is a
+//      broken install, not a host-process non-event.
 //
 // Any throw from main() also exits 2.
 const modulePath = fileURLToPath(import.meta.url);
-let isCli = false;
+let moduleRealPath;
 try {
-  // Guard 1: realpath argv[1] only. ENOENT here means "not the CLI, stay quiet".
-  if (process.argv[1]) {
-    isCli = fs.realpathSync(process.argv[1]) === fs.realpathSync(modulePath);
+  moduleRealPath = fs.realpathSync(modulePath);
+} catch (error) {
+  console.error(
+    `verify-agent-docs-fresh: cannot realpath the module path ${modulePath}: ${error instanceof Error ? error.message : error}`,
+  );
+  process.exitCode = 2;
+}
+let isCli = false;
+if (moduleRealPath !== undefined) {
+  try {
+    // Guard 1: realpath argv[1] only. ENOENT here means "not the CLI, stay quiet".
+    if (process.argv[1]) {
+      isCli = fs.realpathSync(process.argv[1]) === moduleRealPath;
+    }
+  } catch {
+    // argv[1] not realpathable: not the CLI. process.exitCode is left alone.
+    isCli = false;
   }
-} catch {
-  // argv[1] not realpathable: not the CLI. process.exitCode is left alone.
-  isCli = false;
 }
 
 if (isCli) {

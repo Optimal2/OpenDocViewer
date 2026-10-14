@@ -234,3 +234,59 @@ test('the four-way cause routing from phase 1 is still wired in step 4', () => {
   }
   assert.match(step4Block, /unknown reason/, 'the unknown-reason fallback must remain');
 });
+
+/**
+ * Returns the remedy STRING a single step-4 branch assigns. `conditionNeedle`
+ * is a literal substring of that branch's `-match '...'` condition; the
+ * remedy is the first `$remedy = "..."` AFTER the condition, so the pair
+ * (condition -> assignment) is checked, not the block as a whole. A swapped
+ * or edited remedy is attributed to exactly one branch.
+ */
+function branchRemedy(step4Block, conditionNeedle) {
+  const conditionAt = step4Block.indexOf(conditionNeedle);
+  assert.ok(conditionAt >= 0, `step-4 condition not found: ${conditionNeedle}`);
+  const assignAt = step4Block.indexOf('$remedy = "', conditionAt);
+  assert.ok(assignAt >= 0, `no $remedy assignment after condition: ${conditionNeedle}`);
+  const valueStart = assignAt + '$remedy = "'.length;
+  const valueEnd = step4Block.indexOf('"', valueStart);
+  assert.ok(valueEnd > valueStart, `unterminated remedy string after condition: ${conditionNeedle}`);
+  return step4Block.substring(valueStart, valueEnd);
+}
+
+test('each step-4 cause branch assigns its OWN remedy text and no other branch\'s', () => {
+  // Lock the remedy text PER BRANCH. The routing test above only proves the
+  // four match fragments exist SOMEWHERE in the block; it stayed green when
+  // two remedies were swapped and when "run npm run doc:agent" was put back
+  // into the index-bit branch (measured). Swapped remedies are wrong advice:
+  // a skip-worktree bit is not fixed by regenerating docs, and a stale packet
+  // is not fixed by clearing index bits.
+  const step4Block = enclosingBlock(source, '$remedy = $null');
+  const signatures = {
+    gitQuery: 'could not run a git query',
+    cone: 'sparse-checkout reapply',
+    indexBit: '--no-skip-worktree',
+    stale: 'npm run doc:agent',
+    fallback: 'unknown reason',
+  };
+  const remedies = {
+    gitQuery: branchRemedy(step4Block, 'Failed to run git'),
+    cone: branchRemedy(step4Block, 'cone sparse-checkout'),
+    indexBit: branchRemedy(step4Block, 'skip-worktree or assume-unchanged'),
+    stale: branchRemedy(step4Block, 'is stale:'),
+  };
+  // The fallback has no -match condition; its remedy is the assignment inside
+  // the trailing bare `else {`.
+  const elseAt = step4Block.lastIndexOf('else {');
+  assert.ok(elseAt >= 0, 'the unknown-reason else branch is missing');
+  const fallbackAssignAt = step4Block.indexOf('$remedy = "', elseAt);
+  assert.ok(fallbackAssignAt >= 0, 'no $remedy assignment in the unknown-reason else branch');
+  const fallbackStart = fallbackAssignAt + '$remedy = "'.length;
+  remedies.fallback = step4Block.substring(fallbackStart, step4Block.indexOf('"', fallbackStart));
+  for (const [branch, remedy] of Object.entries(remedies)) {
+    assert.ok(remedy.includes(signatures[branch]), `${branch} branch must assign its own remedy ("${signatures[branch]}"), got: ${remedy}`);
+    for (const [other, signature] of Object.entries(signatures)) {
+      if (other === branch) continue;
+      assert.ok(!remedy.includes(signature), `${branch} branch must NOT contain the ${other} remedy ("${signature}"), got: ${remedy}`);
+    }
+  }
+});
