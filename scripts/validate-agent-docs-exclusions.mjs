@@ -17,21 +17,31 @@
 //     which has no anchors: "^" depends on the native path prefix, and "$"
 //     never matches before AgentDocMap's trailing slash. The grammar is
 //     deliberately stricter than separator parity requires;
-//   - the LAST atom of every file-name fragment is neither an UNESCAPED "."
-//     nor a negated character class. A trailing unescaped "." or negated
-//     class depends on what comes after the fragment, which the corpus
-//     cannot enumerate and the pattern cannot anchor against: a pattern
-//     ending in "." matches "example.test." on every consumer but
-//     "example.test" on JSDoc and "example.test/" on AgentDocMap, an
-//     asymmetry no corpus can prove beyond its cases. An escaped "\."
-//     matches a LITERAL dot, which can never be "/" or "\", so it is as
-//     safe as any other literal and the tail rule does not apply to it;
+//   - the LAST CONSUMING atom of every alternation branch of every file-name
+//     fragment is neither an UNESCAPED "." nor a negated character class. A
+//     quantifier is judged by the atom it quantifies ("\.jsx.+" ends with the
+//     "." the "+" repeats); when that quantifier can match empty ("*", "?",
+//     "{0,...}"), a safe quantified atom does not hide the atom before it,
+//     because the match can end there ("\.jsx.z?" can end at "."). A group is
+//     judged by its own last consuming atom recursively, and an alternation
+//     is judged per branch, at the top level and inside groups alike. A
+//     trailing unescaped "." or negated class
+//     depends on what comes after the fragment, which the corpus cannot
+//     enumerate and the pattern cannot anchor against: a pattern ending in
+//     "." matches "example.test." on every consumer but "example.test" on
+//     JSDoc and "example.test/" on AgentDocMap, an asymmetry no corpus can
+//     prove beyond its cases. An escaped "\." matches a LITERAL dot, which
+//     can never be "/" or "\", so it is as safe as any other literal and the
+//     tail rule does not apply to it;
 //   - every declared directory, every fragment's declared example file and two
 //     ordinary files get the expected verdict in four representations of the
 //     same file (see probeRepresentations): relative, AgentDocMap's relative +
 //     "/", Linux absolute and Windows absolute, under checkout prefixes that
 //     contain the usual words (home, runner, work, Users, the repository name).
-// The trailing-atom rule removes the cause; the corpus catches what remains.
+// The tail rule removes, by construction, every fragment whose match can depend
+// on what FOLLOWS the file name (a trailing unescaped "." or negated class, in
+// any alternation branch, under any quantifier or group nesting); the corpus
+// then proves the four probed representations agree for what is left.
 // It does NOT guarantee anything about checkout prefixes it does not probe: a
 // fragment or directory name that equals a word of some other clone path (a
 // user name, a custom folder) still excludes everything there. It also does
@@ -42,15 +52,16 @@
 // ubuntu-latest, so no CI branch needs a fifth representation today. Finally,
 // an unescaped "." anywhere in the MIDDLE of a fragment can still match a
 // separator in an absolute representation (e.g. ".test." on the substring
-// "/.test." inside an absolute path); the leading and trailing atoms are the
-// only ones the tail rule covers, and the corpus catches the middle case only
+// "/.test." inside an absolute path); the tail rule covers only the LAST
+// consuming atom of each branch, and the corpus catches the middle case only
 // for the four probe representations.
 export const EXCLUDED_DIRECTORIES = ['node_modules', 'docs', '__tests__'];
 
 // File-name fragments are raw regex text. Each one declares an example file
 // name that it must exclude, so the probe sees the fragment's own verdict.
-// The last atom must NOT be an UNESCAPED "." or a negated class: see the
-// header above. An escaped "\." matches a literal dot and is not a hazard.
+// The last CONSUMING atom of every alternation branch must NOT be an
+// UNESCAPED "." or a negated class: see the header above. An escaped "\."
+// matches a literal dot and is not a hazard.
 export const EXCLUDED_FILES = [{ pattern: '\\.test\\.', example: 'example.test.js' }];
 
 const SEPARATOR_CLASS = '[/\\\\]';
@@ -93,6 +104,13 @@ export function probeRepresentations(relativePath) {
  * rejected. The fragment must also compile on its own, so it cannot break out
  * of its alternation branch.
  *
+ * The tail rule judges the LAST CONSUMING atom of every alternation branch,
+ * at the top level and inside groups alike: a quantifier is judged by the
+ * atom it quantifies, a safe atom under an empty-capable quantifier ("*",
+ * "?", "{0,...}") does not hide the atom before it, and a group is judged by
+ * its own last consuming atom, recursively. A branch whose last consuming
+ * atom is an UNESCAPED "." or a negated character class is rejected.
+ *
  * @param {string} filePattern
  */
 export function assertFilePatternGrammar(filePattern) {
@@ -112,67 +130,165 @@ export function assertFilePatternGrammar(filePattern) {
     return { char: escaped, next: index + 2, escaped: true };
   };
 
-  let depth = 0;
-  let index = 0;
-  // The fragment's last atom must not depend on what comes after it: a trailing
-  // "." or negated class matches a separator and can reach outside the file name
-  // of a path the corpus does not probe (e.g. "src/App.jsx" vs "src/App.jsx/").
-  // Track whether the final meaningful atom is "." or a negated class.
-  let lastAtom = null;
-  let lastAtomIsNegatedClass = false;
-  while (index < filePattern.length) {
-    const char = filePattern[index];
-    if (char === '[') {
-      const negated = filePattern[index + 1] === '^';
-      index += negated ? 2 : 1;
-      let members = 0;
-      // Bounded by the length, so a missing "]" ends the scan instead of looping.
-      while (index < filePattern.length && filePattern[index] !== ']') {
-        const from = readAtom(index);
-        index = from.next;
-        if (filePattern[index] === '-' && index + 1 < filePattern.length && filePattern[index + 1] !== ']') {
-          const to = readAtom(index + 1);
-          const sameKind = !from.escaped && !to.escaped && RANGE_KINDS.some((kind) => kind.test(from.char) && kind.test(to.char));
-          if (!sameKind) fail(`the range "${from.char}-${to.char}" may cover a path separator; use a-z, A-Z or 0-9 ranges`);
-          index = to.next;
-        }
-        members += 1;
+  // Reads the character class that starts at "["; returns whether it is
+  // negated and the index after its "]". Bounded by the length, so a missing
+  // "]" ends the scan instead of looping.
+  const readClass = (index) => {
+    const negated = filePattern[index + 1] === '^';
+    let cursor = index + (negated ? 2 : 1);
+    let members = 0;
+    while (cursor < filePattern.length && filePattern[cursor] !== ']') {
+      const from = readAtom(cursor);
+      cursor = from.next;
+      if (filePattern[cursor] === '-' && cursor + 1 < filePattern.length && filePattern[cursor + 1] !== ']') {
+        const to = readAtom(cursor + 1);
+        const sameKind = !from.escaped && !to.escaped && RANGE_KINDS.some((kind) => kind.test(from.char) && kind.test(to.char));
+        if (!sameKind) fail(`the range "${from.char}-${to.char}" may cover a path separator; use a-z, A-Z or 0-9 ranges`);
+        cursor = to.next;
       }
-      if (index >= filePattern.length) fail('a character class is not terminated');
-      // JavaScript reads "[]" as a class that matches nothing and "[^]" as one
-      // that matches anything, separators included.
-      if (members === 0) fail('a character class is empty');
-      // A negated class is the last meaningful atom only when it is the final
-      // class in the fragment AND the trailing quantifier (if any) is absent.
-      // recordLastAtom sees the class before any trailing "*", "+" or "?".
-      index += 1;
-      lastAtom = null;
-      lastAtomIsNegatedClass = negated;
-      continue;
+      members += 1;
     }
-    if (char === '(') {
-      if (filePattern[index + 1] === '?' && filePattern[index + 2] !== ':') fail('only plain and non-capturing groups are allowed');
-      depth += 1;
-    } else if (char === ')') {
-      depth -= 1;
-      if (depth < 0) fail('it closes a group it did not open');
-    } else if (char === '^') {
-      fail('"^" anchors to the native path prefix, which differs per platform');
-    } else if (char === '$') {
-      fail('"$" never matches in AgentDocMap, which tests the relative path with a trailing "/"');
+    if (cursor >= filePattern.length) fail('a character class is not terminated');
+    // JavaScript reads "[]" as a class that matches nothing and "[^]" as one
+    // that matches anything, separators included.
+    if (members === 0) fail('a character class is empty');
+    return { negated, next: cursor + 1 };
+  };
+
+  // Consumes one quantifier ("*", "+", "?" or "{n}"/"{n,}"/"{n,m}") plus an
+  // optional lazy "?" and returns the index after it and whether the
+  // quantified element can match NOTHING ("*", "?" and a "{0,...}" minimum).
+  // A quantifier is not an atom: the tail rule judges the atom it quantifies.
+  // Nullability matters because a safe atom under an empty-capable quantifier
+  // can be absent from a match, so the atom BEFORE it can still be the last
+  // consuming one. A "{" that does not spell a quantifier is left for readAtom
+  // as a literal, and the final compile check decides whether the result is a
+  // regex at all.
+  const readQuantifier = (index) => {
+    const char = filePattern[index];
+    if (char === '*' || char === '?') {
+      const next = index + 1;
+      return { next: filePattern[next] === '?' ? next + 1 : next, nullable: true };
     }
-    const atom = readAtom(index);
-    lastAtom = atom;
-    lastAtomIsNegatedClass = false;
-    index = atom.next;
-  }
-  if (depth !== 0) fail('it leaves a group open');
-  if (lastAtomIsNegatedClass) {
-    fail('it ends with a negated character class, which matches a separator and depends on what follows the file name');
-  }
-  if (lastAtom !== null && lastAtom.char === '.' && !lastAtom.escaped) {
-    fail('it ends with ".", which matches a separator and depends on what follows the file name');
-  }
+    if (char === '+') {
+      const next = index + 1;
+      return { next: filePattern[next] === '?' ? next + 1 : next, nullable: false };
+    }
+    if (char === '{') {
+      const counted = /^\{(\d+)(,\d*)?\}/.exec(filePattern.slice(index));
+      if (counted === null) return { next: index, nullable: false };
+      const next = index + counted[0].length;
+      return {
+        next: filePattern[next] === '?' ? next + 1 : next,
+        nullable: Number(counted[1]) === 0,
+      };
+    }
+    return { next: index, nullable: false };
+  };
+
+  // The tail of a branch: null when the branch has no consuming atom yet,
+  // 'safe' when its last consuming atom is an ordinary literal, an escaped
+  // character or a non-negated class, and 'dot' / 'negated-class' for the two
+  // hazards the tail rule rejects.
+  const SAFE = 'safe';
+
+  // Rejects a finished alternation branch whose last consuming atom depends
+  // on what follows the file name: a trailing unescaped "." or negated class
+  // matches a separator and can reach outside the file name of a path the
+  // corpus does not probe (e.g. "src/App.jsx" vs "src/App.jsx/").
+  const judgeBranch = (tail) => {
+    if (tail === 'negated-class') {
+      fail('its last consuming atom is a negated character class, which matches a separator and depends on what follows the file name');
+    }
+    if (tail === 'dot') {
+      fail('its last consuming atom is an unescaped ".", which matches a separator and depends on what follows the file name');
+    }
+  };
+
+  // Parses atoms until the end of the fragment or the ")" that closes the
+  // enclosing group. Returns the tail of the sequence's last consuming atom
+  // (null when no branch consumes anything), whether the sequence can match
+  // nothing, and the index after the sequence.
+  const parseSequence = (start, inGroup) => {
+    let tail = null;
+    let branchNullable = true;
+    let groupConsumes = false;
+    let groupNullable = false;
+    let index = start;
+    const endBranch = () => {
+      // Alternation is judged PER BRANCH: any branch whose last consuming
+      // atom is hazardous rejects the whole fragment.
+      judgeBranch(tail);
+      if (tail !== null) groupConsumes = true;
+      if (branchNullable) groupNullable = true;
+      tail = null;
+      branchNullable = true;
+    };    // Applies one parsed element (atom, class or group) to the current
+    // branch. A hazard is hazardous whether or not it can match empty. A
+    // safe element that CANNOT match empty becomes the last consuming atom;
+    // a safe element that can match empty may be absent from the match, so
+    // the previous atom is still exposed and its tail stands.
+    const applyElement = (elementTail, elementNullable) => {
+      if (elementTail !== SAFE) {
+        tail = elementTail;
+      } else if (!elementNullable) {
+        tail = SAFE;
+      }
+      branchNullable = branchNullable && elementNullable;
+    };
+    while (index < filePattern.length) {
+      const char = filePattern[index];
+      if (char === '|') {
+        endBranch();
+        index += 1;
+        continue;
+      }
+      if (char === ')') {
+        if (!inGroup) fail('it closes a group it did not open');
+        endBranch();
+        // Every branch was judged already, so a consuming group is safe. A
+        // group with an empty branch can match nothing; an empty group only
+        // ever matches nothing.
+        return { tail: groupConsumes ? SAFE : null, nullable: groupNullable, next: index + 1 };
+      }
+      if (char === '(') {
+        if (filePattern[index + 1] === '?' && filePattern[index + 2] !== ':') fail('only plain and non-capturing groups are allowed');
+        // A group is judged by its own last consuming atom, recursively. An
+        // empty group (no consuming branch) consumes nothing whatever the
+        // quantifier says, so it is always transparent.
+        const group = parseSequence(filePattern[index + 1] === '?' ? index + 3 : index + 1, true);
+        if (group.tail === null) {
+          index = readQuantifier(group.next).next;
+          continue;
+        }
+        const quantifier = readQuantifier(group.next);
+        applyElement(group.tail, group.nullable || quantifier.nullable);
+        index = quantifier.next;
+        continue;
+      }
+      if (char === '^') {
+        fail('"^" anchors to the native path prefix, which differs per platform');
+      }
+      if (char === '$') {
+        fail('"$" never matches in AgentDocMap, which tests the relative path with a trailing "/"');
+      }
+      if (char === '[') {
+        const charClass = readClass(index);
+        const quantifier = readQuantifier(charClass.next);
+        applyElement(charClass.negated ? 'negated-class' : SAFE, quantifier.nullable);
+        index = quantifier.next;
+        continue;
+      }
+      const atom = readAtom(index);
+      const quantifier = readQuantifier(atom.next);
+      applyElement(atom.char === '.' && !atom.escaped ? 'dot' : SAFE, quantifier.nullable);
+      index = quantifier.next;
+    }
+    if (inGroup) fail('it leaves a group open');
+    endBranch();
+    return { tail: groupConsumes ? SAFE : null, nullable: groupNullable, next: index };
+  };
+  parseSequence(0, false);
 
   try {
     new RegExp(filePattern);

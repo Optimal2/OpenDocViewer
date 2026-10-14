@@ -143,10 +143,10 @@ test('fragments whose edges reach outside the file name are rejected', () => {
 // Pin the escaped-vs-unescaped distinction at the tail. The grammar's tail
 // rule reads `readAtom`'s `escaped` flag, so a literal "\." (matches a dot,
 // can never be a separator) is accepted where an unescaped "." (matches any
-// character, separators included) is rejected. Drop the `!lastAtom.escaped`
-// condition and the "ACCEPTED" half of this test goes red; weaken the rejection
-// for the unescaped "." half and the suite no longer protects against the
-// asymmetry the rule was built to close.
+// character, separators included) is rejected. Drop the `!atom.escaped`
+// condition in parseSequence and the "ACCEPTED" half of this test goes red;
+// weaken the rejection for the unescaped "." half and the suite no longer
+// protects against the asymmetry the rule was built to close.
 test('the tail rule distinguishes an escaped "\." from an unescaped "."', () => {
   for (const filePattern of ['\\.test\\.', '\\.spec\\.', '[A-Za-z0-9_]+\\.stories\\.']) {
     assert.doesNotThrow(() => assertFilePatternGrammar(filePattern), filePattern);
@@ -158,14 +158,122 @@ test('the tail rule distinguishes an escaped "\." from an unescaped "."', () => 
   for (const filePattern of ['\\.test.', '\\.spec.', 'foo\\.stories.']) {
     assert.throws(
       () => assertFilePatternGrammar(filePattern),
-      /it ends with "\.", which matches a separator/,
+      /its last consuming atom is an unescaped "\.", which matches a separator/,
       filePattern,
     );
   }
   // A negated class at the tail stays rejected regardless of the "." condition.
   assert.throws(
     () => assertFilePatternGrammar('\\.jsx[^y]'),
-    /it ends with a negated character class/,
+    /its last consuming atom is a negated character class/,
+  );
+});
+
+// The tail rule judges the last CONSUMING atom, not the last character: a
+// quantifier is judged by the atom it quantifies, a group by its own last
+// consuming atom recursively, and an alternation per branch (top level and
+// inside groups). The old last-character rule ACCEPTED all nine fragments
+// below, and each one produces the A2 asymmetry the guard exists to remove:
+// on the probe path, AgentDocMap's "<relative>/" form is excluded while the
+// relative, Linux-absolute and Windows-absolute forms are not (the trailing
+// "/" completes the match; the probe path carries the extra characters that
+// "{2,4}" and "(a|b.)" need). Every fragment is judged through the WHOLE
+// gate: declared via withFile and rejected inside buildExcludePattern and
+// validateAgentDocsExclusions, not only by assertFilePatternGrammar.
+//
+// Mutation proof (red-when-removed, the convention this file already uses):
+//   * Quantifier handling: make readQuantifier return { next: index,
+//     nullable: false } unchanged and "\.jsx.+", "\.jsx[^y]+",
+//     "\.jsx[^y]{1,2}" and "\.jsx.{2,4}" go red.
+//   * Group handling: drop the parseSequence recursion for "(" (walk "(" as
+//     an ordinary atom again) and "(\.jsx.)", "(\.jsx[^y])" and "\.jsx(a|b.)"
+//     go red.
+//   * Alternation-per-branch: remove the judgeBranch(tail) call at "|" and
+//     "\.jsx.|\.test\." goes red.
+const consumingTailFragments = [
+  // [fragment, probe path that shows the A2 asymmetry]
+  ['(\\.jsx.)', 'src/App.jsx'],
+  ['\\.jsx.+', 'src/App.jsx'],
+  ['\\.jsx[^y]+', 'src/App.jsx'],
+  ['\\.jsx[^y]{1,2}', 'src/App.jsx'],
+  ['(\\.jsx[^y])', 'src/App.jsx'],
+  ['\\.jsx.|\\.test\\.', 'src/App.jsx'],
+  ['\\.jsx.{2,4}', 'src/App.jsxq'],
+  ['\\.jsx[^0-9]+', 'src/App.jsx'],
+  ['\\.jsx(a|b.)', 'src/App.jsxb'],
+];
+
+test('fragments whose last consuming atom reaches outside the file name are rejected through the whole gate', () => {
+  for (const [filePattern, probePath] of consumingTailFragments) {
+    const verdicts = probeRepresentations(probePath).map(([, candidate]) => new RegExp(filePattern).test(candidate));
+    assert.deepEqual(verdicts, [false, true, false, false], `${filePattern} on ${probePath}`);
+    const files = withFile(filePattern, 'example.jsx');
+    assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, files), /does not fit the file-pattern grammar/, filePattern);
+    assert.throws(() => validateAgentDocsExclusions(config, { files }), /does not fit the file-pattern grammar/, filePattern);
+  }
+});
+
+// An empty-capable quantifier ("*", "?", "{0,...}") makes its atom optional,
+// so a SAFE quantified atom does not hide a hazardous atom before it: the
+// match can end at the hazard ("\.jsx.z?" matches ".jsx/" and stops before
+// the absent "z"). These are the same A2 asymmetry as the nine above, one
+// nullable atom further back. A safe atom under a NON-empty quantifier ("+",
+// "{1,...}") does hide what precedes it, because every match must consume it
+// last — those stay accepted.
+test('a safe atom under an empty-capable quantifier does not hide a hazardous tail', () => {
+  for (const filePattern of ['\\.jsx.z?', '\\.jsx[^y]q?', '[^y]a*', '\\.jsx.(?:z)?', 'x.*', '\\.jsx.{0,3}']) {
+    const files = withFile(filePattern, 'example.jsx');
+    assert.throws(() => buildExcludePattern(EXCLUDED_DIRECTORIES, files), /does not fit the file-pattern grammar/, filePattern);
+    assert.throws(() => validateAgentDocsExclusions(config, { files }), /does not fit the file-pattern grammar/, filePattern);
+  }
+  for (const [filePattern, example] of [
+    ['\\.jsx\\.z?', 'example.jsx.z'],
+    ['[0-9]+px', 'a12px'],
+    ['zz?', 'zz'],
+  ]) {
+    const files = withFile(filePattern, example);
+    const pattern = buildExcludePattern(EXCLUDED_DIRECTORIES, files);
+    assert.doesNotThrow(() => validateAgentDocsExclusions(withPattern(pattern), { files }), filePattern);
+  }
+});
+
+// The accepted set must be unchanged by the stricter tail rule: the canonical
+// fragments (escaped literal at the tail, quantified safe class in the
+// middle) still pass the WHOLE gate, and so do the declared directories and
+// the live jsdoc.json.
+test('the accepted fragments, directories and the live jsdoc.json still pass the whole gate', () => {
+  for (const [filePattern, example] of [
+    ['\\.test\\.', 'example.test.js'],
+    ['\\.spec\\.', 'example.spec.js'],
+    ['[A-Za-z0-9_]+\\.stories\\.', 'Card.stories.jsx'],
+  ]) {
+    const files = withFile(filePattern, example);
+    const pattern = buildExcludePattern(EXCLUDED_DIRECTORIES, files);
+    assert.doesNotThrow(() => validateAgentDocsExclusions(withPattern(pattern), { files }), filePattern);
+  }
+  assert.doesNotThrow(() => validateAgentDocsExclusions(config));
+  const exclude = new RegExp(config.source.excludePattern);
+  for (const directory of EXCLUDED_DIRECTORIES) {
+    for (const [, candidate] of probeRepresentations(`src/${directory}/nested/example.js`)) {
+      assert.equal(exclude.test(candidate), true, candidate);
+    }
+  }
+});
+
+// The corpus rule for checkout-prefix words and the anchor rule are untouched
+// by the tail-rule rewrite: "runner" still fails the corpus and "\.test$"
+// still fails the anchor check.
+test('the checkout-prefix corpus rule and the anchor rule still reject their fragments', () => {
+  const files = withFile('runner', 'example.runner.js');
+  const pattern = buildExcludePattern(EXCLUDED_DIRECTORIES, files);
+  assert.throws(
+    () => validateAgentDocsExclusions(withPattern(pattern), { files }),
+    /must include "src\/utils\/example\.js" in every representation, but not in the Linux absolute form/,
+  );
+  assert.throws(() => assertFilePatternGrammar('\\.test$'), /"\$" never matches in AgentDocMap/);
+  assert.throws(
+    () => buildExcludePattern(EXCLUDED_DIRECTORIES, withFile('\\.test$', 'example.test.js')),
+    /"\$" never matches in AgentDocMap/,
   );
 });
 
