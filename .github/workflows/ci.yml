@@ -120,14 +120,50 @@ jobs:
       # Linux and a named-but-unresolvable root is a hard error. Every other
       # check - including the Check 4 / Check 10 lockstep checks this gate
       # exists for - runs for real: they read only files on disk.
+      #
+      # BASE OF THE DIFF (review 2026-10-14, F1): the diff-based checks (8, 12,
+      # 13 - including LOCKSTEP "project files changed but not bumped") compare
+      # $base...HEAD. On a push to main the old base, origin/main, IS the pushed
+      # HEAD after checkout, so that diff was empty and the checks skipped in
+      # silence: a src/ change committed through the web UI or API straight to
+      # main passed. A push now diffs against github.event.before, the branch tip
+      # before this push. Fallbacks, each printed in the log:
+      # - before is all zeros (a new branch) or not in the clone (a force push
+      #   rewrote it): diff against the default branch; the three-dot diff then
+      #   starts at the merge-base, so a new branch is judged on its own commits.
+      # - that fallback on the default branch itself (its very first push, or a
+      #   force push whose old tip is gone): there is nothing to diff against.
+      #   The static checks (4, 10) still run; the diff checks are reported as
+      #   not run with a workflow warning instead of passing silently.
+      # pull_request keeps the PR's base branch.
       - name: Validate version lockstep
         shell: pwsh
         env:
           OMP_ALLOW_MISSING_PLATFORM: '1'
+          PUSH_BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          $base = 'origin/main'
+          $zero = '0000000000000000000000000000000000000000'
           if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
             git fetch origin $env:GITHUB_BASE_REF --no-tags
             $base = "origin/$env:GITHUB_BASE_REF"
+            Write-Host "Lockstep base: $base (pull request base branch)."
+          } else {
+            $before = "$env:PUSH_BEFORE"
+            $known = $false
+            if ($before -and $before -ne $zero) {
+              git cat-file -e "$before^{commit}" 2>$null
+              $known = ($LASTEXITCODE -eq 0)
+            }
+            if ($known) {
+              $base = $before
+              Write-Host "Lockstep base: $base (github.event.before, the branch tip before this push)."
+            } elseif ($env:GITHUB_REF_NAME -ne $env:DEFAULT_BRANCH) {
+              $base = "origin/$env:DEFAULT_BRANCH"
+              Write-Host "Lockstep base: $base (before '$before' is a new branch or not in the clone; three-dot diff from the merge-base)."
+            } else {
+              $base = 'HEAD'
+              Write-Host "::warning title=Lockstep diff checks not run::Push to $env:DEFAULT_BRANCH with before '$before' (first push or rewritten history): no base to diff against, so checks 8, 12 and 13 did not run. The static lockstep checks still run."
+            }
           }
           & scripts/omp/validate-component-versions.ps1 -Strict -BaseCommit $base
