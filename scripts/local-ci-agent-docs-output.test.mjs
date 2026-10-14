@@ -54,11 +54,41 @@
 //   5. Non-literal assignments (here-strings, command calls), $(...)
 //      subexpressions, Set-Variable remedy, and variables with no literal
 //      assignment in the step-4 block are refused.
-// Named gap that remains, by construction: the lock models the
-// `Write-Host $remedy` line only. A remedy printed through a DIFFERENT
-// output statement (a second Write-Host of another variable, a file or
-// event-log write) is outside the model -- step 4's remedy path is locked,
-// not every conceivable output channel.
+//   6. Indirect writes to the remedy variable fail closed wherever they
+//      appear in the step-4 block, not only when spelled `$remedy =`/`+=`
+//      (HOLD fix, 2026-10-14 -- measured silent-green on 8c273a0d while pwsh
+//      printed the foreign text): braced assignments `${...} =`/`+=`
+//      (including `${remedy}`, `${variable:remedy}` and computed
+//      `${variable:$x}`), scoped assignments `$scope:name =`/`+=`
+//      (global/script/local/private/...), ANY variable cmdlet
+//      (Set-Variable/New-Variable/Clear-Variable/Remove-Variable, named,
+//      positional or with a dynamic `-Name` -- the target cannot be proven
+//      not to be `remedy`), the variable provider via *-Item cmdlets,
+//      Invoke-Expression/iex, the PSVariable API, `(Get-Variable ...).Value
+//      =`, and `-OutVariable` (including its `+` append form). Any of these
+//      fails with "indirect $remedy write via ..." under the same
+//      unresolvable prefix; aliases spelled `set`/`sv`/`nv` followed by
+//      `remedy` are refused the same way.
+// Named gaps that remain, by construction (each is a gap, not a silent
+// pass the header claims to cover):
+//   a. Output channel: the lock models the `Write-Host $remedy` line only.
+//      A remedy printed through a DIFFERENT output statement (a second
+//      Write-Host of another variable, a bare string-literal statement,
+//      Write-Warning, a file or event-log write) is outside the model --
+//      step 4's remedy path is locked, not every conceivable output
+//      channel.
+//   b. Dynamically assembled code/names: a command name, variable name or
+//      scriptblock assembled at runtime and then invoked (`& $sb`,
+//      `. $sb`, `& ("Set-"+"Variable") ...`, a dot-sourced or imported
+//      file, Start-Job/Invoke-Command payloads) carries no literal token
+//      the source-text lock can see, so it is not modelled. Likewise a
+//      variable-provider path or reflection type name built from pieces
+//      (e.g. `"vari"+"able:remedy"`) is not modelled beyond the literal
+//      `variable:` forms rule 6 refuses.
+//   c. Block comments `<# ... #>`: the stripping view blanks `#` line
+//      comments and literals but does not model PowerShell block
+//      comments, which can therefore cause a false RED (never a silent
+//      green remedy) if a block comment contains a refused token.
 //
 // This test is reachable from `npm test` (vitest) so CI's `npm test` step
 // enforces it without a separate PowerShell harness.
@@ -469,11 +499,44 @@ function branchBodyRange(step4Block, segRange, conditionNeedle) {
   return { start: openAt + 1, end: closeAt };
 }
 
+// Indirect writes to the remedy variable (rule 6): a write that is not
+// spelled `$remedy =`/`+=` is invisible to the fold and to the stray-write
+// guard below, yet pwsh executes it exactly the same (measured 2026-10-14
+// on 8c273a0d: exit 0 from this lock, `STALE-advice: npm run doc:agent`
+// printed). Fail closed on every spelling the lock cannot fold, wherever
+// it appears in the step-4 block -- including a dynamic target name, which
+// cannot be proven not to be `remedy`. Scans the stripped view so a token
+// inside a literal or '#' comment is never read as code.
+function assertNoIndirectRemedyWrites(step4Block) {
+  const bare = stripLiteralsAndComments(step4Block);
+  const checks = [
+    [/\$(?:\{[^}\r\n]*\})\s*\+?=/, 'braced variable assignment (${...} =)'],
+    [/\$[A-Za-z_][A-Za-z0-9_]*:[A-Za-z_][A-Za-z0-9_]*\s*\+?=/, 'scoped variable assignment ($scope:name =)'],
+    [/\b(?:Set-Variable|New-Variable|Clear-Variable|Remove-Variable)\b/i, 'variable cmdlet (Set-Variable/New-Variable/Clear-Variable/Remove-Variable; any target fails because a dynamic -Name cannot be proven not to be remedy)'],
+    [/\b(?:Set-Item|New-Item|Clear-Item|Remove-Item)\b/i, 'variable provider (*-Item cmdlet)'],
+    [/\bInvoke-Expression\b|\biex\b/i, 'Invoke-Expression'],
+    [/\bPSVariable\b/, 'PSVariable API'],
+    [/\bGet-Variable\b[^\r\n;]*\.Value\s*\+?=/i, '(Get-Variable ...).Value assignment'],
+    [/-OutVariable\b/i, '-OutVariable'],
+    [/(?:^|[;{}\r\n])\s*(?:set|sv|nv|nsv)\s+(?:-[A-Za-z]+\s+)*remedy\b/im, 'variable cmdlet alias (set/sv/nv)'],
+  ];
+  for (const [re, label] of checks) {
+    const m = re.exec(bare);
+    if (m) {
+      failUnresolvable(
+        `indirect $remedy write via ${label} at offset ${m.index} ('${bare.slice(m.index, m.index + 40).split(/\r?\n/)[0].trim()}') -- ` +
+        'the lock only folds literal $remedy =/+= assignments, so any other write form fails closed rather than passing silently'
+      );
+    }
+  }
+}
+
 // Every `$remedy` write in the step-4 block must live inside one of the five
 // branch bodies or be the `$remedy = $null` initialiser. A write between the
 // if/else chain and `Write-Host $remedy` would override or append to EVERY
 // branch at runtime while the per-branch fold never sees it.
 function assertNoStrayRemedyWrites(step4Block) {
+  assertNoIndirectRemedyWrites(step4Block);
   const bare = stripLiteralsAndComments(step4Block);
   const ranges = BRANCH_NEEDLES.map((needle) => branchBodyRange(step4Block, branchSegmentRange(step4Block, needle), needle));
   const re = /\$remedy(?![A-Za-z0-9_])\s*\+?=/g;
@@ -628,4 +691,60 @@ test('composedBranchRemedy folds += appends, resolves interpolation, and fails c
   // sees it.
   const withStrayWrite = synthetic + '\n$remedy += " npm run doc:agent"';
   assert.throws(() => composedBranchRemedy(withStrayWrite, 'is stale:'), /write outside the five branch bodies/);
+  // (6) INDIRECT writes to the remedy variable (HOLD 2026-10-14): a write
+  // that is not spelled `$remedy =`/`+=` was invisible to both the fold and
+  // the stray-write guard, so the suite stayed green while pwsh printed the
+  // foreign text (measured: exit 0, `STALE-advice: npm run doc:agent`).
+  // Braced variable syntax in the cone branch.
+  const withBracedWrite = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; ${variable:remedy} = "npm run doc:agent";'
+  );
+  assert.throws(() => composedBranchRemedy(withBracedWrite, 'cone sparse-checkout'), /remedy composed from an unresolvable variable: indirect \$remedy write via braced variable assignment/);
+  // Braced plain name and scoped syntax are the same variable.
+  const withBracedPlainWrite = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; ${remedy} = "npm run doc:agent";'
+  );
+  assert.throws(() => composedBranchRemedy(withBracedPlainWrite, 'cone sparse-checkout'), /indirect \$remedy write via braced variable assignment/);
+  const withScopedWrite = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; $script:remedy = "npm run doc:agent";'
+  );
+  assert.throws(() => composedBranchRemedy(withScopedWrite, 'cone sparse-checkout'), /indirect \$remedy write via scoped variable assignment/);
+  // New-Variable (named and positional) overwrites with -Force / creates it.
+  const withNewVariable = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; New-Variable -Name remedy -Value "npm run doc:agent" -Force;'
+  );
+  assert.throws(() => composedBranchRemedy(withNewVariable, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
+  const withNewVariablePositional = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; New-Variable remedy "npm run doc:agent" -Force;'
+  );
+  assert.throws(() => composedBranchRemedy(withNewVariablePositional, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
+  // Set-Variable, both spellings checked explicitly (named and positional).
+  const withSetVariableNamed = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; Set-Variable -Name remedy -Value "npm run doc:agent";'
+  );
+  assert.throws(() => composedBranchRemedy(withSetVariableNamed, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
+  const withSetVariablePositional = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; Set-Variable remedy "npm run doc:agent";'
+  );
+  assert.throws(() => composedBranchRemedy(withSetVariablePositional, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
+  // A dynamic target name cannot be proven not to be `remedy`, so any
+  // variable cmdlet fails closed, not just one naming remedy literally.
+  const withDynamicVariableCmdlet = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply"; $n = "remedy"; Set-Variable -Name $n -Value "npm run doc:agent";'
+  );
+  assert.throws(() => composedBranchRemedy(withDynamicVariableCmdlet, 'cone sparse-checkout'), /indirect \$remedy write via variable cmdlet/);
+  // Indirect writes between the chain and Write-Host are stray too: asking
+  // for any branch must fail, not only the branch the text sits in.
+  const withStrayBracedWrite = synthetic + '\n${variable:remedy} = "npm run doc:agent"';
+  assert.throws(() => composedBranchRemedy(withStrayBracedWrite, 'is stale:'), /indirect \$remedy write via braced variable assignment/);
+  const withStrayNewVariable = synthetic + '\nNew-Variable -Name remedy -Value "npm run doc:agent" -Force';
+  assert.throws(() => composedBranchRemedy(withStrayNewVariable, 'is stale:'), /indirect \$remedy write via variable cmdlet/);
 });
