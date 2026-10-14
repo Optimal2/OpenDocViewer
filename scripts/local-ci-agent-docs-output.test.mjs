@@ -21,14 +21,44 @@
 // git worktree per cause, and three causes (cone sparse-checkout, index bit,
 // git-query failure) cannot be provoked without mutating the developer's
 // `.git`. A source-text lock stays hermetic and fast; its cost is that it
-// must model composition, which `composedBranchRemedy` below now does: it
-// folds every `$remedy = "..."` / `$remedy += "..."` contribution in a
-// branch and resolves `$variable` interpolation against literals in the
-// step-4 block, failing closed ("remedy composed from an unresolvable
-// variable") on anything it cannot follow. What this lock can NOT catch:
-// a remedy composed in a helper function outside the step-4 block,
-// `Set-Variable remedy`, or any non-literal construction it rejects -- the
-// last two fail the test rather than passing silently, by design.
+// must model composition, which `composedBranchRemedy` below does: it folds
+// every `$remedy = "..."` / `$remedy += "..."` contribution in a branch body
+// and resolves `$variable` interpolation against literals in the step-4
+// block, in source order.
+//
+// Fail-closed contract (phase 5, 2026-10-14): anything the lock cannot
+// follow fails the test with a NAMED reason under "remedy composed from an
+// unresolvable variable" -- it never passes silently. The three composition
+// forms measured silent-green on commit 1e21de71 are closed by rules 1-3:
+//   1. After a parsed literal's closing quote an ALLOWLIST decides: only
+//      end of line, ';', '}' or a '#' comment may follow. Every PowerShell
+//      operator (-f, -replace, -join, -split, '+', ...), pipeline or method
+//      call is rejected -- an allowlist, not a denylist. The same check
+//      applies to `$remedy` assignments and to the `$variable` assignments
+//      that interpolation resolves, so `$hint = "a" + "b"` is unresolvable,
+//      not "the first operand".
+//   2. A branch body containing ANY control flow (if/elseif/else/foreach/
+//      for/while/switch/do/until/try/catch/finally) is refused: which text
+//      step 4 would then print depends on a runtime condition the lock
+//      cannot evaluate. A second `$remedy =` reset inside one branch is
+//      refused for the same reason ("more than one '$remedy =' reset").
+//   3. The fallback boundary is the bare `else {` AFTER the last real
+//      condition ('is stale:'), never lastIndexOf('else {'), so a nested
+//      if/else inside the fallback arm cannot move segment boundaries --
+//      and rule 2 refuses such a body outright.
+//   4. Every `$remedy` write in the step-4 block must live inside one of
+//      the five branch bodies or be the `$remedy = $null` initialiser. A
+//      write between the if/else chain and `Write-Host $remedy` would
+//      override every branch at runtime while the per-branch fold never
+//      saw it.
+//   5. Non-literal assignments (here-strings, command calls), $(...)
+//      subexpressions, Set-Variable remedy, and variables with no literal
+//      assignment in the step-4 block are refused.
+// Named gap that remains, by construction: the lock models the
+// `Write-Host $remedy` line only. A remedy printed through a DIFFERENT
+// output statement (a second Write-Host of another variable, a file or
+// event-log write) is outside the model -- step 4's remedy path is locked,
+// not every conceivable output channel.
 //
 // This test is reachable from `npm test` (vitest) so CI's `npm test` step
 // enforces it without a separate PowerShell harness.
@@ -291,15 +321,20 @@ function parsePsLiteral(text, quoteAt, resolveVar) {
 // Resolve `$name` to the composed literal assigned to it anywhere in the
 // step-4 block (`=` resets, `+=` appends, in source order). Fails closed
 // when the variable has no literal assignment, a non-literal assignment,
-// or a cyclic reference.
+// a trailing operator/expression after any assigned literal, or a cyclic
+// reference. Matches are located in the stripped view (literals/comments
+// blanked) so a `$name` mention inside a string or comment is never read
+// as an assignment; the literal itself is then parsed from the raw text at
+// the same offset.
 function resolveStep4Variable(step4Block, name, seen = new Set()) {
   const key = name.toLowerCase();
   if (key === 'remedy' || seen.has(key)) failUnresolvable(`$${name}`);
   seen.add(key);
+  const bare = stripLiteralsAndComments(step4Block);
   const re = new RegExp(`\\$${name}(?![A-Za-z0-9_])`, 'gi');
   let composed = null;
   let m;
-  while ((m = re.exec(step4Block)) !== null) {
+  while ((m = re.exec(bare)) !== null) {
     const rest = step4Block.slice(m.index + m[0].length);
     const op = /^\s*(\+?=)\s*/.exec(rest);
     if (!op) continue; // a use, not an assignment
@@ -307,6 +342,7 @@ function resolveStep4Variable(step4Block, name, seen = new Set()) {
     const ch = step4Block[litAt];
     if (ch !== '"' && ch !== "'") failUnresolvable(`$${name} is assigned a non-literal value`);
     const { value, end } = parsePsLiteral(step4Block, litAt, (n) => resolveStep4Variable(step4Block, n, new Set(seen)));
+    assertLiteralTail(bare, end, `$${name} ${op[1]} literal`);
     composed = op[1] === '+=' ? (composed ?? '') + value : value;
     re.lastIndex = end;
   }
@@ -316,12 +352,100 @@ function resolveStep4Variable(step4Block, name, seen = new Set()) {
 
 const BRANCH_NEEDLES = ['Failed to run git', 'cone sparse-checkout', 'skip-worktree or assume-unchanged', 'is stale:', null];
 
-function branchSegment(step4Block, conditionNeedle) {
+// PowerShell-aware forward brace matcher: braces inside '...' / "..." literals
+// and '#' line comments do not count. PowerShell escapes are a doubled quote
+// ('' or "") or a backtick inside double-quoted literals, so no backslash
+// handling is needed.
+function psMatchingClose(text, openAt) {
+  let depth = 0;
+  let quote = '';
+  let i = openAt;
+  while (i < text.length) {
+    const c = text[i];
+    if (quote) {
+      if (c === '`' && quote === '"') { i += 2; continue; }
+      if (c === quote && text[i + 1] === quote) { i += 2; continue; }
+      if (c === quote) { quote = ''; i++; continue; }
+      i++; continue;
+    }
+    if (c === '#') { while (i < text.length && text[i] !== '\n') i++; continue; }
+    if (c === '"' || c === "'") { quote = c; i++; continue; }
+    if (c === '{') { depth++; i++; continue; }
+    if (c === '}') {
+      depth--;
+      if (depth === 0) return i;
+      i++; continue;
+    }
+    i++;
+  }
+  return -1;
+}
+
+// Length-preserving blanking of string literals and '#' line comments, so
+// keyword/assignment scans never fire on text PowerShell would treat as
+// literal content or commentary. Offsets in the output map 1:1 to `text`.
+function stripLiteralsAndComments(text) {
+  let out = '';
+  let i = 0;
+  while (i < text.length) {
+    const c = text[i];
+    if (c === '#') {
+      while (i < text.length && text[i] !== '\n') { out += ' '; i++; }
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      const q = c;
+      out += ' '; i++;
+      while (i < text.length) {
+        if (text[i] === '`' && q === '"') { out += '  '; i += 2; continue; }
+        if (text[i] === q && text[i + 1] === q) { out += '  '; i += 2; continue; }
+        if (text[i] === q) { out += ' '; i++; break; }
+        out += text[i] === '\n' ? '\n' : ' '; i++;
+      }
+      continue;
+    }
+    out += c; i++;
+  }
+  return out;
+}
+
+// Allowlist of what may follow a parsed literal's closing quote: end of the
+// text, end of the line, ';', '}' or a '#' comment. ANYTHING else -- every
+// PowerShell operator (-f, -replace, -join, -split, '+', ...), a pipeline, a
+// method call -- means the emitted value is not the literal the lock just
+// parsed, so the composition is unresolvable, not "the first operand".
+// `bare` is the stripLiteralsAndComments view of the same text (same length,
+// same offsets), so a trailing '# comment' arrives here already blanked to
+// whitespace and passes via the end-of-line rule.
+function assertLiteralTail(bare, end, what) {
+  let i = end;
+  while (i < bare.length && (bare[i] === ' ' || bare[i] === '\t')) i++;
+  if (i >= bare.length) return;
+  const c = bare[i];
+  if (c === '\r' || c === '\n' || c === ';' || c === '}' || c === '#') return;
+  const tail = bare.slice(i, i + 24).split(/\r?\n/)[0].trim();
+  failUnresolvable(
+    `${what} is followed by '${tail}' -- only end of line, ';', '}' or a '#' comment ` +
+    "may follow a remedy literal's closing quote (an allowlist; every operator such as -f, -replace, -join or '+' is rejected)"
+  );
+}
+
+// Returns the {start, end} offsets of one branch's slice of the step-4 block:
+// from the branch's condition needle to the next branch's condition (or, for
+// the fallback, to the `Write-Host $remedy` line). The fallback is located by
+// searching FORWARDS for the bare `else {` after the last real condition
+// ('is stale:'), never by lastIndexOf('else {') -- the latter silently
+// retargets the boundary to a nested if/else added inside the fallback arm
+// (measured 2026-10-14) and made every remedy write before the nested `else`
+// leak into the stale branch's segment.
+function branchSegmentRange(step4Block, conditionNeedle) {
   const starts = BRANCH_NEEDLES.map((needle) => {
     if (needle === null) {
-      const at = step4Block.lastIndexOf('else {');
-      assert.ok(at >= 0, 'the unknown-reason else branch is missing');
-      return at;
+      const staleAt = step4Block.indexOf('is stale:');
+      assert.ok(staleAt >= 0, "step-4 condition not found: 'is stale:'");
+      const elseMatch = /\belse\s*\{/.exec(step4Block.slice(staleAt));
+      assert.ok(elseMatch, 'the unknown-reason else branch is missing');
+      return staleAt + elseMatch.index;
     }
     const at = step4Block.indexOf(needle);
     assert.ok(at >= 0, `step-4 condition not found: ${needle}`);
@@ -331,40 +455,92 @@ function branchSegment(step4Block, conditionNeedle) {
   const start = starts[idx];
   const end = idx + 1 < starts.length ? starts[idx + 1] : step4Block.indexOf('Write-Host $remedy', start);
   assert.ok(end > start, `cannot bound step-4 branch: ${conditionNeedle ?? 'else'}`);
-  return step4Block.substring(start, end);
+  return { start, end };
+}
+
+// The branch body is the {...} block opened by the branch condition.
+// Composing over the raw segment instead would drag the NEXT branch's
+// `elseif (...)` header into the analysis.
+function branchBodyRange(step4Block, segRange, conditionNeedle) {
+  const openAt = step4Block.indexOf('{', segRange.start);
+  assert.ok(openAt >= 0 && openAt < segRange.end, `branch has no body block: ${conditionNeedle ?? 'else'}`);
+  const closeAt = psMatchingClose(step4Block, openAt);
+  assert.ok(closeAt > openAt, `unterminated branch body: ${conditionNeedle ?? 'else'}`);
+  return { start: openAt + 1, end: closeAt };
+}
+
+// Every `$remedy` write in the step-4 block must live inside one of the five
+// branch bodies or be the `$remedy = $null` initialiser. A write between the
+// if/else chain and `Write-Host $remedy` would override or append to EVERY
+// branch at runtime while the per-branch fold never sees it.
+function assertNoStrayRemedyWrites(step4Block) {
+  const bare = stripLiteralsAndComments(step4Block);
+  const ranges = BRANCH_NEEDLES.map((needle) => branchBodyRange(step4Block, branchSegmentRange(step4Block, needle), needle));
+  const re = /\$remedy(?![A-Za-z0-9_])\s*\+?=/g;
+  let m;
+  while ((m = re.exec(bare)) !== null) {
+    if (ranges.some((r) => m.index >= r.start && m.index < r.end)) continue;
+    if (/^\$remedy(?![A-Za-z0-9_])\s*=\s*\$null\b/.test(bare.slice(m.index))) continue;
+    failUnresolvable(
+      `a $remedy write outside the five branch bodies (offset ${m.index}) would apply to ` +
+      'every branch at runtime while the per-branch fold only sees branch bodies'
+    );
+  }
 }
 
 /**
  * Returns the COMPOSED remedy a single step-4 branch actually emits: every
- * `$remedy = "..."` (resets) and `$remedy += "..."` (appends) contribution
- * between the branch's condition and the next branch, in source order, with
- * `$variable` interpolation resolved against literals in the step-4 block.
- * `conditionNeedle` is a literal substring of the branch's `-match '...'`
- * condition, or null for the trailing bare `else {` fallback. Any
- * contribution that cannot be followed (non-literal assignment,
- * subexpression, unresolved variable, Set-Variable) fails the test instead
- * of returning a partial string.
+ * `$remedy = "..."` (reset) and `$remedy += "..."` (append) contribution in
+ * the branch BODY, in source order, with `$variable` interpolation resolved
+ * against literals in the step-4 block. `conditionNeedle` is a literal
+ * substring of the branch's `-match '...'` condition, or null for the
+ * trailing bare `else {` fallback. Anything the fold cannot follow fails the
+ * test with a named reason instead of returning a partial string: control
+ * flow inside the body, a second `=` reset, a trailing operator after any
+ * literal, a non-literal assignment, a $(...) subexpression, an unresolved
+ * variable, or Set-Variable.
  */
 function composedBranchRemedy(step4Block, conditionNeedle) {
-  const segment = branchSegment(step4Block, conditionNeedle);
-  if (/\bSet-Variable\b[^\n]*\bremedy\b/i.test(segment)) failUnresolvable('Set-Variable remedy in branch');
+  assertNoStrayRemedyWrites(step4Block);
+  const label = conditionNeedle ?? 'else';
+  const segRange = branchSegmentRange(step4Block, conditionNeedle);
+  const bodyRange = branchBodyRange(step4Block, segRange, conditionNeedle);
+  const body = step4Block.substring(bodyRange.start, bodyRange.end);
+  const bare = stripLiteralsAndComments(body);
+  const cf = /\b(if|elseif|else|foreach|for|while|switch|do|until|try|catch|finally)\s*[\({]/.exec(bare);
+  if (cf) {
+    failUnresolvable(
+      `control flow ('${cf[1]}') inside the '${label}' branch body -- which remedy text step 4 ` +
+      'prints would depend on a runtime condition the lock cannot follow'
+    );
+  }
+  if (/\bSet-Variable\b[^\n]*\bremedy\b/i.test(bare)) failUnresolvable('Set-Variable remedy in branch');
   let composed = null;
+  let resets = 0;
   const re = /\$remedy(?![A-Za-z0-9_])/g;
   let m;
-  while ((m = re.exec(segment)) !== null) {
-    const rest = segment.slice(m.index + m[0].length);
+  while ((m = re.exec(bare)) !== null) {
+    const rest = body.slice(m.index + m[0].length);
     const op = /^\s*(\+?=)\s*/.exec(rest);
-    if (!op) failUnresolvable(`non-assignment use of $remedy near: ${segment.slice(m.index, m.index + 40)}`);
+    if (!op) failUnresolvable(`non-assignment use of $remedy near: ${body.slice(m.index, m.index + 40)}`);
     const litAt = m.index + m[0].length + op[0].length;
-    const ch = segment[litAt];
-    if (ch !== '"' && ch !== "'") failUnresolvable(`$remedy ${op[1]} non-literal near: ${segment.slice(m.index, m.index + 40)}`);
-    const { value, end } = parsePsLiteral(segment, litAt, (n) => resolveStep4Variable(step4Block, n));
-    const after = segment.slice(end).trimStart();
-    if (after.startsWith('+')) failUnresolvable('string concatenation after remedy literal');
+    const ch = body[litAt];
+    if (ch !== '"' && ch !== "'") failUnresolvable(`$remedy ${op[1]} non-literal near: ${body.slice(m.index, m.index + 40)}`);
+    const { value, end } = parsePsLiteral(body, litAt, (n) => resolveStep4Variable(step4Block, n));
+    assertLiteralTail(bare, end, `$remedy ${op[1]} literal`);
+    if (op[1] === '=') {
+      resets += 1;
+      if (resets > 1) {
+        failUnresolvable(
+          `more than one '$remedy =' reset in the '${label}' branch -- the emitted remedy would ` +
+          'depend on control flow the lock cannot follow'
+        );
+      }
+    }
     composed = op[1] === '+=' ? (composed ?? '') + value : value;
     re.lastIndex = end;
   }
-  assert.ok(composed !== null, `no $remedy assignment in branch: ${conditionNeedle ?? 'else'}`);
+  assert.ok(composed !== null, `no $remedy assignment in branch: ${label}`);
   return composed;
 }
 
@@ -414,4 +590,42 @@ test('composedBranchRemedy folds += appends, resolves interpolation, and fails c
   assert.equal(composedBranchRemedy(synthetic, 'is stale:'), 'stale; run npm run doc:agent');
   const unresolvable = synthetic.replace('$hint = "npm run doc:agent"; ', '');
   assert.throws(() => composedBranchRemedy(unresolvable, 'is stale:'), /remedy composed from an unresolvable variable/);
+
+  // Fail-closed forms measured silent-green on commit 1e21de71 (phase 5,
+  // 2026-10-14): each must throw the NAMED unresolvable reason, never pass.
+  // (1) A format operator after the literal -- the foreign signature hides in
+  // the -f ARGUMENT the old lock never looked at. The same allowlist rejects
+  // -replace/-join/-split/'+' and every other operator.
+  const withFormatOperator = synthetic.replace(
+    '$remedy = "sparse-checkout reapply";',
+    '$remedy = "sparse-checkout reapply {0}" -f "--no-skip-worktree";'
+  );
+  assert.throws(() => composedBranchRemedy(withFormatOperator, 'cone sparse-checkout'), /only end of line, ';', '}' or a '#' comment may follow/);
+  // (2) Concatenation inside a RESOLVED variable -- the old lock resolved
+  // only the first operand of `$hint`.
+  const withConcatenatedVariable = synthetic.replace(
+    '$hint = "npm run doc:agent"',
+    '$hint = "npm run" + " doc:agent"'
+  );
+  assert.throws(() => composedBranchRemedy(withConcatenatedVariable, 'is stale:'), /only end of line, ';', '}' or a '#' comment may follow/);
+  // (3) Nested reassignment within one branch -- the old fold took the last
+  // `=` in source order while the runtime value depends on the condition.
+  const withNestedReset = synthetic.replace(
+    '$remedy = "clear --no-skip-worktree"',
+    '$remedy = "WRONG"\n  if ($y) { $remedy = "clear --no-skip-worktree" }'
+  );
+  assert.throws(() => composedBranchRemedy(withNestedReset, 'skip-worktree or assume-unchanged'), /control flow \('if'\) inside the 'skip-worktree or assume-unchanged' branch body/);
+  // (4) A nested if/else inside the fallback arm must not move the segment
+  // boundary (forward search, not lastIndexOf) and the body itself is
+  // refused as control-flow-dependent.
+  const withNestedElseInFallback = synthetic.replace(
+    'else { $remedy = "unknown reason" }',
+    'else { $remedy = "unknown reason"\n  if ($z) { $remedy = "x" } else { $remedy = "y" } }'
+  );
+  assert.throws(() => composedBranchRemedy(withNestedElseInFallback, null), /control flow \('if'\) inside the 'else' branch body/);
+  // (5) A `$remedy` write BETWEEN the if/else chain and `Write-Host $remedy`
+  // would rewrite every branch at runtime while the per-branch fold never
+  // sees it.
+  const withStrayWrite = synthetic + '\n$remedy += " npm run doc:agent"';
+  assert.throws(() => composedBranchRemedy(withStrayWrite, 'is stale:'), /write outside the five branch bodies/);
 });
