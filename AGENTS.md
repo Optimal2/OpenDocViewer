@@ -55,7 +55,7 @@ Follow these rules strictly:
 
 When running the vitest suite on the hub (`linus_hemma`): use Node 22.23.3
 (the CI-pinned version via fnm at
-`C:\Users\Linus Dunkers\AppData\Roaming\fnm\node-versions\v22.23.3\installation\`),
+`%APPDATA%\fnm\node-versions\v22.23.3\installation\`),
 not the shell default Node 25.6.0, which is outside vitest 5.0.4's and
 jsdom's own engines ranges. Leave `maxWorkers` unset in `vite.config.js`:
 default parallelism is both the fastest and the only fault-free level

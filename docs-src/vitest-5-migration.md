@@ -70,16 +70,16 @@ worker-count cap.
   fork per test file (69); `maxWorkers` bounds concurrency, not the fork
   count. Default is 23 concurrent workers.
 - Node 22.23.3 via fnm at
-  `C:\Users\Linus Dunkers\AppData\Roaming\fnm\node-versions\v22.23.3\installation\`.
+  `%APPDATA%\fnm\node-versions\v22.23.3\installation\`.
   The shell default is Node 25.6.0, which is outside vitest 5.0.4's and
   jsdom's own engines ranges (`^22.12.0 || ^24.0.0 || >=26.0.0`) while
   OpenDocViewer's `engines` (`^22.22.2 || >=24.15.0`) admits it. Use Node
   22.23.3 for local vitest; the shell default is not safe.
 - Disk 0 = `AMD-RAID Array 1`, SSD on RAID, 3.0 TB, drives **C:** and
   **G:**. Disk 1 = `ST16000NM000J-2T` (Seagate Exos 16 TB, **7200 rpm
-  spinning**), RAID, drive **E:**. The OpenDocViewer checkout at
-  `E:\Linus Dunkers\Documents\GitHub\OpenDocViewer` is on the spinning
-  disk; `G:\wt` (where AO per-job worktrees live) is on the SSD.
+  spinning**), RAID, drive **E:**. The OpenDocViewer checkout
+  (`<workspace>\OpenDocViewer`) is on the spinning disk; the AO per-job
+  worktree root (`G:\wt`) is on the SSD.
 - Bitdefender real-time protection is ON (`VSSERV`, `BDAppSrv`, `BDAuxSrv`,
   `BDProtSrv`, `bdredline`, `bdredline_agent`, `BDSafepaySrv` Running);
   Windows Defender real-time protection is OFF.
@@ -242,9 +242,9 @@ side and is not reworded.
   block above `test:` in `vite.config.js` for the documented instance.
 - A Swedish operator action list with Bitdefender-exclusion paths, the
   load-threshold measurement, and a list of what could NOT be verified
-  lives at
-  `E:\Linus Dunkers\Documents\GitHub\DEV\AI-Vaults\Projects\OMP-ODV\60-Reports\odv-vitest-workerstart-hubben-operatorsatgarder.md`
-  in the private vault (not in this repository).
+  lives in the private vault at
+  `AI-Vaults\Projects\OMP-ODV\60-Reports\odv-vitest-workerstart-hubben-operatorsatgarder.md`
+  (not in this repository).
 
 ## Validation and rollback
 
