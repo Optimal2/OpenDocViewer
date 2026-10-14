@@ -53,6 +53,21 @@ Follow these rules strictly:
 - Do not touch registry, startup settings, scheduled tasks, antivirus settings, Windows security settings, or Bitdefender settings.
 - If a command is blocked or likely to trigger antivirus heuristics, stop and propose the smallest safe manual alternative.
 
+When running the vitest suite on the hub (`linus_hemma`): use Node 22.23.3
+(the CI-pinned version via fnm at
+`C:\Users\Linus Dunkers\AppData\Roaming\fnm\node-versions\v22.23.3\installation\`),
+not the shell default Node 25.6.0, which is outside vitest 5.0.4's and
+jsdom's own engines ranges. Leave `maxWorkers` unset in `vite.config.js`:
+default parallelism is both the fastest and the only fault-free level
+measured on the hub, and `--maxWorkers=1` has been the only
+configuration to produce worker-start deaths. Read the process EXIT CODE,
+not the `Tests` line, because `Errors` is counted separately and a
+worker-start death can leave the suite reporting tests complete while the
+exit code is non-zero. See
+`docs-src/vitest-5-migration.md` § Hub-machine worker-start
+investigation (2026-10-13/14) for the measurement, the exclusion list
+and the decision.
+
 ## Local Paths
 
 Default local development paths:
