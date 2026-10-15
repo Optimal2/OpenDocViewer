@@ -330,10 +330,12 @@
 //      throw's interpolation. Inside step 4 the only stores now
 //      recognized are the two bound gate captures, the exact
 //      '$global:LASTEXITCODE = 0' reset and '$agentDocsPassed = $true';
-//      any other store is RED whatever it assigns. This also closes the
-//      review's F4 note: '$ErrorActionPreference = "SilentlyContinue"'
-//      no longer passes the lock, so the catch channel cannot be
-//      silenced from inside step 4 either.
+//      any other store is RED whatever it assigns. (The sentence here
+//      originally continued "...so the catch channel cannot be silenced
+//      from inside step 4 either"; the phase-14 review refuted that
+//      inference -- an empty catch scaffold around the npm call silences
+//      it without any store -- and it is removed. Phase 15 binds catch
+//      clauses, statement positions and control statements; see below.)
 //   F3 REDIRECTIONS: the command boundary filtered RedirectionAst out of
 //      the shape checks, so 'Write-Host $line 6>$null' counted as the
 //      bound echo while stream 6 (the information stream Write-Host
@@ -342,6 +344,38 @@
 //      gate capture's bound 2>&1. Not every redirection is harmful
 //      (2>$null was measured harmless); the rule is fail-closed because
 //      no step-4 command needs one.
+// Phase 15 (this round) closes the four accepted holes of the phase-14
+// independent review (VERDICT: fail), each measured GREEN on the full
+// suite with console harm on the verbatim step-4 chain:
+//   FOREGROUNDCOLOR VALUES: the banner and the remedy output accepted
+//      any -ForegroundColor string constant; an invalid color is a
+//      terminating parameter-binding error whose message carries the
+//      attacker text into the step-4 catch handler, replacing the gate
+//      output and the remedy. The value must now be a valid ConsoleColor
+//      name (a valid enum name cannot carry text into a binding error).
+//   STORE POSITIONS: '$agentDocsPassed = $true' was accepted anywhere
+//      after the banner and inverts the step verdict to PASS on the
+//      gate-failure path; the store is now bound to the gate-exit test's
+//      then block. '$global:LASTEXITCODE = 0' is bound to immediately
+//      before the gate-output capture, so it cannot be placed between
+//      the npm call and its guard to disarm it (the review's medium).
+//   CATCH SCAFFOLDS: a try inside step 4 may no longer have a catch
+//      clause -- an empty (or continue/break) catch around the npm call
+//      and its guard swallows the bound throw and silences the catch
+//      channel. Only catch-free try/finally scaffolding remains.
+//   CONTROL STATEMENTS: a bare break (or continue) after the banner
+//      aborts the whole script silently with pwsh exit 0 -- no verdict,
+//      no summary. break is RED anywhere inside step 4 and continue is
+//      allowed only inside the bound echo loop (where the echo-body
+//      binding already pins its exact position).
+//   OCCURRENCES: the bound npm/Push-Location/Pop-Location commands may
+//      each occur at most once inside step 4 (the review's duplicate-npm
+//      info and extra-Pop-Location low).
+//   The review's remaining info note (one transient full-suite failure
+//   in eight runs, green on a byte-identical re-run) matches the
+//   environment flakiness AGENTS.md describes for worker/process deaths;
+//   the failure mode is fail-closed (a red run, never a silent green),
+//   so it is documented here rather than "fixed" by weakening a check.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -637,6 +671,15 @@ function isPlainVariable(node, name) {
     && node.text === `$${name}`;
 }
 
+// A -ForegroundColor argument must be a valid ConsoleColor name. Any other
+// string is a terminating parameter-binding error at runtime whose message
+// carries the attacker-chosen text into the step-4 catch handler (phase-14
+// review: banner-fg-constant-injection); a valid enum name cannot.
+const CONSOLE_COLORS = new Set(['black', 'darkblue', 'darkgreen', 'darkcyan', 'darkred', 'darkmagenta', 'darkyellow', 'gray', 'darkgray', 'blue', 'green', 'cyan', 'red', 'magenta', 'yellow', 'white']);
+function isConsoleColor(node) {
+  return node && node.type === 'StringConstantExpressionAst' && CONSOLE_COLORS.has((node.value ?? '').toLowerCase());
+}
+
 // Unwrap the CommandExpressionAst the parser puts around a plain value.
 function unwrap(node, tree) {
   if (node.type !== 'CommandExpressionAst') return node;
@@ -733,7 +776,7 @@ function evalOutput(pipeline, tree) {
     const param = parts[i];
     if (param.type !== 'CommandParameterAst' || (param.parameterName ?? '').toLowerCase() !== 'foregroundcolor') violate(`Write-Host parameter '${param.text}' is not on the allowlist; only -ForegroundColor may follow $remedy`);
     const arg = tree.kids(param)[0] ?? parts[i + 1];
-    if (!arg || arg.type !== 'StringConstantExpressionAst') violate(`-ForegroundColor must take a constant argument`);
+    if (!isConsoleColor(arg)) violate(`-ForegroundColor must take a valid ConsoleColor name; any other string is a terminating parameter-binding error whose message carries attacker text into the step-4 catch handler`);
     i += tree.kids(param).length > 0 ? 1 : 2;
   }
   if (i !== parts.length) violate(`Write-Host output call has extra elements beyond '$remedy [-ForegroundColor <constant>]'`);
@@ -1330,15 +1373,22 @@ function step4Remedies(sourceText) {
     }
 
     // (F1) Statement shapes: every statement inside step 4 is an
-    // assignment, an if/foreach/try container, throw/continue/break, or a
-    // single command judged by the command boundary below. A bare
-    // expression statement (a string/array/subexpression literal or a bare
-    // variable such as $msg) parses as a CommandExpressionAst pipeline and
-    // writes its value to the console, so it is RED whatever words it
-    // uses; so is a multi-element pipeline statement.
+    // assignment, an if/foreach/try container, throw or an echo-loop
+    // continue, or a single command judged by the command boundary below.
+    // A bare expression statement (a string/array/subexpression literal or
+    // a bare variable such as $msg) parses as a CommandExpressionAst
+    // pipeline and writes its value to the console, so it is RED whatever
+    // words it uses; so is a multi-element pipeline statement.
     const STEP4_BLOCKS = new Set(['StatementBlockAst', 'NamedBlockAst', 'ScriptBlockAst']);
     const STEP4_CONTAINERS = new Set(['IfStatementAst', 'ForEachStatementAst', 'TryStatementAst']);
-    const STEP4_CONTROL = new Set(['ThrowStatementAst', 'ContinueStatementAst', 'BreakStatementAst']);
+    // Control statements: throw is allowed (its content is bound exactly
+    // above); continue is allowed only inside the bound echo loop (whose
+    // body binding pins its exact position); a bare break is RED anywhere
+    // inside step 4 -- at script scope it terminates the whole script
+    // silently (banner only, pwsh exit 0, no verdict and no summary --
+    // measured, phase-14 review), a green-by-silence channel.
+    const isAllowedControl = (stmt) => stmt.type === 'ThrowStatementAst'
+      || (stmt.type === 'ContinueStatementAst' && tree.isWithin(stmt, echoLoop));
     // Only blocks that are actual control-flow bodies carry step-4
     // statements. A block inside an EXPRESSION (the @(...) array literal of
     // the echo enumerator, $(...)/(...) internals, a hashtable value) holds
@@ -1353,13 +1403,13 @@ function step4Remedies(sourceText) {
       if (b.id !== step4Block.id && !(bp && STEP4_BODY_PARENTS.has(bp.type))) continue;
       for (const stmt of tree.kids(b)) {
         if (tree.isWithin(stmt, regionBlock)) continue;
-        if (stmt.type === 'AssignmentStatementAst' || STEP4_CONTAINERS.has(stmt.type) || STEP4_CONTROL.has(stmt.type)) continue;
+        if (stmt.type === 'AssignmentStatementAst' || STEP4_CONTAINERS.has(stmt.type) || isAllowedControl(stmt)) continue;
         if (stmt.type === 'PipelineAst') {
           const els = tree.kids(stmt);
           if (els.length === 1 && els[0].type === 'CommandAst') continue; // judged by the command boundary below
-          violate(`literal output channel: statement ${describe(stmt)} inside step 4 is a bare expression or a multi-element pipeline, whose value would be written to the console; the only statements on the step-4 allowlist are assignments, if/foreach/try containers, throw/continue/break and single allowlisted commands, so a bare literal, @(...), $(...) or a bare variable such as $msg inside step 4 is RED whatever words it uses`);
+          violate(`literal output channel: statement ${describe(stmt)} inside step 4 is a bare expression or a multi-element pipeline, whose value would be written to the console; the only statements on the step-4 allowlist are assignments, if/foreach/try containers, throw, an echo-loop continue and single allowlisted commands, so a bare literal, @(...), $(...) or a bare variable such as $msg inside step 4 is RED whatever words it uses`);
         }
-        violate(`literal output channel: statement ${describe(stmt)} inside step 4 is not on the step-4 statement allowlist (assignments, if/foreach/try containers, throw/continue/break, or a single allowlisted command), so it is RED`);
+        violate(`literal output channel: statement ${describe(stmt)} inside step 4 is not on the step-4 statement allowlist (assignments, if/foreach/try containers, throw, an echo-loop continue, or a single allowlisted command), so it is RED`);
       }
     }
 
@@ -1452,7 +1502,7 @@ function step4Remedies(sourceText) {
             const param = parts[i];
             if (param.type !== 'CommandParameterAst' || (param.parameterName ?? '').toLowerCase() !== 'foregroundcolor') violate(`literal output channel: step-4 banner Write-Host parameter '${param.text}' is not on the allowlist; only -ForegroundColor may follow the banner string`);
             const arg = paramArgument(param, n, tree);
-            if (!arg || (arg.type !== 'StringConstantExpressionAst' && arg.type !== 'ConstantExpressionAst')) violate(`literal output channel: the banner's -ForegroundColor must take a constant argument`);
+            if (!isConsoleColor(arg)) violate(`literal output channel: the banner's -ForegroundColor must take a valid ConsoleColor name; any other string is a terminating parameter-binding error whose message carries attacker text into the step-4 catch handler`);
             i += tree.kids(param).length > 0 ? 1 : 2;
           }
           if (i !== parts.length) violate(`literal output channel: the step-4 banner Write-Host has extra elements beyond '<banner string> [-ForegroundColor <constant>]', got '${cmdText}'`);
@@ -1495,15 +1545,23 @@ function step4Remedies(sourceText) {
     // (O-2 class; phase-13 review F1/F2/F4) Stores: inside step 4 an
     // assignment is bound on BOTH sides, not just its right side. The only
     // stores recognized are the two gate captures (bound exactly above),
-    // '$global:LASTEXITCODE = 0' ahead of the capture and
-    // '$agentDocsPassed = $true' in the gate-exit then branch. Binding only
-    // the right side left the TARGET free: '$RepoRoot = "<text>"' feeds the
-    // bound Push-Location, '$LASTEXITCODE = "<text>"' feeds the bound
-    // throw's interpolation and '$ErrorActionPreference = ...' silences the
-    // catch channel -- each re-arms the catch channel or rewrites bound
-    // control flow with a plain store while every shape check stayed green
-    // (measured, phase-13 review), so any other store is RED whatever it
-    // assigns.
+    // '$global:LASTEXITCODE = 0' immediately ahead of the output capture
+    // and '$agentDocsPassed = $true' in the gate-exit then branch. Binding
+    // only the right side left the TARGET free: '$RepoRoot = "<text>"'
+    // feeds the bound Push-Location, '$LASTEXITCODE = "<text>"' feeds the
+    // bound throw's interpolation and '$ErrorActionPreference = ...'
+    // silences the catch channel -- each re-arms the catch channel or
+    // rewrites bound control flow with a plain store while every shape
+    // check stayed green (measured, phase-13 review), so any other store
+    // is RED whatever it assigns. Phase-14 review then measured that the
+    // two non-capture allowlisted stores were position-free: a
+    // '$agentDocsPassed = $true' anywhere after the banner inverts the
+    // verdict to PASS on gate failure, and a '$global:LASTEXITCODE = 0'
+    // between the npm call and its guard disarms the throw guard, so both
+    // stores are now bound to their exact positions as well.
+    const captureBlock = tree.parent(captures.agentDocsOutput);
+    const captureIdx = captureBlock ? tree.kids(captureBlock).indexOf(captures.agentDocsOutput) : -1;
+    const gateThenBlock = tree.kids(gateTests[0])[1];
     for (const n of all) {
       if (n.type !== 'AssignmentStatementAst') continue;
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
@@ -1511,11 +1569,13 @@ function step4Remedies(sourceText) {
       const left = tree.kids(n)[0];
       const rhs = tree.kids(n)[1] ? unwrap(tree.kids(n)[1], tree) : null;
       const isExitReset = n.operator === 'Equals' && left && left.type === 'VariableExpressionAst' && !left.splatted && left.text === '$global:LASTEXITCODE'
-        && rhs && rhs.type === 'ConstantExpressionAst' && rhs.value === '0';
+        && rhs && rhs.type === 'ConstantExpressionAst' && rhs.value === '0'
+        && tree.parent(n) === captureBlock && captureIdx > 0 && tree.kids(captureBlock)[captureIdx - 1].id === n.id;
       const isPassedFlag = n.operator === 'Equals' && left && isPlainVariable(left, 'agentDocsPassed')
-        && rhs && rhs.type === 'VariableExpressionAst' && !rhs.splatted && (rhs.userPath ?? '') === 'true' && rhs.text === '$true';
+        && rhs && rhs.type === 'VariableExpressionAst' && !rhs.splatted && (rhs.userPath ?? '') === 'true' && rhs.text === '$true'
+        && tree.parent(n) === gateThenBlock;
       if (isExitReset || isPassedFlag) continue;
-      violate(`literal output channel: store ${describe(n)} inside step 4 is not on the store allowlist (the two bound gate captures, '$global:LASTEXITCODE = 0', '$agentDocsPassed = $true'); a plain store to a variable a bound structure reads ('$RepoRoot = "<text>"' feeding Push-Location, '$LASTEXITCODE = "<text>"' feeding the bound throw's interpolation, $ErrorActionPreference silencing the catch channel) re-arms the catch channel with attacker text or rewrites bound control flow, so it is RED`);
+      violate(`literal output channel: store ${describe(n)} inside step 4 is not on the store allowlist (the two bound gate captures, '$global:LASTEXITCODE = 0' immediately before the output capture, '$agentDocsPassed = $true' in the gate-exit then branch); a plain store to a variable a bound structure reads ('$RepoRoot = "<text>"' feeding Push-Location, '$LASTEXITCODE = "<text>"' feeding the bound throw's interpolation, $ErrorActionPreference silencing the catch channel) re-arms the catch channel with attacker text or rewrites bound control flow, and a repositioned allowlisted store can invert the verdict or disarm the npm guard, so it is RED`);
     }
 
     // (Phase-13 review F3) Redirections: the command boundary judges exact
@@ -1531,6 +1591,38 @@ function step4Remedies(sourceText) {
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
       if (tree.isWithin(n, captures.agentDocsOutput)) continue; // the bound 2>&1
       violate(`literal output channel: redirection '${n.text.trim()}' inside step 4 is not the gate capture's bound 2>&1; a redirection on an allowlisted command (for example 'Write-Host $line 6>$null') can suppress the gate output the remedy points at while every shape check stays green, so it is RED`);
+    }
+
+    // (Phase-14 review: empty-catch scaffold) Try statements: step 4 uses
+    // try/finally only. A try with a catch clause anywhere inside step 4
+    // swallows the bound throws ('try { & npm ...; if (...) { throw } }
+    // catch {}' silences the npm failure AND the catch channel in one move
+    // -- measured, phase-14 review), so any catch clause is RED; the outer
+    // step-4 try and its catch belong to the caller of step4Remedies, not
+    // to the protected language. try/finally scaffolding stays allowed:
+    // its blocks are judged recursively above.
+    for (const n of all) {
+      if (n.type !== 'TryStatementAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if (tree.kids(n).some((k) => k.type === 'CatchClauseAst')) {
+        violate(`literal output channel: ${describe(n)} inside step 4 carries a catch clause; a catch swallows the bound npm-guard throw and silences the step-4 catch channel from inside step 4 ('try { & npm run doc:agent ... } catch {}' -- measured, phase-14 review), so only catch-free try/finally scaffolding is allowed and this is RED`);
+      }
+    }
+
+    // (Phase-14 review: extra Pop-Location, duplicate npm) Command
+    // occurrences: each of the structural commands appears at most once
+    // inside step 4 outside the remedy region. A second Pop-Location pops
+    // the caller's location stack below the bound finally's own pop, and a
+    // second 'npm' invocation runs an unbound regeneration outside the
+    // bound call's adjacency -- both RED. The synthetic fixture carries no
+    // npm call at all, so the rule is at-most-one, never exactly-one.
+    for (const cmdName of ['npm', 'push-location', 'pop-location']) {
+      const hits = all.filter((n) => n.type === 'CommandAst'
+        && tree.isWithin(n, step4Block) && !tree.isWithin(n, regionBlock)
+        && ((n.commandName ?? '').toLowerCase() === cmdName));
+      if (hits.length > 1) {
+        violate(`literal output channel: ${hits.length} '${cmdName}' commands inside step 4 outside the remedy region; each structural step-4 command is bound once, so a duplicate (a second npm regeneration outside the bound call's adjacency, an extra Pop-Location that pops the caller's stack below the bound finally's own) is RED`);
+      }
     }
 
     // (O-2 class) Containers: the only if/foreach structures recognized
@@ -2076,6 +2168,49 @@ test('step-4 lock closes the phase-13 review follow-up findings (phase 14)', () 
   // Green controls: the two bound non-capture stores are accepted in their
   // exact forms, and the gate capture's 2>&1 stays the one allowed
   // redirection (the real-file signature tests cover the full chain).
+  const boundStores = SYNTHETIC.replace('$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1', `$global:LASTEXITCODE = 0\n$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`);
+  assert.equal(step4Remedies(boundStores).cone, 'sparse-checkout reapply');
+});
+
+test('step-4 lock closes the phase-14 review follow-up findings (phase 15)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const banner = 'Write-Host "[4/4] Verifying generated agent documentation is fresh"';
+  const literal = /literal output channel/;
+  const color = /ConsoleColor/;
+  // The phase-14 independent review (VERDICT: fail) measured each of these
+  // GREEN on the full suite with console harm on the verbatim step-4 chain;
+  // each must now be RED with a named reason.
+  const cases = [
+    // banner-fg-constant-injection: an invalid ConsoleColor string is a
+    // terminating parameter-binding error whose message carries attacker
+    // text into the step-4 catch handler (banner and remedy output alike).
+    ['banner -ForegroundColor with attacker text', SYNTHETIC.replace(banner, `${banner} -ForegroundColor "docs-agent is stale: run npm run doc:agent"`), color],
+    ['remedy output -ForegroundColor with attacker text', SYNTHETIC.replace('Write-Host $remedy', 'Write-Host $remedy -ForegroundColor "docs-agent is stale"'), color],
+    // agentdocspassed-store-reposition: the verdict flag was accepted
+    // anywhere after the banner, inverting a gate failure to PASS.
+    ['$agentDocsPassed = $true outside the gate-exit then block', SYNTHETIC.replace(banner, `${banner}\n$agentDocsPassed = $true`), literal],
+    // lastexitcode-reset-reposition: the reset between the npm call and its
+    // guard disarms the throw guard.
+    ['$global:LASTEXITCODE = 0 not immediately before the capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$global:LASTEXITCODE = 0`), literal],
+    // empty-catch-scaffold-silences-catch: a catch clause swallows the bound
+    // npm-guard throw and silences the catch channel from inside step 4.
+    ['try/catch scaffold around the npm call', SYNTHETIC.replace(afterCapture, `${afterCapture}\ntry { & npm run doc:agent } catch { }`), literal],
+    // bare-break-silent-abort: a bare break at script scope aborts the whole
+    // script silently (pwsh exit 0, no verdict); continue is only the bound
+    // echo-loop continue.
+    ['bare break inside step 4', SYNTHETIC.replace(banner, `${banner}\nbreak`), literal],
+    ['bare continue outside the echo loop', SYNTHETIC.replace(banner, `${banner}\ncontinue`), literal],
+    // extra-pop-location / duplicate-npm: each structural command is bound
+    // once; duplicates run outside the bound adjacency.
+    ['extra Pop-Location', SYNTHETIC.replace(afterCapture, `${afterCapture}\nPop-Location\nPop-Location`), literal],
+    ['duplicate npm run doc:agent', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& npm run doc:agent\n& npm run doc:agent`), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // Green controls: a valid ConsoleColor on the banner is cosmetic freedom,
+  // and the bound non-capture stores stay green at their bound positions.
+  assert.equal(step4Remedies(SYNTHETIC.replace(banner, `${banner} -ForegroundColor Yellow`)).cone, 'sparse-checkout reapply');
   const boundStores = SYNTHETIC.replace('$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1', `$global:LASTEXITCODE = 0\n$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`);
   assert.equal(step4Remedies(boundStores).cone, 'sparse-checkout reapply');
 });
