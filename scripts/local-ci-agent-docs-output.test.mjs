@@ -130,11 +130,67 @@
 //   The four cause patterns are disjoint today, so order is harmless
 //   while the input channel holds; binding it costs one comparison and
 //   keeps it safe if a future pattern ever overlaps another.
+// Phase 9 (this round) closes the five reproduced input-channel bypasses
+// and the assessed splat/dynamic-path forms:
+//   F1 CAPTURE STRUCTURE: the $agentDocsOutput capture must be exactly
+//   `& node scripts/verify-agent-docs-fresh.mjs 2>&1` as an AST shape
+//   (PipelineAst -> CommandAst `node`, Ampersand, the two string
+//   constants and the 2>&1 merging redirection), not a right-hand side
+//   whose text merely mentions the gate filename.
+//   F4 CAPTURE ORDER/SOURCE: $agentDocsExit must be the statement
+//   immediately after $agentDocsOutput in the same block, must read
+//   $global:LASTEXITCODE, and no $global:LASTEXITCODE write may sit
+//   between the two captures. Inserting `$global:LASTEXITCODE = 0`
+//   there is RED (measured: it captures 0 and skips the gate).
+//   F2 DYNAMIC COMMANDS: a non-constant command (`& $cmd`, dot-sourced
+//   or call-operator invocation whose command name is not a constant)
+//   that reaches a variable-name sink (-Name, a *Variable common
+//   parameter, Tee-Object -Variable, a variable: item path) with an
+//   argument that is not statically proven to be a different name is
+//   RED; a dynamic command's positional argument is judged the same
+//   way. Variable arguments are resolved through plain static
+//   assignments in the file ($dn = 'agentDocsOutput'), so indirect
+//   names cannot hide behind a variable either.
+//   F3 PARAMETER BINDING: parameter names are judged by actual
+//   PowerShell binding -- exact names, documented aliases (ov/ev/...),
+//   and unambiguous prefixes (-OutV -> -OutVariable, Tee-Object -Var
+//   -> -Variable). A prefix that could bind to a sink or to another
+//   parameter (ambiguous, e.g. -Ou -> -OutVariable/-OutBuffer) is not
+//   proven clean and is RED.
+//   F5 IN-PLACE MUTATION: any InvokeMemberExpressionAst inside step 4
+//   whose target or arguments touch $agentDocsOutput/$agentDocsExit
+//   (e.g. $agentDocsOutput.SetValue('cone sparse-checkout',0)) counts
+//   as a write to that input and is RED; member invocation cannot be
+//   proven non-mutating from the AST alone.
+//   F7 SPLATS / RESOLVED PATHS: a splatted argument bundle (@s) is
+//   resolved through its plain hashtable assignment; a sink key
+//   (OutVariable, -Name, Path, ...) with the guarded name, a provider
+//   path, or a non-static value is RED, and an unresolvable splat on a
+//   command is not proven clean. Item/cmdlet path arguments that
+//   resolve statically ($p = 'variable:remedy'; Set-Item $p ...) are
+//   judged by their resolved value; an unresolvable dynamic file path
+//   (Remove-Item -LiteralPath $report) stays clean, matching phase 8.
+//   Independent review of phase 9 added, on the same channels: unary
+//   ++/-- and foreach loop variables on the inputs count as writes;
+//   member invocations that name a guarded variable in a string
+//   (PSVariable.Set('agentDocsOutput', ...)) or build code from one
+//   ([scriptblock]::Create('... agentDocsOutput ...')) count as writes;
+//   a splat bundle mutated after its hashtable assignment is
+//   unresolvable; abbreviated switch parameters (-For -> -Force) consume
+//   no argument when the positional elements are collected. Static name
+//   resolution through assignments is scope- and order-blind: several
+//   differing static values for one name fail closed rather than guess.
 // Known gaps (named, not closed): (a) literal remedy-looking TEXT printed
 // somewhere else in the file without ever touching the remedy variable
 // or its name (for example a second hand-written remedy sentence passed
 // directly to Write-Host) cannot be distinguished from legitimate
-// operator messages and is NOT judged; (b) dynamic execution of an
+// operator messages and is NOT judged. This gap was measured in phase 9
+// (a literal Write-Host remedy sentence executes and prints) and is
+// explicitly REJECTED as a fix: closing it would require a denylist of
+// remedy-sounding sentences or banning literal Write-Host text, both of
+// which break legitimate operator messages and contradict the allowlist
+// design; the guarded channels are the variable, its name and its
+// sinks, which phases 8-9 bind. (b) dynamic execution of an
 // external script (`& $Validator`, dot-sourcing the telemetry helper)
 // is judged only by its in-file arguments -- code inside those external
 // files is out of scope. Statements elsewhere that touch neither the
@@ -587,6 +643,35 @@ function staticString(node, tree) {
   return null;
 }
 
+// Resolve a node to a static string through plain assignments in the
+// file: `$dn = 'agentDocsOutput'` makes `$dn` statically that string.
+// Returns null when there is not exactly one static value (zero, several
+// differing, or a non-static right-hand side), so callers fail closed.
+function staticValue(node, tree, seen = new Set()) {
+  if (!node) return null;
+  const direct = staticString(node, tree);
+  if (direct !== null) return direct;
+  const inner = unwrap(node, tree);
+  if (inner.type === 'PipelineAst' || inner.type === 'ParenPipelineAst') {
+    const kids = tree.kids(inner);
+    return kids.length === 1 ? staticValue(kids[0], tree, seen) : null;
+  }
+  if (inner.type !== 'VariableExpressionAst' || inner.splatted || inner.userPath === null || inner.userPath.includes(':')) return null;
+  const key = inner.userPath.toLowerCase();
+  if (seen.has(key)) return null;
+  seen.add(key);
+  const values = new Set();
+  for (const n of tree.byId.values()) {
+    if (n.type !== 'AssignmentStatementAst' || n.operator !== 'Equals') continue;
+    const [left, right] = tree.kids(n);
+    if (!left || !isPlainVariable(left, inner.userPath)) continue;
+    const v = staticValue(right, tree, new Set(seen));
+    if (v === null) return null;
+    values.add(v);
+  }
+  return values.size === 1 ? [...values][0] : null;
+}
+
 function paramArgument(param, cmd, tree) {
   const own = tree.kids(param);
   if (own.length > 0) return own[0];
@@ -602,6 +687,72 @@ function paramArgument(param, cmd, tree) {
 const COMMON_VAR_PARAMS = new Set(['outvariable', 'ov', 'errorvariable', 'ev', 'warningvariable', 'wv', 'informationvariable', 'iv', 'pipelinevariable', 'pv']); // common *Variable parameters and their aliases
 const VAR_COMMANDS = new Set(['set-variable', 'sv', 'new-variable', 'nv', 'get-variable', 'gv', 'clear-variable', 'clv', 'remove-variable', 'rv']); // *-Variable cmdlets take the name via -Name or positionally
 const ITEM_COMMANDS = new Set(['set-item', 'set-content', 'add-content', 'clear-item', 'clear-content', 'new-item', 'remove-item', 'rename-item', 'set-itemproperty']); // item/content cmdlets write through a provider path such as variable:remedy
+const PARAM_ALIASES = { ov: 'outvariable', ev: 'errorvariable', wv: 'warningvariable', iv: 'informationvariable', pv: 'pipelinevariable', ea: 'erroraction', wa: 'warningaction', ia: 'informationaction', vb: 'verbose', db: 'debug' };
+const COMMON_PARAMS = ['verbose', 'debug', 'erroraction', 'warningaction', 'informationaction', 'errorvariable', 'warningvariable', 'informationvariable', 'outvariable', 'outbuffer', 'pipelinevariable', 'progressaction'];
+const VAR_CMD_PARAMS = ['name', 'value', 'description', 'option', 'scope', 'visibility', 'force', 'passthru', 'valueonly', 'include', 'exclude', 'whatif', 'confirm', ...COMMON_PARAMS];
+const TEE_PARAMS = ['inputobject', 'filepath', 'literalpath', 'variable', 'append', 'encoding', ...COMMON_PARAMS];
+const ITEM_PARAMS = ['path', 'literalpath', 'value', 'newvalue', 'filter', 'include', 'exclude', 'recurse', 'force', 'credential', 'passthru', 'encoding', 'append', 'nonewline', 'whatif', 'confirm', ...COMMON_PARAMS];
+// Judge a written parameter name by actual binding: exact, alias, or
+// unambiguous prefix of a parameter in `universe`. Returns 'sink' when it
+// binds to a sink parameter, 'ambiguous' when a prefix could bind to a
+// sink or a competing parameter (not proven clean), else 'none'.
+function paramBinding(pname, sinkNames, universe) {
+  const p = (pname ?? '').toLowerCase();
+  if (sinkNames.includes(p)) return 'sink';
+  if (PARAM_ALIASES[p] && sinkNames.includes(PARAM_ALIASES[p])) return 'sink';
+  if (PARAM_ALIASES[p]) return 'none';
+  if (!p) return 'none';
+  const candidates = universe.filter((u) => u.startsWith(p) && u !== p);
+  if (candidates.length === 0) return 'none';
+  if (candidates.length === 1) return sinkNames.includes(candidates[0]) ? 'sink' : 'none';
+  return candidates.some((c) => sinkNames.includes(c)) ? 'ambiguous' : 'none';
+}
+function sinkKindForParam(param, cmdName) {
+  const pname = param.parameterName ?? '';
+  const kinds = [];
+  const common = paramBinding(pname, ['outvariable', 'errorvariable', 'warningvariable', 'informationvariable', 'pipelinevariable'], COMMON_PARAMS);
+  if (common !== 'none') kinds.push(common);
+  if (VAR_COMMANDS.has(cmdName)) { const k = paramBinding(pname, ['name'], VAR_CMD_PARAMS); if (k !== 'none') kinds.push(k); }
+  if (cmdName === 'tee-object') { const k = paramBinding(pname, ['variable'], TEE_PARAMS); if (k !== 'none') kinds.push(k); }
+  if (ITEM_COMMANDS.has(cmdName)) { const k = paramBinding(pname, ['path', 'literalpath'], ITEM_PARAMS); if (k !== 'none') kinds.push(k); }
+  if (kinds.includes('sink')) return 'sink';
+  if (kinds.includes('ambiguous')) return 'ambiguous';
+  return 'none';
+}
+// Resolve a splatted variable (@s) to its hashtable entries [[keyNode,
+// valueNode], ...] through exactly one plain hashtable assignment, else null.
+function splatEntries(splatNode, tree) {
+  const name = splatNode.userPath;
+  if (!name || name.includes(':')) return null;
+  const tables = [];
+  for (const n of tree.byId.values()) {
+    if (n.type !== 'AssignmentStatementAst' || n.operator !== 'Equals') continue;
+    const [left, right] = tree.kids(n);
+    if (!left || !isPlainVariable(left, name)) continue;
+    let rhs = right ? unwrap(right, tree) : null;
+    if (rhs && rhs.type === 'ConvertExpressionAst') { const inner = tree.kids(rhs).find((k) => k.type === 'HashtableAst'); if (inner) rhs = inner; }
+    if (rhs && rhs.type === 'HashtableAst') tables.push(rhs);
+  }
+  if (tables.length !== 1) return null;
+  const table = tables[0];
+  // The assignment statement that defines the bundle (an ancestor of the
+  // hashtable). Any other write or mutation of the bundle variable
+  // ($s.Add(...), $s['k'] = v, $s.k = v) makes the static entries
+  // unreliable: fail closed.
+  let definition = table;
+  while (definition && definition.type !== 'AssignmentStatementAst') definition = tree.parent(definition);
+  for (const n of tree.byId.values()) {
+    if (n.type === 'AssignmentStatementAst' && n !== definition) {
+      const left = tree.kids(n)[0];
+      if (left && descendantsOf(left, tree).some((d) => isVarNamed(d, name))) return null;
+    }
+    if ((n.type === 'InvokeMemberExpressionAst' || n.type === 'UnaryExpressionAst') && descendantsOf(n, tree).some((d) => isVarNamed(d, name))) return null;
+  }
+  const kids = tree.kids(table);
+  const pairs = [];
+  for (let i = 0; i + 1 < kids.length; i += 2) pairs.push([kids[i], kids[i + 1]]);
+  return pairs;
+}
 
 function isVariableProviderPath(value, name) {
   if (value === null) return false;
@@ -616,39 +767,87 @@ function isVariableProviderPath(value, name) {
 // only (named gap (b) in the header).
 function commandTouchesName(cmd, tree, name) {
   const cmdName = (cmd.commandName ?? '').toLowerCase();
+  const isDynamic = !cmd.commandName;
   const desc = descendantsOf(cmd, tree);
   for (const param of desc.filter((n) => n.type === 'CommandParameterAst')) {
     const pname = (param.parameterName ?? '').toLowerCase();
-    const isSink = COMMON_VAR_PARAMS.has(pname)
-      || (pname === 'name' && VAR_COMMANDS.has(cmdName))
-      || (pname === 'variable' && cmdName === 'tee-object')
-      || ((pname === 'path' || pname === 'literalpath') && ITEM_COMMANDS.has(cmdName));
-    if (!isSink) continue;
+    let kind = sinkKindForParam(param, cmdName);
+    // A dynamic command has no known parameter set, so -Name and the
+    // other sink spellings are judged as sinks on sight (F2).
+    if (isDynamic && kind === 'none' && ['name', 'variable', 'path', 'literalpath'].includes(pname)) kind = 'sink';
+    if (isDynamic && kind === 'none') { const c = paramBinding(pname, ['outvariable', 'errorvariable', 'warningvariable', 'informationvariable', 'pipelinevariable'], COMMON_PARAMS); if (c !== 'none') kind = c; }
+    if (kind === 'none') continue;
     const arg = paramArgument(param, cmd, tree);
-    const value = staticString(arg, tree);
+    const value = staticValue(arg, tree);
+    if (kind === 'ambiguous') {
+      return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' uses ambiguous parameter -${param.parameterName}, which could bind to a variable-name sink for '${name}' or to another parameter, so it cannot be proven clean (actual binding is ambiguous)`;
+    }
     if (value !== null) {
       if (normalizedName(value) === normalizedName(name) || isVariableProviderPath(value, name)) {
         return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' reaches variable-name sink -${param.parameterName} with the name '${name}'`;
       }
     } else if (arg) {
       // A path sink is only a variable sink through the variable: provider;
-      // a dynamic file path (e.g. Remove-Item -LiteralPath $report) is clean.
-      if ((pname === 'path' || pname === 'literalpath') && !/variable:/i.test(arg.text)) continue;
+      // a dynamic file path (e.g. Remove-Item -LiteralPath $report) is clean,
+      // unless the path argument itself mentions the variable: provider.
+      const isPathSink = ITEM_COMMANDS.has(cmdName) && paramBinding(pname, ['path', 'literalpath'], ITEM_PARAMS) === 'sink';
+      if (isPathSink && !/variable:/i.test(arg.text)) continue;
       return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' reaches variable-name sink -${param.parameterName} with an argument that cannot be statically evaluated (${describe(arg)}), so it cannot be proven not to write '${name}'`;
     }
   }
-  // Positional name/path arguments of the sink cmdlets.
-  const positional = tree.kids(cmd).slice(1).filter((n) => n.type !== 'CommandParameterAst');
-  if (VAR_COMMANDS.has(cmdName) || cmdName === 'tee-object' || ITEM_COMMANDS.has(cmdName)) {
+  // Positional name/path arguments of the sink cmdlets. A node that
+  // immediately follows a non-switch CommandParameterAst (with no argument
+  // of its own) is that parameter's argument, not a positional element.
+  const SWITCH_PARAMS = ['force', 'passthru', 'recurse', 'append', 'nonewline', 'whatif', 'confirm', 'valueonly', 'verbose', 'debug', 'noenumerate'];
+  const switchUniverse = VAR_COMMANDS.has(cmdName) ? VAR_CMD_PARAMS : (cmdName === 'tee-object' ? TEE_PARAMS : (ITEM_COMMANDS.has(cmdName) ? ITEM_PARAMS : [...COMMON_PARAMS, ...VAR_CMD_PARAMS, ...TEE_PARAMS, ...ITEM_PARAMS]));
+  const isSwitch = (el) => paramBinding(el.parameterName ?? '', SWITCH_PARAMS, [...new Set(switchUniverse)]) === 'sink';
+  const positional = [];
+  {
+    let expectArg = false;
+    for (const el of tree.kids(cmd).slice(1)) {
+      if (el.type === 'CommandParameterAst') { expectArg = tree.kids(el).length === 0 && !isSwitch(el); continue; }
+      if (expectArg) { expectArg = false; continue; }
+      if (el.type === 'VariableExpressionAst' && el.splatted) continue; // judged by the splat loop below
+      positional.push(el);
+    }
+  }
+  if (VAR_COMMANDS.has(cmdName) || cmdName === 'tee-object' || ITEM_COMMANDS.has(cmdName) || isDynamic) {
     for (const arg of positional) {
       if (tree.kids(arg).some((k) => k.type === 'CommandParameterAst')) continue;
-      const value = staticString(arg, tree);
+      const value = staticValue(arg, tree);
       if (value !== null && (normalizedName(value) === normalizedName(name) || isVariableProviderPath(value, name))) {
         return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' passes the name '${name}' positionally to a variable/item sink cmdlet`;
       }
-      if (value === null && VAR_COMMANDS.has(cmdName) && arg.type !== 'CommandExpressionAst') {
-        // Only the first positional slot of a *-Variable cmdlet is its name.
-        if (arg === positional[0]) return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' passes a non-statically-evaluable positional name to a *-Variable cmdlet, so it cannot be proven not to write '${name}'`;
+      if (value === null && arg.type !== 'CommandExpressionAst') {
+        // Only the first positional slot of a *-Variable / item cmdlet (or
+        // of a dynamic command, which may be one) is its name/path.
+        if (arg === positional[0] && (VAR_COMMANDS.has(cmdName) || ITEM_COMMANDS.has(cmdName) || isDynamic)) return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' passes a non-statically-evaluable positional name to a *-Variable/item or dynamic cmdlet, so it cannot be proven not to write '${name}'`;
+      }
+    }
+  }
+  // Splatted argument bundles (@s): resolve the hashtable assignment and
+  // judge its sink keys; an unresolvable splat is not proven clean (F7).
+  for (const splat of desc.filter((n) => n.type === 'VariableExpressionAst' && n.splatted)) {
+    if (isVarNamed(splat, name)) continue; // the remedy reference itself is judged by the output channel
+    const entries = splatEntries(splat, tree);
+    if (entries === null) {
+      return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' uses splatted argument bundle '${splat.text}', which cannot be statically evaluated, so it cannot be proven not to reach a variable-name sink for '${name}'`;
+    }
+    for (const [keyNode, valueNode] of entries) {
+      const key = staticValue(keyNode, tree);
+      if (key === null) return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' uses splatted bundle '${splat.text}' with a non-statically-evaluable key, so it cannot be proven not to reach a variable-name sink for '${name}'`;
+      const kind = (() => {
+        const fake = { parameterName: key };
+        const ks = [sinkKindForParam(fake, cmdName)];
+        if (isDynamic && ['name', 'variable', 'path', 'literalpath'].includes(key.toLowerCase())) ks.push('sink');
+        return ks.includes('sink') ? 'sink' : (ks.includes('ambiguous') ? 'ambiguous' : 'none');
+      })();
+      if (kind === 'none') continue;
+      const value = staticValue(valueNode, tree);
+      if (kind === 'ambiguous') return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' uses splatted bundle '${splat.text}' with ambiguous key '${key}', which could bind to a variable-name sink for '${name}', so it cannot be proven clean`;
+      if (value === null) return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' uses splatted bundle '${splat.text}' reaching variable-name sink '${key}' with a value that cannot be statically evaluated, so it cannot be proven not to write '${name}'`;
+      if (normalizedName(value) === normalizedName(name) || isVariableProviderPath(value, name)) {
+        return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' uses splatted bundle '${splat.text}' reaching variable-name sink '${key}' with the name '${name}'`;
       }
     }
   }
@@ -662,7 +861,7 @@ function commandTouchesName(cmd, tree, name) {
   // Invoke-Expression executes its argument as code.
   if (cmdName === 'invoke-expression' || cmdName === 'iex') {
     const arg = positional[0] ?? null;
-    const value = staticString(arg, tree);
+    const value = staticValue(arg, tree);
     if (value === null) return `Invoke-Expression with a non-statically-evaluable argument cannot be proven not to write '${name}'`;
     if (normalizedName(value) === normalizedName(name) || new RegExp(`\\b${name}\\b`, 'i').test(value)) return `Invoke-Expression argument mentions '${name}'`;
   }
@@ -670,12 +869,40 @@ function commandTouchesName(cmd, tree, name) {
   for (const el of desc) {
     if (el.type !== 'StringConstantExpressionAst' && el.type !== 'ExpandableStringExpressionAst') continue;
     if (el === tree.kids(cmd)[0]) continue; // the command name itself
-    const value = staticString(el, tree);
+    const value = staticValue(el, tree);
     if (value !== null && (normalizedName(value) === normalizedName(name) || isVariableProviderPath(value, name))) {
       return `command '${cmd.text.replace(/\s+/g, ' ').trim()}' mentions the name '${name}' in ${describe(el)}, so it cannot be proven not to touch that variable`;
     }
   }
   return null;
+}
+
+// True when a member invocation touches `name`: a static name string in
+// its target/arguments (e.g. $ExecutionContext.SessionState.PSVariable
+// .Set('agentDocsOutput', ...)), or a Set/SetValue call whose name
+// argument cannot be statically proven to be a different name.
+function invokeMemberTouches(node, tree, name) {
+  const desc = descendantsOf(node, tree);
+  for (const el of desc) {
+    if (el.type !== 'StringConstantExpressionAst' && el.type !== 'ExpandableStringExpressionAst') continue;
+    const value = staticValue(el, tree);
+    if (value !== null && (normalizedName(value) === normalizedName(name) || isVariableProviderPath(value, name))) return true;
+  }
+  const kids = tree.kids(node);
+  const member = kids.length > 1 ? staticValue(kids[1], tree) : null;
+  if (member !== null && ['set', 'setvalue'].includes(member.toLowerCase()) && kids.length > 2) {
+    return staticValue(kids[2], tree) === null;
+  }
+  // [scriptblock]::Create('<code naming the guarded variable>') builds
+  // executable code from an in-file string: judged by its content.
+  if (member !== null && member.toLowerCase() === 'create') {
+    for (const el of desc) {
+      if (el.type !== 'StringConstantExpressionAst' && el.type !== 'ExpandableStringExpressionAst') continue;
+      const value = staticValue(el, tree);
+      if (value !== null && new RegExp(`\\b${name}\\b`, 'i').test(value)) return true;
+    }
+  }
+  return false;
 }
 
 // True when an assignment's left side targets `name` in any spelling,
@@ -742,7 +969,15 @@ function step4Remedies(sourceText) {
     if (reason) violate(`indirect remedy write via command outside the allowlist: ${reason}; only the single 'Write-Host $remedy' inside the anchored step-4 remedy region may touch the remedy name`);
   }
 
-  // --- Phase 8 input channel: the gate capture is the only write. ---
+  // --- Phase 9: member invocations naming $remedy outside the region. ---
+  for (const n of all) {
+    if (n.type === 'InvokeMemberExpressionAst' && !tree.isWithin(n, regionBlock) && invokeMemberTouches(n, tree, 'remedy')) {
+      violate(`indirect remedy write via member invocation outside the allowlist: ${describe(n)} names 'remedy' in a member invocation (for example PSVariable.Set), which can overwrite $remedy after the region`);
+    }
+  }
+
+  // --- Phase 8/9 input channel: the gate capture is the only write. ---
+  const captures = {};
   for (const name of ['agentDocsOutput', 'agentDocsExit']) {
     const writes = [];
     for (const n of all) {
@@ -750,6 +985,9 @@ function step4Remedies(sourceText) {
       if (n.type === 'AssignmentStatementAst' && assignmentTargetsName(n, tree, name)) writes.push(n);
       else if (n.type === 'CommandAst' && commandTouchesName(n, tree, name)) writes.push(n);
       else if (n.type === 'ConvertExpressionAst' && /^\[ref\]/i.test(n.text.trim()) && descendantsOf(n, tree).some((d) => isVarNamed(d, name))) writes.push(n);
+      else if (n.type === 'InvokeMemberExpressionAst' && (descendantsOf(n, tree).some((d) => isVarNamed(d, name)) || invokeMemberTouches(n, tree, name))) writes.push(n);
+      else if (n.type === 'UnaryExpressionAst' && descendantsOf(n, tree).some((d) => isVarNamed(d, name))) writes.push(n);
+      else if (n.type === 'ForEachStatementAst' && tree.kids(n).length > 0 && isVarNamed(tree.kids(n)[0], name)) writes.push(n);
     }
     if (writes.length !== 1) {
       violate(`input channel: $${name} must be written exactly once in step 4 (the gate-output capture), found ${writes.length} write(s)${writes.length ? `: ${writes.map((w) => describe(w)).join('; ')}` : ''}; an extra write to $${name} in any form (assignment, +=, Set-/New-Variable, -OutVariable, Tee-Object -Variable, variable: path, [ref], scoped or braced spelling) can make a branch print the wrong remedy and is RED`);
@@ -758,12 +996,37 @@ function step4Remedies(sourceText) {
     if (capture.type !== 'AssignmentStatementAst' || capture.operator !== 'Equals' || !isPlainVariable(tree.kids(capture)[0], name)) {
       violate(`input channel: the single write to $${name} in step 4 must be the plain gate-output capture assignment '$${name} = ...', got ${describe(capture)}`);
     }
+    captures[name] = capture;
     const rhs = tree.kids(capture)[1];
-    if (name === 'agentDocsOutput' && !(rhs && rhs.text.includes('verify-agent-docs-fresh.mjs'))) {
-      violate(`input channel: the single write to $agentDocsOutput must capture the gate output ('& node scripts/verify-agent-docs-fresh.mjs 2>&1'), got ${describe(capture)}`);
+    if (name === 'agentDocsOutput') {
+      // F1: bind the actual invocation structure, not a substring.
+      const pipe = rhs ? unwrap(rhs, tree) : null;
+      const cmd = pipe && pipe.type === 'PipelineAst' && tree.kids(pipe).length === 1 ? tree.kids(pipe)[0] : null;
+      const parts = cmd && cmd.type === 'CommandAst' ? tree.kids(cmd) : [];
+      const ok = cmd && cmd.invocationOperator === 'Ampersand' && (cmd.commandName ?? '').toLowerCase() === 'node'
+        && parts.length === 3 && parts[0].type === 'StringConstantExpressionAst' && parts[0].value === 'node'
+        && parts[1].type === 'StringConstantExpressionAst' && parts[1].value === 'scripts/verify-agent-docs-fresh.mjs'
+        && parts[2].type === 'MergingRedirectionAst' && parts[2].text.trim() === '2>&1';
+      if (!ok) violate(`input channel: the single write to $agentDocsOutput must capture the gate output as the exact invocation '& node scripts/verify-agent-docs-fresh.mjs 2>&1' (Ampersand CommandAst 'node' with those two constant arguments and the 2>&1 redirection), got ${describe(capture)}; a literal or command that merely mentions the gate filename is RED`);
     }
     if (name === 'agentDocsExit' && !(rhs && unwrap(rhs, tree).type === 'VariableExpressionAst' && unwrap(rhs, tree).text === '$global:LASTEXITCODE')) {
       violate(`input channel: the single write to $agentDocsExit must capture the gate exit code ('$agentDocsExit = $global:LASTEXITCODE'), got ${describe(capture)}`);
+    }
+  }
+  // F4: capture ordering and source -- the exit capture immediately
+  // follows the output capture in the same block, with no intervening
+  // $global:LASTEXITCODE write.
+  {
+    const outCap = captures.agentDocsOutput;
+    const exitCap = captures.agentDocsExit;
+    const block = tree.parent(outCap);
+    if (!block || tree.parent(exitCap) !== block) violate(`input channel: capture ordering -- $agentDocsExit must be captured in the same statement block as $agentDocsOutput, immediately after it`);
+    const siblings = tree.kids(block);
+    if (siblings.indexOf(exitCap) !== siblings.indexOf(outCap) + 1) violate(`input channel: capture ordering -- $agentDocsExit = $global:LASTEXITCODE must immediately follow $agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1 with no statement in between, so a '$global:LASTEXITCODE = 0' inserted between the gate execution and its capture cannot disable the guard`);
+    for (const n of all) {
+      if (n.type !== 'AssignmentStatementAst' || n.start <= outCap.start || n.start >= exitCap.start) continue;
+      const left = tree.kids(n)[0];
+      if (left && descendantsOf(left, tree).some((d) => d.type === 'VariableExpressionAst' && normalizedName(d.userPath) === 'lastexitcode')) violate(`input channel: capture ordering -- a $global:LASTEXITCODE write sits between the gate execution and $agentDocsExit capture: ${describe(n)}`);
     }
   }
 
@@ -970,6 +1233,50 @@ test('step-4 lock binds input, indirect/output channels and branch order (phase 
   }
 });
 
+test('step-4 lock binds capture structure/order, dynamic commands, parameter binding, in-place mutation and splats (phase 9)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const captureLine = '$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1';
+  const input = /input channel: \$agentDocs(?:Output|Exit) must be written exactly once/;
+  const cases = [
+    // F1: a literal / other command that merely mentions the gate file.
+    ['F1 literal mentioning gate filename', SYNTHETIC.replace(captureLine, '$agentDocsOutput = "verify-agent-docs-fresh.mjs cone sparse-checkout"'), /exact invocation '& node scripts\/verify-agent-docs-fresh\.mjs 2>&1'/],
+    ['F1 wrong script argument mentioning gate filename in a comment-like string', SYNTHETIC.replace(captureLine, '$agentDocsOutput = & node scripts/other.mjs 2>&1'), /exact invocation/],
+    ['F1 gate invocation without call operator', SYNTHETIC.replace(captureLine, '$agentDocsOutput = node scripts/verify-agent-docs-fresh.mjs 2>&1'), /exact invocation/],
+    // F4: LASTEXITCODE reset between gate execution and exit capture.
+    ['F4 $global:LASTEXITCODE=0 between captures', SYNTHETIC.replace(afterCapture, `$global:LASTEXITCODE = 0\n${afterCapture}`), /capture ordering/],
+    ['F4 harmless statement between captures', SYNTHETIC.replace(afterCapture, `Write-Host "captured"\n${afterCapture}`), /capture ordering/],
+    // F2: dynamic command invocation reaching a name sink.
+    ['F2 & $cmd -Name $dn (Set-Variable via variables)', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$cmd = 'Set-Variable'; $dn = 'agentDocsOutput'; & $cmd -Name $dn -Value 'cone sparse-checkout'`), input],
+    ['F2 & $cmd -Name $dn for remedy', `${SYNTHETIC}\n$cmd = 'Set-Variable'; $dn = 'remedy'; & $cmd -Name $dn -Value 'x'`, /indirect remedy write/],
+    // F3: abbreviated parameters with indirect (variable) arguments.
+    ['F3 -OutV $dn', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$dn = 'agentDocsOutput'; Write-Output 'cone sparse-checkout' -OutV $dn`), input],
+    ['F3 Tee-Object -Var $dn', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$dn = 'agentDocsOutput'; 'cone sparse-checkout' | Tee-Object -Var $dn`), input],
+    ['F3 ambiguous -Ou $dn', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$dn = 'agentDocsOutput'; Write-Output 'x' -Ou $dn`), /ambiguous parameter -Ou/],
+    ['F3 abbreviated -OutV remedy via $dn', `${SYNTHETIC}\n$dn = 'remedy'; Write-Output 'x' -OutV $dn`, /indirect remedy write/],
+    // F5: in-place mutation through InvokeMemberExpressionAst.
+    ['F5 $agentDocsOutput.SetValue(...)', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$agentDocsOutput.SetValue('cone sparse-checkout',0)`), input],
+    ['F5 $agentDocsExit member call', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$agentDocsOutput.ToString()`), /input channel: \$agentDocsOutput must be written exactly once/],
+    // F7: splatted sink and statically resolved variable: path.
+    ['F7 splat @{OutVariable=agentDocsOutput}', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$s = @{ OutVariable = 'agentDocsOutput' }; Write-Output 'cone sparse-checkout' @s`), input],
+    ['F7 splat @{OutVariable=remedy}', `${SYNTHETIC}\n$s = @{ OutVariable = 'remedy' }; Write-Output 'x' @s`, /indirect remedy write/],
+    ['F7 unresolvable splat', SYNTHETIC.replace(afterCapture, `${afterCapture}\nWrite-Output 'x' @unknownSplat`), /indirect remedy write|input channel/],
+    ['F7 Set-Item $p where $p is variable:agentDocsOutput', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$p = 'variable:agentDocsOutput'; Set-Item $p 'cone sparse-checkout'`), input],
+    ['F7 Set-Item $p where $p is variable:remedy', `${SYNTHETIC}\n$p = 'variable:remedy'; Set-Item $p 'x'`, /indirect remedy write/],
+    // Independent-review additions (same channels, other AST shapes).
+    ['review: --$agentDocsExit unary write', SYNTHETIC.replace(afterCapture, `${afterCapture}\n--$agentDocsExit`), input],
+    ['review: foreach loop variable overwrites $agentDocsOutput', SYNTHETIC.replace(afterCapture, `${afterCapture}\nforeach ($agentDocsOutput in @('cone sparse-checkout')) {}`), input],
+    ['review: PSVariable.Set with string name (input)', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$ExecutionContext.SessionState.PSVariable.Set('agentDocsOutput', 'cone sparse-checkout')`), input],
+    ['review: PSVariable.Set with string name (remedy)', `${SYNTHETIC}\n$ExecutionContext.SessionState.PSVariable.Set('remedy', 'x')`, /indirect remedy write via member invocation/],
+    ['review: splat bundle mutated after assignment', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$s = @{}; $s.Add('OutVariable', 'agentDocsOutput'); Write-Output 'cone sparse-checkout' @s`), /indirect remedy write|input channel/],
+    ['review: abbreviated switch -For consumes no argument (Set-Variable)', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$dn = 'agentDocsOutput'; Set-Variable -For $dn 'cone sparse-checkout'`), input],
+    ['review: [scriptblock]::Create naming the input', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& ([scriptblock]::Create('$agentDocsOutput = "cone sparse-checkout"'))`), input],
+    ['review: [scriptblock]::Create naming the remedy', `${SYNTHETIC}\nInvoke-Command -ScriptBlock ([scriptblock]::Create('Set-Variable remedy x'))`, /indirect remedy write via member invocation/],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+});
+
 test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // Reworded remedy text: only the real file's texts are pinned, by the
   // signature test above; a synthetic rewording must still parse clean.
@@ -980,4 +1287,19 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   assert.equal(step4Remedies(commented).cone, 'sparse-checkout reapply');
   // A comment mentioning a needle outside any branch.
   assert.equal(step4Remedies(`# cone sparse-checkout\n${SYNTHETIC}`).cone, 'sparse-checkout reapply');
+  // Phase 9 harmless controls: a known clean splat (no sink key), a
+  // dynamic command with only non-sink named arguments, and a literal
+  // operator message that touches neither $remedy nor its name. The
+  // literal case documents the measured, explicitly rejected gap (a):
+  // remedy-looking TEXT without the remedy variable is not judged.
+  const cleanSplat = `${SYNTHETIC}\n$style = @{ ForegroundColor = 'Green' }; Write-Host 'step done' @style`;
+  assert.equal(step4Remedies(cleanSplat).cone, 'sparse-checkout reapply');
+  const literalMessage = `${SYNTHETIC}\nWrite-Host 'docs-agent gate failed; re-read the gate output before re-running'`;
+  assert.equal(step4Remedies(literalMessage).cone, 'sparse-checkout reapply');
+  // A clean splat on a dynamic command and an [ordered] clean splat are
+  // resolved, not rejected (independent-review controls).
+  const dynamicSplat = `${SYNTHETIC}\n$validatorArgs = @{ BaseCommit = 'main' }; & $Validator @validatorArgs`;
+  assert.equal(step4Remedies(dynamicSplat).cone, 'sparse-checkout reapply');
+  const orderedSplat = `${SYNTHETIC}\n$style = [ordered]@{ ForegroundColor = 'Green' }; Write-Host 'step done' @style`;
+  assert.equal(step4Remedies(orderedSplat).cone, 'sparse-checkout reapply');
 });
