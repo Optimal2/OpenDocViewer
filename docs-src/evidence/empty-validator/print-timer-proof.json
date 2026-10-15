@@ -21,5 +21,13 @@
       "publicSha256": "55d476de8aad8127a2598ba7f20471e78245f20d431ba284b248ecb3dc6d0aba"
     }
   ],
-  "publicNormalization": "ANSI color, repository path, trailing whitespace and terminal blank lines normalized; raw logs and their SHA256 unchanged."
+  "publicNormalization": "ANSI color, repository path, trailing whitespace and terminal blank lines normalized; raw logs and their SHA256 unchanged.",
+  "reconstruction": {
+    "source": "src/components/__tests__/printPipeline.test.jsx",
+    "operation": "Replace exactly one UTF-8 byte sequence; preserve every other byte and line ending.",
+    "find": "await vi.runAllTimersAsync();",
+    "replace": "await Promise.resolve();",
+    "expectedOccurrences": 1,
+    "expectedSha256": "437160bc6d1e69bc7341e3a314721cb821b0dbc9e0b6141024a4b9a1c9ad4bc5"
+  }
 }
