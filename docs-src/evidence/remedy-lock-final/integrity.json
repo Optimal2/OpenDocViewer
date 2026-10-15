@@ -1,0 +1,54 @@
+{
+  "baseline": "8f459b84",
+  "originalTestCount": 18,
+  "originalTestsUnchanged": true,
+  "firstFourTestsSha256": "b3034f9809a4f86ba880be5cd35c61bdade03abb0f6eddc9a71f63f751a56fd5",
+  "remainingFourteenTestsAndFixturesSha256": "63629ea4ddd94ca026c0396066d9ad889f0b545f762dacb231da23667be3a3fb",
+  "unchanged": [
+    {
+      "file": "scripts/local-ci.ps1",
+      "sha256": "3ed647babef1750c3753d215d9a567663067f1db72f1081dfaca0485f2bc64f2",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/parse-local-ci-ast.mjs",
+      "sha256": "18364b894bccee56b7706ba824bdfd55feb9410ca49a7fbfe858ce7fd4beeab2",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/parse-local-ci-ast.ps1",
+      "sha256": "f930b466dccf5fb13e6640b2616f0d63cda54342edfe5ef7709410828d9a468c",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/parse-local-ci-ast-batch.test.mjs",
+      "sha256": "c0bb1296a626465109666f271660984e6b10d77cc897431781bdd81736e60ee7",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/benchmark-step4-ast.mjs",
+      "sha256": "c3374a70b52bc102972d7e201582a1ff538e306328f9a7203020a9d1669852f3",
+      "unchanged": true
+    },
+    {
+      "file": "package.json",
+      "sha256": "d119fc47aed70086ab642d46df8bfbe80105bea1ed9d29752f82d44c608a15c4",
+      "unchanged": true
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "518c9e7143e8afa32098accffc0e80335d946ba916635d3cbc57fb49a897558e",
+      "unchanged": true
+    },
+    {
+      "file": "omp-components.json",
+      "sha256": "674b2074be67a47aa835ed9594c436ed9d8a6825cf72d983e7da3164720b54c6",
+      "unchanged": true
+    },
+    {
+      "file": "opendocviewer.module-definition.json",
+      "sha256": "014985240ea075c91a5598e08d19e5e202728ba2779c43a09acfc42b5be61712",
+      "unchanged": true
+    }
+  ]
+}

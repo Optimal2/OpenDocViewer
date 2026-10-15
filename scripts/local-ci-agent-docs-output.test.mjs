@@ -394,11 +394,11 @@
 //   F2 VERDICT-FLAG INITIALISER: '$agentDocsPassed = $false' sits just
 //      ahead of the anchored step-4 block (local-ci.ps1 line 253) and was
 //      unjudged; flipping it to $true made local CI print the stale
-//      remedy and then PASS with exit 0. Every assignment to the verdict
-//      flag anywhere in the file must now be the bound gate-exit
-//      then-block store or an explicit '= $false' (fail-closed values
-//      only). The review's F6 note stands: code outside step 4 other
-//      than this flag stays the documented, deliberate boundary.
+//      remedy and then PASS with exit 0. The file-wide sweep covers
+//      assignment statements to the unqualified $agentDocsPassed path:
+//      the bound gate-exit then-block store or an explicit '= $false'.
+//      This is assignment-only coverage, not all variable spellings or
+//      mutations. Deliberate scope/provider stores are outside this bound.
 //   F3 POSITIONS: the bound throw must BE the npm-guard body and the
 //      bound npm call must sit in the capture's own block, ahead of the
 //      capture, immediately followed by its guard; moved earlier, they
@@ -411,6 +411,13 @@
 //   The phase-15 header's OCCURRENCES bullet (the review's F5) is now
 //   accurate: with qualification banned, the occurrence counter sees the
 //   same name the allowlist judges.
+// Final bounded correction: the real echo must follow both captures and
+// precede the gate-exit branch in their common statement block. A cheap
+// whole-file AST pin rejects constant-zero exits except the final main-try
+// if ($overallSuccess) success branch, and return/break/continue in catches.
+// Existing failure-result catches and the telemetry-warning catch remain
+// valid. This is not a PowerShell interpreter or an all-control-flow proof;
+// deliberate fake output outside step 4 remains an unjudged output channel.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -423,6 +430,7 @@ import fs from 'node:fs';
 import { test } from 'vitest';
 import { URL } from 'node:url';
 import { createPowerShellParser } from './parse-local-ci-ast.mjs';
+import { finalFixtures } from './remedy-lock-final-fixtures.mjs';
 
 const localCiPath = new URL('./local-ci.ps1', import.meta.url);
 const source = fs.readFileSync(localCiPath, 'utf8');
@@ -1122,6 +1130,38 @@ function assignmentTargetsName(assignNode, tree, name) {
 function step4Remedies(sourceText) {
   const tree = buildTree(parsePowerShell(sourceText));
   const all = [...tree.byId.values()];
+  // FINAL-SILENT-TERMINATION-BEGIN
+  // Bind the one legitimate exit 0 to the final verdict of the top-level
+  // try containing step 4. Comments do not appear in this real AST.
+  for (const n of all) {
+    if (['ReturnStatementAst', 'BreakStatementAst', 'ContinueStatementAst'].includes(n.type)
+      && all.some((c) => c.type === 'CatchClauseAst' && tree.isWithin(n, c))) {
+      violate(`silent termination: ${describe(n)} inside a catch can bypass the final failed verdict`);
+    }
+    if (n.type !== 'ExitStatementAst') continue;
+    const parts = tree.kids(n);
+    const expression = parts.length === 1 && parts[0].type === 'PipelineAst' ? tree.kids(parts[0]) : [];
+    const value = expression.length === 1 ? unwrap(expression[0], tree) : null;
+    if (!value || value.type !== 'ConstantExpressionAst' || value.value !== '0') continue;
+    const thenBlock = tree.parent(n);
+    const verdict = thenBlock && tree.parent(thenBlock);
+    const verdictParts = verdict ? tree.kids(verdict) : [];
+    const conditionParts = verdictParts[0] ? tree.kids(verdictParts[0]) : [];
+    const condition = conditionParts.length === 1 ? unwrap(conditionParts[0], tree) : null;
+    const mainBlock = verdict && tree.parent(verdict);
+    const mainTry = mainBlock && tree.parent(mainBlock);
+    const topBlock = mainTry && tree.parent(mainTry);
+    const ok = verdict?.type === 'IfStatementAst' && verdict.clauseCount === 1 && verdict.hasElse
+      && verdictParts[1] === thenBlock && tree.kids(thenBlock).at(-1) === n
+      && condition && isPlainVariable(condition, 'overallSuccess')
+      && mainTry?.type === 'TryStatementAst' && tree.kids(mainTry)[0] === mainBlock
+      && tree.kids(mainBlock).at(-1) === verdict && topBlock?.type === 'NamedBlockAst'
+      && tree.parent(topBlock)?.parentId === 0
+      && all.some((b) => b.type === 'StringConstantExpressionAst'
+        && b.value === '[4/4] Verifying generated agent documentation is fresh' && tree.isWithin(b, mainBlock));
+    if (!ok) violate(`silent termination: constant-zero exit outside the final if ($overallSuccess) success branch: ${describe(n)}`);
+  }
+  // FINAL-SILENT-TERMINATION-END
   const isRemedyAssign = (n) => n.type === 'AssignmentStatementAst' && tree.kids(n)[0] && isPlainVariable(tree.kids(n)[0], 'remedy');
 
   // --- Anchor: step 4's own banner and gate-exit structure. ---
@@ -1251,6 +1291,15 @@ function step4Remedies(sourceText) {
     const echoLoops = all.filter((n) => n.type === 'ForEachStatementAst' && tree.isWithin(n, step4Block) && !tree.isWithin(n, regionBlock) && descendantsOf(n, tree).some((d) => isVarNamed(d, 'agentDocsOutput')));
     if (echoLoops.length !== 1) violate(`literal output channel: expected exactly one gate-output echo loop ('foreach ($line in @($agentDocsOutput))') inside step 4, found ${echoLoops.length}; the echo loop is the only permitted consumer of the captured gate output, so a second loop over it (or none) is RED`);
     const echoLoop = echoLoops[0];
+    // FINAL-ECHO-ORDER-BEGIN
+    // Relative order only: harmless statements need not be adjacent here.
+    const orderBlock = tree.parent(captures.agentDocsOutput);
+    const ordered = [captures.agentDocsOutput, captures.agentDocsExit, echoLoop, gateTests[0]];
+    if (!ordered.every((n) => tree.parent(n) === orderBlock)
+      || !ordered.every((n, i) => i === 0 || ordered[i - 1].end <= n.start)) {
+      violate('literal output channel: echo order: output capture, exit capture, echo and gate-exit branch must occur in that order in their common statement block');
+    }
+    // FINAL-ECHO-ORDER-END
     const loopParts = tree.kids(echoLoop);
     if (loopParts.length !== 3 || !loopParts[0] || !isPlainVariable(loopParts[0], 'line')) violate(`literal output channel: the gate-output echo loop must iterate the plain variable $line ('foreach ($line in @($agentDocsOutput))'), got ${describe(echoLoop)}; a renamed loop variable breaks the binding between the echoed lines and the gate output`);
     const echoEnumerator = loopParts[1];
@@ -1631,11 +1680,11 @@ function step4Remedies(sourceText) {
     // region by construction, so the store sweep above cannot see them.
     // Flipping the initialiser to $true makes local CI print the stale
     // remedy and then report PASS with exit 0 while the documentation is
-    // stale (measured, phase-15 review). Every assignment to the verdict
-    // flag anywhere in the file must therefore be either the bound
+    // stale (measured, phase-15 review). Each assignment to the unqualified
+    // verdict path must therefore be either the bound
     // gate-exit then-block store or an explicit '= $false' -- a value that
-    // can only fail closed. Any other value, operator or scope spelling
-    // ('$global:agentDocsPassed = $true', '$agentDocsPassed += ...') is RED.
+    // can only fail closed. Other values/operators on that path are RED;
+    // scope/provider paths and non-assignment mutations are not swept here.
     for (const n of all) {
       if (n.type !== 'AssignmentStatementAst') continue;
       const left = tree.kids(n)[0];
@@ -2379,4 +2428,32 @@ test('step-4 lock closes the phase-15 review follow-up findings (phase 16)', () 
   assert.equal(step4Remedies(realChain).cone, 'sparse-checkout reapply');
   const boundNpm = SYNTHETIC.replace(capture, `${npmGuard}\n${capture}`);
   assert.equal(step4Remedies(boundNpm).cone, 'sparse-checkout reapply');
+});
+
+test('final correction rejects real echo movements with the order reason', () => {
+  const cases = finalFixtures(source, parsePowerShell(source)).filter((c) => c.name.startsWith('echo-'));
+  powerShellParser.prewarm(cases.map((c) => c.text));
+  for (const { name, reason, text } of cases) {
+    assert.throws(() => step4Remedies(text), reason, `case must be RED: ${name}`);
+  }
+});
+
+test('final correction rejects early zero exit and silent catch termination', () => {
+  const cases = finalFixtures(source, parsePowerShell(source)).filter((c) => !c.name.startsWith('echo-'));
+  powerShellParser.prewarm(cases.map((c) => c.text));
+  for (const { name, reason, text } of cases) {
+    assert.throws(() => step4Remedies(text), reason, `case must be RED: ${name}`);
+  }
+});
+
+test('final correction preserves the real success exit, catches, comments and harmless gaps', () => {
+  const cases = [
+    source,
+    source.replace(/^([ \t]*)exit 0$/m, '$1# exit 0; catch { return; break; continue; exit 0 }\n$1exit 0'),
+    source.replace('foreach ($line in @($agentDocsOutput))', '# Diagnostic wording may change.\n            foreach ($line in @($agentDocsOutput))'),
+    SYNTHETIC.replace(ECHO_LOOP, `try {} finally {}\n${ECHO_LOOP}\ntry {} finally {}`),
+    SYNTHETIC.replace('sparse-checkout reapply', 'reapply the sparse checkout, then re-run'),
+  ];
+  powerShellParser.prewarm(cases);
+  for (const text of cases) assert.ok(step4Remedies(text).cone);
 });

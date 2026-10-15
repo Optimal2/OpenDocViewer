@@ -1,0 +1,28 @@
+
+ RUN  v5.0.4 <repo>
+
+ ❯ scripts/.remedy-lock-final-probe.test.mjs (21 tests | 1 failed | 20 skipped) 3378ms
+   × final correction rejects early zero exit and silent catch termination 3375ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 skipped (21)
+   Start at  00:47:19
+   Duration  3.94s (tests 94%, transform 4%, import 2%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/.remedy-lock-final-probe.test.mjs > final correction rejects early zero exit and silent catch termination
+AssertionError: Missing expected exception: case must be RED: early-exit-zero
+
+simple
+
+ ❯ scripts/.remedy-lock-final-probe.test.mjs:2414:12
+    2412|   powerShellParser.prewarm(cases.map((c) => c.text));
+    2413|   for (const { name, reason, text } of cases) {
+    2414|     assert.throws(() => step4Remedies(text), reason, `case must be RED…
+       |            ^
+    2415|   }
+    2416| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

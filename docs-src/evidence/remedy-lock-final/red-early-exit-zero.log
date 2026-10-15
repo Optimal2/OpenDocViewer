@@ -1,0 +1,30 @@
+
+ RUN  v5.0.4 <repo>
+
+ ❯ scripts/.remedy-lock-final-probe.test.mjs (21 tests | 1 failed | 20 skipped) 1326ms
+   × each step-4 cause branch assigns its OWN remedy text and no other branch's 1323ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 skipped (21)
+   Start at  00:46:54
+   Duration  1.91s (tests 86%, transform 10%, import 4%, worker 1%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/.remedy-lock-final-probe.test.mjs > each step-4 cause branch assigns its OWN remedy text and no other branch's
+AssertionError: step-4 allowlist violation: silent termination: constant-zero exit outside the final if ($overallSuccess) success branch: ExitStatementAst 'exit 0'
+
+simple
+
+ ❯ violate scripts/.remedy-lock-final-probe.test.mjs:650:10
+    648| const VIOLATION = 'step-4 allowlist violation';
+    649| function violate(detail) {
+    650|   assert.fail(`${VIOLATION}: ${detail}`);
+       |          ^
+    651| }
+    652|
+ ❯ step4Remedies scripts/.remedy-lock-final-probe.test.mjs:1162:14
+ ❯ scripts/.remedy-lock-final-probe.test.mjs:1860:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

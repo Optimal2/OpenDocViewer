@@ -1,0 +1,110 @@
+[
+  {
+    "name": "red-echo-before-captures",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "8084f106f87d1ee93cfb8884c1ddfd87217f7f100dd59be3c8636c0f3c6955f0",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "d0bafcfb0bc9793efc85eeef5c595de2834647fb6081a5b1405e159d394e2f5a",
+    "publicOutputSha256": "c47cf18e9e1c828272b6888153a804b1b2ab8d487f4d51e20f51d55134a387f4"
+  },
+  {
+    "name": "red-echo-after-verdict",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "10f2d10628da4afddf757c8b34e5562e1d126bd70176e4d06c3433179a2f9d04",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "f708b793ca4192f2e9bfce175a1be018b75e5c00b9a9d4f596dddb3be2ba5561",
+    "publicOutputSha256": "554a41a509bf5dfa391ca5e61331f2a46c0c708bde47b38055129bce90bb2e1f"
+  },
+  {
+    "name": "red-early-exit-zero",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "0c906404061872cdadcf0a7d5a58a3dfa8cdd061c6ae3699673a9953c50b86a1",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "6c9f377b27152482622d0954c68efa399813d4fb24b9c498a4e9985493a442f9",
+    "publicOutputSha256": "9936f5fa173040acf3d45007582983aa75973bbaa3516aa774783807cf6cf94a"
+  },
+  {
+    "name": "red-catch-return",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "a9952c86f9ff6d8688aafa351b3cc7cb846f2aa7e6a705379d24aea12d889698",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "1bc77ebbc7891013dae45789f719324dc231401328e7b0bf86c4d461d4392819",
+    "publicOutputSha256": "c317104f223af85874b78e332e7c56169b84344c3a663224924d5d45591f602e"
+  },
+  {
+    "name": "red-catch-break",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "693bde0c2a1d1d44294f326b4dc3a214f2ae4be9d10ccc535ed3e3ef2e2e41ae",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "e4c993ac0893796eec97c8e8c50bdba2d3574c4d7dcb7dc63346ebbeba5dadaf",
+    "publicOutputSha256": "48145cfbebf16dccd417376a75b08aa402e96debd5e3be11b6b6340ca00d9f34"
+  },
+  {
+    "name": "red-catch-continue",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "587c225b71889ac0ca40c9ffc08d5e8bc6742b2c04c6d33935fbb654417ed483",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "eb99dcb149de857d7fa35fe8c8ebb0f96b54e796d24e601a1785bda7f77f53b8",
+    "publicOutputSha256": "34e1830042f01ed2dae17a43f782f15a19b23ee94dffcaf083c58da943f7d30b"
+  },
+  {
+    "name": "red-catch-exit-0",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 1,
+    "sourceSha256": "1497ef03ce09054c139acf817f32fb9253d466ab6c50013007d393be52e21825",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "bbf8e86c77bc21ae512753595b33f1640dca00f960a1839fc76136e5a2facd25",
+    "publicOutputSha256": "a9af4237ce1ac43f535fba12116721d5d907ea23353a2246e34c17825682dbb7"
+  },
+  {
+    "name": "guard-off-echo-before-captures",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 0,
+    "sourceSha256": "8084f106f87d1ee93cfb8884c1ddfd87217f7f100dd59be3c8636c0f3c6955f0",
+    "validatorSha256": "f13cade5e00cbc934e655f6cd6ad8750d851923e34b0ad612ecf399284b17d12",
+    "rawOutputSha256": "683e18891fa42efca6f22858acb91010b50a136ace8e6cfd89a3f723224d1699",
+    "publicOutputSha256": "3e065f30180f957e278675fcec8cb70a02248a572bedf7d182e6ccb117d13cb9"
+  },
+  {
+    "name": "binding-red-echo-before-captures",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t final correction rejects real echo",
+    "nativeExit": 1,
+    "sourceSha256": "3ed647babef1750c3753d215d9a567663067f1db72f1081dfaca0485f2bc64f2",
+    "validatorSha256": "f13cade5e00cbc934e655f6cd6ad8750d851923e34b0ad612ecf399284b17d12",
+    "rawOutputSha256": "b9b92d18c661a45d53302d0df57610ade545a940d8c23c3105ea6f092f37eb37",
+    "publicOutputSha256": "217ca1a5027be14108543047e8f01b2ad70d809dc29c5cbf24a8eb58e2fcc309"
+  },
+  {
+    "name": "guard-off-early-exit-zero",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t ^each step-4 cause branch",
+    "nativeExit": 0,
+    "sourceSha256": "0c906404061872cdadcf0a7d5a58a3dfa8cdd061c6ae3699673a9953c50b86a1",
+    "validatorSha256": "23c4ae4d5887632e0dc242e8326fcc4e66b6cd869d8ae65c5e27c1fcf60304e9",
+    "rawOutputSha256": "530df59c8022a1758c61b57e76e82291bb8a194f0caeb664b57ef584267f5f54",
+    "publicOutputSha256": "bbbd2f5d76f08feda01788f7392f2636652b3f910a20b30b80763d65ed758249"
+  },
+  {
+    "name": "binding-red-early-exit-zero",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t final correction rejects early zero",
+    "nativeExit": 1,
+    "sourceSha256": "3ed647babef1750c3753d215d9a567663067f1db72f1081dfaca0485f2bc64f2",
+    "validatorSha256": "23c4ae4d5887632e0dc242e8326fcc4e66b6cd869d8ae65c5e27c1fcf60304e9",
+    "rawOutputSha256": "159d6fb9b6679c8575ecc53b1f2097ee6204ddf74c1a5252177c482f59beea32",
+    "publicOutputSha256": "ca7c738014bf979d3627afb6cdc2a1bc138ae076feab71a193986a533523edb1"
+  },
+  {
+    "name": "restored-green",
+    "command": "node node_modules/vitest/vitest.mjs run scripts/.remedy-lock-final-probe.test.mjs -t final correction|^each step-4 cause branch",
+    "nativeExit": 0,
+    "sourceSha256": "3ed647babef1750c3753d215d9a567663067f1db72f1081dfaca0485f2bc64f2",
+    "validatorSha256": "960b3116aff5e7f3cd04e3a9cc6502edcc373ee9b3dca74620e93cefb0b0b678",
+    "rawOutputSha256": "fa56ed379a35522cd55707b3a5f7045a8ef3a64b4d409014943243eff98a9814",
+    "publicOutputSha256": "9b5e0f5d6bdc1c9f2507a8e09fe420ea7cbd6acc6b59eff404e5bece8e5adb73"
+  }
+]
