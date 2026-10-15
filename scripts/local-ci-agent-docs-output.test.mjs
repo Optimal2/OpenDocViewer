@@ -196,7 +196,10 @@
 // (named, not closed): dynamic execution of an
 // external script (`& $Validator`, dot-sourcing the telemetry helper)
 // is judged only by its in-file arguments -- code inside those external
-// files is out of scope. Statements elsewhere that touch neither the
+// files is out of scope. Since phase 13 such an invocation INSIDE step 4
+// is RED outright (no dynamic or unrecognized command is on the step-4
+// allowlist, captured or not); the gap covers only invocations outside
+// step 4. Statements elsewhere that touch neither the
 // step-4 input variables, the remedy variable/name, nor a name sink
 // above remain out of scope by construction.
 // Phase 11 closes the six bypasses the independent review of
@@ -221,19 +224,26 @@
 //      Write-Host' is judged as Write-Host) and must be on the step-4
 //      allowlist -- the banner/echo Write-Host, Push-/Pop-Location, or
 //      the exact bound '& npm run doc:agent' and gate-capture node
-//      invocation. Any other command is accepted only when its pipeline
-//      (success-stream) output is captured or discarded ('$x = ...',
-//      '$null = ...', piped to Out-Null): uncaptured output of an
-//      innocent-looking cmdlet (Get-Date -Format 'wrong advice') is
-//      console output too. Capture binds only the success stream --
-//      '$null = Write-Host "x"' still prints -- which is why output
-//      cmdlets are rejected outright above and never reach the capture
-//      check. Alias creation in every spelling (Set-Alias/New-Alias, the
-//      built-in nal/sal aliases, '$alias:zz = ...' drive assignments,
-//      alias: provider paths) and the host-only channels Write-Progress
-//      (F6) and Read-Host are RED inside step 4 even when captured;
-//      the review measured no redirected-console harm for Write-Progress,
-//      so no interactive-only channel is claimed closed beyond that.
+//      invocation. Any other command is RED, captured or not: phase 11
+//      originally accepted an unrecognized command when its pipeline
+//      (success-stream) output was captured or discarded ('$x = ...',
+//      '$null = ...', piped to Out-Null), but the phase-12 review
+//      measured that escape hatch green with attacker text (captured
+//      Set-Item/New-Item/Import-Alias creating an alias, captured
+//      Invoke-Expression/iex, captured Clear-Host, and a captured
+//      Get-Item whose terminating error routes attacker text to the
+//      step-4 catch handler), so phase 13 removed it. Capture binds
+//      only the success stream -- '$null = Write-Host "x"' still
+//      prints -- which is why output cmdlets are rejected outright and
+//      why capture never proves an unrecognized command harmless.
+//      Alias creation needs either an alias:-drive assignment (RED, the
+//      sweep below) or a command (no alias-creating command is on the
+//      allowlist, and unrecognized commands are RED captured or not),
+//      so no alias-creating spelling remains inside step 4. The
+//      host-only channels Write-Progress (F6) and Read-Host are RED in
+//      every form, captured or not; the phase-11 review measured no
+//      redirected-console harm for Write-Progress, so no
+//      interactive-only channel is claimed closed beyond that.
 //   F4 MEMBER INVOCATIONS: the only InvokeMemberExpressionAst allowed
 //      inside step 4 is the echo loop's $line.ToString(). A console
 //      write through [Console]::WriteLine, $Host.UI.WriteLine or the same
@@ -252,10 +262,15 @@
 //   F7 ALIAS SPELLINGS: nal/sal (the built-in New-Alias/Set-Alias
 //      aliases), '$alias:zz = "Write-Host"' drive assignments and
 //      'Set-Item alias:zz ...' provider writes all create an alias without
-//      tripping the literal command-name check; every alias-creating
-//      spelling inside step 4 is now RED (command names nal/sal, alias:
-//      drive assignment left sides, alias: provider arguments), wherever
-//      in step 4 they sit (a nested finally included).
+//      tripping the literal command-name check; those literal spellings
+//      are RED (command names nal/sal, alias: drive assignment left
+//      sides, alias: provider string-literal arguments), wherever in
+//      step 4 they sit (a nested finally included). This paragraph
+//      over-claimed when written ("every alias-creating spelling"): the
+//      alias: provider sweep only inspected string literals, so a
+//      variable or constructed provider path ('$p = "alias:zz"; $null =
+//      Set-Item $p Write-Host') stayed green until phase 13 removed the
+//      capture escape hatch that let those commands run at all.
 //   F8 ECHO REACHABILITY: the echo loop body is bound, not just the loop
 //      shape: every body statement must be an echo Write-Host, the exact
 //      'if ($null -eq $line) { continue }' guard, or the exact ErrorRecord
@@ -273,6 +288,46 @@
 //   F11 HEADER TRUTHFULNESS: the phase-11 header claimed the F7 alias
 //      closure and overstated the capture rule; both are corrected above
 //      and by this paragraph.
+// Phase 13 (this round) closes the five follow-up findings of the phase-12
+// independent review (VERDICT: hold), each measured GREEN on the full
+// suite with attacker text on the verbatim step-4 chain:
+//   O-1 ALIAS PROVIDER PATHS: the alias: sweep only inspected string
+//      literals, so '$p = "alias:zz"; $null = Set-Item $p Write-Host'
+//      (also New-Item -Path $p, New-Item -Path ('ali'+'as:zz') and
+//      Import-Alias) created the alias while the lock stayed green.
+//      Those commands are not on the step-4 allowlist anymore at all --
+//      see the capture-hatch removal below.
+//   O-2 THE CATCH CHANNEL: local-ci.ps1 sets $ErrorActionPreference =
+//      'Stop', so any terminating cmdlet error ('$null = Get-Item
+//      -LiteralPath "<text>"') makes the step-4 catch handler print the
+//      attacker message with its own prefix, replacing the gate output
+//      AND the remedy. Binding throw (F10) did not close this. It is now
+//      closed for every statement shape that can carry attacker text
+//      into an exception inside step 4: unrecognized commands are RED
+//      captured or not, every allowlisted command carries an exact bound
+//      shape (the banner/echo Write-Host, exactly 'Push-Location
+//      $RepoRoot', argument-less Pop-Location, '& npm run doc:agent',
+//      the bound gate capture), an assignment right side inside step 4
+//      may only STORE a constant, a string (expandable strings may embed
+//      only plain non-splatted variables) or a plain non-splatted
+//      variable read -- an executing or converting right side (a
+//      captured command, [datetime]'...', $(...), an operator
+//      expression) is RED -- and the only control-flow structures
+//      recognized inside step 4 are the bound npm-exit throw guard, the
+//      anchored gate-exit test, the bound echo loop and try/finally
+//      scaffolding; any other if/foreach evaluates an unbound condition
+//      or enumerator and is RED.
+//   O-3 CAPTURED CODE EXECUTION: '$null = Invoke-Expression ...' / iex
+//      ran attacker code; capture binds only the success stream, so
+//      capture never proves a command harmless.
+//   O-4 CAPTURED HOST EFFECTS: '$null = Clear-Host' and captured
+//      dot-sourcing were accepted; step 4 has no legitimate use for
+//      either.
+//   O-5 MECHANISM: constant propagation fed the name-sink analysis but
+//      not the alias: sweep, hiding the blind spot. The fix is not more
+//      propagation but removing the escape hatch: the step-4 command
+//      boundary is now a strict positive allowlist with no captured-or-
+//      discarded exemption.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -1313,29 +1368,21 @@ function step4Remedies(sourceText) {
       }
     }
 
-    // (F3/F6) Command boundary: the invoked name (module qualifier
+    // (F3/F6/O-1..O-4) Command boundary: the invoked name (module qualifier
     // stripped, dynamic heads resolved statically) must be on the step-4
     // allowlist and carry its bound shape; output cmdlets are only the
-    // banner and the exact echo; alias redefinition is RED; any other
-    // command must have its pipeline output captured or discarded, because
-    // uncaptured output of an innocent-looking cmdlet is console output
-    // too (Get-Date -Format 'wrong advice').
+    // banner and the exact echo; alias redefinition is RED. A command not on
+    // the allowlist is RED whether or not its pipeline output is captured or
+    // discarded: capture binds only the success stream, so a captured
+    // Invoke-Expression/iex still executes attacker code, a captured
+    // Set-Item/New-Item/Import-Alias can still create an alias: provider
+    // entry, a captured Clear-Host still wipes the console, and a
+    // terminating error from any unrecognized command routes its
+    // attacker-chosen message to the step-4 catch handler (phase-12 review
+    // findings O-1..O-4). There is no captured-or-discarded exemption.
     const captureRhs = tree.kids(captures.agentDocsOutput)[1];
     const capturePipe = captureRhs ? unwrap(captureRhs, tree) : null;
     const captureCmd = capturePipe && capturePipe.type === 'PipelineAst' && tree.kids(capturePipe).length === 1 ? tree.kids(capturePipe)[0] : null;
-    const isCapturedOrDiscarded = (cmd) => {
-      let cur = tree.parent(cmd);
-      while (cur && cur.id !== step4Block.id) {
-        if (cur.type === 'AssignmentStatementAst') return true;
-        if (cur.type === 'PipelineAst') {
-          const els = tree.kids(cur);
-          const last = els[els.length - 1];
-          if (els.length > 1 && last && last.type === 'CommandAst' && (last.commandName ?? '').toLowerCase() === 'out-null') return true;
-        }
-        cur = tree.parent(cur);
-      }
-      return false;
-    };
     for (const n of all) {
       if (n.type !== 'CommandAst') continue;
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
@@ -1370,15 +1417,14 @@ function step4Remedies(sourceText) {
       }
       // Capture binds the PIPELINE (success) stream only: '$null =
       // Write-Host "x"' still prints, which is why output cmdlets are
-      // judged above and never reach this capture check.
+      // judged above. For the same reason capture never excuses an
+      // unrecognized command: there is no captured-or-discarded
+      // exemption (phase-12 review findings O-1..O-4).
       if (OUTPUT_COMMANDS.has(cn) && cn !== 'write-host') {
         violate(`literal output channel: output command '${cmdText}' writes to a host/output stream inside step 4 and is neither the step-4 banner nor the gate-output echo; inside step 4 the only console outputs on the allowlist are the banner, the echo (Write-Host $line) and 'Write-Host $remedy', so a literal or aliased output command inside step 4 is RED whatever words it uses`);
       }
       if (!STEP4_COMMANDS.has(cn)) {
-        if (!isCapturedOrDiscarded(n)) {
-          violate(`literal output channel: command '${cmdText}' is not on the step-4 command allowlist (Write-Host, Push-/Pop-Location, the bound npm/node gate invocations) and its pipeline output is not captured or discarded, so it cannot be proven not to print a wrong remedy inside step 4 -- uncaptured output of an innocent-looking cmdlet is console output too; capture it ('$null = ...', piped to Out-Null) or move it out of step 4`);
-        }
-        continue;
+        violate(`literal output channel: command '${cmdText}' is not on the step-4 command allowlist (the banner/echo Write-Host, 'Push-Location $RepoRoot', Pop-Location, the bound npm/node gate invocations); inside step 4 an unrecognized command is RED whether or not its pipeline output is captured or discarded, because capture binds only the success stream -- a captured Invoke-Expression/iex still executes attacker code, a captured Set-Item/New-Item/Import-Alias can still create an alias that redefines a later invocation as an output command, a captured Clear-Host still wipes the console, and a terminating error from the command routes its attacker-chosen message to the step-4 catch handler, replacing the gate output and the remedy; move the command out of step 4 or bind its exact shape on the allowlist`);
       }
       if (cn === 'write-host') {
         if (descendantsOf(n, tree).some((d) => d.id === banners[0].id)) {
@@ -1416,7 +1462,85 @@ function step4Remedies(sourceText) {
         if (!captureCmd || n.id !== captureCmd.id) violate(`literal output channel: the only node invocation on the step-4 allowlist is the bound gate capture '& node scripts/verify-agent-docs-fresh.mjs 2>&1', got '${cmdText}'; a second node call (for example 'node -e ...') can print arbitrary text and is RED`);
         continue;
       }
-      // push-location / pop-location: location scaffolding, no console output.
+      // Push-/Pop-Location: location scaffolding with exact bound shapes.
+      // Unbound arguments are RED even here: Push-Location "<text>"
+      // terminates (ErrorActionPreference = 'Stop') and the step-4 catch
+      // handler prints the attacker-chosen path in its message, replacing
+      // the gate output and the remedy (the O-2 channel through an
+      // allowlisted command).
+      if (cn === 'push-location') {
+        if (parts.length !== 2 || !isPlainVariable(parts[1], 'RepoRoot')) violate(`literal output channel: the only Push-Location on the step-4 allowlist is exactly 'Push-Location $RepoRoot', got '${cmdText}'; any other argument can carry attacker text into a terminating error that the step-4 catch handler prints with its own prefix, replacing the gate output and the remedy -- RED`);
+        continue;
+      }
+      if (cn === 'pop-location') {
+        if (parts.length !== 1) violate(`literal output channel: the only Pop-Location on the step-4 allowlist takes no arguments, got '${cmdText}'`);
+        continue;
+      }
+    }
+
+    // (O-2 class) Assignment right sides: inside step 4 an assignment may
+    // only STORE a value -- a constant, a string (an expandable string may
+    // embed only plain non-splatted variables), or a plain non-splatted
+    // variable read. An executing or converting right side (a captured
+    // command such as '$x = Get-Date', a conversion such as
+    // [datetime]'...', a subexpression $(...), an operator expression) can
+    // terminate with an attacker-chosen message, which the step-4 catch
+    // handler prints with its own prefix -- replacing the gate output and
+    // the remedy while the lock stayed green (the phase-12 review's O-2,
+    // demonstrated with '$null = Get-Item -LiteralPath "<text>"'). The two
+    // gate captures are bound exactly above; the remedy region is bound
+    // separately.
+    const isSafeRhs = (rhs) => {
+      if (!rhs) return false;
+      if (rhs.type === 'ConstantExpressionAst' || rhs.type === 'StringConstantExpressionAst') return true;
+      if (rhs.type === 'VariableExpressionAst') return !rhs.splatted;
+      if (rhs.type === 'ExpandableStringExpressionAst') return tree.kids(rhs).every((k) => k.type === 'VariableExpressionAst' && !k.splatted);
+      return false;
+    };
+    for (const n of all) {
+      if (n.type !== 'AssignmentStatementAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if (n.id === captures.agentDocsOutput.id || n.id === captures.agentDocsExit.id) continue;
+      const rhs = tree.kids(n)[1] ? unwrap(tree.kids(n)[1], tree) : null;
+      if (isSafeRhs(rhs)) continue;
+      violate(`literal output channel: assignment ${describe(n)} inside step 4 has a right side that executes or converts (${rhs ? describe(rhs) : 'missing'}); inside step 4 an assignment may only store a constant, a string or a plain variable read -- an executing or converting right side can terminate with an attacker-chosen message that the step-4 catch handler prints with its own prefix, replacing the gate output and the remedy, so this is RED`);
+    }
+
+    // (O-2 class) Containers: the only if/foreach structures recognized
+    // inside step 4 are the bound npm-exit throw guard ('if
+    // ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code
+    // $LASTEXITCODE" }'), the anchored gate-exit test, the bound echo loop
+    // and the echo-body guards (bound above). Any other if or foreach
+    // evaluates an unbound condition or enumerator, which can execute an
+    // arbitrary command ('foreach ($x in Get-Item "<text>") {}') or
+    // terminate with an attacker-chosen message ('if ([datetime]"<text>")
+    // {}') for the step-4 catch handler -- RED. try/catch/finally
+    // scaffolding stays allowed: its blocks are judged recursively above.
+    const isNpmGuard = (n) => {
+      if (n.clauseCount !== 1 || n.hasElse) return false;
+      const parts = tree.kids(n);
+      if (parts.length !== 2) return false;
+      const condEls = tree.kids(parts[0]);
+      if (condEls.length !== 1) return false;
+      const cond = unwrap(condEls[0], tree);
+      if (cond.type !== 'BinaryExpressionAst' || cond.operator !== 'Ine') return false;
+      const [cl, cr] = tree.kids(cond);
+      if (!cl || !isPlainVariable(cl, 'LASTEXITCODE')) return false;
+      const rv = cr ? unwrap(cr, tree) : null;
+      if (!rv || rv.type !== 'ConstantExpressionAst' || rv.value !== '0') return false;
+      const bodyStmts = tree.kids(parts[1]);
+      return bodyStmts.length === 1 && bodyStmts[0].type === 'ThrowStatementAst';
+    };
+    for (const n of all) {
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if (n.type === 'ForEachStatementAst' && n.id !== echoLoop.id) {
+        violate(`literal output channel: ${describe(n)} is a foreach loop inside step 4 other than the bound gate-output echo loop; its enumerator is unbound and can execute a command or terminate with an attacker-chosen message for the step-4 catch handler, so it is RED`);
+      }
+      if (n.type !== 'IfStatementAst') continue;
+      if (n.id === gateTests[0].id) continue; // the anchored gate-exit test
+      if (tree.isWithin(n, echoLoop)) continue; // echo-body guards, bound above
+      if (isNpmGuard(n)) continue;
+      violate(`literal output channel: ${describe(n)} is an if statement inside step 4 that is none of the bound structures (the npm-exit throw guard, the anchored gate-exit test, the echo-body guards); its unbound condition can execute or terminate with an attacker-chosen message for the step-4 catch handler, so it is RED`);
     }
   }
 
@@ -1722,11 +1846,13 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // operator message that touches neither $remedy nor its name. The
   // literal case documents the measured, explicitly rejected gap (a):
   // remedy-looking TEXT without the remedy variable is not judged.
-  // Phase 11 note: the bare `Get-Date @style` statement is now RED inside
-  // step 4 (uncaptured pipeline output is console output, F1/F3), so the
-  // fixture captures it (`$null = Get-Date @style`): genuinely harmless,
-  // and it exercises the same splat-resolution path as before.
-  const cleanSplat = `${SYNTHETIC}\n$style = @{ ForegroundColor = 'Green' }; $null = Get-Date @style`;
+  // Phase 13 note: the strict positive command allowlist judges every
+  // command INSIDE step 4, captured or not, so `$null = Get-Date @style`
+  // inside step 4 is now RED (see the phase-13 test). The benign-splat
+  // controls therefore live OUTSIDE step 4 (after the try/catch that
+  // step4Block anchors to), where the file-wide remedy-name sink sweep
+  // still exercises the same splat-resolution path as before.
+  const cleanSplat = `try {\n${SYNTHETIC}\n} catch {}\n$style = @{ ForegroundColor = 'Green' }; $null = Get-Date @style`;
   assert.equal(step4Remedies(cleanSplat).cone, 'sparse-checkout reapply');
   // A literal operator message INSIDE step 4 is now RED (literal output
   // channel below); the same literal outside step 4 stays green -- see
@@ -1736,7 +1862,7 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // resolved, not rejected (independent-review controls).
   const dynamicSplat = `try {\n${SYNTHETIC}\n} catch {}\n$validatorArgs = @{ BaseCommit = 'main' }; & $Validator @validatorArgs`;
   assert.equal(step4Remedies(dynamicSplat).cone, 'sparse-checkout reapply');
-  const orderedSplat = `${SYNTHETIC}\n$style = [ordered]@{ ForegroundColor = 'Green' }; $null = Get-Date @style`;
+  const orderedSplat = `try {\n${SYNTHETIC}\n} catch {}\n$style = [ordered]@{ ForegroundColor = 'Green' }; $null = Get-Date @style`;
   assert.equal(step4Remedies(orderedSplat).cone, 'sparse-checkout reapply');
 });
 
@@ -1789,12 +1915,14 @@ test('step-4 lock closes the phase-10 bypasses with a positive structural bounda
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
   // Green controls: the same constructions OUTSIDE step 4 are legitimate
-  // operator output and stay green (the documented boundary), and a
-  // captured/discarded unknown command inside step 4 is harmless because
-  // its pipeline output never reaches the console.
+  // operator output and stay green (the documented boundary). A
+  // captured/discarded unknown command stays green only OUTSIDE step 4:
+  // inside step 4 the strict positive allowlist rejects it captured or
+  // not (phase 13 -- the phase-12 review measured the capture exemption
+  // green with attacker text, findings O-1..O-4).
   const outsideBareLiteral = `try {\n${SYNTHETIC}\n} catch {}\n"docs-agent is stale: run npm run doc:agent"`;
   assert.equal(step4Remedies(outsideBareLiteral).cone, 'sparse-checkout reapply');
-  const capturedUnknown = SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Get-Date -Format "docs-agent is stale: run npm run doc:agent"`);
+  const capturedUnknown = `try {\n${SYNTHETIC}\n} catch {}\n$null = Get-Date -Format "docs-agent is stale: run npm run doc:agent"`;
   assert.equal(step4Remedies(capturedUnknown).cone, 'sparse-checkout reapply');
   // The real file's fuller echo loop (ErrorRecord branch with
   // $line.ToString(), null-guard with continue) stays green -- covered by
@@ -1837,4 +1965,57 @@ test('step-4 lock closes the phase-11 review follow-up findings (phase 12)', () 
   // the real throw shape explicitly.
   const withRealThrow = SYNTHETIC.replace(afterCapture, `${afterCapture}\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }`);
   assert.equal(step4Remedies(withRealThrow).cone, 'sparse-checkout reapply');
+});
+
+test('step-4 lock closes the phase-12 review follow-up findings (phase 13)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const literal = /literal output channel/;
+  // The phase-12 independent review (VERDICT: hold) measured each O-1..O-4
+  // construction GREEN on the real mutated file with attacker text on the
+  // verbatim step-4 chain; each must now be RED with a named reason. The
+  // root fix is structural: no captured-or-discarded exemption, exact bound
+  // shapes for every allowlisted command, store-only assignment right
+  // sides, and bound if/foreach containers.
+  const cases = [
+    // O-1: alias creation through a variable or constructed provider path
+    // (the alias: sweep only saw string literals) and through Import-Alias.
+    ['O-1 Set-Item via variable alias: path', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$p = 'alias:zz'\n$null = Set-Item $p Write-Host\n$null = zz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['O-1 Set-Item -Path via variable alias: path', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$p = 'alias:zz'\n$null = Set-Item -Path $p -Value Write-Host`), literal],
+    ['O-1 New-Item -Path via variable alias: path', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$p = 'alias:zz'\n$null = New-Item -Path $p -Value Write-Host`), literal],
+    ['O-1 New-Item -Path via constructed alias: path', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = New-Item -Path ('ali' + 'as:zz') -Value Write-Host`), literal],
+    ['O-1 Import-Alias from a CSV', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Import-Alias -Path 'aliases.csv' -Force`), literal],
+    // O-2: the catch channel via a terminating cmdlet error (throw binding
+    // alone did not close it).
+    ['O-2 captured Get-Item terminating error', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Get-Item -LiteralPath "docs-agent is stale, run npm run doc:agent"`), literal],
+    // O-3: captured code execution.
+    ['O-3 captured Invoke-Expression', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Invoke-Expression 'Write-Host "docs-agent is stale: run npm run doc:agent"'`), literal],
+    ['O-3 captured iex', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = iex 'Write-Host "docs-agent is stale: run npm run doc:agent"'`), literal],
+    // O-4: captured host effects.
+    ['O-4 captured Clear-Host', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Clear-Host`), literal],
+    ['O-4 captured dot-source', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = . './zz.ps1'`), literal],
+    // Same harm class (catch channel), closed by the new bindings rather
+    // than left for the next review round: a converting assignment right
+    // side, a captured-command right side, an unbound if condition, an
+    // unbound foreach, and attacker text through an allowlisted command
+    // whose shape was not previously bound.
+    ['O-2 class: converting assignment RHS', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$x = [datetime]"docs-agent is stale, run npm run doc:agent"`), literal],
+    ['O-2 class: captured command assignment RHS', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$x = Get-Date`), literal],
+    ['O-2 class: unbound if condition', SYNTHETIC.replace(afterCapture, `${afterCapture}\nif ([datetime]'docs-agent is stale') { }`), literal],
+    ['O-2 class: unbound foreach enumerator', SYNTHETIC.replace(afterCapture, `${afterCapture}\nforeach ($x in 1..2) { }`), literal],
+    ['O-2 class: Push-Location with attacker path', SYNTHETIC.replace(afterCapture, `${afterCapture}\nPush-Location "docs-agent is stale, run npm run doc:agent"`), literal],
+    ['O-2 class: Pop-Location with arguments', SYNTHETIC.replace(afterCapture, `${afterCapture}\nPop-Location -StackName zz`), literal],
+    // The capture exemption is gone for benign-looking commands too.
+    ['boundary: captured Get-Date -Format inside step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Get-Date -Format "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['boundary: captured benign splat inside step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$style = @{ ForegroundColor = 'Green' }\n$null = Get-Date @style`), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // Green control: the real file's full step-4 structure -- banner with
+  // -ForegroundColor, Push-Location $RepoRoot, the nested try/finally with
+  // Pop-Location, the npm-exit throw guard, the $global:LASTEXITCODE reset,
+  // the bound captures and echo loop -- stays green.
+  const realShapes = `${SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"',
+    'Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan\nPush-Location $RepoRoot\ntry {\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }\n$global:LASTEXITCODE = 0')}\n} finally {\nPop-Location\n}`;
+  assert.equal(step4Remedies(realShapes).cone, 'sparse-checkout reapply');
 });
