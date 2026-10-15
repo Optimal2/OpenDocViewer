@@ -6,7 +6,7 @@
       "nativeExit": 0,
       "seconds": 13.057,
       "rawOutputSha256": "f6b549ed17ab0778e909a3aab3198038eae662a5c9fb0b9f9a9c9ddf03795a39",
-      "stdoutStderrTail": "> opendocviewer@2.10.0 lint\n> eslint \"src/**/*.{js,jsx}\"\n\n\n<repo>\\src\\components\\DocumentThumbnailList.jsx\n  614:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components\n\n✖ 1 problem (0 errors, 1 warning)"
+      "stdoutStderrTail": "> opendocviewer@2.10.0 lint\n> eslint \"src/**/*.{js,jsx}\"\n\n\n<repo>/src/components/DocumentThumbnailList.jsx\n  614:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components\n\n✖ 1 problem (0 errors, 1 warning)"
     },
     {
       "name": "build",
@@ -27,14 +27,14 @@
       "nativeExit": 0,
       "seconds": 2.992,
       "rawOutputSha256": "738680ea3831e015636be111d324925b31d923da2cece16cff3f8335f8be09c5",
-      "stdoutStderrTail": "✓ 1 of 1 component versions validated\n✓ 1 of 1 module definition versions synced\n✓ 1 component-to-module mappings validated\n✓ 1 of 1 owned SQL file(s) passed diff validation (0 changed)\n✓ 1 module definition(s) passed content diff validation (0 changed)\n✓ 1 owned seed SQL file(s) scanned for unconditional artifact-pointer writes\n✓ 1 embedded SQL script(s) verified byte-for-byte against disk (content + sha256)\nShared scripts: platform root '<workspace>\\OpenModulePlatform' (from -PlatformRepositoryRoot).\nShared scripts: 'scripts/omp/bump-version.ps1' matches the canonical copy (e632c109e52a9756).\nShared scripts: 'scripts/omp/validate-component-versions.helpers.ps1' matches the canonical copy (2a4c1961144ad27b).\n\n✓ Component version validation passed"
+      "stdoutStderrTail": "✓ 1 of 1 component versions validated\n✓ 1 of 1 module definition versions synced\n✓ 1 component-to-module mappings validated\n✓ 1 of 1 owned SQL file(s) passed diff validation (0 changed)\n✓ 1 module definition(s) passed content diff validation (0 changed)\n✓ 1 owned seed SQL file(s) scanned for unconditional artifact-pointer writes\n✓ 1 embedded SQL script(s) verified byte-for-byte against disk (content + sha256)\nShared scripts: platform root '<workspace>/OpenModulePlatform' (from -PlatformRepositoryRoot).\nShared scripts: 'scripts/omp/bump-version.ps1' matches the canonical copy (e632c109e52a9756).\nShared scripts: 'scripts/omp/validate-component-versions.helpers.ps1' matches the canonical copy (2a4c1961144ad27b).\n\n✓ Component version validation passed"
     },
     {
       "name": "agent-docs",
       "nativeExit": 0,
       "seconds": 15.233,
       "rawOutputSha256": "7077322328582991096937737da14f2f79401952773555c602434661ce583e9e",
-      "stdoutStderrTail": "> opendocviewer@2.10.0 doc:agent\n> node scripts/generate-agent-docs.mjs\n\nAgent-docs environment (pinned in scripts/agent-docs-environment.json): Node v22.23.3 (running Node), AgentDocMap f17676c9656b7a721cb9ba74a14a91197de35fb0 with 30 locked packages, collation en-US (ambient sv-SE, forced by the collation shim).\nAgentDocMap wrote 30 files to <repo>\\docs-agent\nIndexed 148 files and 1640 JSDoc doclets."
+      "stdoutStderrTail": "> opendocviewer@2.10.0 doc:agent\n> node scripts/generate-agent-docs.mjs\n\nAgent-docs environment (pinned in scripts/agent-docs-environment.json): Node v22.23.3 (running Node), AgentDocMap f17676c9656b7a721cb9ba74a14a91197de35fb0 with 30 locked packages, collation en-US (ambient sv-SE, forced by the collation shim).\nAgentDocMap wrote 30 files to <repo>/docs-agent\nIndexed 148 files and 1640 JSDoc doclets."
     },
     {
       "name": "agent-docs-fresh",
@@ -78,5 +78,9 @@
       "rawOutputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "stdoutStderrTail": ""
     }
-  ]
+  ],
+  "publicPathNormalization": {
+    "sourceValidationSha256": "4b664151233da4abf1fe04eb20ec42000ebde5bde7b68a84f04d493705e0510a",
+    "change": "Normalized Windows separators to forward slashes in already sanitized stdout tails; raw output hashes, exits, timings and source identities unchanged."
+  }
 }

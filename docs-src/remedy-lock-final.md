@@ -82,3 +82,29 @@ Component keys bumped: none. Repository/module/npm identities are unchanged.
 No deployment, service restart, runtime activation, package build or package
 refresh/import is needed. The parent owns independent final delta review,
 public scan, push, all remote CI workflows and campaign closeout.
+
+## Independent final review
+
+DeepSeek independently reviewed full pin
+`56b97626357efdc4be50937058b9a83520699559`, schema valid, approved,
+`VERDICT: pass`. It ran literal Vitest 5.0.4 under Node 22.23.3:
+17 parser contracts and 21 step-4 tests passed, native exits zero.
+Scratch-only independent guard removal reproduced the two decisive native
+exit pairs 1/0 with the named order and silent-termination reasons, and
+reproduced the evidence hashes. It did not repeat the full repository run.
+
+The two informational findings are closed without a new implementation:
+F1's step-4-flavoured error for a silent termination in another catch is the
+documented whole-file rule and still identifies the actual cause. F2's
+hypothetical empty prefix filter cannot occur in the current fixed seven
+fixtures with asserted unique anchors; renaming future fixture families is
+future test maintenance, not a present failing control. No new bypass hunt
+is warranted by either finding.
+
+The final publication-only evidence change normalizes Windows path
+separators in sanitized stdout tails to forward slashes so escaped local
+separators are not misidentified as network shares. Original raw log hashes,
+native exits, timings, source and validator identities remain unchanged;
+the receipt records its prior SHA-256. No executable file changed after the
+independent review. Raw review output is retained in the canonical campaign
+evidence rather than added to this public repository.
