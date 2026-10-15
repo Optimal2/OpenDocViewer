@@ -199,7 +199,7 @@
 // files is out of scope. Statements elsewhere that touch neither the
 // step-4 input variables, the remedy variable/name, nor a name sink
 // above remain out of scope by construction.
-// Phase 11 (this round) closes the six bypasses the independent review of
+// Phase 11 closes the six bypasses the independent review of
 // phases 9-10 measured GREEN while the real verbatim step-4 chain printed
 // a wrong remedy. The output/input channels are now a POSITIVE STRUCTURAL
 // BOUNDARY over the protected step-4 language, not name or wording
@@ -221,16 +221,19 @@
 //      Write-Host' is judged as Write-Host) and must be on the step-4
 //      allowlist -- the banner/echo Write-Host, Push-/Pop-Location, or
 //      the exact bound '& npm run doc:agent' and gate-capture node
-//      invocation. Set-Alias/New-Alias or an alias: provider write inside
-//      step 4 is RED, so 'Set-Alias zz Write-Host; zz ...' cannot smuggle
-//      an output command past the name check. Any other command is
-//      accepted only when its pipeline output is captured or discarded
-//      ('$x = ...', '$null = ...', piped to Out-Null): uncaptured output
-//      of an innocent-looking cmdlet (Get-Date -Format 'wrong advice') is
-//      console output too. Write-Progress (F6) is RED by that rule; the
-//      review measured no redirected-console harm for it, so no
-//      interactive-only channel is on the allowlist and none is claimed
-//      closed beyond that.
+//      invocation. Any other command is accepted only when its pipeline
+//      (success-stream) output is captured or discarded ('$x = ...',
+//      '$null = ...', piped to Out-Null): uncaptured output of an
+//      innocent-looking cmdlet (Get-Date -Format 'wrong advice') is
+//      console output too. Capture binds only the success stream --
+//      '$null = Write-Host "x"' still prints -- which is why output
+//      cmdlets are rejected outright above and never reach the capture
+//      check. Alias creation in every spelling (Set-Alias/New-Alias, the
+//      built-in nal/sal aliases, '$alias:zz = ...' drive assignments,
+//      alias: provider paths) and the host-only channels Write-Progress
+//      (F6) and Read-Host are RED inside step 4 even when captured;
+//      the review measured no redirected-console harm for Write-Progress,
+//      so no interactive-only channel is claimed closed beyond that.
 //   F4 MEMBER INVOCATIONS: the only InvokeMemberExpressionAst allowed
 //      inside step 4 is the echo loop's $line.ToString(). A console
 //      write through [Console]::WriteLine, $Host.UI.WriteLine or the same
@@ -243,6 +246,33 @@
 //      foreach loop variable), and the echo Write-Host calls take exactly
 //      one argument -- $line or $line.ToString() -- so the printed lines
 //      are the gate's own output, never a rewritten $line.
+// Phase 12 (this round) closes the five follow-up findings of the phase-11
+// independent review (VERDICT: hold), each measured GREEN with attacker
+// text on the console before this round:
+//   F7 ALIAS SPELLINGS: nal/sal (the built-in New-Alias/Set-Alias
+//      aliases), '$alias:zz = "Write-Host"' drive assignments and
+//      'Set-Item alias:zz ...' provider writes all create an alias without
+//      tripping the literal command-name check; every alias-creating
+//      spelling inside step 4 is now RED (command names nal/sal, alias:
+//      drive assignment left sides, alias: provider arguments), wherever
+//      in step 4 they sit (a nested finally included).
+//   F8 ECHO REACHABILITY: the echo loop body is bound, not just the loop
+//      shape: every body statement must be an echo Write-Host, the exact
+//      'if ($null -eq $line) { continue }' guard, or the exact ErrorRecord
+//      dispatch. Wrapping the body in 'if ($false) { ... }' or filtering
+//      it with 'if ($line -match ...) { continue }' suppresses the gate
+//      output the remedy points at and is now RED.
+//   F9 HOST-ONLY CHANNELS: Write-Progress and Read-Host are RED inside
+//      step 4 in every form, captured or not (capture does not suppress
+//      them; step 4 never reports progress and never prompts).
+//   F10 THROW BINDING: the only throw allowed inside step 4 is the exact
+//      npm-regeneration failure ('throw "npm run doc:agent exited with
+//      code $LASTEXITCODE"'); the step-4 catch handler prints a thrown
+//      message with its own prefix, so an attacker-text throw replaced
+//      the operator-facing exception text while the lock stayed green.
+//   F11 HEADER TRUTHFULNESS: the phase-11 header claimed the F7 alias
+//      closure and overstated the capture rule; both are corrected above
+//      and by this paragraph.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -1114,6 +1144,49 @@ function step4Remedies(sourceText) {
       if (!isPlainVariable(enumVar, 'agentDocsOutput')) bad();
     }
 
+    // (F8) Bind the echo loop BODY, not just its shape: every statement in
+    // it must be an echo Write-Host (arguments bound by the command
+    // boundary below), the exact null-guard `if ($null -eq $line) {
+    // continue }`, or the exact ErrorRecord dispatch `if ($line -is
+    // [...ErrorRecord]) { Write-Host $line.ToString() } else { Write-Host
+    // $line }`. Wrapping the body in `if ($false) { ... }` or filtering it
+    // (`if ($line -match '...') { continue }`) keeps every other check
+    // green while the gate output never reaches the console, so any other
+    // body statement is RED.
+    {
+      const echoBody = loopParts[2];
+      if (!echoBody || echoBody.type !== 'StatementBlockAst') violate(`literal output channel: the gate-output echo loop has no statement-block body, got ${describe(echoLoop)}`);
+      const singleEchoCommand = (stmt) => stmt.type === 'PipelineAst' && tree.kids(stmt).length === 1 && tree.kids(stmt)[0].type === 'CommandAst';
+      const echoBodyBad = (stmt) => violate(`literal output channel: echo loop body statement ${describe(stmt)} is not on the echo-body allowlist (an echo Write-Host, the exact 'if ($null -eq $line) { continue }' guard, or the exact ErrorRecord Write-Host dispatch); guarding or filtering the echo (for example 'if ($false) { ... }' or 'if ($line -match ...) { continue }') suppresses the gate output the remedy points at and is RED`);
+      for (const stmt of tree.kids(echoBody)) {
+        if (singleEchoCommand(stmt)) continue; // echo Write-Host, judged by the command boundary below
+        if (stmt.type !== 'IfStatementAst' || stmt.clauseCount !== 1) echoBodyBad(stmt);
+        const parts = tree.kids(stmt);
+        const condEls = tree.kids(parts[0]);
+        if (condEls.length !== 1) echoBodyBad(stmt);
+        const cond = unwrap(condEls[0], tree);
+        if (cond.type !== 'BinaryExpressionAst') echoBodyBad(stmt);
+        const [cl, cr] = tree.kids(cond);
+        const isNullGuard = cond.operator === 'Ieq' && !stmt.hasElse && cl && cr
+          && ((isPlainVariable(cl, 'null') && isPlainVariable(cr, 'line')) || (isPlainVariable(cr, 'null') && isPlainVariable(cl, 'line')));
+        if (isNullGuard) {
+          const guardStmts = tree.kids(parts[1]);
+          if (guardStmts.length !== 1 || guardStmts[0].type !== 'ContinueStatementAst') echoBodyBad(stmt);
+          continue;
+        }
+        const isDispatch = cond.operator === 'Is' && stmt.hasElse && parts.length === 3 && cl && isPlainVariable(cl, 'line')
+          && cr && cr.type === 'TypeExpressionAst' && /^\[(system\.management\.automation\.)?errorrecord\]$/i.test(cr.text.trim());
+        if (isDispatch) {
+          for (const body of [parts[1], parts[2]]) {
+            const stmts = tree.kids(body);
+            if (stmts.length !== 1 || !singleEchoCommand(stmts[0])) echoBodyBad(stmt);
+          }
+          continue;
+        }
+        echoBodyBad(stmt);
+      }
+    }
+
     // (F5) Nothing else may write $line: the echo loop variable is the only
     // writer, so a '$line = "..."' at the top of the loop (or another
     // foreach reusing $line) cannot replace the gate output being printed.
@@ -1150,6 +1223,41 @@ function step4Remedies(sourceText) {
       if (tree.isWithin(n, gateCondition)) continue; // if ($agentDocsExit -eq 0)
       if (tree.isWithin(n, echoEnumerator)) continue; // foreach ($line in @($agentDocsOutput))
       violate(`input channel: ${describe(n)} reads $${which} outside the three bound positions (the capture's own left side, the gate-exit test, the echo loop's enumerator); taking an alias to the captured gate output ('$x = $${which}') lets a later in-place mutation through the alias rewrite what the cause branches match, so any read outside those positions is RED`);
+    }
+
+    // (F7) Alias creation through the alias: DRIVE needs no command at all
+    // ('$alias:zz = "Write-Host"'), so the command-name check cannot see
+    // it: any assignment whose left side is an alias: provider path inside
+    // step 4 is RED. Step 4 defines no aliases; an alias lets a later
+    // 'zz ...' invocation smuggle an output command past the name check.
+    for (const n of all) {
+      if (n.type !== 'AssignmentStatementAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      const left = tree.kids(n)[0];
+      if (left && left.type === 'VariableExpressionAst' && /^alias:/i.test(left.userPath ?? '')) {
+        violate(`literal output channel: ${describe(n)} writes the alias: drive inside step 4; creating an alias ('$alias:zz = ...', Set-Alias/New-Alias/nal/sal, Set-Item alias:) redefines command resolution, so a later invocation cannot be proven not to be an output command in disguise -- RED`);
+      }
+    }
+
+    // (F10) throw: the only throw allowed inside step 4 is the bound
+    // npm-regeneration failure ('throw "npm run doc:agent exited with code
+    // $LASTEXITCODE"'). The step-4 catch handler prints a thrown message
+    // with its own prefix, so a throw carrying attacker text replaces the
+    // operator-facing exception text (and skips the gate output and remedy
+    // entirely) while every shape check stays green -- RED.
+    for (const n of all) {
+      if (n.type !== 'ThrowStatementAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      let ok = false;
+      const tk = tree.kids(n);
+      if (tk.length === 1 && tk[0].type === 'PipelineAst' && tree.kids(tk[0]).length === 1) {
+        const expr = unwrap(tree.kids(tk[0])[0], tree);
+        if (expr.type === 'ExpandableStringExpressionAst' && expr.value === 'npm run doc:agent exited with code $LASTEXITCODE') {
+          const embedded = tree.kids(expr);
+          ok = embedded.length === 1 && embedded[0].type === 'VariableExpressionAst' && (embedded[0].userPath ?? '').toLowerCase() === 'lastexitcode' && !embedded[0].splatted;
+        }
+      }
+      if (!ok) violate(`literal output channel: ${describe(n)} inside step 4 is not the bound npm-regeneration failure throw ('throw "npm run doc:agent exited with code $LASTEXITCODE"'); the step-4 catch handler prints a thrown message with its own prefix, so a throw carrying attacker text replaces the operator-facing exception text and is RED`);
     }
 
     // (F1) Statement shapes: every statement inside step 4 is an
@@ -1241,8 +1349,16 @@ function step4Remedies(sourceText) {
       }
       // A module-qualified name is the same cmdlet: judge the bare name.
       if (cn.includes('\\')) cn = cn.slice(cn.lastIndexOf('\\') + 1);
-      if (cn === 'set-alias' || cn === 'new-alias') {
-        violate(`literal output channel: '${cmdText}' redefines command resolution inside step 4, so a later invocation of the new alias cannot be proven not to be an output command in disguise; step 4 defines no aliases and any Set-Alias/New-Alias inside it is RED`);
+      // Alias creation, in every command spelling (the built-in aliases
+      // nal/sal included; the alias: drive and alias: provider paths are
+      // covered by the sweeps above).
+      if (['set-alias', 'new-alias', 'sal', 'nal'].includes(cn)) {
+        violate(`literal output channel: '${cmdText}' redefines command resolution inside step 4, so a later invocation of the new alias cannot be proven not to be an output command in disguise; step 4 defines no aliases and any Set-Alias/New-Alias (or the nal/sal built-in aliases) inside it is RED`);
+      }
+      // Host-only channels that capture cannot suppress and step 4 never
+      // legitimately uses: RED in every form, captured or not.
+      if (['write-progress', 'read-host'].includes(cn)) {
+        violate(`literal output channel: '${cmdText}' writes to a host-only channel inside step 4 (a progress record or an interactive prompt) that assigning to $null does not suppress, and step 4 never reports progress and never prompts, so this is RED in every form`);
       }
       for (const el of descendantsOf(n, tree)) {
         if (el.type !== 'StringConstantExpressionAst' && el.type !== 'ExpandableStringExpressionAst') continue;
@@ -1252,6 +1368,9 @@ function step4Remedies(sourceText) {
           violate(`literal output channel: command '${cmdText}' writes the alias: provider inside step 4 ('${value.trim()}'), which can redefine a later invocation as an output command, so it is RED`);
         }
       }
+      // Capture binds the PIPELINE (success) stream only: '$null =
+      // Write-Host "x"' still prints, which is why output cmdlets are
+      // judged above and never reach this capture check.
       if (OUTPUT_COMMANDS.has(cn) && cn !== 'write-host') {
         violate(`literal output channel: output command '${cmdText}' writes to a host/output stream inside step 4 and is neither the step-4 banner nor the gate-output echo; inside step 4 the only console outputs on the allowlist are the banner, the echo (Write-Host $line) and 'Write-Host $remedy', so a literal or aliased output command inside step 4 is RED whatever words it uses`);
       }
@@ -1357,11 +1476,21 @@ test('each step-4 cause branch assigns its OWN remedy text and no other branch\'
   }
 });
 
+// The echo loop in its real two-guard form (mirrors scripts/local-ci.ps1);
+// phase 12 binds exactly these body shapes.
+const ECHO_LOOP = [
+  `foreach ($line in @($agentDocsOutput)) {`,
+  `    if ($null -eq $line) { continue }`,
+  `    if ($line -is [System.Management.Automation.ErrorRecord]) { Write-Host $line.ToString() }`,
+  `    else { Write-Host $line }`,
+  `}`,
+].join('\n');
+
 const SYNTHETIC = [
   `Write-Host "[4/4] Verifying generated agent documentation is fresh"`,
   `$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`,
   `$agentDocsExit = $global:LASTEXITCODE`,
-  `foreach ($line in @($agentDocsOutput)) { Write-Host $line }`,
+  ECHO_LOOP,
   `if ($agentDocsExit -eq 0) { $agentDocsPassed = $true }`,
   `else {`,
   `$remedy = $null`,
@@ -1613,7 +1742,7 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
 
 test('step-4 lock closes the phase-10 bypasses with a positive structural boundary (phase 11)', () => {
   const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
-  const echoLoop = 'foreach ($line in @($agentDocsOutput)) { Write-Host $line }';
+  const echoLoop = ECHO_LOOP;
   const literal = /literal output channel/;
   const input = /input channel/;
   // Every case below was measured GREEN by the independent review of
@@ -1670,4 +1799,42 @@ test('step-4 lock closes the phase-10 bypasses with a positive structural bounda
   // The real file's fuller echo loop (ErrorRecord branch with
   // $line.ToString(), null-guard with continue) stays green -- covered by
   // the signature test over the real source above.
+});
+
+test('step-4 lock closes the phase-11 review follow-up findings (phase 12)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const literal = /literal output channel/;
+  // The phase-11 independent review (VERDICT: hold) measured each of these
+  // GREEN on the real mutated file with attacker text on the console; each
+  // must now be RED with a named reason.
+  const cases = [
+    // F7: alias creation in its remaining spellings (the command-name check
+    // only saw the literal 'set-alias'/'new-alias').
+    ['F7 built-in alias nal (New-Alias)', SYNTHETIC.replace(afterCapture, `${afterCapture}\nnal zz Write-Host\nzz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F7 built-in alias sal (Set-Alias)', SYNTHETIC.replace(afterCapture, `${afterCapture}\nsal zz Write-Host\nzz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F7 alias: drive assignment', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$alias:zz = 'Write-Host'\nzz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F7 Set-Item alias: provider path', SYNTHETIC.replace(afterCapture, `${afterCapture}\nSet-Item alias:zz Write-Host\nzz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F7 captured Set-Item alias: provider path', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Set-Item alias:zz Write-Host\n$null = zz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F7 alias detour in a nested finally', `${SYNTHETIC}\ntry { }\nfinally { sal qq Write-Host\nqq "docs-agent is stale: run npm run doc:agent" }`, literal],
+    // F8: echo reachability -- the gate output must actually be printed.
+    ['F8 echo body wrapped in if ($false)', SYNTHETIC.replace(ECHO_LOOP, `foreach ($line in @($agentDocsOutput)) {\n    if ($false) { Write-Host $line }\n}`), literal],
+    ['F8 echo filtered by a match-continue guard', SYNTHETIC.replace(ECHO_LOOP, `foreach ($line in @($agentDocsOutput)) {\n    if ($line -match 'stale') { continue }\n    Write-Host $line\n}`), literal],
+    ['F8 null-guard with an added else', SYNTHETIC.replace('if ($null -eq $line) { continue }', 'if ($null -eq $line) { continue } else { continue }'), literal],
+    ['F8 ErrorRecord dispatch without the else echo', SYNTHETIC.replace(`    else { Write-Host $line }\n`, ''), literal],
+    // F9: host-only channels are RED in every form, captured or not.
+    ['F9 captured Write-Progress', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Write-Progress -Status "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F9 captured Read-Host prompt', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Read-Host -Prompt "docs-agent is stale: run npm run doc:agent"`), literal],
+    // F10: an attacker-text throw is printed by the step-4 catch handler
+    // with its own prefix, replacing the operator-facing exception text.
+    ['F10 throw with attacker text', SYNTHETIC.replace(afterCapture, `${afterCapture}\nthrow "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F10 throw a different constant', SYNTHETIC.replace(afterCapture, `${afterCapture}\nthrow 'docs-agent is stale'`), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // Green controls: the real throw (bound npm-regeneration failure) and the
+  // real two-guard echo body stay green. SYNTHETIC does not run npm, so add
+  // the real throw shape explicitly.
+  const withRealThrow = SYNTHETIC.replace(afterCapture, `${afterCapture}\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }`);
+  assert.equal(step4Remedies(withRealThrow).cone, 'sparse-checkout reapply');
 });
