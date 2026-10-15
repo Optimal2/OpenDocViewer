@@ -219,12 +219,16 @@
 //      RED (fail-closed instead of interpreting aliasing), so a later
 //      '$x[0] = ...' or '$x.SetValue(...)' in-place mutation through the
 //      alias cannot rewrite what the cause branches match.
-//   F3 COMMAND NAMES: the invoked name is reduced to its bare cmdlet
-//      (module qualifier stripped, so 'Microsoft.PowerShell.Utility\
-//      Write-Host' is judged as Write-Host) and must be on the step-4
-//      allowlist -- the banner/echo Write-Host, Push-/Pop-Location, or
-//      the exact bound '& npm run doc:agent' and gate-capture node
-//      invocation. Any other command is RED, captured or not: phase 11
+//   F3 COMMAND NAMES: the invoked name must be the bare cmdlet on the
+//      step-4 allowlist -- the banner/echo Write-Host, Push-/Pop-Location,
+//      or the exact bound '& npm run doc:agent' and gate-capture node
+//      invocation. (The text here originally continued "a module
+//      qualifier is stripped, so 'Microsoft.PowerShell.Utility\Write-Host'
+//      is judged as Write-Host"; the phase-15 review refuted that
+//      mechanism -- a path-qualified spelling of an allowlisted basename
+//      ran an out-of-tree binary and slid past the occurrence counter --
+//      and phase 16 rejects qualified names outright; see below.) Any
+//      other command is RED, captured or not: phase 11
 //      originally accepted an unrecognized command when its pipeline
 //      (success-stream) output was captured or discarded ('$x = ...',
 //      '$null = ...', piped to Out-Null), but the phase-12 review
@@ -376,6 +380,37 @@
 //   environment flakiness AGENTS.md describes for worker/process deaths;
 //   the failure mode is fail-closed (a red run, never a silent green),
 //   so it is documented here rather than "fixed" by weakening a check.
+// Phase 16 (this round) closes the four accepted holes of the phase-15
+// independent review (VERDICT: fail), each measured GREEN on the full
+// suite with console harm on the verbatim step-4 chain, all pre-existing
+// at the phase-14 commit:
+//   F1 QUALIFIED COMMAND NAMES: the command boundary judged only the
+//      basename after stripping a path/module qualifier, so
+//      '& "C:\<text>\pop-location"' ran an out-of-tree binary whose path
+//      text the step-4 catch handler printed in place of the gate output
+//      and the remedy, while sliding past the occurrence counter. A
+//      qualified command name (module, path or drive) inside step 4 is
+//      now RED outright: every allowlisted command is invoked bare.
+//   F2 VERDICT-FLAG INITIALISER: '$agentDocsPassed = $false' sits just
+//      ahead of the anchored step-4 block (local-ci.ps1 line 253) and was
+//      unjudged; flipping it to $true made local CI print the stale
+//      remedy and then PASS with exit 0. Every assignment to the verdict
+//      flag anywhere in the file must now be the bound gate-exit
+//      then-block store or an explicit '= $false' (fail-closed values
+//      only). The review's F6 note stands: code outside step 4 other
+//      than this flag stays the documented, deliberate boundary.
+//   F3 POSITIONS: the bound throw must BE the npm-guard body and the
+//      bound npm call must sit in the capture's own block, ahead of the
+//      capture, immediately followed by its guard; moved earlier, they
+//      suppressed the gate output and the remedy behind a misleading
+//      cause (the verdict still failed -- diagnostic harm).
+//   F4 POP-LOCATION: the bound Pop-Location must sit in the finally
+//      block of the catch-free try immediately preceded by the bound
+//      Push-Location; a moved Pop-Location left the pushed location
+//      current for everything that followed.
+//   The phase-15 header's OCCURRENCES bullet (the review's F5) is now
+//   accurate: with qualification banned, the occurrence counter sees the
+//   same name the allowlist judges.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -1356,7 +1391,24 @@ function step4Remedies(sourceText) {
     // $LASTEXITCODE"'). The step-4 catch handler prints a thrown message
     // with its own prefix, so a throw carrying attacker text replaces the
     // operator-facing exception text (and skips the gate output and remedy
-    // entirely) while every shape check stays green -- RED.
+    // entirely) while every shape check stays green -- RED. The guard
+    // shape helper is defined here (before its first use) and reused by
+    // the container binding below.
+    const isNpmGuard = (n) => {
+      if (n.clauseCount !== 1 || n.hasElse) return false;
+      const parts = tree.kids(n);
+      if (parts.length !== 2) return false;
+      const condEls = tree.kids(parts[0]);
+      if (condEls.length !== 1) return false;
+      const cond = unwrap(condEls[0], tree);
+      if (cond.type !== 'BinaryExpressionAst' || cond.operator !== 'Ine') return false;
+      const [cl, cr] = tree.kids(cond);
+      if (!cl || !isPlainVariable(cl, 'LASTEXITCODE')) return false;
+      const rv = cr ? unwrap(cr, tree) : null;
+      if (!rv || rv.type !== 'ConstantExpressionAst' || rv.value !== '0') return false;
+      const bodyStmts = tree.kids(parts[1]);
+      return bodyStmts.length === 1 && bodyStmts[0].type === 'ThrowStatementAst';
+    };
     for (const n of all) {
       if (n.type !== 'ThrowStatementAst') continue;
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
@@ -1369,7 +1421,14 @@ function step4Remedies(sourceText) {
           ok = embedded.length === 1 && embedded[0].type === 'VariableExpressionAst' && (embedded[0].userPath ?? '').toLowerCase() === 'lastexitcode' && !embedded[0].splatted;
         }
       }
-      if (!ok) violate(`literal output channel: ${describe(n)} inside step 4 is not the bound npm-regeneration failure throw ('throw "npm run doc:agent exited with code $LASTEXITCODE"'); the step-4 catch handler prints a thrown message with its own prefix, so a throw carrying attacker text replaces the operator-facing exception text and is RED`);
+      // Position: the throw must BE the body of the bound npm-exit guard.
+      // The same throw text moved elsewhere inside step 4 terminates the
+      // step early with a misleading cause for the catch handler while the
+      // text binding stays green (phase-15 review F3), so it is RED.
+      const throwBlock = tree.parent(n);
+      const throwGuard = throwBlock ? tree.parent(throwBlock) : null;
+      if (!throwGuard || throwGuard.type !== 'IfStatementAst' || !isNpmGuard(throwGuard) || tree.kids(throwGuard)[1].id !== throwBlock.id) ok = false;
+      if (!ok) violate(`literal output channel: ${describe(n)} inside step 4 is not the bound npm-regeneration failure throw in its bound guard ('if ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }'); the step-4 catch handler prints a thrown message with its own prefix, so a throw carrying attacker text -- or the bound throw moved out of its guard -- replaces the operator-facing exception text and is RED`);
     }
 
     // (F1) Statement shapes: every statement inside step 4 is an
@@ -1458,8 +1517,18 @@ function step4Remedies(sourceText) {
         if (resolved === null) violate(`literal output channel: dynamic command '${cmdText}' inside step 4 has no statically resolvable name, so it cannot be proven not to be an output command in disguise; every command invoked inside step 4 must resolve statically to the step-4 allowlist (the banner/echo Write-Host, Push-/Pop-Location, or the bound npm/node gate invocations)`);
         cn = resolved.toLowerCase();
       }
-      // A module-qualified name is the same cmdlet: judge the bare name.
-      if (cn.includes('\\')) cn = cn.slice(cn.lastIndexOf('\\') + 1);
+      // A qualified command name is RED outright: every allowlisted step-4
+      // command is invoked by its bare name, so no module qualification
+      // ('Microsoft.PowerShell.Utility\Write-Host'), path qualification
+      // ('C:\<text>\npm', './node') or drive-qualified spelling is ever
+      // legitimate. Judging only the stripped basename (the earlier
+      // behaviour) let a path-qualified spelling of an allowlisted command
+      // run an out-of-tree binary whose path text the step-4 catch handler
+      // prints in place of the gate output and the remedy, while sliding
+      // past the occurrence counter (phase-15 review F1) -- fail closed.
+      if (cn.includes('\\') || cn.includes('/') || cn.includes(':')) {
+        violate(`literal output channel: command '${cmdText}' inside step 4 uses a qualified (module, path or drive) command name; every allowlisted step-4 command is invoked by its bare name, and a qualified spelling can run an out-of-tree binary whose path text the step-4 catch handler prints in place of the gate output and the remedy, so it is RED`);
+      }
       // Alias creation, in every command spelling (the built-in aliases
       // nal/sal included; the alias: drive and alias: provider paths are
       // covered by the sweeps above).
@@ -1578,6 +1647,28 @@ function step4Remedies(sourceText) {
       violate(`literal output channel: store ${describe(n)} inside step 4 is not on the store allowlist (the two bound gate captures, '$global:LASTEXITCODE = 0' immediately before the output capture, '$agentDocsPassed = $true' in the gate-exit then branch); a plain store to a variable a bound structure reads ('$RepoRoot = "<text>"' feeding Push-Location, '$LASTEXITCODE = "<text>"' feeding the bound throw's interpolation, $ErrorActionPreference silencing the catch channel) re-arms the catch channel with attacker text or rewrites bound control flow, and a repositioned allowlisted store can invert the verdict or disarm the npm guard, so it is RED`);
     }
 
+    // (Phase-15 review F2) The verdict flag OUTSIDE the anchored block:
+    // step4Block starts at the banner, but '$agentDocsPassed = $false'
+    // initialises the flag just ahead of it (local-ci.ps1 line 253) and the
+    // step-4 catch handler resets it to $false -- both outside the anchored
+    // region by construction, so the store sweep above cannot see them.
+    // Flipping the initialiser to $true makes local CI print the stale
+    // remedy and then report PASS with exit 0 while the documentation is
+    // stale (measured, phase-15 review). Every assignment to the verdict
+    // flag anywhere in the file must therefore be either the bound
+    // gate-exit then-block store or an explicit '= $false' -- a value that
+    // can only fail closed. Any other value, operator or scope spelling
+    // ('$global:agentDocsPassed = $true', '$agentDocsPassed += ...') is RED.
+    for (const n of all) {
+      if (n.type !== 'AssignmentStatementAst') continue;
+      const left = tree.kids(n)[0];
+      if (!left || left.type !== 'VariableExpressionAst' || (left.userPath ?? '').toLowerCase() !== 'agentdocspassed') continue;
+      if (tree.parent(n) === gateThenBlock) continue; // the bound '= $true'
+      const rhs = n.operator === 'Equals' && tree.kids(n)[1] ? unwrap(tree.kids(n)[1], tree) : null;
+      if (rhs && rhs.type === 'VariableExpressionAst' && !rhs.splatted && (rhs.userPath ?? '') === 'false' && rhs.text === '$false') continue;
+      violate(`literal output channel: store ${describe(n)} writes the step-4 verdict flag outside the bound gate-exit then branch with something other than '= $false'; flipping the flag's initialiser to $true makes local CI report PASS and exit 0 while the documentation is stale (measured, phase-15 review), so only the bound then-block store may set $true and every other store to $agentDocsPassed must be exactly '= $false' -- RED`);
+    }
+
     // (Phase-13 review F3) Redirections: the command boundary judges exact
     // shapes, so a redirection must not be invisible to it. The only
     // redirection allowed inside step 4 is the gate capture's bound 2>&1;
@@ -1625,6 +1716,58 @@ function step4Remedies(sourceText) {
       }
     }
 
+    // (Phase-15 review F3) Positions: the bound npm call is bound in place,
+    // not just in shape and count. It must sit in the gate capture's own
+    // block, ahead of the output capture, immediately followed by the bound
+    // npm-exit throw guard. Moving the call (or its throw -- bound above)
+    // to an earlier point inside step 4 keeps every shape check green while
+    // the verbatim chain prints no gate output and no remedy and surfaces a
+    // misleading cause (measured, phase-15 review) -- RED.
+    for (const n of all) {
+      if (n.type !== 'CommandAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if ((n.commandName ?? '').toLowerCase() !== 'npm') continue;
+      // A CommandAst sits inside its PipelineAst statement; the block's
+      // kids are statements, so climb one level before comparing indices.
+      const stmt = tree.parent(n);
+      const blk = stmt ? tree.parent(stmt) : null;
+      const idx = blk ? tree.kids(blk).indexOf(stmt) : -1;
+      const next = blk && idx >= 0 ? tree.kids(blk)[idx + 1] : null;
+      const ok = blk !== null && captureBlock !== null && blk.id === captureBlock.id && idx >= 0 && captureIdx > idx
+        && next && next.type === 'IfStatementAst' && isNpmGuard(next);
+      if (!ok) violate(`literal output channel: the bound '& npm run doc:agent' must sit in the gate capture's own block, ahead of the output capture, immediately followed by its bound exit-code throw guard; moved, it suppresses the gate output and the remedy behind a misleading cause while every shape check stays green (measured, phase-15 review), so it is RED`);
+    }
+
+    // (Phase-15 review F4) The Pop-Location must be the one the bound
+    // finally runs: its parent block must be the finally block (the second
+    // statement block) of a catch-free try inside step 4, and the bound
+    // Push-Location must be the statement immediately before that try. A
+    // Pop-Location moved out of the finally satisfies the shape and
+    // occurrence checks while leaving the pushed location current for
+    // everything that follows (measured, phase-15 review) -- RED.
+    // PowerShell exposes the finally as a plain StatementBlockAst child of
+    // the TryStatementAst (after the body), so it is identified
+    // positionally; catch clauses are already banned inside step 4 above.
+    for (const n of all) {
+      if (n.type !== 'CommandAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if ((n.commandName ?? '').toLowerCase() !== 'pop-location') continue;
+      // A CommandAst sits inside its PipelineAst statement; the block's
+      // kids are statements, so climb one level before comparing parents.
+      const stmt = tree.parent(n);
+      const blk = stmt ? tree.parent(stmt) : null;
+      const tryNode = blk ? tree.parent(blk) : null;
+      const tryKids = tryNode && tryNode.type === 'TryStatementAst' ? tree.kids(tryNode).filter((k) => k.type === 'StatementBlockAst') : [];
+      const outerBlock = tryNode ? tree.parent(tryNode) : null;
+      const outerKids = outerBlock ? tree.kids(outerBlock) : [];
+      const tryIdx = tryNode ? outerKids.indexOf(tryNode) : -1;
+      const before = tryIdx > 0 ? outerKids[tryIdx - 1] : null;
+      const ok = tryKids.length === 2 && tryKids[1].id === blk.id
+        && before && before.type === 'PipelineAst' && tree.kids(before).length === 1
+        && (() => { const c = tree.kids(before)[0]; return c && c.type === 'CommandAst' && (c.commandName ?? '').toLowerCase() === 'push-location'; })();
+      if (!ok) violate(`literal output channel: the bound Pop-Location must sit in the finally block of the catch-free try immediately preceded by the bound Push-Location; a Pop-Location anywhere else leaves the pushed location current for everything that follows (measured, phase-15 review), so it is RED`);
+    }
+
     // (O-2 class) Containers: the only if/foreach structures recognized
     // inside step 4 are the bound npm-exit throw guard ('if
     // ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code
@@ -1635,21 +1778,7 @@ function step4Remedies(sourceText) {
     // terminate with an attacker-chosen message ('if ([datetime]"<text>")
     // {}') for the step-4 catch handler -- RED. try/catch/finally
     // scaffolding stays allowed: its blocks are judged recursively above.
-    const isNpmGuard = (n) => {
-      if (n.clauseCount !== 1 || n.hasElse) return false;
-      const parts = tree.kids(n);
-      if (parts.length !== 2) return false;
-      const condEls = tree.kids(parts[0]);
-      if (condEls.length !== 1) return false;
-      const cond = unwrap(condEls[0], tree);
-      if (cond.type !== 'BinaryExpressionAst' || cond.operator !== 'Ine') return false;
-      const [cl, cr] = tree.kids(cond);
-      if (!cl || !isPlainVariable(cl, 'LASTEXITCODE')) return false;
-      const rv = cr ? unwrap(cr, tree) : null;
-      if (!rv || rv.type !== 'ConstantExpressionAst' || rv.value !== '0') return false;
-      const bodyStmts = tree.kids(parts[1]);
-      return bodyStmts.length === 1 && bodyStmts[0].type === 'ThrowStatementAst';
-    };
+    // (isNpmGuard itself is defined with the throw binding above.)
     for (const n of all) {
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
       if (n.type === 'ForEachStatementAst' && n.id !== echoLoop.id) {
@@ -2081,8 +2210,9 @@ test('step-4 lock closes the phase-11 review follow-up findings (phase 12)', () 
   }
   // Green controls: the real throw (bound npm-regeneration failure) and the
   // real two-guard echo body stay green. SYNTHETIC does not run npm, so add
-  // the real throw shape explicitly.
-  const withRealThrow = SYNTHETIC.replace(afterCapture, `${afterCapture}\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }`);
+  // the real npm call and throw shape explicitly, in their bound position
+  // (immediately before the output capture; phase 16 binds that position).
+  const withRealThrow = SYNTHETIC.replace('$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1', `& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }\n$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`);
   assert.equal(step4Remedies(withRealThrow).cone, 'sparse-checkout reapply');
 });
 
@@ -2213,4 +2343,51 @@ test('step-4 lock closes the phase-14 review follow-up findings (phase 15)', () 
   assert.equal(step4Remedies(SYNTHETIC.replace(banner, `${banner} -ForegroundColor Yellow`)).cone, 'sparse-checkout reapply');
   const boundStores = SYNTHETIC.replace('$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1', `$global:LASTEXITCODE = 0\n$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`);
   assert.equal(step4Remedies(boundStores).cone, 'sparse-checkout reapply');
+});
+
+test('step-4 lock closes the phase-15 review follow-up findings (phase 16)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const banner = 'Write-Host "[4/4] Verifying generated agent documentation is fresh"';
+  const capture = '$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1';
+  const npmGuard = '& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }';
+  const literal = /literal output channel/;
+  // The phase-15 independent review (VERDICT: fail) measured each of these
+  // GREEN on the full suite with console harm on the verbatim step-4 chain
+  // (all pre-existing at the phase-14 commit); each must now be RED with a
+  // named reason.
+  const cases = [
+    // F1: a path-qualified spelling of an allowlisted basename was judged by
+    // its stripped basename and never counted -- an out-of-tree binary ran
+    // inside step 4 and its path text reached the catch handler.
+    ['F1 path-qualified pop-location basename', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& "C:\docs-agent is stale, run npm run doc:agent\pop-location"`), literal],
+    ['F1 path-qualified npm basename', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& "C:\docs-agent is stale\npm" run doc:agent`), literal],
+    ['F1 module-qualified Push-Location', SYNTHETIC.replace(afterCapture, `${afterCapture}\nMicrosoft.PowerShell.Management\Push-Location $RepoRoot`), literal],
+    ['F1 relative-path node', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& "./node" --version`), literal],
+    // F2: the verdict flag's initialiser sits just ahead of the anchored
+    // block; flipping it to $true made local CI print the stale remedy and
+    // then report PASS with exit 0.
+    ['F2 initialiser flipped to $true', `$agentDocsPassed = $true\n${SYNTHETIC}`, literal],
+    ['F2 scoped verdict-flag store', `$global:agentDocsPassed = $true\n${SYNTHETIC}`, literal],
+    ['F2 compound store to the verdict flag', `$agentDocsPassed += 1\n${SYNTHETIC}`, literal],
+    // F3: the bound throw moved out of its guard terminates step 4 early
+    // with a misleading cause; the bound npm call moved after the captures
+    // breaks the bound adjacency.
+    ['F3 bound throw outside its guard', SYNTHETIC.replace(capture, `throw "npm run doc:agent exited with code $LASTEXITCODE"\n${npmGuard}\n${capture}`), literal],
+    ['F3 npm call moved after the captures', SYNTHETIC.replace(afterCapture, `${afterCapture}\n${npmGuard}`), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // F4: a Pop-Location outside the bound finally satisfies the shape and
+  // occurrence checks while leaving the pushed location current.
+  const realChain = `${SYNTHETIC.replace(banner, `${banner} -ForegroundColor Cyan\nPush-Location $RepoRoot\ntry {\n${npmGuard}\n$global:LASTEXITCODE = 0`)}\n} finally {\nPop-Location\n}`;
+  assert.throws(() => step4Remedies(realChain.replace('} finally {\nPop-Location\n}', '} finally {\n}\nPop-Location')), literal, 'F4 Pop-Location moved out of the finally must be RED');
+  // Green controls: the same chain with the Pop-Location in its bound
+  // finally stays green, the npm call and throw in their bound positions
+  // stay green, and a fail-closed '$agentDocsPassed = $false' outside the
+  // anchored block (the real file's initialiser and catch reset) is fine --
+  // the real-file signature tests cover exactly that.
+  assert.equal(step4Remedies(realChain).cone, 'sparse-checkout reapply');
+  const boundNpm = SYNTHETIC.replace(capture, `${npmGuard}\n${capture}`);
+  assert.equal(step4Remedies(boundNpm).cone, 'sparse-checkout reapply');
 });
