@@ -73,15 +73,18 @@ test('fine-tuning bar: numeric fields, fine buttons and arrow keys write the pag
   await expect(zoom).toHaveValue('101.5');
 
   // Arrow keys on the pan control: 1 px, Shift 10 px; the page number must not change.
-  const pageBefore = await page.locator('.document-pane-frame.is-compare-pane canvas, .document-pane-frame.is-compare-pane img').first().getAttribute('data-page-number');
+  // Wait for a rendered page that carries its number: right after the zoom the pane can be
+  // re-rendering, and an immediate read returned null (CI run 38659245463, 2026-10-15).
+  const pageMedia = page.locator('.document-pane-frame.is-compare-pane canvas[data-page-number], .document-pane-frame.is-compare-pane img[data-page-number]').first();
+  await expect(pageMedia).toHaveAttribute('data-page-number', /\S/);
+  const pageBefore = await pageMedia.getAttribute('data-page-number');
   const pad = bar.getByRole('button', { name: /Move the page/ });
   await pad.focus();
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Shift+ArrowDown');
   await expect(bar.getByRole('spinbutton', { name: 'Horizontal offset in pixels' })).toHaveValue('1.0');
   await expect(bar.getByRole('spinbutton', { name: 'Vertical offset in pixels' })).toHaveValue('10.0');
-  const pageAfter = await page.locator('.document-pane-frame.is-compare-pane canvas, .document-pane-frame.is-compare-pane img').first().getAttribute('data-page-number');
-  expect(pageAfter).toBe(pageBefore);
+  await expect(pageMedia).toHaveAttribute('data-page-number', pageBefore);
   await expect.poll(() => stageTransform(page, 'compare')).toBe('scale(1.015) translate(1px, 10px) rotate(-0.6deg)');
 
   // The left page is untouched.
