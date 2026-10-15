@@ -1,0 +1,25 @@
+{
+  "sourceFixedSha256": "72eb010199e740e81c63ff0b395eea358e09b9bc4c0d5a6edb9df4defbd469b8",
+  "sourceMutantSha256": "437160bc6d1e69bc7341e3a314721cb821b0dbc9e0b6141024a4b9a1c9ad4bc5",
+  "restoredByteIdentical": true,
+  "mutation": "Remove asynchronous timer drain while retaining every behavioral assertion; selected generated-PDF test must fail because the handler has not run.",
+  "results": [
+    {
+      "label": "print-timer-drain-removed-red",
+      "nativeExit": 1,
+      "expectedExit": 1,
+      "seconds": 6.858,
+      "rawSha256": "f12a4e01f00161f23cf707c021e4af2ab827564f700fdecfb245e1916f832964",
+      "publicSha256": "dbc3b3c6d5f1f6139daa406824a23f4362c66085e29a9e5f7aef29fc6d673a82"
+    },
+    {
+      "label": "print-timer-restored-green",
+      "nativeExit": 0,
+      "expectedExit": 0,
+      "seconds": 6.762,
+      "rawSha256": "d5e9f4db44338cb905d1c264c5ad97500c31cfcd324306ae0a4cfebbe552be98",
+      "publicSha256": "55d476de8aad8127a2598ba7f20471e78245f20d431ba284b248ecb3dc6d0aba"
+    }
+  ],
+  "publicNormalization": "ANSI color, repository path, trailing whitespace and terminal blank lines normalized; raw logs and their SHA256 unchanged."
+}

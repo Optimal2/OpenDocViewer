@@ -114,9 +114,17 @@ async function mountPipeline(overrides = {}) {
   };
 }
 
-/** Let the 30 ms submit delay (and the 50 ms PDF start delay) pass. */
+// Drive the pipeline's timers and intervening promises deterministically. A real
+// 120 ms sleep can finish before a nested 50 ms timer when the event loop is busy.
+beforeEach(() => vi.useFakeTimers());
+afterEach(() => {
+  vi.clearAllTimers();
+  vi.useRealTimers();
+});
+
+/** Complete the submit delay, PDF start delay and their asynchronous continuations. */
 async function flushPrint() {
-  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 120)); });
+  await act(async () => { await vi.runAllTimersAsync(); });
 }
 
 const DETAIL = Object.freeze({

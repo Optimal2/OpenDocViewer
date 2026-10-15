@@ -1,0 +1,26 @@
+
+ RUN  v5.0.4 <repo>
+
+ ❯ src/components/__tests__/printPipeline.test.jsx (13 tests | 1 failed | 12 skipped) 58ms
+   ❯ usePrintPipeline: side-by-side compare print (unchanged) (3)
+     × generated PDF: handlePdfCurrentComparison and a print-pdf log row 55ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 skipped (13)
+   Start at  01:38:28
+   Duration  5.60s (environment 73%, import 20%, transform 6%, tests 1%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/__tests__/printPipeline.test.jsx > usePrintPipeline: side-by-side compare print (unchanged) > generated PDF: handlePdfCurrentComparison and a print-pdf log row
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ src/components/__tests__/printPipeline.test.jsx:219:51
+    217|     expect(submitPrint.mock.calls[0][0]).toMatchObject({ action: 'prin…
+    218|     await flushPrint();
+    219|     expect(printUtils.handlePdfCurrentComparison).toHaveBeenCalledTime…
+       |                                                   ^
+    220|     expect(printUtils.handlePdfCurrentComparison.mock.calls[0][0]).toB…
+    221|     expect(printUtils.handlePdfCurrentComparison.mock.calls[0][1]).toB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

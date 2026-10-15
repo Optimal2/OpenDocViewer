@@ -105,3 +105,28 @@ The repository bump helper updates repository `2.4.204` to `2.4.205`, component
 `2.0.151` to `2.0.152` in both physical copies. It also raises the compatible
 artifact maximum to `2.4.194` and the component's minimum definition to `2.0.152`.
 SQL bytes and their embed are unchanged. The npm product version remains `2.10.0`.
+
+## Parent integration: deterministic printing test synchronization
+
+The worker's two clean full runs exposed failures in the unchanged printing
+tests; a focused rerun passed. These observations do not prove a production
+printing defect. The test helper slept for 120 real milliseconds to cover a
+30 ms submit timer and a nested 50 ms PDF timer. When the event loop is busy,
+both the outer timer and the sleep can become ready before the nested timer
+has even been scheduled. A longer fixed sleep would retain this assumption.
+
+The integration changes only `printPipeline.test.jsx`: fake timers are scoped
+to each test, `flushPrint` drains timers and their promise continuations inside
+React `act`, and cleanup restores real timers. All 13 original behavioral
+tests and assertions remain. No printing implementation, delay, timeout or
+expected call count changed. Removing the asynchronous timer drain makes the
+existing generated-PDF assertion fail (native exit 1, expected handler call
+absent); byte-identical restoration passes all 13 tests (native exit 0).
+The exact mutation/restoration hashes and raw-output hashes are recorded in
+`evidence/empty-validator/print-timer-proof.json` with the focused transcripts.
+
+The earlier validation table remains the worker's historical RED record;
+final combined validation and independent review are recorded by the parent
+against the final committed source. An initial parent setup attempt ran before
+dependency copying finished and executed no tests; it is excluded from the
+RED/GREEN and acceptance evidence.
