@@ -180,17 +180,20 @@
 //   no argument when the positional elements are collected. Static name
 //   resolution through assignments is scope- and order-blind: several
 //   differing static values for one name fail closed rather than guess.
-// Known gaps (named, not closed): (a) literal remedy-looking TEXT printed
-// somewhere else in the file without ever touching the remedy variable
-// or its name (for example a second hand-written remedy sentence passed
-// directly to Write-Host) cannot be distinguished from legitimate
-// operator messages and is NOT judged. This gap was measured in phase 9
-// (a literal Write-Host remedy sentence executes and prints) and is
-// explicitly REJECTED as a fix: closing it would require a denylist of
-// remedy-sounding sentences or banning literal Write-Host text, both of
-// which break legitimate operator messages and contradict the allowlist
-// design; the guarded channels are the variable, its name and its
-// sinks, which phases 8-9 bind. (b) dynamic execution of an
+// Phase 10 (this round) closes the literal output channel INSIDE step 4
+// with a structural allowlist, not a wording denylist: inside step 4
+// the only console outputs are the banner, the gate-output echo
+// (Write-Host $line in the foreach over $agentDocsOutput) and
+// 'Write-Host $remedy'. Any other Write-Host/Warning/Output/Error/
+// Information/Verbose/Debug, Out-Host or echo command, or any
+// [Console]::Write/WriteLine invocation, inside step 4 -- literal,
+// expandable or via another variable such as $msg -- is RED whatever
+// words it uses, because it can put a wrong remedy in front of the
+// operator on the step-4 failure path while every $remedy check stays
+// green. Output OUTSIDE step 4 (steps 1-3 banners/results, catch
+// handlers, the summary) is legitimate operator output, is not the
+// step-4 remedy channel, and is not judged by this lock. Known gap
+// (named, not closed): dynamic execution of an
 // external script (`& $Validator`, dot-sourcing the telemetry helper)
 // is judged only by its in-file arguments -- code inside those external
 // files is out of scope. Statements elsewhere that touch neither the
@@ -1030,6 +1033,53 @@ function step4Remedies(sourceText) {
     }
   }
 
+  // --- Phase 10 literal output channel inside step 4. ---
+  // Structural allowlist, not a wording denylist: inside step 4 the only
+  // console outputs are the banner, the gate-output echo ($line) and
+  // 'Write-Host $remedy'. Any other output command (Write-Host/Warning/
+  // Output/Error/Information/Verbose/Debug, Out-Host, echo) or Console
+  // write inside step 4 -- literal, expandable or via another variable
+  // such as $msg -- can put a wrong remedy in front of the operator while
+  // every $remedy check stays green, so it is RED whatever words it uses.
+  // Output outside step 4 (steps 1-3, catch handlers, the summary) is
+  // legitimate operator output and is not judged by this channel.
+  {
+    const OUTPUT_COMMANDS = new Set(['write-host', 'write-warning', 'write-output', 'write-error', 'write-information', 'write-verbose', 'write-debug', 'out-host', 'echo', 'oh']);
+    for (const n of all) {
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if (n.type === 'InvokeMemberExpressionAst' && /(console|\$host\.ui)/i.test(n.text)) {
+        violate(`literal output channel: ${describe(n)} writes to the console inside step 4; inside step 4 the only console outputs on the allowlist are the step-4 banner, the gate-output echo (Write-Host $line) and 'Write-Host $remedy', so a literal [Console]::WriteLine or $Host.UI.WriteLine remedy inside step 4 is RED whatever words it uses`);
+      }
+      if (n.type !== 'CommandAst') continue;
+      const cn = (n.commandName ?? '').toLowerCase();
+      if (!cn) {
+        // Dynamic invocation (& $cmd / . $sb): step 4 invokes only the
+        // constant names npm/node, so a command name that does not
+        // statically resolve to a non-output constant cannot be proven
+        // not to be Write-Host in disguise.
+        const head = tree.kids(n)[0];
+        const resolved = head ? staticValue(head, tree) : null;
+        if (resolved !== null && !OUTPUT_COMMANDS.has(resolved.toLowerCase())) continue;
+        violate(`literal output channel: dynamic command '${n.text.replace(/\s+/g, ' ').trim()}' inside step 4 cannot be proven not to be an output command (Write-Host in disguise); inside step 4 the only invoked command names on the allowlist are the constant external programs the step itself runs`);
+      }
+      if (!OUTPUT_COMMANDS.has(cn)) continue;
+      if (descendantsOf(n, tree).some((d) => d.id === banners[0].id)) continue;
+      let echo = false;
+      let cur = n;
+      while (cur && cur.id !== step4Block.id) {
+        if (cur.type === 'ForEachStatementAst') {
+          const loopVar = tree.kids(cur)[0];
+          const printsLine = descendantsOf(n, tree).some((d) => isVarNamed(d, 'line'));
+          const overGate = descendantsOf(cur, tree).some((d) => isVarNamed(d, 'agentDocsOutput'));
+          if (loopVar && isVarNamed(loopVar, 'line') && printsLine && overGate) echo = true;
+        }
+        cur = tree.parent(cur);
+      }
+      if (echo) continue;
+      violate(`literal output channel: command '${n.text.replace(/\s+/g, ' ').trim()}' writes to the console inside step 4; inside step 4 the only console outputs on the allowlist are the step-4 banner, the gate-output echo (Write-Host $line) and 'Write-Host $remedy', so a literal or indirect (for example via $msg) remedy printed inside step 4 is RED whatever words it uses`);
+    }
+  }
+
   const statements = tree.kids(regionBlock);
   let idx = 0;
   const init = statements[0];
@@ -1277,6 +1327,34 @@ test('step-4 lock binds capture structure/order, dynamic commands, parameter bin
   }
 });
 
+test('step-4 lock binds the literal output channel inside step 4 (phase 10)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const literal = /literal output channel/;
+  const cases = [
+    ['literal Write-Host wrong remedy after capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\nWrite-Host "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['literal Write-Warning wrong remedy after capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\nWrite-Warning "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['[Console]::WriteLine wrong remedy after capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\n[Console]::WriteLine("docs-agent is stale: run npm run doc:agent")`), literal],
+    ['[System.Console]::WriteLine wrong remedy after capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\n[System.Console]::WriteLine("docs-agent is stale")`), literal],
+    ['indirect literal via $msg printed in step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$msg = "docs-agent is stale: run npm run doc:agent"\nWrite-Host $msg`), literal],
+    ['literal Write-Host before the remedy region', SYNTHETIC.replace('if ($agentDocsExit -eq 0)', 'Write-Host "docs-agent is stale: run npm run doc:agent"\nif ($agentDocsExit -eq 0)'), literal],
+    ['alias oh (Out-Host) wrong remedy after capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\noh "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['$Host.UI.WriteLine wrong remedy after capture', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$Host.UI.WriteLine("docs-agent is stale: run npm run doc:agent")`), literal],
+    ['dynamic & $cmd resolving to Write-Host', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$cmd = 'Write-Host'; & $cmd "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['dynamic & $cmd with unresolved name and literal argument', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& $unknownCmd "docs-agent is stale: run npm run doc:agent"`), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // Green controls: the same literal OUTSIDE step 4 (after the try block
+  // that step4Block anchors to, or in its catch) is legitimate operator
+  // output for other steps and stays green; step 4's own banner, gate-
+  // output echo and remedy print are the only outputs inside step 4.
+  const trySynthetic = `try {\n${SYNTHETIC}\n} catch { Write-Host "step 4 failed" }`;
+  assert.equal(step4Remedies(trySynthetic).cone, 'sparse-checkout reapply');
+  const outsideLiteral = `${trySynthetic}\nWrite-Host 'docs-agent gate failed; re-read the gate output before re-running'`;
+  assert.equal(step4Remedies(outsideLiteral).cone, 'sparse-checkout reapply');
+});
+
 test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // Reworded remedy text: only the real file's texts are pinned, by the
   // signature test above; a synthetic rewording must still parse clean.
@@ -1292,14 +1370,16 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // operator message that touches neither $remedy nor its name. The
   // literal case documents the measured, explicitly rejected gap (a):
   // remedy-looking TEXT without the remedy variable is not judged.
-  const cleanSplat = `${SYNTHETIC}\n$style = @{ ForegroundColor = 'Green' }; Write-Host 'step done' @style`;
+  const cleanSplat = `${SYNTHETIC}\n$style = @{ ForegroundColor = 'Green' }; Get-Date @style`;
   assert.equal(step4Remedies(cleanSplat).cone, 'sparse-checkout reapply');
-  const literalMessage = `${SYNTHETIC}\nWrite-Host 'docs-agent gate failed; re-read the gate output before re-running'`;
-  assert.equal(step4Remedies(literalMessage).cone, 'sparse-checkout reapply');
+  // A literal operator message INSIDE step 4 is now RED (literal output
+  // channel below); the same literal outside step 4 stays green -- see
+  // the phase-10 test. This replaces the phase-9 measured gap (a), which
+  // accepted the inside-step-4 literal as an explicitly rejected gap.
   // A clean splat on a dynamic command and an [ordered] clean splat are
   // resolved, not rejected (independent-review controls).
-  const dynamicSplat = `${SYNTHETIC}\n$validatorArgs = @{ BaseCommit = 'main' }; & $Validator @validatorArgs`;
+  const dynamicSplat = `try {\n${SYNTHETIC}\n} catch {}\n$validatorArgs = @{ BaseCommit = 'main' }; & $Validator @validatorArgs`;
   assert.equal(step4Remedies(dynamicSplat).cone, 'sparse-checkout reapply');
-  const orderedSplat = `${SYNTHETIC}\n$style = [ordered]@{ ForegroundColor = 'Green' }; Write-Host 'step done' @style`;
+  const orderedSplat = `${SYNTHETIC}\n$style = [ordered]@{ ForegroundColor = 'Green' }; Get-Date @style`;
   assert.equal(step4Remedies(orderedSplat).cone, 'sparse-checkout reapply');
 });
