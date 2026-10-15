@@ -199,6 +199,50 @@
 // files is out of scope. Statements elsewhere that touch neither the
 // step-4 input variables, the remedy variable/name, nor a name sink
 // above remain out of scope by construction.
+// Phase 11 (this round) closes the six bypasses the independent review of
+// phases 9-10 measured GREEN while the real verbatim step-4 chain printed
+// a wrong remedy. The output/input channels are now a POSITIVE STRUCTURAL
+// BOUNDARY over the protected step-4 language, not name or wording
+// denylists:
+//   F1 STATEMENT SHAPES: every statement inside step 4 must be an
+//      assignment, an if/foreach/try container, throw/continue/break, or
+//      a single command judged by the command boundary below. A bare
+//      expression statement ("...", @("..."), $("...") or a bare $msg)
+//      parses as a CommandExpressionAst pipeline, writes its value to the
+//      console and is RED, as is any multi-element pipeline statement.
+//   F2 INPUT READS: $agentDocsOutput/$agentDocsExit may be READ only in
+//      the capture's own left side, the gate-exit test and the echo
+//      loop's enumerator. Taking an alias ('$x = $agentDocsOutput') is
+//      RED (fail-closed instead of interpreting aliasing), so a later
+//      '$x[0] = ...' or '$x.SetValue(...)' in-place mutation through the
+//      alias cannot rewrite what the cause branches match.
+//   F3 COMMAND NAMES: the invoked name is reduced to its bare cmdlet
+//      (module qualifier stripped, so 'Microsoft.PowerShell.Utility\
+//      Write-Host' is judged as Write-Host) and must be on the step-4
+//      allowlist -- the banner/echo Write-Host, Push-/Pop-Location, or
+//      the exact bound '& npm run doc:agent' and gate-capture node
+//      invocation. Set-Alias/New-Alias or an alias: provider write inside
+//      step 4 is RED, so 'Set-Alias zz Write-Host; zz ...' cannot smuggle
+//      an output command past the name check. Any other command is
+//      accepted only when its pipeline output is captured or discarded
+//      ('$x = ...', '$null = ...', piped to Out-Null): uncaptured output
+//      of an innocent-looking cmdlet (Get-Date -Format 'wrong advice') is
+//      console output too. Write-Progress (F6) is RED by that rule; the
+//      review measured no redirected-console harm for it, so no
+//      interactive-only channel is on the allowlist and none is claimed
+//      closed beyond that.
+//   F4 MEMBER INVOCATIONS: the only InvokeMemberExpressionAst allowed
+//      inside step 4 is the echo loop's $line.ToString(). A console
+//      write through [Console]::WriteLine, $Host.UI.WriteLine or the same
+//      through an aliased variable/type ('$c = [Console]; $c::WriteLine
+//      (...)') cannot be told apart from a safe call statically, so every
+//      other member invocation inside step 4 is RED.
+//   F5 ECHO BINDING: exactly one foreach over exactly @($agentDocsOutput)
+//      with the plain loop variable $line is the echo loop; nothing else
+//      may write $line (assignment, ++/--, [ref], a name sink or another
+//      foreach loop variable), and the echo Write-Host calls take exactly
+//      one argument -- $line or $line.ToString() -- so the printed lines
+//      are the gate's own output, never a rewritten $line.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -1033,52 +1077,230 @@ function step4Remedies(sourceText) {
     }
   }
 
-  // --- Phase 10 literal output channel inside step 4. ---
-  // Structural allowlist, not a wording denylist: inside step 4 the only
-  // console outputs are the banner, the gate-output echo ($line) and
-  // 'Write-Host $remedy'. Any other output command (Write-Host/Warning/
-  // Output/Error/Information/Verbose/Debug, Out-Host, echo) or Console
-  // write inside step 4 -- literal, expandable or via another variable
-  // such as $msg -- can put a wrong remedy in front of the operator while
-  // every $remedy check stays green, so it is RED whatever words it uses.
-  // Output outside step 4 (steps 1-3, catch handlers, the summary) is
-  // legitimate operator output and is not judged by this channel.
+  // --- Phase 11: positive structural boundary for step 4. ---
+  // Replaces the phase-10 name/regex-based literal-output check, which the
+  // independent review bypassed six ways (F1-F6, see the header). Inside
+  // step 4 (outside the already-bound remedy region) the only permitted
+  // console outputs are the banner, the gate-output echo (Write-Host $line
+  // / Write-Host $line.ToString() inside the one bound echo loop) and, in
+  // the region, 'Write-Host $remedy'. Every statement, command, member
+  // invocation and read of a captured gate variable is judged against that
+  // contract; anything unrecognized is RED with a named reason.
   {
     const OUTPUT_COMMANDS = new Set(['write-host', 'write-warning', 'write-output', 'write-error', 'write-information', 'write-verbose', 'write-debug', 'out-host', 'echo', 'oh']);
+    const STEP4_COMMANDS = new Set(['write-host', 'push-location', 'pop-location', 'npm', 'node']);
+
+    // (F5) Bind the echo loop: exactly one foreach inside step 4 may touch
+    // the gate capture, and it must be exactly
+    // `foreach ($line in @($agentDocsOutput))`, so the echoed lines are the
+    // gate's own output and nothing else.
+    const echoLoops = all.filter((n) => n.type === 'ForEachStatementAst' && tree.isWithin(n, step4Block) && !tree.isWithin(n, regionBlock) && descendantsOf(n, tree).some((d) => isVarNamed(d, 'agentDocsOutput')));
+    if (echoLoops.length !== 1) violate(`literal output channel: expected exactly one gate-output echo loop ('foreach ($line in @($agentDocsOutput))') inside step 4, found ${echoLoops.length}; the echo loop is the only permitted consumer of the captured gate output, so a second loop over it (or none) is RED`);
+    const echoLoop = echoLoops[0];
+    const loopParts = tree.kids(echoLoop);
+    if (loopParts.length !== 3 || !loopParts[0] || !isPlainVariable(loopParts[0], 'line')) violate(`literal output channel: the gate-output echo loop must iterate the plain variable $line ('foreach ($line in @($agentDocsOutput))'), got ${describe(echoLoop)}; a renamed loop variable breaks the binding between the echoed lines and the gate output`);
+    const echoEnumerator = loopParts[1];
+    {
+      let e = echoEnumerator;
+      const bad = () => violate(`literal output channel: the gate-output echo loop must enumerate exactly @($agentDocsOutput), got ${describe(echoEnumerator)}; any other enumerator (an extra element, a filtered copy, a different source) can put attacker text where the gate output belongs and is RED`);
+      if (!e || e.type !== 'PipelineAst' || tree.kids(e).length !== 1) bad();
+      e = unwrap(tree.kids(e)[0], tree);
+      if (e.type !== 'ArrayExpressionAst') bad();
+      const innerBlock = tree.kids(e);
+      if (innerBlock.length !== 1 || innerBlock[0].type !== 'StatementBlockAst') bad();
+      const innerStmts = tree.kids(innerBlock[0]);
+      if (innerStmts.length !== 1 || innerStmts[0].type !== 'PipelineAst' || tree.kids(innerStmts[0]).length !== 1) bad();
+      const enumVar = unwrap(tree.kids(innerStmts[0])[0], tree);
+      if (!isPlainVariable(enumVar, 'agentDocsOutput')) bad();
+    }
+
+    // (F5) Nothing else may write $line: the echo loop variable is the only
+    // writer, so a '$line = "..."' at the top of the loop (or another
+    // foreach reusing $line) cannot replace the gate output being printed.
     for (const n of all) {
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
-      if (n.type === 'InvokeMemberExpressionAst' && /(console|\$host\.ui)/i.test(n.text)) {
-        violate(`literal output channel: ${describe(n)} writes to the console inside step 4; inside step 4 the only console outputs on the allowlist are the step-4 banner, the gate-output echo (Write-Host $line) and 'Write-Host $remedy', so a literal [Console]::WriteLine or $Host.UI.WriteLine remedy inside step 4 is RED whatever words it uses`);
+      if (n.type === 'AssignmentStatementAst' && assignmentTargetsName(n, tree, 'line')) {
+        violate(`literal output channel: ${describe(n)} writes $line inside step 4; the echo loop variable is the only permitted writer of $line, so a '$line = ...' rewrite inside the echo loop would replace the gate output with attacker text and is RED`);
+      } else if (n.type === 'ForEachStatementAst' && n.id !== echoLoop.id && tree.kids(n)[0] && isVarNamed(tree.kids(n)[0], 'line')) {
+        violate(`literal output channel: ${describe(n)} reuses $line as a loop variable inside step 4; the bound echo loop is the only permitted writer of $line, so this is RED`);
+      } else if (n.type === 'UnaryExpressionAst' && descendantsOf(n, tree).some((d) => isVarNamed(d, 'line'))) {
+        violate(`literal output channel: ${describe(n)} mutates $line inside step 4; the echo loop variable is the only permitted writer of $line`);
+      } else if (n.type === 'ConvertExpressionAst' && /^\[ref\]/i.test(n.text.trim()) && descendantsOf(n, tree).some((d) => isVarNamed(d, 'line'))) {
+        violate(`literal output channel: ${describe(n)} aliases $line through [ref] inside step 4; the echo loop variable is the only permitted writer of $line`);
+      } else if (n.type === 'CommandAst' && commandTouchesName(n, tree, 'line')) {
+        violate(`literal output channel: ${describe(n)} writes $line through a variable-name sink inside step 4; the echo loop variable is the only permitted writer of $line`);
       }
-      if (n.type !== 'CommandAst') continue;
-      const cn = (n.commandName ?? '').toLowerCase();
-      if (!cn) {
-        // Dynamic invocation (& $cmd / . $sb): step 4 invokes only the
-        // constant names npm/node, so a command name that does not
-        // statically resolve to a non-output constant cannot be proven
-        // not to be Write-Host in disguise.
-        const head = tree.kids(n)[0];
-        const resolved = head ? staticValue(head, tree) : null;
-        if (resolved !== null && !OUTPUT_COMMANDS.has(resolved.toLowerCase())) continue;
-        violate(`literal output channel: dynamic command '${n.text.replace(/\s+/g, ' ').trim()}' inside step 4 cannot be proven not to be an output command (Write-Host in disguise); inside step 4 the only invoked command names on the allowlist are the constant external programs the step itself runs`);
+    }
+
+    // (F2) Bind the reads of the captured gate variables: the only
+    // permitted read positions are the capture's own left side, the
+    // gate-exit test condition and the echo loop's enumerator. Any other
+    // read -- in particular '$x = $agentDocsOutput', which takes a mutable
+    // alias to the captured array -- is RED fail-closed, because an
+    // in-place mutation through that alias ($x[0] = ..., $x.SetValue(...))
+    // rewrites what the cause branches match while every write check on
+    // $agentDocsOutput itself stays green.
+    const gateCondition = tree.kids(gateTests[0])[0];
+    for (const n of all) {
+      if (n.type !== 'VariableExpressionAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      const which = isVarNamed(n, 'agentDocsOutput') ? 'agentDocsOutput' : (isVarNamed(n, 'agentDocsExit') ? 'agentDocsExit' : null);
+      if (!which) continue;
+      if (tree.isWithin(n, tree.kids(captures[which])[0])) continue; // the capture's own left side
+      if (tree.isWithin(n, gateCondition)) continue; // if ($agentDocsExit -eq 0)
+      if (tree.isWithin(n, echoEnumerator)) continue; // foreach ($line in @($agentDocsOutput))
+      violate(`input channel: ${describe(n)} reads $${which} outside the three bound positions (the capture's own left side, the gate-exit test, the echo loop's enumerator); taking an alias to the captured gate output ('$x = $${which}') lets a later in-place mutation through the alias rewrite what the cause branches match, so any read outside those positions is RED`);
+    }
+
+    // (F1) Statement shapes: every statement inside step 4 is an
+    // assignment, an if/foreach/try container, throw/continue/break, or a
+    // single command judged by the command boundary below. A bare
+    // expression statement (a string/array/subexpression literal or a bare
+    // variable such as $msg) parses as a CommandExpressionAst pipeline and
+    // writes its value to the console, so it is RED whatever words it
+    // uses; so is a multi-element pipeline statement.
+    const STEP4_BLOCKS = new Set(['StatementBlockAst', 'NamedBlockAst', 'ScriptBlockAst']);
+    const STEP4_CONTAINERS = new Set(['IfStatementAst', 'ForEachStatementAst', 'TryStatementAst']);
+    const STEP4_CONTROL = new Set(['ThrowStatementAst', 'ContinueStatementAst', 'BreakStatementAst']);
+    // Only blocks that are actual control-flow bodies carry step-4
+    // statements. A block inside an EXPRESSION (the @(...) array literal of
+    // the echo enumerator, $(...)/(...) internals, a hashtable value) holds
+    // expression elements, not executed statements; the enclosing statement
+    // is what the allowlist judges, and the echo enumerator itself is bound
+    // exactly by the echo-loop check above.
+    const STEP4_BODY_PARENTS = new Set(['IfStatementAst', 'ForEachStatementAst', 'TryStatementAst', 'CatchClauseAst', 'NamedBlockAst', 'ScriptBlockAst']);
+    for (const b of all) {
+      if (!STEP4_BLOCKS.has(b.type)) continue;
+      if (!tree.isWithin(b, step4Block) || tree.isWithin(b, regionBlock)) continue;
+      const bp = tree.parent(b);
+      if (b.id !== step4Block.id && !(bp && STEP4_BODY_PARENTS.has(bp.type))) continue;
+      for (const stmt of tree.kids(b)) {
+        if (tree.isWithin(stmt, regionBlock)) continue;
+        if (stmt.type === 'AssignmentStatementAst' || STEP4_CONTAINERS.has(stmt.type) || STEP4_CONTROL.has(stmt.type)) continue;
+        if (stmt.type === 'PipelineAst') {
+          const els = tree.kids(stmt);
+          if (els.length === 1 && els[0].type === 'CommandAst') continue; // judged by the command boundary below
+          violate(`literal output channel: statement ${describe(stmt)} inside step 4 is a bare expression or a multi-element pipeline, whose value would be written to the console; the only statements on the step-4 allowlist are assignments, if/foreach/try containers, throw/continue/break and single allowlisted commands, so a bare literal, @(...), $(...) or a bare variable such as $msg inside step 4 is RED whatever words it uses`);
+        }
+        violate(`literal output channel: statement ${describe(stmt)} inside step 4 is not on the step-4 statement allowlist (assignments, if/foreach/try containers, throw/continue/break, or a single allowlisted command), so it is RED`);
       }
-      if (!OUTPUT_COMMANDS.has(cn)) continue;
-      if (descendantsOf(n, tree).some((d) => d.id === banners[0].id)) continue;
-      let echo = false;
-      let cur = n;
+    }
+
+    // (F4) Member invocations: the only InvokeMemberExpressionAst allowed
+    // inside step 4 is the echo loop's $line.ToString(). A console write
+    // through [Console]::WriteLine, $Host.UI.WriteLine or the same through
+    // an aliased variable/type ('$c = [Console]; $c::WriteLine(...)') is
+    // statically indistinguishable from a safe call, so fail closed.
+    const isEchoToString = (n) => {
+      const k = tree.kids(n);
+      if (k.length !== 2 || !k[0] || !isPlainVariable(k[0], 'line')) return false;
+      const member = staticValue(k[1], tree);
+      return member !== null && member.toLowerCase() === 'tostring' && tree.isWithin(n, echoLoop);
+    };
+    for (const n of all) {
+      if (n.type !== 'InvokeMemberExpressionAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if (!isEchoToString(n)) {
+        violate(`literal output channel: member invocation ${describe(n)} inside step 4 is not the echo loop's $line.ToString(); a console write through [Console]::WriteLine, $Host.UI.WriteLine or an aliased variable/type cannot be told apart from a safe call without running the code, so it is RED`);
+      }
+    }
+
+    // (F3/F6) Command boundary: the invoked name (module qualifier
+    // stripped, dynamic heads resolved statically) must be on the step-4
+    // allowlist and carry its bound shape; output cmdlets are only the
+    // banner and the exact echo; alias redefinition is RED; any other
+    // command must have its pipeline output captured or discarded, because
+    // uncaptured output of an innocent-looking cmdlet is console output
+    // too (Get-Date -Format 'wrong advice').
+    const captureRhs = tree.kids(captures.agentDocsOutput)[1];
+    const capturePipe = captureRhs ? unwrap(captureRhs, tree) : null;
+    const captureCmd = capturePipe && capturePipe.type === 'PipelineAst' && tree.kids(capturePipe).length === 1 ? tree.kids(capturePipe)[0] : null;
+    const isCapturedOrDiscarded = (cmd) => {
+      let cur = tree.parent(cmd);
       while (cur && cur.id !== step4Block.id) {
-        if (cur.type === 'ForEachStatementAst') {
-          const loopVar = tree.kids(cur)[0];
-          const printsLine = descendantsOf(n, tree).some((d) => isVarNamed(d, 'line'));
-          const overGate = descendantsOf(cur, tree).some((d) => isVarNamed(d, 'agentDocsOutput'));
-          if (loopVar && isVarNamed(loopVar, 'line') && printsLine && overGate) echo = true;
+        if (cur.type === 'AssignmentStatementAst') return true;
+        if (cur.type === 'PipelineAst') {
+          const els = tree.kids(cur);
+          const last = els[els.length - 1];
+          if (els.length > 1 && last && last.type === 'CommandAst' && (last.commandName ?? '').toLowerCase() === 'out-null') return true;
         }
         cur = tree.parent(cur);
       }
-      if (echo) continue;
-      violate(`literal output channel: command '${n.text.replace(/\s+/g, ' ').trim()}' writes to the console inside step 4; inside step 4 the only console outputs on the allowlist are the step-4 banner, the gate-output echo (Write-Host $line) and 'Write-Host $remedy', so a literal or indirect (for example via $msg) remedy printed inside step 4 is RED whatever words it uses`);
+      return false;
+    };
+    for (const n of all) {
+      if (n.type !== 'CommandAst') continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      const cmdText = n.text.replace(/\s+/g, ' ').trim();
+      const parts = tree.kids(n).filter((k) => !/RedirectionAst$/.test(k.type));
+      let cn = (n.commandName ?? '').toLowerCase();
+      if (!cn) {
+        const resolved = parts.length > 0 ? staticValue(parts[0], tree) : null;
+        if (resolved === null) violate(`literal output channel: dynamic command '${cmdText}' inside step 4 has no statically resolvable name, so it cannot be proven not to be an output command in disguise; every command invoked inside step 4 must resolve statically to the step-4 allowlist (the banner/echo Write-Host, Push-/Pop-Location, or the bound npm/node gate invocations)`);
+        cn = resolved.toLowerCase();
+      }
+      // A module-qualified name is the same cmdlet: judge the bare name.
+      if (cn.includes('\\')) cn = cn.slice(cn.lastIndexOf('\\') + 1);
+      if (cn === 'set-alias' || cn === 'new-alias') {
+        violate(`literal output channel: '${cmdText}' redefines command resolution inside step 4, so a later invocation of the new alias cannot be proven not to be an output command in disguise; step 4 defines no aliases and any Set-Alias/New-Alias inside it is RED`);
+      }
+      for (const el of descendantsOf(n, tree)) {
+        if (el.type !== 'StringConstantExpressionAst' && el.type !== 'ExpandableStringExpressionAst') continue;
+        if (el === tree.kids(n)[0]) continue;
+        const value = staticValue(el, tree);
+        if (value !== null && /^alias::?/i.test(value.trim())) {
+          violate(`literal output channel: command '${cmdText}' writes the alias: provider inside step 4 ('${value.trim()}'), which can redefine a later invocation as an output command, so it is RED`);
+        }
+      }
+      if (OUTPUT_COMMANDS.has(cn) && cn !== 'write-host') {
+        violate(`literal output channel: output command '${cmdText}' writes to a host/output stream inside step 4 and is neither the step-4 banner nor the gate-output echo; inside step 4 the only console outputs on the allowlist are the banner, the echo (Write-Host $line) and 'Write-Host $remedy', so a literal or aliased output command inside step 4 is RED whatever words it uses`);
+      }
+      if (!STEP4_COMMANDS.has(cn)) {
+        if (!isCapturedOrDiscarded(n)) {
+          violate(`literal output channel: command '${cmdText}' is not on the step-4 command allowlist (Write-Host, Push-/Pop-Location, the bound npm/node gate invocations) and its pipeline output is not captured or discarded, so it cannot be proven not to print a wrong remedy inside step 4 -- uncaptured output of an innocent-looking cmdlet is console output too; capture it ('$null = ...', piped to Out-Null) or move it out of step 4`);
+        }
+        continue;
+      }
+      if (cn === 'write-host') {
+        if (descendantsOf(n, tree).some((d) => d.id === banners[0].id)) {
+          // The banner: the banner string plus an optional
+          // -ForegroundColor <constant>, nothing else.
+          if (parts.length < 2 || parts[1].type !== 'StringConstantExpressionAst' || parts[1].value !== '[4/4] Verifying generated agent documentation is fresh') {
+            violate(`literal output channel: the step-4 banner Write-Host must print exactly the banner string constant, got '${cmdText}'`);
+          }
+          let i = 2;
+          if (i < parts.length) {
+            const param = parts[i];
+            if (param.type !== 'CommandParameterAst' || (param.parameterName ?? '').toLowerCase() !== 'foregroundcolor') violate(`literal output channel: step-4 banner Write-Host parameter '${param.text}' is not on the allowlist; only -ForegroundColor may follow the banner string`);
+            const arg = paramArgument(param, n, tree);
+            if (!arg || (arg.type !== 'StringConstantExpressionAst' && arg.type !== 'ConstantExpressionAst')) violate(`literal output channel: the banner's -ForegroundColor must take a constant argument`);
+            i += tree.kids(param).length > 0 ? 1 : 2;
+          }
+          if (i !== parts.length) violate(`literal output channel: the step-4 banner Write-Host has extra elements beyond '<banner string> [-ForegroundColor <constant>]', got '${cmdText}'`);
+          continue;
+        }
+        if (tree.isWithin(n, echoLoop) && parts.length === 2) {
+          const arg = parts[1];
+          if (isPlainVariable(arg, 'line') || (arg.type === 'InvokeMemberExpressionAst' && isEchoToString(arg))) continue;
+        }
+        violate(`literal output channel: Write-Host '${cmdText}' inside step 4 is neither the step-4 banner nor the gate-output echo ('Write-Host $line' / 'Write-Host $line.ToString()' inside the bound echo loop); any other Write-Host inside step 4 -- literal, expandable or via another variable such as $msg -- can put a wrong remedy in front of the operator and is RED whatever words it uses`);
+      }
+      if (cn === 'npm') {
+        const ok = n.invocationOperator === 'Ampersand' && parts.length === 3
+          && parts[0].type === 'StringConstantExpressionAst' && parts[0].value === 'npm'
+          && parts[1].type === 'StringConstantExpressionAst' && parts[1].value === 'run'
+          && parts[2].type === 'StringConstantExpressionAst' && parts[2].value === 'doc:agent';
+        if (!ok) violate(`literal output channel: the only npm invocation on the step-4 allowlist is the exact gate regeneration '& npm run doc:agent', got '${cmdText}'; any other npm command inside step 4 can print arbitrary text to the operator and is RED`);
+        continue;
+      }
+      if (cn === 'node') {
+        if (!captureCmd || n.id !== captureCmd.id) violate(`literal output channel: the only node invocation on the step-4 allowlist is the bound gate capture '& node scripts/verify-agent-docs-fresh.mjs 2>&1', got '${cmdText}'; a second node call (for example 'node -e ...') can print arbitrary text and is RED`);
+        continue;
+      }
+      // push-location / pop-location: location scaffolding, no console output.
     }
   }
+
 
   const statements = tree.kids(regionBlock);
   let idx = 0;
@@ -1139,6 +1361,7 @@ const SYNTHETIC = [
   `Write-Host "[4/4] Verifying generated agent documentation is fresh"`,
   `$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`,
   `$agentDocsExit = $global:LASTEXITCODE`,
+  `foreach ($line in @($agentDocsOutput)) { Write-Host $line }`,
   `if ($agentDocsExit -eq 0) { $agentDocsPassed = $true }`,
   `else {`,
   `$remedy = $null`,
@@ -1370,7 +1593,11 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // operator message that touches neither $remedy nor its name. The
   // literal case documents the measured, explicitly rejected gap (a):
   // remedy-looking TEXT without the remedy variable is not judged.
-  const cleanSplat = `${SYNTHETIC}\n$style = @{ ForegroundColor = 'Green' }; Get-Date @style`;
+  // Phase 11 note: the bare `Get-Date @style` statement is now RED inside
+  // step 4 (uncaptured pipeline output is console output, F1/F3), so the
+  // fixture captures it (`$null = Get-Date @style`): genuinely harmless,
+  // and it exercises the same splat-resolution path as before.
+  const cleanSplat = `${SYNTHETIC}\n$style = @{ ForegroundColor = 'Green' }; $null = Get-Date @style`;
   assert.equal(step4Remedies(cleanSplat).cone, 'sparse-checkout reapply');
   // A literal operator message INSIDE step 4 is now RED (literal output
   // channel below); the same literal outside step 4 stays green -- see
@@ -1380,6 +1607,67 @@ test('step-4 lock stays green on harmless control probes (phase 8)', () => {
   // resolved, not rejected (independent-review controls).
   const dynamicSplat = `try {\n${SYNTHETIC}\n} catch {}\n$validatorArgs = @{ BaseCommit = 'main' }; & $Validator @validatorArgs`;
   assert.equal(step4Remedies(dynamicSplat).cone, 'sparse-checkout reapply');
-  const orderedSplat = `${SYNTHETIC}\n$style = [ordered]@{ ForegroundColor = 'Green' }; Get-Date @style`;
+  const orderedSplat = `${SYNTHETIC}\n$style = [ordered]@{ ForegroundColor = 'Green' }; $null = Get-Date @style`;
   assert.equal(step4Remedies(orderedSplat).cone, 'sparse-checkout reapply');
+});
+
+test('step-4 lock closes the phase-10 bypasses with a positive structural boundary (phase 11)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const echoLoop = 'foreach ($line in @($agentDocsOutput)) { Write-Host $line }';
+  const literal = /literal output channel/;
+  const input = /input channel/;
+  // Every case below was measured GREEN by the independent review of
+  // phases 9-10 while the real verbatim step-4 chain printed a wrong
+  // remedy (review of 41e30a09..cb84b80e, verdict fail). Each must now be
+  // RED with its named reason.
+  const cases = [
+    // F1: bare expression statements are not CommandAst, yet write to the
+    // console.
+    ['F1 bare string literal statement', SYNTHETIC.replace(afterCapture, `${afterCapture}\n"docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F1 bare array literal statement', SYNTHETIC.replace(afterCapture, `${afterCapture}\n@("docs-agent is stale: run npm run doc:agent")`), literal],
+    ['F1 bare subexpression statement', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$("docs-agent is stale: run npm run doc:agent")`), literal],
+    ['F1 bare variable statement via $msg', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$msg = "docs-agent is stale: run npm run doc:agent"\n$msg`), literal],
+    // F2: an alias to the captured gate output makes the in-place mutation
+    // bypass possible; taking the alias is RED, fail-closed.
+    ['F2 aliased index write through $x', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$x = $agentDocsOutput\n$x[0] = "cone sparse-checkout"`), input],
+    ['F2 aliased SetValue through $x', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$x = $agentDocsOutput\n$x.SetValue("cone sparse-checkout", 0)`), input],
+    ['F2 aliased read of $agentDocsExit', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$e = $agentDocsExit`), input],
+    // F3: command-name allowlist evasions.
+    ['F3 module-qualified Write-Host', SYNTHETIC.replace(afterCapture, `${afterCapture}\nMicrosoft.PowerShell.Utility\\Write-Host "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F3 Set-Alias zz Write-Host, then invoke alias', SYNTHETIC.replace(afterCapture, `${afterCapture}\nSet-Alias zz Write-Host\nzz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F3 New-Alias zz Write-Host, then invoke alias', SYNTHETIC.replace(afterCapture, `${afterCapture}\nNew-Alias zz Write-Host\nzz "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F3 alias: provider write', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Set-Item alias:zz Write-Host`), literal],
+    // F4: console writes through a type/object alias.
+    ['F4 [Console] via type-literal alias', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$c = [Console]\n$c::WriteLine("docs-agent is stale: run npm run doc:agent")`), literal],
+    ['F4 $Host via variable alias', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$h = $Host\n$h.UI.WriteLine("docs-agent is stale: run npm run doc:agent")`), literal],
+    // F5: the echo must print the gate's own lines, bound to the capture.
+    ['F5 echo-loop body rewrite ($line = ...)', SYNTHETIC.replace(echoLoop, `foreach ($line in @($agentDocsOutput)) { $line = "docs-agent is stale: run npm run doc:agent"\n  Write-Host $line }`), literal],
+    ['F5 echo with attacker text around $line', SYNTHETIC.replace(echoLoop, `foreach ($line in @($agentDocsOutput)) { Write-Host "docs-agent is stale: $line" }`), literal],
+    ['F5 second foreach over the gate output', `${SYNTHETIC}\nforeach ($row in @($agentDocsOutput)) { Write-Host $row }`, literal],
+    ['F5 echo enumerator widened with an extra element', SYNTHETIC.replace(echoLoop, `foreach ($line in @($agentDocsOutput) + @("docs-agent is stale: run npm run doc:agent")) { Write-Host $line }`), literal],
+    ['F5 echo loop variable renamed', SYNTHETIC.replace(echoLoop, `foreach ($row in @($agentDocsOutput)) { Write-Host $row }`), literal],
+    ['F5 $line written by a second loop', SYNTHETIC.replace(afterCapture, `${afterCapture}\nforeach ($line in @("docs-agent is stale: run npm run doc:agent")) { }`), literal],
+    // F6: not-listed console cmdlets are closed for free by the positive
+    // boundary (uncaptured, not on the step-4 allowlist).
+    ['F6 Write-Progress inside step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\nWrite-Progress -Status "docs-agent is stale: run npm run doc:agent"`), literal],
+    // Same positive boundary: uncaptured output of an innocent-looking
+    // cmdlet is console output too.
+    ['boundary: uncaptured Get-Date -Format wrong advice', SYNTHETIC.replace(afterCapture, `${afterCapture}\nGet-Date -Format "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['boundary: banner Write-Host carrying an extra payload line', SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"', `Write-Host "[4/4] Verifying generated agent documentation is fresh" "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['boundary: second node invocation', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& node "scripts/print-wrong-remedy.mjs"`), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // Green controls: the same constructions OUTSIDE step 4 are legitimate
+  // operator output and stay green (the documented boundary), and a
+  // captured/discarded unknown command inside step 4 is harmless because
+  // its pipeline output never reaches the console.
+  const outsideBareLiteral = `try {\n${SYNTHETIC}\n} catch {}\n"docs-agent is stale: run npm run doc:agent"`;
+  assert.equal(step4Remedies(outsideBareLiteral).cone, 'sparse-checkout reapply');
+  const capturedUnknown = SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Get-Date -Format "docs-agent is stale: run npm run doc:agent"`);
+  assert.equal(step4Remedies(capturedUnknown).cone, 'sparse-checkout reapply');
+  // The real file's fuller echo loop (ErrorRecord branch with
+  // $line.ToString(), null-guard with continue) stays green -- covered by
+  // the signature test over the real source above.
 });
