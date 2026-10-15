@@ -301,22 +301,15 @@
 //      'Stop', so any terminating cmdlet error ('$null = Get-Item
 //      -LiteralPath "<text>"') makes the step-4 catch handler print the
 //      attacker message with its own prefix, replacing the gate output
-//      AND the remedy. Binding throw (F10) did not close this. It is now
-//      closed for every statement shape that can carry attacker text
-//      into an exception inside step 4: unrecognized commands are RED
-//      captured or not, every allowlisted command carries an exact bound
-//      shape (the banner/echo Write-Host, exactly 'Push-Location
-//      $RepoRoot', argument-less Pop-Location, '& npm run doc:agent',
-//      the bound gate capture), an assignment right side inside step 4
-//      may only STORE a constant, a string (expandable strings may embed
-//      only plain non-splatted variables) or a plain non-splatted
-//      variable read -- an executing or converting right side (a
-//      captured command, [datetime]'...', $(...), an operator
-//      expression) is RED -- and the only control-flow structures
-//      recognized inside step 4 are the bound npm-exit throw guard, the
-//      anchored gate-exit test, the bound echo loop and try/finally
-//      scaffolding; any other if/foreach evaluates an unbound condition
-//      or enumerator and is RED.
+//      AND the remedy. Binding throw (F10) did not close this. Phase 13
+//      bound every allowlisted command to an exact shape, restricted
+//      assignment right sides to stored values, and bound the if/foreach
+//      containers -- and over-claimed the result when written ("closed
+//      for every statement shape"): the SHAPES were bound but the
+//      VARIABLES they read were not, so a plain store ('$RepoRoot =
+//      "<text>"' feeding Push-Location, '$LASTEXITCODE = "<text>"'
+//      feeding the bound throw's interpolation) re-armed the same
+//      channel until phase 14 bound stores on both sides (below).
 //   O-3 CAPTURED CODE EXECUTION: '$null = Invoke-Expression ...' / iex
 //      ran attacker code; capture binds only the success stream, so
 //      capture never proves a command harmless.
@@ -328,6 +321,27 @@
 //      propagation but removing the escape hatch: the step-4 command
 //      boundary is now a strict positive allowlist with no captured-or-
 //      discarded exemption.
+// Phase 14 (this round) closes the three accepted holes of the phase-13
+// independent review (VERDICT: fail), each measured GREEN on the full
+// suite with console harm on the verbatim step-4 chain:
+//   F1/F2 STORE TARGETS: '$RepoRoot = "<text>"' feeds the bound
+//      'Push-Location $RepoRoot' (terminates; the catch handler prints
+//      the attacker text) and '$LASTEXITCODE = "<text>"' feeds the bound
+//      throw's interpolation. Inside step 4 the only stores now
+//      recognized are the two bound gate captures, the exact
+//      '$global:LASTEXITCODE = 0' reset and '$agentDocsPassed = $true';
+//      any other store is RED whatever it assigns. This also closes the
+//      review's F4 note: '$ErrorActionPreference = "SilentlyContinue"'
+//      no longer passes the lock, so the catch channel cannot be
+//      silenced from inside step 4 either.
+//   F3 REDIRECTIONS: the command boundary filtered RedirectionAst out of
+//      the shape checks, so 'Write-Host $line 6>$null' counted as the
+//      bound echo while stream 6 (the information stream Write-Host
+//      writes to) was discarded -- the gate output never reached the
+//      console. The only redirection allowed inside step 4 is now the
+//      gate capture's bound 2>&1. Not every redirection is harmful
+//      (2>$null was measured harmless); the rule is fail-closed because
+//      no step-4 command needs one.
 // If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
@@ -1478,32 +1492,45 @@ function step4Remedies(sourceText) {
       }
     }
 
-    // (O-2 class) Assignment right sides: inside step 4 an assignment may
-    // only STORE a value -- a constant, a string (an expandable string may
-    // embed only plain non-splatted variables), or a plain non-splatted
-    // variable read. An executing or converting right side (a captured
-    // command such as '$x = Get-Date', a conversion such as
-    // [datetime]'...', a subexpression $(...), an operator expression) can
-    // terminate with an attacker-chosen message, which the step-4 catch
-    // handler prints with its own prefix -- replacing the gate output and
-    // the remedy while the lock stayed green (the phase-12 review's O-2,
-    // demonstrated with '$null = Get-Item -LiteralPath "<text>"'). The two
-    // gate captures are bound exactly above; the remedy region is bound
-    // separately.
-    const isSafeRhs = (rhs) => {
-      if (!rhs) return false;
-      if (rhs.type === 'ConstantExpressionAst' || rhs.type === 'StringConstantExpressionAst') return true;
-      if (rhs.type === 'VariableExpressionAst') return !rhs.splatted;
-      if (rhs.type === 'ExpandableStringExpressionAst') return tree.kids(rhs).every((k) => k.type === 'VariableExpressionAst' && !k.splatted);
-      return false;
-    };
+    // (O-2 class; phase-13 review F1/F2/F4) Stores: inside step 4 an
+    // assignment is bound on BOTH sides, not just its right side. The only
+    // stores recognized are the two gate captures (bound exactly above),
+    // '$global:LASTEXITCODE = 0' ahead of the capture and
+    // '$agentDocsPassed = $true' in the gate-exit then branch. Binding only
+    // the right side left the TARGET free: '$RepoRoot = "<text>"' feeds the
+    // bound Push-Location, '$LASTEXITCODE = "<text>"' feeds the bound
+    // throw's interpolation and '$ErrorActionPreference = ...' silences the
+    // catch channel -- each re-arms the catch channel or rewrites bound
+    // control flow with a plain store while every shape check stayed green
+    // (measured, phase-13 review), so any other store is RED whatever it
+    // assigns.
     for (const n of all) {
       if (n.type !== 'AssignmentStatementAst') continue;
       if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
       if (n.id === captures.agentDocsOutput.id || n.id === captures.agentDocsExit.id) continue;
+      const left = tree.kids(n)[0];
       const rhs = tree.kids(n)[1] ? unwrap(tree.kids(n)[1], tree) : null;
-      if (isSafeRhs(rhs)) continue;
-      violate(`literal output channel: assignment ${describe(n)} inside step 4 has a right side that executes or converts (${rhs ? describe(rhs) : 'missing'}); inside step 4 an assignment may only store a constant, a string or a plain variable read -- an executing or converting right side can terminate with an attacker-chosen message that the step-4 catch handler prints with its own prefix, replacing the gate output and the remedy, so this is RED`);
+      const isExitReset = n.operator === 'Equals' && left && left.type === 'VariableExpressionAst' && !left.splatted && left.text === '$global:LASTEXITCODE'
+        && rhs && rhs.type === 'ConstantExpressionAst' && rhs.value === '0';
+      const isPassedFlag = n.operator === 'Equals' && left && isPlainVariable(left, 'agentDocsPassed')
+        && rhs && rhs.type === 'VariableExpressionAst' && !rhs.splatted && (rhs.userPath ?? '') === 'true' && rhs.text === '$true';
+      if (isExitReset || isPassedFlag) continue;
+      violate(`literal output channel: store ${describe(n)} inside step 4 is not on the store allowlist (the two bound gate captures, '$global:LASTEXITCODE = 0', '$agentDocsPassed = $true'); a plain store to a variable a bound structure reads ('$RepoRoot = "<text>"' feeding Push-Location, '$LASTEXITCODE = "<text>"' feeding the bound throw's interpolation, $ErrorActionPreference silencing the catch channel) re-arms the catch channel with attacker text or rewrites bound control flow, so it is RED`);
+    }
+
+    // (Phase-13 review F3) Redirections: the command boundary judges exact
+    // shapes, so a redirection must not be invisible to it. The only
+    // redirection allowed inside step 4 is the gate capture's bound 2>&1;
+    // any other is RED -- 'Write-Host $line 6>$null' suppresses the gate
+    // output the remedy points at while every shape check stays green
+    // (stream 6 carries Write-Host; measured, phase-13 review). Not every
+    // redirection is harmful (2>$null was measured harmless) -- the rule is
+    // fail-closed because no step-4 command needs one.
+    for (const n of all) {
+      if (!/RedirectionAst$/.test(n.type)) continue;
+      if (!tree.isWithin(n, step4Block) || tree.isWithin(n, regionBlock)) continue;
+      if (tree.isWithin(n, captures.agentDocsOutput)) continue; // the bound 2>&1
+      violate(`literal output channel: redirection '${n.text.trim()}' inside step 4 is not the gate capture's bound 2>&1; a redirection on an allowlisted command (for example 'Write-Host $line 6>$null') can suppress the gate output the remedy points at while every shape check stays green, so it is RED`);
     }
 
     // (O-2 class) Containers: the only if/foreach structures recognized
@@ -2018,4 +2045,37 @@ test('step-4 lock closes the phase-12 review follow-up findings (phase 13)', () 
   const realShapes = `${SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"',
     'Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan\nPush-Location $RepoRoot\ntry {\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }\n$global:LASTEXITCODE = 0')}\n} finally {\nPop-Location\n}`;
   assert.equal(step4Remedies(realShapes).cone, 'sparse-checkout reapply');
+});
+
+test('step-4 lock closes the phase-13 review follow-up findings (phase 14)', () => {
+  const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
+  const literal = /literal output channel/;
+  // The phase-13 independent review (VERDICT: fail) measured each of these
+  // GREEN on the full suite with console harm on the verbatim step-4 chain;
+  // each must now be RED with a named reason.
+  const cases = [
+    // F1/F2: the store target was unbound, so a plain store re-armed the
+    // catch channel through a bound structure's variable.
+    ['F1 store to $RepoRoot feeds bound Push-Location', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$RepoRoot = "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F2 store to $LASTEXITCODE feeds the bound throw', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$LASTEXITCODE = "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['F2b $global:LASTEXITCODE store with a non-zero value', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$global:LASTEXITCODE = "docs-agent is stale"`), literal],
+    // F4: a preference-variable store silences the catch channel.
+    ['F4 $ErrorActionPreference store inside step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$ErrorActionPreference = 'SilentlyContinue'`), literal],
+    // Any other store target, however benign the right side.
+    ['store to an ordinary variable', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$x = 'alias:zz'`), literal],
+    // F3: redirections were invisible to the shape checks; stream 6 carries
+    // Write-Host, so the echo could be discarded while staying "bound".
+    ['F3 echo Write-Host $line 6>$null', SYNTHETIC.replace('else { Write-Host $line }', 'else { Write-Host $line 6>$null }'), literal],
+    ['F3 echo Write-Host $line.ToString() 6>$null', SYNTHETIC.replace('Write-Host $line.ToString()', 'Write-Host $line.ToString() 6>$null'), literal],
+    ['F3 banner with 6>$null', SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"', 'Write-Host "[4/4] Verifying generated agent documentation is fresh" 6>$null'), literal],
+    ['F3 fail-closed: measured-harmless 2>$null is still RED', SYNTHETIC.replace('else { Write-Host $line }', 'else { Write-Host $line 2>$null }'), literal],
+  ];
+  for (const [name, snippet, reason] of cases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
+  }
+  // Green controls: the two bound non-capture stores are accepted in their
+  // exact forms, and the gate capture's 2>&1 stays the one allowed
+  // redirection (the real-file signature tests cover the full chain).
+  const boundStores = SYNTHETIC.replace('$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1', `$global:LASTEXITCODE = 0\n$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`);
+  assert.equal(step4Remedies(boundStores).cone, 'sparse-checkout reapply');
 });
