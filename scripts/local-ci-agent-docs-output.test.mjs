@@ -32,15 +32,53 @@
 // shapes inside the step-4 remedy region. Anything not on the allowlist
 // is RED with a named reason ("step-4 allowlist violation: ...").
 //
-// The step-4 remedy region is the statement block that holds the
-// `$remedy = $null` initialiser, the cause-routing if/elseif/else chain
-// and the final `Write-Host $remedy` call. Inside that region, and ONLY
-// there, the allowlist is exactly:
+// Phase 7 (this round) anchors the region to step 4 itself and binds
+// each branch to the cause it really tests. The previous anchor was the
+// first `$remedy = $null` in the file, so an allowlist-shaped decoy
+// region placed before step 4 (for example wrapped in
+// `if ($false) { ... }`) was validated instead of the real region and
+// the real region was never judged. Branch identity was likewise
+// derived from a needle substring of the `-match` pattern, so adding
+// `|skip-worktree or assume-unchanged` to the cone branch's pattern kept
+// the suite green while that branch printed the cone remedy for an
+// index-bit fault. Both constructions are RED probes below.
+//
+// The step-4 remedy region is anchored to step 4's own structure in the
+// AST: the unique "[4/4] Verifying generated agent documentation is
+// fresh" banner, the single `if ($agentDocsExit -eq 0)` gate-exit test
+// inside the statement block that banner sits in, and that test's bare
+// `else` block. That else block -- and only that block -- is the remedy
+// region: it holds the `$remedy = $null` initialiser, the cause-routing
+// if/elseif/else chain and the final `Write-Host $remedy` call.
+// Exactly one remedy region is allowed in the whole file: every
+// assignment statement in the file whose target is $remedy (a plain,
+// scope-qualified, provider or braced variable path, splatted, or a
+// member/[ref] left side that contains $remedy) must lie inside the
+// anchored region. Any such assignment elsewhere -- including a fully
+// allowlist-shaped decoy region before or after step 4, wrapped in
+// `if ($false) { ... }` or not -- is RED with a named reason.
+// Inside the anchored region, and ONLY there, the allowlist is exactly:
 //   1. `$remedy = $null` -- one plain, unqualified, non-splatted
 //      assignment with the Equals operator, as the first statement.
-//   2. One if/elseif/else chain with four `-match` clauses (each condition
-//      is `$<plain variable> -match '<string constant>'`) and one bare
-//      else. That yields the five cause branches.
+//   2. One if/elseif/else chain with four `-match` clauses and one bare
+//      else. That yields the five cause branches. Each clause condition
+//      has exactly this AST shape: a single BinaryExpressionAst with
+//      operator Imatch (PowerShell `-match`), whose left side is the
+//      plain variable $agentDocsOutput and whose right side is a
+//      single-quoted string constant whose value is EXACTLY one of the
+//      four expected patterns (branch key in parentheses):
+//        '(?m)^\s*Failed to run git\b|^\s*git .* exited with code\b|^\s*Failed to run git\b' (gitQuery)
+//        '(?s)cone sparse-checkout' (cone)
+//        '(?s)skip-worktree or assume-unchanged' (indexBit)
+//        '(?s)is stale:' (stale)
+//      Branch identity is that exact pattern match, never a substring:
+//      a pattern that merely contains a known needle, carries an extra
+//      regex alternative (`|...`), or differs in any character is RED,
+//      as is a condition with extra operands (`-and`/`-or` around the
+//      match, a negated or parenthesised match) or a different operator
+//      (`-cmatch`, `-like`, ...), because then the condition is not the
+//      single exact Imatch shape above. Each expected pattern may be
+//      used by at most one clause.
 //   3. Inside each branch body: zero or more helper assignments
 //      `$<plain name> = <string>` (Equals only), followed by exactly one
 //      `$remedy = <string>` (Equals only; `+=` and every other operator
@@ -63,9 +101,11 @@
 // list.
 //
 // Scope boundary (the claim is exactly this, no more): the lock judges
-// the remedy region only. Statements elsewhere in local-ci.ps1, and any
-// other output channel outside `Write-Host $remedy`, are out of scope by
-// construction. If pwsh (or Windows PowerShell) is unavailable the test
+// the anchored remedy region, plus the whole-file scan for $remedy
+// assignment statements described above (exactly one remedy region).
+// Statements elsewhere in local-ci.ps1 that do not assign $remedy, and
+// any other output channel outside `Write-Host $remedy`, are out of
+// scope by construction. If pwsh (or Windows PowerShell) is unavailable the test
 // FAILS with a named reason; it never skips, because a skipped parser is
 // a silent green. GitHub-hosted ubuntu runners ship pwsh, and the lockstep
 // job in ci.yml already runs under `shell: pwsh`.
@@ -330,7 +370,16 @@ function buildTree(parsed) {
     children.get(n.parentId).push(n);
   }
   for (const list of children.values()) list.sort((a, b) => a.start - b.start || a.end - b.end);
-  return { byId, kids: (n) => children.get(n.id) ?? [] };
+  const parent = (n) => byId.get(n.parentId) ?? null;
+  const isWithin = (n, ancestor) => {
+    let cur = n;
+    while (cur) {
+      if (cur.id === ancestor.id) return true;
+      cur = parent(cur);
+    }
+    return false;
+  };
+  return { byId, kids: (n) => children.get(n.id) ?? [], parent, isWithin };
 }
 
 function describe(node) {
@@ -376,11 +425,16 @@ function evalString(node, tree, approved, context) {
   violate(`${context} is ${describe(inner)}, not a constant or expandable string on the allowlist`);
 }
 
-const BRANCH_KEYS = [
-  ['Failed to run git', 'gitQuery'],
-  ['cone sparse-checkout', 'cone'],
-  ['skip-worktree or assume-unchanged', 'indexBit'],
-  ['is stale:', 'stale'],
+// The exact -match pattern value for each cause branch, in the form the
+// real step 4 (and the synthetic fixture below) writes it. Branch identity
+// is an exact equality against this list, never a substring: a pattern
+// that contains one of these values plus an extra `|alternative`, or any
+// other deviation, matches no entry and is RED.
+const BRANCH_PATTERNS = [
+  ['(?m)^\\s*Failed to run git\\b|^\\s*git .* exited with code\\b|^\\s*Failed to run git\\b', 'gitQuery'],
+  ['(?s)cone sparse-checkout', 'cone'],
+  ['(?s)skip-worktree or assume-unchanged', 'indexBit'],
+  ['(?s)is stale:', 'stale'],
 ];
 
 // Validate one branch body and return its composed remedy text.
@@ -408,13 +462,16 @@ function evalBranchBody(bodyBlock, tree, label) {
 
 function evalCondition(pipeline, tree) {
   const elements = tree.kids(pipeline);
-  if (elements.length !== 1) violate(`branch condition ${describe(pipeline)} must be a single -match expression`);
+  if (elements.length !== 1) violate(`branch condition ${describe(pipeline)} must be a single exact '$agentDocsOutput -match <pattern>' expression; extra operands are not on the allowlist`);
   const binary = unwrap(elements[0], tree);
-  if (binary.type !== 'BinaryExpressionAst' || !/^(I?Match)$/i.test(binary.operator ?? '')) violate(`branch condition is ${describe(binary)}; only '$<variable> -match <string constant>' is on the allowlist`);
-  const [left, right] = tree.kids(binary);
-  if (!left || left.type !== 'VariableExpressionAst' || left.splatted || left.userPath === null || left.userPath.includes(':') || left.text !== `$${left.userPath}`) violate(`branch condition's left side is not a plain variable`);
+  if (binary.type !== 'BinaryExpressionAst' || binary.operator !== 'Imatch') violate(`branch condition is ${describe(binary)} with operator '${binary.operator ?? 'none'}'; only a single '$agentDocsOutput -match <exact pattern>' (Imatch) condition is on the allowlist -- a different operator or extra operands around the match are RED`);
+  const operands = tree.kids(binary);
+  if (operands.length !== 2) violate(`branch condition ${describe(binary)} must have exactly two operands ($agentDocsOutput and the pattern); extra operands are not on the allowlist`);
+  const [left, right] = operands;
+  if (!left || left.type !== 'VariableExpressionAst' || left.splatted || left.userPath !== 'agentDocsOutput' || left.text !== '$agentDocsOutput') violate(`branch condition's left side is ${left ? describe(left) : 'missing'}; the exact condition must test the plain variable $agentDocsOutput`);
   const pattern = unwrap(right, tree);
-  if (pattern.type !== 'StringConstantExpressionAst') violate(`branch condition's pattern is ${describe(pattern)}, not a string constant`);
+  if (pattern.type !== 'StringConstantExpressionAst') violate(`branch condition's pattern is ${describe(pattern)}, not a string constant; the exact condition must be '$agentDocsOutput -match <single-quoted exact pattern>'`);
+  if (pattern.stringConstantType !== 'SingleQuoted') violate(`branch condition's pattern must be a single-quoted string constant, got ${pattern.stringConstantType}; the exact condition shape is '$agentDocsOutput -match <single-quoted exact pattern>'`);
   return pattern.value;
 }
 
@@ -438,29 +495,72 @@ function evalOutput(pipeline, tree) {
   if (i !== parts.length) violate(`Write-Host output call has extra elements beyond '$remedy [-ForegroundColor <constant>]'`);
 }
 
+function isRemedyVariable(node) {
+  if (node.type !== 'VariableExpressionAst' || node.userPath === null) return false;
+  const segments = node.userPath.toLowerCase().split(':');
+  return segments[segments.length - 1] === 'remedy';
+}
+
+// True when an assignment statement targets $remedy: the left side is a
+// $remedy variable path (plain, scoped, provider, braced or splatted) or a
+// member/[ref]-style left side that contains a $remedy variable.
+function targetsRemedy(assignNode, tree, all) {
+  const left = tree.kids(assignNode)[0];
+  if (!left) return false;
+  return all.some((n) => n.type === 'VariableExpressionAst' && isRemedyVariable(n) && tree.isWithin(n, left));
+}
+
 // Validate the remedy region in source text and return the five remedies.
+// The region is anchored to step 4 (banner -> gate-exit else block), never
+// to the first `$remedy = $null` in the file, and exactly one remedy
+// region is allowed in the whole file.
 function step4Remedies(sourceText) {
   const tree = buildTree(parsePowerShell(sourceText));
   const all = [...tree.byId.values()];
   const isRemedyAssign = (n) => n.type === 'AssignmentStatementAst' && tree.kids(n)[0] && isPlainVariable(tree.kids(n)[0], 'remedy');
-  const init = all.find((n) => isRemedyAssign(n) && (() => { const r = unwrap(tree.kids(n)[1], tree); return r.type === 'VariableExpressionAst' && (r.userPath ?? '').toLowerCase() === 'null'; })());
-  let regionBlock; let statements;
-  if (init) {
-    regionBlock = tree.byId.get(init.parentId);
-    statements = tree.kids(regionBlock);
-  } else {
-    const chain = all.find((n) => n.type === 'IfStatementAst' && tree.kids(n).some((b) => b.type === 'StatementBlockAst' && tree.kids(b).some(isRemedyAssign)));
-    if (!chain) violate(`no step-4 remedy region found (no '$remedy = $null' initialiser and no remedy if/else chain)`);
-    regionBlock = tree.byId.get(chain.parentId);
-    const siblings = tree.kids(regionBlock);
-    statements = siblings.slice(siblings.indexOf(chain));
+
+  // --- Anchor: step 4's own banner and gate-exit structure. ---
+  const banners = all.filter((n) => n.type === 'StringConstantExpressionAst' && n.value === '[4/4] Verifying generated agent documentation is fresh');
+  if (banners.length !== 1) violate(`expected exactly one step-4 banner ('[4/4] Verifying generated agent documentation is fresh') anchoring the remedy region, found ${banners.length}`);
+  let step4Block = tree.parent(banners[0]);
+  while (step4Block && !['StatementBlockAst', 'NamedBlockAst', 'ScriptBlockAst'].includes(step4Block.type)) step4Block = tree.parent(step4Block);
+  if (!step4Block) violate(`the step-4 banner is not inside any block, so no remedy region can be anchored to step 4`);
+  const isGateExitTest = (n) => {
+    if (n.type !== 'IfStatementAst' || n.clauseCount !== 1 || !n.hasElse) return false;
+    const parts = tree.kids(n);
+    if (parts.length !== 3) return false;
+    const condElements = tree.kids(parts[0]);
+    if (condElements.length !== 1) return false;
+    const binary = unwrap(condElements[0], tree);
+    if (binary.type !== 'BinaryExpressionAst' || binary.operator !== 'Ieq') return false;
+    const [left, right] = tree.kids(binary);
+    if (!left || !isPlainVariable(left, 'agentDocsExit')) return false;
+    const value = right ? unwrap(right, tree) : null;
+    return value !== null && value.type === 'ConstantExpressionAst' && value.value === '0';
+  };
+  const gateTests = all.filter((n) => isGateExitTest(n) && tree.isWithin(n, step4Block));
+  if (gateTests.length !== 1) violate(`expected exactly one 'if ($agentDocsExit -eq 0) ... else' gate-exit test inside step 4 anchoring the remedy region, found ${gateTests.length}; the remedy region must be that test's else block`);
+  const gateParts = tree.kids(gateTests[0]);
+  const regionBlock = gateParts[gateParts.length - 1];
+  if (!regionBlock || regionBlock.type !== 'StatementBlockAst') violate(`the step-4 gate-exit test's else clause is not a statement block, so no remedy region is anchored to step 4`);
+
+  // --- Exactly one remedy region in the whole file. ---
+  for (const n of all) {
+    if (n.type === 'AssignmentStatementAst' && targetsRemedy(n, tree, all) && !tree.isWithin(n, regionBlock)) {
+      violate(`extra $remedy assignment outside the anchored step-4 remedy region: ${describe(n)}; exactly one remedy region is allowed and it must be the else block of step 4's 'if ($agentDocsExit -eq 0)' -- a decoy remedy region elsewhere in the file is RED`);
+    }
   }
+
+  const statements = tree.kids(regionBlock);
   let idx = 0;
-  if (init) {
-    if (statements[0] !== init) violate(`'$remedy = $null' must be the first statement of the remedy region`);
-    if (init.operator !== 'Equals') violate(`'$remedy = $null' must use '='`);
-    idx = 1;
+  const init = statements[0];
+  if (!init || !isRemedyAssign(init)) violate(`'$remedy = $null' must be the first statement of the anchored step-4 remedy region, got ${init ? describe(init) : 'end of region'}`);
+  if (init.operator !== 'Equals') violate(`'$remedy = $null' must use '='`);
+  {
+    const rhs = unwrap(tree.kids(init)[1], tree);
+    if (rhs.type !== 'VariableExpressionAst' || (rhs.userPath ?? '').toLowerCase() !== 'null') violate(`the anchored step-4 remedy region must start with '$remedy = $null', got ${describe(init)}`);
   }
+  idx = 1;
   const chain = statements[idx];
   if (!chain || chain.type !== 'IfStatementAst') violate(`the remedy region's second statement must be the cause-routing if/else chain, got ${chain ? describe(chain) : 'end of region'}`);
   idx += 1;
@@ -476,9 +576,10 @@ function step4Remedies(sourceText) {
   const remedies = {};
   for (let c = 0; c < chain.clauseCount; c++) {
     const pattern = evalCondition(chainParts[c * 2], tree);
-    const key = BRANCH_KEYS.find(([needle]) => pattern.includes(needle))?.[1];
-    if (!key) violate(`branch condition pattern '${pattern}' does not name a known step-4 cause`);
-    if (remedies[key] !== undefined) violate(`duplicate step-4 branch for '${key}'`);
+    const exact = BRANCH_PATTERNS.filter(([expected]) => expected === pattern);
+    if (exact.length !== 1) violate(`branch condition pattern '${pattern}' does not exactly match exactly one expected step-4 cause pattern; extra regex alternatives, a different needle or any other deviation from the exact pattern are RED (expected exactly one of: ${BRANCH_PATTERNS.map(([p]) => `'${p}'`).join(', ')})`);
+    const key = exact[0][1];
+    if (remedies[key] !== undefined) violate(`duplicate step-4 branch for '${key}'; each expected cause pattern may be used by at most one branch`);
     remedies[key] = evalBranchBody(chainParts[c * 2 + 1], tree, key);
   }
   remedies.fallback = evalBranchBody(chainParts[chainParts.length - 1], tree, 'fallback');
@@ -505,12 +606,17 @@ test('each step-4 cause branch assigns its OWN remedy text and no other branch\'
 });
 
 const SYNTHETIC = [
-  `if ($x -match 'Failed to run git') { $remedy = "could not run a git query" }`,
-  `elseif ($x -match 'cone sparse-checkout') { $remedy = "sparse-checkout reapply" }`,
-  `elseif ($x -match 'skip-worktree or assume-unchanged') { $remedy = "clear --no-skip-worktree" }`,
-  `elseif ($x -match 'is stale:') { $hint = "npm run doc:agent"; $remedy = "stale; run $hint" }`,
+  `Write-Host "[4/4] Verifying generated agent documentation is fresh"`,
+  `if ($agentDocsExit -eq 0) { $agentDocsPassed = $true }`,
+  `else {`,
+  `$remedy = $null`,
+  `if ($agentDocsOutput -match '(?m)^\\s*Failed to run git\\b|^\\s*git .* exited with code\\b|^\\s*Failed to run git\\b') { $remedy = "could not run a git query" }`,
+  `elseif ($agentDocsOutput -match '(?s)cone sparse-checkout') { $remedy = "sparse-checkout reapply" }`,
+  `elseif ($agentDocsOutput -match '(?s)skip-worktree or assume-unchanged') { $remedy = "clear --no-skip-worktree" }`,
+  `elseif ($agentDocsOutput -match '(?s)is stale:') { $hint = "npm run doc:agent"; $remedy = "stale; run $hint" }`,
   `else { $remedy = "unknown reason" }`,
   `Write-Host $remedy`,
+  `}`,
 ].join('\n');
 
 test('step-4 allowlist accepts the plain synthetic chain and resolves same-branch helpers', () => {
@@ -560,5 +666,52 @@ test('step-4 allowlist rejects every non-allowlisted spelling with a named reaso
   ];
   for (const [name, snippet] of cases) {
     assert.throws(() => step4Remedies(snippet), /step-4 allowlist violation:/, `case must be RED: ${name}`);
+  }
+});
+
+test('step-4 lock rejects decoy remedy regions and non-exact branch conditions (phase 7)', () => {
+  // An allowlist-shaped remedy region on its own: same init, chain and
+  // output shapes the lock accepts inside step 4. Placed anywhere other
+  // than step 4's gate-exit else block it is a decoy (finding F1).
+  const decoyRegion = [
+    `$remedy = $null`,
+    `if ($agentDocsOutput -match '(?s)cone sparse-checkout') { $remedy = "sparse-checkout reapply" }`,
+    `elseif ($agentDocsOutput -match '(?s)skip-worktree or assume-unchanged') { $remedy = "clear --no-skip-worktree" }`,
+    `else { $remedy = "unknown reason" }`,
+    `Write-Host $remedy`,
+  ].join('\n');
+  const outsideRegion = /extra \$remedy assignment outside the anchored step-4 remedy region/;
+  const decoyCases = [
+    // The reviewer's construction: decoy wrapped in if ($false) before step 4.
+    ['F1 reviewer: decoy in if ($false) before step 4', `if ($false) {\n${decoyRegion}\n}\n${SYNTHETIC}`],
+    // Variations of the same anchor bypass.
+    ['F1 variation: bare decoy block before step 4', `{\n${decoyRegion}\n}\n${SYNTHETIC}`],
+    ['F1 variation: decoy in if ($false) after step 4', `${SYNTHETIC}\nif ($false) {\n${decoyRegion}\n}`],
+    ['F1 variation: single extra $remedy assignment before step 4', `$remedy = "npm run doc:agent"\n${SYNTHETIC}`],
+    ['F1 variation: scoped decoy assignment before step 4', `$script:remedy = "npm run doc:agent"\n${SYNTHETIC}`],
+    ['F1 variation: decoy assignment inside step 4 but outside the gate-exit else', SYNTHETIC.replace('if ($agentDocsExit -eq 0)', 'if ($false) { $remedy = "npm run doc:agent" }\nif ($agentDocsExit -eq 0)')],
+  ];
+  for (const [name, snippet] of decoyCases) {
+    assert.throws(() => step4Remedies(snippet), outsideRegion, `case must be RED with the outside-region reason: ${name}`);
+  }
+
+  const notExact = /does not exactly match exactly one expected step-4 cause pattern/;
+  const coneCondition = `$agentDocsOutput -match '(?s)cone sparse-checkout'`;
+  const conditionCases = [
+    // The reviewer's construction: cone pattern extended with the
+    // index-bit alternative, so the cone remedy answers an index fault.
+    ['F2 reviewer: cone -match extended with |skip-worktree or assume-unchanged', SYNTHETIC.replace(`'(?s)cone sparse-checkout'`, `'(?s)cone sparse-checkout|skip-worktree or assume-unchanged'`), notExact],
+    // Variations: other branches extended, and the needle without its
+    // exact wrapper.
+    ['F2 variation: index-bit -match extended with |cone sparse-checkout', SYNTHETIC.replace(`'(?s)skip-worktree or assume-unchanged'`, `'(?s)skip-worktree or assume-unchanged|cone sparse-checkout'`), notExact],
+    ['F2 variation: stale -match extended with |cone sparse-checkout', SYNTHETIC.replace(`'(?s)is stale:'`, `'(?s)is stale:|cone sparse-checkout'`), notExact],
+    ['F2 variation: cone needle without the exact (?s) wrapper', SYNTHETIC.replace(`'(?s)cone sparse-checkout'`, `'cone sparse-checkout'`), notExact],
+    // Extra operands / different operator around an otherwise exact match.
+    ['F2 variation: extra -or operand on the cone condition', SYNTHETIC.replace(coneCondition, `${coneCondition} -or $agentDocsOutput -match '(?s)is stale:'`), /only a single '\$agentDocsOutput -match <exact pattern>'/],
+    ['F2 variation: different operator -cmatch on the cone condition', SYNTHETIC.replace(coneCondition, `$agentDocsOutput -cmatch '(?s)cone sparse-checkout'`), /only a single '\$agentDocsOutput -match <exact pattern>'/],
+    ['F2 variation: different variable on the cone condition', SYNTHETIC.replace(coneCondition, `$otherOutput -match '(?s)cone sparse-checkout'`), /must test the plain variable \$agentDocsOutput/],
+  ];
+  for (const [name, snippet, reason] of conditionCases) {
+    assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
 });
