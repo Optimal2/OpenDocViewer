@@ -1,0 +1,361 @@
+Source pin: 02c01d7f19553656311b5dc71a4c0420c63c2f65
+Mode: baseline
+Runner prepend: $ErrorActionPreference = 'stop'
+Runner append: if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }
+Output below is verbatim except absolute fixture paths are replaced by <fixture>.
+
+=== push / LASTEXITCODE=undefined / normal ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Validating component versions...
+
+Assembly version note:
+  Directory.Build.props sets assembly version to 0.1.0 intentionally.
+  Assembly version is decoupled from omp-components.json component versions.
+  OMP artifact identity uses manifest version + SHA-256, not assembly version.
+  This script validates the manifest, not the assembly versions.
+
+✓ 1 of 1 embedded SQL script(s) carry the line endings .gitattributes declares
+✓ 1 of 1 component project paths validated
+✓ Repository version validated
+✓ 1 of 1 component versions validated
+✓ 1 of 1 module definition versions synced
+✓ 1 component-to-module mappings validated
+✓ 1 of 1 owned SQL file(s) passed diff validation (0 changed)
+✓ 1 module definition(s) passed content diff validation (0 changed)
+✓ 1 owned seed SQL file(s) scanned for unconditional artifact-pointer writes
+✓ 1 embedded SQL script(s) verified byte-for-byte against disk (content + sha256)
+⚠ 1 warning(s):
+   Check 15: NOT VERIFIED - no OpenModulePlatform checkout at '<fixture>\OpenModulePlatform', accepted only because OMP_ALLOW_MISSING_PLATFORM is set. Set OMP_PLATFORM_ROOT to the root of an OpenModulePlatform checkout (for example $env:OMP_PLATFORM_ROOT = 'C:\src\OpenModulePlatform'), or clone it beside this repository as ..\OpenModulePlatform.
+
+✓ Component version validation passed
+Measured exit: 0
+
+=== push / LASTEXITCODE=undefined / missing ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== push / LASTEXITCODE=undefined / directory ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== push / LASTEXITCODE=undefined / syntax ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+ParserError: <fixture>\repo\scripts\omp\validate-component-versions.ps1:1
+Line |
+   1 |  param(
+     |        ~
+     | Missing ')' in function parameter list.
+Measured exit: 1
+
+=== push / LASTEXITCODE=undefined / empty ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 0
+
+=== push / LASTEXITCODE=undefined / noop ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 0
+
+=== push / LASTEXITCODE=undefined / explicit-exit-zero ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 0
+
+=== push / LASTEXITCODE=undefined / native-zero ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+git version 2.53.0.windows.1
+Measured exit: 0
+
+=== push / LASTEXITCODE=undefined / exit-one ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 1
+
+=== push / LASTEXITCODE=zero / normal ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Validating component versions...
+
+Assembly version note:
+  Directory.Build.props sets assembly version to 0.1.0 intentionally.
+  Assembly version is decoupled from omp-components.json component versions.
+  OMP artifact identity uses manifest version + SHA-256, not assembly version.
+  This script validates the manifest, not the assembly versions.
+
+✓ 1 of 1 embedded SQL script(s) carry the line endings .gitattributes declares
+✓ 1 of 1 component project paths validated
+✓ Repository version validated
+✓ 1 of 1 component versions validated
+✓ 1 of 1 module definition versions synced
+✓ 1 component-to-module mappings validated
+✓ 1 of 1 owned SQL file(s) passed diff validation (0 changed)
+✓ 1 module definition(s) passed content diff validation (0 changed)
+✓ 1 owned seed SQL file(s) scanned for unconditional artifact-pointer writes
+✓ 1 embedded SQL script(s) verified byte-for-byte against disk (content + sha256)
+⚠ 1 warning(s):
+   Check 15: NOT VERIFIED - no OpenModulePlatform checkout at '<fixture>\OpenModulePlatform', accepted only because OMP_ALLOW_MISSING_PLATFORM is set. Set OMP_PLATFORM_ROOT to the root of an OpenModulePlatform checkout (for example $env:OMP_PLATFORM_ROOT = 'C:\src\OpenModulePlatform'), or clone it beside this repository as ..\OpenModulePlatform.
+
+✓ Component version validation passed
+Measured exit: 0
+
+=== push / LASTEXITCODE=zero / missing ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== push / LASTEXITCODE=zero / directory ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== push / LASTEXITCODE=zero / syntax ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+ParserError: <fixture>\repo\scripts\omp\validate-component-versions.ps1:1
+Line |
+   1 |  param(
+     |        ~
+     | Missing ')' in function parameter list.
+Measured exit: 1
+
+=== push / LASTEXITCODE=zero / empty ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 0
+
+=== push / LASTEXITCODE=zero / noop ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 0
+
+=== push / LASTEXITCODE=zero / explicit-exit-zero ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 0
+
+=== push / LASTEXITCODE=zero / native-zero ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+git version 2.53.0.windows.1
+Measured exit: 0
+
+=== push / LASTEXITCODE=zero / exit-one ===
+Lockstep base: 060e2a395456040cce7b47afb30eb9419c9f14d9 (github.event.before, the branch tip before this push).
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=undefined / normal ===
+Lockstep base: origin/main (pull request base branch).
+Validating component versions...
+
+Assembly version note:
+  Directory.Build.props sets assembly version to 0.1.0 intentionally.
+  Assembly version is decoupled from omp-components.json component versions.
+  OMP artifact identity uses manifest version + SHA-256, not assembly version.
+  This script validates the manifest, not the assembly versions.
+
+✓ 1 of 1 embedded SQL script(s) carry the line endings .gitattributes declares
+✓ 1 of 1 component project paths validated
+✓ Repository version validated
+✓ 1 of 1 component versions validated
+✓ 1 of 1 module definition versions synced
+✓ 1 component-to-module mappings validated
+✓ 1 of 1 owned SQL file(s) passed diff validation (0 changed)
+✓ 1 module definition(s) passed content diff validation (0 changed)
+✓ 1 owned seed SQL file(s) scanned for unconditional artifact-pointer writes
+✓ 1 embedded SQL script(s) verified byte-for-byte against disk (content + sha256)
+⚠ 1 warning(s):
+   Check 15: NOT VERIFIED - no OpenModulePlatform checkout at '<fixture>\OpenModulePlatform', accepted only because OMP_ALLOW_MISSING_PLATFORM is set. Set OMP_PLATFORM_ROOT to the root of an OpenModulePlatform checkout (for example $env:OMP_PLATFORM_ROOT = 'C:\src\OpenModulePlatform'), or clone it beside this repository as ..\OpenModulePlatform.
+
+✓ Component version validation passed
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=undefined / missing ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=undefined / directory ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=undefined / syntax ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+ParserError: <fixture>\repo\scripts\omp\validate-component-versions.ps1:1
+Line |
+   1 |  param(
+     |        ~
+     | Missing ')' in function parameter list.
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=undefined / empty ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=undefined / noop ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=undefined / explicit-exit-zero ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=undefined / native-zero ===
+Lockstep base: origin/main (pull request base branch).
+git version 2.53.0.windows.1
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=undefined / exit-one ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=zero / normal ===
+Lockstep base: origin/main (pull request base branch).
+Validating component versions...
+
+Assembly version note:
+  Directory.Build.props sets assembly version to 0.1.0 intentionally.
+  Assembly version is decoupled from omp-components.json component versions.
+  OMP artifact identity uses manifest version + SHA-256, not assembly version.
+  This script validates the manifest, not the assembly versions.
+
+✓ 1 of 1 embedded SQL script(s) carry the line endings .gitattributes declares
+✓ 1 of 1 component project paths validated
+✓ Repository version validated
+✓ 1 of 1 component versions validated
+✓ 1 of 1 module definition versions synced
+✓ 1 component-to-module mappings validated
+✓ 1 of 1 owned SQL file(s) passed diff validation (0 changed)
+✓ 1 module definition(s) passed content diff validation (0 changed)
+✓ 1 owned seed SQL file(s) scanned for unconditional artifact-pointer writes
+✓ 1 embedded SQL script(s) verified byte-for-byte against disk (content + sha256)
+⚠ 1 warning(s):
+   Check 15: NOT VERIFIED - no OpenModulePlatform checkout at '<fixture>\OpenModulePlatform', accepted only because OMP_ALLOW_MISSING_PLATFORM is set. Set OMP_PLATFORM_ROOT to the root of an OpenModulePlatform checkout (for example $env:OMP_PLATFORM_ROOT = 'C:\src\OpenModulePlatform'), or clone it beside this repository as ..\OpenModulePlatform.
+
+✓ Component version validation passed
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=zero / missing ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=zero / directory ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Exception: <fixture>\step.ps1:27
+Line |
+  27 |    throw "Lockstep validator not found: $validator - a gate that canno …
+     |    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Lockstep validator not found:
+     | scripts/omp/validate-component-versions.ps1 - a gate that cannot run
+     | must not read as passing, so this step fails instead of exiting 0
+     | without the validator having run.
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=zero / syntax ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+ParserError: <fixture>\repo\scripts\omp\validate-component-versions.ps1:1
+Line |
+   1 |  param(
+     |        ~
+     | Missing ')' in function parameter list.
+Measured exit: 1
+
+=== pull_request / LASTEXITCODE=zero / empty ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=zero / noop ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=zero / explicit-exit-zero ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=zero / native-zero ===
+Lockstep base: origin/main (pull request base branch).
+git version 2.53.0.windows.1
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 0
+
+=== pull_request / LASTEXITCODE=zero / exit-one ===
+Lockstep base: origin/main (pull request base branch).
+From <fixture>\repo
+ * branch            main       -> FETCH_HEAD
+Measured exit: 1

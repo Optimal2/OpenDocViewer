@@ -175,4 +175,8 @@ jobs:
           if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
             throw "Lockstep validator not found: $validator - a gate that cannot run must not read as passing, so this step fails instead of exiting 0 without the validator having run."
           }
+          $global:LASTEXITCODE = $null
           & $validator -Strict -BaseCommit $base
+          if ($null -eq $LASTEXITCODE) {
+            throw "Lockstep validator did not report an exit code: $validator - an empty or no-op validator must not read as passing."
+          }
