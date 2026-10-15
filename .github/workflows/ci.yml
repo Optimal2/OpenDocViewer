@@ -117,9 +117,14 @@ jobs:
       # of the byte-identical files Check 15 guards, so it must not be edited
       # here. The ubuntu-latest + named-root variant cannot work either: the
       # hardcoded backslash separator (helpers.ps1:139) never resolves on
-      # Linux and a named-but-unresolvable root is a hard error. Every other
-      # check - including the Check 4 / Check 10 lockstep checks this gate
-      # exists for - runs for real: they read only files on disk.
+      # Linux and a named-but-unresolvable root is a hard error. The static
+      # checks - including the Check 4 / Check 10 lockstep checks this gate
+      # exists for - read only files on disk and run for real. The diff-based
+      # checks (7, 8, 9, 12 and 13) do not: they compare $base...HEAD, so
+      # when the base resolves to HEAD they see an empty diff and are
+      # vacuous. Commit 3df68b62 narrowed that case to a first push or
+      # rewritten history (see BASE OF THE DIFF below), where this step
+      # emits a ::warning that those checks did not run.
       #
       # BASE OF THE DIFF (review 2026-10-14, F1): the diff-based checks (8, 12,
       # 13 - including LOCKSTEP "project files changed but not bumped") compare
@@ -166,4 +171,8 @@ jobs:
               Write-Host "::warning title=Lockstep diff checks not run::Push to $env:DEFAULT_BRANCH with before '$before' (first push or rewritten history): no base to diff against, so checks 8, 12 and 13 did not run. The static lockstep checks still run."
             }
           }
-          & scripts/omp/validate-component-versions.ps1 -Strict -BaseCommit $base
+          $validator = 'scripts/omp/validate-component-versions.ps1'
+          if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
+            throw "Lockstep validator not found: $validator - a gate that cannot run must not read as passing, so this step fails instead of exiting 0 without the validator having run."
+          }
+          & $validator -Strict -BaseCommit $base
