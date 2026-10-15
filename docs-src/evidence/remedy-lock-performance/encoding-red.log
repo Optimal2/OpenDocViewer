@@ -1,0 +1,39 @@
+RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (17 tests | 1 failed | 16 skipped) 848ms
+   × real parser emits UTF-8 under a legacy inherited console code page 844ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > real parser emits UTF-8 under a legacy inherited console code page
+AssertionError: single must preserve the exact Unicode/CRLF source
++ actual - expected
+
++ "# comment\r\n$x = '���'\r\n"
+- "# comment\r\n$x = 'åäö'\r\n"
+                      ^
+
+
+- Expected
++ Received
+
+  # comment
+- $x = 'åäö'
++ $x = '���'
+
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:138:14
+    136|       const parsed = JSON.parse(result.stdout);
+    137|       const ast = mode === 'single' ? parsed : parsed.results[0];
+    138|       assert.equal(ast.nodes.find((node) => node.type === 'ScriptBlock…
+       |              ^
+    139|       assert.ok(ast.nodes.some((node) => node.value === '\u00e5\u00e4\…
+    140|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  00:28:25
+   Duration  1.28s (tests 90%, transform 5%, import 3%, worker 1%)

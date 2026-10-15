@@ -1,0 +1,24 @@
+{
+  "base": "949128c63598d176ea1b5a3b7a0ce4536c193513",
+  "actualExits": {
+    "focusedLegacyConsoleRed": 1,
+    "all17ParserContractsGreen": 0,
+    "all206CorpusPairsBeforeEncoding": 0
+  },
+  "redReason": "Exact Unicode/CRLF AST text corrupted under inherited CP1252, not a harness or parse failure",
+  "scope": "Test tooling JSON transport only; unchanged parser AST semantics and original18 cases",
+  "files": {
+    "encoding-red.log": {
+      "rawSha256": "c5782b0362767b861fda71bff068f7e55b7c083a914015e3fa327fd5a29d1ed7",
+      "normalization": "UTF-8 decoded strictly; local path labels and line-end whitespace normalized"
+    },
+    "encoding-green.log": {
+      "rawSha256": "ec2025baac76da7a4a103cd46fd164ceaf4bceebcd25d04a20f0d3ed6ec4cc89",
+      "normalization": "UTF-8 decoded strictly; local path labels and line-end whitespace normalized"
+    },
+    "parent-equivalence-before-encoding.log": {
+      "rawSha256": "32f98cc3f1530ae63970eb9020e9b971c56b0511f6da063948a8917ab9676747",
+      "normalization": "UTF-8 decoded strictly; local path labels and line-end whitespace normalized"
+    }
+  }
+}

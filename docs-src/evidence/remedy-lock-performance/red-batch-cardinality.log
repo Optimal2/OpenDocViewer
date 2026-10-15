@@ -1,0 +1,28 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 29ms
+   × batch parser refuses corrupt response: missing entry 26ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:07:05
+   Duration  862ms (transform 39%, import 33%, tests 18%, worker 10%, environment 1%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser refuses corrupt response: missing entry
+AssertionError: Missing expected exception.
+
+simple
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:89:10
+     87|     return result;
+     88|   } });
+     89|   assert.throws(() => parser.prewarm(['a', 'b']), /PowerShell AST (bat…
+       |          ^
+     90|   broken = false;
+     91|   assert.equal(parser.parse('a').nodes[0].text, 'a');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

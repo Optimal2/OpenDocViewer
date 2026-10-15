@@ -1,0 +1,37 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 32ms
+   × batch parser refuses process failure 29ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:06:58
+   Duration  614ms (transform 38%, import 30%, tests 21%, worker 10%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser refuses process failure
+AssertionError: The input did not match the regular expression /parser exited 7: parser failed/. Input:
+
+'SyntaxError: "undefined" is not valid JSON'
+
+
+- Expected:
+/parser exited 7: parser failed/
+
++ Received:
+SyntaxError {
+  "message": "\"undefined\" is not valid JSON",
+}
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:60:10
+     58|   let broken = true;
+     59|   const parser = createPowerShellParser({ spawn: (exe, ...args) => { a…
+     60|   assert.throws(() => parser.prewarm(['a', 'b']), reason);
+       |          ^
+     61|   assert.deepEqual(attempts, name === 'unavailable interpreters' ? ['p…
+     62|   broken = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

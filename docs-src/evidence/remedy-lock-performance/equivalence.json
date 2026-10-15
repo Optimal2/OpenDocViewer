@@ -1,0 +1,10 @@
+{
+  "distinctInputs": 206,
+  "suiteInputs": 201,
+  "additionalControls": 5,
+  "malformedInputs": 3,
+  "batchCalls": 13,
+  "differences": 0,
+  "baselineAggregateSha256": "68a9655ba1d5abd18273af28f87e377f67b805504c7957352dfbc96bf0dd04f6",
+  "batchAggregateSha256": "68a9655ba1d5abd18273af28f87e377f67b805504c7957352dfbc96bf0dd04f6"
+}

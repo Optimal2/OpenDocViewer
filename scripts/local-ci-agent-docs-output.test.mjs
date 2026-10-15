@@ -419,12 +419,10 @@
 // This test is reachable from `npm test` (vitest) so CI's `npm test` step
 // enforces it without a separate PowerShell harness.
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import { test } from 'vitest';
-import { URL, fileURLToPath } from 'node:url';
+import { URL } from 'node:url';
+import { createPowerShellParser } from './parse-local-ci-ast.mjs';
 
 const localCiPath = new URL('./local-ci.ps1', import.meta.url);
 const source = fs.readFileSync(localCiPath, 'utf8');
@@ -644,34 +642,13 @@ function violate(detail) {
   assert.fail(`${VIOLATION}: ${detail}`);
 }
 
-const parserScriptPath = fileURLToPath(new URL('./parse-local-ci-ast.ps1', import.meta.url));
+const powerShellParser = createPowerShellParser();
 
 // Parse PowerShell source text with PowerShell's own parser (pwsh, falling
 // back to Windows PowerShell). FAILS loudly when no PowerShell is available:
 // a skipped parser would be a silent green.
 function parsePowerShell(sourceText) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-step4-ast-'));
-  try {
-    const snippet = path.join(dir, 'snippet.ps1');
-    fs.writeFileSync(snippet, sourceText, 'utf8');
-    let lastError = null;
-    for (const exe of ['pwsh', 'powershell']) {
-      // Explicit maxBuffer: Node's 1 MiB default bursts on the AST JSON
-      // (545 kB for a 16.6 kB source today, growing with the source), and
-      // ENOBUFS must not be misreported as a missing interpreter.
-      const res = spawnSync(exe, ['-NoProfile', '-File', parserScriptPath, '-Path', snippet], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-      if (res.error) {
-        if (res.error.code === 'ENOBUFS') violate(`PowerShell AST output exceeded the 64 MiB maxBuffer (ENOBUFS) for ${exe}: ${res.error.message}; raise maxBuffer in parsePowerShell -- this is not a missing interpreter`);
-        if (res.error.code === 'ENOENT') { lastError = res.error; continue; }
-        violate(`PowerShell AST parser failed to launch ${exe} (${res.error.code ?? 'unknown'}): ${res.error.message}; refusing to skip`);
-      }
-      assert.equal(res.status, 0, `PowerShell AST parser exited ${res.status}: ${res.stderr}`);
-      return JSON.parse(res.stdout);
-    }
-    violate(`PowerShell (pwsh/powershell) is unavailable, so the step-4 allowlist parser cannot run (${lastError?.message ?? 'not found'}); refusing to skip`);
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
+  return powerShellParser.parse(sourceText);
 }
 
 function buildTree(parsed) {
@@ -1920,6 +1897,7 @@ test('step-4 allowlist rejects every non-allowlisted spelling with a named reaso
     ['NEW: here-string remedy', SYNTHETIC.replace(cone, "$remedy = @'\nnpm run doc:agent\n'@")],
     ['NEW: method-call remedy', SYNTHETIC.replace(cone, '$remedy = "x".Replace("x", "npm run doc:agent")')],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet] of cases) {
     assert.throws(() => step4Remedies(snippet), /step-4 allowlist violation:/, `case must be RED: ${name}`);
   }
@@ -1947,6 +1925,7 @@ test('step-4 lock rejects decoy remedy regions and non-exact branch conditions (
     ['F1 variation: scoped decoy assignment before step 4', `$script:remedy = "npm run doc:agent"\n${SYNTHETIC}`],
     ['F1 variation: decoy assignment inside step 4 but outside the gate-exit else', SYNTHETIC.replace('if ($agentDocsExit -eq 0)', 'if ($false) { $remedy = "npm run doc:agent" }\nif ($agentDocsExit -eq 0)')],
   ];
+  powerShellParser.prewarm(decoyCases.map(([, snippet]) => snippet));
   for (const [name, snippet] of decoyCases) {
     assert.throws(() => step4Remedies(snippet), outsideRegion, `case must be RED with the outside-region reason: ${name}`);
   }
@@ -1967,6 +1946,7 @@ test('step-4 lock rejects decoy remedy regions and non-exact branch conditions (
     ['F2 variation: different operator -cmatch on the cone condition', SYNTHETIC.replace(coneCondition, `$agentDocsOutput -cmatch '(?s)cone sparse-checkout'`), /only a single '\$agentDocsOutput -match <exact pattern>'/],
     ['F2 variation: different variable on the cone condition', SYNTHETIC.replace(coneCondition, `$otherOutput -match '(?s)cone sparse-checkout'`), /must test the plain variable \$agentDocsOutput/],
   ];
+  powerShellParser.prewarm(conditionCases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of conditionCases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2002,6 +1982,7 @@ test('step-4 lock binds input, indirect/output channels and branch order (phase 
     // (4) Branch order is bound.
     ['order: cone and index-bit clauses swapped', SYNTHETIC.replace(`'(?s)cone sparse-checkout'`, `'@@INDEX@@'`).replace(`'(?s)skip-worktree or assume-unchanged'`, `'(?s)cone sparse-checkout'`).replace(`'@@INDEX@@'`, `'(?s)skip-worktree or assume-unchanged'`), /branch order:/],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2046,6 +2027,7 @@ test('step-4 lock binds capture structure/order, dynamic commands, parameter bin
     ['review: [scriptblock]::Create naming the input', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& ([scriptblock]::Create('$agentDocsOutput = "cone sparse-checkout"'))`), input],
     ['review: [scriptblock]::Create naming the remedy', `${SYNTHETIC}\nInvoke-Command -ScriptBlock ([scriptblock]::Create('Set-Variable remedy x'))`, /indirect remedy write via member invocation/],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2066,6 +2048,7 @@ test('step-4 lock binds the literal output channel inside step 4 (phase 10)', ()
     ['dynamic & $cmd resolving to Write-Host', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$cmd = 'Write-Host'; & $cmd "docs-agent is stale: run npm run doc:agent"`), literal],
     ['dynamic & $cmd with unresolved name and literal argument', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& $unknownCmd "docs-agent is stale: run npm run doc:agent"`), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2159,6 +2142,7 @@ test('step-4 lock closes the phase-10 bypasses with a positive structural bounda
     ['boundary: banner Write-Host carrying an extra payload line', SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"', `Write-Host "[4/4] Verifying generated agent documentation is fresh" "docs-agent is stale: run npm run doc:agent"`), literal],
     ['boundary: second node invocation', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& node "scripts/print-wrong-remedy.mjs"`), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2205,6 +2189,7 @@ test('step-4 lock closes the phase-11 review follow-up findings (phase 12)', () 
     ['F10 throw with attacker text', SYNTHETIC.replace(afterCapture, `${afterCapture}\nthrow "docs-agent is stale: run npm run doc:agent"`), literal],
     ['F10 throw a different constant', SYNTHETIC.replace(afterCapture, `${afterCapture}\nthrow 'docs-agent is stale'`), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2257,6 +2242,7 @@ test('step-4 lock closes the phase-12 review follow-up findings (phase 13)', () 
     ['boundary: captured Get-Date -Format inside step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$null = Get-Date -Format "docs-agent is stale: run npm run doc:agent"`), literal],
     ['boundary: captured benign splat inside step 4', SYNTHETIC.replace(afterCapture, `${afterCapture}\n$style = @{ ForegroundColor = 'Green' }\n$null = Get-Date @style`), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2292,6 +2278,7 @@ test('step-4 lock closes the phase-13 review follow-up findings (phase 14)', () 
     ['F3 banner with 6>$null', SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"', 'Write-Host "[4/4] Verifying generated agent documentation is fresh" 6>$null'), literal],
     ['F3 fail-closed: measured-harmless 2>$null is still RED', SYNTHETIC.replace('else { Write-Host $line }', 'else { Write-Host $line 2>$null }'), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2335,6 +2322,7 @@ test('step-4 lock closes the phase-14 review follow-up findings (phase 15)', () 
     ['extra Pop-Location', SYNTHETIC.replace(afterCapture, `${afterCapture}\nPop-Location\nPop-Location`), literal],
     ['duplicate npm run doc:agent', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& npm run doc:agent\n& npm run doc:agent`), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }
@@ -2375,6 +2363,7 @@ test('step-4 lock closes the phase-15 review follow-up findings (phase 16)', () 
     ['F3 bound throw outside its guard', SYNTHETIC.replace(capture, `throw "npm run doc:agent exited with code $LASTEXITCODE"\n${npmGuard}\n${capture}`), literal],
     ['F3 npm call moved after the captures', SYNTHETIC.replace(afterCapture, `${afterCapture}\n${npmGuard}`), literal],
   ];
+  powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
   for (const [name, snippet, reason] of cases) {
     assert.throws(() => step4Remedies(snippet), reason, `case must be RED with its named reason: ${name}`);
   }

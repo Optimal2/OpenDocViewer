@@ -1,0 +1,61 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 28ms
+   × batch parser refuses invalid JSON 25ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:07:01
+   Duration  512ms (transform 41%, import 28%, tests 22%, worker 9%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser refuses invalid JSON
+AssertionError: The input did not match the regular expression /JSON/. Input:
+
+'AssertionError [ERR_ASSERTION]: PowerShell AST batch response paths must match manifest order\n' +
+  '+ actual - expected\n' +
+  '\n' +
+  '+ []\n' +
+  '- [\n' +
+  "-   'G:\\\\wt\\\\tmp\\\\20261015235114-030970b4\\\\odv-step4-ast-wElfwF\\\\0.ps1',\n" +
+  "-   'G:\\\\wt\\\\tmp\\\\20261015235114-030970b4\\\\odv-step4-ast-wElfwF\\\\1.ps1'\n" +
+  '- ]\n'
+
+
+- Expected:
+/JSON/
+
++ Received:
+AssertionError {
+  "message": "PowerShell AST batch response paths must match manifest order
++ actual - expected
+
++ []
+- [
+-   'G:\\\\wt\\\\tmp\\\\20261015235114-030970b4\\\\odv-step4-ast-wElfwF\\\\0.ps1',
+-   'G:\\\\wt\\\\tmp\\\\20261015235114-030970b4\\\\odv-step4-ast-wElfwF\\\\1.ps1'
+- ]
+",
+  "generatedMessage": false,
+  "code": "ERR_ASSERTION",
+  "actual": [],
+  "expected": [
+    "G:\\wt\\tmp\\20261015235114-030970b4\\odv-step4-ast-wElfwF\\0.ps1",
+    "G:\\wt\\tmp\\20261015235114-030970b4\\odv-step4-ast-wElfwF\\1.ps1",
+  ],
+  "operator": "deepStrictEqual",
+  "diff": "simple",
+}
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:60:10
+     58|   let broken = true;
+     59|   const parser = createPowerShellParser({ spawn: (exe, ...args) => { a…
+     60|   assert.throws(() => parser.prewarm(['a', 'b']), reason);
+       |          ^
+     61|   assert.deepEqual(attempts, name === 'unavailable interpreters' ? ['p…
+     62|   broken = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

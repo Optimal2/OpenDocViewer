@@ -1,0 +1,77 @@
+{
+  "controls": [
+    {
+      "name": "missing-interpreters",
+      "pattern": "unavailable interpreters",
+      "red": 1,
+      "green": 0,
+      "mutation": "if (res.error.code === 'ENOENT')",
+      "replacement": "if (false)"
+    },
+    {
+      "name": "max-buffer",
+      "pattern": "maxBuffer refusal",
+      "red": 1,
+      "green": 0,
+      "mutation": "if (res.error.code === 'ENOBUFS')",
+      "replacement": "if (false)"
+    },
+    {
+      "name": "launch-failure",
+      "pattern": "launch failure",
+      "red": 1,
+      "green": 0,
+      "mutation": "if (res.error) {",
+      "replacement": "if (false) {"
+    },
+    {
+      "name": "process-exit",
+      "pattern": "process failure",
+      "red": 1,
+      "green": 0,
+      "mutation": "      assert.equal(res.status, 0, `PowerShell AST parser exited ${res.status}: ${res.stderr}`);",
+      "replacement": ""
+    },
+    {
+      "name": "invalid-json",
+      "pattern": "invalid JSON",
+      "red": 1,
+      "green": 0,
+      "mutation": "return JSON.parse(res.stdout);",
+      "replacement": "try { return JSON.parse(res.stdout); } catch { return { paths: [], results: [] }; }"
+    },
+    {
+      "name": "batch-cardinality",
+      "pattern": "missing entry",
+      "red": 1,
+      "green": 0,
+      "mutation": "        assert.ok(Array.isArray(response.results) && response.results.length === texts.length, 'PowerShell AST batch response must contain exactly one result per source');",
+      "replacement": ""
+    },
+    {
+      "name": "batch-order",
+      "pattern": "wrong ordering",
+      "red": 1,
+      "green": 0,
+      "mutation": "        assert.deepEqual(response?.paths, files, 'PowerShell AST batch response paths must match manifest order');",
+      "replacement": ""
+    },
+    {
+      "name": "batch-ast",
+      "pattern": "invalid AST",
+      "red": 1,
+      "green": 0,
+      "mutation": "      results.forEach(validateAst);",
+      "replacement": ""
+    },
+    {
+      "name": "cache-key",
+      "pattern": "caches exact source text only",
+      "red": 1,
+      "green": 0,
+      "mutation": "trim cache keys",
+      "replacement": "Use .trim() for cache.has(sourceText), cache.get(sourceText), cache.has(text) and cache.set(text, ...)."
+    }
+  ],
+  "fullContractExit": 0
+}

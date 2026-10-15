@@ -1,0 +1,48 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 40ms
+   × batch parser refuses launch failure 35ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:06:54
+   Duration  807ms (transform 40%, import 27%, tests 25%, worker 8%, environment 1%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser refuses launch failure
+AssertionError: The input did not match the regular expression /failed to launch pwsh \(EACCES\).*refusing to skip/. Input:
+
+'AssertionError [ERR_ASSERTION]: PowerShell AST parser exited undefined: undefined\n' +
+  '\n' +
+  'undefined !== 0\n'
+
+
+- Expected:
+/failed to launch pwsh \(EACCES\).*refusing to skip/
+
++ Received:
+AssertionError {
+  "message": "PowerShell AST parser exited undefined: undefined
+
+undefined !== 0
+",
+  "generatedMessage": false,
+  "code": "ERR_ASSERTION",
+  "actual": undefined,
+  "expected": 0,
+  "operator": "strictEqual",
+  "diff": "simple",
+}
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:60:10
+     58|   let broken = true;
+     59|   const parser = createPowerShellParser({ spawn: (exe, ...args) => { a…
+     60|   assert.throws(() => parser.prewarm(['a', 'b']), reason);
+       |          ^
+     61|   assert.deepEqual(attempts, name === 'unavailable interpreters' ? ['p…
+     62|   broken = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

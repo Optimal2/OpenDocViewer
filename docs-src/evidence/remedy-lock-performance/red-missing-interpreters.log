@@ -1,0 +1,43 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 29ms
+   × batch parser refuses unavailable interpreters 25ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:06:47
+   Duration  590ms (transform 39%, import 27%, tests 24%, worker 10%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser refuses unavailable interpreters
+AssertionError: The input did not match the regular expression /PowerShell \(pwsh\/powershell\) is unavailable.*refusing to skip/. Input:
+
+'AssertionError [ERR_ASSERTION]: step-4 allowlist violation: PowerShell AST parser failed to launch pwsh (ENOENT): missing; refusing to skip'
+
+
+- Expected:
+/PowerShell \(pwsh\/powershell\) is unavailable.*refusing to skip/
+
++ Received:
+AssertionError {
+  "message": "step-4 allowlist violation: PowerShell AST parser failed to launch pwsh (ENOENT): missing; refusing to skip",
+  "generatedMessage": false,
+  "code": "ERR_ASSERTION",
+  "actual": undefined,
+  "expected": undefined,
+  "operator": "fail",
+  "diff": "simple",
+}
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:60:10
+     58|   let broken = true;
+     59|   const parser = createPowerShellParser({ spawn: (exe, ...args) => { a…
+     60|   assert.throws(() => parser.prewarm(['a', 'b']), reason);
+       |          ^
+     61|   assert.deepEqual(attempts, name === 'unavailable interpreters' ? ['p…
+     62|   broken = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

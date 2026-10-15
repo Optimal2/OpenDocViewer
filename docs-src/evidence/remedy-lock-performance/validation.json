@@ -1,0 +1,29 @@
+{
+  "node": "v22.23.3",
+  "syntax": {
+    "scripts/parse-local-ci-ast.mjs": 0,
+    "scripts/parse-local-ci-ast-batch.test.mjs": 0,
+    "scripts/local-ci-agent-docs-output.test.mjs": 0,
+    "scripts/benchmark-step4-ast.mjs": 0
+  },
+  "parserScriptParseErrors": [],
+  "agentDocsGenerationExit": 0,
+  "agentDocsDiff": false,
+  "agentDocsFreshnessExit": 0,
+  "strictVersionValidatorBaselineExit": 0,
+  "strictVersionValidatorAfterExit": 0,
+  "baseline": "ce449a76f8cc1573657f6fb5a77f2981591cae98",
+  "protectedPathsUnchanged": [
+    "scripts/local-ci.ps1",
+    ".github",
+    "scripts/omp",
+    "package.json",
+    "package-lock.json",
+    "omp-components.json",
+    "opendocviewer.module-definition.json"
+  ],
+  "componentKeysBumped": [],
+  "packagesToRefresh": [],
+  "runtimeActivationRequired": false,
+  "fullRepositoryCiMeasured": false
+}

@@ -1,0 +1,11 @@
+{
+  "label": "after",
+  "node": "v22.23.3",
+  "command": "node node_modules/vitest/vitest.mjs run scripts/local-ci-agent-docs-output.test.mjs",
+  "exit": 0,
+  "error": null,
+  "wallMs": 73505.3149,
+  "parserCalls": 34,
+  "parsedInputs": 201,
+  "distinctInputs": 201
+}

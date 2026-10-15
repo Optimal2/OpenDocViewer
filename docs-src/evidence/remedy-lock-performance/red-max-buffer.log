@@ -1,0 +1,43 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 27ms
+   × batch parser refuses maxBuffer refusal 24ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:06:51
+   Duration  630ms (transform 40%, import 30%, tests 21%, worker 8%, environment 1%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser refuses maxBuffer refusal
+AssertionError: The input did not match the regular expression /exceeded the 64 MiB maxBuffer \(ENOBUFS\).*not a missing interpreter/. Input:
+
+'AssertionError [ERR_ASSERTION]: step-4 allowlist violation: PowerShell AST parser failed to launch pwsh (ENOBUFS): buffer full; refusing to skip'
+
+
+- Expected:
+/exceeded the 64 MiB maxBuffer \(ENOBUFS\).*not a missing interpreter/
+
++ Received:
+AssertionError {
+  "message": "step-4 allowlist violation: PowerShell AST parser failed to launch pwsh (ENOBUFS): buffer full; refusing to skip",
+  "generatedMessage": false,
+  "code": "ERR_ASSERTION",
+  "actual": undefined,
+  "expected": undefined,
+  "operator": "fail",
+  "diff": "simple",
+}
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:60:10
+     58|   let broken = true;
+     59|   const parser = createPowerShellParser({ spawn: (exe, ...args) => { a…
+     60|   assert.throws(() => parser.prewarm(['a', 'b']), reason);
+       |          ^
+     61|   assert.deepEqual(attempts, name === 'unavailable interpreters' ? ['p…
+     62|   broken = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

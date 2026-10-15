@@ -1,0 +1,11 @@
+{
+  "beforeDistinctInputs": 201,
+  "afterDistinctInputs": 201,
+  "missingInputs": 0,
+  "extraInputs": 0,
+  "differingAsts": 0,
+  "originalTests": 18,
+  "afterTests": 18,
+  "validatorAndCaseTailSha256": "261cf53226d8125dfe5d9e88e180cc0ce8ac2d60115e7c014fd16deb0c3399bc",
+  "validatorAndCasesUnchangedAfterRemovingPrewarmCalls": true
+}

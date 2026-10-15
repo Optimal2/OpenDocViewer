@@ -1,0 +1,35 @@
+
+ RUN  v5.0.4 <worktree>
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs (16 tests | 1 failed | 15 skipped) 42ms
+   × batch parser caches exact source text only, and deduplicates prewarming 39ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  00:07:15
+   Duration  670ms (transform 36%, import 29%, tests 26%, worker 9%)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  scripts/parse-local-ci-ast-batch.test.mjs > batch parser caches exact source text only, and deduplicates prewarming
+AssertionError: Expected values to be strictly equal:
+
+'same\n' !== 'same'
+
+
+- Expected
++ Received
+
+  same
++
+
+ ❯ scripts/parse-local-ci-ast-batch.test.mjs:31:79
+     29|   assert.equal(calls.length, 1);
+     30|   assert.equal(calls[0].files.length, 5);
+     31|   for (const text of ['same', 'same ', ' same', 'same\r\n', 'same\n'])…
+       |                                                                               ^
+     32|   assert.equal(calls.length, 1);
+     33|   assert.equal(parser.parse('new').nodes[0].text, 'new');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
