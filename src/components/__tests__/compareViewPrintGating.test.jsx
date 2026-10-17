@@ -200,6 +200,28 @@ const CASES = [
   { viewOn: false, printOn: false, entry: false, print: false },
 ];
 
+describe('fine-tuning master print gate', () => {
+  beforeEach(() => { vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true); vi.clearAllMocks(); });
+  afterEach(() => { delete window.__ODV_CONFIG__; vi.unstubAllGlobals(); });
+  it.each(['overlay', 'curtain'])('refuses direct %s print opens and stale submissions, keeping ordinary print', async (view) => {
+    const { expose, cleanup } = await renderViewer();
+    const target = { view, primaryRenderRef: documentRenderRef, compareRenderRef: compareRef, getView: () => ({}) };
+    await act(() => expect(expose.pipeline.openComposedPrintDialog(target)).toBe(true));
+    window.__ODV_CONFIG__ = { fineTune: { enabled: false } };
+    await act(() => expect(expose.pipeline.openComposedPrintDialog(target)).toBe(false));
+    await act(() => expose.pipeline.handlePrintSubmit({ mode: 'active', printBackend: 'html' }));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 80)); });
+    expect(printUtils.handlePrintCompareOverlay).not.toHaveBeenCalled();
+    expect(printUtils.handlePrintCompareCurtain).not.toHaveBeenCalled();
+    await act(() => expose.pipeline.openPrintDialog());
+    expect(expose.pipeline.dialogProps.composedView).toBeNull();
+    await act(() => expose.pipeline.handlePrintSubmit({ mode: 'active', activeScope: 'compare-both', printBackend: 'html' }));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 80)); });
+    expect(printUtils.handlePrintCurrentComparison).toHaveBeenCalledTimes(1);
+    await cleanup();
+  });
+});
+
 describe.each(['overlay', 'curtain'])('%s view: print gating (4 combinations)', (view) => {
   const other = view === 'overlay' ? 'curtain' : 'overlay';
 

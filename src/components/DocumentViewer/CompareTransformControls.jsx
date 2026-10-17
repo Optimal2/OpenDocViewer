@@ -15,7 +15,7 @@
  * Collapsed, the summary reads `100,0 % · 0,0°`; a one-character ◐ badge follows it while any
  * image adjustment is active. The image section needs `imageHandlers`.
  *
- * Only rendered in compare mode, so the main toolbar never shifts for other users. Numeric fields
+ * Shown by the ordinary viewer's Fine tuning toggle, or inside overlay/curtain. Numeric fields
  * accept both decimal comma and point; Enter or blur commits, Escape reverts, ArrowUp/ArrowDown
  * step. While the bar is expanded the parent turns drag and Ctrl+wheel on the page into transform
  * changes.
@@ -26,6 +26,7 @@
 import React, { useCallback, useEffect, useId, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { isFineTuneEnabled } from '../../utils/runtimeConfig.js';
 import {
   COMPARE_TRANSFORM_LIMITS,
   formatTransformNumber,
@@ -234,6 +235,7 @@ const CompareTransformControls = ({
     ? t('compareTransform.hide', { defaultValue: 'Hide fine-tuning for this page' })
     : t('compareTransform.show', { defaultValue: 'Adjust zoom, position, rotation and image for this page' });
 
+  if (!isFineTuneEnabled()) return null;
   return (
     <div
       className={[

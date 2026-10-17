@@ -97,6 +97,16 @@ async function press(element, key, init = {}) {
   return event;
 }
 
+it('refuses a direct overlay render when fine tuning is disabled', async () => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  window.__ODV_CONFIG__ = { fineTune: { enabled: false } };
+  const { container, cleanup } = await renderView();
+  expect(container.querySelector('.compare-overlay-view')).toBeNull();
+  await cleanup();
+  delete window.__ODV_CONFIG__;
+  vi.unstubAllGlobals();
+});
+
 /** @param {HTMLElement} container @param {string} label */
 function byLabel(container, label) {
   return /** @type {HTMLElement} */ (container.querySelector(`[aria-label="${label}"]`));

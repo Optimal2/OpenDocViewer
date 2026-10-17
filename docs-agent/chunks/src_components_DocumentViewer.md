@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 17. Line count: 7536. JSDoc symbol count: 154.
+File count: 17. Line count: 7631. JSDoc symbol count: 154.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -18,7 +18,7 @@ Curtain view of the compare mode: the two calibrated pages in one coordinate spa
 
 Exports: `CompareCurtainView`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/compareCurtain.js`, `src/components/DocumentViewer/compareViewKeys.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -50,7 +50,7 @@ Compare toolbar for one compared page: a disclosure button with a short summary,
 
 Exports: `CompareTransformControls`
 
-Local imports: `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`
 
 Symbols:
 
@@ -78,7 +78,7 @@ Per\-pane “post\-zoom” controls shown in comparison mode, tucked behind the 
 
 Exports: `CompareZoomOverlay`
 
-Local imports: `src/utils/compareTransform.js`
+Local imports: `src/utils/compareTransform.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -109,7 +109,7 @@ OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane
 
 Exports: `DocumentViewerRender`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/documentMetadata.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/runtimeConfig.js`, `src/utils/documentMetadata.js`
 
 Symbols:
 

@@ -36,6 +36,10 @@ async function openCompare(page, { query = '', siteConfig = null, showToRight = 
   await page.locator('#thumbnail-2').click({ button: 'right' });
   await page.locator('.odv-context-menu-item', { hasText: showToRight }).click();
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toBeVisible();
+  await page.locator('.fine-tune-toggle').click();
+  // These established tests exercise the per-pane disclosures from their collapsed state.
+  await page.locator('.compare-transform-bar.is-primary .compare-transform-toggle').click();
+  await page.locator('.compare-transform-bar.is-compare .compare-transform-toggle').click();
 }
 
 /** @param {import('@playwright/test').Page} page @param {'primary'|'compare'} pane */

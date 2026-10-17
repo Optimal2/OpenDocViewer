@@ -1,6 +1,6 @@
 # OpenDocViewer / src/types
 
-File count: 1. Line count: 101. JSDoc symbol count: 13.
+File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/types/jsdoc\-types.js
 

@@ -36,6 +36,8 @@ import {
 import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
 import { clampRenderSurfaceSize } from '../utils/renderSurfaceBounds.js';
 import { buildImageFilter } from '../utils/imageAdjustments.js';
+import { composePagePrintCanvas } from '../utils/printCore.js';
+import { isIdentityCompareTransform } from '../utils/compareTransform.js';
 
 /**
  * Shared default for the optional callbacks. It must be one stable function: the canvas draw
@@ -107,6 +109,7 @@ function isBlobAssetUrl(url) {
  * @param {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} props.customFitSizeLimits
  * @param {function(): void=} props.onToggleFitZoomMode
  * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
+ * @param {Object=} props.pageTransform Fine transform for active-page print/export within the page frame.
  * @param {string=} props.surfaceTransform CSS transform for the page stage (compare view, see
  *   utils/compareTransform.js); applied around the page centre without re-rasterising the page.
  * @returns {React.ReactElement}
@@ -127,6 +130,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     onToggleFitZoomMode,
     onDisplayStateChange = NOOP,
     surfaceTransform = '',
+    pageTransform,
   },
   ref
 ) {
@@ -1012,6 +1016,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     getActiveCanvas() {
       return isCanvasEnabled ? canvasRef.current : imgRef.current;
     },
+    getPrintableSurface() {
+      const node = isCanvasEnabled ? canvasRef.current : imgRef.current;
+      return node && pageTransform && !isIdentityCompareTransform(pageTransform)
+        ? composePagePrintCanvas(node, pageTransform, zoom) : node;
+    },
     fitToScreen() {
       fitToScreen();
     },
@@ -1050,7 +1059,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     getPrintablePageUrls,
     isCanvasEnabled,
     onRender,
+    pageTransform,
     setZoom,
+    zoom,
   ]);
 
   useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);

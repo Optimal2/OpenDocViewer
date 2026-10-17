@@ -9,7 +9,7 @@
  * @module useCompareTransforms
  */
 
-import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import ViewerContext from '../../../contexts/viewerContext.js';
 import {
   INITIAL_COMPARE_TRANSFORM_STATE,
@@ -20,6 +20,10 @@ const NOOP_DISPATCH = () => {};
 
 /**
  * @param {boolean} isComparing Whether compare mode is active.
+ * @param {Object=} pages Optional page binding within the viewer session.
+ * @param {(number|null)=} pages.primaryKey Original primary page number.
+ * @param {(number|null)=} pages.compareKey Original secondary page number.
+ * @param {*=} pages.sessionKey Bundle identity; replacing it clears saved page calibrations.
  * @returns {{
  *   primaryTransform: { scale:number, dx:number, dy:number, rotation:number },
  *   compareTransform: { scale:number, dx:number, dy:number, rotation:number },
@@ -31,15 +35,39 @@ const NOOP_DISPATCH = () => {};
  *   resetPostZoom: function(): void
  * }}
  */
-export function useCompareTransforms(isComparing) {
+export function useCompareTransforms(isComparing, { primaryKey, compareKey, sessionKey } = {}) {
   const context = useContext(ViewerContext);
   const state = context?.compareTransforms || INITIAL_COMPARE_TRANSFORM_STATE;
   const dispatch = typeof context?.dispatchCompareTransform === 'function'
     ? context.dispatchCompareTransform
     : NOOP_DISPATCH;
 
-  const primaryTransform = selectCompareTransform(state, 'primary');
-  const compareTransform = selectCompareTransform(state, 'compare');
+  // The context remains the single live transform model. Cache each pane's pages on navigation,
+  // restoring before paint; a page never inherits the previous page's calibration. Separate banks
+  // keep the two editing targets independent even when they display the same original page.
+  const binding = useRef({ sessionKey, primaryKey, compareKey });
+  const pages = useRef({ primary: new Map(), compare: new Map() });
+  const sameSession = binding.current.sessionKey === sessionKey;
+  const resolve = (pane, key) => sameSession && binding.current[`${pane}Key`] === key
+    ? selectCompareTransform(state, pane)
+    : (sameSession && pages.current[pane].get(key)) || INITIAL_COMPARE_TRANSFORM_STATE[pane];
+  const primaryTransform = resolve('primary', primaryKey);
+  const compareTransform = resolve('compare', compareKey);
+
+  useLayoutEffect(() => {
+    const previous = binding.current;
+    if (previous.sessionKey === sessionKey && previous.primaryKey === primaryKey && previous.compareKey === compareKey) return;
+    if (previous.sessionKey !== sessionKey) {
+      pages.current = { primary: new Map(), compare: new Map() };
+    } else {
+      for (const pane of ['primary', 'compare']) {
+        const key = previous[`${pane}Key`];
+        if (key != null) pages.current[pane].set(key, selectCompareTransform(state, pane));
+      }
+    }
+    binding.current = { sessionKey, primaryKey, compareKey };
+    dispatch({ type: 'restore', state: { primary: primaryTransform, compare: compareTransform } });
+  }, [compareKey, compareTransform, dispatch, primaryKey, primaryTransform, sessionKey, state]);
 
   /** @param {number} sign Use +1 to increase, -1 to decrease. */
   const bumpPostZoomLeft = useCallback((sign) => {
@@ -56,10 +84,8 @@ export function useCompareTransforms(isComparing) {
     dispatch({ type: 'resetScale' });
   }, [dispatch]);
 
-  // Fresh alignment on compare enter/exit; whole quarter turns survive like the old page rotation.
-  useEffect(() => {
-    dispatch({ type: 'resetAlignment' });
-  }, [dispatch, isComparing]);
+  // Mode changes deliberately keep calibration. Only page identity, explicit resets and the
+  // fit/actual-size presets change it. isComparing is retained for compatibility with callers.
 
   return useMemo(() => ({
     primaryTransform,

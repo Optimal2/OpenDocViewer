@@ -53,7 +53,7 @@ import {
 } from '../../utils/compareOverlay.js';
 import CompareCurtainButton from './CompareCurtainButton.jsx';
 import { hasActiveModalDialog, isOwnKeyTarget, shouldEscapeCloseView } from './compareViewKeys.js';
-import { isCompareCurtainEnabled, isCompareOverlayPrintEnabled } from '../../utils/runtimeConfig.js';
+import { isCompareCurtainEnabled, isCompareOverlayEnabled, isCompareOverlayPrintEnabled } from '../../utils/runtimeConfig.js';
 
 /** @typedef {'primary'|'compare'} OverlayTarget */
 
@@ -161,6 +161,7 @@ const CompareOverlayView = ({
   useEffect(() => {
     /** @param {KeyboardEvent} event */
     const onKeyDown = (event) => {
+      if (!isCompareOverlayEnabled()) return;
       if (event.defaultPrevented || event.isComposing) return;
       if (hasActiveModalDialog()) return;
       const latest = latestRef.current;
@@ -357,6 +358,7 @@ const CompareOverlayView = ({
     );
   };
 
+  if (!isCompareOverlayEnabled()) return null;
   return (
     <div
       className="compare-overlay-view"

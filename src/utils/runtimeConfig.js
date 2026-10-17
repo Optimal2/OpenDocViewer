@@ -166,28 +166,38 @@ function readBooleanSwitch(value, defaultValue) {
 }
 
 /**
+ * Master capability for page fine tuning and calibration-dependent compare views.
+ * Only boolean false disables it; missing or malformed values default to true.
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isFineTuneEnabled(cfg = getRuntimeConfig()) {
+  return readBooleanSwitch(cfg?.fineTune?.enabled, true);
+}
+
+/**
  * Resolve whether the compare overlay view is available (`compare.overlay.enabled`).
  * Only an explicit `false` removes the view (toolbar entry, open action and render); missing or
  * non-boolean values fall back to the default `true`. The calibration kept in the viewer context
- * and the curtain view are not affected.
+ * and the curtain view are not affected by this child switch. fineTune.enabled gates both views.
  *
  * @param {Object=} cfg
  * @returns {boolean}
  */
 export function isCompareOverlayEnabled(cfg = getRuntimeConfig()) {
-  return readBooleanSwitch(cfg?.compare?.overlay?.enabled, true);
+  return isFineTuneEnabled(cfg) && readBooleanSwitch(cfg?.compare?.overlay?.enabled, true);
 }
 
 /**
  * Resolve whether the compare overlay view offers its print action (`compare.overlay.print.enabled`).
  * Only an explicit `false` removes the action; missing or non-boolean values fall back to `true`.
- * The side-by-side compare print is not affected.
+ * The side-by-side compare print is not affected. The master fineTune capability also gates this action.
  *
  * @param {Object=} cfg
  * @returns {boolean}
  */
 export function isCompareOverlayPrintEnabled(cfg = getRuntimeConfig()) {
-  return readBooleanSwitch(cfg?.compare?.overlay?.print?.enabled, true);
+  return isFineTuneEnabled(cfg) && readBooleanSwitch(cfg?.compare?.overlay?.print?.enabled, true);
 }
 
 /**
@@ -199,7 +209,7 @@ export function isCompareOverlayPrintEnabled(cfg = getRuntimeConfig()) {
  * @returns {boolean}
  */
 export function isCompareCurtainEnabled(cfg = getRuntimeConfig()) {
-  return readBooleanSwitch(cfg?.compare?.curtain?.enabled, true);
+  return isFineTuneEnabled(cfg) && readBooleanSwitch(cfg?.compare?.curtain?.enabled, true);
 }
 
 /**
@@ -211,7 +221,7 @@ export function isCompareCurtainEnabled(cfg = getRuntimeConfig()) {
  * @returns {boolean}
  */
 export function isCompareCurtainPrintEnabled(cfg = getRuntimeConfig()) {
-  return readBooleanSwitch(cfg?.compare?.curtain?.print?.enabled, true);
+  return isFineTuneEnabled(cfg) && readBooleanSwitch(cfg?.compare?.curtain?.print?.enabled, true);
 }
 
 /**

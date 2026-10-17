@@ -225,6 +225,10 @@
     //   print.enabled: false -> keeps the view but removes its print action.
     // Compare mode itself and the side-by-side compare print are NOT affected by these keys.
     // Switching the overlay off keeps the curtain available on the compare view's own calibration.
+    // Master capability for single-page and compare fine tuning, overlay and curtain.
+    // Only boolean false disables it; missing/malformed values default to true.
+    // Panel visibility is a separate session choice, initially off in the ordinary viewer.
+    fineTune: { enabled: true },
     compare: {
       // Overlay view: the two pages stacked with a transparency slider and free calibration.
       overlay: {

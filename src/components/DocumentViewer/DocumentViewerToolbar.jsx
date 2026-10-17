@@ -198,6 +198,8 @@ const DocumentViewerToolbar = ({
   compareCalibrated = false,
   openCompareCurtain,
   compareAdjustPanelsExpanded = undefined,
+  fineTuneVisible,
+  onToggleFineTune,
 }) => {
   return (
     <DocumentToolbar
@@ -278,11 +280,15 @@ const DocumentViewerToolbar = ({
       compareCalibrated={compareCalibrated}
       openCompareCurtain={openCompareCurtain}
       compareAdjustPanelsExpanded={compareAdjustPanelsExpanded}
+      fineTuneVisible={fineTuneVisible}
+      onToggleFineTune={onToggleFineTune}
     />
   );
 };
 
 DocumentViewerToolbar.propTypes = {
+  fineTuneVisible: PropTypes.bool,
+  onToggleFineTune: PropTypes.func,
   runtimeStatusLedState: PropTypes.oneOf(['off', 'pending', 'ready', 'active', 'warning', 'error']).isRequired,
   runtimeStatusLedTitle: PropTypes.string.isRequired,
   pageNumber: PropTypes.number.isRequired,

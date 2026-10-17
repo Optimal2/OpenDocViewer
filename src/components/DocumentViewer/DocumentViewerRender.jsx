@@ -34,6 +34,7 @@ import CompareTransformControls from './CompareTransformControls.jsx';
 import ViewerContext from '../../contexts/viewerContext.js';
 import { IDENTITY_COMPARE_TRANSFORM, buildCompareTransformCss } from '../../utils/compareTransform.js';
 import { needsCanvas } from '../../utils/imageAdjustments.js';
+import { isFineTuneEnabled } from '../../utils/runtimeConfig.js';
 import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
 
 /**
@@ -172,6 +173,7 @@ function preventDefaultIfCancelable(event) {
  * @param {number} props.zoom
  * @param {SetNumberState} props.setZoom
  * @param {boolean} props.isComparing
+ * @param {boolean=} props.fineTuneVisible Ordinary viewer panel visibility (separate from capability).
  * @param {ViewerPaneKey=} props.activePane
  * @param {ViewerPaneKey=} props.effectivePane
  * @param {function(ViewerPaneKey): void=} props.onSetActivePane
@@ -213,6 +215,7 @@ const DocumentViewerRender = ({
   zoom,
   setZoom,
   isComparing,
+  fineTuneVisible = false,
   activePane = 'primary',
   effectivePane = 'primary',
   onSetActivePane,
@@ -249,6 +252,7 @@ const DocumentViewerRender = ({
   onTransformBarExpandedChange,
 }) => {
   const { t } = useTranslation('common');
+  const fineTuneShown = fineTuneVisible && isFineTuneEnabled();
   const { bundle } = useContext(ViewerContext);
   const contextMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const primaryPaneRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -305,15 +309,24 @@ const DocumentViewerRender = ({
     moved: boolean,
     captured: boolean
   })} */ (null));
-  const transformPropsRef = useRef({ primaryTransform, compareTransform, onCompareTransformAction, isComparing, transformBarsExpanded });
-  transformPropsRef.current = { primaryTransform, compareTransform, onCompareTransformAction, isComparing, transformBarsExpanded };
+  const transformPropsRef = useRef({ primaryTransform, compareTransform, onCompareTransformAction, fineTuneShown, transformBarsExpanded });
+  transformPropsRef.current = { primaryTransform, compareTransform, onCompareTransformAction, fineTuneShown, transformBarsExpanded };
 
   const isTransformPaneActive = useCallback((pane) => {
     const current = transformPropsRef.current;
-    return !!current.isComparing
+    return !!current.fineTuneShown && isFineTuneEnabled()
       && !!current.transformBarsExpanded[pane]
       && typeof current.onCompareTransformAction === 'function';
   }, []);
+
+  useEffect(() => {
+    const drag = transformDragRef.current;
+    if (!drag || isTransformPaneActive(drag.pane)) return;
+    transformDragRef.current = null;
+    drag.stage.style.transform = buildCompareTransformCss(drag.transform) || 'none';
+    try { drag.captureElement?.releasePointerCapture?.(drag.pointerId); } catch {}
+    setActivePanPane(null);
+  }, [fineTuneShown, transformBarsExpanded, isTransformPaneActive]);
 
   const setTransformBarExpanded = useCallback((pane, expanded) => {
     if (isTransformBarStateControlled) {
@@ -894,10 +907,10 @@ const DocumentViewerRender = ({
 
   // The per-page compare transform (scale, offset, fine rotation) is a CSS transform on the page
   // stage; both panes keep laying out at the shared base zoom.
-  const primarySurfaceTransform = isComparing ? buildCompareTransformCss(primaryTransform) : '';
+  const primarySurfaceTransform = buildCompareTransformCss(primaryTransform);
   const compareSurfaceTransform = isComparing ? buildCompareTransformCss(compareTransform) : '';
-  const primaryTransformActive = isComparing && transformBarsExpanded.primary && typeof onCompareTransformAction === 'function';
-  const compareTransformActive = isComparing && transformBarsExpanded.compare && typeof onCompareTransformAction === 'function';
+  const primaryTransformActive = fineTuneShown && transformBarsExpanded.primary && typeof onCompareTransformAction === 'function';
+  const compareTransformActive = fineTuneShown && transformBarsExpanded.compare && typeof onCompareTransformAction === 'function';
   const normalizedActivePane = isComparing && activePane === 'compare' ? 'compare' : 'primary';
   const normalizedEffectivePane = isComparing && effectivePane === 'compare' ? 'compare' : 'primary';
   const canHidePageFromSelection = !!selectionPanelEnabled && typeof onHidePageFromSelection === 'function';
@@ -988,7 +1001,7 @@ const DocumentViewerRender = ({
           className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}
           style={{ position: 'relative' }}
         >
-          {isComparing && typeof onCompareTransformAction === 'function' && (
+          {fineTuneShown && typeof onCompareTransformAction === 'function' && (
             <CompareTransformControls
               pane="primary"
               transform={primaryTransform}
@@ -1034,6 +1047,7 @@ const DocumentViewerRender = ({
               pageNumber={pageNumber}
               zoom={zoom}
               surfaceTransform={primarySurfaceTransform}
+              pageTransform={primaryTransform}
               onRender={handlePrimaryRendered}
               setZoom={setZoom}
               imageProperties={primaryImageProperties}
@@ -1050,7 +1064,7 @@ const DocumentViewerRender = ({
         {/* RIGHT / COMPARE PANE */}
         {isComparing && comparePageNumber !== null && (
           <div className="document-render-container-comparison" style={{ position: 'relative' }}>
-            {typeof onCompareTransformAction === 'function' && (
+            {fineTuneShown && typeof onCompareTransformAction === 'function' && (
               <CompareTransformControls
                 pane="compare"
                 transform={compareTransform}
@@ -1094,6 +1108,7 @@ const DocumentViewerRender = ({
                 pageNumber={comparePageNumber}
                 zoom={zoom}
                 surfaceTransform={compareSurfaceTransform}
+                pageTransform={compareTransform}
                 onRender={handleCompareRendered}
                 setZoom={setZoom}
                 imageProperties={compareImageProperties}
@@ -1196,6 +1211,7 @@ const DocumentViewerRender = ({
 };
 
 DocumentViewerRender.propTypes = {
+  fineTuneVisible: PropTypes.bool,
   pageNumber: PropTypes.number.isRequired,
   zoom: PropTypes.number.isRequired,
   setZoom: PropTypes.func.isRequired,

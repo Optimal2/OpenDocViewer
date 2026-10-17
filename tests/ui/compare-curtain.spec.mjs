@@ -21,6 +21,9 @@ async function openCompare(page, session = undefined) {
   await page.locator('#thumbnail-2').click({ button: 'right' });
   await page.locator('.odv-context-menu-item', { hasText: /show to right/i }).click();
   await expect(page.locator('.document-pane-frame.is-compare-pane')).toBeVisible();
+  await page.locator('.fine-tune-toggle').click();
+  await page.locator('.compare-transform-bar.is-primary .compare-transform-toggle').click();
+  await page.locator('.compare-transform-bar.is-compare .compare-transform-toggle').click();
 }
 
 /** @param {import('@playwright/test').Page} page */

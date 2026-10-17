@@ -52,6 +52,7 @@ import {
   getPrintSelectionWorkspaceConfig,
   getViewerEdgeScrollPageTurnConfig,
   isDocumentMetadataUiEnabled,
+  isFineTuneEnabled,
 } from '../../utils/runtimeConfig.js';
 
 const DocumentViewer = () => {
@@ -211,6 +212,15 @@ const DocumentViewer = () => {
   // Expanded per-pane adjustment panels: the renderer shows them, the main toolbar reads them for
   // compare.adjust.toolbarMode 'hide'.
   const [compareAdjustPanelsExpanded, setCompareAdjustPanelsExpanded] = useState({ primary: false, compare: false });
+  const [fineTuneVisible, setFineTuneVisible] = useState(false);
+  const fineTuneEnabled = isFineTuneEnabled();
+  const toggleFineTune = useCallback(() => {
+    if (!isFineTuneEnabled()) return;
+    setFineTuneVisible((visible) => !visible);
+    setCompareAdjustPanelsExpanded({ primary: true, compare: true });
+  }, []);
+  const visibleAdjustPanels = fineTuneEnabled && fineTuneVisible
+    ? compareAdjustPanelsExpanded : { primary: false, compare: false };
   const setCompareAdjustPanelExpanded = useCallback((pane, expanded) => {
     setCompareAdjustPanelsExpanded((current) => (current[pane] === expanded ? current : { ...current, [pane]: expanded }));
   }, []);
@@ -536,6 +546,8 @@ const DocumentViewer = () => {
           imagePropertiesB={compareImageProperties}
           transforms={compareTransforms}
           onClose={closeCompareCurtain}
+          onTransformAction={dispatchCompareTransform}
+          imageHandlers={compareImageHandlers}
           onPrint={printEnabled ? openComposedPrintDialog : undefined}
           printDisabled={comparePrintDisabled}
           printDialogs={comparePrintDialogs}
@@ -625,7 +637,9 @@ const DocumentViewer = () => {
         openCompareOverlay={openCompareOverlay}
         compareCalibrated={compareCalibrated}
         openCompareCurtain={openCompareCurtain}
-        compareAdjustPanelsExpanded={compareAdjustPanelsExpanded}
+        compareAdjustPanelsExpanded={visibleAdjustPanels}
+        fineTuneVisible={fineTuneEnabled && fineTuneVisible}
+        onToggleFineTune={toggleFineTune}
       />
       )}
 
@@ -725,6 +739,7 @@ const DocumentViewer = () => {
           </div>
         ) : (
           <DocumentViewerRender
+            fineTuneVisible={fineTuneEnabled && fineTuneVisible}
             pageNumber={renderPageNumber}
             zoom={zoom}
             setZoom={setZoom}

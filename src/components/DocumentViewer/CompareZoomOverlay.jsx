@@ -34,6 +34,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { COMPARE_TRANSFORM_LIMITS } from '../../utils/compareTransform.js';
+import { isFineTuneEnabled } from '../../utils/runtimeConfig.js';
 
 /** Delay before the zone collapses after the pointer/focus has left, so it does not flicker. */
 const COLLAPSE_DELAY_MS = 180;
@@ -157,6 +158,7 @@ const CompareZoomOverlay = ({
     e.preventDefault();
   };
 
+  if (!isFineTuneEnabled()) return <div className="compare-zoom-zone">{marker}</div>;
   return (
     <div
       ref={zoneRef}

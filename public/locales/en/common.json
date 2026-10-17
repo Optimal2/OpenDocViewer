@@ -7,6 +7,11 @@
     "next": "Next"
   },
   "toolbar": {
+    "fineTune": {
+      "label": "Fine tuning",
+      "show": "Show fine tuning for zoom, position, rotation and image",
+      "hide": "Hide fine tuning; keep page adjustments"
+    },
     "print": "Print",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",

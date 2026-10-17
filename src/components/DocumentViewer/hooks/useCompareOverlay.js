@@ -107,7 +107,7 @@ export function useCompareOverlay(available, { imageAdjustments, onRestoreImageA
   const [curtainOpen, setCurtainOpen] = useState(false);
 
   const openCompareOverlay = useCallback(() => {
-    if (!availableRef.current || !overlayEnabledRef.current) return false;
+    if (!availableRef.current || !isCompareOverlayEnabled()) return false;
     const images = imageAdjustmentsRef.current;
     setSnapshot({
       transforms: transformsRef.current,
@@ -132,7 +132,7 @@ export function useCompareOverlay(available, { imageAdjustments, onRestoreImageA
   }, [dispatch, snapshot]);
 
   const openCompareCurtain = useCallback(() => {
-    if (!availableRef.current || !curtainEnabledRef.current || !calibratedRef.current) return false;
+    if (!availableRef.current || !isCompareCurtainEnabled() || !calibratedRef.current) return false;
     setCurtainOpen(true);
     return true;
   }, []);
@@ -141,8 +141,15 @@ export function useCompareOverlay(available, { imageAdjustments, onRestoreImageA
     setCurtainOpen(false);
   }, []);
 
+  // Boot config is stable for a session. If a host replaces it and re-renders, discard stale open
+  // flags as well as gating the render, so enabling a capability later cannot reopen a view.
+  useEffect(() => {
+    if (!overlayEnabled) setOpen(false);
+    if (!curtainEnabled) setCurtainOpen(false);
+  }, [curtainEnabled, overlayEnabled]);
+
   // Leaving compare mode (or losing the second page) closes both views and drops the calibration
-  // flag (the transforms are reset on compare enter/exit); nothing reopens by itself.
+  // flag; the page-bound transforms survive compare enter/exit. Nothing reopens by itself.
   useEffect(() => {
     if (isAvailable) return;
     setOpen(false);

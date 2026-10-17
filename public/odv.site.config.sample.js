@@ -178,6 +178,9 @@
     //   enabled: false       -> the view is removed entirely.
     //   print.enabled: false -> the view stays but its print action is removed.
     // Compare mode itself and the side-by-side compare print are not affected.
+    // Master capability: false also removes overlay/curtain and their print surfaces.
+    // Ordinary viewing, simple side-by-side comparison and normal printing stay available.
+    fineTune: { enabled: true },
     compare: {
       overlay: {
         enabled: false,

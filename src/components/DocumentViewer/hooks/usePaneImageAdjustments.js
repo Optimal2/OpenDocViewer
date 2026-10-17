@@ -20,7 +20,7 @@
  * @module usePaneImageAdjustments
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import {
   normalizeGrayscale,
   normalizeInvert,
@@ -57,20 +57,35 @@ function readPercent200(e) {
  * @param {Object} options
  * @param {boolean} options.isComparing
  * @param {function(Object): void} options.dispatchCompareTransform compareTransformReducer dispatcher.
+ * @param {(number|string|null)=} options.primaryKey Original primary page identity.
+ * @param {(number|string|null)=} options.compareKey Original secondary page identity.
+ * @param {*=} options.sessionKey Bundle identity; replacing it discards saved image adjustments.
  */
-export function usePaneImageAdjustments({ isComparing, dispatchCompareTransform }) {
-  const [primaryImageAdjustments, setPrimaryImageAdjustments] = useState(DEFAULT_IMAGE_ADJUSTMENTS);
-  const [compareImageAdjustments, setCompareImageAdjustments] = useState(DEFAULT_IMAGE_ADJUSTMENTS);
+export function usePaneImageAdjustments({ isComparing, dispatchCompareTransform, primaryKey = 'primary', compareKey = 'compare', sessionKey }) {
+  const [stored, setStored] = useState(() => ({ sessionKey, primary: new Map(), compare: new Map() }));
+  useLayoutEffect(() => {
+    if (stored.sessionKey === sessionKey) return;
+    setStored({ sessionKey, primary: new Map(), compare: new Map() });
+  }, [sessionKey, stored.sessionKey]);
+  const primaryImageAdjustments = stored.sessionKey === sessionKey
+    ? stored.primary.get(primaryKey) || DEFAULT_IMAGE_ADJUSTMENTS : DEFAULT_IMAGE_ADJUSTMENTS;
+  const compareImageAdjustments = stored.sessionKey === sessionKey
+    ? stored.compare.get(compareKey) || DEFAULT_IMAGE_ADJUSTMENTS : DEFAULT_IMAGE_ADJUSTMENTS;
+  const updatePane = useCallback((pane, update) => {
+    const key = pane === 'compare' ? compareKey : primaryKey;
+    setStored((previous) => {
+      const current = previous.sessionKey === sessionKey ? previous : { sessionKey, primary: new Map(), compare: new Map() };
+      const bank = new Map(current[pane]);
+      bank.set(key, update(bank.get(key) || DEFAULT_IMAGE_ADJUSTMENTS));
+      return { ...current, [pane]: bank };
+    });
+  }, [compareKey, primaryKey, sessionKey]);
 
   /** @param {*} target @param {Object} patch */
   const patchPane = useCallback((target, patch) => {
     const update = (state) => ({ ...state, ...patch });
-    if (normalizeTarget(target) === 'compare') {
-      setCompareImageAdjustments(update);
-      return;
-    }
-    setPrimaryImageAdjustments(update);
-  }, []);
+    updatePane(normalizeTarget(target), update);
+  }, [updatePane]);
 
   /** @param {{target:{value:*}}} e */
   const handleBrightnessChange = useCallback((e, target = 'primary') => {
@@ -100,12 +115,8 @@ export function usePaneImageAdjustments({ isComparing, dispatchCompareTransform 
 
   /** Image only; the transform is kept. */
   const clearImageAdjustments = useCallback((target = 'primary') => {
-    if (normalizeTarget(target) === 'compare') {
-      setCompareImageAdjustments(DEFAULT_IMAGE_ADJUSTMENTS);
-      return;
-    }
-    setPrimaryImageAdjustments(DEFAULT_IMAGE_ADJUSTMENTS);
-  }, []);
+    updatePane(normalizeTarget(target), () => DEFAULT_IMAGE_ADJUSTMENTS);
+  }, [updatePane]);
 
   /**
    * Restore both panes' stored image fields (brightness, contrast, grayscale, invert) from a saved
@@ -114,9 +125,9 @@ export function usePaneImageAdjustments({ isComparing, dispatchCompareTransform 
    */
   const restoreImageAdjustments = useCallback((state) => {
     if (!state) return;
-    setPrimaryImageAdjustments((current) => ({ ...current, ...pickStoredImageAdjustments(state.primary) }));
-    setCompareImageAdjustments((current) => ({ ...current, ...pickStoredImageAdjustments(state.compare) }));
-  }, []);
+    updatePane('primary', (current) => ({ ...current, ...pickStoredImageAdjustments(state.primary) }));
+    updatePane('compare', (current) => ({ ...current, ...pickStoredImageAdjustments(state.compare) }));
+  }, [updatePane]);
 
   /** Everything for one pane: identity transform (no quarter turn either) and neutral image. */
   const resetPane = useCallback((target = 'primary') => {

@@ -1,4 +1,15 @@
-# Compare view: free per-page transform
+# Page fine tuning and comparison
+
+The ordinary viewer starts with fine tuning hidden. The localized **Fine tuning** toolbar button
+toggles controls for the displayed page or both side-by-side pages. Its pressed/expanded state
+reflects visibility, and the session choice survives entering/leaving compare and fullscreen views.
+Hiding controls disables fine drag and Ctrl/Cmd-wheel editing without changing any geometry or
+image adjustment. Per-page disclosure buttons can additionally collapse individual panels.
+
+`fineTune.enabled` is the independent master capability (strict boolean, default `true`). When
+false, controls, fine gestures, overlay, curtain and their print surfaces are unavailable. Ordinary
+viewing, simple comparison and printing remain available. Overlay and curtain always open with
+both reusable fine-tuning panels expanded, regardless of ordinary viewer visibility.
 
 The compare view shows two pages side by side. To compare two pages exactly — for example as a
 semi-transparent overlay or with a draggable "curtain" border — the two pages must first be aligned.
@@ -49,8 +60,11 @@ The state is plain JSON. A later view reads and writes it through the context:
   actual-size modes dispatch `resetScale`, as the old pane zoom reset did.
 - The 90° toolbar buttons, the panel's 90° quick buttons and Ctrl+Arrow shortcuts dispatch
   `rotate` (±90). A fine residual is kept.
-- Changing the page resets its rotation, as before; scale and offset persist like the old pane zoom.
-  Entering or leaving compare mode keeps only the nearest quarter turn (`resetAlignment`).
+- Navigation saves calibration and image adjustments by original page number within each pane.
+  An unvisited page starts neutral; returning restores its values. The pane banks are independent,
+  including when both show the same page. Filtering uses original numbers, so it cannot reassign
+  edits to another page. A new bundle clears the banks. Nothing is stored on the server or disk.
+  Mode changes preserve alignment; they no longer dispatch `resetAlignment`.
 
 ## How the renderer applies it
 
@@ -65,11 +79,11 @@ The state is plain JSON. A later view reads and writes it through the context:
   `scale(s) translate(dx px, dy px) rotate(residual deg)`. The browser composites the existing
   full-resolution raster; nothing is re-rasterised per step, so fractional scales do not lose
   quality.
-- Outside compare mode no transform is applied. Both panes lay out at the shared base zoom.
+- Single-page and compare modes apply the same transform. Both panes lay out at shared base zoom.
 - The stage transform does not grow the scrollable area to the top or left. Use the offset to reach
   those parts of a scaled-up page.
 
-## One adjustment model per page (compare mode only)
+## One adjustment model per page
 
 Each compared page has exactly one adjustment state and one panel for it. The state is the page's
 transform above plus its image adjustment, held per pane by `hooks/usePaneImageAdjustments.js`
@@ -93,9 +107,10 @@ one used before grayscale and invert existed, so neutral pages draw the same pix
 
 ### The panel
 
-`CompareTransformControls.jsx` renders one panel above each compared page. It is collapsed by
-default and shows a summary (`100,0 % · 0,0°`), followed by a one-character `◐` badge while the
-image is adjusted. Expanded, it holds everything the page can be adjusted with:
+`CompareTransformControls.jsx` renders one panel above each displayed page when fine tuning is
+visible. The toolbar toggle opens the panels expanded. Each disclosure can collapse to a summary
+(`100,0 % · 0,0°`), followed by a one-character `◐` badge while the image is adjusted. Expanded,
+it holds everything the page can be adjusted with:
 
 - Zoom: numeric field in percent (0.1 %), −/+ buttons (0.1 %, Shift 1 %), Ctrl+wheel over the page
   (1 % per notch).
@@ -147,8 +162,12 @@ pane (and Shift), as before.
 - The overlay and curtain views draw each page with the same image adjustment as side by side
   (`tests/ui/compare-overlay.spec.mjs` and `compare-curtain.spec.mjs` compare the canvas pixels).
 - "Copy calibration" in the overlay view includes the image fields (see below).
-- All print paths of the compare views read the filtered canvas (`getActiveCanvas()`), so the
-  printed page shows the same adjustment as the screen (`src/utils/__tests__/printCompareCompose.test.js`).
+- Active-page and ordinary two-page HTML/PDF printing read `getPrintableSurface()`: a raster of
+  the current fine transform inside the original page frame (white outside content, clipped at page
+  edges). Base zoom converts CSS offsets to raster pixels; quarter turns and filters are already
+  drawn. Panel visibility does not affect output. Overlay/curtain composition continues to read
+  raw `getActiveCanvas()` and applies transforms once in the shared stage frame. Range/all-page
+  printing intentionally prints source assets without session edits, as before.
 
 ### Input behaviour
 
@@ -204,13 +223,15 @@ Tests: `src/utils/__tests__/compareOverlay.test.js`, `src/components/__tests__/c
 
 ## Curtain view
 
-`CompareCurtainView.jsx` shows the calibration with nothing but a draggable border: the two pages
+`CompareCurtainView.jsx` shows the calibration with a draggable border and per-image controls: the two pages
 in the overlay's coordinate space (same `DocumentRender` layers and transforms), page A below and
 page B above, page B clipped to one side of the border.
 
 - Calibration presence: `compareOverlay.calibrated` is set (`markCalibrated`) when the overlay
   view opens and cleared (`clearCalibrated`) when compare mode ends or the second page goes away;
-  `hasCompareCalibration()` reads it. The transforms are never written by the curtain view.
+  `hasCompareCalibration()` reads it. Both reusable panels edit transforms and image adjustments
+  through the same handlers as the other views, independently of normal panel visibility. Border
+  pointer capture and slider keyboard handling remain separate from the calibration controls.
 - Entry: `CompareCurtainButton.jsx`, in the overlay view's toolbar and in the compare toolbar next
   to the overlay button. Without a calibration the compare toolbar button is `aria-disabled` (still
   focusable, so its tooltip explains that the overlay view calibrates first). If the overlay is

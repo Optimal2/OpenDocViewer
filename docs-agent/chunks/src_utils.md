@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 19747. JSDoc symbol count: 798.
+File count: 51. Line count: 19790. JSDoc symbol count: 801.
 
 ## src/utils/compareCurtain.js
 
@@ -590,7 +590,7 @@ Symbols:
 
 Core print coordinator for the frontend.
 
-Exports: `handlePrint`, `handlePrintCurrentComparison`, `composeCompareOverlayCanvas`, `composeCompareCurtainCanvas`, `handlePrintCompareOverlay`, `handlePrintCompareCurtain`, `handlePrintAll`, `handlePrintSequence`, `handlePrintRange`
+Exports: `handlePrint`, `handlePrintCurrentComparison`, `composePagePrintCanvas`, `resolvePrintableSurface`, `composeCompareOverlayCanvas`, `composeCompareCurtainCanvas`, `handlePrintCompareOverlay`, `handlePrintCompareCurtain`, `handlePrintAll`, `handlePrintSequence`, `handlePrintRange`
 
 Local imports: `src/logging/systemLogger.js`, `src/utils/printDom.js`, `src/utils/printTemplate.js`, `src/utils/printSanitize.js`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`, `src/utils/compareCurtain.js`
 
@@ -811,7 +811,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 

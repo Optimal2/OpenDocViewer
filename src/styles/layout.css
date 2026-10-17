@@ -1136,13 +1136,15 @@
 .document-render-container-single { width: 100%; }
 .document-render-container-comparison { width: 50%; }
 
-/* Compare panes stack the per-page fine-tuning bar (CompareTransformControls) above the frame. */
+/* Both layouts stack the optional per-page fine-tuning panel above the remaining viewport. */
+.document-render-container-single,
 .document-render-container-comparison {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+.document-render-container-single > .document-pane-frame,
 .document-render-container-comparison > .document-pane-frame {
   flex: 1 1 0;
   height: auto;

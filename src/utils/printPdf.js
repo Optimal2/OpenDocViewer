@@ -19,7 +19,7 @@ import { isSafeImageSrc } from './printSanitize.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
 import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
 import { createPdfWithWorkerDispatcher, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
-import { composeCompareCurtainCanvas, composeCompareOverlayCanvas } from './printCore.js';
+import { composeCompareCurtainCanvas, composeCompareOverlayCanvas, resolvePrintableSurface } from './printCore.js';
 
 /**
  * Escape regular-expression metacharacters in literal text.
@@ -2256,7 +2256,7 @@ function blobToDataUrl(blob) {
  */
 export async function handlePdfCurrent(documentRenderRef, options = {}) {
   throwIfAborted(options.signal);
-  const node = documentRenderRef?.current?.getActiveCanvas?.();
+  const node = resolvePrintableSurface(documentRenderRef);
   if (!node) {
     throw new Error('Unable to generate PDF from the active surface: the document handle did not return an active canvas/image element.');
   }
@@ -2280,8 +2280,8 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
 export async function handlePdfCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   throwIfAborted(options.signal);
   const [primary, compare] = await Promise.all([
-    printableSourceFromElement(primaryRenderRef?.current?.getActiveCanvas?.()),
-    printableSourceFromElement(compareRenderRef?.current?.getActiveCanvas?.()),
+    printableSourceFromElement(resolvePrintableSurface(primaryRenderRef)),
+    printableSourceFromElement(resolvePrintableSurface(compareRenderRef)),
   ]);
   const urls = [primary, compare].filter(Boolean);
   if (urls.length !== 2) {

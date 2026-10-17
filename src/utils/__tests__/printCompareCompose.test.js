@@ -98,6 +98,34 @@ function clipRect(canvas) {
 const A = sourceCanvas('A', 200, 100);
 const B = sourceCanvas('B', 200, 100);
 
+describe('ordinary active-page geometry', () => {
+  it('prints scale, CSS offset and residual rotation inside the original page frame', async () => {
+    const { composePagePrintCanvas } = await import('../printCore.js');
+    const canvas = composePagePrintCanvas(A, { scale: 1.2, dx: 16, dy: -8, rotation: 90.5 }, 2);
+    expect([canvas.width, canvas.height]).toEqual([200, 100]);
+    expect(opsBeforeDraw(canvas, A)).toEqual([
+      ['translate', 100, 50], ['scale', 1.2, 1.2], ['translate', 8, -4],
+      ['rotate', 0.5 * Math.PI / 180], ['translate', -100, -50], ['drawImage', 0, 0, 200, 100],
+    ]);
+    expect(canvas.log.find((entry) => entry.op === 'fillRect').args).toEqual([0, 0, 200, 100]);
+  });
+  it('ordinary print and PDF use the fine-tuned surface; composed views keep raw surfaces', async () => {
+    const { resolvePrintableSurface } = await import('../printCore.js');
+    const tuned = sourceCanvas('TUNED', 200, 100);
+    const getPrintableSurface = vi.fn(() => tuned);
+    const ref = { current: { getActiveCanvas: () => A, getPrintableSurface } };
+    expect(resolvePrintableSurface(ref)).toBe(tuned);
+    const { handlePdfCurrent } = await import('../printPdf.js');
+    const controller = new AbortController();
+    await expect(handlePdfCurrent(ref, { deferOutput: true,
+      signal: controller.signal, onProgress: () => controller.abort(),
+    })).rejects.toMatchObject({ name: 'AbortError' });
+    expect(getPrintableSurface).toHaveBeenCalledTimes(2);
+    handlePrintCompareOverlay(ref, renderRef(B), { opacity: 50, transforms: IDENTITY_TRANSFORMS });
+    expect(draws(created[0]).map((entry) => entry.args[0])).toContain(A);
+  });
+});
+
 beforeEach(() => {
   created = [];
   vi.clearAllMocks();

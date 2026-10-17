@@ -520,7 +520,7 @@ function normalizeViewerPaneTarget(pane) {
  * @returns {Object} Returns the viewer API object (see returned keys below).
  */
 export function useDocumentViewer() {
-  const { allPages, pageLoadState } = useContext(ViewerContext);
+  const { allPages, pageLoadState, bundle } = useContext(ViewerContext);
   const totalSessionPages = Array.isArray(allPages) ? allPages.length : 0;
   const keyboardPrintShortcutBehavior = getKeyboardPrintShortcutBehavior();
   const initialZoomSettingsRef = useRef(null);
@@ -861,7 +861,11 @@ export function useDocumentViewer() {
     bumpPostZoomLeft,
     bumpPostZoomRight,
     resetPostZoom,
-  } = useCompareTransforms(isComparing);
+  } = useCompareTransforms(isComparing, {
+    primaryKey: currentOriginalPageNumber,
+    compareKey: compareOriginalPageNumber,
+    sessionKey: bundle,
+  });
 
   // Brightness/contrast/grayscale/invert stay local; rotation lives in the per-page compare transform (viewer
   // context), whose whole quarter turn is what the canvas draws (docs-src/compare-transform.md).
@@ -872,11 +876,15 @@ export function useDocumentViewer() {
     handleContrastChange,
     handleGrayscaleChange,
     handleInvertChange,
-    clearImageAdjustments,
     resetImageProperties,
     restoreImageAdjustments,
     compareImageHandlers,
-  } = usePaneImageAdjustments({ isComparing, dispatchCompareTransform });
+  } = usePaneImageAdjustments({
+    isComparing, dispatchCompareTransform,
+    primaryKey: currentOriginalPageNumber,
+    compareKey: compareOriginalPageNumber,
+    sessionKey: bundle,
+  });
 
   // --- Overlay view of the compare mode (both pages stacked, top page semi-transparent) -------
   const {
@@ -920,29 +928,6 @@ export function useDocumentViewer() {
   /** @type {{ current: any }} */ const thumbnailsContainerRef = useRef(null);
   /** @type {{ current: any }} */ const documentRenderRef = useRef(null);
   /** @type {{ current: any }} */ const compareRef = useRef(null);
-  const previousPrimaryOriginalPageRef = useRef(currentOriginalPageNumber);
-  const previousCompareOriginalPageRef = useRef(compareOriginalPageNumber);
-
-  useEffect(() => {
-    if (previousPrimaryOriginalPageRef.current === currentOriginalPageNumber) return;
-    previousPrimaryOriginalPageRef.current = currentOriginalPageNumber;
-    clearImageAdjustments('primary');
-    // A new page starts unrotated, as before; scale and pan persist like the old pane zoom did.
-    dispatchCompareTransform({ type: 'set', target: 'primary', transform: { rotation: 0 } });
-  }, [clearImageAdjustments, currentOriginalPageNumber, dispatchCompareTransform]);
-
-  useEffect(() => {
-    if (!isComparing) {
-      previousCompareOriginalPageRef.current = compareOriginalPageNumber;
-      clearImageAdjustments('compare');
-      dispatchCompareTransform({ type: 'reset', target: 'compare' });
-      return;
-    }
-    if (previousCompareOriginalPageRef.current === compareOriginalPageNumber) return;
-    previousCompareOriginalPageRef.current = compareOriginalPageNumber;
-    clearImageAdjustments('compare');
-    dispatchCompareTransform({ type: 'set', target: 'compare', transform: { rotation: 0 } });
-  }, [clearImageAdjustments, compareOriginalPageNumber, dispatchCompareTransform, isComparing]);
 
   // --- Selection helpers ---------------------------------------------------------
   const toggleDraftSelectAll = useCallback((checked) => {

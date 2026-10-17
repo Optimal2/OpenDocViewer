@@ -111,6 +111,14 @@ describe('CompareCurtainView', () => {
     vi.unstubAllGlobals();
   });
 
+  it('refuses a direct render when the master capability is false', async () => {
+    window.__ODV_CONFIG__ = { fineTune: { enabled: false } };
+    const { container, cleanup } = await renderCurtain();
+    expect(container.querySelector('.compare-curtain-view')).toBeNull();
+    await cleanup();
+    delete window.__ODV_CONFIG__;
+  });
+
   it('draws page A below and page B above, each with its calibrated transform; B clipped at 50 %', async () => {
     const { container, cleanup } = await renderCurtain({
       transforms: { primary: { scale: 1.5, dx: 0, dy: 0, rotation: 0 }, compare: { scale: 1, dx: 4, dy: 0, rotation: 0.5 } },
@@ -133,12 +141,12 @@ describe('CompareCurtainView', () => {
     await cleanup();
   });
 
-  it('has exactly one Horizontal/Vertical toggle and Close; nothing else', async () => {
+  it('keeps the border toolbar and exposes both fine-tuning panels', async () => {
     const { container, cleanup } = await renderCurtain();
     const toolbar = container.querySelector('.compare-curtain-toolbar');
     const controls = [...toolbar.querySelectorAll('button, input, select, textarea')];
     expect(controls.map((control) => control.textContent)).toEqual(['Horizontal', 'Vertical', 'closeClose']);
-    expect(container.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    expect(container.querySelectorAll('.compare-transform-controls')).toHaveLength(2);
     expect(modeButton(container, 'Vertical').getAttribute('aria-pressed')).toBe('true');
     expect(modeButton(container, 'Horizontal').getAttribute('aria-pressed')).toBe('false');
     await cleanup();

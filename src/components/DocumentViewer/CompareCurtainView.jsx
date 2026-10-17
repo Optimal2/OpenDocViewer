@@ -19,7 +19,7 @@
  *   the view state on release, so the pages are never re-rendered by a drag.
  * - The border is a slider: arrow keys move it 1 %, Shift 10 %. Each mode keeps its own position
  *   while the view is open.
- * - The calibration (per-page transforms) is read from the viewer context and never changed here.
+ * - Both pages have reusable fine-tuning controls that update the shared calibration.
  * - Escape or Close returns to the view the curtain was opened from (hooks/useCompareOverlay.js).
  * - "Print" opens the viewer's one print dialog (DocumentToolbar/usePrintPipeline.js) for this view
  *   and prints both pages composed onto ONE page with the current border, transforms, zoom and
@@ -30,10 +30,11 @@
  * @component
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import DocumentRender from '../DocumentRender.jsx';
+import CompareTransformControls from './CompareTransformControls.jsx';
 import {
   INITIAL_COMPARE_TRANSFORM_STATE,
   buildCompareTransformCss,
@@ -51,7 +52,7 @@ import {
   selectCurtainPosition,
 } from '../../utils/compareCurtain.js';
 import { hasActiveModalDialog, shouldEscapeCloseView } from './compareViewKeys.js';
-import { isCompareCurtainPrintEnabled } from '../../utils/runtimeConfig.js';
+import { isCompareCurtainEnabled, isCompareCurtainPrintEnabled } from '../../utils/runtimeConfig.js';
 
 /** @typedef {('horizontal'|'vertical')} CurtainMode */
 
@@ -98,6 +99,8 @@ function measureStage(stage) {
  * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesA
  * @param {{ rotation:number, brightness:number, contrast:number, grayscale:number, invert:boolean }} props.imagePropertiesB
  * @param {{ primary:Object, compare:Object }} props.transforms Calibrated per-page transforms (viewer context).
+ * @param {function(Object): void} props.onTransformAction Shared transform dispatcher.
+ * @param {Object=} props.imageHandlers Shared per-pane image adjustment handlers.
  * @param {function(): void} props.onClose
  * @param {function(Object): *=} props.onPrint Opens the shared print dialog for this view (usePrintPipeline).
  * @param {boolean=} props.printDisabled True while printing is unavailable (loading, PDF in progress).
@@ -115,12 +118,15 @@ const CompareCurtainView = ({
   imagePropertiesA,
   imagePropertiesB,
   transforms = INITIAL_COMPARE_TRANSFORM_STATE,
+  onTransformAction,
+  imageHandlers,
   onClose,
   onPrint,
   printDisabled = false,
   printDialogs = null,
 }) => {
   const { t } = useTranslation('common');
+  const [barsExpanded, setBarsExpanded] = useState({ primary: true, compare: true });
   const [curtain, dispatchCurtain] = useReducer(compareCurtainReducer, INITIAL_COMPARE_CURTAIN_STATE);
   const mode = curtain.mode;
   const position = selectCurtainPosition(curtain);
@@ -285,6 +291,7 @@ const CompareCurtainView = ({
     </button>
   );
 
+  if (!isCompareCurtainEnabled()) return null;
   return (
     <div
       className="compare-curtain-view"
@@ -339,6 +346,20 @@ const CompareCurtainView = ({
         {printDialogs}
       </div>
 
+      <div className="compare-overlay-calibration">
+        {['primary', 'compare'].map((pane) => (
+          <CompareTransformControls
+            key={pane}
+            pane={pane}
+            transform={pane === 'primary' ? transformA : transformB}
+            imageProperties={pane === 'primary' ? imagePropertiesA : imagePropertiesB}
+            imageHandlers={imageHandlers}
+            expanded={barsExpanded[pane]}
+            onExpandedChange={(expanded) => setBarsExpanded((current) => ({ ...current, [pane]: expanded }))}
+            onAction={onTransformAction}
+          />
+        ))}
+      </div>
       <div
         ref={stageRef}
         className={`compare-curtain-stage is-${mode}`}
@@ -402,6 +423,8 @@ const imagePropertiesShape = PropTypes.shape({
 });
 
 CompareCurtainView.propTypes = {
+  onTransformAction: PropTypes.func,
+  imageHandlers: PropTypes.object,
   pageNumberA: PropTypes.number.isRequired,
   pageNumberB: PropTypes.number.isRequired,
   allPages: PropTypes.array.isRequired,

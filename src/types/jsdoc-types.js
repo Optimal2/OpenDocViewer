@@ -68,6 +68,7 @@
  * Minimal imperative handle exposed by the page renderer for printing.
  * @typedef {Object} DocumentRenderHandle
  * @property {function(): (HTMLCanvasElement|HTMLImageElement|null)} getActiveCanvas
+ * @property {function(): (HTMLCanvasElement|HTMLImageElement|null)} [getPrintableSurface] Active-page surface with fine geometry applied; composed views use getActiveCanvas.
  */
 
 /**

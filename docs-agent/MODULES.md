@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 18. Line count: 7831. JSDoc symbol count: 103.
+File count: 18. Line count: 7842. JSDoc symbol count: 103.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4112. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 19. Line count: 8020. JSDoc symbol count: 137.
+File count: 19. Line count: 8055. JSDoc symbol count: 138.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -62,15 +62,15 @@ File count: 19. Line count: 8020. JSDoc symbol count: 137.
 
 ## src/components/DocumentViewer
 
-File count: 17. Line count: 7536. JSDoc symbol count: 154.
+File count: 17. Line count: 7631. JSDoc symbol count: 154.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;.
+- `src/components/DocumentViewer/CompareTransformControls.jsx` - Compare toolbar for one compared page: a disclosure button with a short summary, which expands into one panel for everything the page can be adjusted with \- its free transform \(utils/compareTransform.js\) and its image ad
 - `src/components/DocumentViewer/compareViewKeys.js` - File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full\-surface compare views \(CompareOverlayView.jsx, CompareCurtainView.jsx\): which focused el...
 - `src/components/DocumentViewer/hooks/usePaneImageAdjustments.js` - File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per\-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the...
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
-- `src/components/DocumentViewer/CompareTransformControls.jsx` - Compare toolbar for one compared page: a disclosure button with a short summary, which expands into one panel for everything the page can be adjusted with \- its free transform \(utils/compareTransform.js\) and its image ad
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
 
 ## src/contexts
@@ -144,13 +144,13 @@ File count: 1. Line count: 363. JSDoc symbol count: 18.
 
 ## src/types
 
-File count: 1. Line count: 101. JSDoc symbol count: 13.
+File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 - `src/types/jsdoc-types.js` - Centralized JSDoc\-only type and callback definitions.
 
 ## src/utils
 
-File count: 51. Line count: 19747. JSDoc symbol count: 798.
+File count: 51. Line count: 19790. JSDoc symbol count: 801.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

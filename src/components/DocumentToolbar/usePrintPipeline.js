@@ -25,7 +25,7 @@ import userLog from '../../logging/userLogger.js';
 import logger from '../../logging/systemLogger.js';
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintCompareOverlay, handlePrintCompareCurtain, handlePrintRange, handlePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, handlePdfCompareOverlay, handlePdfCompareCurtain, downloadPdfBlob, printPdfBlob } from '../../utils/printUtils.js';
 import usePdfPrebuildAllPages from './usePdfPrebuildAllPages.js';
-import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { getRuntimeConfig, isCompareOverlayEnabled, isCompareCurtainEnabled, isCompareOverlayPrintEnabled, isCompareCurtainPrintEnabled } from '../../utils/runtimeConfig.js';
 import {
   canReuseGeneratedPdfPrint,
   getPdfPrintCacheKey,
@@ -42,6 +42,12 @@ const COMPOSED_VIEW_PRINTERS = Object.freeze({
   overlay: { print: handlePrintCompareOverlay, pdf: handlePdfCompareOverlay },
   curtain: { print: handlePrintCompareCurtain, pdf: handlePdfCompareCurtain },
 });
+
+/** Read capability at use time, including delayed submits from a stale dialog. */
+function canPrintComposedView(view) {
+  return view === 'overlay' ? isCompareOverlayEnabled() && isCompareOverlayPrintEnabled()
+    : view === 'curtain' && isCompareCurtainEnabled() && isCompareCurtainPrintEnabled();
+}
 
 /**
  * @param {*} error
@@ -515,6 +521,8 @@ export default function usePrintPipeline({
    * @returns {void}
    */
   const dispatchPrintRequest = useCallback((detail, composed = null) => {
+    if (composed && !canPrintComposedView(composed.target.view)) return;
+    if (isComposedCompareDetail(detail) && !composed) return;
     const commonOpts = makePrintOptions(detail);
     const pageNumbers = Array.isArray(commonOpts.pageNumbers) ? commonOpts.pageNumbers : resolvePrintPageNumbers(detail);
     const composedPrinter = composed ? COMPOSED_VIEW_PRINTERS[composed.target.view] : null;
@@ -710,6 +718,10 @@ export default function usePrintPipeline({
    */
   const handlePrintSubmit = useCallback((detail) => {
     const target = composedTargetRef.current;
+    if (target && !canPrintComposedView(target.view)) {
+      closePrintDialog?.();
+      return;
+    }
     const composed = target ? { target, view: target.getView() } : null;
     const submitted = composed
       ? { ...(detail || {}), mode: 'active', activeScope: `compare-${target.view}` }
@@ -737,6 +749,7 @@ export default function usePrintPipeline({
   const openComposedPrintDialog = useCallback((target) => {
     if (!toolbarPrintEnabled || isPdfOutputLocked) return false;
     if (!target || !COMPOSED_VIEW_PRINTERS[target.view] || typeof target.getView !== 'function') return false;
+    if (!canPrintComposedView(target.view)) return false;
     composedTargetRef.current = target;
     setComposedView(target.view);
     openPrintDialog?.();

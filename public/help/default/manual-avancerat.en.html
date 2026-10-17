@@ -141,7 +141,7 @@
 </details>
 
 <h3 id="compare-finetune">Fine-tune zoom, position and rotation</h3>
-<p>In compare mode, each page has a <strong>Fine-tune</strong> bar above it. Collapsed, the bar shows a summary, for example <em>100.0 % · 0.0°</em>. Click it to show the controls for that page:</p>
+<p>Click <strong>Fine tuning</strong> in the toolbar to show controls for the displayed page, or both pages in side-by-side comparison. They start hidden. Clicking again hides the controls and fine-edit gestures, keeping your zoom, position, rotation and image adjustments. The selection stays the same when you change modes. Each page also has a <strong>Fine-tune</strong> disclosure with a summary such as <em>100.0 % · 0.0°</em>:</p>
 <ul>
   <li><strong>Zoom</strong> in percent with one decimal. The − and + buttons change it by 0.1 % (with <kbd>Shift</kbd>: 1 %). The zoom buttons along the top of the page still step by 10 % and keep the fine adjustment.</li>
   <li><strong>Position</strong>: X and Y in pixels. Drag the page with the mouse, or select the move button (four arrows) and use the arrow keys: 1 px per press, 10 px with <kbd>Shift</kbd>.</li>
@@ -171,11 +171,13 @@
   <li><strong>Open</strong>: click <strong>Curtain</strong> in the overlay view's toolbar. In the compare view the curtain button sits next to the overlay button. When the overlay is enabled, open it first to calibrate the pages – until then the curtain button is grey, and its tooltip explains why. If the overlay is disabled for this installation, the curtain uses the compare view's calibration directly.</li>
   <li><strong>Horizontal / Vertical</strong> chooses the direction of the border. Vertical: the border is upright, page A shows on the left and page B on the right. Horizontal: the border is level, page A shows above and page B below. The labels in the corners show which page, with its page number, is where.</li>
   <li><strong>Move the border</strong>: drag the grip on the border with the mouse or a finger. The border is selected when the view opens, so the <kbd>arrow keys</kbd> move it at once: 1 % per press, 10 % with <kbd>Shift</kbd>. Each direction remembers its own position while the view is open.</li>
-  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to where you opened the curtain view: the overlay view or the compare view. The curtain view never changes the calibration.</li>
+  <li><strong>Fine tuning</strong>: both images have controls for zoom, position, rotation and image adjustments. Overlay and curtain always show these controls when opened, regardless of the normal toolbar selection. Edits stay when you close the view; your normal visibility selection stays unchanged.</li>
+  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to where you opened the curtain view: the overlay view or the compare view.</li>
 </ul>
 <p><strong>Print the curtain view:</strong> click <strong>Print</strong> to print one composed page of the visible area with the current horizontal or vertical border position and both pages’ zoom, position and rotation. It uses the same print dialog, options, direct print, <strong>Print via PDF</strong> and <strong>Save PDF</strong>. The result and the print log page count are both one page; the border handle and toolbar are not printed.</p>
 <p class="small"><strong>Installation settings:</strong> <code>compare.overlay.enabled</code> and <code>compare.curtain.enabled</code> control whether each view can be opened; a disabled view has no entry button. <code>compare.overlay.print.enabled</code> and <code>compare.curtain.print.enabled</code> control each view’s <strong>Print</strong> button. All four default to <code>true</code>; <code>odv.site.config.js</code> overrides them. Only the boolean <code>false</code> switches a key off. Ordinary side-by-side comparison and its printing remain available. If the overlay is disabled, the curtain uses the compare view’s calibration directly.</p>
 
+<p class="small">An installation can disable fine tuning, overlay and curtain together with <code>fineTune.enabled: false</code> in <code>odv.site.config.js</code>. Ordinary viewing, side-by-side comparison and their printing remain available. The default is <code>true</code>; only boolean <code>false</code> disables the capability.</p>
 <h2 id="metadata">Document metadata</h2>
 <p>Right-click a thumbnail or the page and choose <strong>Show document metadata</strong>. You see the information the system that opened ODV sent with the document – for example ID, name, department, date, number of pages and document ID. Which fields exist depends on that system. The information is for display only and cannot be changed in ODV.</p>
 <figure class="wide">

@@ -218,7 +218,9 @@ function getODVConfig() {
  * @returns {HTMLCanvasElement|HTMLImageElement|null}
  */
 function resolveActiveNode(documentRenderRef, viewerContainerRef) {
-  const viaHandle = documentRenderRef?.current?.getActiveCanvas?.();
+  const viaHandle = resolvePrintableSurface(documentRenderRef);
+  // A failed fine-geometry export must not silently fall back to untransformed DOM content.
+  if (typeof documentRenderRef?.current?.getPrintableSurface === 'function') return viaHandle || null;
   if (viaHandle) return viaHandle;
 
   const container = viewerContainerRef?.current;
@@ -343,8 +345,8 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
   logger.info('handlePrintCurrentComparison invoked');
 
   const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null, pageContexts = [] } = options;
-  const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
-  const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
+  const primaryNode = resolvePrintableSurface(primaryRenderRef);
+  const compareNode = resolvePrintableSurface(compareRenderRef);
   if (!primaryNode || !compareNode) {
     logger.error('Compare print requested without two active render surfaces');
     return;
@@ -524,6 +526,37 @@ function drawComposedPage(ctx, page, frame, k) {
   ctx.translate(-page.cx, -page.cy);
   ctx.drawImage(page.node, 0, 0, page.width, page.height);
   ctx.restore();
+}
+
+/**
+ * Active page output uses the untransformed page frame as its sheet. Preserve CSS fine geometry
+ * inside that frame (white outside the image, clipping at page edges), at raster resolution.
+ * Quarter turns and image filters are already drawn in the source surface.
+ * @param {HTMLCanvasElement|HTMLImageElement} node
+ * @param {Object} transform
+ * @param {number} zoom
+ * @returns {HTMLCanvasElement|null}
+ */
+export function composePagePrintCanvas(node, transform, zoom) {
+  const page = placeComposedPage(node, transform, Number(zoom) > 0 ? Number(zoom) : 1);
+  if (!page.width || !page.height) return null;
+  const k = Math.min(1, MAX_COMPOSED_PAGE_DIMENSION / Math.max(page.width, page.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(page.width * k));
+  canvas.height = Math.max(1, Math.round(page.height * k));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawComposedPage(ctx, page, { x: 0, y: 0 }, k);
+  return canvas;
+}
+
+/** Active print/export preserves fine geometry; composed views explicitly use raw surfaces. */
+export function resolvePrintableSurface(renderRef) {
+  const handle = renderRef?.current;
+  return typeof handle?.getPrintableSurface === 'function'
+    ? handle.getPrintableSurface() : handle?.getActiveCanvas?.();
 }
 
 /**

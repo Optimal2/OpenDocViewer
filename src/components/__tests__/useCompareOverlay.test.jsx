@@ -285,6 +285,11 @@ describe('useCompareOverlay', () => {
   });
 
   describe('resolveShownCompareViews (render gate)', () => {
+    it('master false refuses both stale views despite explicit child true flags', () => {
+      expect(resolveShownCompareViews({ overlayOpen: true, curtainOpen: true }, {
+        fineTune: { enabled: false }, compare: { overlay: { enabled: true }, curtain: { enabled: true } },
+      })).toEqual({ overlay: false, curtain: false });
+    });
     it('passes the open flags through by default', () => {
       expect(resolveShownCompareViews({ overlayOpen: true, curtainOpen: false }, {})).toEqual({ overlay: true, curtain: false });
       expect(resolveShownCompareViews({ overlayOpen: false, curtainOpen: true }, {})).toEqual({ overlay: false, curtain: true });
@@ -315,5 +320,25 @@ describe('useCompareOverlay', () => {
     expect(probe.hook.compareCurtainOpen).toBe(false);
     expect(probe.hook.compareOverlayOpen).toBe(false);
     await view.unmount();
+  });
+
+  it('master false blocks programmatic opens with calibration and discards both stale flags', async () => {
+    const view = await mount(true);
+    await run(() => probe.hook.openCompareOverlay());
+    await run(() => probe.hook.openCompareCurtain());
+    window.__ODV_CONFIG__ = { fineTune: { enabled: false } };
+    // Open callbacks also check current config before a host-triggered render.
+    await run(() => expect(probe.hook.openCompareOverlay()).toBe(false));
+    await run(() => expect(probe.hook.openCompareCurtain()).toBe(false));
+    await view.rerender(true);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    expect(probe.hook.compareCurtainOpen).toBe(false);
+    expect(probe.context.compareOverlay.calibrated).toBe(true);
+    window.__ODV_CONFIG__ = {};
+    await view.rerender(true);
+    expect(probe.hook.compareOverlayOpen).toBe(false);
+    expect(probe.hook.compareCurtainOpen).toBe(false);
+    await view.unmount();
+    delete window.__ODV_CONFIG__;
   });
 });

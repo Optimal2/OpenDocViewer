@@ -34,6 +34,7 @@ import {
   getRuntimeConfig,
   isCompareCurtainEnabled,
   isCompareOverlayEnabled,
+  isFineTuneEnabled,
 } from '../../utils/runtimeConfig.js';
 import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
 import { isIdentityCompareTransform, selectCompareTransform } from '../../utils/compareTransform.js';
@@ -284,6 +285,8 @@ const DocumentToolbar = ({
   compareCalibrated = false,
   openCompareCurtain,
   compareAdjustPanelsExpanded = undefined,
+  fineTuneVisible = false,
+  onToggleFineTune,
 }) => {
   const { t } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
@@ -1122,6 +1125,23 @@ const DocumentToolbar = ({
 
       <div className="separator" />
 
+      {/* Fine-tuning visibility is shared by ordinary single and two-page viewing. */}
+      {isFineTuneEnabled() && typeof onToggleFineTune === 'function' ? (
+        <button
+          type="button"
+          className="odv-btn fine-tune-toggle"
+          aria-label={t('toolbar.fineTune.label', { defaultValue: 'Fine tuning' })}
+          aria-pressed={fineTuneVisible}
+          aria-expanded={fineTuneVisible}
+          title={fineTuneVisible
+            ? t('toolbar.fineTune.hide', { defaultValue: 'Hide fine tuning; keep page adjustments' })
+            : t('toolbar.fineTune.show', { defaultValue: 'Show fine tuning for zoom, position, rotation and image' })}
+          onClick={onToggleFineTune}
+        >
+          <span className="material-icons" aria-hidden="true">tune</span>
+          <span>{t('toolbar.fineTune.label', { defaultValue: 'Fine tuning' })}</span>
+        </button>
+      ) : null}
       {/* Compare mode */}
       <button
         type="button"
@@ -1382,6 +1402,8 @@ const DocumentToolbar = ({
 };
 
 DocumentToolbar.propTypes = {
+  fineTuneVisible: PropTypes.bool,
+  onToggleFineTune: PropTypes.func,
   runtimeStatusLedState: PropTypes.oneOf(['off', 'pending', 'ready', 'active', 'warning', 'error']),
   runtimeStatusLedTitle: PropTypes.string,
   pageNumber: PropTypes.number.isRequired,

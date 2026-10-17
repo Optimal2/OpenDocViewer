@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 19. Line count: 8020. JSDoc symbol count: 137.
+File count: 19. Line count: 8055. JSDoc symbol count: 138.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -250,6 +250,7 @@ Symbols:
 
 - `module:usePrintPipeline` (module) - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
 - `module:usePrintPipeline~COMPOSED_VIEW_PRINTERS` (constant) - Compare views that print as one composed page, with their print helpers.
+- `module:usePrintPipeline~canPrintComposedView` (function) - Read capability at use time, including delayed submits from a stale dialog.
 - `module:usePrintPipeline~isPdfAbortError` (function) - No description.
 - `module:usePrintPipeline.isComposedCompareDetail` (function) - True for the dialog detail of a compare\-view print \( activeScope compare\-overlay / compare\-curtain \): both compared pages composed onto one page.
 - `module:usePrintPipeline.normalizeToolbarPageNumber` (function) - Clamp a page number to the visible page range.
@@ -259,7 +260,6 @@ Symbols:
 - `module:usePrintPipeline` (function) - The single print pipeline shared by the toolbar and the compare views.
 - `module:usePrintPipeline~usePrintPipeline~toPagesString` (constant) - Build a compact &quot;pages&quot; descriptor for logging.
 - `module:usePrintPipeline~usePrintPipeline~resolvePrintPageCount` (constant) - Estimate the number of pages the user is about to print.
-- `module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts` (constant) - Resolve page metadata objects aligned with the printed page sequence.
 
 ## src/components/DocumentToolbar/usePrintRangeDialog.js
 

@@ -141,7 +141,7 @@
 </details>
 
 <h3 id="jamforelse-finjustera">Finjustera zoom, läge och rotation</h3>
-<p>I jämförelseläget har varje sida en rad <strong>Finjustera</strong> ovanför sig. Stängd visar raden en sammanfattning, till exempel <em>100,0 % · 0,0°</em>. Klicka på den för att visa kontrollerna för sidan:</p>
+<p>Klicka på <strong>Finjustering</strong> i verktygsfältet för att visa kontroller för den visade sidan eller båda sidorna vid jämförelse sida vid sida. Kontrollerna är dolda från början. Klicka igen för att dölja kontroller och finjusteringsgester; zoom, läge, rotation och bildjusteringar behålls. Valet följer med när du byter läge. Varje sida har också en rad <strong>Finjustera</strong> med en sammanfattning, till exempel <em>100,0 % · 0,0°</em>:</p>
 <ul>
   <li><strong>Zoom</strong> i procent med en decimal. Knapparna − och + ändrar 0,1 % (med <kbd>Shift</kbd>: 1 %). Zoomknapparna i sidans överkant stegar fortfarande 10 % och behåller finjusteringen.</li>
   <li><strong>Läge</strong>: X och Y i pixlar. Dra sidan med musen, eller markera flyttknappen (fyra pilar) och använd piltangenterna: 1 px per tryck, 10 px med <kbd>Shift</kbd>.</li>
@@ -171,11 +171,13 @@
   <li><strong>Öppna</strong>: klicka på <strong>Gardin</strong> i överlagringsvyns verktygsfält. I jämförelsevyn finns gardinknappen bredvid överlagringsknappen. När överlagring är aktiverad öppnar du först överlagringsvyn för att kalibrera sidorna – innan dess är gardinknappen grå, och verktygstipset förklarar varför. Om överlagring är avstängd för installationen använder gardinen jämförelsevyns kalibrering direkt.</li>
   <li><strong>Horisontell / Vertikal</strong> väljer gränsens riktning. Vertikal: gränsen är lodrät, sida A syns till vänster och sida B till höger. Horisontell: gränsen är vågrät, sida A syns ovanför och sida B nedanför. Etiketterna i hörnen visar vilken sida, med sidnummer, som ligger var.</li>
   <li><strong>Flytta gränsen</strong>: dra i greppet på gränsen med musen eller med fingret. Gränsen är markerad när vyn öppnas, så <kbd>piltangenterna</kbd> flyttar den direkt: 1 % per tryck, 10 % med <kbd>Shift</kbd>. Varje riktning kommer ihåg sitt eget läge så länge vyn är öppen.</li>
-  <li><strong>Stäng</strong> – eller <kbd>Esc</kbd> – tar dig tillbaka dit du öppnade gardinvyn: överlagringsvyn eller jämförelsevyn. Gardinvyn ändrar aldrig kalibreringen.</li>
+  <li><strong>Finjustering</strong>: båda bilderna har kontroller för zoom, läge, rotation och bildjusteringar. Överlagrings- och gardinvyn visar alltid kontrollerna när de öppnas, oberoende av valet i det vanliga verktygsfältet. Justeringarna finns kvar när du stänger vyn; ditt vanliga synlighetsval ändras inte.</li>
+  <li><strong>Stäng</strong> – eller <kbd>Esc</kbd> – tar dig tillbaka dit du öppnade gardinvyn: överlagringsvyn eller jämförelsevyn.</li>
 </ul>
 <p><strong>Skriv ut gardinvyn:</strong> klicka på <strong>Skriv ut</strong> för att skriva ut en sammansatt sida av den synliga ytan med den horisontella eller vertikala gränsens aktuella läge samt båda sidornas zoom, läge och rotation. Samma utskriftsdialog, alternativ, direktutskrift, <strong>Skriv ut via PDF</strong> och <strong>Spara PDF</strong> används. Resultatet och utskriftsloggens sidantal är båda en sida; gränsens handtag och verktygsfältet skrivs inte ut.</p>
 <p class="small"><strong>Installationsinställningar:</strong> <code>compare.overlay.enabled</code> och <code>compare.curtain.enabled</code> styr om respektive vy kan öppnas; en avstängd vy har ingen öppningsknapp. <code>compare.overlay.print.enabled</code> och <code>compare.curtain.print.enabled</code> styr respektive vys knapp <strong>Skriv ut</strong>. Alla fyra har standardvärdet <code>true</code>; <code>odv.site.config.js</code> skriver över dem. Endast det booleska värdet <code>false</code> stänger av en inställning. Vanlig jämförelse sida vid sida och dess utskrift finns kvar. Om överlagring är avstängd använder gardinen jämförelsevyns kalibrering direkt.</p>
 
+<p class="small">Installationen kan stänga av finjustering, överlagring och gardin tillsammans med <code>fineTune.enabled: false</code> i <code>odv.site.config.js</code>. Vanlig visning, jämförelse sida vid sida och deras utskrift finns kvar. Standardvärdet är <code>true</code>; endast booleskt <code>false</code> stänger av funktionen.</p>
 <h2 id="metadata">Dokumentets metadata</h2>
 <p>Högerklicka på en miniatyr eller på sidan och välj <strong>Visa metadata</strong>. Du ser de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel id, namn, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns beror på det systemet. Uppgifterna är bara för visning och kan inte ändras i ODV.</p>
 <figure class="wide">

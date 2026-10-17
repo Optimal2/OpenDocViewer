@@ -339,6 +339,34 @@ the deployed `odv.config.js`, rename it to `odv.site.config.js`, and review its 
 The sample already contains the all-off block above. Reload the viewer after changing the file.
 See [Printing design notes](printing.md) for the composed-page output and shared print options.
 
+### Fine-tuning capability and visibility
+
+`fineTune.enabled` is the canonical master switch for fine tuning in both ordinary single-page and
+side-by-side views, plus the calibration-dependent overlay and curtain views. It defaults to `true`.
+Only a real boolean `false` disables it; missing, null, strings, numbers and objects use the default.
+Set it in the existing site configuration object; normal deep-merge precedence applies:
+
+```js
+fineTune: { enabled: false },
+```
+
+With capability disabled, the toggle, panels and fine-edit gestures are unavailable. Overlay and
+curtain are blocked at availability, open, render and print boundaries, even with individual child
+flags enabled or stored calibration/open flags. Ordinary viewing, simple side-by-side comparison
+and normal printing remain available. Child view/print flags continue to restrict each surface
+independently when the master capability is enabled.
+
+This switch is distinct from the session's **Fine tuning** toolbar selection. Ordinary panels start
+hidden; the selection survives mode changes and hides only controls/gestures, preserving edits.
+Overlay and curtain always open their own per-image controls expanded and never write their
+visibility into the ordinary viewer selection. `compare.adjust.toolbarMode` only mirrors/hides
+coarse image controls in compare mode; it is neither a capability nor a visibility preference.
+
+Configuration loads before React mounts; installations apply changes by reloading the viewer.
+There is no live configuration subscription. If a host replaces configuration and causes a render,
+advanced views are blocked and their stale open flags discarded. Opens and print submits read the
+current configuration again, including delayed print dispatches.
+
 ### Toolbar image controls in compare mode
 
 In compare mode each compared page has one adjustment panel (zoom, position, rotation,

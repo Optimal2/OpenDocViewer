@@ -7,6 +7,11 @@
     "next": "Nästa"
   },
   "toolbar": {
+    "fineTune": {
+      "label": "Finjustering",
+      "show": "Visa finjustering av zoom, läge, rotation och bild",
+      "hide": "Dölj finjustering; behåll sidornas justeringar"
+    },
     "print": "Skriv ut",
     "zoomIn": "Zooma in",
     "zoomOut": "Zooma ut",
