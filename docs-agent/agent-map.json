@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60286,
+    "sourceLineCount": 60285,
     "docletCount": 1644,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
@@ -1102,7 +1102,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 19,
-      "lineCount": 8055,
+      "lineCount": 8054,
       "docletCount": 138,
       "importantFiles": [
         {
@@ -1135,7 +1135,7 @@
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
           "score": 49,
-          "lines": 1552,
+          "lines": 1551,
           "incomingLocalImports": 1,
           "doclets": 18,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11338,7 +11338,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 1552,
+      "lines": 1551,
       "extension": ".jsx",
       "jsdocBlockCount": 25,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11563,7 +11563,7 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 1551
+          "line": 1550
         }
       ],
       "declarations": [

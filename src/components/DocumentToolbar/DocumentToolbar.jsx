@@ -1139,7 +1139,6 @@ const DocumentToolbar = ({
           onClick={onToggleFineTune}
         >
           <span className="material-icons" aria-hidden="true">tune</span>
-          <span>{t('toolbar.fineTune.label', { defaultValue: 'Fine tuning' })}</span>
         </button>
       ) : null}
       {/* Compare mode */}

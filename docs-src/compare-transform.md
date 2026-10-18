@@ -3,6 +3,8 @@
 The ordinary viewer starts with fine tuning hidden. The localized **Fine tuning** toolbar button
 toggles controls for the displayed page or both side-by-side pages. Its pressed/expanded state
 reflects visibility, and the session choice survives entering/leaving compare and fullscreen views.
+The button uses the toolbar's square icon-button layout in both densities; its accessible name and
+state-specific tooltip remain localized.
 Hiding controls disables fine drag and Ctrl/Cmd-wheel editing without changing any geometry or
 image adjustment. Per-page disclosure buttons can additionally collapse individual panels.
 
