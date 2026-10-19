@@ -3,7 +3,7 @@
   "node": "22.23.3",
   "agentDocMap": {
     "repository": "Optimal2/AgentDocMap",
-    "revision": "f17676c9656b7a721cb9ba74a14a91197de35fb0"
+    "revision": "2d1a1fef482df40d95afbb9870c7e9809db32362"
   },
   "collation": {
     "locale": "en-US",
