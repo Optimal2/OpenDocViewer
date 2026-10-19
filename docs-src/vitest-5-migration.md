@@ -240,11 +240,9 @@ side and is not reworded.
   separately and a worker-start death can leave the suite reporting
   `Tests` complete while the exit code is non-zero. See the comment
   block above `test:` in `vite.config.js` for the documented instance.
-- A Swedish operator action list with Bitdefender-exclusion paths, the
+- An operator action list with antivirus-exclusion paths, the
   load-threshold measurement, and a list of what could NOT be verified
-  lives in the private vault at
-  `AI-Vaults\Projects\OMP-ODV\60-Reports\odv-vitest-workerstart-hubben-operatorsatgarder.md`
-  (not in this repository).
+  is kept in the maintainers' private notes (not in this repository).
 
 ## Validation and rollback
 
