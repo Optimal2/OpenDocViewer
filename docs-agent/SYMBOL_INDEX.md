@@ -143,32 +143,32 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx:30</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:21</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:38</code> |  |
-| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:493</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
-| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:516</code> |  |
-| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:237</code> |  |
-| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:225</code> |  |
+| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:494</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
+| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:517</code> |  |
+| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:238</code> |  |
+| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:226</code> |  |
 | <code>DisplayedAsset</code> | typedef | <code>src/components/DocumentRender.jsx:90</code> |  |
 | <code>DocumentRender</code> | constant | <code>src/components/DocumentRender.jsx:117</code> |  |
-| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:406</code> |  |
-| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:738</code> |  |
-| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:480</code> |  |
-| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:461</code> |  |
-| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:470</code> |  |
-| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:448</code> | Returns the surface whose intrinsic size should drive fit calculations. |
+| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:407</code> |  |
+| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:739</code> |  |
+| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:481</code> |  |
+| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:462</code> |  |
+| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:471</code> |  |
+| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:449</code> | Returns the surface whose intrinsic size should drive fit calculations. |
 | <code>getCurrentPage</code> | function | <code>src/components/DocumentRender.jsx:58</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:942</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:875</code> |  |
-| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:539</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:970</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:818</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:943</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:876</code> |  |
+| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:540</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:971</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:819</code> |  |
 | <code>hasUsableSize</code> | function | <code>src/components/DocumentRender.jsx:78</code> |  |
 | <code>isBlobAssetUrl</code> | function | <code>src/components/DocumentRender.jsx:86</code> |  |
-| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:163</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
+| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:164</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
 | <code>NOOP</code> | function | <code>src/components/DocumentRender.jsx:51</code> | Shared default for the optional callbacks. |
 | <code>normalizeSize</code> | function | <code>src/components/DocumentRender.jsx:67</code> |  |
-| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:901</code> |  |
-| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:218</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
-| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:277</code> |  |
+| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:902</code> |  |
+| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:219</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
+| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:278</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentSelectionPanel.jsx:89</code> |  |
 | <code>SelectionCheckboxRow</code> | function | <code>src/components/DocumentSelectionPanel.jsx:30</code> |  |
 | <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:161</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
@@ -548,9 +548,9 @@
 | <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
 | <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:115</code> | ThemeProvider component to manage and provide theme-related state and functions. |
 | <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:191</code> | Toggle between the two highest-contrast explicit themes. |
-| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:228</code> |  |
-| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:218</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:235</code> |  |
+| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:233</code> |  |
+| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:223</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:240</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -1230,43 +1230,45 @@
 | <code>escapeMetaName</code> | function | <code>src/utils/performanceOverlayFlag.js:14</code> |  |
 | <code>isPerformanceOverlayEnabled</code> | function | <code>src/utils/performanceOverlayFlag.js:72</code> | Determine whether the diagnostics/performance overlay is enabled. |
 | <code>readRuntimeBooleanFlag</code> | function | <code>src/utils/performanceOverlayFlag.js:34</code> | Resolve a boolean flag from \(precedence order\): window. |
-| <code>beginComposedPage</code> | function | <code>src/utils/printCore.js:573</code> | Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint a white sheet. |
-| <code>collectAllPrintableDataUrlsFromDom</code> | function | <code>src/utils/printCore.js:746</code> | Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list. |
-| <code>CompareCurtainPrintView</code> | typedef | <code>src/utils/printCore.js:404</code> | View state of the curtain view needed to print it \(utils/compareCurtain.js\). |
-| <code>CompareOverlayPrintView</code> | typedef | <code>src/utils/printCore.js:394</code> | View state of the overlay view needed to print it \(utils/compareOverlay.js\). |
-| <code>composeCompareCurtainCanvas</code> | function | <code>src/utils/printCore.js:625</code> | Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border \(below a horizontal border, right of a vertical one\), each page with its own compa... |
-| <code>composeCompareOverlayCanvas</code> | function | <code>src/utils/printCore.js:602</code> | Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view&#39;s opacity, each page with its own compare transform. |
-| <code>ComposedPagePlacement</code> | typedef | <code>src/utils/printCore.js:414</code> | One page placed in the shared page-pixel space of a composed compare page. |
-| <code>composePagePrintCanvas</code> | function | <code>src/utils/printCore.js:542</code> | Active page output uses the untransformed page frame as its sheet. |
+| <code>beginComposedPage</code> | function | <code>src/utils/printCore.js:614</code> | Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint a white sheet. |
+| <code>collectAllPrintableDataUrlsFromDom</code> | function | <code>src/utils/printCore.js:787</code> | Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list. |
+| <code>CompareCurtainPrintView</code> | typedef | <code>src/utils/printCore.js:445</code> | View state of the curtain view needed to print it \(utils/compareCurtain.js\). |
+| <code>CompareOverlayPrintView</code> | typedef | <code>src/utils/printCore.js:435</code> | View state of the overlay view needed to print it \(utils/compareOverlay.js\). |
+| <code>composeCompareCurtainCanvas</code> | function | <code>src/utils/printCore.js:666</code> | Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border \(below a horizontal border, right of a vertical one\), each page with its own compa... |
+| <code>composeCompareOverlayCanvas</code> | function | <code>src/utils/printCore.js:643</code> | Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view&#39;s opacity, each page with its own compare transform. |
+| <code>ComposedPagePlacement</code> | typedef | <code>src/utils/printCore.js:455</code> | One page placed in the shared page-pixel space of a composed compare page. |
+| <code>composePagePrintCanvas</code> | function | <code>src/utils/printCore.js:583</code> | Active page output uses the untransformed page frame as its sheet. |
 | <code>createHiddenIframe</code> | function | <code>src/utils/printCore.js:241</code> | Create the temporary hidden iframe used as the print document host. |
-| <code>drawComposedPage</code> | function | <code>src/utils/printCore.js:520</code> | Draw one placed page onto the composed canvas. |
+| <code>drawComposedPage</code> | function | <code>src/utils/printCore.js:561</code> | Draw one placed page onto the composed canvas. |
 | <code>getODVConfig</code> | function | <code>src/utils/printCore.js:197</code> | Read runtime configuration from the globals populated by public/odv.config.js . |
 | <code>getPrintableDataUrl</code> | function | <code>src/utils/printCore.js:148</code> | Safely derive a printable data URL from an element that is either a or an . |
 | <code>handlePrint</code> | function | <code>src/utils/printCore.js:277</code> | Handles the print functionality for the CURRENT page/image. |
-| <code>handlePrintAll</code> | function | <code>src/utils/printCore.js:819</code> | Print all available pages in viewer order. |
-| <code>handlePrintCompareCurtain</code> | function | <code>src/utils/printCore.js:733</code> | Print the curtain view as ONE page: page A with page B clipped at the current border, each page with its own compare transform. |
-| <code>handlePrintCompareOverlay</code> | function | <code>src/utils/printCore.js:717</code> | Print the overlay view as ONE page: page B over page A \(or the other way round after a swap\) at the current opacity, each page with its own compare transform. |
-| <code>handlePrintCurrentComparison</code> | function | <code>src/utils/printCore.js:346</code> | Print both currently visible compare panes as a two-page print job. |
-| <code>handlePrintRange</code> | function | <code>src/utils/printCore.js:965</code> | Print an inclusive page range. |
-| <code>handlePrintSequence</code> | function | <code>src/utils/printCore.js:893</code> | Print an explicit page sequence such as 3,1,2 . |
+| <code>handlePrintAll</code> | function | <code>src/utils/printCore.js:893</code> | Print all available pages in viewer order. |
+| <code>handlePrintCompareCurtain</code> | function | <code>src/utils/printCore.js:774</code> | Print the curtain view as ONE page: page A with page B clipped at the current border, each page with its own compare transform. |
+| <code>handlePrintCompareOverlay</code> | function | <code>src/utils/printCore.js:758</code> | Print the overlay view as ONE page: page B over page A \(or the other way round after a swap\) at the current opacity, each page with its own compare transform. |
+| <code>handlePrintCurrentComparison</code> | function | <code>src/utils/printCore.js:362</code> | Print both currently visible compare panes as a two-page print job. |
+| <code>handlePrintRange</code> | function | <code>src/utils/printCore.js:1055</code> | Print an inclusive page range. |
+| <code>handlePrintSequence</code> | function | <code>src/utils/printCore.js:975</code> | Print an explicit page sequence such as 3,1,2 . |
 | <code>HiddenIframe</code> | typedef | <code>src/utils/printCore.js:92</code> | Return type for the hidden-iframe factory. |
+| <code>isLeasableSurfaceUrl</code> | function | <code>src/utils/printCore.js:806</code> | Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease \(releasing them is a no-op\). |
 | <code>isVisiblyMeasurable</code> | function | <code>src/utils/printCore.js:106</code> | Check whether a candidate element is both present in layout and not hidden by basic CSS visibility. |
+| <code>leaseSurfaceBlobUrl</code> | function | <code>src/utils/printCore.js:819</code> | Lease a live surface blob URL for the duration of a print flow so a supersession \(resolution boost, force-refresh\) cannot revoke it mid-print. |
 | <code>PageRange</code> | typedef | <code>src/utils/printCore.js:53</code> | A 1-based inclusive page range. |
 | <code>pickLargestVisibleElement</code> | function | <code>src/utils/printCore.js:123</code> | Best-effort: pick the largest visible or inside a container \(or document\). |
-| <code>placeComposedPage</code> | function | <code>src/utils/printCore.js:451</code> | Placement of one page in the shared page-pixel space. |
-| <code>placedPageBounds</code> | function | <code>src/utils/printCore.js:471</code> |  |
+| <code>placeComposedPage</code> | function | <code>src/utils/printCore.js:492</code> | Placement of one page in the shared page-pixel space. |
+| <code>placedPageBounds</code> | function | <code>src/utils/printCore.js:512</code> |  |
 | <code>PrintAllOptions</code> | typedef | <code>src/utils/printCore.js:60</code> | Options for printing multiple pages \(all/range/sequence\). |
 | <code>PrintCandidate</code> | typedef | <code>src/utils/printCore.js:73</code> | Internal: candidate node for &amp;quot;largest visible&amp;quot; heuristics. |
-| <code>printComposedComparison</code> | function | <code>src/utils/printCore.js:660</code> | Shared body of the overlay and curtain print \(after their invoked log line\): one composed page through the single-page print document, with the same config and base token context... |
+| <code>printComposedComparison</code> | function | <code>src/utils/printCore.js:701</code> | Shared body of the overlay and curtain print \(after their invoked log line\): one composed page through the single-page print document, with the same config and base token context... |
 | <code>PrintHeaderCfg</code> | typedef | <code>src/utils/printCore.js:80</code> | Print header config \(runtime\) consumed by the print overlay logic. |
 | <code>PrintOptions</code> | typedef | <code>src/utils/printCore.js:40</code> | Options for single-page printing. |
-| <code>releasePrintableDataUrls</code> | function | <code>src/utils/printCore.js:767</code> | Release print URL leases held through the document renderer. |
+| <code>releasePrintableDataUrls</code> | function | <code>src/utils/printCore.js:841</code> | Release print URL leases held through the document renderer. |
 | <code>resolveActiveNode</code> | function | <code>src/utils/printCore.js:220</code> | Attempt to resolve the currently active visual node to print. |
-| <code>resolveAllPageDataUrls</code> | function | <code>src/utils/printCore.js:785</code> | Resolve all printable page URLs, preferring the renderer&#39;s imperative API and falling back to DOM inspection. |
-| <code>resolveComposeFrame</code> | function | <code>src/utils/printCore.js:494</code> | The area of the composed page in page pixels: the visible stage when its size is known \(both pages share the stage&#39;s top-left as origin\), otherwise the union of both transformed p... |
+| <code>resolveAllPageDataUrls</code> | function | <code>src/utils/printCore.js:859</code> | Resolve all printable page URLs, preferring the renderer&#39;s imperative API and falling back to DOM inspection. |
+| <code>resolveComposeFrame</code> | function | <code>src/utils/printCore.js:535</code> | The area of the composed page in page pixels: the visible stage when its size is known \(both pages share the stage&#39;s top-left as origin\), otherwise the union of both transformed p... |
 | <code>resolveOrientation</code> | function | <code>src/utils/printCore.js:183</code> | Compute page orientation from dimensions when options.orientation === &#39;auto&#39;. |
-| <code>resolvePrintableSurface</code> | function | <code>src/utils/printCore.js:558</code> | Active print/export preserves fine geometry; composed views explicitly use raw surfaces. |
-| <code>surfaceSize</code> | function | <code>src/utils/printCore.js:433</code> | Intrinsic pixel size of a rendered page surface \(the canvas already carries the quarter turn\). |
+| <code>resolvePrintableSurface</code> | function | <code>src/utils/printCore.js:599</code> | Active print/export preserves fine geometry; composed views explicitly use raw surfaces. |
+| <code>surfaceSize</code> | function | <code>src/utils/printCore.js:474</code> | Intrinsic pixel size of a rendered page surface \(the canvas already carries the quarter turn\). |
 | <code>buildOverlayElement</code> | function | <code>src/utils/printDom.js:227</code> | Build a header/footer DIV element for a page using config + tokens. |
 | <code>buildPrintCss</code> | function | <code>src/utils/printDom.js:134</code> | Build the print-only CSS string \(inlined within the print iframe\). |
 | <code>buildPrintFormatElements</code> | function | <code>src/utils/printDom.js:275</code> | Build configured print-format header/watermark elements for a page. |
@@ -1294,17 +1296,17 @@
 | <code>appendRichLineBreak</code> | function | <code>src/utils/printPdf.js:553</code> |  |
 | <code>appendRichText</code> | function | <code>src/utils/printPdf.js:563</code> |  |
 | <code>asNumber</code> | function | <code>src/utils/printPdf.js:217</code> | Convert a value to a finite number for PDF layout calculations. |
-| <code>blobToDataUrl</code> | function | <code>src/utils/printPdf.js:2286</code> |  |
+| <code>blobToDataUrl</code> | function | <code>src/utils/printPdf.js:2324</code> |  |
 | <code>buildPdfPagePlans</code> | function | <code>src/utils/printPdf.js:1560</code> |  |
 | <code>calculateOverlayReserve</code> | function | <code>src/utils/printPdf.js:1605</code> |  |
-| <code>canvasToBlob</code> | function | <code>src/utils/printPdf.js:2271</code> |  |
-| <code>canvasToPngDataUrl</code> | function | <code>src/utils/printPdf.js:2257</code> | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
+| <code>canvasToBlob</code> | function | <code>src/utils/printPdf.js:2309</code> |  |
+| <code>canvasToPngDataUrl</code> | function | <code>src/utils/printPdf.js:2295</code> | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
 | <code>clamp01</code> | function | <code>src/utils/printPdf.js:242</code> | Clamp a numeric value to the inclusive 0..1 range. |
-| <code>collectPrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2159</code> | Collect printable page image URLs without creating or opening a PDF. |
+| <code>collectPrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2193</code> | Collect printable page image URLs without creating or opening a PDF. |
 | <code>createAbortError</code> | function | <code>src/utils/printPdf.js:249</code> |  |
 | <code>createDefaultSegment</code> | function | <code>src/utils/printPdf.js:1144</code> |  |
 | <code>createJsPdfOptions</code> | function | <code>src/utils/printPdf.js:1041</code> |  |
-| <code>createPdfFromDocumentHandle</code> | function | <code>src/utils/printPdf.js:2195</code> |  |
+| <code>createPdfFromDocumentHandle</code> | function | <code>src/utils/printPdf.js:2229</code> |  |
 | <code>createPrintPdfBlob</code> | function | <code>src/utils/printPdf.js:1663</code> | Build a PDF blob from page image URLs and print metadata. |
 | <code>createPrintPdfBlobInWorker</code> | function | <code>src/utils/printPdf.js:1581</code> |  |
 | <code>describeImageSource</code> | function | <code>src/utils/printPdf.js:797</code> |  |
@@ -1325,12 +1327,12 @@
 | <code>getElementStyleHints</code> | function | <code>src/utils/printPdf.js:420</code> |  |
 | <code>getImageDimension</code> | function | <code>src/utils/printPdf.js:941</code> |  |
 | <code>getRichLineColumns</code> | function | <code>src/utils/printPdf.js:1074</code> |  |
-| <code>getSelectedPrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2091</code> | Read printable page image URLs from the document renderer. |
-| <code>handlePdfCompareCurtain</code> | function | <code>src/utils/printPdf.js:2405</code> | Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform. |
-| <code>handlePdfCompareOverlay</code> | function | <code>src/utils/printPdf.js:2391</code> | Generate/print/download a ONE-page PDF of the overlay view: page B over page A \(or swapped\) at the current opacity, each page with its own compare transform. |
-| <code>handlePdfCurrent</code> | function | <code>src/utils/printPdf.js:2307</code> | Generate/print/download a PDF from the currently rendered active page surface. |
-| <code>handlePdfCurrentComparison</code> | function | <code>src/utils/printPdf.js:2330</code> | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
-| <code>handlePdfOutput</code> | function | <code>src/utils/printPdf.js:2210</code> |  |
+| <code>getSelectedPrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2125</code> | Read printable page image URLs from the document renderer. |
+| <code>handlePdfCompareCurtain</code> | function | <code>src/utils/printPdf.js:2461</code> | Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform. |
+| <code>handlePdfCompareOverlay</code> | function | <code>src/utils/printPdf.js:2447</code> | Generate/print/download a ONE-page PDF of the overlay view: page B over page A \(or swapped\) at the current opacity, each page with its own compare transform. |
+| <code>handlePdfCurrent</code> | function | <code>src/utils/printPdf.js:2345</code> | Generate/print/download a PDF from the currently rendered active page surface. |
+| <code>handlePdfCurrentComparison</code> | function | <code>src/utils/printPdf.js:2375</code> | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
+| <code>handlePdfOutput</code> | function | <code>src/utils/printPdf.js:2247</code> |  |
 | <code>htmlToRichLines</code> | function | <code>src/utils/printPdf.js:636</code> | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
 | <code>imageExtensionFromUrl</code> | function | <code>src/utils/printPdf.js:894</code> |  |
 | <code>imageFormatAttempts</code> | function | <code>src/utils/printPdf.js:952</code> |  |
@@ -1338,7 +1340,9 @@
 | <code>inferImageFormat</code> | function | <code>src/utils/printPdf.js:879</code> |  |
 | <code>isBlockNode</code> | function | <code>src/utils/printPdf.js:436</code> | Check whether an HTML node name should be treated as block-level in PDF text flow. |
 | <code>isBoldFontWeight</code> | function | <code>src/utils/printPdf.js:293</code> | Check whether a CSS font-weight value should be treated as bold text. |
+| <code>isLeasableSurfaceUrl</code> | function | <code>src/utils/printPdf.js:2069</code> | Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease \(releasing them is a no-op\). |
 | <code>layoutRichColumns</code> | function | <code>src/utils/printPdf.js:1229</code> |  |
+| <code>leaseSurfaceBlobUrls</code> | function | <code>src/utils/printPdf.js:2083</code> | Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow. |
 | <code>loadImage</code> | function | <code>src/utils/printPdf.js:747</code> |  |
 | <code>loadImagesConcurrently</code> | function | <code>src/utils/printPdf.js:838</code> |  |
 | <code>loadJsPdf</code> | function | <code>src/utils/printPdf.js:1643</code> | Dynamically load the jsPDF constructor used by generated PDF output. |
@@ -1350,21 +1354,21 @@
 | <code>normalizeRichLine</code> | function | <code>src/utils/printPdf.js:1098</code> |  |
 | <code>normalizeRichSegments</code> | function | <code>src/utils/printPdf.js:1057</code> |  |
 | <code>pageFormatForImage</code> | function | <code>src/utils/printPdf.js:1029</code> |  |
-| <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2182</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
+| <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2216</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
 | <code>parseTemplateCssClassSelector</code> | function | <code>src/utils/printPdf.js:335</code> | Parse a supported class-only selector into descendant selector parts. |
 | <code>parseTemplateCssStyleRules</code> | function | <code>src/utils/printPdf.js:398</code> | Parse only the small CSS subset used by trusted print header/footer templates. |
 | <code>parseTextStyleDeclarations</code> | function | <code>src/utils/printPdf.js:305</code> |  |
-| <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2360</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
+| <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2416</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
 | <code>PdfPrintOptions</code> | typedef | <code>src/utils/printPdf.js:157</code> |  |
 | <code>PdfRichColumn</code> | typedef | <code>src/utils/printPdf.js:200</code> |  |
 | <code>PdfRichLine</code> | typedef | <code>src/utils/printPdf.js:208</code> |  |
 | <code>PdfRichSegment</code> | typedef | <code>src/utils/printPdf.js:192</code> |  |
 | <code>PdfTemplateCssStyleRule</code> | typedef | <code>src/utils/printPdf.js:186</code> |  |
 | <code>PdfTextStyleHints</code> | typedef | <code>src/utils/printPdf.js:176</code> |  |
-| <code>printableSourceFromElement</code> | function | <code>src/utils/printPdf.js:2230</code> | Extract a safe printable image source from an already-rendered canvas or image element. |
+| <code>printableSourceFromElement</code> | function | <code>src/utils/printPdf.js:2268</code> | Extract a safe printable image source from an already-rendered canvas or image element. |
 | <code>printPdfBlob</code> | function | <code>src/utils/printPdf.js:1835</code> | Print a generated PDF through a hidden iframe. |
-| <code>releasePrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2071</code> | Release print URL leases held through the document renderer. |
-| <code>releasePrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2171</code> | Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them \(prebuild/benchmark keep the URLs only while rendering\). |
+| <code>releasePrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2105</code> | Release print URL leases held through the document renderer. |
+| <code>releasePrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2205</code> | Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them \(prebuild/benchmark keep the URLs only while rendering\). |
 | <code>renderOverlayRichLines</code> | function | <code>src/utils/printPdf.js:731</code> |  |
 | <code>reportProgress</code> | function | <code>src/utils/printPdf.js:1511</code> |  |
 | <code>resolveJsPdfConstructor</code> | function | <code>src/utils/printPdf.js:1617</code> | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |

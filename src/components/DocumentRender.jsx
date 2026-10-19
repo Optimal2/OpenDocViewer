@@ -142,6 +142,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     unpinPageAsset,
     getPrintablePageUrls,
     releasePrintablePageUrls,
+    leasePrintablePageUrl,
     documentLoadingConfig,
   } = useContext(ViewerContext);
 
@@ -1053,6 +1054,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     releasePrintableDataUrls(urls) {
       if (typeof releasePrintablePageUrls === 'function') releasePrintablePageUrls(urls);
     },
+    leasePrintablePageUrl(url) {
+      if (typeof leasePrintablePageUrl === 'function') leasePrintablePageUrl(url);
+    },
     // Backward-compatible alias for older print callers; prefer getAllPrintableDataUrls().
     // Same lease contract: the caller must call releasePrintableDataUrls(urls) when done.
     async exportAllPagesAsDataUrls(pageIndexes) {
@@ -1065,6 +1069,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     fitToWidth,
     getPrintablePageUrls,
     releasePrintablePageUrls,
+    leasePrintablePageUrl,
     isCanvasEnabled,
     onRender,
     pageTransform,

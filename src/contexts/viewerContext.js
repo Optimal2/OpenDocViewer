@@ -190,6 +190,11 @@ import { createContext } from 'react';
  * @property {function((Array.<string>|string)): void} releasePrintablePageUrls
  *   Release URLs previously acquired through getPrintablePageUrls when the print flow ends
  *   (completed or cancelled), so superseded page URLs can be revoked without leaking.
+ * @property {function(string): void} leasePrintablePageUrl
+ *   Lease one live surface blob URL (for example the <img> source a
+ *   surface-capture print or PDF export is consuming) so a supersession cannot
+ *   revoke it mid-flow. Every leased URL must be passed to
+ *   releasePrintablePageUrls when the flow ends.
  * @property {(string|null)} error
  * @property {function((string|null)): void} setError
  * @property {number} workerCount

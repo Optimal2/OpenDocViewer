@@ -2060,6 +2060,40 @@ function warnDeprecatedPrintableUrlExportAlias(handle) {
 }
 
 /**
+ * Only blob URLs can be revoked mid-print by the provider; data: and remote URLs
+ * need no lease (releasing them is a no-op).
+ *
+ * @param {*} url
+ * @returns {boolean}
+ */
+function isLeasableSurfaceUrl(url) {
+  return typeof url === 'string' && /^blob:/i.test(url);
+}
+
+/**
+ * Lease the live blob URL behind an already-rendered <img> surface for the
+ * duration of a PDF flow. Canvas surfaces snapshot to a data URL and need no
+ * lease. Foreign handles without a lease function are ignored.
+ *
+ * @param {{ current: * }} documentRenderRef
+ * @param {*} node The rendered surface the URL was extracted from.
+ * @param {string|null} url The extracted printable source URL.
+ * @returns {Array<string>} The leased URLs (empty when nothing needed leasing).
+ */
+function leaseSurfaceBlobUrls(documentRenderRef, node, url) {
+  if (String(node?.tagName || '').toLowerCase() !== 'img' || !isLeasableSurfaceUrl(url)) return [];
+  try {
+    const lease = documentRenderRef?.current?.leasePrintablePageUrl;
+    if (typeof lease !== 'function') return [];
+    lease.call(documentRenderRef.current, url);
+    return [url];
+  } catch (error) {
+    logger.warn('leasePrintablePageUrl() failed', { error: String(error?.message || error) });
+    return [];
+  }
+}
+
+/**
  * Release print URL leases held through the document renderer. The provider revokes a
  * released URL once no live page state references it; DOM-derived URLs and foreign
  * handles without a release function are ignored.
@@ -2197,7 +2231,10 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
   try {
     return await createPrintPdfBlob(selected, options);
   } finally {
-    releasePrintableDataUrls(documentRenderRef, selected);
+    // Release per lease, not per occurrence: a duplicated page selection against
+    // a legacy zero-arg handle leases each URL once, so duplicates must not
+    // release twice (that would steal a concurrent flow's lease).
+    releasePrintableDataUrls(documentRenderRef, [...new Set(selected)]);
   }
 }
 
@@ -2217,7 +2254,8 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
     if (options.deferOutput === true) return blob;
     await executeOutputAction(blob, options, selectedCount);
   } finally {
-    releasePrintableDataUrls(documentRenderRef, selected);
+    // Release per lease, not per occurrence (see createPdfFromDocumentHandle).
+    releasePrintableDataUrls(documentRenderRef, [...new Set(selected)]);
   }
 }
 
@@ -2314,10 +2352,17 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   if (!src) {
     throw new Error(`Unable to generate PDF from the active surface: active ${String(node?.tagName || 'element').toLowerCase()} could not be converted to a safe printable source. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
-  const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
-  throwIfAborted(options.signal);
-  if (options.deferOutput === true) return blob;
-  await executeOutputAction(blob, options, 1);
+  // Pin the live surface URL for the PDF flow; released on completion, cancel
+  // and failure alike.
+  const leasedUrls = leaseSurfaceBlobUrls(documentRenderRef, node, src);
+  try {
+    const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
+    throwIfAborted(options.signal);
+    if (options.deferOutput === true) return blob;
+    await executeOutputAction(blob, options, 1);
+  } finally {
+    releasePrintableDataUrls(documentRenderRef, leasedUrls);
+  }
 }
 
 /**
@@ -2329,9 +2374,11 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
  */
 export async function handlePdfCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   throwIfAborted(options.signal);
+  const primaryNode = resolvePrintableSurface(primaryRenderRef);
+  const compareNode = resolvePrintableSurface(compareRenderRef);
   const [primary, compare] = await Promise.all([
-    printableSourceFromElement(resolvePrintableSurface(primaryRenderRef)),
-    printableSourceFromElement(resolvePrintableSurface(compareRenderRef)),
+    printableSourceFromElement(primaryNode),
+    printableSourceFromElement(compareNode),
   ]);
   const urls = [primary, compare].filter(Boolean);
   if (urls.length !== 2) {
@@ -2340,10 +2387,19 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
     if (!compare) missing.push('compare');
     throw new Error(`Both comparison surfaces are required for generated PDF output. Missing surface(s): ${missing.join(', ')}.`);
   }
-  const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: selectPageContexts(options.pageContexts, urls.length) });
-  throwIfAborted(options.signal);
-  if (options.deferOutput === true) return blob;
-  await executeOutputAction(blob, options, urls.length);
+  // Pin each live pane URL through its own handle; released on completion,
+  // cancel and failure alike.
+  const leasedPrimaryUrls = leaseSurfaceBlobUrls(primaryRenderRef, primaryNode, primary);
+  const leasedCompareUrls = leaseSurfaceBlobUrls(compareRenderRef, compareNode, compare);
+  try {
+    const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: selectPageContexts(options.pageContexts, urls.length) });
+    throwIfAborted(options.signal);
+    if (options.deferOutput === true) return blob;
+    await executeOutputAction(blob, options, urls.length);
+  } finally {
+    releasePrintableDataUrls(primaryRenderRef, leasedPrimaryUrls);
+    releasePrintableDataUrls(compareRenderRef, leasedCompareUrls);
+  }
 }
 
 /**

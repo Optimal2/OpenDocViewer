@@ -291,6 +291,13 @@ export function handlePrint(documentRenderRef, options = {}) {
     return;
   }
 
+  // A live <img> blob URL can be superseded (and revoked) while the print is
+  // still consuming it. Lease it for the duration of the print; canvas pages
+  // snapshot to a data URL above and need no lease.
+  const leasedSurfaceUrl = !isCanvas && leaseSurfaceBlobUrl(documentRenderRef, dataUrl)
+    ? dataUrl
+    : null;
+
   let w = 0;
   let h = 0;
   try {
@@ -306,30 +313,39 @@ export function handlePrint(documentRenderRef, options = {}) {
 
   const pageOrientation = resolveOrientation(w, h, orientation);
 
-  const odv = getODVConfig();
-  const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+  // The iframe cleanup owns the surface lease once installed. Until then a
+  // throw (for example from makeBaseTokenContext) must release it here.
+  let iframeOwnsLease = false;
+  try {
+    const odv = getODVConfig();
+    const anyHandle = /** @type {*} */ (documentRenderRef?.current);
+    const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame, cleanup } = createHiddenIframe(
-    resolveIframeCleanupDelay(DEFAULT_IFRAME_CLEANUP_MS, printDelayMs)
-  );
-  const doc = frame.contentDocument || frame.contentWindow?.document;
-  if (!doc) {
-    logger.error('Failed to get iframe document for printing');
-    cleanup();
-    return;
+    const { frame, cleanup } = createHiddenIframe(
+      resolveIframeCleanupDelay(DEFAULT_IFRAME_CLEANUP_MS, printDelayMs),
+      leasedSurfaceUrl ? () => releasePrintableDataUrls(documentRenderRef, [leasedSurfaceUrl]) : undefined
+    );
+    iframeOwnsLease = true;
+    const doc = frame.contentDocument || frame.contentWindow?.document;
+    if (!doc) {
+      logger.error('Failed to get iframe document for printing');
+      cleanup();
+      return;
+    }
+
+    renderSingleDocument(doc, {
+      dataUrl,
+      orientation: pageOrientation,
+      printDelayMs,
+      printHeaderCfg: odv.printHeader || {},
+      printFooterCfg: odv.printFooter || {},
+      printFormatCfg: odv.print?.format || {},
+      tokenContext,
+      pageContexts: normalizePageContexts(pageContexts).slice(0, 1)
+    });
+  } finally {
+    if (leasedSurfaceUrl && !iframeOwnsLease) releasePrintableDataUrls(documentRenderRef, [leasedSurfaceUrl]);
   }
-
-  renderSingleDocument(doc, {
-    dataUrl,
-    orientation: pageOrientation,
-    printDelayMs,
-    printHeaderCfg: odv.printHeader || {},
-    printFooterCfg: odv.printFooter || {},
-    printFormatCfg: odv.print?.format || {},
-    tokenContext,
-    pageContexts: normalizePageContexts(pageContexts).slice(0, 1)
-  });
 }
 
 /**
@@ -362,29 +378,54 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
     return;
   }
 
-  const odv = getODVConfig();
-  const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+  // Lease each live pane blob URL for the duration of the print (see handlePrint).
+  const leasedPrimaryUrl = !primaryData.isCanvas && leaseSurfaceBlobUrl(primaryRenderRef, primaryData.dataUrl)
+    ? primaryData.dataUrl
+    : null;
+  const leasedCompareUrl = !compareData.isCanvas && leaseSurfaceBlobUrl(compareRenderRef, compareData.dataUrl)
+    ? compareData.dataUrl
+    : null;
 
-  const { frame, cleanup } = createHiddenIframe(
-    resolveIframeCleanupDelay(MIN_MULTI_PAGE_CLEANUP_MS, printDelayMs)
-  );
-  const doc = frame.contentDocument || frame.contentWindow?.document;
-  if (!doc) {
-    logger.error('Failed to get iframe document for compare printing');
-    cleanup();
-    return;
+  // The iframe cleanup owns the pane leases once installed. Until then a throw
+  // (for example from makeBaseTokenContext) must release them here.
+  let iframeOwnsLease = false;
+  try {
+    const odv = getODVConfig();
+    const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
+    const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+
+    const { frame, cleanup } = createHiddenIframe(
+      resolveIframeCleanupDelay(MIN_MULTI_PAGE_CLEANUP_MS, printDelayMs),
+      leasedPrimaryUrl || leasedCompareUrl
+        ? () => {
+          if (leasedPrimaryUrl) releasePrintableDataUrls(primaryRenderRef, [leasedPrimaryUrl]);
+          if (leasedCompareUrl) releasePrintableDataUrls(compareRenderRef, [leasedCompareUrl]);
+        }
+        : undefined
+    );
+    iframeOwnsLease = true;
+    const doc = frame.contentDocument || frame.contentWindow?.document;
+    if (!doc) {
+      logger.error('Failed to get iframe document for compare printing');
+      cleanup();
+      return;
+    }
+
+    renderMultiDocument(doc, {
+      dataUrls,
+      printDelayMs,
+      printHeaderCfg: odv.printHeader || {},
+      printFooterCfg: odv.printFooter || {},
+      printFormatCfg: odv.print?.format || {},
+      tokenContext,
+      pageContexts: normalizePageContexts(pageContexts).slice(0, dataUrls.length),
+    });
+  } finally {
+    if (!iframeOwnsLease) {
+      if (leasedPrimaryUrl) releasePrintableDataUrls(primaryRenderRef, [leasedPrimaryUrl]);
+      if (leasedCompareUrl) releasePrintableDataUrls(compareRenderRef, [leasedCompareUrl]);
+    }
   }
-
-  renderMultiDocument(doc, {
-    dataUrls,
-    printDelayMs,
-    printHeaderCfg: odv.printHeader || {},
-    printFooterCfg: odv.printFooter || {},
-    printFormatCfg: odv.print?.format || {},
-    tokenContext,
-    pageContexts: normalizePageContexts(pageContexts).slice(0, dataUrls.length),
-  });
 }
 
 // Longest side of a composed overlay/curtain page in canvas pixels. Larger frames (pages zoomed far
@@ -756,6 +797,39 @@ function collectAllPrintableDataUrlsFromDom(root) {
 }
 
 /**
+ * Only blob URLs can be revoked mid-print by the provider; data: and remote URLs
+ * need no lease (releasing them is a no-op).
+ *
+ * @param {*} url
+ * @returns {boolean}
+ */
+function isLeasableSurfaceUrl(url) {
+  return typeof url === 'string' && /^blob:/i.test(url);
+}
+
+/**
+ * Lease a live surface blob URL for the duration of a print flow so a
+ * supersession (resolution boost, force-refresh) cannot revoke it mid-print.
+ * Foreign handles without a lease function are ignored.
+ *
+ * @param {{ current: * }} documentRenderRef
+ * @param {string} url
+ * @returns {boolean} True when a lease was acquired (the caller must release it).
+ */
+function leaseSurfaceBlobUrl(documentRenderRef, url) {
+  if (!isLeasableSurfaceUrl(url)) return false;
+  try {
+    const lease = documentRenderRef?.current?.leasePrintablePageUrl;
+    if (typeof lease !== 'function') return false;
+    lease.call(documentRenderRef.current, url);
+    return true;
+  } catch (error) {
+    logger.warn('leasePrintablePageUrl() failed', { error: String(error?.message || error) });
+    return false;
+  }
+}
+
+/**
  * Release print URL leases held through the document renderer. The provider revokes a
  * released URL once no live page state references it; DOM-derived URLs and foreign
  * handles without a release function are ignored.
@@ -850,36 +924,44 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
     }
   }
 
-  const odv = getODVConfig();
-  const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+  // The iframe cleanup owns the collected URL leases once installed. Until then a
+  // throw (for example from makeBaseTokenContext) must release them here.
+  let iframeOwnsLease = false;
+  try {
+    const odv = getODVConfig();
+    const anyHandle = /** @type {*} */ (documentRenderRef?.current);
+    const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame, cleanup } = createHiddenIframe(
-    resolveIframeCleanupDelay(
-      Math.max(
-        MIN_MULTI_PAGE_CLEANUP_MS,
-        BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+    const { frame, cleanup } = createHiddenIframe(
+      resolveIframeCleanupDelay(
+        Math.max(
+          MIN_MULTI_PAGE_CLEANUP_MS,
+          BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+        ),
+        printDelayMs
       ),
-      printDelayMs
-    ),
-    () => releasePrintableDataUrls(documentRenderRef, dataUrls)
-  );
-  const doc = frame.contentDocument || frame.contentWindow?.document;
-  if (!doc) {
-    logger.error('Failed to get iframe document for printing');
-    cleanup();
-    return;
-  }
+      () => releasePrintableDataUrls(documentRenderRef, dataUrls)
+    );
+    iframeOwnsLease = true;
+    const doc = frame.contentDocument || frame.contentWindow?.document;
+    if (!doc) {
+      logger.error('Failed to get iframe document for printing');
+      cleanup();
+      return;
+    }
 
-  renderMultiDocument(doc, {
-    dataUrls: toPrint,
-    printDelayMs,
-    printHeaderCfg: odv.printHeader || {},
-    printFooterCfg: odv.printFooter || {},
-    printFormatCfg: odv.print?.format || {},
-    tokenContext,
-    pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
-  });
+    renderMultiDocument(doc, {
+      dataUrls: toPrint,
+      printDelayMs,
+      printHeaderCfg: odv.printHeader || {},
+      printFooterCfg: odv.printFooter || {},
+      printFormatCfg: odv.print?.format || {},
+      tokenContext,
+      pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
+    });
+  } finally {
+    if (!iframeOwnsLease) releasePrintableDataUrls(documentRenderRef, dataUrls);
+  }
 }
 
 /**
@@ -917,36 +999,44 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
     toPrint.push(dataUrls[idx]);
   }
 
-  const odv = getODVConfig();
-  const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+  // The iframe cleanup owns the collected URL leases once installed. Until then a
+  // throw (for example from makeBaseTokenContext) must release them here.
+  let iframeOwnsLease = false;
+  try {
+    const odv = getODVConfig();
+    const anyHandle = /** @type {*} */ (documentRenderRef?.current);
+    const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame, cleanup } = createHiddenIframe(
-    resolveIframeCleanupDelay(
-      Math.max(
-        MIN_MULTI_PAGE_CLEANUP_MS,
-        BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+    const { frame, cleanup } = createHiddenIframe(
+      resolveIframeCleanupDelay(
+        Math.max(
+          MIN_MULTI_PAGE_CLEANUP_MS,
+          BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+        ),
+        printDelayMs
       ),
-      printDelayMs
-    ),
-    () => releasePrintableDataUrls(documentRenderRef, dataUrls)
-  );
-  const doc = frame.contentDocument || frame.contentWindow?.document;
-  if (!doc) {
-    logger.error('Failed to get iframe document for printing');
-    cleanup();
-    return;
-  }
+      () => releasePrintableDataUrls(documentRenderRef, dataUrls)
+    );
+    iframeOwnsLease = true;
+    const doc = frame.contentDocument || frame.contentWindow?.document;
+    if (!doc) {
+      logger.error('Failed to get iframe document for printing');
+      cleanup();
+      return;
+    }
 
-  renderMultiDocument(doc, {
-    dataUrls: toPrint,
-    printDelayMs,
-    printHeaderCfg: odv.printHeader || {},
-    printFooterCfg: odv.printFooter || {},
-    printFormatCfg: odv.print?.format || {},
-    tokenContext,
-    pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
-  });
+    renderMultiDocument(doc, {
+      dataUrls: toPrint,
+      printDelayMs,
+      printHeaderCfg: odv.printHeader || {},
+      printFooterCfg: odv.printFooter || {},
+      printFormatCfg: odv.print?.format || {},
+      tokenContext,
+      pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
+    });
+  } finally {
+    if (!iframeOwnsLease) releasePrintableDataUrls(documentRenderRef, dataUrls);
+  }
 }
 
 
