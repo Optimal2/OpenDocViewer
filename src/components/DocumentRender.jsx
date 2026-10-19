@@ -141,6 +141,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     pinPageAsset,
     unpinPageAsset,
     getPrintablePageUrls,
+    releasePrintablePageUrls,
     documentLoadingConfig,
   } = useContext(ViewerContext);
 
@@ -1047,6 +1048,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     async getAllPrintableDataUrls(pageIndexes) {
       return getPrintablePageUrls(pageIndexes);
     },
+    releasePrintableDataUrls(urls) {
+      if (typeof releasePrintablePageUrls === 'function') releasePrintablePageUrls(urls);
+    },
     // Backward-compatible alias for older print callers; prefer getAllPrintableDataUrls().
     async exportAllPagesAsDataUrls(pageIndexes) {
       return getPrintablePageUrls(pageIndexes);
@@ -1057,6 +1061,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     fitToCustomWidth,
     fitToWidth,
     getPrintablePageUrls,
+    releasePrintablePageUrls,
     isCanvasEnabled,
     onRender,
     pageTransform,

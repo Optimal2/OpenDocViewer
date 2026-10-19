@@ -451,6 +451,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const thumbnailCacheRef = useRef(new Map());
   const pinnedAssetsRef = useRef(new Map());
   const ephemeralPrintUrlsRef = useRef(new Set());
+  // Print leases: live page URLs handed to a print consumer stay valid until that print flow
+  // releases them, even when a resolution boost (or eviction) supersedes them meanwhile.
+  // Map of object URL to outstanding lease count.
+  const printLeasedUrlsRef = useRef(new Map());
   const indexedDbModeAnnouncedRef = useRef(false);
   const assetIndexedDbModeAnnouncedRef = useRef(false);
   const releasedRasterSourceKeysRef = useRef(new Set());
@@ -688,6 +692,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     thumbnailCacheRef.current.clear();
     pinnedAssetsRef.current.clear();
     ephemeralPrintUrlsRef.current.clear();
+    printLeasedUrlsRef.current.clear();
   }, []);
 
   /**
@@ -888,6 +893,72 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [updateAllPages]);
 
   /**
+   * @param {string} url
+   * @returns {boolean}
+   */
+  const isPrintablePageUrlLeased = useCallback((url) => {
+    const value = String(url || '').trim();
+    return !!value && Number(printLeasedUrlsRef.current.get(value) || 0) > 0;
+  }, []);
+
+  /**
+   * @param {string} url
+   * @returns {void}
+   */
+  const leasePrintablePageUrl = useCallback((url) => {
+    const value = String(url || '').trim();
+    if (!value) return;
+    printLeasedUrlsRef.current.set(value, Number(printLeasedUrlsRef.current.get(value) || 0) + 1);
+  }, []);
+
+  /**
+   * @param {string} url
+   * @returns {boolean}
+   */
+  const isPageAssetUrlReferenced = useCallback((url) => {
+    const value = String(url || '').trim();
+    if (!value) return false;
+    for (const page of allPagesRef.current) {
+      if (!page) continue;
+      if (String(page.fullSizeUrl || '').trim() === value) return true;
+      if (String(page.thumbnailUrl || '').trim() === value) return true;
+    }
+    for (const cache of [fullPageCacheRef.current, thumbnailCacheRef.current]) {
+      for (const entry of cache.values()) {
+        if (String(entry?.url || '').trim() === value) return true;
+      }
+    }
+    return false;
+  }, []);
+
+  /**
+   * Release print leases previously acquired through `getPrintablePageUrls`. A released URL that
+   * is no longer referenced by live page state is revoked, so cancelled print flows leave no
+   * tracked URL behind. Releasing an unknown or already-released URL is a no-op.
+   *
+   * @param {(Array<string>|string)} urls
+   * @returns {void}
+   */
+  const releasePrintablePageUrls = useCallback((urls) => {
+    const list = Array.isArray(urls) ? urls : [urls];
+    for (const raw of list) {
+      const value = String(raw || '').trim();
+      if (!value) continue;
+      const outstanding = Number(printLeasedUrlsRef.current.get(value) || 0);
+      if (outstanding <= 0) continue;
+      if (outstanding > 1) {
+        printLeasedUrlsRef.current.set(value, outstanding - 1);
+        continue;
+      }
+      printLeasedUrlsRef.current.delete(value);
+      if (!isTrackedObjectUrl(value)) continue;
+      if (isPageAssetUrlReferenced(value)) continue;
+      ephemeralPrintUrlsRef.current.delete(value);
+      revokeTrackedObjectUrl(value);
+    }
+  }, [isPageAssetUrlReferenced]);
+
+  /**
    * @param {number} index
    * @param {Object|function(*): Object} patch
    * @returns {void}
@@ -920,7 +991,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
         const stillReferenced = ['fullSizeUrl', 'thumbnailUrl']
           .some((candidate) => String(nextPage?.[candidate] || '').trim() === previousUrl);
-        if (!stillReferenced && isTrackedObjectUrl(previousUrl)) {
+        // A URL leased to a print flow stays valid until the print releases it, even when a
+        // resolution boost (or another refresh) supersedes it here.
+        if (!stillReferenced && isTrackedObjectUrl(previousUrl) && !isPrintablePageUrlLeased(previousUrl)) {
           revokeTrackedObjectUrl(previousUrl);
         }
 
@@ -934,7 +1007,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       next[safeIndex] = nextPage;
       return next;
     });
-  }, [updateAllPages]);
+  }, [isPrintablePageUrlLeased, updateAllPages]);
 
   /**
    * @param {string} message
@@ -1432,8 +1505,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     }
 
     const urlsToRevoke = new Set();
-    if (cacheUrl && (!normalizedExpected || cacheUrl === normalizedExpected)) urlsToRevoke.add(cacheUrl);
-    if (pageUrl && (!normalizedExpected || pageUrl === normalizedExpected)) urlsToRevoke.add(pageUrl);
+    if (cacheUrl && (!normalizedExpected || cacheUrl === normalizedExpected) && !isPrintablePageUrlLeased(cacheUrl)) urlsToRevoke.add(cacheUrl);
+    if (pageUrl && (!normalizedExpected || pageUrl === normalizedExpected) && !isPrintablePageUrlLeased(pageUrl)) urlsToRevoke.add(pageUrl);
     if (urlsToRevoke.size > 0) revokeTrackedObjectUrls(urlsToRevoke);
 
     if (!currentPage) return;
@@ -1462,7 +1535,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           : {}),
       };
     });
-  }, [getVariantCache, patchPageAtIndex]);
+  }, [getVariantCache, isPrintablePageUrlLeased, patchPageAtIndex]);
 
   /**
    * @param {number} pageIndex
@@ -1528,6 +1601,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       if (cache.size <= limit) break;
       const pinKey = makeAssetKey(variant, pageIndex);
       if (pinnedAssetsRef.current.has(pinKey)) continue;
+      // A URL leased to a print flow is never an eviction victim; the print releases it when done.
+      if (isPrintablePageUrlLeased(String(entry?.url || ''))) continue;
 
       cache.delete(pageIndex);
       revokeTrackedObjectUrl(entry.url);
@@ -1552,7 +1627,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         };
       });
     }
-  }, [getVariantCache, getVariantCacheLimit, patchPageAtIndex]);
+  }, [getVariantCache, getVariantCacheLimit, isPrintablePageUrlLeased, patchPageAtIndex]);
 
 
 
@@ -1883,7 +1958,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
         const supersededUrl = replaceVisibleOnCommit ? String(getPageAt(allPagesRef.current, safeIndex)?.[urlField] || '').trim() || previousVisibleUrl : '';
         const url = commitRenderedPageAsset(safeIndex, variant, rendered, options);
-        if (replaceVisibleOnCommit && supersededUrl && supersededUrl !== url && isTrackedObjectUrl(supersededUrl)) {
+        if (replaceVisibleOnCommit && supersededUrl && supersededUrl !== url && isTrackedObjectUrl(supersededUrl) && !isPrintablePageUrlLeased(supersededUrl)) {
           const pageAfterCommit = getPageAt(allPagesRef.current, safeIndex);
           const stillReferenced = [pageAfterCommit?.fullSizeUrl, pageAfterCommit?.thumbnailUrl].some((value) => String(value || '').trim() === supersededUrl);
           if (!stillReferenced) revokeTrackedObjectUrls(new Set([supersededUrl]));
@@ -1918,7 +1993,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     if (replaceVisibleOnCommit) pendingAssetPromisesRef.current.set(plainPendingKey, promise);
     return promise;
-  }, [clearPageAssetReference, commitRenderedPageAsset, getVariantCache, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+  }, [clearPageAssetReference, commitRenderedPageAsset, getVariantCache, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, isPrintablePageUrlLeased, touchPageAsset]);
 
   /**
    * Render one PDF page again at twice its effective PDF scale. The policy ceiling does not apply
@@ -2342,6 +2417,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
       if (page.fullSizeUrl && page.fullSizeStatus === 1) {
         touchPageAsset(pageIndex, 'full');
+        leasePrintablePageUrl(page.fullSizeUrl);
         urls.push(page.fullSizeUrl);
         continue;
       }
@@ -2362,6 +2438,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         if (blob) {
           const url = createTrackedObjectUrl(blob);
           ephemeralPrintUrlsRef.current.add(url);
+          leasePrintablePageUrl(url);
           urls.push(url);
         }
       } catch (e) {
@@ -2373,7 +2450,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     }
 
     return urls;
-  }, [persistRenderedAsset, renderPageBlob, touchPageAsset]);
+  }, [leasePrintablePageUrl, persistRenderedAsset, renderPageBlob, touchPageAsset]);
 
   useEffect(() => {
     syncRendererPdfPageCount();
@@ -2662,6 +2739,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pinPageAsset,
     unpinPageAsset,
     getPrintablePageUrls,
+    releasePrintablePageUrls,
     error,
     setError,
     workerCount,
@@ -2707,6 +2785,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pinPageAsset,
     unpinPageAsset,
     getPrintablePageUrls,
+    releasePrintablePageUrls,
     error,
     workerCount,
     loadingRunActive,

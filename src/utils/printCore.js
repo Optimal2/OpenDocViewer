@@ -235,9 +235,10 @@ function resolveActiveNode(documentRenderRef, viewerContainerRef) {
  * print dialogs do not leave detached iframes behind.
  *
  * @param {number} [cleanupDelayMs=DEFAULT_IFRAME_CLEANUP_MS]
+ * @param {function(): void} [onCleanup] Optional hook run when the iframe is cleaned up (afterprint or timeout fallback).
  * @returns {HiddenIframe}
  */
-function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS) {
+function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS, onCleanup) {
   const f = document.createElement('iframe');
   f.setAttribute('aria-hidden', 'true');
   Object.assign(f.style, {
@@ -256,6 +257,7 @@ function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS) {
     if (cleaned) return;
     cleaned = true;
     try { f.remove(); } catch {}
+    if (typeof onCleanup === 'function') { try { onCleanup(); } catch {} }
   };
 
   try { f.contentWindow?.addEventListener('afterprint', cleanup, { once: true }); } catch {}
@@ -754,6 +756,26 @@ function collectAllPrintableDataUrlsFromDom(root) {
 }
 
 /**
+ * Release print URL leases held through the document renderer. The provider revokes a
+ * released URL once no live page state references it; DOM-derived URLs and foreign
+ * handles without a release function are ignored.
+ *
+ * @param {{ current: * }} documentRenderRef
+ * @param {Array<string>} urls
+ * @returns {void}
+ */
+function releasePrintableDataUrls(documentRenderRef, urls) {
+  try {
+    const release = documentRenderRef?.current?.releasePrintableDataUrls;
+    if (typeof release === 'function' && Array.isArray(urls) && urls.length > 0) {
+      release.call(documentRenderRef.current, urls);
+    }
+  } catch (error) {
+    logger.warn('releasePrintableDataUrls() failed', { error: String(error?.message || error) });
+  }
+}
+
+/**
  * Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.
  *
  * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
@@ -839,12 +861,14 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
         BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
       ),
       printDelayMs
-    )
+    ),
+    () => releasePrintableDataUrls(documentRenderRef, dataUrls)
   );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
     cleanup();
+    releasePrintableDataUrls(documentRenderRef, dataUrls);
     return;
   }
 
@@ -903,12 +927,14 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
         BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
       ),
       printDelayMs
-    )
+    ),
+    () => releasePrintableDataUrls(documentRenderRef, dataUrls)
   );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
     cleanup();
+    releasePrintableDataUrls(documentRenderRef, dataUrls);
     return;
   }
 

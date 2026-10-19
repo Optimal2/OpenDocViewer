@@ -2060,6 +2060,26 @@ function warnDeprecatedPrintableUrlExportAlias(handle) {
 }
 
 /**
+ * Release print URL leases held through the document renderer. The provider revokes a
+ * released URL once no live page state references it; DOM-derived URLs and foreign
+ * handles without a release function are ignored.
+ *
+ * @param {{ current: * }} documentRenderRef
+ * @param {Array<string>} urls
+ * @returns {void}
+ */
+function releasePrintableDataUrls(documentRenderRef, urls) {
+  try {
+    const release = documentRenderRef?.current?.releasePrintableDataUrls;
+    if (typeof release === 'function' && Array.isArray(urls) && urls.length > 0) {
+      release.call(documentRenderRef.current, urls);
+    }
+  } catch (error) {
+    logger.warn('releasePrintableDataUrls() failed', { error: String(error?.message || error) });
+  }
+}
+
+/**
  * Read printable page image URLs from the document renderer. getAllPrintableDataUrls()
  * is the preferred API; exportAllPagesAsDataUrls() remains a backward-compatible alias
  * for older integrations, with no removal date currently scheduled.
@@ -2152,7 +2172,11 @@ function pageNumberToIndex(pageNumber, pageCount) {
  */
 export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options = {}) {
   const selected = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
-  return createPrintPdfBlob(selected, options);
+  try {
+    return await createPrintPdfBlob(selected, options);
+  } finally {
+    releasePrintableDataUrls(documentRenderRef, selected);
+  }
 }
 
 /**
@@ -2165,10 +2189,14 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
   throwIfAborted(options.signal);
   const selected = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
   const selectedCount = selected.length;
-  const blob = await createPrintPdfBlob(selected, options);
-  throwIfAborted(options.signal);
-  if (options.deferOutput === true) return blob;
-  await executeOutputAction(blob, options, selectedCount);
+  try {
+    const blob = await createPrintPdfBlob(selected, options);
+    throwIfAborted(options.signal);
+    if (options.deferOutput === true) return blob;
+    await executeOutputAction(blob, options, selectedCount);
+  } finally {
+    releasePrintableDataUrls(documentRenderRef, selected);
+  }
 }
 
 

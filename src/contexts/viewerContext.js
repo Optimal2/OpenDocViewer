@@ -185,6 +185,9 @@ import { createContext } from 'react';
  * @property {function(number, ('full'|'thumbnail')): void} pinPageAsset
  * @property {function(number, ('full'|'thumbnail')): void} unpinPageAsset
  * @property {function(Array.<number>=): Promise<Array.<string>>} getPrintablePageUrls
+ * @property {function((Array.<string>|string)): void} releasePrintablePageUrls
+ *   Release URLs previously acquired through getPrintablePageUrls when the print flow ends
+ *   (completed or cancelled), so superseded page URLs can be revoked without leaking.
  * @property {(string|null)} error
  * @property {function((string|null)): void} setError
  * @property {number} workerCount
