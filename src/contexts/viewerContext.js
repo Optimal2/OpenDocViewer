@@ -185,6 +185,8 @@ import { createContext } from 'react';
  * @property {function(number, ('full'|'thumbnail')): void} pinPageAsset
  * @property {function(number, ('full'|'thumbnail')): void} unpinPageAsset
  * @property {function(Array.<number>=): Promise<Array.<string>>} getPrintablePageUrls
+ *   Every returned URL is leased: the caller must pass it to releasePrintablePageUrls
+ *   when the print flow ends, or superseded blobs are never revoked.
  * @property {function((Array.<string>|string)): void} releasePrintablePageUrls
  *   Release URLs previously acquired through getPrintablePageUrls when the print flow ends
  *   (completed or cancelled), so superseded page URLs can be revoked without leaking.

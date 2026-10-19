@@ -134,4 +134,70 @@ describe('print URL lease across a resolution boost', () => {
       await api.disposeDocumentSession();
     }
   });
+
+  it('keeps a doubly leased URL alive until the last concurrent print releases it', async () => {
+    const api = await setup(2);
+    const original = await api.ensurePageAsset(0, 'full');
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    try {
+      const first = await api.getPrintablePageUrls([0]);
+      const second = await api.getPrintablePageUrls([0]);
+      expect(first).toEqual([original]);
+      expect(second).toEqual([original]);
+
+      expect(await api.enhancePdfPageResolution(0)).toBe(true);
+      const boosted = await api.ensurePageAsset(0, 'full');
+      expect(boosted).not.toBe(original);
+
+      // One lease is still outstanding: the first release must not revoke.
+      api.releasePrintablePageUrls(first);
+      expect(revokeSpy.mock.calls.filter(([url]) => url === original)).toHaveLength(0);
+      expect(isTrackedObjectUrl(original)).toBe(true);
+
+      api.releasePrintablePageUrls(second);
+      expect(revokeSpy.mock.calls.filter(([url]) => url === original)).toHaveLength(1);
+      expect(isTrackedObjectUrl(original)).toBe(false);
+      expect(isTrackedObjectUrl(boosted)).toBe(true);
+    } finally {
+      revokeSpy.mockRestore();
+      await api.disposeDocumentSession();
+    }
+  });
+
+  it('does not revoke a still-referenced live URL when its print lease is released', async () => {
+    const api = await setup(2);
+    const original = await api.ensurePageAsset(0, 'full');
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    try {
+      const urls = await api.getPrintablePageUrls([0]);
+      // No boost happened: the URL is still the live page asset.
+      api.releasePrintablePageUrls(urls);
+      expect(revokeSpy.mock.calls.filter(([url]) => url === original)).toHaveLength(0);
+      expect(isTrackedObjectUrl(original)).toBe(true);
+      expect(await api.ensurePageAsset(0, 'full')).toBe(original);
+    } finally {
+      revokeSpy.mockRestore();
+      await api.disposeDocumentSession();
+    }
+  });
+
+  it('revokes a superseded leased URL on dispose even when the print never releases it', async () => {
+    const api = await setup(2);
+    const original = await api.ensurePageAsset(0, 'full');
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    try {
+      await api.getPrintablePageUrls([0]);
+      expect(await api.enhancePdfPageResolution(0)).toBe(true);
+      const boosted = await api.ensurePageAsset(0, 'full');
+      expect(boosted).not.toBe(original);
+
+      // The print flow never releases its lease; session teardown must still revoke it.
+      await api.disposeDocumentSession();
+      expect(revokeSpy.mock.calls.filter(([url]) => url === original)).toHaveLength(1);
+      expect(isTrackedObjectUrl(original)).toBe(false);
+      expect(isTrackedObjectUrl(boosted)).toBe(false);
+    } finally {
+      revokeSpy.mockRestore();
+    }
+  });
 });

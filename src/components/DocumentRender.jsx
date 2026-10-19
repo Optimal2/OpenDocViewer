@@ -1045,6 +1045,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         setImageRevision((prev) => prev + 1);
       }
     },
+    // The returned URLs are leased: the caller owns them and must call
+    // releasePrintableDataUrls(urls) when done, or the blobs stay pinned.
     async getAllPrintableDataUrls(pageIndexes) {
       return getPrintablePageUrls(pageIndexes);
     },
@@ -1052,6 +1054,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       if (typeof releasePrintablePageUrls === 'function') releasePrintablePageUrls(urls);
     },
     // Backward-compatible alias for older print callers; prefer getAllPrintableDataUrls().
+    // Same lease contract: the caller must call releasePrintableDataUrls(urls) when done.
     async exportAllPagesAsDataUrls(pageIndexes) {
       return getPrintablePageUrls(pageIndexes);
     },

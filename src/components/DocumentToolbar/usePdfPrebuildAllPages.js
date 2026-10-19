@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import logger from '../../logging/systemLogger.js';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
-import { collectPrintablePdfSources, createPrintPdfBlob } from '../../utils/printPdf.js';
+import { collectPrintablePdfSources, createPrintPdfBlob, releasePrintablePdfSources } from '../../utils/printPdf.js';
 import {
   createPdfPrebuildAllPagesVariants,
   getPdfPrebuildAllPagesLanguageDependency,
@@ -267,57 +267,62 @@ export default function usePdfPrebuildAllPages({
           setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });
           const pageNumbers = createSessionPageNumbers(pageCount);
           const urls = await collectPrintablePdfSources(documentRenderRef, pageNumbers, signal);
-          throwIfAborted(signal);
-          if (!Array.isArray(urls) || urls.length !== pageCount) {
-            throw new Error(`Expected ${pageCount} printable page URLs for PDF prebuild, got ${Array.isArray(urls) ? urls.length : 0}.`);
-          }
-
-          const pendingVariants = plan.variants.filter((variant) => !(cacheRef.current.get(variant?.key)?.blob instanceof Blob));
-          await runLimited(pendingVariants, plan.config.concurrency, async (variant) => {
-            try {
-              const detail = createVariantDetail(variant);
-              const options = {
-                ...makePrintOptionsRef.current(detail),
-                deferOutput: true,
-                signal,
-              };
-              const blob = await createPrintPdfBlob(urls, options);
-              throwIfAborted(signal);
-              if (!(blob instanceof Blob)) throw new Error('Prebuilt PDF generation did not return a Blob.');
-              cacheRef.current.set(variant.key, {
-                blob,
-                variant,
-                languageDependency: prebuildLanguageDependency,
-                printCacheKey: getPdfPrintCacheKey(detail, pageNumbers, pdfPrintCacheKeyOptions),
-                createdAt: Date.now(),
-              });
-              completed += 1;
-              if (runSeqRef.current === runSeq) {
-                setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });
-              }
-            } catch (error) {
-              throwIfAborted(signal);
-              errors.push(error);
-              logger.warn('PDF prebuild variant failed', {
-                key: variant?.key,
-                error: String(error?.message || error),
-              });
+          try {
+            throwIfAborted(signal);
+            if (!Array.isArray(urls) || urls.length !== pageCount) {
+              throw new Error(`Expected ${pageCount} printable page URLs for PDF prebuild, got ${Array.isArray(urls) ? urls.length : 0}.`);
             }
-          }, signal);
 
-          throwIfAborted(signal);
-          if (runSeqRef.current !== runSeq) return;
-          if (errors.length > 0) {
-            setStatus({
-              state: completed > 0 ? 'warning' : 'error',
-              completed,
-              total: plan.variants.length,
-              error: String(errors[0]?.message || errors[0] || 'PDF prebuild failed.'),
-              paused: false,
-            });
-            return;
+            const pendingVariants = plan.variants.filter((variant) => !(cacheRef.current.get(variant?.key)?.blob instanceof Blob));
+            await runLimited(pendingVariants, plan.config.concurrency, async (variant) => {
+              try {
+                const detail = createVariantDetail(variant);
+                const options = {
+                  ...makePrintOptionsRef.current(detail),
+                  deferOutput: true,
+                  signal,
+                };
+                const blob = await createPrintPdfBlob(urls, options);
+                throwIfAborted(signal);
+                if (!(blob instanceof Blob)) throw new Error('Prebuilt PDF generation did not return a Blob.');
+                cacheRef.current.set(variant.key, {
+                  blob,
+                  variant,
+                  languageDependency: prebuildLanguageDependency,
+                  printCacheKey: getPdfPrintCacheKey(detail, pageNumbers, pdfPrintCacheKeyOptions),
+                  createdAt: Date.now(),
+                });
+                completed += 1;
+                if (runSeqRef.current === runSeq) {
+                  setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });
+                }
+              } catch (error) {
+                throwIfAborted(signal);
+                errors.push(error);
+                logger.warn('PDF prebuild variant failed', {
+                  key: variant?.key,
+                  error: String(error?.message || error),
+                });
+              }
+            }, signal);
+
+            throwIfAborted(signal);
+            if (runSeqRef.current !== runSeq) return;
+            if (errors.length > 0) {
+              setStatus({
+                state: completed > 0 ? 'warning' : 'error',
+                completed,
+                total: plan.variants.length,
+                error: String(errors[0]?.message || errors[0] || 'PDF prebuild failed.'),
+                paused: false,
+              });
+              return;
+            }
+            setStatus({ state: 'ready', completed, total: plan.variants.length, error: '', paused: false });
+          } finally {
+            // The collected page URLs are leased; the cached blobs own their own data.
+            releasePrintablePdfSources(documentRenderRef, urls);
           }
-          setStatus({ state: 'ready', completed, total: plan.variants.length, error: '', paused: false });
         } catch (error) {
           if (isAbortError(error) || runSeqRef.current !== runSeq) return;
           logger.warn('PDF prebuild failed', { error: String(error?.message || error) });

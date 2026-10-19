@@ -868,7 +868,6 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
     cleanup();
-    releasePrintableDataUrls(documentRenderRef, dataUrls);
     return;
   }
 
@@ -897,6 +896,7 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!Array.isArray(sequence) || !sequence.length) {
     logger.error('handlePrintSequence: empty sequence');
+    releasePrintableDataUrls(documentRenderRef, dataUrls);
     return;
   }
   if (!dataUrls.length) {
@@ -911,6 +911,7 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
     const idx = Math.floor(n) - 1;
     if (!Number.isFinite(n) || idx < 0 || idx >= total) {
       logger.error('handlePrintSequence: page out of range', { n, total });
+      releasePrintableDataUrls(documentRenderRef, dataUrls);
       return;
     }
     toPrint.push(dataUrls[idx]);
@@ -934,7 +935,6 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
     cleanup();
-    releasePrintableDataUrls(documentRenderRef, dataUrls);
     return;
   }
 

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 19862. JSDoc symbol count: 804.
+File count: 51. Line count: 19889. JSDoc symbol count: 805.
 
 ## src/utils/compareCurtain.js
 
@@ -649,7 +649,7 @@ Symbols:
 
 OpenDocViewer — Generated PDF print backend.
 
-Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `handlePdfCompareOverlay`, `handlePdfCompareCurtain`
+Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `releasePrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `handlePdfCompareOverlay`, `handlePdfCompareCurtain`
 
 Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/printCore.js`
 

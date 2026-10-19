@@ -5,7 +5,7 @@
 
 import logger from '../logging/systemLogger.js';
 import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
-import { collectPrintablePdfSources, createPrintPdfBlob } from './printPdf.js';
+import { collectPrintablePdfSources, createPrintPdfBlob, releasePrintablePdfSources } from './printPdf.js';
 import { planPdfWorkerBatches, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
 import { getRuntimeConfig } from './runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestPdfBenchmarkResult } from './supportDiagnostics.js';
@@ -825,140 +825,145 @@ export async function runPdfGenerationBenchmark({
   if (!benchmarkCfg.enabled) throw new Error('PDF benchmark is disabled by configuration.');
 
   const sourceUrls = await collectPrintablePdfSources(documentRenderRef, pageNumbers, signal);
-  const selected = selectBenchmarkPages(sourceUrls, baseOptions, benchmarkCfg);
-  const basePdfCfg = baseOptions.pdfCfg || config?.print?.pdf || {};
-  const scenarioPlan = createBenchmarkScenarios(benchmarkCfg, selected.urls.length, basePdfCfg);
-  const scenarios = scenarioPlan.scenarios;
-  const runs = [];
-  const totalRuns = scenarios.length * benchmarkCfg.iterations;
-  let completedRuns = 0;
+  try {
+    const selected = selectBenchmarkPages(sourceUrls, baseOptions, benchmarkCfg);
+    const basePdfCfg = baseOptions.pdfCfg || config?.print?.pdf || {};
+    const scenarioPlan = createBenchmarkScenarios(benchmarkCfg, selected.urls.length, basePdfCfg);
+    const scenarios = scenarioPlan.scenarios;
+    const runs = [];
+    const totalRuns = scenarios.length * benchmarkCfg.iterations;
+    let completedRuns = 0;
 
-  for (const scenario of scenarios) {
-    for (let iteration = 1; iteration <= benchmarkCfg.iterations; iteration += 1) {
-      if (signal?.aborted) {
-        const error = new Error('PDF benchmark was cancelled.');
-        error.name = 'AbortError';
-        throw error;
+    for (const scenario of scenarios) {
+      for (let iteration = 1; iteration <= benchmarkCfg.iterations; iteration += 1) {
+        if (signal?.aborted) {
+          const error = new Error('PDF benchmark was cancelled.');
+          error.name = 'AbortError';
+          throw error;
+        }
+
+        onProgress?.({
+          phase: 'running',
+          batchSize: scenario.batchSize,
+          scenarioLabel: scenario.scenarioLabel,
+          strategy: scenario.strategy,
+          workerCount: scenario.workerCount,
+          imageLoadConcurrency: scenario.imageLoadConcurrency,
+          mergeMode: scenario.mergeMode,
+          iteration,
+          completedRuns,
+          totalRuns,
+        });
+
+        const pdfCfg = createScenarioPdfConfig(basePdfCfg, scenario);
+        const plan = describeScenarioPlan(selected.urls.length, pdfCfg, scenario);
+        const started = performance.now();
+        const progressEvents = [];
+        const blob = await createPrintPdfBlob(selected.urls, {
+          ...baseOptions,
+          pageContexts: selected.pageContexts,
+          pdfCfg,
+          signal,
+          onProgress: (event) => {
+            progressEvents.push({
+              atMs: performance.now() - started,
+              phase: String(event?.phase || 'unknown'),
+              current: finiteNumberOrNull(event?.current),
+              total: finiteNumberOrNull(event?.total),
+              page: finiteNumberOrNull(event?.page),
+              localCurrent: finiteNumberOrNull(event?.localCurrent),
+              localTotal: finiteNumberOrNull(event?.localTotal),
+              batchIndex: finiteNumberOrNull(event?.batchIndex),
+              batchCount: finiteNumberOrNull(event?.batchCount),
+              batchStartPageIndex: finiteNumberOrNull(event?.batchStartPageIndex),
+              batchPageCount: finiteNumberOrNull(event?.batchPageCount),
+              mergeCurrent: finiteNumberOrNull(event?.mergeCurrent),
+              mergeTotal: finiteNumberOrNull(event?.mergeTotal),
+              roundIndex: finiteNumberOrNull(event?.roundIndex),
+              pairIndex: finiteNumberOrNull(event?.pairIndex),
+              globalMergeTaskIndex: finiteNumberOrNull(event?.globalMergeTaskIndex),
+            });
+          },
+        });
+        const durationMs = performance.now() - started;
+        const timings = summarizeBenchmarkTiming(progressEvents, durationMs);
+        runs.push({
+          strategy: scenario.strategy,
+          scenarioLabel: scenario.scenarioLabel,
+          batchSize: scenario.batchSize,
+          batchSizeLabel: scenario.batchSize === 0 ? 'auto' : String(scenario.batchSize),
+          workerCountSetting: scenario.workerCount,
+          imageLoadConcurrencySetting: scenario.imageLoadConcurrency,
+          mergeModeSetting: scenario.mergeMode,
+          iteration,
+          durationMs: Math.round(durationMs),
+          outputBytes: Math.max(0, Number(blob?.size) || 0),
+          workerCount: plan.workerCount,
+          desiredWorkerCount: plan.desiredWorkerCount,
+          resolvedBatchSize: plan.resolvedBatchSize,
+          batchCount: plan.batchCount,
+          mergeMode: plan.mergeMode || scenario.mergeMode || 'auto',
+          plan,
+          timings,
+        });
+        completedRuns += 1;
+        onProgress?.({
+          phase: 'completed-run',
+          batchSize: scenario.batchSize,
+          scenarioLabel: scenario.scenarioLabel,
+          strategy: scenario.strategy,
+          workerCount: scenario.workerCount,
+          imageLoadConcurrency: scenario.imageLoadConcurrency,
+          mergeMode: scenario.mergeMode,
+          iteration,
+          completedRuns,
+          totalRuns,
+        });
+        await delay(benchmarkCfg.delayBetweenRunsMs, signal);
       }
-
-      onProgress?.({
-        phase: 'running',
-        batchSize: scenario.batchSize,
-        scenarioLabel: scenario.scenarioLabel,
-        strategy: scenario.strategy,
-        workerCount: scenario.workerCount,
-        imageLoadConcurrency: scenario.imageLoadConcurrency,
-        mergeMode: scenario.mergeMode,
-        iteration,
-        completedRuns,
-        totalRuns,
-      });
-
-      const pdfCfg = createScenarioPdfConfig(basePdfCfg, scenario);
-      const plan = describeScenarioPlan(selected.urls.length, pdfCfg, scenario);
-      const started = performance.now();
-      const progressEvents = [];
-      const blob = await createPrintPdfBlob(selected.urls, {
-        ...baseOptions,
-        pageContexts: selected.pageContexts,
-        pdfCfg,
-        signal,
-        onProgress: (event) => {
-          progressEvents.push({
-            atMs: performance.now() - started,
-            phase: String(event?.phase || 'unknown'),
-            current: finiteNumberOrNull(event?.current),
-            total: finiteNumberOrNull(event?.total),
-            page: finiteNumberOrNull(event?.page),
-            localCurrent: finiteNumberOrNull(event?.localCurrent),
-            localTotal: finiteNumberOrNull(event?.localTotal),
-            batchIndex: finiteNumberOrNull(event?.batchIndex),
-            batchCount: finiteNumberOrNull(event?.batchCount),
-            batchStartPageIndex: finiteNumberOrNull(event?.batchStartPageIndex),
-            batchPageCount: finiteNumberOrNull(event?.batchPageCount),
-            mergeCurrent: finiteNumberOrNull(event?.mergeCurrent),
-            mergeTotal: finiteNumberOrNull(event?.mergeTotal),
-            roundIndex: finiteNumberOrNull(event?.roundIndex),
-            pairIndex: finiteNumberOrNull(event?.pairIndex),
-            globalMergeTaskIndex: finiteNumberOrNull(event?.globalMergeTaskIndex),
-          });
-        },
-      });
-      const durationMs = performance.now() - started;
-      const timings = summarizeBenchmarkTiming(progressEvents, durationMs);
-      runs.push({
-        strategy: scenario.strategy,
-        scenarioLabel: scenario.scenarioLabel,
-        batchSize: scenario.batchSize,
-        batchSizeLabel: scenario.batchSize === 0 ? 'auto' : String(scenario.batchSize),
-        workerCountSetting: scenario.workerCount,
-        imageLoadConcurrencySetting: scenario.imageLoadConcurrency,
-        mergeModeSetting: scenario.mergeMode,
-        iteration,
-        durationMs: Math.round(durationMs),
-        outputBytes: Math.max(0, Number(blob?.size) || 0),
-        workerCount: plan.workerCount,
-        desiredWorkerCount: plan.desiredWorkerCount,
-        resolvedBatchSize: plan.resolvedBatchSize,
-        batchCount: plan.batchCount,
-        mergeMode: plan.mergeMode || scenario.mergeMode || 'auto',
-        plan,
-        timings,
-      });
-      completedRuns += 1;
-      onProgress?.({
-        phase: 'completed-run',
-        batchSize: scenario.batchSize,
-        scenarioLabel: scenario.scenarioLabel,
-        strategy: scenario.strategy,
-        workerCount: scenario.workerCount,
-        imageLoadConcurrency: scenario.imageLoadConcurrency,
-        mergeMode: scenario.mergeMode,
-        iteration,
-        completedRuns,
-        totalRuns,
-      });
-      await delay(benchmarkCfg.delayBetweenRunsMs, signal);
     }
+
+    const best = runs.slice().sort((a, b) => a.durationMs - b.durationMs)[0] || null;
+    const result = {
+      schema: 'opendocviewer.pdf-benchmark.v1',
+      createdUtc: new Date().toISOString(),
+      pageCount: selected.urls.length,
+      sourcePageCount: sourceUrls.length,
+      pageLimit: benchmarkCfg.pageLimit,
+      iterations: benchmarkCfg.iterations,
+      profile: benchmarkCfg.profile,
+      batchSizes: benchmarkCfg.batchSizes,
+      batchCounts: benchmarkCfg.batchCounts,
+      workerCounts: benchmarkCfg.workerCounts,
+      imageLoadConcurrencies: benchmarkCfg.imageLoadConcurrencies,
+      mergeModes: benchmarkCfg.mergeModes,
+      strategies: benchmarkCfg.strategies,
+      maxRuns: benchmarkCfg.maxRuns,
+      testedBatchSizes: Array.from(new Set(scenarios.map((scenario) => scenario.batchSize))),
+      testedWorkerCounts: Array.from(new Set(scenarios.map((scenario) => scenario.workerCount))),
+      testedImageLoadConcurrencies: Array.from(new Set(scenarios.map((scenario) => scenario.imageLoadConcurrency))),
+      testedMergeModes: Array.from(new Set(scenarios.map((scenario) => scenario.mergeMode || 'auto'))),
+      testedStrategies: Array.from(new Set(scenarios.map((scenario) => scenario.strategy))),
+      testedScenarios: scenarios,
+      scenarioCount: scenarios.length,
+      totalScenarioCount: scenarioPlan.totalScenarioCount,
+      scenarioLimitApplied: scenarioPlan.totalScenarioCount > scenarios.length,
+      runs,
+      best,
+      diagnostics: collectSupportDiagnostics({ latestPdfBenchmark: null }),
+    };
+
+    saveLatestPdfBenchmarkResult(result);
+    logger.info('PDF benchmark completed', {
+      pageCount: result.pageCount,
+      runCount: runs.length,
+      bestBatchSize: best?.batchSizeLabel || null,
+      bestDurationMs: best?.durationMs || null,
+    });
+    onProgress?.({ phase: 'done', completedRuns, totalRuns, result });
+    return result;
+  } finally {
+    // The collected page URLs are leased; the benchmark keeps no references past the run.
+    releasePrintablePdfSources(documentRenderRef, sourceUrls);
   }
-
-  const best = runs.slice().sort((a, b) => a.durationMs - b.durationMs)[0] || null;
-  const result = {
-    schema: 'opendocviewer.pdf-benchmark.v1',
-    createdUtc: new Date().toISOString(),
-    pageCount: selected.urls.length,
-    sourcePageCount: sourceUrls.length,
-    pageLimit: benchmarkCfg.pageLimit,
-    iterations: benchmarkCfg.iterations,
-    profile: benchmarkCfg.profile,
-    batchSizes: benchmarkCfg.batchSizes,
-    batchCounts: benchmarkCfg.batchCounts,
-    workerCounts: benchmarkCfg.workerCounts,
-    imageLoadConcurrencies: benchmarkCfg.imageLoadConcurrencies,
-    mergeModes: benchmarkCfg.mergeModes,
-    strategies: benchmarkCfg.strategies,
-    maxRuns: benchmarkCfg.maxRuns,
-    testedBatchSizes: Array.from(new Set(scenarios.map((scenario) => scenario.batchSize))),
-    testedWorkerCounts: Array.from(new Set(scenarios.map((scenario) => scenario.workerCount))),
-    testedImageLoadConcurrencies: Array.from(new Set(scenarios.map((scenario) => scenario.imageLoadConcurrency))),
-    testedMergeModes: Array.from(new Set(scenarios.map((scenario) => scenario.mergeMode || 'auto'))),
-    testedStrategies: Array.from(new Set(scenarios.map((scenario) => scenario.strategy))),
-    testedScenarios: scenarios,
-    scenarioCount: scenarios.length,
-    totalScenarioCount: scenarioPlan.totalScenarioCount,
-    scenarioLimitApplied: scenarioPlan.totalScenarioCount > scenarios.length,
-    runs,
-    best,
-    diagnostics: collectSupportDiagnostics({ latestPdfBenchmark: null }),
-  };
-
-  saveLatestPdfBenchmarkResult(result);
-  logger.info('PDF benchmark completed', {
-    pageCount: result.pageCount,
-    runCount: runs.length,
-    bestBatchSize: best?.batchSizeLabel || null,
-    bestDurationMs: best?.durationMs || null,
-  });
-  onProgress?.({ phase: 'done', completedRuns, totalRuns, result });
-  return result;
 }

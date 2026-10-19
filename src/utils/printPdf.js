@@ -2118,23 +2118,33 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
       : 'exportAllPagesAsDataUrls';
     throw new Error(`Document handle method ${methodName}() failed while collecting printable page URLs. Details: ${String(error?.message || error)}`, { cause: error });
   }
-  throwIfAborted(signal);
-  if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
-  if (!Array.isArray(pageNumbers) || !pageNumbers.length) return allUrls;
-  if (shouldRequestSelectedUrls) return allUrls;
+  try {
+    throwIfAborted(signal);
+    if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
+    if (!Array.isArray(pageNumbers) || !pageNumbers.length) return allUrls;
+    if (shouldRequestSelectedUrls) return allUrls;
 
-  const selected = [];
-  for (const pageNumber of pageNumbers) {
-    const index = pageNumberToIndex(pageNumber, allUrls.length);
-    if (index === null) {
-      logger.warn('Ignored invalid PDF page selection', { pageNumber });
-      continue;
+    const selected = [];
+    for (const pageNumber of pageNumbers) {
+      const index = pageNumberToIndex(pageNumber, allUrls.length);
+      if (index === null) {
+        logger.warn('Ignored invalid PDF page selection', { pageNumber });
+        continue;
+      }
+      selected.push(allUrls[index]);
     }
-    selected.push(allUrls[index]);
-  }
 
-  if (!selected.length) throw new Error('No valid printable page numbers were selected.');
-  return selected;
+    if (!selected.length) throw new Error('No valid printable page numbers were selected.');
+    // A legacy handle may return every URL while the caller asked for a subset: release
+    // the leases this flow does not hand out so only `selected` stays leased.
+    const selectedSet = new Set(selected);
+    releasePrintableDataUrls(documentRenderRef, allUrls.filter((url) => !selectedSet.has(url)));
+    return selected;
+  } catch (error) {
+    // The URLs were already leased above; a throw here must not leave them pinned.
+    releasePrintableDataUrls(documentRenderRef, allUrls);
+    throw error;
+  }
 }
 
 /**
@@ -2148,6 +2158,18 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
  */
 export async function collectPrintablePdfSources(documentRenderRef, pageNumbers, signal) {
   return getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal);
+}
+
+/**
+ * Release URL leases previously acquired through collectPrintablePdfSources when the
+ * consumer is done with them (prebuild/benchmark keep the URLs only while rendering).
+ * Unknown URLs and foreign handles without a release function are ignored.
+ * @param {{ current: * }} documentRenderRef
+ * @param {Array<string>} urls
+ * @returns {void}
+ */
+export function releasePrintablePdfSources(documentRenderRef, urls) {
+  releasePrintableDataUrls(documentRenderRef, urls);
 }
 
 /**

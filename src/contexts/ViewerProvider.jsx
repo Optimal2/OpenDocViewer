@@ -686,6 +686,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     for (const entry of fullPageCacheRef.current.values()) urls.add(entry.url);
     for (const entry of thumbnailCacheRef.current.values()) urls.add(entry.url);
     for (const url of ephemeralPrintUrlsRef.current.values()) urls.add(url);
+    // Outstanding print leases keep superseded URLs out of every set above: a boost
+    // skips their revoke while leased, and page state no longer references them.
+    // Session teardown revokes them so an unreleased lease cannot pin blobs past dispose.
+    for (const url of printLeasedUrlsRef.current.keys()) urls.add(url);
 
     revokeTrackedObjectUrls(urls);
     fullPageCacheRef.current.clear();
