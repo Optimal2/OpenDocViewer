@@ -1296,17 +1296,18 @@
 | <code>appendRichLineBreak</code> | function | <code>src/utils/printPdf.js:553</code> |  |
 | <code>appendRichText</code> | function | <code>src/utils/printPdf.js:563</code> |  |
 | <code>asNumber</code> | function | <code>src/utils/printPdf.js:217</code> | Convert a value to a finite number for PDF layout calculations. |
-| <code>blobToDataUrl</code> | function | <code>src/utils/printPdf.js:2324</code> |  |
+| <code>blobToDataUrl</code> | function | <code>src/utils/printPdf.js:2348</code> |  |
 | <code>buildPdfPagePlans</code> | function | <code>src/utils/printPdf.js:1560</code> |  |
 | <code>calculateOverlayReserve</code> | function | <code>src/utils/printPdf.js:1605</code> |  |
-| <code>canvasToBlob</code> | function | <code>src/utils/printPdf.js:2309</code> |  |
-| <code>canvasToPngDataUrl</code> | function | <code>src/utils/printPdf.js:2295</code> | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
+| <code>canvasToBlob</code> | function | <code>src/utils/printPdf.js:2333</code> |  |
+| <code>canvasToPngDataUrl</code> | function | <code>src/utils/printPdf.js:2319</code> | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
 | <code>clamp01</code> | function | <code>src/utils/printPdf.js:242</code> | Clamp a numeric value to the inclusive 0..1 range. |
-| <code>collectPrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2193</code> | Collect printable page image URLs without creating or opening a PDF. |
+| <code>collectedSourceLeases</code> | constant | <code>src/utils/printPdf.js:2193</code> | Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence. |
+| <code>collectPrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2204</code> | Collect printable page image URLs without creating or opening a PDF. |
 | <code>createAbortError</code> | function | <code>src/utils/printPdf.js:249</code> |  |
 | <code>createDefaultSegment</code> | function | <code>src/utils/printPdf.js:1144</code> |  |
 | <code>createJsPdfOptions</code> | function | <code>src/utils/printPdf.js:1041</code> |  |
-| <code>createPdfFromDocumentHandle</code> | function | <code>src/utils/printPdf.js:2229</code> |  |
+| <code>createPdfFromDocumentHandle</code> | function | <code>src/utils/printPdf.js:2244</code> |  |
 | <code>createPrintPdfBlob</code> | function | <code>src/utils/printPdf.js:1663</code> | Build a PDF blob from page image URLs and print metadata. |
 | <code>createPrintPdfBlobInWorker</code> | function | <code>src/utils/printPdf.js:1581</code> |  |
 | <code>describeImageSource</code> | function | <code>src/utils/printPdf.js:797</code> |  |
@@ -1327,13 +1328,14 @@
 | <code>getElementStyleHints</code> | function | <code>src/utils/printPdf.js:420</code> |  |
 | <code>getImageDimension</code> | function | <code>src/utils/printPdf.js:941</code> |  |
 | <code>getRichLineColumns</code> | function | <code>src/utils/printPdf.js:1074</code> |  |
-| <code>getSelectedPrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2125</code> | Read printable page image URLs from the document renderer. |
-| <code>handlePdfCompareCurtain</code> | function | <code>src/utils/printPdf.js:2461</code> | Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform. |
-| <code>handlePdfCompareOverlay</code> | function | <code>src/utils/printPdf.js:2447</code> | Generate/print/download a ONE-page PDF of the overlay view: page B over page A \(or swapped\) at the current opacity, each page with its own compare transform. |
-| <code>handlePdfCurrent</code> | function | <code>src/utils/printPdf.js:2345</code> | Generate/print/download a PDF from the currently rendered active page surface. |
-| <code>handlePdfCurrentComparison</code> | function | <code>src/utils/printPdf.js:2375</code> | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
-| <code>handlePdfOutput</code> | function | <code>src/utils/printPdf.js:2247</code> |  |
+| <code>getSelectedPrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2126</code> | Read printable page image URLs from the document renderer. |
+| <code>handlePdfCompareCurtain</code> | function | <code>src/utils/printPdf.js:2486</code> | Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform. |
+| <code>handlePdfCompareOverlay</code> | function | <code>src/utils/printPdf.js:2472</code> | Generate/print/download a ONE-page PDF of the overlay view: page B over page A \(or swapped\) at the current opacity, each page with its own compare transform. |
+| <code>handlePdfCurrent</code> | function | <code>src/utils/printPdf.js:2369</code> | Generate/print/download a PDF from the currently rendered active page surface. |
+| <code>handlePdfCurrentComparison</code> | function | <code>src/utils/printPdf.js:2400</code> | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
+| <code>handlePdfOutput</code> | function | <code>src/utils/printPdf.js:2261</code> |  |
 | <code>htmlToRichLines</code> | function | <code>src/utils/printPdf.js:636</code> | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
+| <code>imageElementUrl</code> | function | <code>src/utils/printPdf.js:2308</code> | Read the URL an surface currently displays \(empty for any other element\). |
 | <code>imageExtensionFromUrl</code> | function | <code>src/utils/printPdf.js:894</code> |  |
 | <code>imageFormatAttempts</code> | function | <code>src/utils/printPdf.js:952</code> |  |
 | <code>imageToJpegDataUrl</code> | function | <code>src/utils/printPdf.js:915</code> | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
@@ -1354,21 +1356,21 @@
 | <code>normalizeRichLine</code> | function | <code>src/utils/printPdf.js:1098</code> |  |
 | <code>normalizeRichSegments</code> | function | <code>src/utils/printPdf.js:1057</code> |  |
 | <code>pageFormatForImage</code> | function | <code>src/utils/printPdf.js:1029</code> |  |
-| <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2216</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
+| <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2231</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
 | <code>parseTemplateCssClassSelector</code> | function | <code>src/utils/printPdf.js:335</code> | Parse a supported class-only selector into descendant selector parts. |
 | <code>parseTemplateCssStyleRules</code> | function | <code>src/utils/printPdf.js:398</code> | Parse only the small CSS subset used by trusted print header/footer templates. |
 | <code>parseTextStyleDeclarations</code> | function | <code>src/utils/printPdf.js:305</code> |  |
-| <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2416</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
+| <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2441</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
 | <code>PdfPrintOptions</code> | typedef | <code>src/utils/printPdf.js:157</code> |  |
 | <code>PdfRichColumn</code> | typedef | <code>src/utils/printPdf.js:200</code> |  |
 | <code>PdfRichLine</code> | typedef | <code>src/utils/printPdf.js:208</code> |  |
 | <code>PdfRichSegment</code> | typedef | <code>src/utils/printPdf.js:192</code> |  |
 | <code>PdfTemplateCssStyleRule</code> | typedef | <code>src/utils/printPdf.js:186</code> |  |
 | <code>PdfTextStyleHints</code> | typedef | <code>src/utils/printPdf.js:176</code> |  |
-| <code>printableSourceFromElement</code> | function | <code>src/utils/printPdf.js:2268</code> | Extract a safe printable image source from an already-rendered canvas or image element. |
+| <code>printableSourceFromElement</code> | function | <code>src/utils/printPdf.js:2282</code> | Extract a safe printable image source from an already-rendered canvas or image element. |
 | <code>printPdfBlob</code> | function | <code>src/utils/printPdf.js:1835</code> | Print a generated PDF through a hidden iframe. |
 | <code>releasePrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2105</code> | Release print URL leases held through the document renderer. |
-| <code>releasePrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2205</code> | Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them \(prebuild/benchmark keep the URLs only while rendering\). |
+| <code>releasePrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2218</code> | Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them \(prebuild/benchmark keep the URLs only while rendering\). |
 | <code>renderOverlayRichLines</code> | function | <code>src/utils/printPdf.js:731</code> |  |
 | <code>reportProgress</code> | function | <code>src/utils/printPdf.js:1511</code> |  |
 | <code>resolveJsPdfConstructor</code> | function | <code>src/utils/printPdf.js:1617</code> | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |

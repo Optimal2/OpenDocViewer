@@ -4,6 +4,8 @@
 // fails against the pre-fix code, which never leases surface URLs, never
 // releases the all-pages lease when token-context creation throws, and
 // releases duplicate page selections per occurrence instead of per lease.
+// The follow-up review findings (F1: release exactly what was leased, F2: lease
+// the surface URL before the first await) are covered by the last two blocks.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('i18next', () => ({ default: { t: (key, options) => options?.defaultValue ?? key } }));
@@ -36,9 +38,12 @@ import {
 import { renderMultiDocument, renderSingleDocument } from '../printDom.js';
 import { makeBaseTokenContext } from '../printTemplate.js';
 import {
+  collectPrintablePdfSources,
   createPdfFromDocumentHandle,
   handlePdfCurrent,
   handlePdfCurrentComparison,
+  handlePdfOutput,
+  releasePrintablePdfSources,
 } from '../printPdf.js';
 
 afterEach(() => {
@@ -254,5 +259,119 @@ describe('F4: duplicate page selection releases per lease, not per occurrence', 
     expect(releaseCalls).toContainEqual(['blob:u1']);
     expect(releaseCalls.some((call) => call.length === 2 && call[0] === 'blob:u1' && call[1] === 'blob:u1')).toBe(false);
     expect(outstanding.get('blob:u1')).toBe(1);
+  });
+});
+
+/**
+ * Lease ledger mirroring the provider: a request-selected handle (one declared
+ * parameter) leases once per requested index occurrence, a legacy zero-arg
+ * handle once per page; release decrements once per entry.
+ */
+function makeLedgerHandle(pageUrls, { requestSelected }) {
+  const outstanding = new Map();
+  const lease = (url) => outstanding.set(url, (outstanding.get(url) || 0) + 1);
+  const releasePrintableDataUrls = (urls) => {
+    for (const url of urls) {
+      const count = outstanding.get(url) || 0;
+      if (count > 0) outstanding.set(url, count - 1);
+    }
+  };
+  const getAllPrintableDataUrls = requestSelected
+    ? async (pageIndexes) => {
+        const indexes = pageIndexes || pageUrls.map((_, index) => index);
+        return indexes.map((index) => {
+          lease(pageUrls[index]);
+          return pageUrls[index];
+        });
+      }
+    : async () => {
+        pageUrls.forEach(lease);
+        return [...pageUrls];
+      };
+  return { current: { getAllPrintableDataUrls, releasePrintableDataUrls }, outstanding, lease };
+}
+
+describe('Follow-up F1: PDF flows release exactly the leases they took', () => {
+  it('createPdfFromDocumentHandle releases every per-occurrence lease of a request-selected handle', async () => {
+    stubFailingImage();
+    const ref = makeLedgerHandle(['blob:p1', 'blob:p2', 'blob:p3'], { requestSelected: true });
+    expect(ref.current.getAllPrintableDataUrls.length).toBe(1);
+    await expect(createPdfFromDocumentHandle(ref, [3, 1, 3], {})).rejects.toThrow();
+    expect(ref.outstanding.get('blob:p3')).toBe(0);
+    expect(ref.outstanding.get('blob:p1')).toBe(0);
+    expect(ref.outstanding.has('blob:p2')).toBe(false);
+  });
+
+  it('handlePdfOutput releases every per-occurrence lease of a request-selected handle', async () => {
+    stubFailingImage();
+    const ref = makeLedgerHandle(['blob:o1', 'blob:o2', 'blob:o3'], { requestSelected: true });
+    await expect(handlePdfOutput(ref, [3, 1, 3], {})).rejects.toThrow();
+    expect(ref.outstanding.get('blob:o3')).toBe(0);
+    expect(ref.outstanding.get('blob:o1')).toBe(0);
+  });
+
+  it('releasePrintablePdfSources releases a legacy duplicated selection once, keeping a concurrent lease', async () => {
+    const ref = makeLedgerHandle(['blob:l1', 'blob:l2'], { requestSelected: false });
+    ref.lease('blob:l1'); // a concurrent flow's lease
+    const urls = await collectPrintablePdfSources(ref, [1, 1]);
+    expect(urls).toEqual(['blob:l1', 'blob:l1']);
+    releasePrintablePdfSources(ref, urls);
+    expect(ref.outstanding.get('blob:l1')).toBe(1);
+    expect(ref.outstanding.get('blob:l2')).toBe(0);
+  });
+
+  it('releasePrintablePdfSources balances a request-selected duplicated selection', async () => {
+    const ref = makeLedgerHandle(['blob:r1', 'blob:r2'], { requestSelected: true });
+    const urls = await collectPrintablePdfSources(ref, [2, 2]);
+    expect(ref.outstanding.get('blob:r2')).toBe(2);
+    releasePrintablePdfSources(ref, urls);
+    expect(ref.outstanding.get('blob:r2')).toBe(0);
+  });
+});
+
+/**
+ * Img surface ref backed by a provider-like lease map: supersede() revokes the URL
+ * unless a print flow currently holds a lease on it.
+ */
+function makeSupersedableSurfaceRef(url) {
+  const ref = makeImgSurfaceRef(url);
+  const leases = new Map();
+  const revoked = new Set();
+  ref.leasePrintablePageUrl.mockImplementation((leasedUrl) => {
+    leases.set(leasedUrl, (leases.get(leasedUrl) || 0) + 1);
+  });
+  ref.releasePrintableDataUrls.mockImplementation((urls) => {
+    for (const leasedUrl of urls) leases.set(leasedUrl, Math.max(0, (leases.get(leasedUrl) || 0) - 1));
+  });
+  ref.supersede = () => {
+    if (!leases.get(url)) revoked.add(url);
+  };
+  ref.revoked = revoked;
+  return ref;
+}
+
+describe('Follow-up F2: current-page PDF leases the surface URL before the first await', () => {
+  it('handlePdfCurrent holds the lease when a supersession lands right after the call', async () => {
+    stubFailingImage();
+    const ref = makeSupersedableSurfaceRef('blob:pdf-current-race');
+    const pending = handlePdfCurrent(ref, {});
+    ref.supersede();
+    await expect(pending).rejects.toThrow();
+    expect(ref.revoked.has('blob:pdf-current-race')).toBe(false);
+    expect(ref.releasePrintableDataUrls).toHaveBeenCalledWith(['blob:pdf-current-race']);
+  });
+
+  it('handlePdfCurrentComparison holds both pane leases when a supersession lands right after the call', async () => {
+    stubFailingImage();
+    const primary = makeSupersedableSurfaceRef('blob:pdf-race-a');
+    const compare = makeSupersedableSurfaceRef('blob:pdf-race-b');
+    const pending = handlePdfCurrentComparison(primary, compare, {});
+    primary.supersede();
+    compare.supersede();
+    await expect(pending).rejects.toThrow();
+    expect(primary.revoked.has('blob:pdf-race-a')).toBe(false);
+    expect(compare.revoked.has('blob:pdf-race-b')).toBe(false);
+    expect(primary.releasePrintableDataUrls).toHaveBeenCalledWith(['blob:pdf-race-a']);
+    expect(compare.releasePrintableDataUrls).toHaveBeenCalledWith(['blob:pdf-race-b']);
   });
 });

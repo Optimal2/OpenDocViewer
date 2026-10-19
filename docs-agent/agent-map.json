@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60651,
-    "docletCount": 1656,
+    "sourceLineCount": 60676,
+    "docletCount": 1658,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -530,9 +530,9 @@
     {
       "path": "src/utils/printPdf.js",
       "score": 98,
-      "lines": 2464,
+      "lines": 2489,
       "incomingLocalImports": 3,
-      "doclets": 99,
+      "doclets": 101,
       "summary": "OpenDocViewer — Generated PDF print backend.",
       "summaryConfidence": "high"
     },
@@ -1567,8 +1567,8 @@
     {
       "name": "src/utils",
       "fileCount": 51,
-      "lineCount": 20035,
-      "docletCount": 809,
+      "lineCount": 20060,
+      "docletCount": 811,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1636,9 +1636,9 @@
         {
           "path": "src/utils/printPdf.js",
           "score": 98,
-          "lines": 2464,
+          "lines": 2489,
           "incomingLocalImports": 3,
-          "doclets": 99,
+          "doclets": 101,
           "summary": "OpenDocViewer — Generated PDF print backend.",
           "summaryConfidence": "high"
         }
@@ -55137,9 +55137,9 @@
     },
     {
       "path": "src/utils/printPdf.js",
-      "lines": 2464,
+      "lines": 2489,
       "extension": ".js",
-      "jsdocBlockCount": 107,
+      "jsdocBlockCount": 109,
       "sourceSummary": "OpenDocViewer — Generated PDF print backend.",
       "imports": [
         {
@@ -55254,42 +55254,42 @@
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2193
+          "line": 2204
         },
         {
           "name": "releasePrintablePdfSources",
           "kind": "function",
-          "line": 2205
+          "line": 2218
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2229
+          "line": 2244
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2247
+          "line": 2261
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2345
+          "line": 2369
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2375
+          "line": 2400
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2447
+          "line": 2472
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2461
+          "line": 2486
         }
       ],
       "declarations": [
@@ -55776,77 +55776,82 @@
         {
           "name": "getSelectedPrintableDataUrls",
           "kind": "function",
-          "line": 2125
+          "line": 2126
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2193
+          "line": 2204
         },
         {
           "name": "releasePrintablePdfSources",
           "kind": "function",
-          "line": 2205
+          "line": 2218
         },
         {
           "name": "pageNumberToIndex",
           "kind": "function",
-          "line": 2216
+          "line": 2231
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2229
+          "line": 2244
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2247
+          "line": 2261
         },
         {
           "name": "printableSourceFromElement",
           "kind": "function",
-          "line": 2268
+          "line": 2282
+        },
+        {
+          "name": "imageElementUrl",
+          "kind": "function",
+          "line": 2308
         },
         {
           "name": "canvasToPngDataUrl",
           "kind": "function",
-          "line": 2295
+          "line": 2319
         },
         {
           "name": "canvasToBlob",
           "kind": "function",
-          "line": 2309
+          "line": 2333
         },
         {
           "name": "blobToDataUrl",
           "kind": "function",
-          "line": 2324
+          "line": 2348
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2345
+          "line": 2369
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2375
+          "line": 2400
         },
         {
           "name": "pdfComposedComparison",
           "kind": "function",
-          "line": 2416
+          "line": 2441
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2447
+          "line": 2472
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2461
+          "line": 2486
         }
       ],
       "parseError": null,
@@ -58362,7 +58367,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2125,
+          "line": 2126,
           "description": "Read printable page image URLs from the document renderer.",
           "params": [
             {
@@ -58386,10 +58391,23 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<string>>",
-              "description": ""
+              "type": "Promise.<{urls: Array.<string>, leased: Array.<string>}>",
+              "description": "urls in PDF order and leased , the exact lease entries the flow now holds (release those, not urls )."
             }
           ],
+          "examples": 0
+        },
+        {
+          "id": "collectedSourceLeases",
+          "name": "collectedSourceLeases",
+          "longname": "collectedSourceLeases",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/printPdf.js",
+          "line": 2193,
+          "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
+          "params": [],
+          "returns": [],
           "examples": 0
         },
         {
@@ -58399,7 +58417,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2193,
+          "line": 2204,
           "description": "Collect printable page image URLs without creating or opening a PDF.",
           "params": [
             {
@@ -58436,7 +58454,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2205,
+          "line": 2218,
           "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
           "params": [
             {
@@ -58449,7 +58467,7 @@
               "name": "urls",
               "type": "Array.<string>",
               "optional": false,
-              "description": ""
+              "description": "The array returned by collectPrintablePdfSources."
             }
           ],
           "returns": [
@@ -58467,7 +58485,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2216,
+          "line": 2231,
           "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
           "params": [
             {
@@ -58498,7 +58516,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2229,
+          "line": 2244,
           "description": "",
           "params": [
             {
@@ -58535,7 +58553,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2247,
+          "line": 2261,
           "description": "",
           "params": [
             {
@@ -58572,7 +58590,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2268,
+          "line": 2282,
           "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
           "params": [
             {
@@ -58591,13 +58609,38 @@
           "examples": 0
         },
         {
+          "id": "imageElementUrl",
+          "name": "imageElementUrl",
+          "longname": "imageElementUrl",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printPdf.js",
+          "line": 2308,
+          "description": "Read the URL an surface currently displays (empty for any other element).",
+          "params": [
+            {
+              "name": "el",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "canvasToPngDataUrl",
           "name": "canvasToPngDataUrl",
           "longname": "canvasToPngDataUrl",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2295,
+          "line": 2319,
           "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
           "params": [
             {
@@ -58622,7 +58665,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2309,
+          "line": 2333,
           "description": "",
           "params": [
             {
@@ -58653,7 +58696,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2324,
+          "line": 2348,
           "description": "",
           "params": [
             {
@@ -58678,7 +58721,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2345,
+          "line": 2369,
           "description": "Generate/print/download a PDF from the currently rendered active page surface.",
           "params": [
             {
@@ -58709,7 +58752,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2375,
+          "line": 2400,
           "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
           "params": [
             {
@@ -58746,7 +58789,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2416,
+          "line": 2441,
           "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
           "params": [
             {
@@ -58801,7 +58844,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2447,
+          "line": 2472,
           "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
           "params": [
             {
@@ -58844,7 +58887,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2461,
+          "line": 2486,
           "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
           "params": [
             {
@@ -101397,7 +101440,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2324,
+      "line": 2348,
       "description": "",
       "params": [
         {
@@ -101496,7 +101539,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2309,
+      "line": 2333,
       "description": "",
       "params": [
         {
@@ -101527,7 +101570,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2295,
+      "line": 2319,
       "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
       "params": [
         {
@@ -101571,13 +101614,26 @@
       "examples": 0
     },
     {
+      "id": "collectedSourceLeases",
+      "name": "collectedSourceLeases",
+      "longname": "collectedSourceLeases",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/printPdf.js",
+      "line": 2193,
+      "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "collectPrintablePdfSources",
       "name": "collectPrintablePdfSources",
       "longname": "collectPrintablePdfSources",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2193,
+      "line": 2204,
       "description": "Collect printable page image URLs without creating or opening a PDF.",
       "params": [
         {
@@ -101694,7 +101750,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2229,
+      "line": 2244,
       "description": "",
       "params": [
         {
@@ -102423,7 +102479,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2125,
+      "line": 2126,
       "description": "Read printable page image URLs from the document renderer.",
       "params": [
         {
@@ -102447,8 +102503,8 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<string>>",
-          "description": ""
+          "type": "Promise.<{urls: Array.<string>, leased: Array.<string>}>",
+          "description": "urls in PDF order and leased , the exact lease entries the flow now holds (release those, not urls )."
         }
       ],
       "examples": 0
@@ -102460,7 +102516,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2461,
+      "line": 2486,
       "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
       "params": [
         {
@@ -102503,7 +102559,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2447,
+      "line": 2472,
       "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
       "params": [
         {
@@ -102546,7 +102602,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2345,
+      "line": 2369,
       "description": "Generate/print/download a PDF from the currently rendered active page surface.",
       "params": [
         {
@@ -102577,7 +102633,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2375,
+      "line": 2400,
       "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
       "params": [
         {
@@ -102614,7 +102670,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2247,
+      "line": 2261,
       "description": "",
       "params": [
         {
@@ -102670,6 +102726,31 @@
       "returns": [
         {
           "type": "Array.<PdfRichLine>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "imageElementUrl",
+      "name": "imageElementUrl",
+      "longname": "imageElementUrl",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printPdf.js",
+      "line": 2308,
+      "description": "Read the URL an surface currently displays (empty for any other element).",
+      "params": [
+        {
+          "name": "el",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
           "description": ""
         }
       ],
@@ -103289,7 +103370,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2216,
+      "line": 2231,
       "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
       "params": [
         {
@@ -103395,7 +103476,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2416,
+      "line": 2441,
       "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
       "params": [
         {
@@ -103528,7 +103609,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2268,
+      "line": 2282,
       "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
       "params": [
         {
@@ -103609,7 +103690,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2205,
+      "line": 2218,
       "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
       "params": [
         {
@@ -103622,7 +103703,7 @@
           "name": "urls",
           "type": "Array.<string>",
           "optional": false,
-          "description": ""
+          "description": "The array returned by collectPrintablePdfSources."
         }
       ],
       "returns": [

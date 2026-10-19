@@ -2120,7 +2120,8 @@ function releasePrintableDataUrls(documentRenderRef, urls) {
  * @param {{ current: * }} documentRenderRef
  * @param {Array<number>=} pageNumbers 1-based page numbers in desired PDF order.
  * @param {AbortSignal=} signal
- * @returns {Promise<Array<string>>}
+ * @returns {Promise<{ urls: Array<string>, leased: Array<string> }>} `urls` in PDF order and
+ *   `leased`, the exact lease entries the flow now holds (release those, not `urls`).
  */
 async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal) {
   throwIfAborted(signal);
@@ -2155,8 +2156,10 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   try {
     throwIfAborted(signal);
     if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
-    if (!Array.isArray(pageNumbers) || !pageNumbers.length) return allUrls;
-    if (shouldRequestSelectedUrls) return allUrls;
+    // The handle leased once per returned entry: a request-selected handle leases
+    // every occurrence of a duplicated index, so the lease list is allUrls as-is.
+    if (!Array.isArray(pageNumbers) || !pageNumbers.length) return { urls: allUrls, leased: allUrls };
+    if (shouldRequestSelectedUrls) return { urls: allUrls, leased: allUrls };
 
     const selected = [];
     for (const pageNumber of pageNumbers) {
@@ -2169,17 +2172,25 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
     }
 
     if (!selected.length) throw new Error('No valid printable page numbers were selected.');
-    // A legacy handle may return every URL while the caller asked for a subset: release
-    // the leases this flow does not hand out so only `selected` stays leased.
+    // A legacy handle returns (and leases) every URL once while the caller asked for a
+    // subset: release the leases this flow does not hand out. A duplicated selection
+    // still holds only the one lease its URL got, so `leased` keeps one entry per lease.
     const selectedSet = new Set(selected);
     releasePrintableDataUrls(documentRenderRef, allUrls.filter((url) => !selectedSet.has(url)));
-    return selected;
+    return { urls: selected, leased: allUrls.filter((url) => selectedSet.has(url)) };
   } catch (error) {
     // The URLs were already leased above; a throw here must not leave them pinned.
     releasePrintableDataUrls(documentRenderRef, allUrls);
     throw error;
   }
 }
+
+/**
+ * Exact lease entries behind each array returned by collectPrintablePdfSources, so
+ * releasePrintablePdfSources releases what was leased rather than one per occurrence.
+ * @type {WeakMap<Array<string>, Array<string>>}
+ */
+const collectedSourceLeases = new WeakMap();
 
 /**
  * Collect printable page image URLs without creating or opening a PDF. This is
@@ -2191,7 +2202,9 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
  * @returns {Promise<Array<string>>}
  */
 export async function collectPrintablePdfSources(documentRenderRef, pageNumbers, signal) {
-  return getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal);
+  const { urls, leased } = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal);
+  collectedSourceLeases.set(urls, leased);
+  return urls;
 }
 
 /**
@@ -2199,11 +2212,13 @@ export async function collectPrintablePdfSources(documentRenderRef, pageNumbers,
  * consumer is done with them (prebuild/benchmark keep the URLs only while rendering).
  * Unknown URLs and foreign handles without a release function are ignored.
  * @param {{ current: * }} documentRenderRef
- * @param {Array<string>} urls
+ * @param {Array<string>} urls The array returned by collectPrintablePdfSources.
  * @returns {void}
  */
 export function releasePrintablePdfSources(documentRenderRef, urls) {
-  releasePrintableDataUrls(documentRenderRef, urls);
+  const leased = urls && collectedSourceLeases.get(urls);
+  if (leased) collectedSourceLeases.delete(urls);
+  releasePrintableDataUrls(documentRenderRef, leased || urls);
 }
 
 /**
@@ -2227,14 +2242,13 @@ function pageNumberToIndex(pageNumber, pageCount) {
  * @returns {Promise<Blob>}
  */
 export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options = {}) {
-  const selected = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
+  const { urls: selected, leased } = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
   try {
     return await createPrintPdfBlob(selected, options);
   } finally {
-    // Release per lease, not per occurrence: a duplicated page selection against
-    // a legacy zero-arg handle leases each URL once, so duplicates must not
-    // release twice (that would steal a concurrent flow's lease).
-    releasePrintableDataUrls(documentRenderRef, [...new Set(selected)]);
+    // Release exactly the leases taken: a legacy zero-arg handle leases a duplicated
+    // page once, a request-selected handle once per occurrence.
+    releasePrintableDataUrls(documentRenderRef, leased);
   }
 }
 
@@ -2246,7 +2260,7 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
  */
 export async function handlePdfOutput(documentRenderRef, pageNumbers, options = {}) {
   throwIfAborted(options.signal);
-  const selected = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
+  const { urls: selected, leased } = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
   const selectedCount = selected.length;
   try {
     const blob = await createPrintPdfBlob(selected, options);
@@ -2254,8 +2268,8 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
     if (options.deferOutput === true) return blob;
     await executeOutputAction(blob, options, selectedCount);
   } finally {
-    // Release per lease, not per occurrence (see createPdfFromDocumentHandle).
-    releasePrintableDataUrls(documentRenderRef, [...new Set(selected)]);
+    // Release exactly the leases taken (see createPdfFromDocumentHandle).
+    releasePrintableDataUrls(documentRenderRef, leased);
   }
 }
 
@@ -2280,10 +2294,20 @@ async function printableSourceFromElement(el) {
     }
   }
   if (tag === 'img') {
-    const url = el.currentSrc || el.src || '';
+    const url = imageElementUrl(el);
     return isSafeImageSrc(url) ? url : null;
   }
   return null;
+}
+
+/**
+ * Read the URL an <img> surface currently displays (empty for any other element).
+ * @param {*} el
+ * @returns {string}
+ */
+function imageElementUrl(el) {
+  if (String(el?.tagName || '').toLowerCase() !== 'img') return '';
+  return el.currentSrc || el.src || '';
 }
 
 /**
@@ -2348,14 +2372,15 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   if (!node) {
     throw new Error('Unable to generate PDF from the active surface: the document handle did not return an active canvas/image element.');
   }
-  const src = await printableSourceFromElement(node);
-  if (!src) {
-    throw new Error(`Unable to generate PDF from the active surface: active ${String(node?.tagName || 'element').toLowerCase()} could not be converted to a safe printable source. ${SAFE_IMAGE_SOURCE_HINT}`);
-  }
-  // Pin the live surface URL for the PDF flow; released on completion, cancel
-  // and failure alike.
-  const leasedUrls = leaseSurfaceBlobUrls(documentRenderRef, node, src);
+  // Pin the live surface URL before the first await, in the same task that reads
+  // it, so a supersession cannot revoke it in between; released on completion,
+  // cancel and failure alike.
+  const leasedUrls = leaseSurfaceBlobUrls(documentRenderRef, node, imageElementUrl(node));
   try {
+    const src = await printableSourceFromElement(node);
+    if (!src) {
+      throw new Error(`Unable to generate PDF from the active surface: active ${String(node?.tagName || 'element').toLowerCase()} could not be converted to a safe printable source. ${SAFE_IMAGE_SOURCE_HINT}`);
+    }
     const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
     throwIfAborted(options.signal);
     if (options.deferOutput === true) return blob;
@@ -2376,22 +2401,22 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
   throwIfAborted(options.signal);
   const primaryNode = resolvePrintableSurface(primaryRenderRef);
   const compareNode = resolvePrintableSurface(compareRenderRef);
-  const [primary, compare] = await Promise.all([
-    printableSourceFromElement(primaryNode),
-    printableSourceFromElement(compareNode),
-  ]);
-  const urls = [primary, compare].filter(Boolean);
-  if (urls.length !== 2) {
-    const missing = [];
-    if (!primary) missing.push('primary');
-    if (!compare) missing.push('compare');
-    throw new Error(`Both comparison surfaces are required for generated PDF output. Missing surface(s): ${missing.join(', ')}.`);
-  }
-  // Pin each live pane URL through its own handle; released on completion,
-  // cancel and failure alike.
-  const leasedPrimaryUrls = leaseSurfaceBlobUrls(primaryRenderRef, primaryNode, primary);
-  const leasedCompareUrls = leaseSurfaceBlobUrls(compareRenderRef, compareNode, compare);
+  // Pin each live pane URL through its own handle before the first await (see
+  // handlePdfCurrent); released on completion, cancel and failure alike.
+  const leasedPrimaryUrls = leaseSurfaceBlobUrls(primaryRenderRef, primaryNode, imageElementUrl(primaryNode));
+  const leasedCompareUrls = leaseSurfaceBlobUrls(compareRenderRef, compareNode, imageElementUrl(compareNode));
   try {
+    const [primary, compare] = await Promise.all([
+      printableSourceFromElement(primaryNode),
+      printableSourceFromElement(compareNode),
+    ]);
+    const urls = [primary, compare].filter(Boolean);
+    if (urls.length !== 2) {
+      const missing = [];
+      if (!primary) missing.push('primary');
+      if (!compare) missing.push('compare');
+      throw new Error(`Both comparison surfaces are required for generated PDF output. Missing surface(s): ${missing.join(', ')}.`);
+    }
     const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: selectPageContexts(options.pageContexts, urls.length) });
     throwIfAborted(options.signal);
     if (options.deferOutput === true) return blob;
