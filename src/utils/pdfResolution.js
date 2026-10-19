@@ -107,6 +107,24 @@ export function resolvePdfResolutionBoost(input, currentScale) {
   return { ...result, available: result.scale > currentScale * (1 + 1e-9) };
 }
 
+/**
+ * Apply an explicit per-render scale override to a normalized policy, the same way
+ * `getPdfResolutionInputs` does on the main thread: the override becomes a fixed scale and
+ * raises `maxScale` so it is not clamped by the policy ceiling. The hard safety caps inside
+ * `resolvePdfRenderScale` (scale limit, maxPixels, render surface) still apply, and an
+ * invalid override leaves the normalized policy unchanged.
+ * @param {Object} config Render config accepted by `normalizePdfResolution`.
+ * @param {*} fullPageScale Explicit scale override, if any.
+ * @returns {Object} Normalized policy with the bounded override applied.
+ */
+export function applyPdfScaleOverride(config, fullPageScale) {
+  const policy = normalizePdfResolution(config);
+  const override = Number(fullPageScale);
+  return Number.isFinite(override) && override > 0
+    ? { ...policy, mode: 'fixed', fixedScale: override, maxScale: Math.max(policy.maxScale, override) }
+    : policy;
+}
+
 /** Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. */
 export function resolvePdfViewportResolution(viewport, input) {
   const dimensions = { pageWidthPt: viewport.width, pageHeightPt: viewport.height, rotation: 0 };

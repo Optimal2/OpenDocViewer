@@ -10,7 +10,7 @@
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { withPdfJsDocumentOptions } from '../utils/pdfjsDocumentOptions.js';
-import { resolvePdfViewportResolution } from '../utils/pdfResolution.js';
+import { applyPdfScaleOverride, resolvePdfViewportResolution } from '../utils/pdfResolution.js';
 
 const workerScope = self;
 const MIN_THUMBNAIL_DIMENSION = 24;
@@ -286,7 +286,7 @@ async function renderPdfPageAsset(payload) {
     const baseViewport = page.getViewport({ scale: 1 });
     const pdfResolution = variant === 'thumbnail' ? null
       : resolvePdfViewportResolution(baseViewport, payload.pdfResolutionInput || {
-          config: { fullPageScale: payload.fullPageScale, pdfResolution: { mode: 'fixed' } },
+          config: { pdfResolution: applyPdfScaleOverride({ fullPageScale: payload.fullPageScale, pdfResolution: { mode: 'fixed' } }, payload.fullPageScale) },
         });
     const targetScale = variant === 'thumbnail'
       ? fitScale(

@@ -32,4 +32,16 @@ it('renders single and batch requests in a window-less worker with the shared po
   const batch = worker.postMessage.mock.calls.find(([value]) => value.type === 'renderPdfPageAssetBatchItem')[0];
   expect(batch).toMatchObject({ ok: true, width: single.width, height: single.height, pdfResolution: single.pdfResolution });
   expect(render).toHaveBeenCalledTimes(2);
+  await worker.onmessage({ data: { type: 'renderPdfPageAsset', taskId: 3, payload: { ...payload, pdfResolutionInput: undefined, fullPageScale: 8 } } });
+  const boosted = worker.postMessage.mock.calls.find(([value]) => value.taskId === 3)[0];
+  expect(boosted).toMatchObject({ ok: true, width: 4760, height: 6736 });
+  expect(boosted.pdfResolution.scale).toBe(8);
+  await worker.onmessage({ data: { type: 'renderPdfPageAsset', taskId: 4, payload: { ...payload, pdfResolutionInput: undefined, fullPageScale: 'junk' } } });
+  const invalid = worker.postMessage.mock.calls.find(([value]) => value.taskId === 4)[0];
+  expect(invalid.pdfResolution.scale).toBe(2);
+  await worker.onmessage({ data: { type: 'renderPdfPageAsset', taskId: 5, payload: { ...payload, pdfResolutionInput: undefined, fullPageScale: 20 } } });
+  const bounded = worker.postMessage.mock.calls.find(([value]) => value.taskId === 5)[0];
+  expect(bounded.pdfResolution.scale).toBeGreaterThan(6);
+  expect(bounded.pdfResolution.scale).toBeLessThanOrEqual(12);
+  expect(bounded.pdfResolution.pixels).toBeLessThanOrEqual(40e6);
 });

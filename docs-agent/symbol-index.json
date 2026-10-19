@@ -15087,7 +15087,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2626,
+    "line": 2634,
     "description": "",
     "params": [
       {
@@ -15107,7 +15107,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2612,
+    "line": 2620,
     "description": "",
     "params": [
       {
@@ -15203,7 +15203,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1925,
+    "line": 1933,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -15278,7 +15278,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2631,
+    "line": 2639,
     "description": "",
     "params": [
       {
@@ -15329,7 +15329,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2322,
+    "line": 2330,
     "description": "",
     "params": [
       {
@@ -15951,7 +15951,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2188,
+    "line": 2196,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -16019,7 +16019,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2007,
+    "line": 2015,
     "description": "",
     "params": [
       {
@@ -16216,7 +16216,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2279,
+    "line": 2287,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -16247,7 +16247,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2621,
+    "line": 2629,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -16398,7 +16398,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2029,
+    "line": 2037,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {
@@ -28447,6 +28447,37 @@
     "examples": 0
   },
   {
+    "id": "applyPdfScaleOverride",
+    "name": "applyPdfScaleOverride",
+    "longname": "applyPdfScaleOverride",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/pdfResolution.js",
+    "line": 120,
+    "description": "Apply an explicit per-render scale override to a normalized policy, the same way getPdfResolutionInputs does on the main thread: the override becomes a fixed scale and raises maxS...",
+    "params": [
+      {
+        "name": "config",
+        "type": "Object",
+        "optional": false,
+        "description": "Render config accepted by normalizePdfResolution ."
+      },
+      {
+        "name": "fullPageScale",
+        "type": "*",
+        "optional": false,
+        "description": "Explicit scale override, if any."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "Normalized policy with the bounded override applied."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "normalizePdfResolution",
     "name": "normalizePdfResolution",
     "longname": "normalizePdfResolution",
@@ -28530,7 +28561,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfResolution.js",
-    "line": 111,
+    "line": 129,
     "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
     "params": [],
     "returns": [],

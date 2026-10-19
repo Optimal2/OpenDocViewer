@@ -567,18 +567,18 @@
 | <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:985</code> |  |
 | <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:543</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:217</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2626</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2612</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2634</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2620</code> |  |
 | <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1057</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:59</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:53</code> |  |
 | <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1518</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1925</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1933</code> | Render one PDF page again at twice its effective PDF scale. |
 | <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1740</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:74</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2631</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2639</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:149</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2322</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2330</code> |  |
 | <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1398</code> |  |
 | <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1494</code> |  |
 | <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:994</code> |  |
@@ -600,24 +600,24 @@
 | <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:895</code> |  |
 | <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1329</code> |  |
 | <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1472</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2188</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2196</code> | Drain background eager-render work without blocking the UI thread. |
 | <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1253</code> |  |
 | <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1262</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2007</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2015</code> |  |
 | <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1209</code> |  |
 | <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1648</code> |  |
 | <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:696</code> |  |
 | <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:159</code> |  |
 | <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1576</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:674</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2279</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2621</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2287</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2629</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
 | <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1563</code> |  |
 | <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1229</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:64</code> |  |
 | <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:172</code> |  |
 | <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1407</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2029</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2037</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
 | <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1483</code> |  |
 | <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:496</code> |  |
 | <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:338</code> |  |
@@ -1142,12 +1142,13 @@
 | <code>normalizePdfPrintCacheLanguageMode</code> | function | <code>src/utils/pdfPrintCacheKey.js:21</code> |  |
 | <code>normalizePdfPrintCachePageNumbers</code> | function | <code>src/utils/pdfPrintCacheKey.js:60</code> |  |
 | <code>stablePrintText</code> | function | <code>src/utils/pdfPrintCacheKey.js:13</code> |  |
+| <code>applyPdfScaleOverride</code> | function | <code>src/utils/pdfResolution.js:120</code> | Apply an explicit per-render scale override to a normalized policy, the same way getPdfResolutionInputs does on the main thread: the override becomes a fixed scale and raises maxS... |
 | <code>normalizePdfResolution</code> | function | <code>src/utils/pdfResolution.js:29</code> | Normalize a render config, including the legacy fullPageScale alias. |
 | <code>PDF_POINTS_PER_INCH</code> | constant | <code>src/utils/pdfResolution.js:10</code> | PDF user space is 72 points per inch; a scale factor is therefore dpi / 72. |
 | <code>PDF_RESOLUTION_SCALE_LIMIT</code> | constant | <code>src/utils/pdfResolution.js:17</code> | Upper bound for configured scale factors. |
 | <code>resolvePdfRenderScale</code> | function | <code>src/utils/pdfResolution.js:62</code> | Resolve an effective scale without reading browser globals. |
 | <code>resolvePdfResolutionBoost</code> | function | <code>src/utils/pdfResolution.js:100</code> | Double the current effective scale for a one-shot boost. |
-| <code>resolvePdfViewportResolution</code> | function | <code>src/utils/pdfResolution.js:111</code> | Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. |
+| <code>resolvePdfViewportResolution</code> | function | <code>src/utils/pdfResolution.js:129</code> | Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. |
 | <code>getPdfResolutionDiagnostics</code> | function | <code>src/utils/pdfResolutionRuntime.js:39</code> | Effective PDF display diagnostics, with null scale until a page has been rendered. |
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |

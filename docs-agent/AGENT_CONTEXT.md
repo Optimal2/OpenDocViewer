@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 148
-- Source lines: 60285
-- JSDoc symbols: 1644
+- Source lines: 60311
+- JSDoc symbols: 1645
 - Files with JSDoc: 148
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -39,8 +39,8 @@ Source commit: not embedded
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
-- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
+- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfSignatureDocuments.js` - Per\-document aggregation of PDF signature reports.
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.

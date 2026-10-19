@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60285,
-    "docletCount": 1644,
+    "sourceLineCount": 60311,
+    "docletCount": 1645,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -519,21 +519,21 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/utils/pdfResolution.js",
+      "score": 100,
+      "lines": 133,
+      "incomingLocalImports": 6,
+      "doclets": 7,
+      "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/utils/printPdf.js",
       "score": 97,
       "lines": 2358,
       "incomingLocalImports": 3,
       "doclets": 95,
       "summary": "OpenDocViewer — Generated PDF print backend.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/pdfResolution.js",
-      "score": 96,
-      "lines": 115,
-      "incomingLocalImports": 6,
-      "doclets": 6,
-      "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "summaryConfidence": "high"
     },
     {
@@ -650,7 +650,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2729,
+            "lines": 2737,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -1262,7 +1262,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3352,
+      "lineCount": 3360,
       "docletCount": 91,
       "importantFiles": [
         {
@@ -1277,7 +1277,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2729,
+          "lines": 2737,
           "incomingLocalImports": 1,
           "doclets": 62,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1567,8 +1567,8 @@
     {
       "name": "src/utils",
       "fileCount": 51,
-      "lineCount": 19790,
-      "docletCount": 801,
+      "lineCount": 19808,
+      "docletCount": 802,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1625,21 +1625,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/utils/pdfResolution.js",
+          "score": 100,
+          "lines": 133,
+          "incomingLocalImports": 6,
+          "doclets": 7,
+          "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/utils/printPdf.js",
           "score": 97,
           "lines": 2358,
           "incomingLocalImports": 3,
           "doclets": 95,
           "summary": "OpenDocViewer — Generated PDF print backend.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/utils/pdfResolution.js",
-          "score": 96,
-          "lines": 115,
-          "incomingLocalImports": 6,
-          "doclets": 6,
-          "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
           "summaryConfidence": "high"
         }
       ]
@@ -28980,7 +28980,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2729,
+      "lines": 2737,
       "extension": ".jsx",
       "jsdocBlockCount": 67,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -29274,37 +29274,37 @@
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2067
+          "line": 2075
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2081
+          "line": 2089
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2095
+          "line": 2103
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2128
+          "line": 2136
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2298
+          "line": 2306
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2389
+          "line": 2397
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2391
+          "line": 2399
         }
       ],
       "parseError": null,
@@ -30689,7 +30689,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1925,
+          "line": 1933,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -30714,7 +30714,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2007,
+          "line": 2015,
           "description": "",
           "params": [
             {
@@ -30745,7 +30745,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2029,
+          "line": 2037,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -30770,7 +30770,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2188,
+          "line": 2196,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -30788,7 +30788,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2279,
+          "line": 2287,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -30819,7 +30819,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2322,
+          "line": 2330,
           "description": "",
           "params": [
             {
@@ -30844,7 +30844,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2612,
+          "line": 2620,
           "description": "",
           "params": [
             {
@@ -30864,7 +30864,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2621,
+          "line": 2629,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -30890,7 +30890,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2626,
+          "line": 2634,
           "description": "",
           "params": [
             {
@@ -30910,7 +30910,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2631,
+          "line": 2639,
           "description": "",
           "params": [
             {
@@ -48992,9 +48992,9 @@
     },
     {
       "path": "src/utils/pdfResolution.js",
-      "lines": 115,
+      "lines": 133,
       "extension": ".js",
-      "jsdocBlockCount": 7,
+      "jsdocBlockCount": 8,
       "sourceSummary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "imports": [
         {
@@ -49038,9 +49038,14 @@
           "line": 100
         },
         {
+          "name": "applyPdfScaleOverride",
+          "kind": "function",
+          "line": 120
+        },
+        {
           "name": "resolvePdfViewportResolution",
           "kind": "function",
-          "line": 111
+          "line": 129
         }
       ],
       "declarations": [
@@ -49070,14 +49075,19 @@
           "line": 100
         },
         {
+          "name": "applyPdfScaleOverride",
+          "kind": "function",
+          "line": 120
+        },
+        {
           "name": "resolvePdfViewportResolution",
           "kind": "function",
-          "line": 111
+          "line": 129
         },
         {
           "name": "dimensions",
           "kind": "object",
-          "line": 112
+          "line": 130
         }
       ],
       "parseError": null,
@@ -49164,13 +49174,44 @@
           "examples": 0
         },
         {
+          "id": "applyPdfScaleOverride",
+          "name": "applyPdfScaleOverride",
+          "longname": "applyPdfScaleOverride",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/pdfResolution.js",
+          "line": 120,
+          "description": "Apply an explicit per-render scale override to a normalized policy, the same way getPdfResolutionInputs does on the main thread: the override becomes a fixed scale and raises maxS...",
+          "params": [
+            {
+              "name": "config",
+              "type": "Object",
+              "optional": false,
+              "description": "Render config accepted by normalizePdfResolution ."
+            },
+            {
+              "name": "fullPageScale",
+              "type": "*",
+              "optional": false,
+              "description": "Explicit scale override, if any."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": "Normalized policy with the bounded override applied."
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "resolvePdfViewportResolution",
           "name": "resolvePdfViewportResolution",
           "longname": "resolvePdfViewportResolution",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 111,
+          "line": 129,
           "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
           "params": [],
           "returns": [],
@@ -49191,7 +49232,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 6,
-      "importanceScore": 96,
+      "importanceScore": 100,
       "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -67850,6 +67891,7 @@
         {
           "source": "../utils/pdfResolution.js",
           "specifiers": [
+            "applyPdfScaleOverride",
             "resolvePdfViewportResolution"
           ],
           "line": 13,
@@ -68005,6 +68047,7 @@
         {
           "source": "../utils/pdfResolution.js",
           "specifiers": [
+            "applyPdfScaleOverride",
             "resolvePdfViewportResolution"
           ],
           "line": 13,
@@ -83436,7 +83479,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2626,
+      "line": 2634,
       "description": "",
       "params": [
         {
@@ -83456,7 +83499,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2612,
+      "line": 2620,
       "description": "",
       "params": [
         {
@@ -83552,7 +83595,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1925,
+      "line": 1933,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -83627,7 +83670,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2631,
+      "line": 2639,
       "description": "",
       "params": [
         {
@@ -83678,7 +83721,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2322,
+      "line": 2330,
       "description": "",
       "params": [
         {
@@ -84300,7 +84343,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2188,
+      "line": 2196,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -84368,7 +84411,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2007,
+      "line": 2015,
       "description": "",
       "params": [
         {
@@ -84565,7 +84608,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2279,
+      "line": 2287,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -84596,7 +84639,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2621,
+      "line": 2629,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -84747,7 +84790,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2029,
+      "line": 2037,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -96796,6 +96839,37 @@
       "examples": 0
     },
     {
+      "id": "applyPdfScaleOverride",
+      "name": "applyPdfScaleOverride",
+      "longname": "applyPdfScaleOverride",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/pdfResolution.js",
+      "line": 120,
+      "description": "Apply an explicit per-render scale override to a normalized policy, the same way getPdfResolutionInputs does on the main thread: the override becomes a fixed scale and raises maxS...",
+      "params": [
+        {
+          "name": "config",
+          "type": "Object",
+          "optional": false,
+          "description": "Render config accepted by normalizePdfResolution ."
+        },
+        {
+          "name": "fullPageScale",
+          "type": "*",
+          "optional": false,
+          "description": "Explicit scale override, if any."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": "Normalized policy with the bounded override applied."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "normalizePdfResolution",
       "name": "normalizePdfResolution",
       "longname": "normalizePdfResolution",
@@ -96879,7 +96953,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 111,
+      "line": 129,
       "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
       "params": [],
       "returns": [],

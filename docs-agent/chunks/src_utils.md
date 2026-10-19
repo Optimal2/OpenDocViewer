@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 19790. JSDoc symbol count: 801.
+File count: 51. Line count: 19808. JSDoc symbol count: 802.
 
 ## src/utils/compareCurtain.js
 
@@ -430,7 +430,7 @@ Symbols:
 
 Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 
-Exports: `PDF_RESOLUTION_DEFAULTS`, `PDF_POINTS_PER_INCH`, `PDF_RESOLUTION_SCALE_LIMIT`, `normalizePdfResolution`, `resolvePdfRenderScale`, `resolvePdfResolutionBoost`, `resolvePdfViewportResolution`
+Exports: `PDF_RESOLUTION_DEFAULTS`, `PDF_POINTS_PER_INCH`, `PDF_RESOLUTION_SCALE_LIMIT`, `normalizePdfResolution`, `resolvePdfRenderScale`, `resolvePdfResolutionBoost`, `applyPdfScaleOverride`, `resolvePdfViewportResolution`
 
 Local imports: `src/utils/renderSurfaceBounds.js`
 
@@ -441,6 +441,7 @@ Symbols:
 - `normalizePdfResolution` (function) - Normalize a render config, including the legacy fullPageScale alias.
 - `resolvePdfRenderScale` (function) - Resolve an effective scale without reading browser globals.
 - `resolvePdfResolutionBoost` (function) - Double the current effective scale for a one\-shot boost.
+- `applyPdfScaleOverride` (function) - Apply an explicit per\-render scale override to a normalized policy, the same way getPdfResolutionInputs does on the main thread: the override becomes a fixed scale and raises maxS...
 - `resolvePdfViewportResolution` (function) - Resolve a scale\-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.
 
 ## src/utils/pdfResolutionRuntime.js

@@ -22,7 +22,7 @@ import { ViewerProvider } from './ViewerProvider.jsx';
 import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
 import { resolvePdfViewportResolution } from '../utils/pdfResolution.js';
 import { getPdfResolutionInputs } from '../utils/pdfResolutionRuntime.js';
-import { revokeTrackedObjectUrl } from '../utils/objectUrlRegistry.js';
+import { isTrackedObjectUrl, revokeTrackedObjectUrl } from '../utils/objectUrlRegistry.js';
 
 beforeEach(() => { harness.states = []; harness.assets.clear(); });
 async function setup(scale = 2, pdfResolutionOverrides = {}) {
@@ -135,6 +135,89 @@ describe('provider PDF resolution and asset replacement', () => {
     await api.ensurePageAsset(2, 'full');
     expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(2);
     await api.disposeDocumentSession();
+  });
+  it('captures the superseded URL after an in-flight plain render lands and revokes it exactly once', async () => {
+    const api = await setup(2);
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    const realRender = harness.renderer.renderPageAsset.getMockImplementation();
+    let resolvePlain; let resolveBoost;
+    const plainGate = new Promise((resolve) => { resolvePlain = resolve; });
+    const boostGate = new Promise((resolve) => { resolveBoost = resolve; });
+    harness.renderer.renderPageAsset
+      .mockImplementationOnce(async (page, options) => { await plainGate; return realRender(page, options); })
+      .mockImplementationOnce(async (page, options) => { await boostGate; return realRender(page, options); });
+    try {
+      const plain = api.ensurePageAsset(0, 'full');
+      const boost = api.ensurePageAsset(0, 'full', { forceRefresh: true, fullPageScale: 4, persist: false });
+      resolvePlain();
+      const plainUrl = await plain;
+      // The plain asset stays displayed while the boost renders; it is not cleared up front.
+      const during = harness.states.find((state) => Array.isArray(state) && state[0]?.fullSizeUrl !== undefined);
+      expect(during?.[0]?.fullSizeUrl).toBe(plainUrl);
+      expect(isTrackedObjectUrl(plainUrl)).toBe(true);
+      resolveBoost();
+      const boostedUrl = await boost;
+      expect(boostedUrl).not.toBe(plainUrl);
+      expect(revokeSpy.mock.calls.filter(([url]) => url === plainUrl)).toHaveLength(1);
+      expect(isTrackedObjectUrl(plainUrl)).toBe(false);
+      expect(isTrackedObjectUrl(boostedUrl)).toBe(true);
+      const after = harness.states.find((state) => Array.isArray(state) && state[0]?.fullSizeUrl !== undefined);
+      expect(after?.[0]?.fullSizeUrl).toBe(boostedUrl);
+    } finally {
+      revokeSpy.mockRestore();
+      await api.disposeDocumentSession();
+    }
+  });
+  it('revokes each superseded URL once when a boost waits for an in-flight scale render', async () => {
+    const api = await setup(2);
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    const realRender = harness.renderer.renderPageAsset.getMockImplementation();
+    let resolveFirst;
+    const firstGate = new Promise((resolve) => { resolveFirst = resolve; });
+    try {
+      const original = await api.ensurePageAsset(0, 'full');
+      harness.renderer.renderPageAsset.mockImplementationOnce(async (page, options) => { await firstGate; return realRender(page, options); });
+      const first = api.ensurePageAsset(0, 'full', { forceRefresh: true, fullPageScale: 4, persist: false });
+      const second = api.ensurePageAsset(0, 'full', { forceRefresh: true, fullPageScale: 8, persist: false });
+      resolveFirst();
+      const firstUrl = await first;
+      const secondUrl = await second;
+      expect(firstUrl).not.toBe(original);
+      expect(secondUrl).not.toBe(firstUrl);
+      expect(revokeSpy.mock.calls.filter(([url]) => url === original)).toHaveLength(1);
+      expect(revokeSpy.mock.calls.filter(([url]) => url === firstUrl)).toHaveLength(1);
+      expect(isTrackedObjectUrl(secondUrl)).toBe(true);
+    } finally {
+      revokeSpy.mockRestore();
+      await api.disposeDocumentSession();
+    }
+  });
+  it('does not commit or double-revoke when a boost completes after disposal', async () => {
+    const api = await setup(2);
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');
+    const realRender = harness.renderer.renderPageAsset.getMockImplementation();
+    let resolvePlain; let resolveBoost;
+    const plainGate = new Promise((resolve) => { resolvePlain = resolve; });
+    const boostGate = new Promise((resolve) => { resolveBoost = resolve; });
+    harness.renderer.renderPageAsset
+      .mockImplementationOnce(async (page, options) => { await plainGate; return realRender(page, options); })
+      .mockImplementationOnce(async (page, options) => { await boostGate; return realRender(page, options); });
+    try {
+      const plain = api.ensurePageAsset(0, 'full');
+      const boost = api.ensurePageAsset(0, 'full', { forceRefresh: true, fullPageScale: 4, persist: false });
+      resolvePlain();
+      const plainUrl = await plain;
+      await api.disposeDocumentSession();
+      const callsAfterDispose = revokeSpy.mock.calls.filter(([url]) => url === plainUrl).length;
+      expect(callsAfterDispose).toBe(1);
+      resolveBoost();
+      expect(await boost).toBeNull();
+      // Late completion created no visible asset and did not revoke the disposed URL again.
+      expect(revokeSpy.mock.calls.filter(([url]) => url === plainUrl)).toHaveLength(1);
+      expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(2);
+    } finally {
+      revokeSpy.mockRestore();
+    }
   });
   it('does not serve the previous factor when an explicit scale is requested without forceRefresh', async () => {
     const api = await setup(2);

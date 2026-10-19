@@ -1757,7 +1757,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     // an empty page and request an ordinary render that raced the boost; the ordinary raster
     // landed last and silently won (measured 2026-09-10). The previous URL is revoked on commit.
     const replaceVisibleOnCommit = isScaleOverride && (options.forceRefresh === true || resolutionChanged);
-    const previousVisibleUrl = replaceVisibleOnCommit ? String(workingPage[urlField] || '').trim() : '';
+    let previousVisibleUrl = '';
     if ((options.forceRefresh === true || resolutionChanged) && !replaceVisibleOnCommit) {
       clearPageAssetReference(safeIndex, variant);
       workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
@@ -1829,6 +1829,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       // An ordinary render is already in flight; let it land first, the boost retries afterwards.
       await pendingAssetPromisesRef.current.get(plainPendingKey);
     }
+    // Capture the superseded URL only after any in-flight render has landed: it may have
+    // committed a newer visible URL than the one seen at entry.
+    if (replaceVisibleOnCommit) {
+      previousVisibleUrl = String((getPageAt(allPagesRef.current, safeIndex) || workingPage)?.[urlField] || '').trim();
+    }
 
     const sessionEpoch = sessionEpochRef.current;
     if (!replaceVisibleOnCommit) patchPageAtIndex(safeIndex, { [statusField]: 0 });
@@ -1876,9 +1881,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           if (sessionEpochRef.current !== sessionEpoch) return null;
         }
 
+        const supersededUrl = replaceVisibleOnCommit ? String(getPageAt(allPagesRef.current, safeIndex)?.[urlField] || '').trim() || previousVisibleUrl : '';
         const url = commitRenderedPageAsset(safeIndex, variant, rendered, options);
-        if (replaceVisibleOnCommit && previousVisibleUrl && previousVisibleUrl !== url) {
-          revokeTrackedObjectUrls(new Set([previousVisibleUrl]));
+        if (replaceVisibleOnCommit && supersededUrl && supersededUrl !== url && isTrackedObjectUrl(supersededUrl)) {
+          const pageAfterCommit = getPageAt(allPagesRef.current, safeIndex);
+          const stillReferenced = [pageAfterCommit?.fullSizeUrl, pageAfterCommit?.thumbnailUrl].some((value) => String(value || '').trim() === supersededUrl);
+          if (!stillReferenced) revokeTrackedObjectUrls(new Set([supersededUrl]));
         }
 
         if (options.persist !== false && persistFullInBackground) {
