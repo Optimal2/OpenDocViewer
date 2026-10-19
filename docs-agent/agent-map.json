@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60311,
-    "docletCount": 1645,
+    "sourceLineCount": 60452,
+    "docletCount": 1651,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -530,9 +530,9 @@
     {
       "path": "src/utils/printPdf.js",
       "score": 97,
-      "lines": 2358,
+      "lines": 2386,
       "incomingLocalImports": 3,
-      "doclets": 95,
+      "doclets": 96,
       "summary": "OpenDocViewer — Generated PDF print backend.",
       "summaryConfidence": "high"
     },
@@ -547,8 +547,8 @@
     },
     {
       "path": "src/contexts/viewerContext.js",
-      "score": 90,
-      "lines": 239,
+      "score": 91,
+      "lines": 242,
       "incomingLocalImports": 12,
       "doclets": 12,
       "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
@@ -592,10 +592,10 @@
     },
     {
       "path": "src/utils/printCore.js",
-      "score": 85,
-      "lines": 942,
+      "score": 86,
+      "lines": 968,
       "incomingLocalImports": 3,
-      "doclets": 36,
+      "doclets": 37,
       "summary": "Core print coordinator for the frontend.",
       "summaryConfidence": "high"
     },
@@ -643,14 +643,14 @@
         "files": [
           {
             "path": "src/contexts/viewerContext.js",
-            "score": 90,
-            "lines": 239,
+            "score": 91,
+            "lines": 242,
             "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360)."
           },
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2737,
+            "lines": 2816,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -925,7 +925,7 @@
     {
       "name": "src/components",
       "fileCount": 18,
-      "lineCount": 7842,
+      "lineCount": 7847,
       "docletCount": 103,
       "importantFiles": [
         {
@@ -940,7 +940,7 @@
         {
           "path": "src/components/DocumentRender.jsx",
           "score": 62,
-          "lines": 1167,
+          "lines": 1172,
           "incomingLocalImports": 3,
           "doclets": 26,
           "summary": "OpenDocViewer — Active page renderer.",
@@ -1262,13 +1262,13 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3360,
-      "docletCount": 91,
+      "lineCount": 3442,
+      "docletCount": 95,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
-          "score": 90,
-          "lines": 239,
+          "score": 91,
+          "lines": 242,
           "incomingLocalImports": 12,
           "doclets": 12,
           "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
@@ -1277,9 +1277,9 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2737,
+          "lines": 2816,
           "incomingLocalImports": 1,
-          "doclets": 62,
+          "doclets": 66,
           "summary": "OpenDocViewer — Viewer state provider.",
           "summaryConfidence": "high"
         },
@@ -1567,8 +1567,8 @@
     {
       "name": "src/utils",
       "fileCount": 51,
-      "lineCount": 19808,
-      "docletCount": 802,
+      "lineCount": 19862,
+      "docletCount": 804,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1636,9 +1636,9 @@
         {
           "path": "src/utils/printPdf.js",
           "score": 97,
-          "lines": 2358,
+          "lines": 2386,
           "incomingLocalImports": 3,
-          "doclets": 95,
+          "doclets": 96,
           "summary": "OpenDocViewer — Generated PDF print backend.",
           "summaryConfidence": "high"
         }
@@ -8395,7 +8395,7 @@
     },
     {
       "path": "src/components/DocumentRender.jsx",
-      "lines": 1167,
+      "lines": 1172,
       "extension": ".jsx",
       "jsdocBlockCount": 36,
       "sourceSummary": "OpenDocViewer — Active page renderer.",
@@ -8520,7 +8520,7 @@
         {
           "name": "DocumentRender",
           "kind": "default",
-          "line": 1166
+          "line": 1171
         }
       ],
       "declarations": [
@@ -8557,27 +8557,27 @@
         {
           "name": "normalizeRequired",
           "kind": "function",
-          "line": 254
+          "line": 255
         },
         {
           "name": "normalizeOptional",
           "kind": "function",
-          "line": 259
+          "line": 260
         },
         {
           "name": "resolveOptionalFactor",
           "kind": "function",
-          "line": 285
+          "line": 286
         },
         {
           "name": "syntheticSurface",
           "kind": "object",
-          "line": 499
+          "line": 500
         },
         {
           "name": "beginTransition",
           "kind": "function",
-          "line": 555
+          "line": 556
         }
       ],
       "parseError": null,
@@ -8845,7 +8845,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 162,
+          "line": 163,
           "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
           "params": [],
           "returns": [],
@@ -8858,7 +8858,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 217,
+          "line": 218,
           "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
           "params": [],
           "returns": [
@@ -8876,7 +8876,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 224,
+          "line": 225,
           "description": "",
           "params": [],
           "returns": [
@@ -8894,7 +8894,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 236,
+          "line": 237,
           "description": "",
           "params": [
             {
@@ -8925,7 +8925,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 276,
+          "line": 277,
           "description": "",
           "params": [
             {
@@ -8950,7 +8950,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 405,
+          "line": 406,
           "description": "",
           "params": [
             {
@@ -8975,7 +8975,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 447,
+          "line": 448,
           "description": "Returns the surface whose intrinsic size should drive fit calculations.",
           "params": [],
           "returns": [
@@ -8993,7 +8993,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 460,
+          "line": 461,
           "description": "",
           "params": [],
           "returns": [
@@ -9011,7 +9011,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 469,
+          "line": 470,
           "description": "",
           "params": [],
           "returns": [
@@ -9029,7 +9029,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 479,
+          "line": 480,
           "description": "",
           "params": [
             {
@@ -9054,7 +9054,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 492,
+          "line": 493,
           "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
           "params": [
             {
@@ -9079,7 +9079,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 515,
+          "line": 516,
           "description": "",
           "params": [],
           "returns": [
@@ -9097,7 +9097,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 538,
+          "line": 539,
           "description": "",
           "params": [
             {
@@ -9122,7 +9122,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 737,
+          "line": 738,
           "description": "",
           "params": [
             {
@@ -9153,7 +9153,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 817,
+          "line": 818,
           "description": "",
           "params": [
             {
@@ -9178,7 +9178,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 874,
+          "line": 875,
           "description": "",
           "params": [
             {
@@ -9209,7 +9209,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 900,
+          "line": 901,
           "description": "",
           "params": [
             {
@@ -9246,7 +9246,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 941,
+          "line": 942,
           "description": "",
           "params": [
             {
@@ -9277,7 +9277,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 969,
+          "line": 970,
           "description": "",
           "params": [],
           "returns": [
@@ -28773,7 +28773,7 @@
     },
     {
       "path": "src/contexts/viewerContext.js",
-      "lines": 239,
+      "lines": 242,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": null,
@@ -28791,7 +28791,7 @@
         {
           "name": "ViewerContext",
           "kind": "default",
-          "line": 238
+          "line": 241
         }
       ],
       "declarations": [],
@@ -28927,7 +28927,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 213,
+          "line": 216,
           "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
           "params": [],
           "returns": [],
@@ -28940,7 +28940,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 223,
+          "line": 226,
           "description": "",
           "params": [],
           "returns": [],
@@ -28953,7 +28953,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 230,
+          "line": 233,
           "description": "",
           "params": [],
           "returns": [],
@@ -28973,16 +28973,16 @@
         }
       ],
       "incomingLocalImports": 12,
-      "importanceScore": 90,
+      "importanceScore": 91,
       "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
       "summaryConfidence": "medium",
       "summarySource": "doclet"
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2737,
+      "lines": 2816,
       "extension": ".jsx",
-      "jsdocBlockCount": 67,
+      "jsdocBlockCount": 71,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
       "imports": [
         {
@@ -29259,52 +29259,52 @@
         {
           "name": "next",
           "kind": "object",
-          "line": 584
+          "line": 588
         },
         {
           "name": "nextPage",
           "kind": "object",
-          "line": 912
+          "line": 983
         },
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1660
+          "line": 1735
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2075
+          "line": 2150
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2089
+          "line": 2164
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2103
+          "line": 2178
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2136
+          "line": 2211
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2306
+          "line": 2381
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2397
+          "line": 2474
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2399
+          "line": 2476
         }
       ],
       "parseError": null,
@@ -29816,7 +29816,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 496,
+          "line": 500,
           "description": "",
           "params": [
             {
@@ -29841,7 +29841,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 520,
+          "line": 524,
           "description": "Record that a page now has a reusable full-size asset available.",
           "params": [
             {
@@ -29866,7 +29866,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 530,
+          "line": 534,
           "description": "Record that a page now has a reusable thumbnail asset available.",
           "params": [
             {
@@ -29891,7 +29891,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 543,
+          "line": 547,
           "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
           "params": [],
           "returns": [
@@ -29909,7 +29909,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 674,
+          "line": 678,
           "description": "",
           "params": [],
           "returns": [
@@ -29927,7 +29927,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 696,
+          "line": 701,
           "description": "",
           "params": [],
           "returns": [
@@ -29945,7 +29945,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 857,
+          "line": 862,
           "description": "",
           "params": [
             {
@@ -29976,7 +29976,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 874,
+          "line": 879,
           "description": "",
           "params": [
             {
@@ -30001,13 +30001,113 @@
           "examples": 0
         },
         {
+          "id": "ViewerProvider~isPrintablePageUrlLeased",
+          "name": "isPrintablePageUrlLeased",
+          "longname": "ViewerProvider~isPrintablePageUrlLeased",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/contexts/ViewerProvider.jsx",
+          "line": 899,
+          "description": "",
+          "params": [
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "ViewerProvider~leasePrintablePageUrl",
+          "name": "leasePrintablePageUrl",
+          "longname": "ViewerProvider~leasePrintablePageUrl",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/contexts/ViewerProvider.jsx",
+          "line": 908,
+          "description": "",
+          "params": [
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "ViewerProvider~isPageAssetUrlReferenced",
+          "name": "isPageAssetUrlReferenced",
+          "longname": "ViewerProvider~isPageAssetUrlReferenced",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/contexts/ViewerProvider.jsx",
+          "line": 918,
+          "description": "",
+          "params": [
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "ViewerProvider~releasePrintablePageUrls",
+          "name": "releasePrintablePageUrls",
+          "longname": "ViewerProvider~releasePrintablePageUrls",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/contexts/ViewerProvider.jsx",
+          "line": 942,
+          "description": "Release print leases previously acquired through getPrintablePageUrls .",
+          "params": [
+            {
+              "name": "urls",
+              "type": "Array.<string>|string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "ViewerProvider~patchPageAtIndex",
           "name": "patchPageAtIndex",
           "longname": "ViewerProvider~patchPageAtIndex",
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 895,
+          "line": 966,
           "description": "",
           "params": [
             {
@@ -30038,7 +30138,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 943,
+          "line": 1016,
           "description": "",
           "params": [
             {
@@ -30063,7 +30163,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 958,
+          "line": 1031,
           "description": "",
           "params": [
             {
@@ -30100,7 +30200,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 985,
+          "line": 1058,
           "description": "",
           "params": [],
           "returns": [
@@ -30118,7 +30218,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 994,
+          "line": 1067,
           "description": "",
           "params": [
             {
@@ -30143,7 +30243,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1057,
+          "line": 1130,
           "description": "",
           "params": [
             {
@@ -30168,7 +30268,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1209,
+          "line": 1282,
           "description": "",
           "params": [
             {
@@ -30193,7 +30293,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1229,
+          "line": 1302,
           "description": "",
           "params": [
             {
@@ -30218,7 +30318,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1253,
+          "line": 1326,
           "description": "",
           "params": [
             {
@@ -30243,7 +30343,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1262,
+          "line": 1335,
           "description": "",
           "params": [
             {
@@ -30268,7 +30368,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1270,
+          "line": 1343,
           "description": "",
           "params": [],
           "returns": [
@@ -30286,7 +30386,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1282,
+          "line": 1355,
           "description": "",
           "params": [
             {
@@ -30311,7 +30411,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1329,
+          "line": 1402,
           "description": "",
           "params": [
             {
@@ -30348,7 +30448,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1398,
+          "line": 1471,
           "description": "",
           "params": [
             {
@@ -30373,7 +30473,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1407,
+          "line": 1480,
           "description": "",
           "params": [
             {
@@ -30404,7 +30504,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1420,
+          "line": 1493,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -30441,7 +30541,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1472,
+          "line": 1545,
           "description": "",
           "params": [
             {
@@ -30472,7 +30572,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1483,
+          "line": 1556,
           "description": "",
           "params": [
             {
@@ -30503,7 +30603,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1494,
+          "line": 1567,
           "description": "",
           "params": [
             {
@@ -30528,7 +30628,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1518,
+          "line": 1591,
           "description": "",
           "params": [
             {
@@ -30553,7 +30653,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1563,
+          "line": 1638,
           "description": "",
           "params": [
             {
@@ -30578,7 +30678,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1576,
+          "line": 1651,
           "description": "",
           "params": [
             {
@@ -30615,7 +30715,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1648,
+          "line": 1723,
           "description": "",
           "params": [
             {
@@ -30652,7 +30752,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1740,
+          "line": 1815,
           "description": "",
           "params": [
             {
@@ -30689,7 +30789,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1933,
+          "line": 2008,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -30714,7 +30814,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2015,
+          "line": 2090,
           "description": "",
           "params": [
             {
@@ -30745,7 +30845,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2037,
+          "line": 2112,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -30770,7 +30870,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2196,
+          "line": 2271,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -30788,7 +30888,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2287,
+          "line": 2362,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -30819,7 +30919,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2330,
+          "line": 2405,
           "description": "",
           "params": [
             {
@@ -30844,7 +30944,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2620,
+          "line": 2697,
           "description": "",
           "params": [
             {
@@ -30864,7 +30964,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2629,
+          "line": 2706,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -30890,7 +30990,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2634,
+          "line": 2711,
           "description": "",
           "params": [
             {
@@ -30910,7 +31010,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2639,
+          "line": 2716,
           "description": "",
           "params": [
             {
@@ -52466,9 +52566,9 @@
     },
     {
       "path": "src/utils/printCore.js",
-      "lines": 942,
+      "lines": 968,
       "extension": ".js",
-      "jsdocBlockCount": 58,
+      "jsdocBlockCount": 59,
       "sourceSummary": "Core print coordinator for the frontend.",
       "imports": [
         {
@@ -52536,57 +52636,57 @@
         {
           "name": "handlePrint",
           "kind": "function",
-          "line": 275
+          "line": 277
         },
         {
           "name": "handlePrintCurrentComparison",
           "kind": "function",
-          "line": 344
+          "line": 346
         },
         {
           "name": "composePagePrintCanvas",
           "kind": "function",
-          "line": 540
+          "line": 542
         },
         {
           "name": "resolvePrintableSurface",
           "kind": "function",
-          "line": 556
+          "line": 558
         },
         {
           "name": "composeCompareOverlayCanvas",
           "kind": "function",
-          "line": 600
+          "line": 602
         },
         {
           "name": "composeCompareCurtainCanvas",
           "kind": "function",
-          "line": 623
+          "line": 625
         },
         {
           "name": "handlePrintCompareOverlay",
           "kind": "function",
-          "line": 715
+          "line": 717
         },
         {
           "name": "handlePrintCompareCurtain",
           "kind": "function",
-          "line": 731
+          "line": 733
         },
         {
           "name": "handlePrintAll",
           "kind": "function",
-          "line": 797
+          "line": 819
         },
         {
           "name": "handlePrintSequence",
           "kind": "function",
-          "line": 870
+          "line": 894
         },
         {
           "name": "handlePrintRange",
           "kind": "function",
-          "line": 939
+          "line": 965
         }
       ],
       "declarations": [
@@ -52633,112 +52733,117 @@
         {
           "name": "createHiddenIframe",
           "kind": "function",
-          "line": 240
+          "line": 241
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 255
+          "line": 256
         },
         {
           "name": "handlePrint",
           "kind": "function",
-          "line": 275
+          "line": 277
         },
         {
           "name": "handlePrintCurrentComparison",
           "kind": "function",
-          "line": 344
+          "line": 346
         },
         {
           "name": "surfaceSize",
           "kind": "function",
-          "line": 431
+          "line": 433
         },
         {
           "name": "placeComposedPage",
           "kind": "function",
-          "line": 449
+          "line": 451
         },
         {
           "name": "placedPageBounds",
           "kind": "function",
-          "line": 469
+          "line": 471
         },
         {
           "name": "resolveComposeFrame",
           "kind": "function",
-          "line": 492
+          "line": 494
         },
         {
           "name": "drawComposedPage",
           "kind": "function",
-          "line": 518
+          "line": 520
         },
         {
           "name": "composePagePrintCanvas",
           "kind": "function",
-          "line": 540
+          "line": 542
         },
         {
           "name": "resolvePrintableSurface",
           "kind": "function",
-          "line": 556
+          "line": 558
         },
         {
           "name": "beginComposedPage",
           "kind": "function",
-          "line": 571
+          "line": 573
         },
         {
           "name": "composeCompareOverlayCanvas",
           "kind": "function",
-          "line": 600
+          "line": 602
         },
         {
           "name": "composeCompareCurtainCanvas",
           "kind": "function",
-          "line": 623
+          "line": 625
         },
         {
           "name": "printComposedComparison",
           "kind": "function",
-          "line": 658
+          "line": 660
         },
         {
           "name": "handlePrintCompareOverlay",
           "kind": "function",
-          "line": 715
+          "line": 717
         },
         {
           "name": "handlePrintCompareCurtain",
           "kind": "function",
-          "line": 731
+          "line": 733
         },
         {
           "name": "collectAllPrintableDataUrlsFromDom",
           "kind": "function",
-          "line": 744
+          "line": 746
+        },
+        {
+          "name": "releasePrintableDataUrls",
+          "kind": "function",
+          "line": 767
         },
         {
           "name": "resolveAllPageDataUrls",
           "kind": "function",
-          "line": 763
+          "line": 785
         },
         {
           "name": "handlePrintAll",
           "kind": "function",
-          "line": 797
+          "line": 819
         },
         {
           "name": "handlePrintSequence",
           "kind": "function",
-          "line": 870
+          "line": 894
         },
         {
           "name": "handlePrintRange",
           "kind": "function",
-          "line": 939
+          "line": 965
         }
       ],
       "parseError": null,
@@ -52993,7 +53098,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 240,
+          "line": 241,
           "description": "Create the temporary hidden iframe used as the print document host.",
           "params": [
             {
@@ -53001,6 +53106,12 @@
               "type": "number",
               "optional": true,
               "description": ""
+            },
+            {
+              "name": "onCleanup",
+              "type": "function",
+              "optional": true,
+              "description": "Optional hook run when the iframe is cleaned up (afterprint or timeout fallback)."
             }
           ],
           "returns": [
@@ -53018,7 +53129,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 275,
+          "line": 277,
           "description": "Handles the print functionality for the CURRENT page/image.",
           "params": [
             {
@@ -53049,7 +53160,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 344,
+          "line": 346,
           "description": "Print both currently visible compare panes as a two-page print job.",
           "params": [
             {
@@ -53086,7 +53197,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 392,
+          "line": 394,
           "description": "View state of the overlay view needed to print it (utils/compareOverlay.js).",
           "params": [],
           "returns": [],
@@ -53099,7 +53210,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 402,
+          "line": 404,
           "description": "View state of the curtain view needed to print it (utils/compareCurtain.js).",
           "params": [],
           "returns": [],
@@ -53112,7 +53223,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 412,
+          "line": 414,
           "description": "One page placed in the shared page-pixel space of a composed compare page.",
           "params": [],
           "returns": [],
@@ -53125,7 +53236,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 431,
+          "line": 433,
           "description": "Intrinsic pixel size of a rendered page surface (the canvas already carries the quarter turn).",
           "params": [
             {
@@ -53150,7 +53261,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 449,
+          "line": 451,
           "description": "Placement of one page in the shared page-pixel space.",
           "params": [
             {
@@ -53187,7 +53298,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 469,
+          "line": 471,
           "description": "",
           "params": [
             {
@@ -53212,7 +53323,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 492,
+          "line": 494,
           "description": "The area of the composed page in page pixels: the visible stage when its size is known (both pages share the stage's top-left as origin), otherwise the union of both transformed p...",
           "params": [
             {
@@ -53249,7 +53360,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 518,
+          "line": 520,
           "description": "Draw one placed page onto the composed canvas.",
           "params": [
             {
@@ -53292,7 +53403,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 540,
+          "line": 542,
           "description": "Active page output uses the untransformed page frame as its sheet.",
           "params": [
             {
@@ -53329,7 +53440,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 556,
+          "line": 558,
           "description": "Active print/export preserves fine geometry; composed views explicitly use raw surfaces.",
           "params": [],
           "returns": [],
@@ -53342,7 +53453,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 571,
+          "line": 573,
           "description": "Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint a white sheet.",
           "params": [
             {
@@ -53379,7 +53490,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 600,
+          "line": 602,
           "description": "Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view's opacity, each page with its own compare transform.",
           "params": [
             {
@@ -53416,7 +53527,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 623,
+          "line": 625,
           "description": "Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border (below a horizontal border, right of a vertical one), each page with its own compa...",
           "params": [
             {
@@ -53453,7 +53564,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 658,
+          "line": 660,
           "description": "Shared body of the overlay and curtain print (after their invoked log line): one composed page through the single-page print document, with the same config and base token context...",
           "params": [
             {
@@ -53508,7 +53619,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 715,
+          "line": 717,
           "description": "Print the overlay view as ONE page: page B over page A (or the other way round after a swap) at the current opacity, each page with its own compare transform.",
           "params": [
             {
@@ -53551,7 +53662,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 731,
+          "line": 733,
           "description": "Print the curtain view as ONE page: page A with page B clipped at the current border, each page with its own compare transform.",
           "params": [
             {
@@ -53594,7 +53705,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 744,
+          "line": 746,
           "description": "Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list.",
           "params": [
             {
@@ -53613,13 +53724,44 @@
           "examples": 0
         },
         {
+          "id": "releasePrintableDataUrls",
+          "name": "releasePrintableDataUrls",
+          "longname": "releasePrintableDataUrls",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printCore.js",
+          "line": 767,
+          "description": "Release print URL leases held through the document renderer.",
+          "params": [
+            {
+              "name": "documentRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "urls",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "resolveAllPageDataUrls",
           "name": "resolveAllPageDataUrls",
           "longname": "resolveAllPageDataUrls",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 763,
+          "line": 785,
           "description": "Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.",
           "params": [
             {
@@ -53650,7 +53792,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 797,
+          "line": 819,
           "description": "Print all available pages in viewer order.",
           "params": [
             {
@@ -53681,7 +53823,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 870,
+          "line": 894,
           "description": "Print an explicit page sequence such as 3,1,2 .",
           "params": [
             {
@@ -53718,7 +53860,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printCore.js",
-          "line": 939,
+          "line": 965,
           "description": "Print an inclusive page range.",
           "params": [
             {
@@ -53827,7 +53969,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 3,
-      "importanceScore": 85,
+      "importanceScore": 86,
       "summary": "Core print coordinator for the frontend.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -54925,9 +55067,9 @@
     },
     {
       "path": "src/utils/printPdf.js",
-      "lines": 2358,
+      "lines": 2386,
       "extension": ".js",
-      "jsdocBlockCount": 103,
+      "jsdocBlockCount": 104,
       "sourceSummary": "OpenDocViewer — Generated PDF print backend.",
       "imports": [
         {
@@ -55042,37 +55184,37 @@
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2129
+          "line": 2149
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2153
+          "line": 2173
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2164
+          "line": 2188
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2257
+          "line": 2285
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2280
+          "line": 2308
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2341
+          "line": 2369
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2355
+          "line": 2383
         }
       ],
       "declarations": [
@@ -55542,74 +55684,79 @@
           "line": 2052
         },
         {
-          "name": "getSelectedPrintableDataUrls",
+          "name": "releasePrintableDataUrls",
           "kind": "function",
           "line": 2071
         },
         {
+          "name": "getSelectedPrintableDataUrls",
+          "kind": "function",
+          "line": 2091
+        },
+        {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2129
+          "line": 2149
         },
         {
           "name": "pageNumberToIndex",
           "kind": "function",
-          "line": 2140
+          "line": 2160
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2153
+          "line": 2173
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2164
+          "line": 2188
         },
         {
           "name": "printableSourceFromElement",
           "kind": "function",
-          "line": 2180
+          "line": 2208
         },
         {
           "name": "canvasToPngDataUrl",
           "kind": "function",
-          "line": 2207
+          "line": 2235
         },
         {
           "name": "canvasToBlob",
           "kind": "function",
-          "line": 2221
+          "line": 2249
         },
         {
           "name": "blobToDataUrl",
           "kind": "function",
-          "line": 2236
+          "line": 2264
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2257
+          "line": 2285
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2280
+          "line": 2308
         },
         {
           "name": "pdfComposedComparison",
           "kind": "function",
-          "line": 2310
+          "line": 2338
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2341
+          "line": 2369
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2355
+          "line": 2383
         }
       ],
       "parseError": null,
@@ -58026,13 +58173,44 @@
           "examples": 0
         },
         {
+          "id": "releasePrintableDataUrls",
+          "name": "releasePrintableDataUrls",
+          "longname": "releasePrintableDataUrls",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/printPdf.js",
+          "line": 2071,
+          "description": "Release print URL leases held through the document renderer.",
+          "params": [
+            {
+              "name": "documentRenderRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "urls",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "getSelectedPrintableDataUrls",
           "name": "getSelectedPrintableDataUrls",
           "longname": "getSelectedPrintableDataUrls",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2071,
+          "line": 2091,
           "description": "Read printable page image URLs from the document renderer.",
           "params": [
             {
@@ -58069,7 +58247,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2129,
+          "line": 2149,
           "description": "Collect printable page image URLs without creating or opening a PDF.",
           "params": [
             {
@@ -58106,7 +58284,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2140,
+          "line": 2160,
           "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
           "params": [
             {
@@ -58137,7 +58315,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2153,
+          "line": 2173,
           "description": "",
           "params": [
             {
@@ -58174,7 +58352,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2164,
+          "line": 2188,
           "description": "",
           "params": [
             {
@@ -58211,7 +58389,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2180,
+          "line": 2208,
           "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
           "params": [
             {
@@ -58236,7 +58414,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2207,
+          "line": 2235,
           "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
           "params": [
             {
@@ -58261,7 +58439,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2221,
+          "line": 2249,
           "description": "",
           "params": [
             {
@@ -58292,7 +58470,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2236,
+          "line": 2264,
           "description": "",
           "params": [
             {
@@ -58317,7 +58495,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2257,
+          "line": 2285,
           "description": "Generate/print/download a PDF from the currently rendered active page surface.",
           "params": [
             {
@@ -58348,7 +58526,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2280,
+          "line": 2308,
           "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
           "params": [
             {
@@ -58385,7 +58563,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2310,
+          "line": 2338,
           "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
           "params": [
             {
@@ -58440,7 +58618,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2341,
+          "line": 2369,
           "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
           "params": [
             {
@@ -58483,7 +58661,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2355,
+          "line": 2383,
           "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
           "params": [
             {
@@ -72060,7 +72238,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 492,
+      "line": 493,
       "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
       "params": [
         {
@@ -72085,7 +72263,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 515,
+      "line": 516,
       "description": "",
       "params": [],
       "returns": [
@@ -72103,7 +72281,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 236,
+      "line": 237,
       "description": "",
       "params": [
         {
@@ -72134,7 +72312,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 224,
+      "line": 225,
       "description": "",
       "params": [],
       "returns": [
@@ -72280,7 +72458,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 405,
+      "line": 406,
       "description": "",
       "params": [
         {
@@ -72305,7 +72483,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 737,
+      "line": 738,
       "description": "",
       "params": [
         {
@@ -72336,7 +72514,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 479,
+      "line": 480,
       "description": "",
       "params": [
         {
@@ -72361,7 +72539,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 460,
+      "line": 461,
       "description": "",
       "params": [],
       "returns": [
@@ -72379,7 +72557,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 469,
+      "line": 470,
       "description": "",
       "params": [],
       "returns": [
@@ -72397,7 +72575,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 447,
+      "line": 448,
       "description": "Returns the surface whose intrinsic size should drive fit calculations.",
       "params": [],
       "returns": [
@@ -72446,7 +72624,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 941,
+      "line": 942,
       "description": "",
       "params": [
         {
@@ -72477,7 +72655,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 874,
+      "line": 875,
       "description": "",
       "params": [
         {
@@ -72508,7 +72686,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 538,
+      "line": 539,
       "description": "",
       "params": [
         {
@@ -72533,7 +72711,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 969,
+      "line": 970,
       "description": "",
       "params": [],
       "returns": [
@@ -72551,7 +72729,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 817,
+      "line": 818,
       "description": "",
       "params": [
         {
@@ -72626,7 +72804,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 162,
+      "line": 163,
       "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
       "params": [],
       "returns": [],
@@ -72682,7 +72860,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 900,
+      "line": 901,
       "description": "",
       "params": [
         {
@@ -72719,7 +72897,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 217,
+      "line": 218,
       "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
       "params": [],
       "returns": [
@@ -72737,7 +72915,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 276,
+      "line": 277,
       "description": "",
       "params": [
         {
@@ -83145,7 +83323,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 223,
+      "line": 226,
       "description": "",
       "params": [],
       "returns": [],
@@ -83158,7 +83336,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 213,
+      "line": 216,
       "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
       "params": [],
       "returns": [],
@@ -83171,7 +83349,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 230,
+      "line": 233,
       "description": "",
       "params": [],
       "returns": [],
@@ -83301,7 +83479,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 943,
+      "line": 1016,
       "description": "",
       "params": [
         {
@@ -83326,7 +83504,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1270,
+      "line": 1343,
       "description": "",
       "params": [],
       "returns": [
@@ -83344,7 +83522,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 958,
+      "line": 1031,
       "description": "",
       "params": [
         {
@@ -83381,7 +83559,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1420,
+      "line": 1493,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -83418,7 +83596,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 985,
+      "line": 1058,
       "description": "",
       "params": [],
       "returns": [
@@ -83436,7 +83614,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 543,
+      "line": 547,
       "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
       "params": [],
       "returns": [
@@ -83479,7 +83657,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2634,
+      "line": 2711,
       "description": "",
       "params": [
         {
@@ -83499,7 +83677,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2620,
+      "line": 2697,
       "description": "",
       "params": [
         {
@@ -83519,7 +83697,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1057,
+      "line": 1130,
       "description": "",
       "params": [
         {
@@ -83570,7 +83748,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1518,
+      "line": 1591,
       "description": "",
       "params": [
         {
@@ -83595,7 +83773,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1933,
+      "line": 2008,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -83620,7 +83798,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1740,
+      "line": 1815,
       "description": "",
       "params": [
         {
@@ -83670,7 +83848,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2639,
+      "line": 2716,
       "description": "",
       "params": [
         {
@@ -83721,7 +83899,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2330,
+      "line": 2405,
       "description": "",
       "params": [
         {
@@ -83746,7 +83924,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1398,
+      "line": 1471,
       "description": "",
       "params": [
         {
@@ -83771,7 +83949,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1494,
+      "line": 1567,
       "description": "",
       "params": [
         {
@@ -83796,7 +83974,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 994,
+      "line": 1067,
       "description": "",
       "params": [
         {
@@ -83821,7 +83999,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 857,
+      "line": 862,
       "description": "",
       "params": [
         {
@@ -83852,7 +84030,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 874,
+      "line": 879,
       "description": "",
       "params": [
         {
@@ -83889,6 +84067,31 @@
         {
           "name": "url",
           "type": "string|null|undefined",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "ViewerProvider~isPageAssetUrlReferenced",
+      "name": "isPageAssetUrlReferenced",
+      "longname": "ViewerProvider~isPageAssetUrlReferenced",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/contexts/ViewerProvider.jsx",
+      "line": 918,
+      "description": "",
+      "params": [
+        {
+          "name": "url",
+          "type": "string",
           "optional": false,
           "description": ""
         }
@@ -83977,6 +84180,31 @@
       "examples": 0
     },
     {
+      "id": "ViewerProvider~isPrintablePageUrlLeased",
+      "name": "isPrintablePageUrlLeased",
+      "longname": "ViewerProvider~isPrintablePageUrlLeased",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/contexts/ViewerProvider.jsx",
+      "line": 899,
+      "description": "",
+      "params": [
+        {
+          "name": "url",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "isReusableAssetUrl",
       "name": "isReusableAssetUrl",
       "longname": "isReusableAssetUrl",
@@ -83996,6 +84224,31 @@
       "returns": [
         {
           "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "ViewerProvider~leasePrintablePageUrl",
+      "name": "leasePrintablePageUrl",
+      "longname": "ViewerProvider~leasePrintablePageUrl",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/contexts/ViewerProvider.jsx",
+      "line": 908,
+      "description": "",
+      "params": [
+        {
+          "name": "url",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
           "description": ""
         }
       ],
@@ -84144,7 +84397,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1282,
+      "line": 1355,
       "description": "",
       "params": [
         {
@@ -84194,7 +84447,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 520,
+      "line": 524,
       "description": "Record that a page now has a reusable full-size asset available.",
       "params": [
         {
@@ -84219,7 +84472,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 530,
+      "line": 534,
       "description": "Record that a page now has a reusable thumbnail asset available.",
       "params": [
         {
@@ -84244,7 +84497,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 895,
+      "line": 966,
       "description": "",
       "params": [
         {
@@ -84275,7 +84528,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1329,
+      "line": 1402,
       "description": "",
       "params": [
         {
@@ -84312,7 +84565,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1472,
+      "line": 1545,
       "description": "",
       "params": [
         {
@@ -84343,7 +84596,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2196,
+      "line": 2271,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -84361,7 +84614,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1253,
+      "line": 1326,
       "description": "",
       "params": [
         {
@@ -84386,7 +84639,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1262,
+      "line": 1335,
       "description": "",
       "params": [
         {
@@ -84411,7 +84664,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2015,
+      "line": 2090,
       "description": "",
       "params": [
         {
@@ -84442,12 +84695,37 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1209,
+      "line": 1282,
       "description": "",
       "params": [
         {
           "name": "descriptor",
           "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "ViewerProvider~releasePrintablePageUrls",
+      "name": "releasePrintablePageUrls",
+      "longname": "ViewerProvider~releasePrintablePageUrls",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/contexts/ViewerProvider.jsx",
+      "line": 942,
+      "description": "Release print leases previously acquired through getPrintablePageUrls .",
+      "params": [
+        {
+          "name": "urls",
+          "type": "Array.<string>|string",
           "optional": false,
           "description": ""
         }
@@ -84467,7 +84745,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1648,
+      "line": 1723,
       "description": "",
       "params": [
         {
@@ -84504,7 +84782,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 696,
+      "line": 701,
       "description": "",
       "params": [],
       "returns": [
@@ -84553,7 +84831,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1576,
+      "line": 1651,
       "description": "",
       "params": [
         {
@@ -84590,7 +84868,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 674,
+      "line": 678,
       "description": "",
       "params": [],
       "returns": [
@@ -84608,7 +84886,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2287,
+      "line": 2362,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -84639,7 +84917,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2629,
+      "line": 2706,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -84665,7 +84943,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1563,
+      "line": 1638,
       "description": "",
       "params": [
         {
@@ -84690,7 +84968,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1229,
+      "line": 1302,
       "description": "",
       "params": [
         {
@@ -84759,7 +85037,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1407,
+      "line": 1480,
       "description": "",
       "params": [
         {
@@ -84790,7 +85068,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2037,
+      "line": 2112,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -84815,7 +85093,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1483,
+      "line": 1556,
       "description": "",
       "params": [
         {
@@ -84846,7 +85124,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 496,
+      "line": 500,
       "description": "",
       "params": [
         {
@@ -98885,7 +99163,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 571,
+      "line": 573,
       "description": "Shared set-up of a composed compare page: place both pages, size the offscreen canvas and paint a white sheet.",
       "params": [
         {
@@ -98922,7 +99200,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 744,
+      "line": 746,
       "description": "Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list.",
       "params": [
         {
@@ -98947,7 +99225,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 402,
+      "line": 404,
       "description": "View state of the curtain view needed to print it (utils/compareCurtain.js).",
       "params": [],
       "returns": [],
@@ -98960,7 +99238,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 392,
+      "line": 394,
       "description": "View state of the overlay view needed to print it (utils/compareOverlay.js).",
       "params": [],
       "returns": [],
@@ -98973,7 +99251,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 623,
+      "line": 625,
       "description": "Compose the curtain view onto one canvas: page A whole, page B clipped to its side of the border (below a horizontal border, right of a vertical one), each page with its own compa...",
       "params": [
         {
@@ -99010,7 +99288,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 600,
+      "line": 602,
       "description": "Compose the overlay view onto one canvas: the bottom page opaque, the top page at the view's opacity, each page with its own compare transform.",
       "params": [
         {
@@ -99047,7 +99325,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 412,
+      "line": 414,
       "description": "One page placed in the shared page-pixel space of a composed compare page.",
       "params": [],
       "returns": [],
@@ -99060,7 +99338,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 540,
+      "line": 542,
       "description": "Active page output uses the untransformed page frame as its sheet.",
       "params": [
         {
@@ -99097,7 +99375,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 240,
+      "line": 241,
       "description": "Create the temporary hidden iframe used as the print document host.",
       "params": [
         {
@@ -99105,6 +99383,12 @@
           "type": "number",
           "optional": true,
           "description": ""
+        },
+        {
+          "name": "onCleanup",
+          "type": "function",
+          "optional": true,
+          "description": "Optional hook run when the iframe is cleaned up (afterprint or timeout fallback)."
         }
       ],
       "returns": [
@@ -99122,7 +99406,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 518,
+      "line": 520,
       "description": "Draw one placed page onto the composed canvas.",
       "params": [
         {
@@ -99208,7 +99492,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 275,
+      "line": 277,
       "description": "Handles the print functionality for the CURRENT page/image.",
       "params": [
         {
@@ -99239,7 +99523,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 797,
+      "line": 819,
       "description": "Print all available pages in viewer order.",
       "params": [
         {
@@ -99270,7 +99554,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 731,
+      "line": 733,
       "description": "Print the curtain view as ONE page: page A with page B clipped at the current border, each page with its own compare transform.",
       "params": [
         {
@@ -99313,7 +99597,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 715,
+      "line": 717,
       "description": "Print the overlay view as ONE page: page B over page A (or the other way round after a swap) at the current opacity, each page with its own compare transform.",
       "params": [
         {
@@ -99356,7 +99640,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 344,
+      "line": 346,
       "description": "Print both currently visible compare panes as a two-page print job.",
       "params": [
         {
@@ -99393,7 +99677,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 939,
+      "line": 965,
       "description": "Print an inclusive page range.",
       "params": [
         {
@@ -99436,7 +99720,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 870,
+      "line": 894,
       "description": "Print an explicit page sequence such as 3,1,2 .",
       "params": [
         {
@@ -99549,7 +99833,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 449,
+      "line": 451,
       "description": "Placement of one page in the shared page-pixel space.",
       "params": [
         {
@@ -99586,7 +99870,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 469,
+      "line": 471,
       "description": "",
       "params": [
         {
@@ -99637,7 +99921,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 658,
+      "line": 660,
       "description": "Shared body of the overlay and curtain print (after their invoked log line): one composed page through the single-page print document, with the same config and base token context...",
       "params": [
         {
@@ -99712,6 +99996,37 @@
       "examples": 0
     },
     {
+      "id": "releasePrintableDataUrls",
+      "name": "releasePrintableDataUrls",
+      "longname": "releasePrintableDataUrls",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printCore.js",
+      "line": 767,
+      "description": "Release print URL leases held through the document renderer.",
+      "params": [
+        {
+          "name": "documentRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "urls",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "resolveActiveNode",
       "name": "resolveActiveNode",
       "longname": "resolveActiveNode",
@@ -99749,7 +100064,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 763,
+      "line": 785,
       "description": "Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.",
       "params": [
         {
@@ -99780,7 +100095,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 492,
+      "line": 494,
       "description": "The area of the composed page in page pixels: the visible stage when its size is known (both pages share the stage's top-left as origin), otherwise the union of both transformed p...",
       "params": [
         {
@@ -99854,7 +100169,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 556,
+      "line": 558,
       "description": "Active print/export preserves fine geometry; composed views explicitly use raw surfaces.",
       "params": [],
       "returns": [],
@@ -99867,7 +100182,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printCore.js",
-      "line": 431,
+      "line": 433,
       "description": "Intrinsic pixel size of a rendered page surface (the canvas already carries the quarter turn).",
       "params": [
         {
@@ -100843,7 +101158,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2236,
+      "line": 2264,
       "description": "",
       "params": [
         {
@@ -100942,7 +101257,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2221,
+      "line": 2249,
       "description": "",
       "params": [
         {
@@ -100973,7 +101288,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2207,
+      "line": 2235,
       "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
       "params": [
         {
@@ -101023,7 +101338,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2129,
+      "line": 2149,
       "description": "Collect printable page image URLs without creating or opening a PDF.",
       "params": [
         {
@@ -101140,7 +101455,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2153,
+      "line": 2173,
       "description": "",
       "params": [
         {
@@ -101869,7 +102184,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2071,
+      "line": 2091,
       "description": "Read printable page image URLs from the document renderer.",
       "params": [
         {
@@ -101906,7 +102221,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2355,
+      "line": 2383,
       "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
       "params": [
         {
@@ -101949,7 +102264,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2341,
+      "line": 2369,
       "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
       "params": [
         {
@@ -101992,7 +102307,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2257,
+      "line": 2285,
       "description": "Generate/print/download a PDF from the currently rendered active page surface.",
       "params": [
         {
@@ -102023,7 +102338,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2280,
+      "line": 2308,
       "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
       "params": [
         {
@@ -102060,7 +102375,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2164,
+      "line": 2188,
       "description": "",
       "params": [
         {
@@ -102673,7 +102988,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2140,
+      "line": 2160,
       "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
       "params": [
         {
@@ -102779,7 +103094,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2310,
+      "line": 2338,
       "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
       "params": [
         {
@@ -102912,7 +103227,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2180,
+      "line": 2208,
       "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
       "params": [
         {
@@ -102950,6 +103265,37 @@
       "returns": [
         {
           "type": "Promise.<void>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "releasePrintableDataUrls",
+      "name": "releasePrintableDataUrls",
+      "longname": "releasePrintableDataUrls",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/printPdf.js",
+      "line": 2071,
+      "description": "Release print URL leases held through the document renderer.",
+      "params": [
+        {
+          "name": "documentRenderRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "urls",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
           "description": ""
         }
       ],
