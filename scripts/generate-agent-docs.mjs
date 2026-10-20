@@ -7,6 +7,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolveAgentDocMapRoot as resolveAgentDocMapRootFromDisk } from './resolve-agentdocmap-root.mjs';
+import { resolvePinnedAgentDocMap } from './pinned-agentdocmap.mjs';
 import { validateAgentDocsExclusions } from './validate-agent-docs-exclusions.mjs';
 import {
   collationChildEnv,
@@ -76,7 +77,10 @@ Options:
   --source-metadata <mode>  AgentDocMap source metadata mode. Defaults to none.
 
 The Node version, AgentDocMap revision and collation are pinned in
-scripts/agent-docs-environment.json. Outside CI, a different ambient Node is
+scripts/agent-docs-environment.json. When the AgentDocMap checkout is at another
+commit (or has tracked modifications), the pinned commit runs from a detached
+worktree created from that checkout's object store under the OS temp directory
+(override with ODV_AGENTDOCMAP_CACHE) with its own npm ci install. Outside CI, a different ambient Node is
 allowed: AgentDocMap then runs with the pinned Node found through
 ODV_AGENT_DOCS_NODE, fnm or nvm.
 `);
@@ -93,12 +97,20 @@ function main() {
     process.exit(0);
   }
 
-  const agentDocMapRoot = resolveAgentDocMapRoot(options.agentDocMapRoot);
+  const agentDocMapSource = resolveAgentDocMapRoot(options.agentDocMapRoot);
   const targetPath = resolveTargetPath(options.target);
   const outPath = resolveOutputPath(options.out);
   validateAgentDocsExclusions(JSON.parse(fs.readFileSync(path.join(targetPath, 'jsdoc.json'), 'utf8')));
   const pin = readEnvironmentPin();
   const node = resolvePinnedNode(pin.node);
+  const pinned = resolvePinnedAgentDocMap(agentDocMapSource, pin.agentDocMap.revision);
+  const agentDocMapRoot = pinned.root;
+  if (pinned.source !== 'checkout') {
+    console.log(
+      `NOTE: AgentDocMap at ${agentDocMapSource} is not a clean checkout of the pinned ${pin.agentDocMap.revision}; ` +
+        `running the pinned commit from the ${pinned.source} worktree ${agentDocMapRoot}.`,
+    );
+  }
   const revision = verifyAgentDocMapRevision(agentDocMapRoot, pin.agentDocMap.revision);
   const packageCount = verifyAgentDocMapDependencies(agentDocMapRoot);
   const ambientLocale = new Intl.Collator().resolvedOptions().locale;

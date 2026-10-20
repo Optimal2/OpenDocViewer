@@ -56,8 +56,18 @@ enforces it before AgentDocMap runs:
   Node is allowed: the generator prints a `NOTE` and runs AgentDocMap with the
   pinned binary from `ODV_AGENT_DOCS_NODE`, fnm, or nvm, and fails with an
   install hint (`fnm install <version>`) when none is found.
-- `agentDocMap.revision`: the AgentDocMap commit. The checkout must be at this
-  commit without tracked modifications, and `node_modules/.package-lock.json`
+- `agentDocMap.revision`: the AgentDocMap commit. AgentDocMap always runs at
+  this commit without tracked modifications. When the selected checkout
+  (`--agentdocmap-root`, `AGENTDOCMAP_ROOT` or the sibling lookup) is at another
+  commit or has tracked modifications, `scripts/pinned-agentdocmap.mjs` creates
+  a detached git worktree of the pinned commit from that checkout's object
+  store under the OS temp directory (`ODV_AGENTDOCMAP_CACHE` overrides the
+  location), runs `npm ci` there, and the generator runs AgentDocMap from it
+  with a visible `NOTE`. The checkout itself is never switched or installed
+  into; a missing commit is fetched from its `origin`. The worktree is reused
+  by later runs with the same pin, and worktrees of other revisions are removed
+  after a day without use. The resolved directory's
+  `node_modules/.package-lock.json`
   metadata must match its `package-lock.json`. This does not hash installed
   package files: local patches, missing files or linked dependencies can pass
   this check. Use a clean `npm ci` installation to reproduce CI's dependency

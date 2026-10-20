@@ -249,7 +249,8 @@ try {
     # tolerated: the generator prints a NOTE and runs AgentDocMap with the
     # pinned binary (ODV_AGENT_DOCS_NODE, fnm or nvm), and fails with an
     # install hint when none is found. AGENTDOCMAP_ROOT can select the tool in
-    # a worktree.
+    # a worktree; a checkout at another commit is not an error, the generator
+    # runs the pinned commit from a temporary worktree of it instead.
     $agentDocsPassed = $false
     try {
         Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan
