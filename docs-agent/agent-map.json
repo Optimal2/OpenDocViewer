@@ -3784,7 +3784,7 @@
           ],
           "returns": [
             {
-              "type": "void|Promise.<void>",
+              "type": "void|Promise<void>",
               "description": ""
             }
           ],
@@ -5860,7 +5860,7 @@
           "params": [
             {
               "name": "sourceList",
-              "type": "Array.<DocumentSourceItem>|null|undefined",
+              "type": "Array<DocumentSourceItem>|null|undefined",
               "optional": false,
               "description": ""
             },
@@ -5884,7 +5884,7 @@
             },
             {
               "name": "demoFormats",
-              "type": "Array.<string>|undefined",
+              "type": "Array<string>|undefined",
               "optional": false,
               "description": ""
             },
@@ -6551,7 +6551,7 @@
           ],
           "returns": [
             {
-              "type": "Array.<Object>|'unknown'",
+              "type": "Array<Object>|'unknown'",
               "description": "List of per-page metadata objects, or 'unknown' if parsing fails."
             }
           ],
@@ -7143,7 +7143,7 @@
           ],
           "returns": [
             {
-              "type": "Array.<number>|undefined",
+              "type": "Array<number>|undefined",
               "description": ""
             }
           ],
@@ -9591,7 +9591,7 @@
             },
             {
               "name": "props.documents",
-              "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, pageCount:number, pages:Array.<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
+              "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, pageCount:number, pages:Array<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
               "optional": false,
               "description": ""
             },
@@ -23994,7 +23994,7 @@
           "params": [
             {
               "name": "mask",
-              "type": "Array.<boolean>|null|undefined",
+              "type": "Array<boolean>|null|undefined",
               "optional": false,
               "description": ""
             },
@@ -24360,7 +24360,7 @@
           ],
           "returns": [
             {
-              "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array.<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
+              "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
               "description": ""
             }
           ],
@@ -29824,7 +29824,7 @@
           "params": [
             {
               "name": "updater",
-              "type": "Array.<any>|function",
+              "type": "Array<any>|function",
               "optional": false,
               "description": ""
             }
@@ -30090,7 +30090,7 @@
           "params": [
             {
               "name": "urls",
-              "type": "Array.<string>|string",
+              "type": "Array<string>|string",
               "optional": false,
               "description": ""
             }
@@ -30934,7 +30934,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<string>>",
+              "type": "Promise.<Array<string>>",
               "description": ""
             }
           ],
@@ -33270,13 +33270,13 @@
           "params": [
             {
               "name": "lngs",
-              "type": "string|Array.<string>",
+              "type": "string|Array<string>",
               "optional": false,
               "description": ""
             },
             {
               "name": "namespaces",
-              "type": "string|Array.<string>",
+              "type": "string|Array<string>",
               "optional": false,
               "description": ""
             }
@@ -38070,7 +38070,7 @@
           ],
           "returns": [
             {
-              "type": "Object.<string, *>|null",
+              "type": "Object<string, *>|null",
               "description": ""
             }
           ],
@@ -38120,7 +38120,7 @@
           ],
           "returns": [
             {
-              "type": "Object.<string, string>|undefined",
+              "type": "Object<string, string>|undefined",
               "description": ""
             }
           ],
@@ -38145,7 +38145,7 @@
           ],
           "returns": [
             {
-              "type": "Object.<string, Object>|undefined",
+              "type": "Object<string, Object>|undefined",
               "description": ""
             }
           ],
@@ -38170,7 +38170,7 @@
           ],
           "returns": [
             {
-              "type": "Object.<string, Object>|undefined",
+              "type": "Object<string, Object>|undefined",
               "description": ""
             }
           ],
@@ -41656,7 +41656,7 @@
             },
             {
               "name": "aliasLabelsById",
-              "type": "Object.<string, Array.<{label:string, selectedSource: (string|undefined)}>>",
+              "type": "Object.<string, Array<{label:string, selectedSource: (string|undefined)}>>",
               "optional": false,
               "description": "Alias-derived labels grouped by metadata field id. This lets the UI fall back to deployment alias labels when the host payload does not pro..."
             }
@@ -41744,7 +41744,7 @@
           ],
           "returns": [
             {
-              "type": "Object.<string, Array.<{label:string, selectedSource: (string|undefined)}>>",
+              "type": "Object.<string, Array<{label:string, selectedSource: (string|undefined)}>>",
               "description": ""
             }
           ],
@@ -42684,7 +42684,7 @@
             },
             {
               "name": "fallback",
-              "type": "string|Array.<string>",
+              "type": "string|Array<string>",
               "optional": true,
               "description": ""
             }
@@ -44934,7 +44934,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<{results:Array.<*>, summary: {itemCount:number, successCount:number, errorCount:number}}>",
+              "type": "Promise.<{results:Array<*>, summary: {itemCount:number, successCount:number, errorCount:number}}>",
               "description": ""
             }
           ],
@@ -47466,7 +47466,7 @@
           ],
           "returns": [
             {
-              "type": "Map.<string, Array.<Object>>",
+              "type": "Map.<string, Array<Object>>",
               "description": ""
             }
           ],
@@ -49727,13 +49727,13 @@
           "params": [
             {
               "name": "pages",
-              "type": "Array.<*>|null|undefined",
+              "type": "Array<*>|null|undefined",
               "optional": false,
               "description": "Session pages (allPages)."
             },
             {
               "name": "reports",
-              "type": "Object.<string, *>|null|undefined",
+              "type": "Object<string, *>|null|undefined",
               "optional": false,
               "description": "Map of sourceKey to PdfSignatureReport."
             },
@@ -49764,7 +49764,7 @@
           "params": [
             {
               "name": "documents",
-              "type": "Array.<SignatureDocumentEntry>|null|undefined",
+              "type": "Array<SignatureDocumentEntry>|null|undefined",
               "optional": false,
               "description": ""
             }
@@ -49789,7 +49789,7 @@
           "params": [
             {
               "name": "documents",
-              "type": "Array.<SignatureDocumentEntry>|null|undefined",
+              "type": "Array<SignatureDocumentEntry>|null|undefined",
               "optional": false,
               "description": ""
             },
@@ -51279,7 +51279,7 @@
           "params": [
             {
               "name": "signatures",
-              "type": "Array.<*>|null|undefined",
+              "type": "Array<*>|null|undefined",
               "optional": false,
               "description": ""
             }
@@ -51392,7 +51392,7 @@
           "params": [
             {
               "name": "signatures",
-              "type": "Array.<*>|null|undefined",
+              "type": "Array<*>|null|undefined",
               "optional": false,
               "description": ""
             }
@@ -52098,7 +52098,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<U>>",
+              "type": "Promise.<Array<U>>",
               "description": ""
             }
           ],
@@ -53850,7 +53850,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<string>>",
+              "type": "Promise.<Array<string>>",
               "description": ""
             }
           ],
@@ -56188,7 +56188,7 @@
           ],
           "returns": [
             {
-              "type": "Array.<Array.<string>>|null",
+              "type": "Array<Array<string>>|null",
               "description": ""
             }
           ],
@@ -56243,7 +56243,7 @@
             },
             {
               "name": "selectorParts",
-              "type": "Array.<Array.<string>>",
+              "type": "Array.<Array<string>>",
               "optional": false,
               "description": ""
             }
@@ -56884,7 +56884,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<HTMLImageElement>>",
+              "type": "Promise.<Array<HTMLImageElement>>",
               "description": ""
             }
           ],
@@ -58392,7 +58392,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<{urls: Array.<string>, leased: Array.<string>}>",
+              "type": "Promise.<{urls: Array<string>, leased: Array<string>}>",
               "description": "urls in PDF order and leased , the exact lease entries the flow now holds (release those, not urls )."
             }
           ],
@@ -58442,7 +58442,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<string>>",
+              "type": "Promise.<Array<string>>",
               "description": ""
             }
           ],
@@ -62607,7 +62607,7 @@
           ],
           "returns": [
             {
-              "type": "Promise.<Array.<*>>",
+              "type": "Promise.<Array<*>>",
               "description": ""
             }
           ],
@@ -69680,7 +69680,7 @@
       ],
       "returns": [
         {
-          "type": "void|Promise.<void>",
+          "type": "void|Promise<void>",
           "description": ""
         }
       ],
@@ -70774,7 +70774,7 @@
       "params": [
         {
           "name": "sourceList",
-          "type": "Array.<DocumentSourceItem>|null|undefined",
+          "type": "Array<DocumentSourceItem>|null|undefined",
           "optional": false,
           "description": ""
         },
@@ -70798,7 +70798,7 @@
         },
         {
           "name": "demoFormats",
-          "type": "Array.<string>|undefined",
+          "type": "Array<string>|undefined",
           "optional": false,
           "description": ""
         },
@@ -71502,7 +71502,7 @@
       ],
       "returns": [
         {
-          "type": "Array.<Object>|'unknown'",
+          "type": "Array<Object>|'unknown'",
           "description": "List of per-page metadata objects, or 'unknown' if parsing fails."
         }
       ],
@@ -71721,7 +71721,7 @@
       ],
       "returns": [
         {
-          "type": "Array.<number>|undefined",
+          "type": "Array<number>|undefined",
           "description": ""
         }
       ],
@@ -73190,7 +73190,7 @@
         },
         {
           "name": "props.documents",
-          "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, pageCount:number, pages:Array.<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
+          "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, pageCount:number, pages:Array<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
           "optional": false,
           "description": ""
         },
@@ -80770,7 +80770,7 @@
       ],
       "returns": [
         {
-          "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array.<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
+          "type": "Array.<{key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{originalIndex:number, originalPageNumber:number, documentPageNumber:number}>}>",
           "description": ""
         }
       ],
@@ -81561,7 +81561,7 @@
       "params": [
         {
           "name": "mask",
-          "type": "Array.<boolean>|null|undefined",
+          "type": "Array<boolean>|null|undefined",
           "optional": false,
           "description": ""
         },
@@ -84138,7 +84138,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<string>>",
+          "type": "Promise.<Array<string>>",
           "description": ""
         }
       ],
@@ -84952,7 +84952,7 @@
       "params": [
         {
           "name": "urls",
-          "type": "Array.<string>|string",
+          "type": "Array<string>|string",
           "optional": false,
           "description": ""
         }
@@ -85356,7 +85356,7 @@
       "params": [
         {
           "name": "updater",
-          "type": "Array.<any>|function",
+          "type": "Array<any>|function",
           "optional": false,
           "description": ""
         }
@@ -86587,13 +86587,13 @@
       "params": [
         {
           "name": "lngs",
-          "type": "string|Array.<string>",
+          "type": "string|Array<string>",
           "optional": false,
           "description": ""
         },
         {
           "name": "namespaces",
-          "type": "string|Array.<string>",
+          "type": "string|Array<string>",
           "optional": false,
           "description": ""
         }
@@ -89598,7 +89598,7 @@
       ],
       "returns": [
         {
-          "type": "Object.<string, Object>|undefined",
+          "type": "Object<string, Object>|undefined",
           "description": ""
         }
       ],
@@ -89623,7 +89623,7 @@
       ],
       "returns": [
         {
-          "type": "Object.<string, string>|undefined",
+          "type": "Object<string, string>|undefined",
           "description": ""
         }
       ],
@@ -89648,7 +89648,7 @@
       ],
       "returns": [
         {
-          "type": "Object.<string, Object>|undefined",
+          "type": "Object<string, Object>|undefined",
           "description": ""
         }
       ],
@@ -89763,7 +89763,7 @@
       ],
       "returns": [
         {
-          "type": "Object.<string, *>|null",
+          "type": "Object<string, *>|null",
           "description": ""
         }
       ],
@@ -91942,7 +91942,7 @@
       ],
       "returns": [
         {
-          "type": "Object.<string, Array.<{label:string, selectedSource: (string|undefined)}>>",
+          "type": "Object.<string, Array<{label:string, selectedSource: (string|undefined)}>>",
           "description": ""
         }
       ],
@@ -92322,7 +92322,7 @@
         },
         {
           "name": "aliasLabelsById",
-          "type": "Object.<string, Array.<{label:string, selectedSource: (string|undefined)}>>",
+          "type": "Object.<string, Array<{label:string, selectedSource: (string|undefined)}>>",
           "optional": false,
           "description": "Alias-derived labels grouped by metadata field id. This lets the UI fall back to deployment alias labels when the host payload does not pro..."
         }
@@ -92898,7 +92898,7 @@
         },
         {
           "name": "fallback",
-          "type": "string|Array.<string>",
+          "type": "string|Array<string>",
           "optional": true,
           "description": ""
         }
@@ -94349,7 +94349,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<{results:Array.<*>, summary: {itemCount:number, successCount:number, errorCount:number}}>",
+          "type": "Promise.<{results:Array<*>, summary: {itemCount:number, successCount:number, errorCount:number}}>",
           "description": ""
         }
       ],
@@ -95993,7 +95993,7 @@
       ],
       "returns": [
         {
-          "type": "Map.<string, Array.<Object>>",
+          "type": "Map.<string, Array<Object>>",
           "description": ""
         }
       ],
@@ -97528,13 +97528,13 @@
       "params": [
         {
           "name": "pages",
-          "type": "Array.<*>|null|undefined",
+          "type": "Array<*>|null|undefined",
           "optional": false,
           "description": "Session pages (allPages)."
         },
         {
           "name": "reports",
-          "type": "Object.<string, *>|null|undefined",
+          "type": "Object<string, *>|null|undefined",
           "optional": false,
           "description": "Map of sourceKey to PdfSignatureReport."
         },
@@ -97565,7 +97565,7 @@
       "params": [
         {
           "name": "documents",
-          "type": "Array.<SignatureDocumentEntry>|null|undefined",
+          "type": "Array<SignatureDocumentEntry>|null|undefined",
           "optional": false,
           "description": ""
         },
@@ -97759,7 +97759,7 @@
       "params": [
         {
           "name": "documents",
-          "type": "Array.<SignatureDocumentEntry>|null|undefined",
+          "type": "Array<SignatureDocumentEntry>|null|undefined",
           "optional": false,
           "description": ""
         }
@@ -98455,7 +98455,7 @@
       "params": [
         {
           "name": "signatures",
-          "type": "Array.<*>|null|undefined",
+          "type": "Array<*>|null|undefined",
           "optional": false,
           "description": ""
         }
@@ -98480,7 +98480,7 @@
       "params": [
         {
           "name": "signatures",
-          "type": "Array.<*>|null|undefined",
+          "type": "Array<*>|null|undefined",
           "optional": false,
           "description": ""
         }
@@ -99192,7 +99192,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<U>>",
+          "type": "Promise.<Array<U>>",
           "description": ""
         }
       ],
@@ -100365,7 +100365,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<string>>",
+          "type": "Promise.<Array<string>>",
           "description": ""
         }
       ],
@@ -101658,7 +101658,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<string>>",
+          "type": "Promise.<Array<string>>",
           "description": ""
         }
       ],
@@ -102504,7 +102504,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<{urls: Array.<string>, leased: Array.<string>}>",
+          "type": "Promise.<{urls: Array<string>, leased: Array<string>}>",
           "description": "urls in PDF order and leased , the exact lease entries the flow now holds (release those, not urls )."
         }
       ],
@@ -103086,7 +103086,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<HTMLImageElement>>",
+          "type": "Promise.<Array<HTMLImageElement>>",
           "description": ""
         }
       ],
@@ -103414,7 +103414,7 @@
       ],
       "returns": [
         {
-          "type": "Array.<Array.<string>>|null",
+          "type": "Array<Array<string>>|null",
           "description": ""
         }
       ],
@@ -104150,7 +104150,7 @@
         },
         {
           "name": "selectorParts",
-          "type": "Array.<Array.<string>>",
+          "type": "Array.<Array<string>>",
           "optional": false,
           "description": ""
         }
@@ -106724,7 +106724,7 @@
       ],
       "returns": [
         {
-          "type": "Promise.<Array.<*>>",
+          "type": "Promise.<Array<*>>",
           "description": ""
         }
       ],
