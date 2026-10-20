@@ -100,11 +100,14 @@ PowerShell 7; it does not measure fallback base paths or the hosted Linux runner
 
 ## Version scope
 
-The repository bump helper updates repository `2.4.204` to `2.4.205`, component
+These numbers are historical: they record the bump made with this change, as
+reported by the repository bump helper, not the current versions (see
+`omp-components.json` and `package.json` for those). The repository bump helper
+updated repository `2.4.204` to `2.4.205`, component
 `opendocviewer-web` `2.4.193` to `2.4.194`, and module definition `opendocviewer`
-`2.0.151` to `2.0.152` in both physical copies. It also raises the compatible
+`2.0.151` to `2.0.152` in both physical copies. It also raised the compatible
 artifact maximum to `2.4.194` and the component's minimum definition to `2.0.152`.
-SQL bytes and their embed are unchanged. The npm product version remains `2.10.0`.
+SQL bytes and their embed were unchanged. The npm product version remained `2.10.0`.
 
 ## Parent integration: deterministic printing test synchronization
 

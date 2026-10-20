@@ -46,7 +46,8 @@ The search returned no matches (git grep exit 1). Four tracked test files were
 checked: `public/__tests__/web-headers.test.js`,
 `src/logging/__tests__/systemLogger.test.js`,
 `src/utils/__tests__/documentLoadingConfig.test.js`, and
-`src/utils/__tests__/runtimeConfig.test.js`. Additional searches checked mocking,
+`src/utils/__tests__/runtimeConfig.test.js`. (The header test has since moved
+to `src/__tests__/webConfigHeaders.test.js`.) Additional searches checked mocking,
 environment annotations, sequential options, asynchronous assertions, snapshots,
 and deprecated imports. Literal document-loading strategy values named
 `sequential` are application data and need no migration.
@@ -254,8 +255,10 @@ runs tests, lint, build, and JSDoc after a clean npm install.
 Both the Vitest 4 baseline and Vitest 5 full local run passed 91 tests in five
 files (exit 0). The local build output already contains a copied
 `dist/__tests__/web-headers.test.js`, accounting for four duplicate header
-checks; the tracked suite contains 87 tests in four files. This pre-existing
-discovery behavior is unchanged by the migration. The Vitest 5 run used
+checks; the tracked suite contains 87 tests in four files. That `dist/` copy is a
+generated, git-ignored build artifact, not a fifth tracked file. This pre-existing
+discovery behavior is unchanged by the migration (the later move of the header
+test to `src/__tests__/` keeps it out of `dist/`, and Vitest now excludes `dist/**`). The Vitest 5 run used
 Node 24.20.0; Node 25.6.0 was used for the baseline.
 The explicit tracked-suite run (`npm test -- src public`) also passed all
 87 tests in four files (exit 0). Lint, the full production build, and the local
