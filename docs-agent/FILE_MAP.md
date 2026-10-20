@@ -131,7 +131,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
 | <code>src/utils/printCore.js</code> | 1058 | 3 | 39 | high | Core print coordinator for the frontend. |
 | <code>src/utils/printDom.js</code> | 473 | 1 | 19 | high | OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\). |
-| <code>src/utils/printParse.js</code> | 100 | 1 | 3 | high | OpenDocViewer — Print Sequence Parser Parse a user-entered &quot;Custom pages&quot; string into a sequence of page indices. |
+| <code>src/utils/printParse.js</code> | 103 | 1 | 3 | high | OpenDocViewer — Print Sequence Parser Parse a user-entered &quot;Custom pages&quot; string into a sequence of page indices. |
 | <code>src/utils/printPdf.js</code> | 2489 | 3 | 101 | high | OpenDocViewer — Generated PDF print backend. |
 | <code>src/utils/printSanitize.js</code> | 23 | 4 | 1 | high | OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules. |
 | <code>src/utils/printTemplate.js</code> | 809 | 3 | 34 | high | OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates. |

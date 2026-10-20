@@ -89,7 +89,7 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60676,
+    "sourceLineCount": 60679,
     "docletCount": 1658,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
@@ -1568,7 +1568,7 @@
     {
       "name": "src/utils",
       "fileCount": 51,
-      "lineCount": 20060,
+      "lineCount": 20063,
       "docletCount": 811,
       "importantFiles": [
         {
@@ -54997,7 +54997,7 @@
     },
     {
       "path": "src/utils/printParse.js",
-      "lines": 100,
+      "lines": 103,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "OpenDocViewer — Print Sequence Parser Parse a user-entered \"Custom pages\" string into a sequence of page indices.",

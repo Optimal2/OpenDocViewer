@@ -69,6 +69,9 @@ export function parsePrintSequence(text, totalPages) {
 
     if (tok.includes('-')) {
       const parts = tok.split('-');
+      if (parts.length !== 2) {
+        return { ok: false, error: tr('printDialog.errors.invalidRange', 'Invalid range "{range}".', { range: tok }) };
+      }
       const a = Number.parseInt(parts[0], 10);
       const b = Number.parseInt(parts[1], 10);
       if (!Number.isFinite(a) || !Number.isFinite(b)) {
