@@ -24,4 +24,5 @@ artifacts' `node_modules`.
 | Component | Licence | Used for |
 | --- | --- | --- |
 | `@peculiar/x509` | MIT | Fixture generator and tests only: creating throwaway test CA/signer certificates. Never imported from application code and never bundled. |
+| `reflect-metadata` | Apache-2.0 | Polyfill required by `@peculiar/x509` v2 (via `tsyringe`); loaded once at the top of the fixture generator. Never imported from application code and never bundled. |
 | `@playwright/test` | Apache-2.0 | Browser UI tests (`npm run test:ui`, `tests/ui/`) only. Never imported from application code and never bundled. |

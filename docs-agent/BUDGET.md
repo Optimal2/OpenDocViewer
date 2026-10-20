@@ -11,15 +11,15 @@ Token counts are rough estimates using one token per four characters. Use this f
 ## Generated Output Estimate
 
 - Output files measured: 29 (excluding this budget file)
-- Output lines: 157793
-- Output characters: 4416118
-- Estimated output tokens: 1104041
+- Output lines: 157795
+- Output characters: 4416208
+- Estimated output tokens: 1104064
 
 ## Largest Output Files
 
 | File | Lines | Characters | Estimated tokens |
 | --- | ---: | ---: | ---: |
-| `agent-map.json` | 110876 | 2990182 | 747546 |
+| `agent-map.json` | 110877 | 2990215 | 747554 |
 | `symbol-index.json` | 42079 | 989723 | 247431 |
 | `SYMBOL_INDEX.md` | 1663 | 244405 | 61102 |
 | `chunks/src_utils.md` | 934 | 53810 | 13453 |
@@ -30,7 +30,7 @@ Token counts are rough estimates using one token per four characters. Use this f
 | `chunks/src_components.md` | 259 | 10168 | 2542 |
 | `chunks/src_components_DocumentLoader.md` | 150 | 8600 | 2150 |
 | `chunks/src_integrations.md` | 145 | 7862 | 1966 |
-| `DEPENDENCIES.md` | 66 | 5776 | 1444 |
+| `DEPENDENCIES.md` | 67 | 5833 | 1459 |
 | `CROSS_CUTTING.md` | 57 | 5266 | 1317 |
 | `chunks/src_contexts.md` | 83 | 4357 | 1090 |
 | `chunks/src_hooks.md` | 83 | 3488 | 872 |
