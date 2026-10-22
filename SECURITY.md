@@ -428,11 +428,11 @@ We aim to:
 The maintainer is Optimal2 AB, Sweden. These practices support the obligations of
 Regulation (EU) 2024/2847 (Cyber Resilience Act) where they apply:
 
-- **Coordinated vulnerability disclosure.** Report vulnerabilities privately through
+- **Coordinated vulnerability disclosure.** Report vulnerabilities privately by e-mail (see above) or through
   GitHub private vulnerability reporting (the repository's Security tab, "Report a
   vulnerability"). It is enabled for this repository. Fixed vulnerabilities are
   published as GitHub security advisories.
-- **Software bill of materials.** Each GitHub release carries `OpenDocViewer-sbom-vX.Y.Z.cdx.json`, a CycloneDX SBOM of the runtime dependencies (development dependencies excluded), generated from the release's own lockfile.
+- **Software bill of materials.** From the first release after this policy update, each GitHub release carries `OpenDocViewer-sbom-vX.Y.Z.cdx.json`, a CycloneDX SBOM of the runtime dependencies (development dependencies excluded), generated from the release's own lockfile.
 - **Actively exploited vulnerabilities and severe incidents** affecting a supported
   release are handled under the CRA reporting obligations, which apply from
   11 September 2026.
