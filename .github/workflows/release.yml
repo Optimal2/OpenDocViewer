@@ -112,6 +112,12 @@ jobs:
             fi
           done
 
+      # Software bill of materials for the EU Cyber Resilience Act (Annex I,
+      # Part II(1)): runtime dependencies only, CycloneDX JSON, attached to the
+      # release next to the dist archive.
+      - name: Generate SBOM (CycloneDX)
+        run: npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --omit dev --output-format JSON --output-file "OpenDocViewer-sbom-${{ github.ref_name }}.cdx.json"
+
       - name: Install AgentDocMap deps
         working-directory: _tools/AgentDocMap
         run: npm ci --no-audit --fund=false
@@ -159,3 +165,4 @@ jobs:
             OpenDocViewer-dist-${{ github.ref_name }}.zip
             OpenDocViewer-docs-${{ github.ref_name }}.zip
             OpenDocViewer-agent-docs-${{ github.ref_name }}.zip
+            OpenDocViewer-sbom-${{ github.ref_name }}.cdx.json
