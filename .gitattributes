@@ -14,3 +14,10 @@
 # exists to remove. All 30 HEAD blobs are already LF; renormalization is a
 # no-op (proved in the commit that introduced this line).
 docs-agent/** text eol=lf
+
+# scripts/omp/*.ps1 are verbatim copies of OpenModulePlatform's shared scripts,
+# compared byte-for-byte by Check 15 (validate-shared-scripts.ps1) against the
+# platform checkout, which pins "*.ps1 text eol=crlf". Mirror that rule so the
+# working-tree bytes match the platform (CRLF) while the blobs stay LF, which
+# also keeps the pre-commit whitespace check (git diff --check) green.
+*.ps1 text eol=crlf
