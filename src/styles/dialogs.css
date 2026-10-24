@@ -1121,7 +1121,7 @@
 .odv-manual-content {
   color: inherit;
   line-height: 1.6;
-  /* The manual HTML (ODV-HELP) reads these aliases with light-theme hex fallbacks; ODV's
+  /* The bundled manual HTML reads these aliases with light-theme hex fallbacks; ODV's
      theme tokens have other names, so without the aliases a dark theme showed dark text on a
      dark surface (2026-10-05). Map them to the live theme here, never in the manual files. */
   --odv-text: var(--text-color);
