@@ -5,6 +5,356 @@
 <title>Fler funktioner – OpenDocViewer</title>
 </head>
 <body>
+<!-- SOK-START: sökrutan, inlagd av embed.py ur ODV-HELP/sokruta (ändra där, inte här) -->
+<script>
+/* Sökrutan i ODV-manualerna (kampanj odv-manual-sokruta, 2026-09-28).
+ *
+ * Bäddas in av embed.py (via sokruta.py) mellan SOK-START/SOK-END, direkt efter body och före
+ * manualens rotelement (id="top"). Allt byggs vid körning: i filen finns bara det här skriptet, så
+ * html2docx (som läser rotelementet) och ODV:s manualfönster (DOMPurify tar bort script) får
+ * ingenting av sökrutan. PDF:en skrivs ut av Edge med skriptet igång; utskrifts-CSS:en döljer rutan.
+ *
+ * Inga beroenden, inga nätanrop. Filen får inte innehålla mindre-än-tecknet: build.ps1, embed.py och
+ * html2docx letar taggar med textsökning, och ODV:s sanering tömmer ett stilblock som har ett.
+ * sokruta.py fyller i CSS:en, språkets texter och språkkoden (platshållarna i början av funktionen).
+ */
+(function () {
+  'use strict';
+  var STIL = "/* Sökrutan i ODV-manualerna (kampanj odv-manual-sokruta). Läggs in av skriptet vid körning,\n   aldrig som en style-tagg i filen: embed.py tar första style-blocket som CSS-master, och ODV:s\n   manualfönster (DOMPurify) ska inte få något kvar av sökrutan. Inget mindre-än-tecken här. */\n.odv-sok {\n  position: sticky; top: 0; z-index: 1000;\n  max-width: 900px; margin: 0 auto 0.5rem; padding: 0.55rem 0.6rem 0.5rem;\n  background: var(--odv-surface, #ffffff); color: var(--odv-text, #1f2933);\n  border-bottom: 1px solid var(--odv-border, #d7dde6);\n  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);\n  font: 15px/1.4 system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif;\n}\n.odv-sok-rad { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }\n.odv-sok-etikett {\n  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;\n  clip: rect(0 0 0 0); white-space: nowrap; border: 0;\n}\n.odv-sok-falt {\n  flex: 1 1 14rem; min-width: 10rem; padding: 0.45rem 0.6rem; font: inherit; color: inherit;\n  background: var(--odv-surface, #ffffff); border: 1px solid #8a96a8; border-radius: 6px;\n}\n/* Webbläsarens egen rensknapp i type=search dubblerar knappen × (som också nås med Esc). */\n.odv-sok-falt::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }\n.odv-sok-knapp {\n  min-width: 2.2rem; padding: 0.4rem 0.6rem; font: inherit; line-height: 1; cursor: pointer;\n  color: inherit; background: var(--odv-surface-elevated, #f7f9fc);\n  border: 1px solid #8a96a8; border-radius: 6px;\n}\n.odv-sok-knapp:disabled { opacity: 0.45; cursor: default; }\n.odv-sok-falt:focus-visible, .odv-sok-knapp:focus-visible, .odv-sok-rubrik:focus-visible {\n  outline: 3px solid #1f6fd1; outline-offset: 2px;\n}\n.odv-sok-raknare { min-width: 6.5rem; font-size: 0.9rem; color: var(--odv-muted-text, #5f6b7a); }\n.odv-sok-rubriker { list-style: none; margin: 0.4rem 0 0; padding: 0; max-height: 11rem; overflow-y: auto; }\n.odv-sok-rubriker[hidden] { display: none; }\n.odv-sok-rubriker li { margin: 0; }\n.odv-sok-rubrik {\n  display: block; width: 100%; padding: 0.3rem 0.5rem; text-align: left; font: inherit; font-size: 0.92rem;\n  color: #1f6fd1; background: transparent; border: 0; border-radius: 4px; cursor: pointer;\n}\n.odv-sok-rubrik:hover { background: var(--odv-surface-elevated, #f7f9fc); text-decoration: underline; }\n.odv-sok-rubrik span { color: var(--odv-muted-text, #5f6b7a); }\n::highlight(odv-sok) { background-color: #ffe58a; color: inherit; }\n::highlight(odv-sok-aktuell) { background-color: #ff9f1a; color: #111827; }\nmark.odv-sok-traff { background-color: #ffe58a; color: inherit; padding: 0; }\nmark.odv-sok-traff.odv-sok-aktuell { background-color: #ff9f1a; color: #111827; }\n/* Ankarhopp (innehållsförteckningen, rubriklistan) hamnar under den fasta rutan, inte bakom den. */\nhtml { scroll-padding-top: 5rem; }\n@media print {\n  .odv-sok { display: none !important; }\n  mark.odv-sok-traff { background: none !important; color: inherit !important; }\n}\n";
+  var T = {"region": "Sök i manualen", "etikett": "Sök i manualen", "platshallare": "Sök i manualen…", "foregaende": "Föregående träff", "nasta": "Nästa träff", "rensa": "Rensa sökningen", "raknare": "{n} av {m}", "ingen": "Inga träffar", "minst": "Skriv minst 2 tecken", "rubriker": "Rubriker som matchar"};
+  var SPRAK = "sv";
+  var FORDROJNING_MS = 200;
+  var MINSTA_LANGD = 2;
+  var MAX_RUBRIKER = 8;
+  var MAX_TRAFFAR = 2000;
+  var BLOCK = /^(P|LI|H[1-6]|TD|TH|DT|DD|FIGCAPTION|FIGURE|SUMMARY|DETAILS|DIV|SECTION|NAV|PRE|BLOCKQUOTE|TABLE|TR|UL|OL|BODY)$/;
+  var HOPPA_OVER = /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/;
+
+  // Skriptet står före rotelementet och körs medan sidan tolkas: vänta tills hela sidan finns.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', starta);
+  else starta();
+
+  function starta() {
+    var rot = document.getElementById('top');
+    if (!rot || document.getElementById('odv-sok')) return;
+    var highlightApi = !!(window.CSS && window.CSS.highlights && typeof window.Highlight === 'function');
+
+    // ---------- gränssnittet ----------
+    var stil = document.createElement('style');
+    stil.id = 'odv-sok-stil';
+    stil.textContent = STIL;
+    document.head.appendChild(stil);
+
+    function el(tagg, attr, text) {
+      var e = document.createElement(tagg);
+      for (var k in attr) if (Object.prototype.hasOwnProperty.call(attr, k)) e.setAttribute(k, attr[k]);
+      if (text) e.textContent = text;
+      return e;
+    }
+    var ui = el('div', { id: 'odv-sok', 'class': 'odv-sok', role: 'search', 'aria-label': T.region });
+    var rad = el('div', { 'class': 'odv-sok-rad' });
+    var etikett = el('label', { 'for': 'odv-sok-falt', 'class': 'odv-sok-etikett' }, T.etikett);
+    var falt = el('input', {
+      id: 'odv-sok-falt', 'class': 'odv-sok-falt', type: 'search', placeholder: T.platshallare,
+      autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'odv-sok-raknare', 'aria-controls': 'odv-sok-rubriker'
+    });
+    var forra = el('button', { type: 'button', 'class': 'odv-sok-knapp', 'aria-label': T.foregaende, title: T.foregaende + ' (Shift+Enter)' }, '↑');
+    var nasta = el('button', { type: 'button', 'class': 'odv-sok-knapp', 'aria-label': T.nasta, title: T.nasta + ' (Enter)' }, '↓');
+    var rensa = el('button', { type: 'button', 'class': 'odv-sok-knapp', 'aria-label': T.rensa, title: T.rensa + ' (Esc)' }, '×');
+    var raknare = el('span', { id: 'odv-sok-raknare', 'class': 'odv-sok-raknare', 'aria-live': 'polite' });
+    var lista = el('ul', { id: 'odv-sok-rubriker', 'class': 'odv-sok-rubriker', 'aria-label': T.rubriker });
+    lista.hidden = true;
+    rad.appendChild(etikett); rad.appendChild(falt); rad.appendChild(forra); rad.appendChild(nasta);
+    rad.appendChild(rensa); rad.appendChild(raknare);
+    ui.appendChild(rad); ui.appendChild(lista);
+    rot.parentNode.insertBefore(ui, rot);
+
+    // ---------- textindex ----------
+    // Skiftlägesokänsligt tecken för tecken (Å -> å, Ä -> ä, Ö -> ö), så positionerna i den vikta
+    // texten är samma som i sidans text. Ett tecken vars gemena form är längre lämnas som det är.
+    function vik(s) {
+      var ut = [];
+      for (var i = 0; s.length > i; i++) {
+        var c = s.charAt(i);
+        var g = c.toLocaleLowerCase(SPRAK);
+        ut.push(g.length === 1 ? g : c);
+      }
+      return ut.join('');
+    }
+    function doldForSok(e) {
+      // Ljuslådor och navigeringsträdet (nav.sidonav) upprepar bara text som finns i manualen.
+      return e === ui || HOPPA_OVER.test(e.tagName) || (e.classList && (e.classList.contains('lb') || e.classList.contains('sidonav')));
+    }
+    function blockFor(nod) {
+      var e = nod.parentNode;
+      while (e && e.nodeType === 1 && !BLOCK.test(e.tagName)) e = e.parentNode;
+      return e;
+    }
+    var index = null;
+    function byggIndex() {
+      var delar = [], noder = [], starter = [], pos = 0, forraBlock = null;
+      var gangare = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) {
+          for (var e = n.parentNode; e && e !== rot.parentNode; e = e.parentNode) {
+            if (e.nodeType === 1 && doldForSok(e)) return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      var n;
+      while ((n = gangare.nextNode())) {
+        var b = blockFor(n);
+        // En avgränsare mellan block: en träff får aldrig gå över två stycken.
+        if (forraBlock !== null && b !== forraBlock) { delar.push('\u0000'); pos += 1; }
+        forraBlock = b;
+        var v = vik(n.data);
+        noder.push(n); starter.push(pos); delar.push(v); pos += v.length;
+      }
+      return { text: delar.join(''), noder: noder, starter: starter };
+    }
+    function nodVid(p) {
+      var lo = 0, hi = index.starter.length - 1;
+      while (hi > lo) {
+        var mitt = (lo + hi + 1) >> 1;
+        if (index.starter[mitt] > p) hi = mitt - 1; else lo = mitt;
+      }
+      return { i: lo, nod: index.noder[lo], off: p - index.starter[lo] };
+    }
+    function monster(fraga) {
+      var ord = vik(fraga).trim().split(/\s+/).filter(Boolean);
+      if (!ord.length) return null;
+      return new RegExp(ord.map(function (o) { return o.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('\\s+'), 'g');
+    }
+
+    // ---------- träffar ----------
+    var traffar = [];     // [{start, slut, range, markar}]
+    var aktuell = -1;
+    var rensaMarkar = function () {};
+
+    function tomTraffar() {
+      if (highlightApi) {
+        window.CSS.highlights.delete('odv-sok');
+        window.CSS.highlights.delete('odv-sok-aktuell');
+      } else {
+        rensaMarkar();
+      }
+      traffar = []; aktuell = -1;
+    }
+
+    function markeraMedMark() {
+      // Reserv utan CSS Custom Highlight API: varje träff delas per textnod och slås in i mark.
+      // Bakifrån, så att en uppdelad textnod aldrig flyttar en träff som ännu inte är gjord.
+      var foraldrar = [];
+      for (var t = traffar.length - 1; t >= 0; t--) {
+        var a = nodVid(traffar[t].start), b = nodVid(traffar[t].slut - 1), markar = [];
+        for (var i = b.i; i >= a.i; i--) {
+          var nod = index.noder[i];
+          var fran = i === a.i ? a.off : 0;
+          var till = i === b.i ? b.off + 1 : nod.data.length;
+          if (till > fran) {
+            if (nod.data.length > till) nod.splitText(till);
+            var mitt = fran > 0 ? nod.splitText(fran) : nod;
+            var mark = document.createElement('mark');
+            mark.className = 'odv-sok-traff';
+            mitt.parentNode.replaceChild(mark, mitt);
+            mark.appendChild(mitt);
+            markar.unshift(mark);
+            if (foraldrar.indexOf(mark.parentNode) === -1) foraldrar.push(mark.parentNode);
+          }
+        }
+        traffar[t].markar = markar;
+      }
+      rensaMarkar = function () {
+        var berorda = [];
+        for (var t2 = 0; traffar.length > t2; t2++) {
+          (traffar[t2].markar || []).forEach(function (m) {
+            var f = m.parentNode;
+            if (!f) return;
+            while (m.firstChild) f.insertBefore(m.firstChild, m);
+            f.removeChild(m);
+            if (berorda.indexOf(f) === -1) berorda.push(f);
+          });
+        }
+        berorda.forEach(function (f) { f.normalize(); });
+        index = null;
+        rensaMarkar = function () {};
+      };
+      index = null;
+    }
+
+    function oppnaDetaljer(nod) {
+      for (var e = nod.nodeType === 1 ? nod : nod.parentNode; e && e !== document.body; e = e.parentNode) {
+        if (e.tagName === 'DETAILS' && !e.open) e.open = true;
+      }
+    }
+
+    function visaAktuell(skrolla) {
+      var t = traffar[aktuell];
+      if (!t) return;
+      if (highlightApi) {
+        var hlAktuell = new window.Highlight(t.range);
+        hlAktuell.priority = 1;   // den aktuella träffen ritas alltid ovanpå de övriga
+        window.CSS.highlights.set('odv-sok-aktuell', hlAktuell);
+      } else {
+        traffar.forEach(function (x) { (x.markar || []).forEach(function (m) { m.classList.remove('odv-sok-aktuell'); }); });
+        (t.markar || []).forEach(function (m) { m.classList.add('odv-sok-aktuell'); });
+      }
+      oppnaDetaljer(highlightApi ? t.range.startContainer : t.markar[0]);
+      raknare.textContent = T.raknare.replace('{n}', String(aktuell + 1)).replace('{m}', String(traffar.length) + (traffar.length === MAX_TRAFFAR ? '+' : ''));
+      if (!skrolla) return;
+      var ruta = highlightApi ? t.range.getBoundingClientRect() : t.markar[0].getBoundingClientRect();
+      if (ruta && (ruta.width || ruta.height)) {
+        var y = (window.pageYOffset || document.documentElement.scrollTop) + ruta.top - Math.round(window.innerHeight / 3);
+        window.scrollTo(0, Math.max(0, y));
+      } else {
+        var e = highlightApi ? t.range.startContainer.parentNode : t.markar[0];
+        if (e && e.scrollIntoView) e.scrollIntoView({ block: 'center' });
+      }
+    }
+
+    function hoppa(steg) {
+      if (!traffar.length) return;
+      aktuell = (aktuell + steg + traffar.length) % traffar.length;
+      visaAktuell(true);
+    }
+
+    // ---------- rubriker ----------
+    function guideFor(rubrik) {
+      for (var e = rubrik.parentNode; e && e !== rot; e = e.parentNode) {
+        if (e.tagName === 'DETAILS' && e.classList.contains('embedded')) {
+          var s = e.querySelector('summary');
+          return s ? s.textContent.replace(/\s+/g, ' ').trim() : '';
+        }
+      }
+      return '';
+    }
+    function visaRubriker(re) {
+      while (lista.firstChild) lista.removeChild(lista.firstChild);
+      var antal = 0;
+      var rubriker = rot.querySelectorAll('h2, h3');
+      for (var i = 0; rubriker.length > i && MAX_RUBRIKER > antal; i++) {
+        var h = rubriker[i];
+        if (h.closest && h.closest('.lb')) continue;
+        var text = h.textContent.replace(/\s+/g, ' ').trim();
+        re.lastIndex = 0;
+        if (!re.test(vik(text))) continue;
+        var li = document.createElement('li');
+        var knapp = el('button', { type: 'button', 'class': 'odv-sok-rubrik' });
+        var guide = guideFor(h);
+        if (guide) knapp.appendChild(el('span', {}, guide + ' › '));
+        knapp.appendChild(document.createTextNode(text));
+        knapp.addEventListener('click', hoppaTillRubrik.bind(null, h));
+        li.appendChild(knapp);
+        lista.appendChild(li);
+        antal++;
+      }
+      lista.hidden = antal === 0;
+    }
+    function hoppaTillRubrik(h) {
+      oppnaDetaljer(h);
+      if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+      // Under rutan, som är högre när rubriklistan är öppen än vad scroll-padding räknar med.
+      var y = (window.pageYOffset || document.documentElement.scrollTop) + h.getBoundingClientRect().top - ui.getBoundingClientRect().height - 8;
+      window.scrollTo(0, Math.max(0, y));
+      try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+    }
+
+    // ---------- sökningen ----------
+    var vantar = null;
+    function sok() {
+      vantar = null;
+      tomTraffar();
+      var fraga = falt.value;
+      var trimmad = fraga.trim();
+      if (!trimmad) {
+        raknare.textContent = ''; lista.hidden = true; uppdateraKnappar(); return;
+      }
+      if (MINSTA_LANGD > trimmad.length) {
+        raknare.textContent = T.minst; lista.hidden = true; uppdateraKnappar(); return;
+      }
+      var re = monster(fraga);
+      if (!index) index = byggIndex();
+      var m;
+      re.lastIndex = 0;
+      while ((m = re.exec(index.text)) && MAX_TRAFFAR > traffar.length) {
+        if (!m[0].length) { re.lastIndex++; continue; }
+        traffar.push({ start: m.index, slut: m.index + m[0].length });
+      }
+      visaRubriker(re);
+      if (!traffar.length) {
+        raknare.textContent = T.ingen; uppdateraKnappar(); return;
+      }
+      if (highlightApi) {
+        var ranges = traffar.map(function (t) {
+          var a = nodVid(t.start), b = nodVid(t.slut - 1);
+          var r = document.createRange();
+          r.setStart(a.nod, a.off); r.setEnd(b.nod, b.off + 1);
+          t.range = r;
+          return r;
+        });
+        var hl = new window.Highlight();
+        hl.priority = 0;
+        ranges.forEach(function (r) { hl.add(r); });
+        window.CSS.highlights.set('odv-sok', hl);
+      } else {
+        markeraMedMark();
+      }
+      aktuell = 0;
+      visaAktuell(true);
+      uppdateraKnappar();
+    }
+    function sokNu() { if (vantar) { clearTimeout(vantar); sok(); } }
+    function uppdateraKnappar() {
+      forra.disabled = nasta.disabled = !traffar.length;
+      rensa.disabled = !falt.value;
+    }
+    function tom() {
+      if (vantar) { clearTimeout(vantar); vantar = null; }
+      falt.value = '';
+      sok();
+    }
+
+    falt.addEventListener('input', function () {
+      if (vantar) clearTimeout(vantar);
+      vantar = setTimeout(sok, FORDROJNING_MS);
+    });
+    falt.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (vantar) { sokNu(); if (e.shiftKey) hoppa(-1); return; }
+        hoppa(e.shiftKey ? -1 : 1);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        if (falt.value) tom(); else falt.blur();
+      } else if (e.key === 'ArrowDown' && !lista.hidden) {
+        e.preventDefault();
+        var forsta = lista.querySelector('button');
+        if (forsta) forsta.focus();
+      }
+    });
+    lista.addEventListener('keydown', function (e) {
+      var knappar = Array.prototype.slice.call(lista.querySelectorAll('button'));
+      var i = knappar.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' && i >= 0) { e.preventDefault(); knappar[Math.min(knappar.length - 1, i + 1)].focus(); }
+      else if (e.key === 'ArrowUp' && i >= 0) { e.preventDefault(); if (i === 0) falt.focus(); else knappar[i - 1].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); falt.focus(); }
+    });
+    forra.addEventListener('click', function () { sokNu(); hoppa(-1); });
+    nasta.addEventListener('click', function () { sokNu(); hoppa(1); });
+    rensa.addEventListener('click', function () { tom(); falt.focus(); });
+    // Snabbtangent "/" till sökrutan, när fokus inte redan står i ett textfält.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.ctrlKey || e.altKey || e.metaKey) return;
+      var a = document.activeElement;
+      if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable)) return;
+      e.preventDefault();
+      falt.focus();
+    });
+    uppdateraKnappar();
+  }
+})();
+</script>
+<!-- SOK-END -->
 <div class="odv-manual" id="top">
 <!-- CSS ligger i body: ODV:s manualfönster behåller bara body-innehållet (en inledande <style> i head försvinner). -->
 <style>
@@ -100,15 +450,43 @@
   .odv-manual figure { padding: 0.45rem; }
   .odv-manual table { display: block; overflow-x: auto; }
 }
+/* Navigeringsträdet (embed.py, nav.sidonav). Visas bara när manualen är en egen sida: då är
+   rotelementet ett direkt barn till body. I ODV:s hjälpfönster ligger manualen inne i appens egen
+   DOM, väljaren matchar inte och trädet förblir dolt (en fast position där skulle hamna ovanpå
+   appen). Fönstret måste också vara brett nog för trädet bredvid textkolumnen. */
+.odv-manual > .sidonav { display: none; }
+@media screen and (min-width: 1240px) {
+  body:has(> .odv-manual) > .odv-manual,
+  body:has(> .odv-manual) > .odv-sok { margin-left: max(18.5rem, calc((100vw - 900px) / 2)); }
+  body:has(> .odv-manual) > .odv-manual > .sidonav {
+    display: block; position: fixed; z-index: 10; top: 4.6rem; bottom: 1rem;
+    left: max(1rem, calc((100vw - 900px) / 2 - 17.5rem)); width: 16rem; overflow-y: auto;
+    padding: 0.7rem 0.8rem; font-size: 0.86rem; line-height: 1.4;
+    background: var(--manual-surface); border: 1px solid var(--manual-border); border-radius: 10px;
+  }
+  .odv-manual .sidonav a { display: block; padding: 0.2rem 0.35rem; border-radius: 5px; text-decoration: none; color: var(--manual-text); }
+  .odv-manual .sidonav a:hover { background: var(--manual-soft, rgba(31, 111, 209, 0.08)); color: var(--manual-blue); }
+  .odv-manual .sidonav a:target, .odv-manual .sidonav a:focus-visible { outline: 2px solid var(--manual-blue); outline-offset: 1px; }
+  .odv-manual .sidonav .sidonav-guide { font-weight: 700; color: var(--manual-blue); margin-top: 0.55rem; }
+  .odv-manual .sidonav .sidonav-guide:first-child { margin-top: 0; }
+  .odv-manual .sidonav ol { list-style: none; margin: 0.15rem 0 0 0.55rem; padding: 0 0 0 0.45rem; border-left: 1px solid var(--manual-border); max-width: none; }
+  .odv-manual .sidonav li { margin: 0; }
+}
+@media print { .odv-manual .sidonav { display: none !important; } }
 </style>
+<!-- NAV-START: navigeringsträdet, genererat av embed.py -->
+<nav class="sidonav" aria-label="Innehåll i manualen">
+  <a class="sidonav-guide" href="#top">Fler funktioner i OpenDocViewer</a>
+  <ol><li><a href="#metadata">Dokumentets metadata</a></li><li><a href="#hq">Skarpare PDF-sidor</a></li><li><a href="#egen">Egen storlek och standardzoom</a></li><li><a href="#tangentbord">Alla kortkommandon</a></li><li><a href="#verktygsfalt">Verktygsfältet knapp för knapp</a></li><li><a href="#tema">Mörkt tema</a></li><li><a href="#support">Supportinformation</a></li></ol>
+</nav>
+<!-- NAV-END -->
 <section class="hero">
   <h1>Fler funktioner i OpenDocViewer</h1>
   <p class="lead">Det här är fortsättningen på <a href="manual.sv.html">Kom igång-guiden</a>: funktioner som inte alla behöver varje dag, men som är bra att känna till. Läs det avsnitt du behöver.</p>
-  <p class="small">Bilderna visar ett påhittat testdokument. <a href="manual-avancerat.sv.pdf">Ladda ned guiden som PDF</a>.</p>
+  <p class="small">Att jämföra två sidor har en egen guide: <a href="manual-jamforelse.sv.html">Jämför två sidor</a>. Bilderna visar ett påhittat testdokument. <a href="manual-avancerat.sv.pdf">Ladda ned guiden som PDF</a>.</p>
 </section>
 
 <nav class="toc" aria-label="Innehåll">
-  <a href="#jamforelse">Jämför två sidor</a>
   <a href="#metadata">Dokumentets metadata</a>
   <a href="#hq">Skarpare PDF-sidor</a>
   <a href="#egen">Egen storlek och standardzoom</a>
@@ -118,66 +496,6 @@
   <a href="#support">Supportinformation</a>
 </nav>
 
-<h2 id="jamforelse">Jämför två sidor</h2>
-<p>Klicka på <strong>jämförelseknappen</strong> i verktygsfältet. Sidan du tittar på hamnar till vänster med <span class="blue">blå ram</span>, och en andra sida visas till höger med <span class="orange">orange ram</span>. Vill du byta ut den högra sidan: högerklicka på en miniatyr och välj <em>Visa till höger</em>.</p>
-<figure class="wide">
-  <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Jämförelseläget med två sidor bredvid varandra"></a>
-  <figcaption><strong>Jämförelseläget.</strong> Varje sida har egna zoomknappar i överkanten. I panelen märks vänster sida <span class="blue">V</span> och höger sida <span class="orange">H</span>.</figcaption>
-</figure>
-<p>En av sidorna är alltid <strong>aktiv</strong> – den du senast klickade i. Verktygsfältet och tangentbordet styr den aktiva sidan, och ramarna runt knapparna visar vilken: blå för vänster, orange för höger.</p>
-<p>Skriver du ut med metoden <strong>Aktiv sida</strong> medan du jämför kan du välja att ta med bara den aktiva sidan eller båda. Sidorna skrivs ut precis som du ser dem – rotation, ljusstyrka och kontrast följer med, på samma sätt som när du tittar på en enda sida. Med alla andra utskriftsmetoder skrivs sidorna ut som de är i arkivet.</p>
-<details>
-  <summary>Styra den andra sidan utan att byta</summary>
-  <p>Håll <kbd>Shift</kbd> nedtryckt medan du klickar på en knapp eller använder tangentbordet, så gäller kommandot den sida som <em>inte</em> är aktiv. Ramarna byter färg medan du håller Shift, så du ser vad som kommer att hända.</p>
-  <figure class="wide">
-    <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="Verktygsfältet med Shift nedtryckt och orange ramar"></a>
-    <figcaption><strong>Shift nedtryckt.</strong> Orange ramar = knapparna styr höger sida just nu.</figcaption>
-  </figure>
-  <p><kbd>Pil vänster</kbd> och <kbd>Pil höger</kbd> byter aktiv sida. <kbd>Pil vänster</kbd> när vänster redan är aktiv avslutar jämförelsen – det gör också jämförelseknappen, eller <em>Avsluta jämförelse</em> i högerklicksmenyn på den högra sidan.</p>
-  <figure class="menu">
-    <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="Högerklicksmenyn på höger sida i jämförelseläget"></a>
-    <figcaption><strong>Högerklick på höger sida.</strong> Samma val som vanligt, plus <em>Avsluta jämförelse</em>.</figcaption>
-  </figure>
-</details>
-
-<h3 id="jamforelse-finjustera">Finjustera zoom, läge och rotation</h3>
-<p>Klicka på <strong>Finjustering</strong> i verktygsfältet för att visa kontroller för den visade sidan eller båda sidorna vid jämförelse sida vid sida. Kontrollerna är dolda från början. Klicka igen för att dölja kontroller och finjusteringsgester; zoom, läge, rotation och bildjusteringar behålls. Valet följer med när du byter läge. Varje sida har också en rad <strong>Finjustera</strong> med en sammanfattning, till exempel <em>100,0 % · 0,0°</em>:</p>
-<ul>
-  <li><strong>Zoom</strong> i procent med en decimal. Knapparna − och + ändrar 0,1 % (med <kbd>Shift</kbd>: 1 %). Zoomknapparna i sidans överkant stegar fortfarande 10 % och behåller finjusteringen.</li>
-  <li><strong>Läge</strong>: X och Y i pixlar. Dra sidan med musen, eller markera flyttknappen (fyra pilar) och använd piltangenterna: 1 px per tryck, 10 px med <kbd>Shift</kbd>.</li>
-  <li><strong>Rotation</strong> i grader med en decimal. Knapparna ↺ och ↻ vrider 0,1° (med <kbd>Shift</kbd>: 1°). En liten vridning moturs visas som ett negativt tal, till exempel −0,3. Knapparna för 90° i verktygsfältet fungerar som förut och behåller finjusteringen.</li>
-  <li><strong>Återställ</strong> (rund pil) sätter tillbaka sidan till 100 %, läge 0 och rotation 0.</li>
-</ul>
-<p>I fälten kan du skriva med decimalkomma eller decimalpunkt – 12,5 och 12.5 fungerar båda. <kbd>Enter</kbd>, eller att du lämnar fältet, använder värdet. <kbd>Esc</kbd> ångrar det du skrivit, och <kbd>Pil upp</kbd> / <kbd>Pil ned</kbd> stegar värdet (med <kbd>Shift</kbd>: tio steg). Medan raden är öppen flyttar du sidan genom att dra i den i stället för att rulla, och <kbd>Ctrl</kbd> + mushjulet över sidan zoomar bara den sidan, 1 % per hack. Stäng raden för att rulla och zooma som vanligt igen.</p>
-
-<h3 id="jamforelse-overlagring">Lägg sidorna på varandra (överlagring)</h3>
-<p>Små skillnader syns lättast när sidorna ligger på varandra. Klicka på <strong>överlagringsknappen</strong> (staplade lager) bredvid jämförelseknappen – den finns bara när två sidor jämförs. Överlagringsvyn fyller fönstret och har ett eget verktygsfält. Sida A (vänster sida, blå) ligger underst och sida B (höger sida, orange) överst. Båda behåller den zoom, det läge och den rotation du ställt in i jämförelsevyn.</p>
-<ul>
-  <li><strong>Opacitet</strong>: reglaget styr hur synlig den översta sidan är, från 0 % (osynlig) till 100 % (helt täckande). Det börjar på 50 %. När reglaget är markerat ändrar <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd> värdet 1 %, med <kbd>Shift</kbd> 10 %, och <kbd>Home</kbd> / <kbd>End</kbd> går till 0 % och 100 %.</li>
-  <li><strong>Byt plats</strong> (pilar upp och ned) lägger den andra sidan överst. Reglaget styr alltid den sida som ligger överst.</li>
-  <li><strong>Kalibrera</strong>: samma rader för finjustering som i jämförelsevyn, märkta A och B, finns ovanför sidorna. Drar du i sidorna flyttas den översta sidan, och <kbd>Ctrl</kbd> + mushjulet zoomar den översta sidan.</li>
-  <li><strong>Knuffläge</strong> (flyttknappen): när det är på flyttar piltangenterna den översta sidan 1 px (med <kbd>Shift</kbd>: 10 px). Klicka först på sidorna så att tangenterna går dit.</li>
-  <li><strong>Återställ till jämförelsen</strong> (klocka med pil) sätter tillbaka den zoom, det läge och den rotation sidorna hade när du öppnade överlagringsvyn.</li>
-  <li><strong>Kopiera kalibreringen</strong> kopierar båda sidornas inställningar som text (JSON), så att du kan klistra in dem i ett supportärende.</li>
-  <li><strong>Gardin</strong> öppnar gardinvyn med samma kalibrering, se nästa avsnitt.</li>
-  <li><strong>Stäng</strong> – eller <kbd>Esc</kbd> – tar dig tillbaka till jämförelsevyn. Kalibreringen sparas: sidorna behåller sina justeringar, och nästa gång du öppnar överlagringsvyn är opaciteten och den översta sidan som du lämnade dem.</li>
-</ul>
-
-<p><strong>Skriv ut överlagringsvyn:</strong> klicka på <strong>Skriv ut</strong> för att skriva ut en sammansatt sida av den synliga ytan med aktuell genomskinlighet, översta sida och båda sidornas zoom, läge och rotation. Den vanliga utskriftsdialogen har samma alternativ, inklusive direktutskrift, <strong>Skriv ut via PDF</strong> och <strong>Spara PDF</strong>. Du väljer inget sidintervall: resultatet är en sida. Utskriften loggas på samma sätt som andra utskrifter, med sidantalet 1.</p>
-
-<h3 id="jamforelse-gardin">Dra en gräns mellan sidorna (gardin)</h3>
-<p>I gardinvyn ligger de två kalibrerade sidorna på samma plats, och en gräns som du drar avgör var du ser vilken sida: sida A på ena sidan om gränsen och sida B på den andra. Så ser du snabbt om linjer och text fortsätter obrutet över gränsen.</p>
-<ul>
-  <li><strong>Öppna</strong>: klicka på <strong>Gardin</strong> i överlagringsvyns verktygsfält. I jämförelsevyn finns gardinknappen bredvid överlagringsknappen. När överlagring är aktiverad öppnar du först överlagringsvyn för att kalibrera sidorna – innan dess är gardinknappen grå, och verktygstipset förklarar varför. Om överlagring är avstängd för installationen använder gardinen jämförelsevyns kalibrering direkt.</li>
-  <li><strong>Horisontell / Vertikal</strong> väljer gränsens riktning. Vertikal: gränsen är lodrät, sida A syns till vänster och sida B till höger. Horisontell: gränsen är vågrät, sida A syns ovanför och sida B nedanför. Etiketterna i hörnen visar vilken sida, med sidnummer, som ligger var.</li>
-  <li><strong>Flytta gränsen</strong>: dra i greppet på gränsen med musen eller med fingret. Gränsen är markerad när vyn öppnas, så <kbd>piltangenterna</kbd> flyttar den direkt: 1 % per tryck, 10 % med <kbd>Shift</kbd>. Varje riktning kommer ihåg sitt eget läge så länge vyn är öppen.</li>
-  <li><strong>Finjustering</strong>: båda bilderna har kontroller för zoom, läge, rotation och bildjusteringar. Överlagrings- och gardinvyn visar alltid kontrollerna när de öppnas, oberoende av valet i det vanliga verktygsfältet. Justeringarna finns kvar när du stänger vyn; ditt vanliga synlighetsval ändras inte.</li>
-  <li><strong>Stäng</strong> – eller <kbd>Esc</kbd> – tar dig tillbaka dit du öppnade gardinvyn: överlagringsvyn eller jämförelsevyn.</li>
-</ul>
-<p><strong>Skriv ut gardinvyn:</strong> klicka på <strong>Skriv ut</strong> för att skriva ut en sammansatt sida av den synliga ytan med den horisontella eller vertikala gränsens aktuella läge samt båda sidornas zoom, läge och rotation. Samma utskriftsdialog, alternativ, direktutskrift, <strong>Skriv ut via PDF</strong> och <strong>Spara PDF</strong> används. Resultatet och utskriftsloggens sidantal är båda en sida; gränsens handtag och verktygsfältet skrivs inte ut.</p>
-<p class="small"><strong>Installationsinställningar:</strong> <code>compare.overlay.enabled</code> och <code>compare.curtain.enabled</code> styr om respektive vy kan öppnas; en avstängd vy har ingen öppningsknapp. <code>compare.overlay.print.enabled</code> och <code>compare.curtain.print.enabled</code> styr respektive vys knapp <strong>Skriv ut</strong>. Alla fyra har standardvärdet <code>true</code>; <code>odv.site.config.js</code> skriver över dem. Endast det booleska värdet <code>false</code> stänger av en inställning. Vanlig jämförelse sida vid sida och dess utskrift finns kvar. Om överlagring är avstängd använder gardinen jämförelsevyns kalibrering direkt.</p>
-
-<p class="small">Installationen kan stänga av finjustering, överlagring och gardin tillsammans med <code>fineTune.enabled: false</code> i <code>odv.site.config.js</code>. Vanlig visning, jämförelse sida vid sida och deras utskrift finns kvar. Standardvärdet är <code>true</code>; endast booleskt <code>false</code> stänger av funktionen.</p>
 <h2 id="metadata">Dokumentets metadata</h2>
 <p>Högerklicka på en miniatyr eller på sidan och välj <strong>Visa metadata</strong>. Du ser de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel id, namn, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns beror på det systemet. Uppgifterna är bara för visning och kan inte ändras i ODV.</p>
 <figure class="wide">
@@ -221,11 +539,10 @@
     <tr><td><kbd>Shift</kbd> + kommando</td><td>I jämförelseläget: styr den sida som inte är aktiv.</td></tr>
     <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Dölj sidan / dölj hela dokumentet (urval).</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Öppna ODV:s utskriftsdialog.</td></tr>
-    <tr><td><kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd> på opacitetsreglaget</td><td>I överlagringsvyn: ändra opaciteten 1 % (med Shift: 10 %).</td></tr>
-    <tr><td>Piltangenterna i knuffläge</td><td>I överlagringsvyn: flytta den översta sidan 1 px (med Shift: 10 px).</td></tr>
-    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning. Stänger också överlagringsvyn.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning.</td></tr>
   </tbody>
 </table>
+<p class="small">Tangenterna i jämförelseläget, överlagringsvyn och gardinvyn finns samlade i guiden <a href="manual-jamforelse.sv.html">Jämför två sidor</a>.</p>
 
 <h2 id="verktygsfalt">Verktygsfältet knapp för knapp</h2>
 <figure class="wide">
@@ -241,13 +558,13 @@
   <li><strong>Urval</strong> öppnar urvalsarbetsytan. Röd när ett urval är aktivt.</li>
   <li><strong>Sidnavigering</strong>: första, föregående, nästa, sista, och ett fält för sidnummer.</li>
   <li><strong>Zoom</strong>: ut, in, procentfält, 1:1, anpassa till skärm, anpassa till bredd.</li>
-  <li><strong>1:X</strong>: egen storlek. <strong>Jämförelse</strong>: två sidor bredvid varandra. <strong>Överlagring</strong>: bara i jämförelseläget – lägger sidorna på varandra. <strong>Rotera</strong>: ett kvarts varv.</li>
+  <li><strong>1:X</strong>: egen storlek. <strong>Finjustering</strong>, <strong>jämförelse</strong>, <strong>överlagring</strong> och <strong>gardin</strong>: beskrivs i guiden <a href="manual-jamforelse.sv.html">Jämför två sidor</a>. <strong>Rotera</strong>: ett kvarts varv.</li>
   <li><strong>HQ</strong>: skarpare PDF-sida. <strong>Ljusstyrka</strong>, <strong>kontrast</strong> och <strong>återställ</strong>.</li>
   <li><strong>Tema</strong>, <strong>språk</strong>, <strong>hjälp</strong>. Lampan på hjälpknappen: grön = allt väl, gul = datorn har lite minne, röd = fel.</li>
 </ul>
 
 <h2 id="tema">Mörkt tema</h2>
-<p>Temamenyn längst till höger har <em>Normal</em>, <em>Ljust</em> och <em>Mörkt</em>. I mörkt tema blir gränssnittet mörkt medan dokumentsidan visas som vanligt.</p>
+<p>Temamenyn längst till höger har <em>Normal</em>, <em>Ljust</em> och <em>Mörkt</em>. I mörkt tema blir gränssnittet mörkt medan dokumentsidan visas som vanligt. Under temana finns kryssrutan <em>Större verktygsknappar</em>: avbockad ger ett lägre verktygsfält med mindre knappar, och ODV kommer ihåg valet.</p>
 <figure class="wide">
   <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer i mörkt tema"></a>
   <figcaption><strong>Mörkt tema.</strong></figcaption>
@@ -276,11 +593,8 @@
   </div>
 </details>
 
-<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.8. Uppdaterad 2026-09-26.</p>
+<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.10. Uppdaterad 2026-10-24.</p>
 <!-- LB-START -->
-<div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/jamforelse.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
-<div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-shift.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
-<div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadata.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadataoversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-fore.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>

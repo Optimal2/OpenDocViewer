@@ -1,8 +1,8 @@
 /**
  * User help for the three compare views (fine-tune, overlay, curtain): the in-app help dialog
  * (HelpOverlayDialog.jsx) has an entry per view in English and Swedish, and the bundled
- * "More features" guide carries a section per view in its HTML (standalone and embedded in
- * manual.<lng>.html) and in its PDF.
+ * comparison guide (manual-jamforelse.<lng>.html) carries a section per view in its HTML
+ * (standalone and embedded in manual.<lng>.html with the "jmf-" id prefix) and in its PDF.
  *
  * @vitest-environment node
  */
@@ -16,16 +16,20 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const read = (relative) => readFileSync(path.join(ROOT, relative));
 const readText = (relative) => read(relative).toString('utf8');
 
+const GUIDE = 'manual-jamforelse';
+/** Id prefix embed.py gives the guide's ids when it is embedded in manual.<lng>.html. */
+const EMBED_PREFIX = 'jmf-';
+
 const SECTIONS = {
   sv: [
-    { id: 'jamforelse-finjustera', heading: 'Finjustera zoom, läge och rotation' },
-    { id: 'jamforelse-overlagring', heading: 'Lägg sidorna på varandra (överlagring)' },
-    { id: 'jamforelse-gardin', heading: 'Dra en gräns mellan sidorna (gardin)' },
+    { id: 'finjustera', heading: '3. Finjustera varje sida' },
+    { id: 'overlagring', heading: '4. Lägg sidorna på varandra (överlagring)' },
+    { id: 'gardin', heading: '5. Dra en gräns mellan sidorna (gardin)' },
   ],
   en: [
-    { id: 'compare-finetune', heading: 'Fine-tune zoom, position and rotation' },
-    { id: 'compare-overlay', heading: 'Lay the pages on top of each other (overlay)' },
-    { id: 'compare-curtain', heading: 'Drag a border between the pages (curtain)' },
+    { id: 'finetune', heading: '3. Fine-tune each page' },
+    { id: 'overlay', heading: '4. Lay the pages on top of each other (overlay)' },
+    { id: 'curtain', heading: '5. Drag a border between the pages (curtain)' },
   ],
 };
 
@@ -39,6 +43,7 @@ const PRINT_HELP = {
 const COMPARE_KEYS = [
   'compare.overlay.enabled', 'compare.overlay.print.enabled',
   'compare.curtain.enabled', 'compare.curtain.print.enabled',
+  'compare.adjust.toolbarMode', 'fineTune.enabled',
 ];
 
 describe('help dialog entries for the compare views', () => {
@@ -86,23 +91,30 @@ describe('help dialog entries for the compare views', () => {
   });
 });
 
-describe('bundled "More features" guide', () => {
+describe('bundled comparison guide', () => {
   for (const [lng, sections] of Object.entries(SECTIONS)) {
     it(`${lng}: HTML has a section per compare view, also in the guide embedded in manual.${lng}.html`, () => {
-      const guide = readText(`public/help/default/manual-avancerat.${lng}.html`);
+      const guide = readText(`public/help/default/${GUIDE}.${lng}.html`);
       const main = readText(`public/help/default/manual.${lng}.html`);
       for (const { id, heading } of sections) {
-        expect(guide).toContain(`<h3 id="${id}">${heading}</h3>`);
-        expect(main).toContain(`<h3 id="fler-${id}">${heading}</h3>`);
+        expect(guide).toContain(`<h2 id="${id}">${heading}</h2>`);
+        expect(main).toContain(`<h2 id="${EMBED_PREFIX}${id}">${heading}</h2>`);
       }
     });
 
-    it(`${lng}: both HTML guides explain composed printing and all four site switches`, () => {
-      for (const name of ['manual-avancerat', 'manual']) {
+    it(`${lng}: both HTML guides explain composed printing and every site switch`, () => {
+      for (const name of [GUIDE, 'manual']) {
         const html = readText(`public/help/default/${name}.${lng}.html`);
         for (const phrase of [...PRINT_HELP[lng], ...COMPARE_KEYS, 'odv.site.config.js']) {
           expect(html).toContain(phrase);
         }
+      }
+    });
+
+    it(`${lng}: the "More features" guide no longer carries the compare sections`, () => {
+      const more = readText(`public/help/default/manual-avancerat.${lng}.html`);
+      for (const { heading } of sections) {
+        expect(more).not.toContain(heading);
       }
     });
   }
@@ -131,8 +143,8 @@ describe('bundled "More features" guide', () => {
     }
 
     for (const [lng, sections] of Object.entries(SECTIONS)) {
-      it(`${lng}: manual-avancerat.${lng}.pdf carries every compare section`, async () => {
-        const text = await pdfText(`public/help/default/manual-avancerat.${lng}.pdf`);
+      it(`${lng}: ${GUIDE}.${lng}.pdf carries every compare section`, async () => {
+        const text = await pdfText(`public/help/default/${GUIDE}.${lng}.pdf`);
         for (const { heading } of sections) {
           expect(text, heading).toContain(normalize(heading));
         }

@@ -5,6 +5,356 @@
 <title>More features – OpenDocViewer</title>
 </head>
 <body>
+<!-- SOK-START: sökrutan, inlagd av embed.py ur ODV-HELP/sokruta (ändra där, inte här) -->
+<script>
+/* Sökrutan i ODV-manualerna (kampanj odv-manual-sokruta, 2026-09-28).
+ *
+ * Bäddas in av embed.py (via sokruta.py) mellan SOK-START/SOK-END, direkt efter body och före
+ * manualens rotelement (id="top"). Allt byggs vid körning: i filen finns bara det här skriptet, så
+ * html2docx (som läser rotelementet) och ODV:s manualfönster (DOMPurify tar bort script) får
+ * ingenting av sökrutan. PDF:en skrivs ut av Edge med skriptet igång; utskrifts-CSS:en döljer rutan.
+ *
+ * Inga beroenden, inga nätanrop. Filen får inte innehålla mindre-än-tecknet: build.ps1, embed.py och
+ * html2docx letar taggar med textsökning, och ODV:s sanering tömmer ett stilblock som har ett.
+ * sokruta.py fyller i CSS:en, språkets texter och språkkoden (platshållarna i början av funktionen).
+ */
+(function () {
+  'use strict';
+  var STIL = "/* Sökrutan i ODV-manualerna (kampanj odv-manual-sokruta). Läggs in av skriptet vid körning,\n   aldrig som en style-tagg i filen: embed.py tar första style-blocket som CSS-master, och ODV:s\n   manualfönster (DOMPurify) ska inte få något kvar av sökrutan. Inget mindre-än-tecken här. */\n.odv-sok {\n  position: sticky; top: 0; z-index: 1000;\n  max-width: 900px; margin: 0 auto 0.5rem; padding: 0.55rem 0.6rem 0.5rem;\n  background: var(--odv-surface, #ffffff); color: var(--odv-text, #1f2933);\n  border-bottom: 1px solid var(--odv-border, #d7dde6);\n  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);\n  font: 15px/1.4 system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif;\n}\n.odv-sok-rad { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }\n.odv-sok-etikett {\n  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;\n  clip: rect(0 0 0 0); white-space: nowrap; border: 0;\n}\n.odv-sok-falt {\n  flex: 1 1 14rem; min-width: 10rem; padding: 0.45rem 0.6rem; font: inherit; color: inherit;\n  background: var(--odv-surface, #ffffff); border: 1px solid #8a96a8; border-radius: 6px;\n}\n/* Webbläsarens egen rensknapp i type=search dubblerar knappen × (som också nås med Esc). */\n.odv-sok-falt::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }\n.odv-sok-knapp {\n  min-width: 2.2rem; padding: 0.4rem 0.6rem; font: inherit; line-height: 1; cursor: pointer;\n  color: inherit; background: var(--odv-surface-elevated, #f7f9fc);\n  border: 1px solid #8a96a8; border-radius: 6px;\n}\n.odv-sok-knapp:disabled { opacity: 0.45; cursor: default; }\n.odv-sok-falt:focus-visible, .odv-sok-knapp:focus-visible, .odv-sok-rubrik:focus-visible {\n  outline: 3px solid #1f6fd1; outline-offset: 2px;\n}\n.odv-sok-raknare { min-width: 6.5rem; font-size: 0.9rem; color: var(--odv-muted-text, #5f6b7a); }\n.odv-sok-rubriker { list-style: none; margin: 0.4rem 0 0; padding: 0; max-height: 11rem; overflow-y: auto; }\n.odv-sok-rubriker[hidden] { display: none; }\n.odv-sok-rubriker li { margin: 0; }\n.odv-sok-rubrik {\n  display: block; width: 100%; padding: 0.3rem 0.5rem; text-align: left; font: inherit; font-size: 0.92rem;\n  color: #1f6fd1; background: transparent; border: 0; border-radius: 4px; cursor: pointer;\n}\n.odv-sok-rubrik:hover { background: var(--odv-surface-elevated, #f7f9fc); text-decoration: underline; }\n.odv-sok-rubrik span { color: var(--odv-muted-text, #5f6b7a); }\n::highlight(odv-sok) { background-color: #ffe58a; color: inherit; }\n::highlight(odv-sok-aktuell) { background-color: #ff9f1a; color: #111827; }\nmark.odv-sok-traff { background-color: #ffe58a; color: inherit; padding: 0; }\nmark.odv-sok-traff.odv-sok-aktuell { background-color: #ff9f1a; color: #111827; }\n/* Ankarhopp (innehållsförteckningen, rubriklistan) hamnar under den fasta rutan, inte bakom den. */\nhtml { scroll-padding-top: 5rem; }\n@media print {\n  .odv-sok { display: none !important; }\n  mark.odv-sok-traff { background: none !important; color: inherit !important; }\n}\n";
+  var T = {"region": "Search the manual", "etikett": "Search the manual", "platshallare": "Search the manual…", "foregaende": "Previous match", "nasta": "Next match", "rensa": "Clear the search", "raknare": "{n} of {m}", "ingen": "No matches", "minst": "Type at least 2 characters", "rubriker": "Matching headings"};
+  var SPRAK = "en";
+  var FORDROJNING_MS = 200;
+  var MINSTA_LANGD = 2;
+  var MAX_RUBRIKER = 8;
+  var MAX_TRAFFAR = 2000;
+  var BLOCK = /^(P|LI|H[1-6]|TD|TH|DT|DD|FIGCAPTION|FIGURE|SUMMARY|DETAILS|DIV|SECTION|NAV|PRE|BLOCKQUOTE|TABLE|TR|UL|OL|BODY)$/;
+  var HOPPA_OVER = /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/;
+
+  // Skriptet står före rotelementet och körs medan sidan tolkas: vänta tills hela sidan finns.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', starta);
+  else starta();
+
+  function starta() {
+    var rot = document.getElementById('top');
+    if (!rot || document.getElementById('odv-sok')) return;
+    var highlightApi = !!(window.CSS && window.CSS.highlights && typeof window.Highlight === 'function');
+
+    // ---------- gränssnittet ----------
+    var stil = document.createElement('style');
+    stil.id = 'odv-sok-stil';
+    stil.textContent = STIL;
+    document.head.appendChild(stil);
+
+    function el(tagg, attr, text) {
+      var e = document.createElement(tagg);
+      for (var k in attr) if (Object.prototype.hasOwnProperty.call(attr, k)) e.setAttribute(k, attr[k]);
+      if (text) e.textContent = text;
+      return e;
+    }
+    var ui = el('div', { id: 'odv-sok', 'class': 'odv-sok', role: 'search', 'aria-label': T.region });
+    var rad = el('div', { 'class': 'odv-sok-rad' });
+    var etikett = el('label', { 'for': 'odv-sok-falt', 'class': 'odv-sok-etikett' }, T.etikett);
+    var falt = el('input', {
+      id: 'odv-sok-falt', 'class': 'odv-sok-falt', type: 'search', placeholder: T.platshallare,
+      autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'odv-sok-raknare', 'aria-controls': 'odv-sok-rubriker'
+    });
+    var forra = el('button', { type: 'button', 'class': 'odv-sok-knapp', 'aria-label': T.foregaende, title: T.foregaende + ' (Shift+Enter)' }, '↑');
+    var nasta = el('button', { type: 'button', 'class': 'odv-sok-knapp', 'aria-label': T.nasta, title: T.nasta + ' (Enter)' }, '↓');
+    var rensa = el('button', { type: 'button', 'class': 'odv-sok-knapp', 'aria-label': T.rensa, title: T.rensa + ' (Esc)' }, '×');
+    var raknare = el('span', { id: 'odv-sok-raknare', 'class': 'odv-sok-raknare', 'aria-live': 'polite' });
+    var lista = el('ul', { id: 'odv-sok-rubriker', 'class': 'odv-sok-rubriker', 'aria-label': T.rubriker });
+    lista.hidden = true;
+    rad.appendChild(etikett); rad.appendChild(falt); rad.appendChild(forra); rad.appendChild(nasta);
+    rad.appendChild(rensa); rad.appendChild(raknare);
+    ui.appendChild(rad); ui.appendChild(lista);
+    rot.parentNode.insertBefore(ui, rot);
+
+    // ---------- textindex ----------
+    // Skiftlägesokänsligt tecken för tecken (Å -> å, Ä -> ä, Ö -> ö), så positionerna i den vikta
+    // texten är samma som i sidans text. Ett tecken vars gemena form är längre lämnas som det är.
+    function vik(s) {
+      var ut = [];
+      for (var i = 0; s.length > i; i++) {
+        var c = s.charAt(i);
+        var g = c.toLocaleLowerCase(SPRAK);
+        ut.push(g.length === 1 ? g : c);
+      }
+      return ut.join('');
+    }
+    function doldForSok(e) {
+      // Ljuslådor och navigeringsträdet (nav.sidonav) upprepar bara text som finns i manualen.
+      return e === ui || HOPPA_OVER.test(e.tagName) || (e.classList && (e.classList.contains('lb') || e.classList.contains('sidonav')));
+    }
+    function blockFor(nod) {
+      var e = nod.parentNode;
+      while (e && e.nodeType === 1 && !BLOCK.test(e.tagName)) e = e.parentNode;
+      return e;
+    }
+    var index = null;
+    function byggIndex() {
+      var delar = [], noder = [], starter = [], pos = 0, forraBlock = null;
+      var gangare = document.createTreeWalker(rot, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) {
+          for (var e = n.parentNode; e && e !== rot.parentNode; e = e.parentNode) {
+            if (e.nodeType === 1 && doldForSok(e)) return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      var n;
+      while ((n = gangare.nextNode())) {
+        var b = blockFor(n);
+        // En avgränsare mellan block: en träff får aldrig gå över två stycken.
+        if (forraBlock !== null && b !== forraBlock) { delar.push('\u0000'); pos += 1; }
+        forraBlock = b;
+        var v = vik(n.data);
+        noder.push(n); starter.push(pos); delar.push(v); pos += v.length;
+      }
+      return { text: delar.join(''), noder: noder, starter: starter };
+    }
+    function nodVid(p) {
+      var lo = 0, hi = index.starter.length - 1;
+      while (hi > lo) {
+        var mitt = (lo + hi + 1) >> 1;
+        if (index.starter[mitt] > p) hi = mitt - 1; else lo = mitt;
+      }
+      return { i: lo, nod: index.noder[lo], off: p - index.starter[lo] };
+    }
+    function monster(fraga) {
+      var ord = vik(fraga).trim().split(/\s+/).filter(Boolean);
+      if (!ord.length) return null;
+      return new RegExp(ord.map(function (o) { return o.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('\\s+'), 'g');
+    }
+
+    // ---------- träffar ----------
+    var traffar = [];     // [{start, slut, range, markar}]
+    var aktuell = -1;
+    var rensaMarkar = function () {};
+
+    function tomTraffar() {
+      if (highlightApi) {
+        window.CSS.highlights.delete('odv-sok');
+        window.CSS.highlights.delete('odv-sok-aktuell');
+      } else {
+        rensaMarkar();
+      }
+      traffar = []; aktuell = -1;
+    }
+
+    function markeraMedMark() {
+      // Reserv utan CSS Custom Highlight API: varje träff delas per textnod och slås in i mark.
+      // Bakifrån, så att en uppdelad textnod aldrig flyttar en träff som ännu inte är gjord.
+      var foraldrar = [];
+      for (var t = traffar.length - 1; t >= 0; t--) {
+        var a = nodVid(traffar[t].start), b = nodVid(traffar[t].slut - 1), markar = [];
+        for (var i = b.i; i >= a.i; i--) {
+          var nod = index.noder[i];
+          var fran = i === a.i ? a.off : 0;
+          var till = i === b.i ? b.off + 1 : nod.data.length;
+          if (till > fran) {
+            if (nod.data.length > till) nod.splitText(till);
+            var mitt = fran > 0 ? nod.splitText(fran) : nod;
+            var mark = document.createElement('mark');
+            mark.className = 'odv-sok-traff';
+            mitt.parentNode.replaceChild(mark, mitt);
+            mark.appendChild(mitt);
+            markar.unshift(mark);
+            if (foraldrar.indexOf(mark.parentNode) === -1) foraldrar.push(mark.parentNode);
+          }
+        }
+        traffar[t].markar = markar;
+      }
+      rensaMarkar = function () {
+        var berorda = [];
+        for (var t2 = 0; traffar.length > t2; t2++) {
+          (traffar[t2].markar || []).forEach(function (m) {
+            var f = m.parentNode;
+            if (!f) return;
+            while (m.firstChild) f.insertBefore(m.firstChild, m);
+            f.removeChild(m);
+            if (berorda.indexOf(f) === -1) berorda.push(f);
+          });
+        }
+        berorda.forEach(function (f) { f.normalize(); });
+        index = null;
+        rensaMarkar = function () {};
+      };
+      index = null;
+    }
+
+    function oppnaDetaljer(nod) {
+      for (var e = nod.nodeType === 1 ? nod : nod.parentNode; e && e !== document.body; e = e.parentNode) {
+        if (e.tagName === 'DETAILS' && !e.open) e.open = true;
+      }
+    }
+
+    function visaAktuell(skrolla) {
+      var t = traffar[aktuell];
+      if (!t) return;
+      if (highlightApi) {
+        var hlAktuell = new window.Highlight(t.range);
+        hlAktuell.priority = 1;   // den aktuella träffen ritas alltid ovanpå de övriga
+        window.CSS.highlights.set('odv-sok-aktuell', hlAktuell);
+      } else {
+        traffar.forEach(function (x) { (x.markar || []).forEach(function (m) { m.classList.remove('odv-sok-aktuell'); }); });
+        (t.markar || []).forEach(function (m) { m.classList.add('odv-sok-aktuell'); });
+      }
+      oppnaDetaljer(highlightApi ? t.range.startContainer : t.markar[0]);
+      raknare.textContent = T.raknare.replace('{n}', String(aktuell + 1)).replace('{m}', String(traffar.length) + (traffar.length === MAX_TRAFFAR ? '+' : ''));
+      if (!skrolla) return;
+      var ruta = highlightApi ? t.range.getBoundingClientRect() : t.markar[0].getBoundingClientRect();
+      if (ruta && (ruta.width || ruta.height)) {
+        var y = (window.pageYOffset || document.documentElement.scrollTop) + ruta.top - Math.round(window.innerHeight / 3);
+        window.scrollTo(0, Math.max(0, y));
+      } else {
+        var e = highlightApi ? t.range.startContainer.parentNode : t.markar[0];
+        if (e && e.scrollIntoView) e.scrollIntoView({ block: 'center' });
+      }
+    }
+
+    function hoppa(steg) {
+      if (!traffar.length) return;
+      aktuell = (aktuell + steg + traffar.length) % traffar.length;
+      visaAktuell(true);
+    }
+
+    // ---------- rubriker ----------
+    function guideFor(rubrik) {
+      for (var e = rubrik.parentNode; e && e !== rot; e = e.parentNode) {
+        if (e.tagName === 'DETAILS' && e.classList.contains('embedded')) {
+          var s = e.querySelector('summary');
+          return s ? s.textContent.replace(/\s+/g, ' ').trim() : '';
+        }
+      }
+      return '';
+    }
+    function visaRubriker(re) {
+      while (lista.firstChild) lista.removeChild(lista.firstChild);
+      var antal = 0;
+      var rubriker = rot.querySelectorAll('h2, h3');
+      for (var i = 0; rubriker.length > i && MAX_RUBRIKER > antal; i++) {
+        var h = rubriker[i];
+        if (h.closest && h.closest('.lb')) continue;
+        var text = h.textContent.replace(/\s+/g, ' ').trim();
+        re.lastIndex = 0;
+        if (!re.test(vik(text))) continue;
+        var li = document.createElement('li');
+        var knapp = el('button', { type: 'button', 'class': 'odv-sok-rubrik' });
+        var guide = guideFor(h);
+        if (guide) knapp.appendChild(el('span', {}, guide + ' › '));
+        knapp.appendChild(document.createTextNode(text));
+        knapp.addEventListener('click', hoppaTillRubrik.bind(null, h));
+        li.appendChild(knapp);
+        lista.appendChild(li);
+        antal++;
+      }
+      lista.hidden = antal === 0;
+    }
+    function hoppaTillRubrik(h) {
+      oppnaDetaljer(h);
+      if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+      // Under rutan, som är högre när rubriklistan är öppen än vad scroll-padding räknar med.
+      var y = (window.pageYOffset || document.documentElement.scrollTop) + h.getBoundingClientRect().top - ui.getBoundingClientRect().height - 8;
+      window.scrollTo(0, Math.max(0, y));
+      try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+    }
+
+    // ---------- sökningen ----------
+    var vantar = null;
+    function sok() {
+      vantar = null;
+      tomTraffar();
+      var fraga = falt.value;
+      var trimmad = fraga.trim();
+      if (!trimmad) {
+        raknare.textContent = ''; lista.hidden = true; uppdateraKnappar(); return;
+      }
+      if (MINSTA_LANGD > trimmad.length) {
+        raknare.textContent = T.minst; lista.hidden = true; uppdateraKnappar(); return;
+      }
+      var re = monster(fraga);
+      if (!index) index = byggIndex();
+      var m;
+      re.lastIndex = 0;
+      while ((m = re.exec(index.text)) && MAX_TRAFFAR > traffar.length) {
+        if (!m[0].length) { re.lastIndex++; continue; }
+        traffar.push({ start: m.index, slut: m.index + m[0].length });
+      }
+      visaRubriker(re);
+      if (!traffar.length) {
+        raknare.textContent = T.ingen; uppdateraKnappar(); return;
+      }
+      if (highlightApi) {
+        var ranges = traffar.map(function (t) {
+          var a = nodVid(t.start), b = nodVid(t.slut - 1);
+          var r = document.createRange();
+          r.setStart(a.nod, a.off); r.setEnd(b.nod, b.off + 1);
+          t.range = r;
+          return r;
+        });
+        var hl = new window.Highlight();
+        hl.priority = 0;
+        ranges.forEach(function (r) { hl.add(r); });
+        window.CSS.highlights.set('odv-sok', hl);
+      } else {
+        markeraMedMark();
+      }
+      aktuell = 0;
+      visaAktuell(true);
+      uppdateraKnappar();
+    }
+    function sokNu() { if (vantar) { clearTimeout(vantar); sok(); } }
+    function uppdateraKnappar() {
+      forra.disabled = nasta.disabled = !traffar.length;
+      rensa.disabled = !falt.value;
+    }
+    function tom() {
+      if (vantar) { clearTimeout(vantar); vantar = null; }
+      falt.value = '';
+      sok();
+    }
+
+    falt.addEventListener('input', function () {
+      if (vantar) clearTimeout(vantar);
+      vantar = setTimeout(sok, FORDROJNING_MS);
+    });
+    falt.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (vantar) { sokNu(); if (e.shiftKey) hoppa(-1); return; }
+        hoppa(e.shiftKey ? -1 : 1);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        if (falt.value) tom(); else falt.blur();
+      } else if (e.key === 'ArrowDown' && !lista.hidden) {
+        e.preventDefault();
+        var forsta = lista.querySelector('button');
+        if (forsta) forsta.focus();
+      }
+    });
+    lista.addEventListener('keydown', function (e) {
+      var knappar = Array.prototype.slice.call(lista.querySelectorAll('button'));
+      var i = knappar.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' && i >= 0) { e.preventDefault(); knappar[Math.min(knappar.length - 1, i + 1)].focus(); }
+      else if (e.key === 'ArrowUp' && i >= 0) { e.preventDefault(); if (i === 0) falt.focus(); else knappar[i - 1].focus(); }
+      else if (e.key === 'Escape') { e.preventDefault(); falt.focus(); }
+    });
+    forra.addEventListener('click', function () { sokNu(); hoppa(-1); });
+    nasta.addEventListener('click', function () { sokNu(); hoppa(1); });
+    rensa.addEventListener('click', function () { tom(); falt.focus(); });
+    // Snabbtangent "/" till sökrutan, när fokus inte redan står i ett textfält.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.ctrlKey || e.altKey || e.metaKey) return;
+      var a = document.activeElement;
+      if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable)) return;
+      e.preventDefault();
+      falt.focus();
+    });
+    uppdateraKnappar();
+  }
+})();
+</script>
+<!-- SOK-END -->
 <div class="odv-manual" id="top">
 <!-- The CSS lives in body: ODV's manual window keeps only the body content (a leading <style> in head disappears). -->
 <style>
@@ -100,15 +450,43 @@
   .odv-manual figure { padding: 0.45rem; }
   .odv-manual table { display: block; overflow-x: auto; }
 }
+/* Navigeringsträdet (embed.py, nav.sidonav). Visas bara när manualen är en egen sida: då är
+   rotelementet ett direkt barn till body. I ODV:s hjälpfönster ligger manualen inne i appens egen
+   DOM, väljaren matchar inte och trädet förblir dolt (en fast position där skulle hamna ovanpå
+   appen). Fönstret måste också vara brett nog för trädet bredvid textkolumnen. */
+.odv-manual > .sidonav { display: none; }
+@media screen and (min-width: 1240px) {
+  body:has(> .odv-manual) > .odv-manual,
+  body:has(> .odv-manual) > .odv-sok { margin-left: max(18.5rem, calc((100vw - 900px) / 2)); }
+  body:has(> .odv-manual) > .odv-manual > .sidonav {
+    display: block; position: fixed; z-index: 10; top: 4.6rem; bottom: 1rem;
+    left: max(1rem, calc((100vw - 900px) / 2 - 17.5rem)); width: 16rem; overflow-y: auto;
+    padding: 0.7rem 0.8rem; font-size: 0.86rem; line-height: 1.4;
+    background: var(--manual-surface); border: 1px solid var(--manual-border); border-radius: 10px;
+  }
+  .odv-manual .sidonav a { display: block; padding: 0.2rem 0.35rem; border-radius: 5px; text-decoration: none; color: var(--manual-text); }
+  .odv-manual .sidonav a:hover { background: var(--manual-soft, rgba(31, 111, 209, 0.08)); color: var(--manual-blue); }
+  .odv-manual .sidonav a:target, .odv-manual .sidonav a:focus-visible { outline: 2px solid var(--manual-blue); outline-offset: 1px; }
+  .odv-manual .sidonav .sidonav-guide { font-weight: 700; color: var(--manual-blue); margin-top: 0.55rem; }
+  .odv-manual .sidonav .sidonav-guide:first-child { margin-top: 0; }
+  .odv-manual .sidonav ol { list-style: none; margin: 0.15rem 0 0 0.55rem; padding: 0 0 0 0.45rem; border-left: 1px solid var(--manual-border); max-width: none; }
+  .odv-manual .sidonav li { margin: 0; }
+}
+@media print { .odv-manual .sidonav { display: none !important; } }
 </style>
+<!-- NAV-START: navigeringsträdet, genererat av embed.py -->
+<nav class="sidonav" aria-label="Contents of the manual">
+  <a class="sidonav-guide" href="#top">More features in OpenDocViewer</a>
+  <ol><li><a href="#metadata">Document metadata</a></li><li><a href="#hq">Sharper PDF pages</a></li><li><a href="#custom">Custom size and default zoom</a></li><li><a href="#keyboard">All keyboard shortcuts</a></li><li><a href="#toolbar">The toolbar button by button</a></li><li><a href="#theme">Dark theme</a></li><li><a href="#support">Support information</a></li></ol>
+</nav>
+<!-- NAV-END -->
 <section class="hero">
   <h1>More features in OpenDocViewer</h1>
   <p class="lead">This continues the <a href="manual.en.html">Getting started guide</a>: features that not everyone needs every day, but that are good to know about. Read the section you need.</p>
-  <p class="small">The pictures show a made-up test document, in the Swedish interface; the button names here are the English ones. <a href="manual-avancerat.en.pdf">Download the guide as PDF</a>.</p>
+  <p class="small">Comparing two pages has its own guide: <a href="manual-jamforelse.en.html">Compare two pages</a>. The pictures show a made-up test document, in the Swedish interface; the button names here are the English ones. <a href="manual-avancerat.en.pdf">Download the guide as PDF</a>.</p>
 </section>
 
 <nav class="toc" aria-label="Contents">
-  <a href="#compare">Compare two pages</a>
   <a href="#metadata">Document metadata</a>
   <a href="#hq">Sharper PDF pages</a>
   <a href="#custom">Custom size and default zoom</a>
@@ -118,66 +496,6 @@
   <a href="#support">Support information</a>
 </nav>
 
-<h2 id="compare">Compare two pages</h2>
-<p>Click the <strong>compare button</strong> in the toolbar (<em>Enable compare mode</em>). The page you are looking at moves to the left with a <span class="blue">blue frame</span>, and a second page is shown on the right with an <span class="orange">orange frame</span>. To swap the right-hand page: right-click a thumbnail and choose <em>Show to right</em>.</p>
-<figure class="wide">
-  <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Compare mode with two pages side by side"></a>
-  <figcaption><strong>Compare mode.</strong> Each page has its own zoom buttons along the top. In the pane, the left page is marked <span class="blue">V</span> and the right page <span class="orange">H</span> (Swedish for left and right).</figcaption>
-</figure>
-<p>One of the pages is always <strong>active</strong> – the one you last clicked in. The toolbar and the keyboard control the active page, and the frames around the buttons show which one: blue for left, orange for right.</p>
-<p>If you print with the <strong>Active page</strong> method while comparing, you can choose to include only the active page or <em>Both compare pages</em>. The pages are printed exactly as you see them – rotation, brightness and contrast are included, just as when you look at a single page. With every other print method, the pages are printed as they are in the archive.</p>
-<details>
-  <summary>Controlling the other page without switching</summary>
-  <p>Hold <kbd>Shift</kbd> while you click a button or use the keyboard, and the command applies to the page that is <em>not</em> active. The frames change colour while you hold Shift, so you can see what will happen.</p>
-  <figure class="wide">
-    <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="The toolbar with Shift held down and orange frames"></a>
-    <figcaption><strong>Shift held down.</strong> Orange frames = the buttons control the right page right now.</figcaption>
-  </figure>
-  <p><kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd> switch the active page. <kbd>Arrow Left</kbd> when the left page is already active ends the comparison – so does the compare button, or <em>Close comparison</em> in the right-click menu on the right-hand page.</p>
-  <figure class="menu">
-    <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="The right-click menu on the right page in compare mode"></a>
-    <figcaption><strong>Right-clicking the right page.</strong> The usual options, plus <em>Close comparison</em>.</figcaption>
-  </figure>
-</details>
-
-<h3 id="compare-finetune">Fine-tune zoom, position and rotation</h3>
-<p>Click <strong>Fine tuning</strong> in the toolbar to show controls for the displayed page, or both pages in side-by-side comparison. They start hidden. Clicking again hides the controls and fine-edit gestures, keeping your zoom, position, rotation and image adjustments. The selection stays the same when you change modes. Each page also has a <strong>Fine-tune</strong> disclosure with a summary such as <em>100.0 % · 0.0°</em>:</p>
-<ul>
-  <li><strong>Zoom</strong> in percent with one decimal. The − and + buttons change it by 0.1 % (with <kbd>Shift</kbd>: 1 %). The zoom buttons along the top of the page still step by 10 % and keep the fine adjustment.</li>
-  <li><strong>Position</strong>: X and Y in pixels. Drag the page with the mouse, or select the move button (four arrows) and use the arrow keys: 1 px per press, 10 px with <kbd>Shift</kbd>.</li>
-  <li><strong>Rotation</strong> in degrees with one decimal. The ↺ and ↻ buttons turn the page 0.1° (with <kbd>Shift</kbd>: 1°). A small counter-clockwise tilt shows as a negative number, for example −0.3. The 90° buttons in the toolbar work as before and keep the fine rotation.</li>
-  <li><strong>Reset</strong> (circular arrow) returns the page to 100 %, position 0 and rotation 0.</li>
-</ul>
-<p>You can type into the fields with a decimal comma or a decimal point – 12,5 and 12.5 both work. <kbd>Enter</kbd>, or leaving the field, applies the value. <kbd>Esc</kbd> undoes what you typed, and <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> step the value (with <kbd>Shift</kbd>: ten steps). While the bar is open, dragging the page moves it instead of scrolling, and <kbd>Ctrl</kbd> + mouse wheel over the page zooms only that page, 1 % per notch. Close the bar to scroll and zoom as usual again.</p>
-
-<h3 id="compare-overlay">Lay the pages on top of each other (overlay)</h3>
-<p>Small differences are easiest to see when the pages lie on top of each other. Click the <strong>overlay button</strong> (stacked layers) next to the compare button – it is only there while two pages are compared. The overlay view fills the window and has its own toolbar. Page A (the left page, blue) lies underneath and page B (the right page, orange) on top. Both keep the zoom, position and rotation you set in the compare view.</p>
-<ul>
-  <li><strong>Opacity</strong>: the slider sets how visible the top page is, from 0 % (invisible) to 100 % (fully opaque). It starts at 50 %. With the slider selected, <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd> change it by 1 %, with <kbd>Shift</kbd> by 10 %, and <kbd>Home</kbd> / <kbd>End</kbd> go to 0 % and 100 %.</li>
-  <li><strong>Swap</strong> (up and down arrows) puts the other page on top. The slider always controls the page on top.</li>
-  <li><strong>Calibrate</strong>: the same fine-tune bars as in the compare view, marked A and B, are shown above the pages. Dragging the pages moves the top page, and <kbd>Ctrl</kbd> + mouse wheel zooms the top page.</li>
-  <li><strong>Nudge mode</strong> (the move button): while it is on, the arrow keys move the top page 1 px (with <kbd>Shift</kbd>: 10 px). Click the pages first so that the keys go there.</li>
-  <li><strong>Reset to compare</strong> (clock with an arrow) restores the zoom, position and rotation the pages had when you opened the overlay view.</li>
-  <li><strong>Copy calibration</strong> copies the settings of both pages as text (JSON), so you can paste them into a support case.</li>
-  <li><strong>Curtain</strong> opens the curtain view with the same calibration, see the next section.</li>
-  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to the compare view. The calibration is kept: the pages keep their adjustments, and the next time you open the overlay view the opacity and the top page are as you left them.</li>
-</ul>
-
-<p><strong>Print the overlay view:</strong> click <strong>Print</strong> to print one composed page of the visible area with the current opacity, top page and both pages’ zoom, position and rotation. The usual print dialog offers the same options, including direct print, <strong>Print via PDF</strong> and <strong>Save PDF</strong>. There is no page range to choose: the result is one page. Printing is logged in the same way as other prints, with a page count of 1.</p>
-
-<h3 id="compare-curtain">Drag a border between the pages (curtain)</h3>
-<p>In the curtain view the two calibrated pages lie in the same place, and a border you drag decides where you see which page: page A on one side of the border and page B on the other. This shows quickly whether lines and text continue unbroken across the border.</p>
-<ul>
-  <li><strong>Open</strong>: click <strong>Curtain</strong> in the overlay view's toolbar. In the compare view the curtain button sits next to the overlay button. When the overlay is enabled, open it first to calibrate the pages – until then the curtain button is grey, and its tooltip explains why. If the overlay is disabled for this installation, the curtain uses the compare view's calibration directly.</li>
-  <li><strong>Horizontal / Vertical</strong> chooses the direction of the border. Vertical: the border is upright, page A shows on the left and page B on the right. Horizontal: the border is level, page A shows above and page B below. The labels in the corners show which page, with its page number, is where.</li>
-  <li><strong>Move the border</strong>: drag the grip on the border with the mouse or a finger. The border is selected when the view opens, so the <kbd>arrow keys</kbd> move it at once: 1 % per press, 10 % with <kbd>Shift</kbd>. Each direction remembers its own position while the view is open.</li>
-  <li><strong>Fine tuning</strong>: both images have controls for zoom, position, rotation and image adjustments. Overlay and curtain always show these controls when opened, regardless of the normal toolbar selection. Edits stay when you close the view; your normal visibility selection stays unchanged.</li>
-  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to where you opened the curtain view: the overlay view or the compare view.</li>
-</ul>
-<p><strong>Print the curtain view:</strong> click <strong>Print</strong> to print one composed page of the visible area with the current horizontal or vertical border position and both pages’ zoom, position and rotation. It uses the same print dialog, options, direct print, <strong>Print via PDF</strong> and <strong>Save PDF</strong>. The result and the print log page count are both one page; the border handle and toolbar are not printed.</p>
-<p class="small"><strong>Installation settings:</strong> <code>compare.overlay.enabled</code> and <code>compare.curtain.enabled</code> control whether each view can be opened; a disabled view has no entry button. <code>compare.overlay.print.enabled</code> and <code>compare.curtain.print.enabled</code> control each view’s <strong>Print</strong> button. All four default to <code>true</code>; <code>odv.site.config.js</code> overrides them. Only the boolean <code>false</code> switches a key off. Ordinary side-by-side comparison and its printing remain available. If the overlay is disabled, the curtain uses the compare view’s calibration directly.</p>
-
-<p class="small">An installation can disable fine tuning, overlay and curtain together with <code>fineTune.enabled: false</code> in <code>odv.site.config.js</code>. Ordinary viewing, side-by-side comparison and their printing remain available. The default is <code>true</code>; only boolean <code>false</code> disables the capability.</p>
 <h2 id="metadata">Document metadata</h2>
 <p>Right-click a thumbnail or the page and choose <strong>Show document metadata</strong>. You see the information the system that opened ODV sent with the document – for example ID, name, department, date, number of pages and document ID. Which fields exist depends on that system. The information is for display only and cannot be changed in ODV.</p>
 <figure class="wide">
@@ -221,11 +539,10 @@
     <tr><td><kbd>Shift</kbd> + command</td><td>In compare mode: control the page that is not active.</td></tr>
     <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Hide the page / hide the whole document (selection).</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Open ODV's print dialog.</td></tr>
-    <tr><td><kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd> on the opacity slider</td><td>In the overlay view: change the opacity by 1 % (with Shift: 10 %).</td></tr>
-    <tr><td>Arrow keys in nudge mode</td><td>In the overlay view: move the top page 1 px (with Shift: 10 px).</td></tr>
-    <tr><td><kbd>Esc</kbd></td><td>Close menus, dialogs and the preview. Also closes the overlay view.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Close menus, dialogs and the preview.</td></tr>
   </tbody>
 </table>
+<p class="small">The keys in compare mode, the overlay view and the curtain view are collected in the guide <a href="manual-jamforelse.en.html">Compare two pages</a>.</p>
 
 <h2 id="toolbar">The toolbar button by button</h2>
 <figure class="wide">
@@ -241,13 +558,13 @@
   <li><strong>Selection</strong> opens the selection workspace. Red when a selection is active.</li>
   <li><strong>Page navigation</strong>: first, previous, next, last, and a box for the page number.</li>
   <li><strong>Zoom</strong>: out, in, percentage box, 1:1, fit to screen, fit to width.</li>
-  <li><strong>1:X</strong>: custom size. <strong>Compare</strong>: two pages side by side. <strong>Overlay</strong>: only in compare mode – lays the pages on top of each other. <strong>Rotate</strong>: a quarter turn.</li>
+  <li><strong>1:X</strong>: custom size. <strong>Fine tuning</strong>, <strong>compare</strong>, <strong>overlay</strong> and <strong>curtain</strong>: described in the guide <a href="manual-jamforelse.en.html">Compare two pages</a>. <strong>Rotate</strong>: a quarter turn.</li>
   <li><strong>HQ</strong>: sharper PDF page. <strong>Brightness</strong>, <strong>contrast</strong> and <strong>reset</strong>.</li>
   <li><strong>Theme</strong>, <strong>language</strong>, <strong>help</strong>. The light on the help button: green = all is well, yellow = the computer is low on memory, red = error.</li>
 </ul>
 
 <h2 id="theme">Dark theme</h2>
-<p>The theme menu at the far right has <em>Normal</em>, <em>Light</em> and <em>Dark</em>. In the dark theme the interface turns dark while the document page is shown as usual.</p>
+<p>The theme menu at the far right has <em>Normal</em>, <em>Light</em> and <em>Dark</em>. In the dark theme the interface turns dark while the document page is shown as usual. Below the themes, the <em>Larger toolbar buttons</em> checkbox can be unticked for a lower toolbar with smaller buttons; ODV remembers the choice.</p>
 <figure class="wide">
   <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer in the dark theme"></a>
   <figcaption><strong>Dark theme.</strong></figcaption>
@@ -276,11 +593,8 @@
   </div>
 </details>
 
-<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.8. Updated 2026-09-26.</p>
+<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.10. Updated 2026-10-24.</p>
 <!-- LB-START -->
-<div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse.png" alt=""><span>Click anywhere to close</span></a></div>
-<div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-shift.png" alt=""><span>Click anywhere to close</span></a></div>
-<div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadata.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadataoversikt.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-fore.png" alt=""><span>Click anywhere to close</span></a></div>

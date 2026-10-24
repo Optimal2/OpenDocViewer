@@ -390,6 +390,7 @@ Use the following files depending on what you are trying to understand:
 - `docs-src/printing.md` — print pipeline design and the responsibilities of the print helper modules
 - `docs-src/pdf-signatures.md` — level-1 PDF signature inspection: handled formats, integrity rules, data contract, fixtures
 - `docs-src/compare-transform.md` — compare view per-page transform (stepless zoom, free pan and 0.1° rotation, context API, rendering), the overlay view and the curtain view
+- `docs-src/help-manuals.md` — the bundled manual under `public/help/default/`: generated copies, the build chain in the source repository, and the rule never to hand-edit them
 - `docs-src/omp-component-manifest.md` — OMP artifact component manifest and version-bump helper usage
 - `docs-src/agent-documentation.md` — how `docs-agent/` is generated
 - `docs-src/customer-performance-profile.md` — rationale for the high-memory, fast-feeling default profile

@@ -771,9 +771,11 @@ Behavior (manual order: **site before default**):
 Shipped public files:
 
 - `public/help/default/` – the bundled user manual in English and Swedish: `manual.<lng>.html`
-  (getting started; the two other guides are embedded at the bottom), `manual-urval.<lng>.html`
-  (selection), `manual-avancerat.<lng>.html` (more features), a PDF of each guide, and the
-  screenshots in `img/`. The content is customer-neutral and uses a made-up test document.
+  (getting started; the three other guides are embedded at the bottom), `manual-urval.<lng>.html`
+  (selection), `manual-jamforelse.<lng>.html` (comparing two pages), `manual-avancerat.<lng>.html`
+  (more features), a PDF of each guide, and the screenshots in `img/`. The content is
+  customer-neutral and uses a made-up test document. These files are generated copies of a
+  source kept outside this repository and are never edited here: see `docs-src/help-manuals.md`.
 - `public/help/site/manual.en.sample.html`
 - `public/help/site/manual.sv.sample.html`
 
