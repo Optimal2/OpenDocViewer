@@ -848,8 +848,8 @@
 <p>Välj vilken sida som ska visas till höger på något av de här sätten:</p>
 <ul>
   <li><strong>Högerklicka</strong> på en miniatyr och välj <em>Visa till höger</em>. Det fungerar också när jämförelsen är avstängd – då öppnas den samtidigt.</li>
-  <li><kbd>Shift</kbd>+klick på en miniatyr gör samma sak.</li>
-  <li><kbd>Pil höger</kbd> öppnar jämförelsen med sidan du tittar på till höger, eller gör den högra sidan aktiv om jämförelsen redan är igång.</li>
+  <li><kbd>Shift</kbd>+klick på en miniatyr visar sidan i den sida som <em>inte</em> är aktiv: till höger när vänster sida är aktiv (eller när jämförelsen är avstängd – då öppnas den), till vänster när höger sida är aktiv. Den aktiva sidan byts inte.</li>
+  <li><kbd>Pil höger</kbd> öppnar jämförelsen på samma sätt som knappen – första gången med sidan du tittar på till höger, senare med den sida du jämförde med sist – eller gör den högra sidan aktiv om jämförelsen redan är igång.</li>
 </ul>
 <figure class="menu">
   <a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="Högerklicksmenyn på en miniatyr med valet Visa till höger"></a>
@@ -906,9 +906,9 @@
 <p>Medan en sidas panel är utfälld flyttar du sidan genom att <strong>dra</strong> i den i stället för att rulla, och <kbd>Ctrl</kbd> + mushjulet över sidan zoomar bara den sidan, 1 % per hack. Fäll ihop panelen, eller slå av Finjustering, för att rulla och zooma som vanligt igen.</p>
 <details>
   <summary>Zoomknapparna bakom ringen och verktygsfältets zoom</summary>
-  <p>Varje sida har också egna zoomknappar, gömda bakom den färgade ringen uppe till vänster: peka på ringen (eller tabba dit) så fälls de ut under den – zooma in, faktorn (till exempel ×1,0) och zooma ut. Varje klick ändrar sidans zoom tio procent av grundzoomen och behåller finjusteringen. Verktygsfältets <em>Anpassa till skärm</em>, <em>Anpassa till bredd</em>, <em>1:1</em> och <em>1:X</em> nollställer båda sidornas egna zoom men behåller läge och rotation.</p>
+  <p>Varje sida har också egna zoomknappar, gömda bakom den färgade ringen uppe till vänster: peka på ringen (eller tabba dit) så fälls de ut under den – zooma in, faktorn (till exempel ×1.0 – alltid med punkt) och zooma ut. Varje klick ändrar sidans zoom tio procent av grundzoomen och behåller finjusteringen. Verktygsfältets <em>Anpassa till skärm</em>, <em>Anpassa till bredd</em>, <em>1:1</em> och <em>1:X</em> nollställer båda sidornas egna zoom men behåller läge och rotation.</p>
   <figure class="tiny">
-    <!-- TODO-BILD: img/jamforelse-ring-zoom.png. Ringen uppe till vänster i vänster sida med muspekaren över, så att zoomknapparna är utfällda under den: zooma in, ×1,0 och zooma ut. Liten beskärning. alt="Ringen med zoomknapparna utfällda" -->
+    <!-- TODO-BILD: img/jamforelse-ring-zoom.png. Ringen uppe till vänster i vänster sida med muspekaren över, så att zoomknapparna är utfällda under den: zooma in, ×1.0 och zooma ut. Liten beskärning. alt="Ringen med zoomknapparna utfällda" -->
     <figcaption><strong>Ringen med zoomknapparna utfällda.</strong></figcaption>
   </figure>
 </details>
@@ -953,10 +953,10 @@
 </figure>
 <p><strong>Skriv ut överlagringsvyn:</strong> klicka på <strong>Skriv ut</strong> i överlagringsvyns verktygsfält. Du får en sammansatt sida av den synliga ytan, med sidorna lagda på varandra som på skärmen: den undre sidan täckande, den översta med reglagets opacitet, och båda med sin zoom, sitt läge, sin rotation och sina bildjusteringar. Verktygsfältet och reglaget skrivs inte ut.</p>
 <p><strong>Skriv ut gardinvyn:</strong> klicka på <strong>Skriv ut</strong> i gardinvyns verktygsfält. Du får en sammansatt sida av den synliga ytan med gränsens riktning och läge som i det ögonblicket, och båda sidornas kalibrering. Greppet, hörnetiketterna och verktygsfältet skrivs inte ut.</p>
-<p>För de två vyerna är dialogen enklare: du väljer ingen utskriftsmetod och inget sidintervall, och förra utskriftens inställningar erbjuds inte. Sammanfattningen säger till exempel <em>Förbered överlagringsvyn av sidorna 1 och 2 som en sida</em> eller <em>Förbered gardinvyn av sidorna 1 och 2 som en sida</em>. Resultatet är alltid en sammansatt sida, stående eller liggande efter den synliga ytans form, med samma sidhuvud, sidfot och vattenstämpel som andra utskrifter, och utskriften loggas med sidantalet 1. Knappen <strong>Skriv ut</strong> i en vy visas först när alla sidor har laddats, och den är grå medan en PDF förbereds.</p>
+<p>För de två vyerna är dialogen enklare: utskriftsmetoden är låst till <em>Aktiv sida</em> (grå), avsnittet <em>Sidor och omfång</em> visas inte, och förra utskriftens inställningar erbjuds inte. Sammanfattningen säger till exempel <em>Förbered överlagringsvyn av sidorna 1 och 2 som en sida</em> eller <em>Förbered gardinvyn av sidorna 1 och 2 som en sida</em>. Resultatet är alltid en sammansatt sida, stående eller liggande efter den synliga ytans form, med samma sidhuvud, sidfot och vattenstämpel som andra utskrifter, och utskriften loggas med sidantalet 1. Knappen <strong>Skriv ut</strong> i en vy visas först när alla sidor har laddats, och den är grå medan en PDF förbereds.</p>
 <figure class="print">
-  <!-- TODO-BILD: img/utskrift-overlagring.png. Utskriftsdialogen öppnad från överlagringsvyn: ingen utskriftsmetod, sammanfattningen Förbered överlagringsvyn av sidorna 1 och 2 som en sida, samt valen direktutskrift, Skriv ut via PDF och Spara PDF. alt="Utskriftsdialogen öppnad från överlagringsvyn" -->
-  <figcaption><strong>Utskrift från överlagringsvyn.</strong> Samma dialog som vanligt, men utan utskriftsmetod: resultatet är en sida.</figcaption>
+  <!-- TODO-BILD: img/utskrift-overlagring.png. Utskriftsdialogen öppnad från överlagringsvyn: utskriftsmetoden Aktiv sida grå (låst), inget avsnitt Sidor och omfång, sammanfattningen Förbered överlagringsvyn av sidorna 1 och 2 som en sida, samt valen direktutskrift, Skriv ut via PDF och Spara PDF. alt="Utskriftsdialogen öppnad från överlagringsvyn" -->
+  <figcaption><strong>Utskrift från överlagringsvyn.</strong> Samma dialog som vanligt, men metoden är låst till <em>Aktiv sida</em>: resultatet är en sida.</figcaption>
 </figure>
 
 <h2 id="jmf-avstangt">7. Det här kan din organisation ha stängt av</h2>
@@ -973,10 +973,10 @@
 <table>
   <thead><tr><th>Tangent</th><th>Gör detta</th></tr></thead>
   <tbody>
-    <tr><td><kbd>Pil höger</kbd></td><td>Öppnar jämförelsen med sidan till höger, eller gör höger sida aktiv.</td></tr>
+    <tr><td><kbd>Pil höger</kbd></td><td>Öppnar jämförelsen (första gången med sidan du tittar på till höger, senare med den senast jämförda sidan), eller gör höger sida aktiv.</td></tr>
     <tr><td><kbd>Pil vänster</kbd></td><td>Gör vänster sida aktiv. När den redan är aktiv avslutas jämförelsen.</td></tr>
     <tr><td><kbd>Shift</kbd> + knapp eller tangent</td><td>Gäller den sida som inte är aktiv, ett klick eller tryck i taget.</td></tr>
-    <tr><td><kbd>Shift</kbd> + klick på en miniatyr</td><td>Visar sidan till höger.</td></tr>
+    <tr><td><kbd>Shift</kbd> + klick på en miniatyr</td><td>Visar sidan i den sida som inte är aktiv (till vänster när höger sida är aktiv).</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>Vrider den styrda sidan 90° och behåller finjusteringen.</td></tr>
     <tr><td>Piltangenterna i flyttknappen</td><td>Flyttar sidan 1 px, med <kbd>Shift</kbd> 10 px.</td></tr>
     <tr><td><kbd>Enter</kbd> / <kbd>Esc</kbd> / <kbd>Pil upp</kbd> / <kbd>Pil ned</kbd> i ett fält</td><td>Använder värdet / ångrar / stegar värdet (med <kbd>Shift</kbd>: tio steg).</td></tr>

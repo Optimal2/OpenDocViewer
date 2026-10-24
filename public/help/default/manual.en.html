@@ -848,8 +848,8 @@
 <p>Choose which page to show on the right in any of these ways:</p>
 <ul>
   <li><strong>Right-click</strong> a thumbnail and choose <em>Show to right</em>. This also works while comparing is off – it then opens at the same time.</li>
-  <li><kbd>Shift</kbd>+click a thumbnail does the same.</li>
-  <li><kbd>Arrow Right</kbd> opens the comparison with the page you are looking at on the right, or makes the right page active if the comparison is already on.</li>
+  <li><kbd>Shift</kbd>+click a thumbnail shows the page in the pane that is <em>not</em> active: on the right when the left page is active (or when the comparison is off – then it opens), on the left when the right page is active. The active page does not change.</li>
+  <li><kbd>Arrow Right</kbd> opens the comparison just like the button – the first time with the page you are looking at on the right, later with the page you last compared with – or makes the right page active if the comparison is already on.</li>
 </ul>
 <figure class="menu">
   <a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="The right-click menu on a thumbnail with the option Show to right"></a>
@@ -908,7 +908,7 @@
   <summary>The zoom buttons behind the ring and the toolbar's zoom</summary>
   <p>Each page also has its own zoom buttons, tucked behind the coloured ring at the top left: point at the ring (or tab to it) and they fold out below it – zoom in, the factor (for example ×1.0) and zoom out. Each click changes the page's zoom by ten percent of the base zoom and keeps the fine tuning. The toolbar's <em>Fit to screen</em>, <em>Fit to width</em>, <em>1:1</em> and <em>1:X</em> reset both pages' own zoom but keep position and rotation.</p>
   <figure class="tiny">
-    <!-- TODO-BILD: img/jamforelse-ring-zoom.png (same file as in the Swedish guide). The ring at the top left of the left page with the mouse pointer over it, so that the zoom buttons are folded out below it: zoom in, ×1,0 and zoom out. Small crop. alt="The ring with the zoom buttons folded out" -->
+    <!-- TODO-BILD: img/jamforelse-ring-zoom.png (same file as in the Swedish guide). The ring at the top left of the left page with the mouse pointer over it, so that the zoom buttons are folded out below it: zoom in, ×1.0 and zoom out. Small crop. alt="The ring with the zoom buttons folded out" -->
     <figcaption><strong>The ring with the zoom buttons folded out.</strong></figcaption>
   </figure>
 </details>
@@ -953,10 +953,10 @@
 </figure>
 <p><strong>Print the overlay view:</strong> click <strong>Print</strong> in the overlay view's toolbar. You get one composed page of the visible area, with the pages laid on top of each other as on screen: the lower page opaque, the top page at the slider's opacity, and both with their zoom, position, rotation and image adjustments. The toolbar and the slider are not printed.</p>
 <p><strong>Print the curtain view:</strong> click <strong>Print</strong> in the curtain view's toolbar. You get one composed page of the visible area with the border's direction and position as at that moment, and both pages' calibration. The grip, the corner labels and the toolbar are not printed.</p>
-<p>For the two views the dialog is simpler: you choose no print method and no page range, and the previous print's settings are not offered. The summary says, for example, <em>Prepare the overlay view of pages 1 and 2 as one page</em> or <em>Prepare the curtain view of pages 1 and 2 as one page</em>. The result is always one composed page, portrait or landscape after the shape of the visible area, with the same header, footer and watermark as other prints, and the print is logged with a page count of 1. The <strong>Print</strong> button in a view is shown only once all pages have loaded, and it is grey while a PDF is being prepared.</p>
+<p>For the two views the dialog is simpler: the print method is locked to <em>Active page</em> (greyed out), the <em>Pages and scope</em> section is not shown, and the previous print's settings are not offered. The summary says, for example, <em>Prepare the overlay view of pages 1 and 2 as one page</em> or <em>Prepare the curtain view of pages 1 and 2 as one page</em>. The result is always one composed page, portrait or landscape after the shape of the visible area, with the same header, footer and watermark as other prints, and the print is logged with a page count of 1. The <strong>Print</strong> button in a view is shown only once all pages have loaded, and it is grey while a PDF is being prepared.</p>
 <figure class="print">
-  <!-- TODO-BILD: img/utskrift-overlagring.png (same file as in the Swedish guide). The print dialog opened from the overlay view: no print method, the summary Förbered överlagringsvyn av sidorna 1 och 2 som en sida, and the choices direct print, Skriv ut via PDF and Spara PDF. alt="The print dialog opened from the overlay view" -->
-  <figcaption><strong>Printing from the overlay view.</strong> The same dialog as usual, but without a print method: the result is one page.</figcaption>
+  <!-- TODO-BILD: img/utskrift-overlagring.png (same file as in the Swedish guide). The print dialog opened from the overlay view: the print method Aktiv sida greyed out (locked), no Sidor och omfång section, the summary Förbered överlagringsvyn av sidorna 1 och 2 som en sida, and the choices direct print, Skriv ut via PDF and Spara PDF. alt="The print dialog opened from the overlay view" -->
+  <figcaption><strong>Printing from the overlay view.</strong> The same dialog as usual, but the method is locked to <em>Active page</em>: the result is one page.</figcaption>
 </figure>
 
 <h2 id="jmf-disabled">7. What your organisation may have switched off</h2>
@@ -973,10 +973,10 @@
 <table>
   <thead><tr><th>Key</th><th>Does this</th></tr></thead>
   <tbody>
-    <tr><td><kbd>Arrow Right</kbd></td><td>Opens the comparison with the page on the right, or makes the right page active.</td></tr>
+    <tr><td><kbd>Arrow Right</kbd></td><td>Opens the comparison (the first time with the page you are looking at on the right, later with the last compared page), or makes the right page active.</td></tr>
     <tr><td><kbd>Arrow Left</kbd></td><td>Makes the left page active. When it is already active, the comparison ends.</td></tr>
     <tr><td><kbd>Shift</kbd> + button or key</td><td>Applies to the page that is not active, one click or key press at a time.</td></tr>
-    <tr><td><kbd>Shift</kbd> + click on a thumbnail</td><td>Shows the page on the right.</td></tr>
+    <tr><td><kbd>Shift</kbd> + click on a thumbnail</td><td>Shows the page in the pane that is not active (on the left when the right page is active).</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Turns the controlled page 90° and keeps the fine tuning.</td></tr>
     <tr><td>Arrow keys in the move button</td><td>Move the page 1 px, with <kbd>Shift</kbd> 10 px.</td></tr>
     <tr><td><kbd>Enter</kbd> / <kbd>Esc</kbd> / <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> in a field</td><td>Applies the value / undoes / steps the value (with <kbd>Shift</kbd>: ten steps).</td></tr>
