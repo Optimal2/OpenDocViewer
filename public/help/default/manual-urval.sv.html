@@ -477,132 +477,193 @@
 <!-- NAV-START: navigeringsträdet, genererat av embed.py -->
 <nav class="sidonav" aria-label="Innehåll i manualen">
   <a class="sidonav-guide" href="#top">Urval – välj sidor som visas och skrivs ut</a>
-  <ol><li><a href="#oppna">1. Öppna urvalsarbetsytan</a></li><li><a href="#tabort">2. Ta bort sidor</a></li><li><a href="#laggtill">3. Lägg tillbaka sidor</a></li><li><a href="#ordning">4. Ändra ordning</a></li><li><a href="#forhandsvisa">5. Titta närmare på en sida</a></li><li><a href="#spara">6. Spara eller lämna</a></li><li><a href="#aktivt">7. Så ser du att ett urval är aktivt</a></li><li><a href="#skrivut">8. Skriva ut urvalet</a></li><li><a href="#aterstall">9. Ta bort urvalet</a></li></ol>
+  <ol><li><a href="#oppna">1. Öppna urvalsarbetsytan</a></li><li><a href="#tabort">2. Ta bort sidor ur urvalet</a></li><li><a href="#laggtill">3. Lägg tillbaka sidor i urvalet</a></li><li><a href="#ordning">4. Ändra ordning</a></li><li><a href="#forhandsvisa">5. Förhandsvisa en sida i arbetsytan</a></li><li><a href="#spara">6. Spara urvalet eller lämna arbetsytan</a></li><li><a href="#aktivt">7. Så ser du att ett urval är aktivt</a></li><li><a href="#skrivut">8. Skriv ut urvalet</a></li><li><a href="#aterstall">9. Ta bort urvalet</a></li></ol>
 </nav>
 <!-- NAV-END -->
 <section class="hero">
   <h1>Urval – välj sidor som visas och skrivs ut</h1>
-  <p class="lead">Med ett <strong>urval</strong> bestämmer du vilka sidor ODV visar och skriver ut. Du börjar alltid med alla sidor och tar bort dem du inte vill ha med. Det är praktiskt när en session innehåller många dokument men du bara behöver några sidor.</p>
+  <p class="lead">Med ett <strong>urval</strong> bestämmer du vilka sidor OpenDocViewer (ODV) visar och skriver ut. Du utgår från alla sidor och tar bort dem du inte vill ha med. Det är praktiskt när en session innehåller många dokument men du bara behöver några sidor.</p>
   <p class="small">Den här guiden hör ihop med <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Bilderna visar ett påhittat testdokument. <a href="manual-urval.sv.pdf">Ladda ned guiden som PDF</a>.</p>
 </section>
-<div class="warning"><p><strong>Viktigt:</strong> ett urval döljer sidor i ODV och styr vad som skrivs ut. Originaldokumenten i arkivet påverkas aldrig.</p></div>
+<div class="warning"><p><strong>Viktigt:</strong> ett urval döljer sidor i ODV och styr vad som skrivs ut. Originaldokumenten i arkivet påverkas aldrig. Urvalet sparas inte: när du laddar nya dokument visas alla sidor igen.</p></div>
 
 <nav class="toc" aria-label="Innehåll">
   <a href="#oppna">1. Öppna urvalsarbetsytan</a>
-  <a href="#tabort">2. Ta bort sidor</a>
-  <a href="#laggtill">3. Lägg tillbaka sidor</a>
+  <a href="#tabort">2. Ta bort sidor ur urvalet</a>
+  <a href="#laggtill">3. Lägg tillbaka sidor i urvalet</a>
   <a href="#ordning">4. Ändra ordning</a>
-  <a href="#forhandsvisa">5. Titta närmare på en sida</a>
-  <a href="#spara">6. Spara eller lämna</a>
+  <a href="#forhandsvisa">5. Förhandsvisa en sida i arbetsytan</a>
+  <a href="#spara">6. Spara urvalet eller lämna arbetsytan</a>
   <a href="#aktivt">7. Så ser du att ett urval är aktivt</a>
-  <a href="#skrivut">8. Skriva ut urvalet</a>
+  <a href="#skrivut">8. Skriv ut urvalet</a>
   <a href="#aterstall">9. Ta bort urvalet</a>
 </nav>
 
 <h2 id="oppna">1. Öppna urvalsarbetsytan</h2>
-<p>Klicka på <strong>urvalsknappen</strong> i verktygsfältet – den med en lista och en bock, direkt till höger om skrivarknappen. Urvalsarbetsytan öppnas över hela fönstret.</p>
+<p>Klicka på <strong>urvalsknappen</strong> i verktygsfältet – knappen med en lista och en bock, direkt till höger om skrivarknappen. Verktygstipset säger <em>Hantera vilka sidor som visas och skrivs ut</em>. Arbetsytan öppnas över hela fönstret.</p>
+<p class="small">Knappen är grå tills alla sidor är inlästa. Verktygstipset säger då <em>Urval kan hanteras när alla sidor är helt inlästa</em>.</p>
 <figure class="wide">
   <a href="#lb-urval-oversikt"><img src="img/urval-oversikt.png" alt="Urvalsarbetsytan med tillgängliga sidor till vänster och valda sidor till höger"></a>
-  <figcaption><strong>Urvalsarbetsytan.</strong> Till vänster alla sidor som finns. Till höger de sidor som ingår i urvalet. En bock på en sida till vänster betyder att den är med.</figcaption>
+  <figcaption><strong>Arbetsytan.</strong> Till vänster <em>Tillgängliga sidor</em> – alla sidor i sessionen. Till höger <em>Valda sidor</em> – de sidor som ingår i urvalet, i den ordning de visas och skrivs ut. En bock på en sida till vänster betyder att den redan är med.</figcaption>
 </figure>
 <figure class="strip">
   <a href="#lb-urval-verktygsfalt"><img src="img/urval-verktygsfalt.png" alt="Urvalsarbetsytans verktygsfält"></a>
-  <figcaption><strong>Verktygsfältet i arbetsytan.</strong> Läge (Dokument eller Sidor), panelvisning, miniatyrstorlek, ångra/gör om, återställ, <em>Spara</em> och <em>Lämna</em>.</figcaption>
+  <figcaption><strong>Verktygsfältet i arbetsytan.</strong> Från vänster: läge (<em>Dokument</em> eller <em>Sidor</em>), panellayout, miniatyrstorlek, <em>Ångra</em> och <em>Gör om</em>. Till höger: knappen som makulerar osparade ändringar, <em>Spara</em> och <em>Lämna</em>.</figcaption>
 </figure>
+<p><strong>Två lägen.</strong> Uppe till vänster väljer du hur sidorna får flyttas:</p>
+<ul>
+  <li><strong>Dokument</strong> håller ihop sidorna per dokument. Du kan ta bort och lägga till sidor och flytta dem inom sitt dokument. Läget är förvalt när systemet du kom från har lämnat uppgifter om dokumenten. Annars är valet grått, och bara <em>Sidor</em> finns.</li>
+  <li><strong>Sidor</strong> släpper grupperingen. Då kan du blanda sidor från olika dokument i vilken ordning du vill, till exempel inför en utskrift.</li>
+</ul>
 <details>
-  <summary>Två lägen: Dokument och Sidor</summary>
+  <summary>Fler knappar och reglage i arbetsytan</summary>
   <ul>
-    <li><strong>Dokument</strong> är förvalt. Sidorna hålls ihop per dokument. Du kan ta bort och lägga till sidor och flytta dem inom sitt dokument.</li>
-    <li><strong>Sidor</strong> släpper grupperingen. Sidor från olika dokument kan blandas i vilken ordning du vill – till exempel inför en utskrift i en viss ordning.</li>
+    <li><strong>Panellayout</strong>: <em>Visa båda panelerna</em> eller <em>Visa valda sidor</em>, som bara visar höger panel.</li>
+    <li><strong>Miniatyrstorlek</strong>: reglaget gör sidorna i panelerna större eller mindre, mellan 70 och 320 %.</li>
+    <li><strong>Dölj tillagda sidor</strong> i vänster panel döljer de sidor som redan är med, så att du bara ser dem som är kvar att lägga till. Räknaren visar då hur många som är kvar.</li>
+    <li><strong>Ögat</strong> i panelrubriken förhandsvisar panelens sidor från den första (se <em>Förhandsvisa en sida i arbetsytan</em>).</li>
+    <li>Dra i <strong>skiljelinjen</strong> mellan panelerna för att ändra deras bredd.</li>
+    <li>Tangenten <kbd>Esc</kbd> gör samma sak som <strong>Lämna</strong>.</li>
   </ul>
 </details>
+<details>
+  <summary>För den som sköter installationen: knappen kan vara avstängd</summary>
+  <p class="small">Arbetsytan stängs av med <code>print.selectionWorkspace.enabled</code> i <code>odv.site.config.js</code>. Då finns ingen urvalsknapp i verktygsfältet, men högerklicksmenyn och tangenten <kbd>Delete</kbd> (se <em>Ta bort sidor ur urvalet</em>) fungerar ändå.</p>
+</details>
 
-<h2 id="tabort">2. Ta bort sidor</h2>
+<h2 id="tabort">2. Ta bort sidor ur urvalet</h2>
 <ol class="steps">
-  <li><strong>Markera</strong> de sidor i höger panel som inte ska vara med. Klicka på en sida i taget.</li>
-  <li>Klicka på <strong>Ta bort valda</strong> – pilen <em>‹</em> mitt emellan panelerna. Sidorna tappar sin bock i vänster panel.</li>
-  <li>Vill du ta bort allt och börja från noll: klicka <strong>Ta bort alla</strong> (<em>«</em>).</li>
+  <li><strong>Klicka på en sida i höger panel</strong> som inte ska vara med – den får en mörk ram, och knapparna kallar den nu <em>vald</em>. Håll <kbd>Ctrl</kbd> och klicka för att markera fler, eller håll <kbd>Shift</kbd> och klicka för att markera alla sidor mellan två klick.</li>
+  <li>Klicka på <strong>Ta bort valda</strong> – pilen <em>‹</em> mellan panelerna. Sidorna försvinner från höger panel och tappar sin bock till vänster.</li>
 </ol>
+<p>Vill du börja från noll i stället? Klicka på <strong>Ta bort alla</strong> (<em>«</em>) så töms höger panel.</p>
 <div class="figure-grid">
   <figure class="wide">
     <a href="#lb-urval-markerade"><img src="img/urval-markerade.png" alt="Tre sidor markerade i höger panel"></a>
-    <figcaption><strong>Markerade sidor</strong> får en grå ram.</figcaption>
+    <figcaption><strong>Markerade sidor.</strong> Tre sidor i dokument 1 har en mörk ram. Ögat på sidan där muspekaren vilar öppnar förhandsvisningen.</figcaption>
   </figure>
   <figure class="wide">
     <a href="#lb-urval-borttagna"><img src="img/urval-borttagna.png" alt="Urvalet efter att tre sidor tagits bort"></a>
-    <figcaption><strong>Efter Ta bort valda.</strong> Dokument 1 har nu en sida kvar och räknaren visar 21 valda. Spara-knappen har blivit grön.</figcaption>
+    <figcaption><strong>Efter Ta bort valda.</strong> Dokument 1 har en sida kvar och räknaren visar <em>21 valda</em>. Sidorna till vänster har tappat sin bock, <em>Spara</em> har blivit grön och <em>Ångra</em> går att klicka på.</figcaption>
   </figure>
 </div>
 <details>
-  <summary>Snabbare sätt att markera och ta bort</summary>
+  <summary>Fler sätt att markera: Shift, Ctrl, rektangel, dubbelklick</summary>
   <ul>
     <li><kbd>Shift</kbd>+klick markerar alla sidor mellan två klick. <kbd>Ctrl</kbd>+klick lägger till eller tar bort en enskild sida i markeringen.</li>
-    <li>Dra en <strong>rektangel</strong> över flera sidor för att markera dem på en gång.</li>
-    <li><strong>Dubbelklicka</strong> på en sida i vänster panel för att lägga till eller ta bort den direkt.</li>
-    <li>Du behöver inte öppna arbetsytan alls för enstaka sidor: <strong>högerklicka</strong> på en miniatyr eller på sidan i huvudvyn och välj <em>Dölj sidan</em> eller <em>Dölj dokumentet</em>. Tangenten <kbd>Delete</kbd> döljer sidan du tittar på, <kbd>Ctrl</kbd>+<kbd>Delete</kbd> hela dokumentet.</li>
+    <li>Dra en <strong>rektangel</strong> över en tom yta i panelen så markeras sidorna innanför. Håller du <kbd>Ctrl</kbd> läggs de till den markering du redan har.</li>
+    <li><strong>Dubbelklicka</strong> på en sida: i höger panel tas den bort, i vänster panel läggs den till – är sidan redan med (grå, med bock) tas den i stället bort.</li>
+    <li>Klicka på en <strong>dokumentrubrik</strong> för att markera hela dokumentet. Dubbelklicka på rubriken för att ta bort hela dokumentet (höger) eller lägga till det (vänster; är hela dokumentet redan med tas det bort).</li>
+    <li>Du kan också <strong>dra</strong> sidor från den ena panelen till den andra.</li>
   </ul>
+</details>
+<details>
+  <summary>Dölj sidor direkt från dokumentet: högerklick eller Delete</summary>
+  <p>För enstaka sidor behöver du inte öppna arbetsytan:</p>
+  <ul>
+    <li><strong>Högerklicka</strong> på en miniatyr eller på sidan i mitten och välj <strong>Dölj denna sida</strong> eller <strong>Dölj dokument 1/5</strong>. Siffrorna är dokumentets nummer och antalet dokument i sessionen.</li>
+    <li>Tryck <kbd>Delete</kbd> för att dölja sidan du tittar på, eller <kbd>Ctrl</kbd>+<kbd>Delete</kbd> för hela dokumentet.</li>
+  </ul>
+  <p>Sidorna försvinner direkt, utan att du behöver spara. Valen visas först när alla sidor är inlästa.</p>
   <div class="figure-grid">
-    <figure class="menu"><a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="Högerklicksmenyn på en miniatyr"></a><figcaption><strong>Högerklick på en miniatyr.</strong></figcaption></figure>
-    <figure class="menu"><a href="#lb-sida-hogerklick"><img src="img/sida-hogerklick.png" alt="Högerklicksmenyn på sidan i huvudvyn"></a><figcaption><strong>Högerklick på sidan.</strong></figcaption></figure>
+    <figure class="menu"><a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="Högerklicksmenyn på en miniatyr"></a><figcaption><strong>Högerklick på en miniatyr.</strong> De två sista valen döljer sidan eller hela dokumentet. <em>Visa till höger</em> hör till guiden Jämför två sidor.</figcaption></figure>
+    <figure class="menu"><a href="#lb-sida-hogerklick"><img src="img/sida-hogerklick.png" alt="Högerklicksmenyn på sidan i mitten"></a><figcaption><strong>Högerklick på sidan i mitten.</strong> Samma val för att dölja sidan eller dokumentet.</figcaption></figure>
   </div>
 </details>
 
-<h2 id="laggtill">3. Lägg tillbaka sidor</h2>
-<p>Ångrade du dig? Markera sidorna i <strong>vänster</strong> panel och klicka <strong>Lägg till valda</strong> (<em>›</em>), eller <strong>Lägg till alla</strong> (<em>»</em>) för att få tillbaka allt. Knapparna <em>Ångra</em> och <em>Gör om</em> i verktygsfältet tar tillbaka ett steg i taget.</p>
+<h2 id="laggtill">3. Lägg tillbaka sidor i urvalet</h2>
+<ol class="steps">
+  <li>Klicka på en sida utan bock i <strong>vänster</strong> panel – sidor utan bock är inte med. Håll <kbd>Ctrl</kbd> och klicka för att markera fler, eller håll <kbd>Shift</kbd> och klicka för att markera alla sidor mellan två klick.</li>
+  <li>Klicka på <strong>Lägg till valda</strong> (<em>›</em>). Sidorna får tillbaka sin bock och visas i höger panel – i läget <em>Dokument</em> på sin plats i dokumentet.</li>
+</ol>
+<p>Du kan också lägga tillbaka en sida genom att dubbelklicka på den till vänster eller dra den till höger panel. Vill du ha tillbaka allt? Klicka på <strong>Lägg till alla</strong> (<em>»</em>).</p>
+<p><strong>Ångra</strong> i verktygsfältet tar tillbaka din senaste ändring, och <strong>Gör om</strong> gör om den igen. Bara den senaste ändringen kan ångras, inte flera i rad. Vill du tillbaka till det senast sparade urvalet använder du den orange knappen till vänster om <em>Spara</em> (se <em>Spara urvalet eller lämna arbetsytan</em>).</p>
 
 <h2 id="ordning">4. Ändra ordning</h2>
-<p>Dra en sida i höger panel till en ny plats. I läget <em>Dokument</em> kan du flytta sidor inom sitt dokument; i läget <em>Sidor</em> kan du blanda fritt. Ordningen i urvalet blir ordningen på utskriften.</p>
+<p>Dra en sida i höger panel till en ny plats. Ett märke visar var den hamnar när du släpper.</p>
+<ul>
+  <li>I läget <em>Dokument</em> flyttar du sidor inom sitt dokument. Dra i dokumentrubriken för att flytta hela dokumentet. En sida som inte längre ligger i sin ursprungliga ordning får en orange ram. Håll muspekaren över den så står det <em>Den här sidan ligger inte i ursprunglig ordning inom sitt dokument</em>.</li>
+  <li>I läget <em>Sidor</em> blandar du fritt, även mellan dokument.</li>
+</ul>
+<p>Ordningen i höger panel blir ordningen i ODV och på utskriften. Siffran uppe till vänster på varje sida i höger panel är sidans plats i utskriften.</p>
+<p class="small">Byter du till <em>Dokument</em> när ordningen korsar dokumentgränser frågar ODV om du vill återställa den ursprungliga dokument- och sidordningen.</p>
 
-<h2 id="forhandsvisa">5. Titta närmare på en sida</h2>
-<p>Håll muspekaren över en sida och klicka på <strong>ögat</strong>. Sidan visas stor, med pilar för att bläddra till nästa. Grön kant betyder att sidan ingår i urvalet, och knappen högst upp lägger till eller tar bort sidan direkt. <kbd>Esc</kbd> stänger.</p>
+<h2 id="forhandsvisa">5. Förhandsvisa en sida i arbetsytan</h2>
+<p>Håll muspekaren över en sida och klicka på <strong>ögat</strong> (<em>Visa sida</em>). Sidan visas stor.</p>
+<ul>
+  <li>Ett <strong>grönt band</strong> högst upp betyder att sidan ingår i urvalet, ett <strong>rött band</strong> att den inte gör det.</li>
+  <li>Knappen i bandet lägger till (<em>+</em>) eller tar bort (<em>−</em>) sidan direkt. <kbd>Mellanslag</kbd> gör samma sak.</li>
+  <li>Pilarna vid kanterna, eller piltangenterna, bläddrar till nästa sida i samma panel.</li>
+  <li><kbd>Esc</kbd> eller krysset uppe till höger stänger.</li>
+</ul>
+<p>Ögat i panelrubriken (<em>Förhandsvisa valda sidor från första sidan</em>; till vänster <em>Förhandsvisa tillgängliga sidor från första sidan</em>) öppnar förhandsvisningen på panelens första sida, så att du kan bläddra igenom hela panelen.</p>
 <figure class="wide">
-  <a href="#lb-urval-forhandsvisning"><img src="img/urval-forhandsvisning.png" alt="Förhandsvisning av en sida i urvalsarbetsytan"></a>
-  <figcaption><strong>Förhandsvisning.</strong> Uppe till vänster syns sidans plats, dokument och metadata.</figcaption>
+  <a href="#lb-urval-forhandsvisning"><img src="img/urval-forhandsvisning.png" alt="Förhandsvisning av en sida som ingår i urvalet"></a>
+  <figcaption><strong>Förhandsvisning.</strong> Bandet är grönt, så sidan ingår i urvalet. Knappen <em>−</em> tar bort den. Uppe till vänster står sidans nummer i sessionen och dess plats i dokumentet.</figcaption>
 </figure>
 
-<h2 id="spara">6. Spara eller lämna</h2>
-<p>Knappen <strong>Spara</strong> blir grön så snart du ändrat något. Klicka på den när du är klar, och sedan på <strong>Lämna</strong> för att komma tillbaka till dokumentet. Lämnar du utan att spara får du en fråga.</p>
+<h2 id="spara">6. Spara urvalet eller lämna arbetsytan</h2>
+<ol class="steps">
+  <li>Klicka på <strong>Spara</strong>. Knappen är grön så länge du har osparade ändringar, och vit med tunn ram när det inte finns något att spara.</li>
+  <li>Klicka på <strong>Lämna</strong>. Du kommer tillbaka till dokumentet med urvalet aktivt.</li>
+</ol>
+<p>Lämnar du utan att spara visas rutan <em>Osparade ändringar</em> med tre val: <strong>Spara ändringar</strong>, <strong>Makulera ändringar</strong> och <strong>Fortsätt redigera</strong>.</p>
+<p>Den orange knappen till vänster om <em>Spara</em> makulerar dina osparade ändringar och går tillbaka till det senast sparade urvalet. Höger panel måste innehålla minst en sida för att du ska kunna spara.</p>
 <div class="figure-grid">
   <figure class="strip">
     <a href="#lb-urval-verktygsfalt-osparat"><img src="img/urval-verktygsfalt-osparat.png" alt="Verktygsfältet med osparade ändringar"></a>
-    <figcaption><strong>Osparade ändringar.</strong> Grön knapp sparar, orange knapp kastar ändringarna.</figcaption>
+    <figcaption><strong>Verktygsfältet med osparade ändringar.</strong> Grön <em>Spara</em> sparar, den orange knappen makulerar ändringarna.</figcaption>
   </figure>
   <figure class="wide">
-    <a href="#lb-urval-lamna-dialog"><img src="img/urval-lamna-dialog.png" alt="Dialogen Osparade ändringar"></a>
-    <figcaption><strong>Lämna utan att ha sparat.</strong> Spara, kasta, eller fortsätt redigera.</figcaption>
+    <a href="#lb-urval-lamna-dialog"><img src="img/urval-lamna-dialog.png" alt="Rutan Osparade ändringar"></a>
+    <figcaption><strong>Rutan Osparade ändringar.</strong> Visas när du klickar på <em>Lämna</em> eller trycker <kbd>Esc</kbd> utan att ha sparat.</figcaption>
   </figure>
 </div>
 
 <h2 id="aktivt">7. Så ser du att ett urval är aktivt</h2>
-<p>Tillbaka i dokumentet är <strong>urvalsknappen röd</strong>, sidräknaren räknar bara urvalets sidor, och miniatyrpanelen visar bara de sidor som är med. Högst upp i panelen finns en <strong>röd återställningsknapp</strong>.</p>
+<p>Tillbaka i dokumentet syns urvalet på tre ställen:</p>
+<ul>
+  <li><strong>Urvalsknappen</strong> i verktygsfältet är röd.</li>
+  <li><strong>Sidfältet</strong> i verktygsfältet räknar bara urvalets sidor, till exempel <em>1 / 21</em>. Märket <em>T</em> på miniatyrerna visar sidans nummer i urvalet.</li>
+  <li><strong>Miniatyrpanelen</strong> visar bara de sidor som är med. Högst upp i panelen finns en <strong>röd knapp</strong> som tar bort urvalet.</li>
+</ul>
 <figure class="wide">
-  <a href="#lb-huvudvy-efter-urval"><img src="img/huvudvy-efter-urval.png" alt="Huvudvyn med aktivt urval: röd urvalsknapp och färre miniatyrer"></a>
-  <figcaption><strong>Aktivt urval.</strong> Sidräknaren visar 1 / 21, urvalsknappen är röd, panelen visar bara urvalet.</figcaption>
+  <a href="#lb-huvudvy-efter-urval"><img src="img/huvudvy-efter-urval.png" alt="Huvudvyn med aktivt urval: röd urvalsknapp, sidfältet 1 / 21 och färre miniatyrer"></a>
+  <figcaption><strong>Aktivt urval.</strong> Sidfältet visar <em>1 / 21</em>, urvalsknappen är röd, panelen visar bara urvalets sidor och den röda knappen uppe till höger i panelen tar bort urvalet.</figcaption>
 </figure>
+<div class="tip"><p><strong>Tips:</strong> döljer du sidan du tittar på hoppar ODV till närmaste sida som är kvar.</p></div>
 
-<h2 id="skrivut">8. Skriva ut urvalet</h2>
-<p>Öppna utskriften med skrivarknappen och välj <strong>Alla sidor</strong>. När ett urval är aktivt får du välja mellan <strong>Aktuellt urval</strong> – bara sidorna i urvalet, förvalt – och <strong>Hela sessionen</strong>, som skriver ut allt och struntar i urvalet.</p>
+<h2 id="skrivut">8. Skriv ut urvalet</h2>
+<ol class="steps">
+  <li>Klicka på <strong>skrivarknappen</strong>, eller tryck <kbd>Ctrl</kbd>+<kbd>P</kbd> – normalt öppnar det ODV:s utskriftsdialog.</li>
+  <li>Välj <strong>Alla sidor</strong> under <em>Utskriftsmetod</em>.</li>
+  <li>Kontrollera under <em>Sidor och omfång</em> att <strong>Aktuellt urval</strong> är valt (det är förvalt), så skrivs bara urvalets sidor ut, i urvalets ordning. Vill du ha med allt väljer du <strong>Hela sessionen</strong> i stället.</li>
+  <li>Fyll i utskriftsuppgifterna och starta utskriften som vanligt. Hur det går till står i <a href="manual.sv.html#utskrift">Skriv ut i Kom igång-guiden</a>.</li>
+</ol>
 <figure class="print">
   <a href="#lb-utskrift-alla-sidor-urval"><img src="img/utskrift-alla-sidor-urval.png" alt="Utskriftsdialogen med Alla sidor och valet Aktuellt urval"></a>
-  <figcaption><strong>Alla sidor med urval.</strong> <em>Aktuellt urval (21 sidor)</em> är förvalt.</figcaption>
+  <figcaption><strong>Alla sidor med urval.</strong> Under <em>Sidor och omfång</em> är <em>Aktuellt urval (21 sidor)</em> förvalt. <em>Hela sessionen (24 sidor)</em> tar med allt.</figcaption>
 </figure>
-<p class="small">Valen <em>Enkelt intervall</em> och <em>Anpassade sidor</em> finns inte när ett urval är aktivt – då styr urvalet vad som skrivs ut. Resten av utskriften (orsak, mottagare, vattenstämpel) fungerar som i <a href="manual.sv.html#utskrift">Kom igång-guiden</a>.</p>
-<div class="tip"><p><strong>Bra att veta:</strong> utskrift av ett urval tar med sidorna som de är i arkivet. Har du roterat en sida eller ändrat ljusstyrka och kontrast följer det inte med här – det gör det bara med utskriftsmetoden <em>Aktiv sida</em>.</p></div>
+<p class="small">Valen <em>Enkelt intervall</em> och <em>Anpassade sidor</em> finns inte när ett urval är aktivt – då styr urvalet vad som skrivs ut. Sidorna skrivs ut som de är i arkivet: rotation, ljusstyrka och kontrast följer bara med när du skriver ut med utskriftsmetoden <em>Aktiv sida</em>.</p>
 
 <h2 id="aterstall">9. Ta bort urvalet</h2>
-<p>Klicka på den <strong>röda knappen högst upp i miniatyrpanelen</strong>. Alla sidor kommer tillbaka. Du kan också öppna arbetsytan, välja <em>Lägg till alla</em>, <em>Spara</em> och <em>Lämna</em>.</p>
+<p><strong>Snabbast:</strong> klicka på den röda knappen högst upp i miniatyrpanelen (<em>Ta bort urval/filtrering och visa alla sidor</em>). Alla sidor visas igen i sin ursprungliga ordning.</p>
+<p><strong>Från arbetsytan:</strong> klicka på <strong>Lägg till alla</strong> (<em>»</em>), sedan <strong>Spara</strong> och <strong>Lämna</strong>. Då ingår alla sidor igen. Urvalet tas bara bort om sidorna också ligger i sin ursprungliga ordning. Har du ändrat ordningen använder du i stället den röda knappen i miniatyrpanelen.</p>
 <figure class="menu">
-  <a href="#lb-panel-efter-urval"><img src="img/panel-efter-urval.png" alt="Miniatyrpanelen med den röda återställningsknappen"></a>
-  <figcaption><strong>Återställningsknappen</strong> uppe till höger i panelen.</figcaption>
+  <a href="#lb-panel-efter-urval"><img src="img/panel-efter-urval.png" alt="Miniatyrpanelen med den röda knappen som tar bort urvalet"></a>
+  <figcaption><strong>Den röda knappen.</strong> Den sitter längst till höger i panelens knapprad och finns bara när ett urval är aktivt.</figcaption>
 </figure>
+<p>Har du dolt alla sidor, till exempel genom att dölja det sista dokumentet, visar ODV texten <em>Inga sidor återstår i det aktuella urvalet</em> i stället för sidan. Klicka på <strong>Visa alla sidor</strong> där.</p>
 
-<h3>Kort kontrollista</h3>
+<h3>Kort kontrollista för urval</h3>
 <ul class="checklist">
-  <li>Grön Spara-knapp betyder att du har osparade ändringar.</li>
-  <li>Röd urvalsknapp i verktygsfältet betyder att sidor är dolda.</li>
+  <li>Grön <em>Spara</em>-knapp i arbetsytan betyder att du har osparade ändringar.</li>
+  <li>Röd urvalsknapp i verktygsfältet betyder att ett urval är aktivt: sidor är dolda eller ligger i en annan ordning.</li>
+  <li>Ordningen i höger panel är ordningen i ODV och på utskriften.</li>
   <li><em>Aktuellt urval</em> skriver ut det du valt, <em>Hela sessionen</em> skriver ut allt.</li>
+  <li>Den röda knappen i miniatyrpanelen tar bort urvalet.</li>
 </ul>
-<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.8. Uppdaterad 2026-09-26.</p>
+<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.11. Uppdaterad 2026-10-25.</p>
 <!-- LB-START -->
 <div class="lb" id="lb-urval-oversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-oversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-urval-verktygsfalt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-verktygsfalt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>

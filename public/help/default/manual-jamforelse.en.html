@@ -477,183 +477,229 @@
 <!-- NAV-START: navigeringsträdet, genererat av embed.py -->
 <nav class="sidonav" aria-label="Contents of the manual">
   <a class="sidonav-guide" href="#top">Compare two pages – side by side, overlaid or with a curtain</a>
-  <ol><li><a href="#open">1. Open the comparison and pick the pages</a></li><li><a href="#calibrate">2. Calibrate – so that the pages line up</a></li><li><a href="#finetune">3. Fine-tune each page</a></li><li><a href="#overlay">4. Lay the pages on top of each other (overlay)</a></li><li><a href="#curtain">5. Drag a border between the pages (curtain)</a></li><li><a href="#print">6. Print from the comparison</a></li><li><a href="#disabled">7. What your organisation may have switched off</a></li></ol>
+  <ol><li><a href="#open">1. Open the comparison and pick the pages</a></li><li><a href="#calibrate">2. The adjustments follow the page (calibration)</a></li><li><a href="#finetune">3. Fine-tune each page</a></li><li><a href="#overlay">4. Lay the pages on top of each other (overlay)</a></li><li><a href="#curtain">5. Drag a border between the pages (curtain)</a></li><li><a href="#print">6. Print from the comparison</a></li><li><a href="#disabled">7. What your organization may have switched off</a></li><li><a href="#keys">8. The keys in the comparison</a></li></ol>
 </nav>
 <!-- NAV-END -->
 <section class="hero">
   <h1>Compare two pages – side by side, overlaid or with a curtain</h1>
-  <p class="lead">In <strong>compare mode</strong> ODV shows two pages side by side. You can fine-tune each page on its own – zoom, position, rotation and image – lay the pages on top of each other with transparency, or drag a border between them to see whether they match. Nothing you set is saved: it lasts until you load new documents, and the documents in the archive are never changed.</p>
-  <p class="small">This guide belongs with <a href="manual.en.html">Getting started with OpenDocViewer</a>. The pictures show a made-up test document, in the Swedish interface; the button names here are the English ones. <a href="manual-jamforelse.en.pdf">Download the guide as PDF</a>.</p>
+  <p class="lead">Need to see whether two pages are identical – or exactly where they differ? In <strong>compare mode</strong>, OpenDocViewer (ODV) shows two pages side by side. You can then lay them on top of each other or drag a border between them, so that even small differences stand out. Everything you set lasts only until you load new documents. The documents in the archive are never changed.</p>
+  <p class="small">This guide belongs with <a href="manual.en.html">Getting started with OpenDocViewer</a>. The pictures show a made-up test document in the Swedish interface; the button names in the text are the English ones. <a href="manual-jamforelse.en.pdf">Download the guide as PDF</a>.</p>
 </section>
-<div class="tip"><p><strong>Good to know:</strong> everything in this guide is included from the start, but your organisation may have switched parts of it off – see <a href="#disabled">section 7</a>. If a button described here is missing, that is probably why.</p></div>
+<div class="tip"><p><strong>Tip:</strong> everything in this guide is included from the start, but your organization may have switched parts of it off – see <a href="#disabled">What your organization may have switched off</a>. If a button described here is missing, that is probably why.</p></div>
 
 <nav class="toc" aria-label="Contents">
   <a href="#open">1. Open the comparison and pick the pages</a>
-  <a href="#calibrate">2. Calibrate – so that the pages line up</a>
+  <a href="#calibrate">2. The adjustments follow the page (calibration)</a>
   <a href="#finetune">3. Fine-tune each page</a>
   <a href="#overlay">4. Lay the pages on top of each other (overlay)</a>
   <a href="#curtain">5. Drag a border between the pages (curtain)</a>
   <a href="#print">6. Print from the comparison</a>
-  <a href="#disabled">7. What your organisation may have switched off</a>
+  <a href="#disabled">7. What your organization may have switched off</a>
+  <a href="#keys">8. The keys in the comparison</a>
 </nav>
 
 <h2 id="open">1. Open the comparison and pick the pages</h2>
-<p>Click the <strong>compare button</strong> in the toolbar (<em>Enable compare mode</em>). The page you are looking at moves to the left with a <span class="blue">blue frame</span>, and a second page is shown on the right with an <span class="orange">orange frame</span>. The first time it is the same page in both places; later, the page you last compared with comes back on the right. The right page becomes the active one.</p>
-<p>Choose which page to show on the right in any of these ways:</p>
-<ul>
-  <li><strong>Right-click</strong> a thumbnail and choose <em>Show to right</em>. This also works while comparing is off – it then opens at the same time.</li>
-  <li><kbd>Shift</kbd>+click a thumbnail shows the page in the pane that is <em>not</em> active: on the right when the left page is active (or when the comparison is off – then it opens), on the left when the right page is active. The active page does not change.</li>
-  <li><kbd>Arrow Right</kbd> opens the comparison just like the button – the first time with the page you are looking at on the right, later with the page you last compared with – or makes the right page active if the comparison is already on.</li>
-</ul>
-<figure class="menu">
-  <a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="The right-click menu on a thumbnail with the option Show to right"></a>
-  <figcaption><strong>Right-clicking a thumbnail.</strong> <em>Show to right</em> (<em>Visa till höger</em>) puts the page on the right in the comparison.</figcaption>
-</figure>
+<ol class="steps">
+  <li>Click the <strong>compare button</strong> in the toolbar (<em>Enable compare mode</em>), to the right of the 1:X and Fine tuning buttons. The page you are looking at is shown on the left with a <span class="blue">blue frame</span> and a second page on the right with an <span class="orange">orange frame</span> – the first time the same page, later the one you last compared with.</li>
+  <li><strong>Right-click a thumbnail</strong> and choose <em>Show to right</em>. The page is shown on the right.</li>
+</ol>
 <figure class="wide">
   <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Compare mode with two pages side by side"></a>
-  <figcaption><strong>Compare mode.</strong> Left page blue, right page orange. The ring at the top left of each page shows which one is active, and in the pane the left page is marked <span class="blue">V</span> and the right page <span class="orange">H</span> (Swedish for left and right).</figcaption>
+  <figcaption><strong>Compare mode.</strong> The left page has a blue frame, the right page an orange one. The ring at the top left of each page shows which one is active, and in the thumbnail pane the pages are marked <span class="blue">L</span> and <span class="orange">R</span> (<span class="blue">V</span> and <span class="orange">H</span> in the pictures, which show the Swedish interface).</figcaption>
 </figure>
-<p>One of the pages is always <strong>active</strong> – the one you last clicked in. The active page's ring is filled, like a radio button, and you can click a ring to make that page active. The toolbar's page box and browsing buttons, the keyboard and the image adjustments apply to the active page. The frames around the buttons show which page is being controlled: blue for left, orange for right.</p>
+<figure class="menu">
+  <a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="The right-click menu on a thumbnail with the option Show to right"></a>
+  <figcaption><strong>Right-clicking a thumbnail.</strong> <em>Show to right</em> (<em>Visa till höger</em> in the picture) puts the page on the right in the comparison – even when compare mode is off; it is then switched on at the same time.</figcaption>
+</figure>
+<p>This is how the colors and letters fit together, in the guide and in ODV:</p>
+<table>
+  <thead><tr><th>Left page</th><th>Right page</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="blue">Blue frame</span>. Marked <span class="blue">L</span> in the thumbnail pane (<span class="blue">V</span> in the pictures). Called <strong>A</strong> in the overlay view and the curtain view.</td>
+      <td><span class="orange">Orange frame</span>. Marked <span class="orange">R</span> in the thumbnail pane (<span class="orange">H</span> in the pictures). Called <strong>B</strong> in the overlay view and the curtain view.</td>
+    </tr>
+  </tbody>
+</table>
+<p>The view with the two pages side by side is called the <strong>compare view</strong>. One of the pages is always <strong>active</strong>: when you open the comparison with the compare button, <kbd>Arrow Right</kbd> or <em>Show to right</em>, it is the right page; after that, the one you last clicked in. The ring at the top left of the active page is filled, and you can click a ring to switch. The page box, the arrow buttons, the keyboard and the image adjustments apply to the active page. The frames around the toolbar buttons show which one: blue for left, orange for right.</p>
 <details>
-  <summary>Controlling the other page without switching</summary>
-  <p>Hold <kbd>Shift</kbd> while you click a button or use the keyboard, and the command applies to the page that is <em>not</em> active – one click or key press at a time. The frames change colour while you hold Shift, so you can see what will happen.</p>
+  <summary>More ways to open the comparison and switch pages</summary>
+  <ul>
+    <li>Click a thumbnail to replace the active page. <kbd>Shift</kbd>+click replaces the other page. If compare mode is off, it is switched on.</li>
+    <li><kbd>Arrow Right</kbd> does the same as the compare button. If the comparison is already running, the key instead makes the right page active, and <kbd>Arrow Left</kbd> makes the left page active.</li>
+    <li>Hold <kbd>Shift</kbd> while you click a button or press a key, and the command applies to the page that is <em>not</em> active – one click or key press at a time. The frames change color while you hold Shift.</li>
+  </ul>
   <figure class="wide">
     <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="The toolbar with Shift held down and orange frames"></a>
     <figcaption><strong>Shift held down.</strong> Orange frames = the buttons control the right page right now.</figcaption>
   </figure>
-  <p><kbd>Arrow Left</kbd> makes the left page active and <kbd>Arrow Right</kbd> the right page. <kbd>Ctrl</kbd>+<kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd> turns the controlled page a quarter turn.</p>
 </details>
-<p><strong>End the comparison</strong> with the compare button (<em>Disable compare mode</em>), with <kbd>Arrow Left</kbd> when the left page is already active, or with <em>Close comparison</em> in the right-click menu on the right page. What you fine-tuned is still there if you switch comparing on again.</p>
+<p><strong>End the comparison</strong> with the compare button (<em>Disable compare mode</em>), with <kbd>Arrow Left</kbd> when the left page is already active, or with <em>Close comparison</em> in the right-click menu on the right page. Your adjustments are still there if you switch compare mode on again.</p>
 <figure class="menu">
   <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="The right-click menu on the right page in compare mode"></a>
-  <figcaption><strong>Right-clicking the right page.</strong> The usual options, plus <em>Close comparison</em> (<em>Avsluta jämförelse</em>).</figcaption>
+  <figcaption><strong>Right-clicking the right page.</strong> The usual options, plus <em>Close comparison</em> (<em>Avsluta jämförelse</em> in the picture) last in the menu.</figcaption>
 </figure>
 
-<h2 id="calibrate">2. Calibrate – so that the pages line up</h2>
-<p>Two pages to be compared rarely lie exactly alike: one may be slightly shifted, slightly tilted or scanned at a different scale. <strong>Calibration</strong> is ODV's word for the adjustments you make per page so that they line up – zoom, position and rotation, plus the image adjustments brightness, contrast, grayscale and invert. You make them in the <em>Fine-tune</em> panel (<a href="#finetune">section 3</a>), and they follow the pages between the compare view, the overlay view and the curtain view.</p>
+<h2 id="calibrate">2. The adjustments follow the page (calibration)</h2>
+<p>Two pages rarely line up exactly. One of them may be slightly shifted, slightly tilted or scanned at a different scale. So you adjust each page on its own – zoom, position, rotation and image – until they match. ODV calls this <strong>calibration</strong>.</p>
 <ul>
-  <li><strong>The calibration belongs to the page.</strong> If you switch page in a pane and then back, the adjustments are still there. A page you have not touched is unadjusted. If you load new documents, everything starts over. Nothing is saved to disk or server.</li>
-  <li>The comparison counts as <strong>calibrated</strong> once you have opened the overlay view. Until then the curtain button in the toolbar is grey, and its tooltip says <em>Curtain: open the overlay view first – it calibrates the two pages</em>. If you end the comparison, or the right page disappears, you need to open the overlay view again before the curtain can be opened.</li>
-  <li>When you open the overlay view, ODV takes a <strong>snapshot</strong> of both pages' adjustments. The button <em>Reset to the alignment from the compare view</em> in the overlay view goes back to it.</li>
-  <li><strong>Copy the calibration</strong> in the overlay view puts both pages' values on the clipboard as text (JSON), so you can paste them into a support case. ODV does not read the text back.</li>
+  <li>The adjustments <strong>belong to the page</strong>. If you switch to another page and then back, they are still there. A page you have not touched is unadjusted.</li>
+  <li>They <strong>follow the page</strong> between the three views: the compare view (side by side), the overlay view and the curtain view.</li>
+  <li>They <strong>disappear</strong> when you load new documents. Nothing is saved in the archive or on the server.</li>
 </ul>
+<p>The curtain button in the toolbar is gray until you have opened the overlay view once – only then does ODV count the pages as calibrated. Its tooltip says <em>Curtain: open the overlay view first – it calibrates the two pages</em>. If you end the comparison, you need to open the overlay view again before the curtain can be opened. See <a href="#overlay">Lay the pages on top of each other</a> and <a href="#curtain">Drag a border between the pages</a>.</p>
 <figure class="strip">
-  <a href="#lb-jamforelse-verktygsfalt"><img src="img/jamforelse-verktygsfalt.png" alt="The toolbar in compare mode with a grey curtain button"></a>
-  <figcaption><strong>The toolbar in compare mode.</strong> Fine tuning, compare (on), overlay and curtain. The curtain button is grey until you have calibrated the pages in the overlay view.</figcaption>
+  <a href="#lb-jamforelse-verktygsfalt"><img src="img/jamforelse-verktygsfalt.png" alt="The toolbar in compare mode with a gray curtain button"></a>
+  <figcaption><strong>The toolbar in compare mode.</strong> From the left: Fine tuning, compare (on), overlay and curtain. The curtain button is gray until the pages are calibrated.</figcaption>
 </figure>
 
 <h2 id="finetune">3. Fine-tune each page</h2>
-<p>Click <strong>Fine tuning</strong> in the toolbar (the button with the sliders, next to the compare button). A <strong>Fine-tune</strong> panel is then shown above each page – both pages in compare mode, or the single page when you are not comparing. The button starts off; switching it on expands both panels. Switching it off hides the controls and gestures again, but the adjustments are kept.</p>
-<p>The panel's header shows a summary, for example <em>100.0 % · 0.0°</em>, and the sign ◐ when the image is adjusted. Click the header to expand or collapse the panel. Expanded, it has four groups:</p>
-<ul>
-  <li><strong>Zoom</strong> in percent with one decimal, 10–800. The − and + buttons change it by 0.1 % (with <kbd>Shift</kbd>: 1 %). The percentage is applied on top of the shared zoom in the toolbar.</li>
-  <li><strong>Position</strong>: horizontal and vertical offset in pixels. Drag the page with the mouse, or select the move button (four arrows) and use the arrow keys: 1 px per press, 10 px with <kbd>Shift</kbd>.</li>
-  <li><strong>Rotation</strong> in degrees with one decimal. The ↺ and ↻ buttons turn the page 0.1° (with <kbd>Shift</kbd>: 1°). A small counter-clockwise tilt shows as a negative number, for example −0.3. The ⟲90 and ⟳90 buttons in the panel turn a quarter turn and keep the fine tuning – 4.6° becomes 94.6° – and so do the 90° buttons in the toolbar and <kbd>Ctrl</kbd>+<kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd>.</li>
-  <li><strong>Image</strong>: brightness and contrast 0–200 (100 = unchanged), grayscale 0–100 (0 = in color) and the <em>Invert</em> checkbox. The steps are 1, with <kbd>Shift</kbd> 10.</li>
-</ul>
-<p>At the bottom there are three resets: <strong>Reset all (layout and image)</strong>, <strong>Reset layout (zoom, position, rotation)</strong> and <strong>Reset image (brightness, contrast, color)</strong>. A button is grey when there is nothing to reset. In compare mode the toolbar's reset button does the same as <em>Reset all</em>, and the toolbar's brightness and contrast buttons show the controlled page's value.</p>
+<p>The <strong>Fine-tune</strong> panel is the tool for calibration. It sits above each page – both pages in compare mode, or the single page when you are not comparing.</p>
+<ol class="steps">
+  <li>Click <strong>Fine tuning</strong> in the toolbar (the button with the sliders, next to the compare button). The <strong>Fine-tune</strong> panel is shown expanded above each page.</li>
+  <li>Change zoom, position, rotation or image in the panel until the page sits the way you want it. You can also drag the page to move it.</li>
+  <li>Click <strong>Fine tuning</strong> again when you are done. The panels are hidden, but the adjustments are kept.</li>
+</ol>
 <figure class="wide">
   <a href="#lb-finjustera-panel"><img src="img/finjustera-panel.png" alt="The Fine-tune panel expanded above a page"></a>
   <figcaption><strong>The Fine-tune panel.</strong> Zoom, position, rotation and image for one page, and at the bottom the three resets.</figcaption>
 </figure>
-<p>You can type into the fields with a decimal comma or a decimal point – 12,5 and 12.5 both work. <kbd>Enter</kbd>, or leaving the field, applies the value. <kbd>Esc</kbd> undoes what you typed, and <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> step the value (with <kbd>Shift</kbd>: ten steps).</p>
-<p>While a page's panel is expanded, you move the page by <strong>dragging</strong> it instead of scrolling, and <kbd>Ctrl</kbd> + mouse wheel over the page zooms only that page, 1 % per notch. Collapse the panel, or switch Fine tuning off, to scroll and zoom as usual again.</p>
+<p>The panel header shows a summary, for example <em>100.0 % · 0.0°</em>, and the ◐ badge when the image is adjusted. Click the header to collapse or expand the panel. Expanded, it has four groups:</p>
+<ul>
+  <li><strong>Zoom</strong> in percent, 10–800. The − and + buttons change it by 0.1 % (with <kbd>Shift</kbd> 1 %). The percentage is applied on top of the shared zoom in the toolbar. Clicking <em>Fit to screen</em>, <em>Fit to width</em>, <em>Actual size (1:1)</em> or <em>Custom size</em>, or double-clicking the page, sets the zoom back to 100 % on both the left and the right page, even when compare mode is off. Position, rotation and image are kept.</li>
+  <li><strong>Position</strong>: horizontal and vertical offset in pixels. Drag the page, or select the move button (four arrows) and use the arrow keys: 1 px per press, 10 px with <kbd>Shift</kbd>.</li>
+  <li><strong>Rotation</strong> in degrees. The ↺ and ↻ buttons turn the page 0.1° (with <kbd>Shift</kbd> 1°); a counter-clockwise turn shows as a negative number. The outer buttons in the rotation group (tooltip <em>Rotates 90° and keeps the fine tuning</em>) turn a quarter turn and keep the fine tuning – 4.6° becomes 94.6°.</li>
+  <li><strong>Image</strong>: brightness and contrast 0–200 (100 = unchanged), grayscale 0–100 (0 = in color) and the <em>Invert</em> checkbox.</li>
+</ul>
+<p>At the bottom there are three resets: <strong>Reset all (layout and image)</strong>, <strong>Reset layout (zoom, position, rotation)</strong> and <strong>Reset image (brightness, contrast, color)</strong>. A button is gray when there is nothing to reset.</p>
+<p>In the fields you can type with a decimal comma or a decimal point – 12,5 and 12.5 both work. <kbd>Enter</kbd> applies the value, <kbd>Esc</kbd> undoes what you typed.</p>
+<p>While a page's panel is expanded, you <strong>drag</strong> the page to move it instead of scrolling, and <kbd>Ctrl</kbd> + the mouse wheel zooms only that page. Collapse the panel, or switch Fine tuning off, to scroll and zoom as usual again.</p>
+<p class="small">In compare mode the toolbar's reset button does the same as <em>Reset all (layout and image)</em> for the active page. The toolbar's 90° buttons keep the fine tuning, and the brightness and contrast buttons show the active page's value.</p>
 <details>
   <summary>The zoom buttons behind the ring and the toolbar's zoom</summary>
-  <p>Each page also has its own zoom buttons, tucked behind the coloured ring at the top left: point at the ring (or tab to it) and they fold out below it – zoom in, the factor (for example ×1.0) and zoom out. Each click changes the page's zoom by ten percent of the base zoom and keeps the fine tuning. The toolbar's <em>Fit to screen</em>, <em>Fit to width</em>, <em>1:1</em> and <em>1:X</em> reset both pages' own zoom but keep position and rotation.</p>
+  <p>In compare mode, each page also has its own zoom buttons, tucked behind the colored ring at the top left. Point at the ring (or tab to it) and they fold out below it: zoom in, the factor (for example ×1.0, always with a decimal point) and zoom out. The factor is the same value as <em>Zoom</em> in the Fine-tune panel (×1.1 = 110 %). Each click changes it by 0.1, and any decimals you fine-tuned are kept.</p>
+  <p>The toolbar's <em>Fit to screen</em>, <em>Fit to width</em>, <em>Actual size (1:1)</em> and <em>Custom size</em> set both pages' factor back to ×1.0 but keep position and rotation.</p>
   <figure class="tiny">
     <a href="#lb-jamforelse-ring-zoom"><img src="img/jamforelse-ring-zoom.png" alt="The ring with the zoom buttons folded out"></a>
-    <figcaption><strong>The ring with the zoom buttons folded out.</strong></figcaption>
+    <figcaption><strong>The ring with the zoom buttons folded out.</strong> Plus, the factor and minus below the ring.</figcaption>
   </figure>
 </details>
 
 <h2 id="overlay">4. Lay the pages on top of each other (overlay)</h2>
-<p>Small differences are easiest to see when the pages lie on top of each other. Click the <strong>overlay button</strong> (stacked layers) next to the compare button – it is only there while two pages are compared. The overlay view takes over the whole window, with its own toolbar in place of the usual one. Page A (the left page, blue) lies underneath and page B (the right page, orange) on top. Both keep their calibration, and page A sets the shared zoom.</p>
+<p>Small differences are easiest to see when the pages lie on top of each other. In the overlay view, page A (left, blue) lies underneath and page B (right, orange) on top, and you decide how transparent the top page should be.</p>
+<ol class="steps">
+  <li>Click the <strong>overlay button</strong> (stacked layers) next to the compare button – it is only there while two pages are being compared. The view takes over the whole window, with a toolbar of its own.</li>
+  <li>Drag the <strong>Opacity</strong> slider until you can see both pages. The first time, the view opens at 50 %.</li>
+  <li>Move page B until it lies exactly on page A: drag the page, or use the <strong>B</strong> panel above the pages. <kbd>Ctrl</kbd> + the mouse wheel zooms the top page.</li>
+  <li>Click <strong>Close</strong> (or press <kbd>Esc</kbd>) when you are done. You are back in the compare view, and the calibration is kept.</li>
+</ol>
 <figure class="wide">
   <a href="#lb-overlagring"><img src="img/overlagring.png" alt="The overlay view with page B half transparent over page A"></a>
   <figcaption><strong>The overlay view.</strong> The <em>Opacity</em> slider controls the top page. The panels <em>A</em> and <em>B</em> are the same Fine-tune panels as in the compare view.</figcaption>
 </figure>
+<p>The buttons in the view's toolbar:</p>
 <ul>
-  <li><strong>Opacity</strong>: the slider sets how visible the top page is, from 0 % (invisible) to 100 % (fully opaque). It starts at 50 %. With the slider selected, <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd> (or <kbd>Arrow Down</kbd> / <kbd>Arrow Up</kbd>) change it by 1 %, with <kbd>Shift</kbd> by 10 %, and <kbd>Home</kbd> / <kbd>End</kbd> go to 0 % and 100 %.</li>
-  <li><strong>Swap which page is on top</strong> (up and down arrows) puts the other page on top. The slider always controls the page on top.</li>
-  <li><strong>Calibrate</strong>: the panels <em>A</em> and <em>B</em> above the pages are always expanded here, regardless of the choice in the usual toolbar. Dragging the pages moves the top page, and <kbd>Ctrl</kbd> + mouse wheel zooms the top page, 1 % per notch.</li>
-  <li><strong>Nudge mode</strong> (the move button): while it is on, the arrow keys move the top page 1 px (with <kbd>Shift</kbd>: 10 px). If the cursor is in a field, the keys go there instead – click outside the field first.</li>
-  <li><strong>Reset to the alignment from the compare view</strong> restores both pages' zoom, position, rotation <em>and</em> image adjustments as they were when you opened the overlay view.</li>
-  <li><strong>Copy the calibration as JSON</strong> puts both pages' settings on the clipboard for a support case. <em>Calibration copied</em> is shown for a moment.</li>
-  <li><strong>Curtain</strong> opens the curtain view with the same calibration, see <a href="#curtain">section 5</a>. <strong>Print</strong> is described in <a href="#print">section 6</a>.</li>
-  <li><strong>Close</strong> – or <kbd>Esc</kbd>, except while the cursor is in a text field – takes you back to the compare view. The calibration is kept, and the next time you open the overlay view the opacity and the top page are as you left them.</li>
+  <li><strong>Swap which page is on top</strong> (up and down arrows) puts the other page on top. The <em>Opacity</em> slider always controls the page on top.</li>
+  <li><strong>Nudge mode</strong> (the button with arrows around a dot): while it is on, the arrow keys move the top page 1 px per press – not while the cursor is in a field.</li>
+  <li><strong>Reset to the alignment from the compare view</strong>: when the view opens, ODV takes a snapshot of both pages' adjustments. The button goes back to it – zoom, position, rotation and image.</li>
+  <li><strong>Copy the calibration as JSON (for support)</strong> puts both pages' values on the clipboard as text, so you can paste them into a support case. <em>Calibration copied</em> is shown for a moment.</li>
+  <li><strong>Curtain</strong> opens the curtain view with the same calibration, see <a href="#curtain">Drag a border between the pages</a>. <strong>Print</strong> is described in <a href="#print">Print from the comparison</a>.</li>
 </ul>
+<p class="small">The panels <em>A</em> and <em>B</em> open expanded here, regardless of the choice in the usual toolbar; click a header to collapse it. The next time you open the overlay view, the opacity and the top page are as you left them.</p>
 
 <h2 id="curtain">5. Drag a border between the pages (curtain)</h2>
-<p>In the curtain view the two calibrated pages lie in the same place, and a border you drag decides where you see which page: page A on one side of the border and page B on the other. This shows quickly whether lines and text continue unbroken across the border.</p>
+<p>In the curtain view the two calibrated pages lie in the same place, and a border you drag splits the picture: on one half you see page A, on the other page B. That shows at once whether lines and text continue unbroken across the border.</p>
+<ol class="steps">
+  <li>Click <strong>Curtain</strong> in the overlay view's toolbar. You can also click the curtain button next to the overlay button in the usual toolbar – it is gray until you have opened the overlay view once.</li>
+  <li>Drag the grip on the border. The grip has keyboard focus when the view opens, so the arrow keys move it straight away: 1 % per press, 10 % with <kbd>Shift</kbd>.</li>
+  <li>Choose <strong>Horizontal</strong> if you would rather have a border that runs across the page. The view always opens with <strong>Vertical</strong> and the border at 50 %.</li>
+  <li>Click <strong>Close</strong> (or press <kbd>Esc</kbd>). You are back where you opened the curtain view from: the overlay view or the compare view.</li>
+</ol>
 <figure class="wide">
   <a href="#lb-gardin"><img src="img/gardin.png" alt="The curtain view with a vertical border between page A and page B"></a>
   <figcaption><strong>The curtain view.</strong> Page A to the left of the border, page B to the right. The labels in the corners show which page, with its page number, is where.</figcaption>
 </figure>
 <ul>
-  <li><strong>Open</strong>: click <strong>Curtain</strong> in the overlay view's toolbar. In the compare view the curtain button sits next to the overlay button; it is grey until you have calibrated the pages in the overlay view (<a href="#calibrate">section 2</a>). If the overlay is switched off for the installation, the curtain uses the compare view's calibration directly.</li>
-  <li><strong>Horizontal / Vertical</strong> chooses the direction of the border. Vertical: the border is upright, page A shows on the left and page B on the right. Horizontal: the border is level, page A shows above and page B below. The view always opens vertical with the border at 50 %, and each direction remembers its own position while the view is open.</li>
-  <li><strong>Move the border</strong>: drag the grip on the border with the mouse or a finger. The grip is selected when the view opens, so the <kbd>arrow keys</kbd> move it at once: 1 % per press, 10 % with <kbd>Shift</kbd>.</li>
-  <li><strong>Fine-tune</strong>: the panels <em>A</em> and <em>B</em> are expanded here too and change the same calibration as the compare view and the overlay view – the adjustments stay when you close.</li>
-  <li><strong>Close</strong> – or <kbd>Esc</kbd> – takes you back to where you opened the curtain view: the overlay view or the compare view.</li>
+  <li><strong>Vertical</strong>: the border is upright, page A shows on the left and page B on the right. <strong>Horizontal</strong>: the border runs across the page, page A above and page B below. Each direction remembers its own position as long as the view is open.</li>
+  <li>The labels in the corners show which page is where, for example <em>A · page 1</em> and <em>B · page 2</em>.</li>
+  <li>The panels <em>A</em> and <em>B</em> are expanded here too and change the same calibration as the other views.</li>
+  <li><strong>Print</strong> is described in <a href="#print">Print from the comparison</a>.</li>
 </ul>
+<p class="small">If the overlay view is switched off in your installation, the curtain opens straight away, with the compare view's calibration.</p>
 
 <h2 id="print">6. Print from the comparison</h2>
-<p>There are three ways to get the comparison on paper or as a PDF. All of them use ODV's usual print dialog, so reason, recipient, watermark and the choice between direct print, <strong>Print via PDF</strong> and <strong>Save PDF</strong> work as in the <a href="manual.en.html#printing">Getting started guide</a>.</p>
-<p><strong>Side by side:</strong> click the print button in the toolbar and choose the <strong>Active page</strong> method. In compare mode the dialog asks <em>What should “Active page” mean in compare view?</em> – <em>Left / primary page only</em> or <em>Both compare pages</em>. With both, two pages are printed, exactly as you see them: zoom, position, rotation and image adjustments are included. Every other print method prints the pages as they are in the archive.</p>
+<p>There are three ways to get the comparison on paper or as a PDF. All of them use ODV's usual print dialog. You fill in reason, recipient and watermark as usual – see the section <a href="manual.en.html#printing">Print in the Getting started guide</a>. At the bottom you choose <strong>Print via HTML</strong> or <strong>Print via PDF</strong>, depending on which buttons you have. The <strong>Save PDF</strong> button is only there if your organization has enabled it.</p>
+<p><strong>Side by side</strong> – two pages on the printout:</p>
+<ol class="steps">
+  <li>Click the print button in the toolbar.</li>
+  <li>Choose the <strong>Active page</strong> print method.</li>
+  <li>Under <em>Pages and scope</em> there are two options: <em>Left / primary page only</em> (preselected) and <em>Both compare pages</em>. Choose <strong>Both compare pages</strong>.</li>
+  <li>Fill in the details and click <strong>Print via HTML</strong> or <strong>Print via PDF</strong>.</li>
+</ol>
+<p>You get two pages, exactly as you see them: zoom, position, rotation and image adjustments are included. If you leave the preselected <em>Left / primary page only</em>, only the left page is printed – even when the right page is active. Every other print method prints the pages as they are in the archive.</p>
 <figure class="print">
   <a href="#lb-utskrift-jamforelse-bada"><img src="img/utskrift-jamforelse-bada.png" alt="The print dialog with the option Both compare pages"></a>
-  <figcaption><strong>Active page in compare mode.</strong> <em>Both compare pages</em> gives two pages on the printout.</figcaption>
+  <figcaption><strong>The Active page print method in compare mode.</strong> <em>Both compare pages</em> gives two pages on the printout.</figcaption>
 </figure>
-<p><strong>Print the overlay view:</strong> click <strong>Print</strong> in the overlay view's toolbar. You get one composed page of the visible area, with the pages laid on top of each other as on screen: the lower page opaque, the top page at the slider's opacity, and both with their zoom, position, rotation and image adjustments. The toolbar and the slider are not printed.</p>
-<p><strong>Print the curtain view:</strong> click <strong>Print</strong> in the curtain view's toolbar. You get one composed page of the visible area with the border's direction and position as at that moment, and both pages' calibration. The grip, the corner labels and the toolbar are not printed.</p>
-<p>For the two views the dialog is simpler: the print method is locked to <em>Active page</em> (greyed out), the <em>Pages and scope</em> section is not shown, and the previous print's settings are not offered. The summary says, for example, <em>Prepare the overlay view of pages 1 and 2 as one page</em> or <em>Prepare the curtain view of pages 1 and 2 as one page</em>. The result is always one composed page, portrait or landscape after the shape of the visible area, with the same header, footer and watermark as other prints, and the print is logged with a page count of 1. The <strong>Print</strong> button in a view is grey until all pages have loaded, and it is also grey while a PDF is being prepared.</p>
+<p><strong>Print the overlay view:</strong> click <strong>Print</strong> in the overlay view's toolbar. You get one composed page of the visible area, with the pages laid on top of each other as on screen: the lower page opaque, the top page at the slider's opacity, and both with their calibration.</p>
+<p><strong>Print the curtain view:</strong> click <strong>Print</strong> in the curtain view's toolbar. You get one composed page of the visible area, with the border's direction and position as at that moment and both pages' calibration.</p>
+<p>When you print from one of the two views, the dialog is simpler:</p>
+<ul>
+  <li>The print method is locked to <em>Active page</em>, and the <em>Pages and scope</em> section is not there.</li>
+  <li>The summary says, for example, <em>Prepare the overlay view of pages 1 and 2 as one page</em>.</li>
+  <li>The result is always <strong>one composed page</strong>, with the same header, footer and watermark as other prints. Toolbars, the slider, the grip and the corner labels are not printed.</li>
+</ul>
+<p class="small">The <strong>Print</strong> button in a view appears only once all pages have loaded, and it is gray while a PDF is being prepared.</p>
 <figure class="print">
   <a href="#lb-utskrift-overlagring"><img src="img/utskrift-overlagring.png" alt="The print dialog opened from the overlay view"></a>
-  <figcaption><strong>Printing from the overlay view.</strong> The same dialog as usual, but the method is locked to <em>Active page</em>: the result is one page.</figcaption>
+  <figcaption><strong>Printing from the overlay view.</strong> The same dialog as usual, but the method is locked to <em>Active page</em> and the result is one page.</figcaption>
 </figure>
 
-<h2 id="disabled">7. What your organisation may have switched off</h2>
-<p>Everything above is included from the start, but whoever manages the installation can switch parts of it off. If a button described in the guide is missing, that is probably why – ask your local support.</p>
+<h2 id="disabled">7. What your organization may have switched off</h2>
+<p>Everything in this guide is included from the start, but whoever manages the installation can switch parts of it off. If a button described here is missing, that is probably why – ask your local support.</p>
 <ul>
-  <li><strong>Fine tuning, overlay and curtain together.</strong> Then there is no Fine tuning button, no panels, no zoom buttons behind the ring and neither of the two views. Ordinary viewing, side-by-side comparison and its printing remain.</li>
-  <li><strong>The overlay view</strong> or <strong>the curtain view</strong> separately. A switched-off view has no button at all – neither in the toolbar nor in the other view. If the overlay is switched off, the curtain uses the compare view's calibration directly, and the curtain button is never grey.</li>
-  <li><strong>Printing from a view.</strong> The view remains but has no Print button. Side-by-side printing is not affected.</li>
-  <li><strong>The toolbar's image buttons in compare mode.</strong> Normally brightness and contrast show the controlled page's values. An installation can instead let the 90° buttons, brightness, contrast and reset give way while a Fine-tune panel is expanded – the panel has the same controls. The HQ button always remains.</li>
+  <li><strong>Fine tuning, overlay and curtain together.</strong> Then there is no Fine tuning button, no panels, no zoom buttons behind the ring and neither of the two views. Side-by-side comparison and its printing remain.</li>
+  <li><strong>The overlay view or the curtain view separately.</strong> A switched-off view has no button at all, neither in the toolbar nor in the other view. If the overlay is switched off, the curtain opens straight away, and the curtain button is never gray.</li>
+  <li><strong>Printing from a view.</strong> The view remains but has no Print button. The button is also missing while the pages are still loading. Side-by-side printing is not affected.</li>
+  <li><strong>The toolbar's image buttons in compare mode.</strong> Normally brightness and contrast show the active page's values. An installation can hide the 90° buttons, brightness, contrast and reset while a Fine-tune panel is expanded – the panel has the same controls. The <em>Increase PDF page resolution</em> button always remains.</li>
 </ul>
-<p class="small"><strong>Installation settings</strong> in <code>odv.site.config.js</code>, for whoever manages the installation: <code>fineTune.enabled</code> switches off fine tuning, overlay and curtain together. <code>compare.overlay.enabled</code> and <code>compare.curtain.enabled</code> control whether each view can be opened. <code>compare.overlay.print.enabled</code> and <code>compare.curtain.print.enabled</code> control each view's <strong>Print</strong> button. All five default to <code>true</code>, and only the boolean <code>false</code> switches one off. <code>compare.adjust.toolbarMode</code> is <code>'mirror'</code> (default: the toolbar shows the page's values) or <code>'hide'</code> (the image buttons give way while a panel is expanded).</p>
+<details>
+  <summary>For whoever manages the installation: the settings behind this section</summary>
+  <p class="small">The settings live in <code>odv.site.config.js</code>. <code>fineTune.enabled</code> switches off fine tuning, overlay and curtain together. <code>compare.overlay.enabled</code> and <code>compare.curtain.enabled</code> control whether each view can be opened. <code>compare.overlay.print.enabled</code> and <code>compare.curtain.print.enabled</code> control each view's <strong>Print</strong> button. All five default to <code>true</code>; only the value <code>false</code> switches one off. <code>compare.adjust.toolbarMode</code> is <code>'mirror'</code> (default: the toolbar shows the page's values) or <code>'hide'</code> (the image buttons give way while a panel is expanded).</p>
+</details>
 
-<h3>The keys in the comparison</h3>
+<h2 id="keys">8. The keys in the comparison</h2>
 <table>
   <thead><tr><th>Key</th><th>Does this</th></tr></thead>
   <tbody>
-    <tr><td><kbd>Arrow Right</kbd></td><td>Opens the comparison (the first time with the page you are looking at on the right, later with the last compared page), or makes the right page active.</td></tr>
-    <tr><td><kbd>Arrow Left</kbd></td><td>Makes the left page active. When it is already active, the comparison ends.</td></tr>
+    <tr><td><kbd>Arrow Right</kbd></td><td>Opens the comparison, or makes the right page active when the comparison is already running.</td></tr>
+    <tr><td><kbd>Arrow Left</kbd></td><td>Makes the left page active. If it is already active, the comparison ends.</td></tr>
     <tr><td><kbd>Shift</kbd> + button or key</td><td>Applies to the page that is not active, one click or key press at a time.</td></tr>
-    <tr><td><kbd>Shift</kbd> + click on a thumbnail</td><td>Shows the page in the pane that is not active (on the left when the right page is active).</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Turns the controlled page 90° and keeps the fine tuning.</td></tr>
-    <tr><td>Arrow keys in the move button</td><td>Move the page 1 px, with <kbd>Shift</kbd> 10 px.</td></tr>
-    <tr><td><kbd>Enter</kbd> / <kbd>Esc</kbd> / <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> in a field</td><td>Applies the value / undoes / steps the value (with <kbd>Shift</kbd>: ten steps).</td></tr>
+    <tr><td><kbd>Shift</kbd> + click on a thumbnail</td><td>Replaces the page that is not active.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Turns the active page 90° and keeps the fine tuning.</td></tr>
+    <tr><td><kbd>Enter</kbd> / <kbd>Esc</kbd> / <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> in a field in the Fine-tune panel</td><td>Applies the value / undoes / steps the value (with <kbd>Shift</kbd> ten steps).</td></tr>
+    <tr><td>Arrow keys on the move button</td><td>Move the page 1 px, with <kbd>Shift</kbd> 10 px.</td></tr>
     <tr><td><kbd>Ctrl</kbd> + mouse wheel over a page with an expanded panel</td><td>Zooms only that page, 1 % per notch.</td></tr>
-    <tr><td>Arrow keys on the opacity slider</td><td>Left/down −1 %, right/up +1 %, with <kbd>Shift</kbd> 10 %. <kbd>Home</kbd> 0 %, <kbd>End</kbd> 100 %.</td></tr>
+    <tr><td>Arrow keys on the Opacity slider</td><td>Left/down −1 %, right/up +1 %, with <kbd>Shift</kbd> 10 %. <kbd>Home</kbd> 0 %, <kbd>End</kbd> 100 %.</td></tr>
     <tr><td>Arrow keys in nudge mode</td><td>Move the top page 1 px, with <kbd>Shift</kbd> 10 px.</td></tr>
     <tr><td>Arrow keys on the curtain's border</td><td>Left/up −1 %, right/down +1 %, with <kbd>Shift</kbd> 10 %.</td></tr>
     <tr><td><kbd>Esc</kbd></td><td>Closes the overlay view or the curtain view – not while the cursor is in a text field.</td></tr>
   </tbody>
 </table>
-<p class="small">While the overlay view or the curtain view is open, the usual keyboard shortcuts are paused. All keyboard shortcuts in ODV are listed in <a href="manual-avancerat.en.html#keyboard">More features</a>.</p>
+<p class="small">While the overlay view or the curtain view is open, the usual keyboard shortcuts are paused. All keyboard shortcuts in ODV are listed in the guide <a href="manual-avancerat.en.html#keyboard">More features</a>.</p>
 
-<h3>Short checklist</h3>
+<h3>Short checklist for comparison</h3>
 <ul class="checklist">
-  <li>Blue frame = left page, orange frame = right page. The filled ring shows the active page.</li>
-  <li><em>Fine tuning</em> in the toolbar shows the panels. The adjustments stay when you hide them.</li>
+  <li>Blue frame = left page (A), orange frame = right page (B). The filled ring shows which page is active.</li>
+  <li><em>Fine tuning</em> in the toolbar shows the Fine-tune panels. The adjustments are kept when you hide them.</li>
   <li>Open the overlay view once – then the curtain can be opened.</li>
-  <li>Printing from a view always gives one page. <em>Active page</em> with <em>Both compare pages</em> gives two.</li>
+  <li>Printing from the overlay view or the curtain view always gives one page. The <em>Active page</em> print method with <em>Both compare pages</em> gives two.</li>
+  <li>Nothing is saved in the archive. Everything you have set disappears when you load new documents.</li>
 </ul>
-<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.10. Updated 2026-10-24.</p>
+<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.11. Updated 2026-10-25.</p>
 <!-- LB-START -->
-<div class="lb" id="lb-miniatyr-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/miniatyr-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-miniatyr-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/miniatyr-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-shift.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-jamforelse-verktygsfalt"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse-verktygsfalt.png" alt=""><span>Click anywhere to close</span></a></div>

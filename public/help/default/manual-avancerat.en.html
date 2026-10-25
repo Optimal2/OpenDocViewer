@@ -477,126 +477,228 @@
 <!-- NAV-START: navigeringsträdet, genererat av embed.py -->
 <nav class="sidonav" aria-label="Contents of the manual">
   <a class="sidonav-guide" href="#top">More features in OpenDocViewer</a>
-  <ol><li><a href="#metadata">Document metadata</a></li><li><a href="#hq">Sharper PDF pages</a></li><li><a href="#custom">Custom size and default zoom</a></li><li><a href="#keyboard">All keyboard shortcuts</a></li><li><a href="#toolbar">The toolbar button by button</a></li><li><a href="#theme">Dark theme</a></li><li><a href="#support">Support information</a></li></ol>
+  <ol><li><a href="#metadata">View the document's metadata</a></li><li><a href="#signatures">Check signatures in PDF documents</a></li><li><a href="#hq">Make a PDF page sharper</a></li><li><a href="#custom">Set a custom size and default zoom</a></li><li><a href="#keyboard">All keyboard shortcuts</a></li><li><a href="#toolbar">The toolbar button by button</a></li><li><a href="#theme">Choose a theme and button size</a></li><li><a href="#support">Contacting support – what they need</a></li></ol>
 </nav>
 <!-- NAV-END -->
 <section class="hero">
   <h1>More features in OpenDocViewer</h1>
-  <p class="lead">This continues the <a href="manual.en.html">Getting started guide</a>: features that not everyone needs every day, but that are good to know about. Read the section you need.</p>
-  <p class="small">Comparing two pages has its own guide: <a href="manual-jamforelse.en.html">Compare two pages</a>. The pictures show a made-up test document, in the Swedish interface; the button names here are the English ones. <a href="manual-avancerat.en.pdf">Download the guide as PDF</a>.</p>
+  <p class="lead">This guide continues the <a href="manual.en.html">Getting started guide</a> with features that not everyone needs every day, but that are worth knowing about. Read the section you need.</p>
+  <p class="small">Comparing two pages has a guide of its own: <a href="manual-jamforelse.en.html">Compare two pages</a>. The screenshots show a made-up test document in the Swedish interface; the button names in this guide are the English ones. <a href="manual-avancerat.en.pdf">Download the guide as PDF</a>.</p>
 </section>
 
 <nav class="toc" aria-label="Contents">
-  <a href="#metadata">Document metadata</a>
-  <a href="#hq">Sharper PDF pages</a>
-  <a href="#custom">Custom size and default zoom</a>
+  <a href="#metadata">View the document's metadata</a>
+  <a href="#signatures">Check signatures in PDF documents</a>
+  <a href="#hq">Make a PDF page sharper</a>
+  <a href="#custom">Set a custom size and default zoom</a>
   <a href="#keyboard">All keyboard shortcuts</a>
   <a href="#toolbar">The toolbar button by button</a>
-  <a href="#theme">Dark theme</a>
-  <a href="#support">Support information</a>
+  <a href="#theme">Choose a theme and button size</a>
+  <a href="#support">Contacting support – what they need</a>
 </nav>
 
-<h2 id="metadata">Document metadata</h2>
-<p>Right-click a thumbnail or the page and choose <strong>Show document metadata</strong>. You see the information the system that opened ODV sent with the document – for example ID, name, department, date, number of pages and document ID. Which fields exist depends on that system. The information is for display only and cannot be changed in ODV.</p>
+<h2 id="metadata">View the document's metadata</h2>
+<p>Metadata is the information that the system which opened ODV sent along with the document – for example document type, title, department, date, number of pages and document ID. That system decides which fields exist. The information is shown for reference only; it cannot be changed in ODV.</p>
+<ol class="steps">
+  <li>Right-click a thumbnail, or the page itself.</li>
+  <li>Choose <strong>Show document metadata</strong>. The option is only there when the document has metadata.</li>
+  <li>Read the table in the <em>Document metadata</em> dialog: the columns <em>Field</em>, <em>Value</em> and <em>Id</em>. A <em>Raw value</em> line under a value shows the original value behind the text that is displayed.</li>
+  <li>Close with <strong>Close</strong> or <kbd>Esc</kbd>.</li>
+</ol>
 <figure class="wide">
-  <a href="#lb-metadata"><img src="img/metadata.png" alt="The Document metadata dialog"></a>
-  <figcaption><strong>Document metadata</strong> for one document.</figcaption>
+  <a href="#lb-metadata"><img src="img/metadata.png" alt="The Document metadata dialog with the columns Field, Value and Id for document 1 of 5"></a>
+  <figcaption><strong>Document metadata.</strong> The subtitle tells you which document you are looking at (<em>Document 1 of 5</em>). The <strong>Metadata table</strong> button at the bottom opens the overview of all documents.</figcaption>
 </figure>
-<details>
-  <summary>All documents in one table</summary>
-  <p>The <em>Metadata table</em> button in the metadata dialog shows the whole session as a table – one document per row. Handy when you want to see at a glance which departments and dates are included.</p>
-  <figure class="wide">
-    <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="The metadata overview with every document in the session"></a>
-    <figcaption><strong>Document metadata overview.</strong></figcaption>
+<h3>All documents in one table</h3>
+<p>Click <strong>Metadata table</strong> in the metadata dialog, or press <kbd>M</kbd> while the viewer has focus. The <em>Document metadata overview</em> dialog shows the whole session: one document per row and one metadata field per column. Handy when you want a quick look at which departments and dates are included.</p>
+<p class="small">The <kbd>M</kbd> key is paused in the same situations as the other shortcuts (see <a href="#keyboard">All keyboard shortcuts</a>). If the session has no metadata, nothing happens.</p>
+<figure class="wide">
+  <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="The metadata overview with five documents as rows and the metadata fields as columns"></a>
+  <figcaption><strong>Document metadata overview.</strong> The subtitle counts documents and fields (<em>5 documents and 8 metadata fields</em>). A dash marks a field that the document has no value for.</figcaption>
+</figure>
+<p class="small">Your organization may have switched off the metadata display. The menu option is then missing and the key does nothing.</p>
+
+<h2 id="signatures">Check signatures in PDF documents</h2>
+<p>If a PDF in the session is digitally signed, ODV shows it in three places:</p>
+<ul>
+  <li><strong>In the thumbnail pane</strong> – a symbol and a count next to the document heading (for example <em>DOC 1</em>), when the session has more than one document.</li>
+  <li><strong>On the page thumbnails</strong> – a small symbol at the top of every page in the signed file.</li>
+  <li><strong>In the toolbar</strong> – a button that shows how many signed documents the session has.</li>
+</ul>
+<p>The check starts once the first page has been shown and does not get in the way of your reading.</p>
+<p>The color of the symbol summarizes the state of the signature:</p>
+<ul>
+  <li><strong>Green</strong> – the content is intact since it was signed.</li>
+  <li><strong>Orange</strong> – something deserves a closer look: the document was modified after signing, the signature format is not supported, or the trust of the signature is unknown.</li>
+  <li><strong>Red</strong> – the signature is invalid, cannot be read, or the content does not match the signature.</li>
+</ul>
+<p>If a document has several signatures, or the session has several signed documents, the symbol shows the most serious state.</p>
+<ol class="steps">
+  <li>Click the signature button in the toolbar – it sits just to the left of the three menus at the far right. The <em>Signatures</em> dialog lists the signed documents with the number of signatures, integrity, trust, signer and time.</li>
+  <li>Click <strong>Details</strong> next to a document to see each signature on its own.</li>
+</ol>
+<div class="figure-grid">
+  <figure class="compact">
+    <a href="#lb-signatur-miniatyr"><img src="img/signatur-miniatyr.png" alt="The document heading (DOK 1 in the Swedish picture, DOC 1 in English) with a green signature symbol and the number 3, and a page thumbnail with a faint signature symbol"></a>
+    <figcaption><strong>The symbols.</strong> Next to the <em>DOC 1</em> heading (<em>DOK 1</em> in the picture) a green symbol with the number of signatures; on the page thumbnail a fainter symbol.</figcaption>
   </figure>
+  <figure class="print">
+    <a href="#lb-signaturer-oversikt"><img src="img/signaturer-oversikt.png" alt="The Signatures dialog with two signed documents, one intact and one modified after signing"></a>
+    <figcaption><strong>Signatures.</strong> One document is intact (green), the other has been modified after signing (orange). Trust has not been checked.</figcaption>
+  </figure>
+</div>
+<p>In the <em>Signatures</em> dialog you can also click a row to go to the first page of that document; the dialog stays open. You reach the same details by clicking the symbol next to the document heading or on a page thumbnail.</p>
+<p>The details dialog shows, for each signature: <em>Signer</em>, <em>Organisation</em>, <em>Issuer</em>, <em>Signing time</em>, <em>Reason</em>, <em>Location</em>, <em>Kind</em>, <em>Integrity</em>, <em>Covers the whole document</em>, <em>Certificate valid</em>, <em>Trust</em> and <em>Format</em>. If the document consists of several signed files, each file gets a tab of its own with the file's name, and the heading below the tabs says, for example, <em>File 1 of 2</em>. A dash means that the signature does not carry that piece of information.</p>
+<figure class="print">
+  <a href="#lb-signatur-detaljer"><img src="img/signatur-detaljer.png" alt="The details dialog for a signature with a tab per file, Integrity Intact and Trust Not checked"></a>
+  <figcaption><strong>Details for one signature.</strong> One tab per signed file. At the top the note on why trust has not been checked, further down <em>Integrity</em> and <em>Trust</em>. The names in the example come from a test certificate.</figcaption>
+</figure>
+<p>Two lines matter most, and it pays to tell them apart:</p>
+<ul>
+  <li><strong>Integrity</strong> answers whether the content is unchanged since signing (<em>Intact</em>, <em>Modified after signing</em> and so on). It is checked in your browser, and nothing is sent anywhere for it.</li>
+  <li><strong>Trust</strong> answers whether the certificate chain and revocation status have been checked. Only the server can do that, when the document is opened through ODVGateway and your organization has switched the check on. Otherwise it says <em>Not checked</em>, with an explanation at the top of the signature.</li>
+</ul>
+<p><em>Unknown</em> trust does not mean that the signature is invalid. Look at <em>Integrity</em> to see whether the content is unchanged.</p>
+<p class="small">Your organization may have switched off the signature display entirely or only the symbols on the page thumbnails.</p>
+<details>
+  <summary>For whoever manages the installation: the settings</summary>
+  <p class="small">In <code>odv.site.config.js</code>, <code>metadata.enabled</code> switches off the metadata display, <code>pdfSignatures.enabled</code> the signature display and <code>pdfSignatures.thumbnailPageBadge</code> only the symbols on the page thumbnails.</p>
 </details>
 
-<h2 id="hq">Sharper PDF pages</h2>
-<p>PDF pages are already shown in print quality. If you need to see a detail even more sharply: click <strong>HQ</strong> in the toolbar (<em>Increase PDF page resolution</em>). The page is redrawn at double resolution and the button turns red. It applies only to that page.</p>
+<h2 id="hq">Make a PDF page sharper</h2>
+<p>Need to see a small detail on a PDF page more clearly? Click <strong>HQ</strong> in the toolbar (<em>Increase PDF page resolution</em>). The page is redrawn at double resolution without changing its size on screen, and the button turns red. This applies only to that page and only during the current session. In compare mode the button applies to the active page.</p>
 <div class="figure-grid narrow">
-  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="The HQ button before"></a><figcaption><strong>Before.</strong></figcaption></figure>
-  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="The HQ button after, red"></a><figcaption><strong>After.</strong> Red = the sharpness has been increased.</figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="The toolbar with the HQ button in its normal state"></a><figcaption><strong>Before:</strong> the HQ button is dark like the others; the page is shown at normal resolution.</figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="The toolbar with the HQ button red"></a><figcaption><strong>After:</strong> the button is red and the page is redrawn at double resolution.</figcaption></figure>
 </div>
-<p class="small">HQ is grey for scanned pages (TIFF/JPEG), because they are already shown exactly as sharp as they were scanned. Hover over the button to see why.</p>
+<p class="small">The button is gray when it cannot be used. Hover over it to see why: the page is not a PDF page (an image file, such as a scanned image, cannot get sharper than the original), or the page is already drawn at the highest safe resolution. If the resolution has already been raised for the page, the button is red and cannot be clicked again.</p>
 
-<h2 id="custom">Custom size and default zoom</h2>
-<p>The <strong>1:X</strong> button (<em>Custom size</em>) shows the page at a size you choose yourself – a share of the window width. The arrow next to it opens the settings. There you also choose which zoom every new session should start with (<em>Default zoom/size</em>); your organization decides the default. ODV remembers your choices.</p>
+<h2 id="custom">Set a custom size and default zoom</h2>
+<p><strong>Show the page at your own size.</strong> Click <strong>1:X</strong> (<em>Custom size</em>). The page is shown at a size you decide yourself: a share of the window width, 70 percent by default.</p>
+<p>Click the arrow next to the button to change the share in the <em>Window width</em> field. An empty field means the default applies. <kbd>Enter</kbd> saves, <kbd>Esc</kbd> cancels.</p>
+<p>Under <em>Advanced</em> you can limit the size further: <em>Window height</em> (the page may not be taller than that percentage of the window) and <em>Actual size</em> (no larger than that percentage of the page's actual size). ODV uses the smallest of the limits. Your organization may have other defaults.</p>
+<p><strong>Choose how new sessions start.</strong> In the same menu, under <em>Default zoom/size</em>, you pick the zoom that pages get when you open new documents: <em>Actual size (1:1)</em>, <em>Fit to screen</em>, <em>Custom size</em> or <em>Fit to width</em>. The choice takes effect immediately, and ODV remembers it in your browser.</p>
+<p class="small">To undo your choice, click the highlighted option again. Your organization's default then applies, normally <em>Fit to width</em>.</p>
 <div class="figure-grid">
-  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="The custom size menu"></a><figcaption><strong>Custom size.</strong> Share of the window width and default zoom.</figcaption></figure>
-  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="The menu with Advanced expanded"></a><figcaption><strong>Advanced.</strong> Limits for window height and actual size.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="The menu under the arrow next to 1:X with the Window width field and the Default zoom/size list"></a><figcaption><strong>The menu next to 1:X.</strong> The <em>Window width</em> field at the top, then <em>Default zoom/size</em> with four options.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="The same menu with Advanced expanded: the Window height and Actual size fields"></a><figcaption><strong>Advanced expanded.</strong> Two extra limits: <em>Window height</em> and <em>Actual size</em>.</figcaption></figure>
 </div>
 
 <h2 id="keyboard">All keyboard shortcuts</h2>
+<p>The shortcuts work while the viewer has focus. They are paused while a dialog is open, while the cursor is in a text field, and while the selection workspace, the overlay view or the curtain view is open.</p>
 <table>
   <thead><tr><th>Key</th><th>Does this</th></tr></thead>
   <tbody>
-    <tr><td><kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd>, <kbd>Page Up</kbd> / <kbd>Page Down</kbd></td><td>Previous or next page. Hold down to browse quickly.</td></tr>
+    <tr><td><kbd>Arrow Down</kbd> / <kbd>Page Down</kbd></td><td>Next page. Hold the key down to keep paging forward.</td></tr>
+    <tr><td><kbd>Arrow Up</kbd> / <kbd>Page Up</kbd></td><td>Previous page. Hold the key down to keep paging back.</td></tr>
     <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>First or last page.</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + any of the above</td><td>The same, but document by document instead of page by page.</td></tr>
-    <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Zoom in or out.</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Rotate the page.</td></tr>
-    <tr><td><kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>In compare mode: switch the active page. Arrow Left when the left page is already active ends the comparison.</td></tr>
-    <tr><td><kbd>Shift</kbd> + command</td><td>In compare mode: control the page that is not active.</td></tr>
-    <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Hide the page / hide the whole document (selection).</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Open ODV's print dialog.</td></tr>
-    <tr><td><kbd>Esc</kbd></td><td>Close menus, dialogs and the preview.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Down</kbd> / <kbd>Arrow Up</kbd> / <kbd>Home</kbd> / <kbd>End</kbd></td><td>The same, but document by document. Only when the session has more than one document.</td></tr>
+    <tr><td><kbd>Shift</kbd> + any of the above</td><td>In compare mode: controls the page that is not active. <kbd>Ctrl</kbd>+<kbd>Shift</kbd> switches document in that page.</td></tr>
+    <tr><td><kbd>Arrow Right</kbd></td><td>Opens the comparison with the page you are looking at on the right (later with the page you last compared with), or makes the right page active if the comparison is already running.</td></tr>
+    <tr><td><kbd>Arrow Left</kbd></td><td>Makes the left page active. Press again while the left page is already active to end the comparison.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Rotates the active page a quarter turn to the left or right.</td></tr>
+    <tr><td><kbd>+</kbd> / <kbd>-</kbd> (also on the numeric keypad)</td><td>Zoom in or out.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + mouse wheel</td><td>Zoom in or out.</td></tr>
+    <tr><td><kbd>Delete</kbd></td><td>Hides the active page from the selection, once all pages have loaded. <kbd>Ctrl</kbd>+<kbd>Delete</kbd> hides the whole document; <kbd>Shift</kbd> targets the other page in the comparison.</td></tr>
+    <tr><td><kbd>M</kbd></td><td>Opens the <em>Document metadata overview</em>, when the session has metadata.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Normally opens ODV's print dialog. Your organization may have set it to use the browser's own print instead, or switched the shortcut off.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Closes menus, dialogs, right-click menus, the overlay view and the curtain view. Leaves the selection workspace. Cancels a PDF preparation in progress, after asking first.</td></tr>
+    <tr><td><kbd>Enter</kbd> / <kbd>Esc</kbd> in the page box or the percentage box</td><td>Applies or cancels what you typed.</td></tr>
   </tbody>
 </table>
-<p class="small">The keys in compare mode, the overlay view and the curtain view are collected in the guide <a href="manual-jamforelse.en.html">Compare two pages</a>.</p>
+<p class="small">With the mouse: double-click the page to switch between <em>Fit to width</em> and <em>Fit to screen</em>. The keys for compare mode, the overlay view and the curtain view are collected in the guide <a href="manual-jamforelse.en.html">Compare two pages</a>.</p>
 
 <h2 id="toolbar">The toolbar button by button</h2>
+<p>From left to right. Hover over a button to see its name. The button that is currently in effect – for example the page fit in use – is red.</p>
 <figure class="wide">
-  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="The left part of the toolbar"></a>
-  <figcaption><strong>Left:</strong> print with an arrow for the default, selection, page navigation, zoom out/in with a percentage box, 1:1, fit to screen, fit to width.</figcaption>
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="The left part of the toolbar: printer with a light and an arrow, selection button, page navigation with the page box 1 / 24, zoom out, the percentage box, zoom in, 1:1, fit to screen and fit to width"></a>
+  <figcaption><strong>Left part.</strong> Printer with a light and an arrow, selection, page navigation with the page box (<em>1 / 24</em>), zoom out, the percentage box, zoom in, <strong>1:1</strong>, fit to screen and fit to width (red = currently in effect).</figcaption>
 </figure>
 <figure class="wide">
-  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="The right part of the toolbar"></a>
-  <figcaption><strong>Right:</strong> 1:X custom size with an arrow, compare, rotate left/right, HQ, brightness, contrast, reset, and theme, language and help.</figcaption>
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="The right part of the toolbar: 1:X with an arrow, fine tuning, compare, rotate left and right, HQ, brightness, contrast, reset, theme, language and help with a light"></a>
+  <figcaption><strong>Right part.</strong> <strong>1:X</strong> with an arrow, <em>Fine tuning</em>, compare, the image adjustments in a frame (rotate left, rotate right, <strong>HQ</strong>, brightness, contrast, reset) and, at the far right, theme, language and help with a light.</figcaption>
 </figure>
 <ul>
-  <li><strong>Print</strong> opens printing. The arrow next to it sets the default, <em>Active page</em> or <em>All pages</em>.</li>
-  <li><strong>Selection</strong> opens the selection workspace. Red when a selection is active.</li>
-  <li><strong>Page navigation</strong>: first, previous, next, last, and a box for the page number.</li>
-  <li><strong>Zoom</strong>: out, in, percentage box, 1:1, fit to screen, fit to width.</li>
-  <li><strong>1:X</strong>: custom size. <strong>Fine tuning</strong>, <strong>compare</strong>, <strong>overlay</strong> and <strong>curtain</strong>: described in the guide <a href="manual-jamforelse.en.html">Compare two pages</a>. <strong>Rotate</strong>: a quarter turn.</li>
-  <li><strong>HQ</strong>: sharper PDF page. <strong>Brightness</strong>, <strong>contrast</strong> and <strong>reset</strong>.</li>
-  <li><strong>Theme</strong>, <strong>language</strong>, <strong>help</strong>. The light on the help button: green = all is well, yellow = the computer is low on memory, red = error.</li>
+  <li><strong>Print</strong> opens the print dialog. The button is gray while pages are loading and while a PDF print is being prepared. The arrow next to it sets the default scope, <em>Active page</em> or <em>All pages</em>. The small light on the button shows the state of a PDF of all pages that ODV prepares in advance, a <em>print cache</em> that your organization may have switched on. Normally the light is off.</li>
+  <li><strong>Manage the pages shown and printed</strong> opens the selection workspace. The button is red while a selection is active and gray until all pages have loaded. The button is missing if your organization has switched the selection workspace off. See the guide <a href="manual-urval.en.html">Selection</a>.</li>
+  <li><strong>Page navigation</strong>: <em>First page</em>, <em>Previous page</em>, the page box, <em>Next page</em>, <em>Last page</em>. Type a page number in the box and press <kbd>Enter</kbd>. Hold <kbd>Ctrl</kbd> and the buttons move document by document, when the session has several. While pages are loading, the page box shows how far the loading has come.</li>
+  <li><strong>Zoom</strong>: <em>Zoom out</em>, the percentage box (5–800 percent; type a number and press <kbd>Enter</kbd>), <em>Zoom in</em>. Each click changes the zoom by roughly ten percent.</li>
+  <li><strong>Actual size (1:1)</strong>, <strong>Fit to screen</strong>, <strong>Fit to width</strong> and <strong>Custom size (1:X)</strong>: four ways to fit the page. A fit is red while it is in effect and follows along when you change page. The arrow at 1:X opens the <a href="#custom">custom size settings</a>.</li>
+  <li><strong>Fine tuning</strong> shows or hides the <em>Fine-tune</em> panel above each page. Hiding the panel does not remove the adjustments. The button is missing if your organization has switched fine tuning off.</li>
+  <li><strong>Enable compare mode</strong> opens two pages side by side. While two pages are being compared, the buttons for the <em>overlay</em> and the <em>curtain</em> are shown as well, unless your organization has switched them off. All of this is described in the guide <a href="manual-jamforelse.en.html">Compare two pages</a>.</li>
+  <li><strong>Image adjustments</strong> (the frame): <em>Rotate left 90°</em>, <em>Rotate right 90°</em>, <strong>HQ</strong> (<em>Increase PDF page resolution</em>), <em>Adjust brightness</em> and <em>Adjust contrast</em> (each opens a slider; 100 = unchanged) and <em>Reset adjustments</em>, which clears the rotation and removes the brightness, contrast and color adjustments. Everything applies to the page you are looking at, is remembered per page during the session and is never saved in the document.</li>
+  <li><strong>Signatures</strong> is shown only when the session contains a signed PDF document and your organization has not switched off the signature display. See <a href="#signatures">Check signatures in PDF documents</a>.</li>
+  <li><strong>Choose theme</strong>, <strong>Choose language</strong> (<em>Svenska</em> or <em>English</em>) and <strong>Open help menu</strong> with the options <em>Manual</em> and <em>About OpenDocViewer</em>.</li>
 </ul>
+<p><strong>The light on the help button</strong> shows the viewer's state:</p>
+<ul>
+  <li><strong>Green</strong> – <em>Performance mode active</em>. Everything is as usual.</li>
+  <li><strong>Orange</strong> – <em>Memory-efficient mode active</em>. ODV is saving memory, either because the computer is short of memory or because your organization has chosen that mode.</li>
+  <li><strong>Red</strong> – <em>Hard memory protection active</em> or <em>Loading error detected</em>. See <a href="#support">Contacting support</a>.</li>
+</ul>
+<p class="small">In the selection workspace, the overlay view and the curtain view, the toolbar is replaced by that view's own buttons. For a lower toolbar with smaller buttons, see <a href="#theme">theme and button size</a>.</p>
 
-<h2 id="theme">Dark theme</h2>
-<p>The theme menu at the far right has <em>Normal</em>, <em>Light</em> and <em>Dark</em>. In the dark theme the interface turns dark while the document page is shown as usual. Below the themes, the <em>Larger toolbar buttons</em> checkbox can be unticked for a lower toolbar with smaller buttons; ODV remembers the choice.</p>
+<h2 id="theme">Choose a theme and button size</h2>
+<p>Click the theme button, the first of the three menus at the far right of the toolbar (<em>Choose theme</em>). The menu has four themes:</p>
+<ul>
+  <li><em>System</em> follows your computer's light or dark setting and switches automatically when it changes.</li>
+  <li><em>Normal</em> is a slightly softer light variant.</li>
+  <li><em>Light</em> and <em>Dark</em> are fixed.</li>
+</ul>
+<p>The button's icon shows which theme is in effect. ODV remembers the choice in your browser. The default is <em>System</em>, unless your organization has chosen something else.</p>
+<p>Below the themes is the <strong>Larger toolbar buttons</strong> checkbox. Checked gives the usual toolbar; unchecked gives a lower toolbar with smaller buttons. The menu stays open so that you see the difference right away, and ODV remembers that choice too.</p>
 <figure class="wide">
-  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer in the dark theme"></a>
-  <figcaption><strong>Dark theme.</strong></figcaption>
+  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer in the dark theme: dark toolbar and dark thumbnail pane, the document page white as usual"></a>
+  <figcaption><strong>Dark theme.</strong> The toolbar and the thumbnail pane turn dark. The document page is drawn unchanged – you see the document as it is, not an inverted copy. The theme button shows a moon.</figcaption>
 </figure>
 
-<h2 id="support">Support information</h2>
-<p>Turn to <strong>your local support</strong> first – they know how ODV is installed and set up in your organization, and can pass the case on to the supplier. Two things make it much easier to help you: the <strong>version</strong> and the <strong>diagnostics file</strong>. Both are under the help menu → <em>About OpenDocViewer</em>.</p>
+<h2 id="support">Contacting support – what they need</h2>
+<p>Turn to <strong>your local support</strong> first. They know how ODV is installed and set up in your organization and can pass the case on to the supplier. Two things make it much easier to help you: the <strong>version</strong> and the <strong>diagnostics file</strong>. Both are in the help menu under <em>About OpenDocViewer</em>.</p>
+<ol class="steps">
+  <li>Click the help button at the far right of the toolbar and choose <strong>About OpenDocViewer</strong>.</li>
+  <li>Read off <em>Version</em> and <em>Build id</em> at the top of the dialog.</li>
+  <li>Expand <em>Diagnostics</em> and click <strong>Download diagnostics JSON</strong>. The file <code>opendocviewer-diagnostics.json</code> lands among your downloaded files.</li>
+</ol>
 <p>Good to include in the ticket:</p>
 <ul>
-  <li><strong>Version and build ID</strong> from <em>About OpenDocViewer</em>.</li>
-  <li><strong>The diagnostics file</strong> (<em>Download diagnostics JSON</em>). It contains technical information about ODV and the browser – no documents.</li>
+  <li><strong>Version and build id</strong> from <em>About OpenDocViewer</em>.</li>
+  <li><strong>The diagnostics file.</strong> It contains the version, details about the browser and the computer (such as the number of processor cores and the memory), the viewer's address without query parameters, and ODV's settings. It contains no documents and nothing from the documents.</li>
   <li><strong>When</strong> it happened (date and time), <strong>what you did</strong> and which <strong>browser</strong> you used.</li>
-  <li>The text under <em>Technical details</em> if an error box was shown.</li>
+  <li>If the <em>Something went wrong</em> box was shown: click <strong>Copy details</strong> and paste the text into the ticket.</li>
+  <li>If the box <em>The documents could not be shown correctly</em> was shown: say so, and include what it said under <em>Technical details</em> if that line exists in your installation (see below).</li>
 </ul>
-<div class="warning"><p><strong>Do not send personal data.</strong> Do not attach screenshots or printouts that show real documents, names or ID numbers, unless your organization has explicitly asked for them.</p></div>
+<div class="warning"><p><strong>Important:</strong> do not send personal data. Do not attach screenshots or printouts that show real documents, names or ID numbers, unless your organization has explicitly asked for them.</p></div>
 <div class="figure-grid">
-  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="About OpenDocViewer"></a><figcaption><strong>About OpenDocViewer.</strong> Version, build ID and contact details. <em>Reload resource files</em> fetches translations and settings again without restarting.</figcaption></figure>
-  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="The Diagnostics section in About OpenDocViewer"></a><figcaption><strong>Diagnostics.</strong> <em>Download diagnostics JSON</em> gives you a file to attach to the ticket. It contains technical information – no documents.</figcaption></figure>
+  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="The About OpenDocViewer dialog with the lines Version, Build id, Project and Contact and the collapsed Diagnostics heading"></a><figcaption><strong>About OpenDocViewer.</strong> <em>Version</em> and <em>Build id</em> at the top, then a link to the project and a contact address that your organization may have replaced. <em>Diagnostics</em> is collapsed.</figcaption></figure>
+  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="Diagnostics expanded with the Download diagnostics JSON button and a preview of the file's contents"></a><figcaption><strong>Diagnostics expanded.</strong> The <em>Download diagnostics JSON</em> button and a preview of the file: version, build id and details about the browser.</figcaption></figure>
 </div>
+<p class="small"><strong>Reload resource files</strong> in the same dialog fetches the interface texts (the language files) again without restarting the viewer.</p>
 <details>
-  <summary>When the session has expired</summary>
-  <p>The box <em>The documents could not be shown correctly</em> has a <em>Technical details</em> link. Expand it to see which pages could not be fetched and why. Include that in the ticket.</p>
+  <summary>The box “The documents could not be shown correctly”</summary>
+  <p>The box appears at the top when the pages can no longer be fetched, usually because the document session has expired. The <strong>Reset session</strong> button reloads the page so that the documents are fetched again. Normally there are also <strong>Reload viewer</strong> and <strong>Dismiss</strong>. The common case is described in the <a href="manual.en.html#problems">Getting started guide</a>.</p>
+  <p>If your organization has switched on the <em>Technical details</em> line in the box, expand it. It tells you how many pages failed to load and gives a technical message. Include that text in the ticket.</p>
   <div class="figure-grid">
-    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV with an expired session and pages shown as warning triangles"></a><figcaption><strong>Expired session.</strong></figcaption></figure>
-    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Technical details expanded"></a><figcaption><strong>Technical details.</strong></figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV with an expired session: the pages are shown as warning triangles and the box The documents could not be shown correctly sits at the top"></a><figcaption><strong>Expired session.</strong> The pages are shown as warning triangles and the box at the top has the <em>Reset session</em> button. The picture shows an installation that has switched on <em>Technical details</em>, hidden the <em>Reload viewer</em> and <em>Dismiss</em> buttons and uses a message text of its own.</figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="The box with Technical details expanded: 5 of 5 pages failed to load"></a><figcaption><strong>Technical details expanded.</strong> The first line counts the pages (<em>5 of 5 pages failed to load</em>), followed by the technical message to include.</figcaption></figure>
   </div>
 </details>
 
-<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.10. Updated 2026-10-24.</p>
+<h3>Short checklist for more features</h3>
+<ul class="checklist">
+  <li>Right-click and choose <em>Show document metadata</em>; <kbd>M</kbd> opens the table with all documents.</li>
+  <li>The signature symbol: green = intact, orange = take a closer look, red = invalid. <em>Trust</em> is only checked when your organization has enabled the check on the server.</li>
+  <li><strong>HQ</strong> applies only to PDF pages, only to that page and only in this session.</li>
+  <li><strong>1:X</strong> is your own size; <em>Default zoom/size</em> controls how new sessions start.</li>
+  <li>For support: version, build id and the diagnostics file – never personal data.</li>
+</ul>
+
+<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.11. Updated 2026-10-25.</p>
 <!-- LB-START -->
 <div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadata.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadataoversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-signatur-miniatyr"><a href="#lb-stang" aria-label="Close the image"><img src="img/signatur-miniatyr.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-signaturer-oversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/signaturer-oversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-signatur-detaljer"><a href="#lb-stang" aria-label="Close the image"><img src="img/signatur-detaljer.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-fore.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-boost-efter"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-efter.png" alt=""><span>Click anywhere to close</span></a></div>
 <div class="lb" id="lb-egen-storlek"><a href="#lb-stang" aria-label="Close the image"><img src="img/egen-storlek.png" alt=""><span>Click anywhere to close</span></a></div>

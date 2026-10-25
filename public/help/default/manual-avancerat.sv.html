@@ -477,7 +477,7 @@
 <!-- NAV-START: navigeringsträdet, genererat av embed.py -->
 <nav class="sidonav" aria-label="Innehåll i manualen">
   <a class="sidonav-guide" href="#top">Fler funktioner i OpenDocViewer</a>
-  <ol><li><a href="#metadata">Dokumentets metadata</a></li><li><a href="#hq">Skarpare PDF-sidor</a></li><li><a href="#egen">Egen storlek och standardzoom</a></li><li><a href="#tangentbord">Alla kortkommandon</a></li><li><a href="#verktygsfalt">Verktygsfältet knapp för knapp</a></li><li><a href="#tema">Mörkt tema</a></li><li><a href="#support">Supportinformation</a></li></ol>
+  <ol><li><a href="#metadata">Se dokumentets metadata</a></li><li><a href="#signaturer">Kontrollera signaturer i PDF-dokument</a></li><li><a href="#hq">Gör en PDF-sida skarpare</a></li><li><a href="#egen">Ställ in egen storlek och standardzoom</a></li><li><a href="#tangentbord">Alla kortkommandon</a></li><li><a href="#verktygsfalt">Verktygsfältet knapp för knapp</a></li><li><a href="#tema">Välj tema och knappstorlek</a></li><li><a href="#support">Kontakta support – det här behöver de</a></li></ol>
 </nav>
 <!-- NAV-END -->
 <section class="hero">
@@ -487,116 +487,218 @@
 </section>
 
 <nav class="toc" aria-label="Innehåll">
-  <a href="#metadata">Dokumentets metadata</a>
-  <a href="#hq">Skarpare PDF-sidor</a>
-  <a href="#egen">Egen storlek och standardzoom</a>
+  <a href="#metadata">Se dokumentets metadata</a>
+  <a href="#signaturer">Kontrollera signaturer i PDF-dokument</a>
+  <a href="#hq">Gör en PDF-sida skarpare</a>
+  <a href="#egen">Ställ in egen storlek och standardzoom</a>
   <a href="#tangentbord">Alla kortkommandon</a>
   <a href="#verktygsfalt">Verktygsfältet knapp för knapp</a>
-  <a href="#tema">Mörkt tema</a>
-  <a href="#support">Supportinformation</a>
+  <a href="#tema">Välj tema och knappstorlek</a>
+  <a href="#support">Kontakta support – det här behöver de</a>
 </nav>
 
-<h2 id="metadata">Dokumentets metadata</h2>
-<p>Högerklicka på en miniatyr eller på sidan och välj <strong>Visa metadata</strong>. Du ser de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel id, namn, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns beror på det systemet. Uppgifterna är bara för visning och kan inte ändras i ODV.</p>
+<h2 id="metadata">Se dokumentets metadata</h2>
+<p>Metadata är de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel dokumenttyp, titel, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns bestäms av det systemet. Uppgifterna visas bara; de kan inte ändras i ODV.</p>
+<ol class="steps">
+  <li>Högerklicka på en miniatyr, eller på själva sidan.</li>
+  <li>Välj <strong>Visa metadata för dokument</strong>. Valet finns bara när dokumentet har metadata.</li>
+  <li>Läs tabellen i dialogen <em>Dokumentmetadata</em>: kolumnerna <em>Fält</em>, <em>Värde</em> och <em>Id</em>. Raden <em>Råvärde</em> under ett värde visar det ursprungliga värdet bakom den visade texten.</li>
+  <li>Stäng med <strong>Stäng</strong> eller <kbd>Esc</kbd>.</li>
+</ol>
 <figure class="wide">
-  <a href="#lb-metadata"><img src="img/metadata.png" alt="Dialogen Dokumentmetadata"></a>
-  <figcaption><strong>Dokumentmetadata</strong> för ett dokument.</figcaption>
+  <a href="#lb-metadata"><img src="img/metadata.png" alt="Dialogen Dokumentmetadata med kolumnerna Fält, Värde och Id för dokument 1 av 5"></a>
+  <figcaption><strong>Dokumentmetadata.</strong> Underrubriken säger vilket dokument du tittar på (<em>Dokument 1 av 5</em>). Knappen <strong>Metadata-tabell</strong> längst ned öppnar översikten över alla dokument.</figcaption>
 </figure>
-<details>
-  <summary>Alla dokument i en tabell</summary>
-  <p>Knappen <em>Metadata-tabell</em> i metadatadialogen visar hela sessionen som en tabell – ett dokument per rad. Praktiskt när du snabbt vill se vilka avdelningar och datum som ingår.</p>
-  <figure class="wide">
-    <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="Metadataöversikten med alla dokument i sessionen"></a>
-    <figcaption><strong>Metadataöversikt.</strong></figcaption>
+<h3>Alla dokument i en tabell</h3>
+<p>Klicka på <strong>Metadata-tabell</strong> i metadatadialogen, eller tryck <kbd>M</kbd> när du står i visaren. Dialogen <em>Metadataöversikt</em> visar hela sessionen: ett dokument per rad och ett metadatafält per kolumn. Praktiskt när du snabbt vill se vilka avdelningar och datum som ingår.</p>
+<p class="small">Tangenten <kbd>M</kbd> är pausad i samma lägen som de andra kortkommandona (se <a href="#tangentbord">Alla kortkommandon</a>). Saknar sessionen metadata händer ingenting.</p>
+<figure class="wide">
+  <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="Metadataöversikten med fem dokument som rader och metadatafälten som kolumner"></a>
+  <figcaption><strong>Metadataöversikt.</strong> Underrubriken räknar dokument och fält (<em>5 dokument och 8 metadatafält</em>). Ett streck står där dokumentet saknar värde för fältet.</figcaption>
+</figure>
+<p class="small">Din organisation kan ha stängt av metadatavisningen. Då saknas menyvalet och tangenten gör ingenting.</p>
+
+<h2 id="signaturer">Kontrollera signaturer i PDF-dokument</h2>
+<p>Är en PDF i sessionen digitalt signerad visar ODV det på tre ställen:</p>
+<ul>
+  <li><strong>I miniatyrpanelen</strong> – en symbol och ett antal bredvid dokumentrubriken (till exempel <em>DOK 1</em>), när sessionen har flera dokument.</li>
+  <li><strong>På sidminiatyrerna</strong> – en liten symbol högst upp på varje sida i den signerade filen.</li>
+  <li><strong>I verktygsfältet</strong> – en knapp som visar hur många signerade dokument sessionen har.</li>
+</ul>
+<p>Kontrollen startar när den första sidan har visats och stör inte läsningen.</p>
+<p>Symbolens färg är en sammanfattning av signaturens läge:</p>
+<ul>
+  <li><strong>Grön</strong> – innehållet är intakt sedan signeringen.</li>
+  <li><strong>Orange</strong> – något bör granskas: dokumentet har ändrats efter signeringen, signaturformatet stöds inte, eller signaturens tillit är okänd.</li>
+  <li><strong>Röd</strong> – signaturen är ogiltig, kan inte läsas, eller innehållet matchar inte signaturen.</li>
+</ul>
+<p>Har ett dokument flera signaturer, eller sessionen flera signerade dokument, visar symbolen det allvarligaste läget.</p>
+<ol class="steps">
+  <li>Klicka på signaturknappen i verktygsfältet – den sitter till vänster om de tre menyerna längst till höger. Dialogen <em>Signaturer</em> listar de signerade dokumenten med antal signaturer, integritet, tillit, undertecknare och tidpunkt.</li>
+  <li>Klicka på <strong>Detaljer</strong> vid ett dokument för att se varje signatur för sig.</li>
+</ol>
+<div class="figure-grid">
+  <figure class="compact">
+    <a href="#lb-signatur-miniatyr"><img src="img/signatur-miniatyr.png" alt="Rubriken DOK 1 med en grön signatursymbol och siffran 3, och en sidminiatyr med en svag signatursymbol"></a>
+    <figcaption><strong>Symbolerna.</strong> Vid rubriken <em>DOK 1</em> en grön symbol med antalet signaturer, på sidminiatyren en svagare symbol.</figcaption>
   </figure>
+  <figure class="print">
+    <a href="#lb-signaturer-oversikt"><img src="img/signaturer-oversikt.png" alt="Dialogen Signaturer med två signerade dokument, det ena intakt och det andra ändrat efter signering"></a>
+    <figcaption><strong>Signaturer.</strong> Ett dokument är intakt (grönt), det andra har ändrats efter signeringen (orange). Tilliten är inte kontrollerad.</figcaption>
+  </figure>
+</div>
+<p>I dialogen <em>Signaturer</em> kan du också klicka på en rad för att gå till dokumentets första sida; dialogen ligger kvar. Samma detaljer når du genom att klicka på symbolen vid dokumentrubriken eller på en sidminiatyr.</p>
+<p>Detaljdialogen visar per signatur: <em>Undertecknare</em>, <em>Organisation</em>, <em>Utfärdare</em>, <em>Signeringstid</em>, <em>Orsak</em>, <em>Plats</em>, <em>Typ</em>, <em>Integritet</em>, <em>Omfattar hela dokumentet</em>, <em>Certifikatet giltigt</em>, <em>Tillit</em> och <em>Format</em>. Består dokumentet av flera signerade filer får varje fil en egen flik med filens namn, och rubriken under flikarna visar till exempel <em>Fil 1 av 2</em>. Ett streck betyder att uppgiften saknas i signaturen.</p>
+<figure class="print">
+  <a href="#lb-signatur-detaljer"><img src="img/signatur-detaljer.png" alt="Detaljdialogen för en signatur med flikar per fil, Integritet Intakt och Tillit Ej kontrollerad"></a>
+  <figcaption><strong>Detaljer för en signatur.</strong> En flik per signerad fil. Överst förklaringen till varför tilliten inte är kontrollerad, längre ned <em>Integritet</em> och <em>Tillit</em>. Namnen i exemplet kommer från ett testcertifikat.</figcaption>
+</figure>
+<p>Två rader är särskilt viktiga att hålla isär:</p>
+<ul>
+  <li><strong>Integritet</strong> svarar på om innehållet är oförändrat sedan signeringen (<em>Intakt</em>, <em>Ändrat efter signering</em> och så vidare). Det kontrolleras i din webbläsare, utan att något skickas iväg.</li>
+  <li><strong>Tillit</strong> svarar på om certifikatkedjan och spärrstatusen har kontrollerats. Det kan bara servern göra, när dokumentet öppnas via ODVGateway och din organisation har slagit på kontrollen. Annars står det <em>Ej kontrollerad</em>, med en förklaring högst upp i signaturen.</li>
+</ul>
+<p><em>Okänd</em> tillit betyder inte att signaturen är ogiltig. Titta på <em>Integritet</em> för att se om innehållet är oförändrat.</p>
+<p class="small">Din organisation kan ha stängt av signaturvisningen helt eller bara symbolerna på sidminiatyrerna.</p>
+<details>
+  <summary>För den som sköter installationen: inställningarna</summary>
+  <p class="small">I <code>odv.site.config.js</code> stänger <code>metadata.enabled</code> av metadatavisningen, <code>pdfSignatures.enabled</code> av signaturvisningen och <code>pdfSignatures.thumbnailPageBadge</code> bara symbolerna på sidminiatyrerna.</p>
 </details>
 
-<h2 id="hq">Skarpare PDF-sidor</h2>
-<p>PDF-sidor visas redan i utskriftskvalitet. Behöver du se en detalj ännu skarpare: klicka på <strong>HQ</strong> i verktygsfältet. Sidan ritas om med dubbel upplösning och knappen blir röd. Det gäller bara den sidan.</p>
+<h2 id="hq">Gör en PDF-sida skarpare</h2>
+<p>Behöver du se en liten detalj på en PDF-sida tydligare? Klicka på <strong>HQ</strong> i verktygsfältet (<em>Öka PDF-sidans upplösning</em>). Sidan ritas om med dubbel upplösning utan att byta storlek på skärmen, och knappen blir röd. Det gäller bara den sidan och bara under den här sessionen. I jämförelseläget gäller knappen den aktiva sidan.</p>
 <div class="figure-grid narrow">
-  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="HQ-knappen före"></a><figcaption><strong>Före.</strong></figcaption></figure>
-  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="HQ-knappen efter, röd"></a><figcaption><strong>Efter.</strong> Röd = skärpan är höjd.</figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="Verktygsfältet med HQ-knappen i normalt läge"></a><figcaption><strong>Före:</strong> HQ-knappen är mörk som de andra, sidan visas i normal upplösning.</figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="Verktygsfältet med HQ-knappen röd"></a><figcaption><strong>Efter:</strong> knappen är röd och sidan ritas om med dubbel upplösning.</figcaption></figure>
 </div>
-<p class="small">HQ är grå för skannade sidor (TIFF/JPEG), eftersom de redan visas exakt så skarpa som de skannades. Håll muspekaren över knappen så står det varför.</p>
+<p class="small">Knappen är grå när den inte kan användas. Håll muspekaren över den så står det varför: sidan är ingen PDF-sida (en bildfil, till exempel en skannad bild, kan inte bli skarpare än originalet), eller sidan ritas redan i högsta säkra upplösning. Är skärpan redan höjd för sidan är knappen röd och går inte att klicka på igen.</p>
 
-<h2 id="egen">Egen storlek och standardzoom</h2>
-<p>Knappen <strong>1:X</strong> visar sidan i en storlek du själv bestämt – en andel av fönstrets bredd. Pilen bredvid öppnar inställningarna. Där väljer du också vilken zoom varje ny session ska börja med (<em>Standard zoom/storlek</em>); förvalet bestäms av din organisation. ODV kommer ihåg dina val.</p>
+<h2 id="egen">Ställ in egen storlek och standardzoom</h2>
+<p><strong>Visa sidan i egen storlek.</strong> Klicka på <strong>1:X</strong> (<em>Egen storlek</em>). Sidan visas i en storlek du själv bestämt: en andel av fönstrets bredd, normalt 70 procent.</p>
+<p>Klicka på pilen bredvid knappen för att ändra andelen i fältet <em>Fönsterbredd</em>. Tomt fält betyder att standardvärdet gäller. <kbd>Enter</kbd> sparar, <kbd>Esc</kbd> ångrar.</p>
+<p>Under <em>Avancerat</em> kan du begränsa storleken ytterligare: <em>Fönsterhöjd</em> (sidan får inte bli högre än så många procent av fönstret) och <em>Faktisk storlek</em> (inte större än så många procent av sidans faktiska storlek). ODV använder den minsta av gränserna. Din organisation kan ha andra standardvärden.</p>
+<p><strong>Välj hur nya sessioner ska börja.</strong> I samma meny, under <em>Standard zoom/storlek</em>, väljer du vilken zoom sidorna får när du öppnar nya dokument: <em>Faktisk storlek (1:1)</em>, <em>Anpassa till skärm</em>, <em>Egen storlek</em> eller <em>Anpassa till bredd</em>. Valet gäller direkt, och ODV kommer ihåg det i webbläsaren.</p>
+<p class="small">Ångra ditt val: klicka på det markerade valet igen. Då gäller organisationens förval, normalt <em>Anpassa till bredd</em>.</p>
 <div class="figure-grid">
-  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="Menyn för egen storlek"></a><figcaption><strong>Egen storlek.</strong> Andel av fönsterbredden och standardzoom.</figcaption></figure>
-  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="Menyn med Avancerat utfällt"></a><figcaption><strong>Avancerat.</strong> Gränser för fönsterhöjd och verklig storlek.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="Menyn under pilen bredvid 1:X med fältet Fönsterbredd och listan Standard zoom/storlek"></a><figcaption><strong>Menyn bredvid 1:X.</strong> Överst fältet <em>Fönsterbredd</em>, därunder <em>Standard zoom/storlek</em> med fyra val.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="Samma meny med Avancerat utfällt: fälten Fönsterhöjd och Faktisk storlek"></a><figcaption><strong>Avancerat utfällt.</strong> Två extra gränser: <em>Fönsterhöjd</em> och <em>Faktisk storlek</em>.</figcaption></figure>
 </div>
 
 <h2 id="tangentbord">Alla kortkommandon</h2>
+<p>Kortkommandona fungerar när du står i visaren. De är pausade medan en dialog är öppen, medan markören står i ett textfält, och medan urvalsarbetsytan, överlagringsvyn eller gardinvyn är öppen.</p>
 <table>
   <thead><tr><th>Tangent</th><th>Gör detta</th></tr></thead>
   <tbody>
-    <tr><td><kbd>Pil upp</kbd> / <kbd>Pil ned</kbd>, <kbd>Page Up</kbd> / <kbd>Page Down</kbd></td><td>Föregående eller nästa sida. Håll inne för snabb bläddring.</td></tr>
+    <tr><td><kbd>Pil ned</kbd> / <kbd>Page Down</kbd></td><td>Nästa sida. Håll inne för att bläddra vidare.</td></tr>
+    <tr><td><kbd>Pil upp</kbd> / <kbd>Page Up</kbd></td><td>Föregående sida. Håll inne för att bläddra bakåt.</td></tr>
     <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>Första eller sista sidan.</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + någon av ovanstående</td><td>Samma sak, men dokument för dokument i stället för sida för sida.</td></tr>
-    <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Zooma in eller ut.</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>Rotera sidan.</td></tr>
-    <tr><td><kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>I jämförelseläget: byt aktiv sida. Pil vänster när vänster redan är aktiv avslutar jämförelsen.</td></tr>
-    <tr><td><kbd>Shift</kbd> + kommando</td><td>I jämförelseläget: styr den sida som inte är aktiv.</td></tr>
-    <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Dölj sidan / dölj hela dokumentet (urval).</td></tr>
-    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Öppna ODV:s utskriftsdialog.</td></tr>
-    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Pil ned</kbd> / <kbd>Pil upp</kbd> / <kbd>Home</kbd> / <kbd>End</kbd></td><td>Samma sak, men dokument för dokument. Bara när sessionen har fler än ett dokument.</td></tr>
+    <tr><td><kbd>Shift</kbd> + något av ovanstående</td><td>I jämförelseläget: styr den sida som inte är aktiv. <kbd>Ctrl</kbd>+<kbd>Shift</kbd> byter dokument i den sidan.</td></tr>
+    <tr><td><kbd>Pil höger</kbd></td><td>Öppnar jämförelsen med sidan du tittar på till höger (senare med den sida du jämförde med sist), eller gör den högra sidan aktiv om jämförelsen redan är igång.</td></tr>
+    <tr><td><kbd>Pil vänster</kbd></td><td>Gör den vänstra sidan aktiv. Tryck igen när vänster redan är aktiv för att avsluta jämförelsen.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>Roterar den aktiva sidan ett kvarts varv åt vänster eller höger.</td></tr>
+    <tr><td><kbd>+</kbd> / <kbd>-</kbd> (även på det numeriska tangentbordet)</td><td>Zooma in eller ut.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + mushjulet</td><td>Zooma in eller ut.</td></tr>
+    <tr><td><kbd>Delete</kbd></td><td>Döljer den aktiva sidan ur urvalet, när alla sidor är inlästa. <kbd>Ctrl</kbd>+<kbd>Delete</kbd> döljer hela dokumentet; <kbd>Shift</kbd> gäller den andra sidan i jämförelsen.</td></tr>
+    <tr><td><kbd>M</kbd></td><td>Öppnar <em>Metadataöversikt</em>, när sessionen har metadata.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Öppnar normalt ODV:s utskriftsdialog. Din organisation kan ha ställt in webbläsarens egen utskrift i stället, eller stängt av genvägen.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Stänger menyer, dialoger, högerklicksmenyer, överlagringsvyn och gardinvyn. Lämnar urvalsarbetsytan. Avbryter en pågående PDF-förberedelse efter en fråga.</td></tr>
+    <tr><td><kbd>Enter</kbd> / <kbd>Esc</kbd> i sidfältet eller procentfältet</td><td>Tillämpar eller ångrar det du skrev.</td></tr>
   </tbody>
 </table>
-<p class="small">Tangenterna i jämförelseläget, överlagringsvyn och gardinvyn finns samlade i guiden <a href="manual-jamforelse.sv.html">Jämför två sidor</a>.</p>
+<p class="small">Med musen: dubbelklicka på sidan för att växla mellan <em>Anpassa till bredd</em> och <em>Anpassa till skärm</em>. Tangenterna i jämförelseläget, överlagringsvyn och gardinvyn finns samlade i guiden <a href="manual-jamforelse.sv.html">Jämför två sidor</a>.</p>
 
 <h2 id="verktygsfalt">Verktygsfältet knapp för knapp</h2>
+<p>Från vänster till höger. Håll muspekaren över en knapp så visas dess namn. Den knapp som gäller just nu – till exempel den anpassning sidan visas med – är röd.</p>
 <figure class="wide">
-  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="Vänstra delen av verktygsfältet"></a>
-  <figcaption><strong>Vänster:</strong> skrivare med pil för förval, urval, sidnavigering, zoom ut/in med procentfält, 1:1, anpassa till skärm, anpassa till bredd.</figcaption>
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="Vänstra delen av verktygsfältet: skrivare med lampa och pil, urvalsknapp, sidnavigering med fältet 1 / 24, zooma ut, procentfältet, zooma in, 1:1, anpassa till skärm och anpassa till bredd"></a>
+  <figcaption><strong>Vänstra delen.</strong> Skrivare med lampa och pil, urval, sidnavigering med sidfältet (<em>1 / 24</em>), zooma ut, procentfältet, zooma in, <strong>1:1</strong>, anpassa till skärm och anpassa till bredd (röd = den gäller nu).</figcaption>
 </figure>
 <figure class="wide">
-  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="Högra delen av verktygsfältet"></a>
-  <figcaption><strong>Höger:</strong> 1:X egen storlek med pil, jämförelse, rotera vänster/höger, HQ, ljusstyrka, kontrast, återställ, samt tema, språk och hjälp.</figcaption>
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="Högra delen av verktygsfältet: 1:X med pil, finjustering, jämförelse, rotera vänster och höger, HQ, ljusstyrka, kontrast, återställ, tema, språk och hjälp med lampa"></a>
+  <figcaption><strong>Högra delen.</strong> <strong>1:X</strong> med pil, <em>Finjustering</em>, jämförelse, bildjusteringarna i en ram (rotera vänster, rotera höger, <strong>HQ</strong>, ljusstyrka, kontrast, återställ) och längst till höger tema, språk och hjälp med lampa.</figcaption>
 </figure>
 <ul>
-  <li><strong>Skrivare</strong> öppnar utskriften. Pilen bredvid sätter förvalet <em>Aktiv sida</em> eller <em>Alla sidor</em>.</li>
-  <li><strong>Urval</strong> öppnar urvalsarbetsytan. Röd när ett urval är aktivt.</li>
-  <li><strong>Sidnavigering</strong>: första, föregående, nästa, sista, och ett fält för sidnummer.</li>
-  <li><strong>Zoom</strong>: ut, in, procentfält, 1:1, anpassa till skärm, anpassa till bredd.</li>
-  <li><strong>1:X</strong>: egen storlek. <strong>Finjustering</strong>, <strong>jämförelse</strong>, <strong>överlagring</strong> och <strong>gardin</strong>: beskrivs i guiden <a href="manual-jamforelse.sv.html">Jämför två sidor</a>. <strong>Rotera</strong>: ett kvarts varv.</li>
-  <li><strong>HQ</strong>: skarpare PDF-sida. <strong>Ljusstyrka</strong>, <strong>kontrast</strong> och <strong>återställ</strong>.</li>
-  <li><strong>Tema</strong>, <strong>språk</strong>, <strong>hjälp</strong>. Lampan på hjälpknappen: grön = allt väl, gul = datorn har lite minne, röd = fel.</li>
+  <li><strong>Skriv ut</strong> öppnar utskriftsdialogen. Knappen är grå medan sidor laddas och medan en PDF-utskrift förbereds. Pilen bredvid sätter standardomfånget <em>Aktiv sida</em> eller <em>Alla sidor</em>. Den lilla lampan på knappen visar om ODV förbereder en PDF av alla sidor i förväg, något som din organisation kan ha slagit på (verktygstipset kallar det <em>utskriftscache</em>). Normalt är lampan släckt.</li>
+  <li><strong>Hantera vilka sidor som visas och skrivs ut</strong> öppnar urvalsarbetsytan. Knappen är röd när ett urval är aktivt och grå tills alla sidor är inlästa. Knappen saknas om din organisation har stängt av urvalsarbetsytan. Se guiden <a href="manual-urval.sv.html">Urval</a>.</li>
+  <li><strong>Sidnavigering</strong>: <em>Första sidan</em>, <em>Föregående sida</em>, sidfältet, <em>Nästa sida</em>, <em>Sista sidan</em>. Skriv ett sidnummer i fältet och tryck <kbd>Enter</kbd>. Håll <kbd>Ctrl</kbd> nedtryckt så bläddrar knapparna dokument för dokument, när sessionen har flera. Medan sidorna laddas visar sidfältet hur långt laddningen kommit.</li>
+  <li><strong>Zoom</strong>: <em>Zooma ut</em>, procentfältet (5–800 procent, skriv ett tal och tryck <kbd>Enter</kbd>), <em>Zooma in</em>. Varje klick ändrar zoomen med ungefär tio procent.</li>
+  <li><strong>Faktisk storlek (1:1)</strong>, <strong>Anpassa till skärm</strong>, <strong>Anpassa till bredd</strong> och <strong>Egen storlek (1:X)</strong>: fyra sätt att passa in sidan. En anpassning är röd medan den gäller och följer med när du byter sida. Pilen vid 1:X öppnar <a href="#egen">inställningarna för egen storlek</a>.</li>
+  <li><strong>Finjustering</strong> visar eller döljer panelen <em>Finjustera</em> ovanför varje sida. Att dölja panelen tar inte bort justeringarna. Knappen saknas om din organisation har stängt av finjusteringen.</li>
+  <li><strong>Aktivera jämför-läge</strong> öppnar två sidor bredvid varandra. Medan två sidor jämförs visas också knapparna för <em>överlagring</em> och <em>gardin</em>, om inte din organisation har stängt av dem. Allt detta beskrivs i guiden <a href="manual-jamforelse.sv.html">Jämför två sidor</a>.</li>
+  <li><strong>Bildjusteringar</strong> (ramen): <em>Rotera vänster 90°</em>, <em>Rotera höger 90°</em>, <strong>HQ</strong> (<em>Öka PDF-sidans upplösning</em>), <em>Justera ljusstyrka</em> och <em>Justera kontrast</em> (öppnar varsitt reglage, 100 = oförändrad) samt <em>Återställ justeringar</em>, som nollställer rotationen och tar bort ljus-, kontrast- och färgjusteringar. Allt gäller sidan du tittar på, kommer ihåg per sida under sessionen och sparas aldrig i dokumentet.</li>
+  <li><strong>Signaturer</strong> visas bara när sessionen innehåller ett signerat PDF-dokument och din organisation inte har stängt av signaturvisningen. Se <a href="#signaturer">Kontrollera signaturer i PDF-dokument</a>.</li>
+  <li><strong>Välj tema</strong>, <strong>Välj språk</strong> (<em>Svenska</em> eller <em>English</em>) och <strong>Öppna hjälpmeny</strong> med valen <em>Manual</em> och <em>Om OpenDocViewer</em>.</li>
 </ul>
+<p><strong>Lampan på hjälpknappen</strong> visar visarens läge:</p>
+<ul>
+  <li><strong>Grön</strong> – <em>Prestandaläge aktivt</em>. Allt är som vanligt.</li>
+  <li><strong>Orange</strong> – <em>Minneseffektivt läge aktivt</em>. ODV sparar minne, antingen för att datorn har ont om minne eller för att din organisation har valt det läget.</li>
+  <li><strong>Röd</strong> – <em>Kritiskt minnesskydd aktivt</em> eller <em>Fel upptäckt under laddning</em>. Se <a href="#support">Kontakta support</a>.</li>
+</ul>
+<p class="small">I urvalsarbetsytan, överlagringsvyn och gardinvyn byts verktygsfältet ut mot vyns egna knappar. Vill du ha ett lägre verktygsfält med mindre knappar: se <a href="#tema">tema och knappstorlek</a>.</p>
 
-<h2 id="tema">Mörkt tema</h2>
-<p>Temamenyn längst till höger har <em>Normal</em>, <em>Ljust</em> och <em>Mörkt</em>. I mörkt tema blir gränssnittet mörkt medan dokumentsidan visas som vanligt. Under temana finns kryssrutan <em>Större verktygsknappar</em>: avbockad ger ett lägre verktygsfält med mindre knappar, och ODV kommer ihåg valet.</p>
+<h2 id="tema">Välj tema och knappstorlek</h2>
+<p>Klicka på temaknappen, den första av de tre menyerna längst till höger i verktygsfältet (<em>Välj tema</em>). Menyn har fyra teman:</p>
+<ul>
+  <li><em>System</em> följer datorns inställning för ljust eller mörkt och byter automatiskt när den ändras.</li>
+  <li><em>Normal</em> är en något mjukare ljus variant.</li>
+  <li><em>Ljust</em> och <em>Mörkt</em> är fasta.</li>
+</ul>
+<p>Knappens ikon visar vilket tema som gäller. ODV kommer ihåg valet i webbläsaren. Förvalet är <em>System</em>, om inte din organisation har valt något annat.</p>
+<p>Under temana finns kryssrutan <strong>Större verktygsknappar</strong>. Med kryss får du det vanliga verktygsfältet, utan kryss ett lägre verktygsfält med mindre knappar. Menyn stannar kvar så att du ser skillnaden direkt, och ODV kommer ihåg även det valet.</p>
 <figure class="wide">
-  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer i mörkt tema"></a>
-  <figcaption><strong>Mörkt tema.</strong></figcaption>
+  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer i mörkt tema: mörkt verktygsfält och mörk miniatyrpanel, dokumentsidan vit som vanligt"></a>
+  <figcaption><strong>Mörkt tema.</strong> Verktygsfältet och miniatyrpanelen blir mörka. Dokumentsidan ritas oförändrad – du ser dokumentet som det är, inte en inverterad kopia. Temaknappen visar en måne.</figcaption>
 </figure>
 
-<h2 id="support">Supportinformation</h2>
-<p>Vänd dig först till <strong>din lokala support</strong> – de känner till hur ODV är installerat och inställt hos er, och kan föra ärendet vidare till leverantören. Två saker gör det mycket lättare att hjälpa dig: <strong>versionen</strong> och <strong>diagnostikfilen</strong>. Båda finns under hjälpmenyn → <em>Om OpenDocViewer</em>.</p>
+<h2 id="support">Kontakta support – det här behöver de</h2>
+<p>Vänd dig först till <strong>din lokala support</strong>. De känner till hur ODV är installerat och inställt hos er och kan föra ärendet vidare till leverantören. Två uppgifter gör det mycket lättare att hjälpa dig: <strong>versionen</strong> och <strong>diagnostikfilen</strong>. Båda finns i hjälpmenyn under <em>Om OpenDocViewer</em>.</p>
+<ol class="steps">
+  <li>Klicka på hjälpknappen längst till höger i verktygsfältet och välj <strong>Om OpenDocViewer</strong>.</li>
+  <li>Läs av <em>Version</em> och <em>Build-id</em> högst upp i dialogen.</li>
+  <li>Fäll ut <em>Diagnostik</em> och klicka på <strong>Ladda ned diagnostik som JSON</strong>. Filen <code>opendocviewer-diagnostics.json</code> hamnar bland dina hämtade filer.</li>
+</ol>
 <p>Det här är bra att ta med i ärendet:</p>
 <ul>
   <li><strong>Version och build-id</strong> från <em>Om OpenDocViewer</em>.</li>
-  <li><strong>Diagnostikfilen</strong> (<em>Ladda ned diagnostik som JSON</em>). Den innehåller tekniska uppgifter om ODV och webbläsaren – inga dokument.</li>
+  <li><strong>Diagnostikfilen.</strong> Den innehåller versionen, uppgifter om webbläsaren och datorn (till exempel antal processorkärnor och minne), adressen till visaren utan sökparametrar, samt ODV:s inställningar. Den innehåller inga dokument och inga uppgifter ur dokumenten.</li>
   <li><strong>När</strong> det hände (datum och klockslag), <strong>vad du gjorde</strong> och vilken <strong>webbläsare</strong> du använde.</li>
-  <li>Texten under <em>Tekniska detaljer</em> om en felruta visades.</li>
+  <li>Visades rutan <em>Något gick fel</em>: klicka på <strong>Kopiera detaljer</strong> och klistra in texten i ärendet.</li>
+  <li>Visades rutan <em>Dokumenten kunde inte visas korrekt</em>: skriv det, och vad som stod under <em>Tekniska detaljer</em> om den raden finns hos er (se nedan).</li>
 </ul>
-<div class="warning"><p><strong>Skicka inga personuppgifter.</strong> Bifoga inte skärmdumpar eller utskrifter som visar verkliga dokument, namn eller id-nummer, om inte din organisation uttryckligen har bett om det.</p></div>
+<div class="warning"><p><strong>Viktigt:</strong> skicka inga personuppgifter. Bifoga inte skärmdumpar eller utskrifter som visar verkliga dokument, namn eller id-nummer, om inte din organisation uttryckligen har bett om det.</p></div>
 <div class="figure-grid">
-  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="Om OpenDocViewer"></a><figcaption><strong>Om OpenDocViewer.</strong> Version, build-id och kontaktuppgifter. <em>Ladda om resursfiler</em> hämtar om översättningar och inställningar utan att starta om.</figcaption></figure>
-  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="Diagnostiksektionen i Om OpenDocViewer"></a><figcaption><strong>Diagnostik.</strong> <em>Ladda ned diagnostik som JSON</em> ger en fil att bifoga ärendet. Den innehåller tekniska uppgifter – inga dokument.</figcaption></figure>
+  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="Dialogen Om OpenDocViewer med raderna Version, Build-id, Projekt och Kontakt samt den hopfällda rubriken Diagnostik"></a><figcaption><strong>Om OpenDocViewer.</strong> <em>Version</em> och <em>Build-id</em> överst, därunder en länk till projektet och en kontaktadress som din organisation kan ha bytt ut. <em>Diagnostik</em> är hopfälld.</figcaption></figure>
+  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="Diagnostik utfällt med knappen Ladda ned diagnostik som JSON och en förhandsvisning av filens innehåll"></a><figcaption><strong>Diagnostik utfälld.</strong> Knappen <em>Ladda ned diagnostik som JSON</em> och en förhandsvisning av filen: version, build-id och uppgifter om webbläsaren.</figcaption></figure>
 </div>
+<p class="small"><strong>Ladda om resursfiler</strong> i samma dialog hämtar om gränssnittets texter (språkfilerna) utan att starta om visaren.</p>
 <details>
-  <summary>När sessionen gått ut</summary>
-  <p>Rutan <em>Dokumenten kunde inte visas korrekt</em> har en länk <em>Tekniska detaljer</em>. Fäll ut den så ser du vilka sidor som inte kunde hämtas och varför. Ta med det i ärendet.</p>
+  <summary>Rutan Dokumenten kunde inte visas korrekt</summary>
+  <p>Rutan visas högst upp när sidorna inte längre kan hämtas, oftast för att dokumentsessionen har gått ut. Knappen <strong>Starta om sessionen</strong> laddar om sidan så att dokumenten hämtas på nytt. Normalt finns också <strong>Ladda om visaren</strong> och <strong>Stäng</strong>. Det vanliga fallet beskrivs i <a href="manual.sv.html#problem">Kom igång-guiden</a>.</p>
+  <p>Har din organisation slagit på raden <em>Tekniska detaljer</em> i rutan: fäll ut den. Där står hur många sidor som inte kunde läsas in och ett tekniskt meddelande. Ta med texten i ärendet.</p>
   <div class="figure-grid">
-    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV med utgången session och sidor som varningstrianglar"></a><figcaption><strong>Utgången session.</strong></figcaption></figure>
-    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Tekniska detaljer utfällda"></a><figcaption><strong>Tekniska detaljer.</strong></figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV med utgången session: sidorna visas som varningstrianglar och rutan Dokumenten kunde inte visas korrekt ligger högst upp"></a><figcaption><strong>Utgången session.</strong> Sidorna visas som varningstrianglar och rutan högst upp har knappen <em>Starta om sessionen</em>. Bilden visar en installation som har slagit på <em>Tekniska detaljer</em>, dolt knapparna <em>Ladda om visaren</em> och <em>Stäng</em> och använder en egen meddelandetext.</figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Rutan med Tekniska detaljer utfällda: 5 av 5 sidor kunde inte läsas in"></a><figcaption><strong>Tekniska detaljer utfällda.</strong> Första raden räknar sidorna (<em>5 av 5 sidor kunde inte läsas in</em>), sedan följer det tekniska meddelandet att skicka med.</figcaption></figure>
   </div>
 </details>
 
-<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.10. Uppdaterad 2026-10-24.</p>
+<h3>Kort kontrollista för fler funktioner</h3>
+<ul class="checklist">
+  <li>Högerklicka och välj <em>Visa metadata för dokument</em>; <kbd>M</kbd> öppnar tabellen med alla dokument.</li>
+  <li>Signatursymbolen: grön = intakt, orange = granska, röd = ogiltig. <em>Tillit</em> kontrolleras bara när din organisation har slagit på kontrollen på servern.</li>
+  <li><strong>HQ</strong> gäller bara PDF-sidor, bara den sidan och bara den här sessionen.</li>
+  <li><strong>1:X</strong> är din egen storlek; <em>Standard zoom/storlek</em> styr hur nya sessioner börjar.</li>
+  <li>Till supporten: version, build-id och diagnostikfilen – aldrig personuppgifter.</li>
+</ul>
+
+<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.11. Uppdaterad 2026-10-25.</p>
 <!-- LB-START -->
 <div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadata.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadataoversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-signatur-miniatyr"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/signatur-miniatyr.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-signaturer-oversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/signaturer-oversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-signatur-detaljer"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/signatur-detaljer.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-fore.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-boost-efter"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-efter.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
 <div class="lb" id="lb-egen-storlek"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/egen-storlek.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
