@@ -10,14 +10,21 @@ list with licence identifiers is in `package.json` / `package-lock.json`.
 | --- | --- | --- |
 | `pkijs` | BSD-3-Clause (Copyright (c) 2014 GlobalSign, 2015-2019 Peculiar Ventures) | Parsing CMS/PKCS#7 signature payloads in signed PDFs (loaded dynamically only when a document contains signature fields) |
 | `asn1js` | BSD-3-Clause (Copyright (c) 2014 GMO GlobalSign, 2015-2022 Peculiar Ventures) | ASN.1/DER decoding backing `pkijs` |
+| `@noble/hashes` | MIT (Copyright (c) 2022 Paul Miller) | SHA-1 and SHA-2 hashing backing `pkijs` |
+| `@peculiar/utils` | MIT (Copyright (c) 2017-2026 Peculiar Ventures, LLC) | Binary, hex and base64 conversion helpers backing `pkijs` and `asn1js` |
+| `bytestreamjs` | BSD-3-Clause (Copyright (c) 2016-2022 Peculiar Ventures) | Byte-stream reading and writing backing `pkijs` |
 
-Both ship their licence text inside their npm packages
-(`node_modules/pkijs/LICENSE`, `node_modules/asn1js/LICENSE`).
+All five ship their licence text inside their npm packages
+(`node_modules/pkijs/LICENSE`, `node_modules/asn1js/LICENSE`,
+`node_modules/@noble/hashes/LICENSE`, `node_modules/pkijs/node_modules/@peculiar/utils/LICENSE`,
+`node_modules/bytestreamjs/LICENSE`). The bundled `@peculiar/utils` 4.1.0 is installed under
+`pkijs` and `asn1js`; the top-level `node_modules/@peculiar/utils` is an older,
+development-only copy.
 
 Redistribution notice for BSD-3-Clause components: these licences require retention of the
-copyright notice, this list of conditions and the following disclaimer in redistributions;
-their full licence texts are available in the installed packages and in the release
-artifacts' `node_modules`.
+copyright notice, this list of conditions and the following disclaimer in redistributions.
+The MIT licences require the copyright and permission notice in all copies or substantial
+portions of the software. The full licence texts are in the installed packages listed above.
 
 ## Development-only dependencies (not shipped)
 
