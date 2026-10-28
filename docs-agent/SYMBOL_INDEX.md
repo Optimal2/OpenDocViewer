@@ -730,9 +730,10 @@
 | <code>normalizeBase64</code> | function | <code>src/integrations/sessionToken.js:54</code> | Normalize a Base64 string to a decodable form: Trim whitespace Convert URL-safe chars &#39;-&#39; → &#39;+&#39;, &#39;_&#39; → &#39;/&#39; Add &#39;=&#39; padding to reach a length divisible by 4 |
 | <code>readFromSessionToken</code> | function | <code>src/integrations/sessionToken.js:104</code> | Read and decode a session payload from the URL query string. |
 | <code>SessionTokenResult</code> | typedef | <code>src/integrations/sessionToken.js:38</code> | Session token read result. |
-| <code>MAX_RESPONSE_TEXT_LEN</code> | constant | <code>src/integrations/sessionUrl.js:9</code> | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
-| <code>readFromSessionUrl</code> | function | <code>src/integrations/sessionUrl.js:85</code> | Read and fetch a session payload URL from the viewer query string. |
-| <code>SessionUrlResult</code> | typedef | <code>src/integrations/sessionUrl.js:12</code> |  |
+| <code>ALLOWED_PROTOCOLS</code> | constant | <code>src/integrations/sessionUrl.js:52</code> | Protocols a session URL may use. |
+| <code>MAX_RESPONSE_TEXT_LEN</code> | constant | <code>src/integrations/sessionUrl.js:10</code> | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
+| <code>readFromSessionUrl</code> | function | <code>src/integrations/sessionUrl.js:94</code> | Read and fetch a session payload URL from the viewer query string. |
+| <code>SessionUrlResult</code> | typedef | <code>src/integrations/sessionUrl.js:13</code> |  |
 | <code>parsePositiveInt</code> | function | <code>src/integrations/urlParams.js:64</code> | Parse a positive integer from a string. |
 | <code>pick</code> | function | <code>src/integrations/urlParams.js:51</code> | Pick the first non-empty value among a list of candidate query keys. |
 | <code>readFromUrlParams</code> | function | <code>src/integrations/urlParams.js:83</code> | Reads common query params used by the demo and other hosts. |

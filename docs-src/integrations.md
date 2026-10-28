@@ -19,7 +19,8 @@ OpenDocViewer should stay a generic viewer:
 - `src/integrations/sessionToken.js`
   - decodes `?sessiondata=<base64-json>` payloads
 - `src/integrations/sessionUrl.js`
-  - fetches host-prepared JSON from `?sessionurl=<url>` or `?bundleUrl=<url>`
+  - fetches host-prepared JSON from `?sessionurl=<url>` or `?bundleUrl=<url>` (http, https or a
+    same-origin `blob:` URL the host page created with `URL.createObjectURL`)
 - `src/integrations/urlParams.js`
   - supports legacy pattern mode from URL query parameters
 - `src/integrations/normalizePortableBundle.js`

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/integrations
 
-File count: 8. Line count: 2276. JSDoc symbol count: 59.
+File count: 8. Line count: 2285. JSDoc symbol count: 60.
 
 ## src/integrations/bootstrapRuntime.js
 
@@ -106,6 +106,7 @@ Symbols:
 
 - `MAX_RESPONSE_TEXT_LEN` (constant) - Fetch a host\-prepared Portable Document Bundle from a short URL query value.
 - `SessionUrlResult` (typedef) - No description.
+- `ALLOWED_PROTOCOLS` (constant) - Protocols a session URL may use.
 - `readFromSessionUrl` (function) - Read and fetch a session payload URL from the viewer query string.
 
 ## src/integrations/urlParams.js

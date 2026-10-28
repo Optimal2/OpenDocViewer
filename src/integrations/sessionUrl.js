@@ -3,7 +3,8 @@
  * Fetch a host-prepared Portable Document Bundle from a short URL query value.
  *
  * Hosts should use this for large or server-side prepared sessions instead of
- * embedding base64 JSON directly in the viewer URL.
+ * embedding base64 JSON directly in the viewer URL. The URL may be http(s) or a
+ * same-origin `blob:` URL created by the host page.
  */
 
 const MAX_RESPONSE_TEXT_LEN = 256_000_000;
@@ -42,12 +43,20 @@ function nowMs() {
   return Date.now();
 }
 
+/**
+ * Protocols a session URL may use. `blob:` lets a same-origin host page build the bundle in the
+ * browser (`URL.createObjectURL(new Blob([json]))`) and hand it over without a server endpoint;
+ * blob URLs are origin-bound, so a page from another origin cannot be read this way. The fetch,
+ * timeout, size cap and JSON parsing below are the same for every protocol.
+ */
+const ALLOWED_PROTOCOLS = new Set(['http:', 'https:', 'blob:']);
+
 function resolveHttpUrl(rawUrl) {
   if (!rawUrl || typeof window === 'undefined') return null;
 
   try {
     const url = new URL(rawUrl, window.location.href);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
       return null;
     }
 

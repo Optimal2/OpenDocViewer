@@ -126,7 +126,7 @@ On startup, `src/integrations/bootstrapRuntime.js` probes the available startup 
 
 | Priority | Mode | Transport | Source module |
 | --- | --- | --- | --- |
-| 1 | Session URL | `?sessionurl=` / `?bundleUrl=` — same-origin JSON fetch (180 s timeout, 256 MB cap). An explicit session URL that fails leaves the viewer in demo mode with the diagnosis `session-url-unavailable` instead of falling through. | `src/integrations/sessionUrl.js` |
+| 1 | Session URL | `?sessionurl=` / `?bundleUrl=` — same-origin JSON fetch over http(s) or a same-origin `blob:` URL (180 s timeout, 256 MB cap). An explicit session URL that fails leaves the viewer in demo mode with the diagnosis `session-url-unavailable` instead of falling through. | `src/integrations/sessionUrl.js` |
 | 2 | Parent page | `window.parent.ODV_BOOTSTRAP` / `window.opener.ODV_BOOTSTRAP`, same-origin only; filtered by `sessiondata.caseIds` when present. | `src/integrations/parentBridge.js` |
 | 3 | Session token | `?sessiondata=` — Base64 JSON with hard size limits (200 000 encoded / 150 000 decoded characters). | `src/integrations/sessionToken.js` |
 | 4 | URL parameters | Legacy pattern mode: `folder` + `extension` + `endNumber`. | `src/integrations/urlParams.js` |

@@ -48,8 +48,8 @@ document-loading, rendering and memory policies are normalized once by
 `src/integrations/` holds the startup adapters. `bootstrapRuntime.js` probes them in a fixed
 priority order and takes the first source that yields a bundle with at least one document:
 
-1. `sessionUrl.js` - `?sessionurl=` / `?bundleUrl=`: a same-origin JSON fetch (http/https only,
-   180 s timeout, 256 MB response limit). An explicit session URL that fails leaves the viewer in
+1. `sessionUrl.js` - `?sessionurl=` / `?bundleUrl=`: a same-origin JSON fetch (http, https or a
+   same-origin `blob:` URL created by the host page; 180 s timeout, 256 MB response limit). An explicit session URL that fails leaves the viewer in
    demo mode with the diagnosis `session-url-unavailable` instead of falling through.
 2. `parentBridge.js` - `window.parent.ODV_BOOTSTRAP` / `window.opener.ODV_BOOTSTRAP`, read only
    when the parent is same-origin, cloned before use, and filtered by `sessiondata.caseIds` when

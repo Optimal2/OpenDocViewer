@@ -89,8 +89,8 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60679,
-    "docletCount": 1658,
+    "sourceLineCount": 60688,
+    "docletCount": 1659,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -1411,8 +1411,8 @@
     {
       "name": "src/integrations",
       "fileCount": 8,
-      "lineCount": 2276,
-      "docletCount": 59,
+      "lineCount": 2285,
+      "docletCount": 60,
       "importantFiles": [
         {
           "path": "src/integrations/ompThemeBridge.js",
@@ -1470,10 +1470,10 @@
         },
         {
           "path": "src/integrations/sessionUrl.js",
-          "score": 33,
-          "lines": 157,
+          "score": 36,
+          "lines": 166,
           "incomingLocalImports": 1,
-          "doclets": 3,
+          "doclets": 4,
           "summary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
           "summaryConfidence": "high"
         },
@@ -35275,58 +35275,58 @@
     },
     {
       "path": "src/integrations/sessionUrl.js",
-      "lines": 157,
+      "lines": 166,
       "extension": ".js",
-      "jsdocBlockCount": 3,
+      "jsdocBlockCount": 4,
       "sourceSummary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
       "imports": [],
       "exports": [
         {
           "name": "hasSessionUrlParameter",
           "kind": "function",
-          "line": 32
+          "line": 33
         },
         {
           "name": "readFromSessionUrl",
           "kind": "function",
-          "line": 85
+          "line": 94
         },
         {
           "name": "default",
           "kind": "default",
-          "line": 156
+          "line": 165
         }
       ],
       "declarations": [
         {
           "name": "readSessionUrlParameter",
           "kind": "function",
-          "line": 18
+          "line": 19
         },
         {
           "name": "hasSessionUrlParameter",
           "kind": "function",
-          "line": 32
+          "line": 33
         },
         {
           "name": "nowMs",
           "kind": "function",
-          "line": 36
+          "line": 37
         },
         {
           "name": "resolveHttpUrl",
           "kind": "function",
-          "line": 45
+          "line": 54
         },
         {
           "name": "warnSessionUrl",
           "kind": "function",
-          "line": 60
+          "line": 69
         },
         {
           "name": "readFromSessionUrl",
           "kind": "function",
-          "line": 85
+          "line": 94
         }
       ],
       "parseError": null,
@@ -35342,7 +35342,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/integrations/sessionUrl.js",
-          "line": 9,
+          "line": 10,
           "description": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
           "params": [],
           "returns": [],
@@ -35355,8 +35355,21 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/integrations/sessionUrl.js",
-          "line": 12,
+          "line": 13,
           "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "ALLOWED_PROTOCOLS",
+          "name": "ALLOWED_PROTOCOLS",
+          "longname": "ALLOWED_PROTOCOLS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/integrations/sessionUrl.js",
+          "line": 52,
+          "description": "Protocols a session URL may use.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -35368,7 +35381,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/integrations/sessionUrl.js",
-          "line": 85,
+          "line": 94,
           "description": "Read and fetch a session payload URL from the viewer query string.",
           "params": [],
           "returns": [
@@ -35384,7 +35397,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 33,
+      "importanceScore": 36,
       "summary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -87601,13 +87614,26 @@
       "examples": 0
     },
     {
+      "id": "ALLOWED_PROTOCOLS",
+      "name": "ALLOWED_PROTOCOLS",
+      "longname": "ALLOWED_PROTOCOLS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/integrations/sessionUrl.js",
+      "line": 52,
+      "description": "Protocols a session URL may use.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "MAX_RESPONSE_TEXT_LEN",
       "name": "MAX_RESPONSE_TEXT_LEN",
       "longname": "MAX_RESPONSE_TEXT_LEN",
       "kind": "constant",
       "scope": "global",
       "file": "src/integrations/sessionUrl.js",
-      "line": 9,
+      "line": 10,
       "description": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
       "params": [],
       "returns": [],
@@ -87620,7 +87646,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/integrations/sessionUrl.js",
-      "line": 85,
+      "line": 94,
       "description": "Read and fetch a session payload URL from the viewer query string.",
       "params": [],
       "returns": [
@@ -87638,7 +87664,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/integrations/sessionUrl.js",
-      "line": 12,
+      "line": 13,
       "description": "",
       "params": [],
       "returns": [],
