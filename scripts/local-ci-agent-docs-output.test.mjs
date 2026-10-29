@@ -440,10 +440,11 @@ const source = fs.readFileSync(localCiPath, 'utf8');
  * and comment noise so a `{` inside a literal does not match), then return
  * the block from that `{` to the next balanced `}` after the anchor.
  *
- * The if/elseif/elseif/elseif/else chain inside `else {` has no braces, so
- * a naive forward scan from `$remedy = $null` would land on the outer `finally`
- * block. This helper instead finds the ENCLOSING `{`, which is the one
- * introduced by the surrounding `else {`.
+ * Every branch of the if/elseif/elseif/elseif/else chain that follows
+ * `$remedy = $null` carries its own braces, so a naive forward scan from that
+ * anchor would return only the FIRST branch's block instead of the whole chain.
+ * This helper instead finds the ENCLOSING `{`, which is the one introduced by
+ * the surrounding `else {`, so the assertions see every remedy string.
  */
 function enclosingBlock(source, anchor, openChar = '{', closeChar = '}') {
   const anchorAt = source.indexOf(anchor);
