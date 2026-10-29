@@ -10,7 +10,7 @@ import { createSecurityFixtures } from './signature-security-fixtures.mjs';
 const entry = (await readdir('dist/assets')).find((name) => /^pdfSignatureWorker-.*\.js$/.test(name));
 assert.ok(entry, 'Build the application before testing the production worker');
 const security = await createSecurityFixtures();
-const fixtures = { ...security.normal, ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array)) };
+const fixtures = { ...security.normal, ...security.revisions, ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array)) };
 const workerUrl = pathToFileURL(path.resolve('dist/assets', entry)).href;
 const harness = `const { parentPort } = require('node:worker_threads');
 globalThis.self = { postMessage: message => parentPort.postMessage(message) };
@@ -30,7 +30,15 @@ try {
     ['sha224Digest', 'not-checked-in-viewer', 'algorithm-unsupported'],
     ['structureFilterChain', 'not-checked-in-viewer', 'structure-unsupported'],
     ['encrypted', 'not-checked-in-viewer', 'encrypted'],
-    ['wrongIssuer', 'unreadable', 'signer-certificate-missing']
+    ['wrongIssuer', 'unreadable', 'signer-certificate-missing'],
+    // Appended-revision classifier: the pdf-lib parser hooks must survive minification
+    // (a missing hook would turn every green row below into a warning, never the reverse).
+    ['okDss', 'intact', 'extended-with-validation-data'],
+    ['okDssXrefStreamCompressed', 'intact', 'extended-with-validation-data'],
+    ['okDssObjectStream', 'intact', 'extended-with-validation-data'],
+    ['pageContent', 'modified-after-signing', 'content-changed-after-signing'],
+    ['freeLiveObject', 'modified-after-signing', 'content-changed-after-signing'],
+    ['shadowObject', 'modified-after-signing', 'unclassified-change-after-signing']
   ]) {
     const message = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => { cleanup(); reject(new Error('Built worker timeout')); }, 15000);

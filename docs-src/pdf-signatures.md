@@ -91,11 +91,12 @@ Integrity rules, in evaluation order:
      Verification runs from the last revision backwards. The later range must start at
      zero, its first segment must include the entire earlier revision, and its end must
      reach EOF. An unreadable or invalid later CMS cannot authorize an extension.
-   - If the extension is **not** covered by any later signature, someone changed the file
-     without signing the change: `integrity: 'modified-after-signing'` with
-     `integrityCode: 'unclassified-change-after-signing'` (the tail is not inspected yet; a
-     revision classifier that tells validation-data updates apart from content changes is
-     planned).
+   - If the extension is **not** covered by any later signature, the revision classifier
+     (`src/utils/pdfSignatureRevisions.js`, see "Appended revisions" below) decides what the
+     unsigned update changed: validation data or metadata only is `intact` /
+     `extended-with-validation-data`; a content change is `modified-after-signing` /
+     `content-changed-after-signing`; anything it cannot classify with certainty is
+     `modified-after-signing` / `unclassified-change-after-signing`.
 7. Everything verifies and the range reaches EOF -> `integrity: 'intact'`,
    `coversWholeFile: true`.
 
@@ -152,13 +153,75 @@ Signing time for the validity check: verified RFC 3161 signature timestamp `genT
 the signed `signingTime` attribute, else `/M`. Without any signing time the check is shown
 as not performed (information).
 
-Implementation status: the `extended-with-validation-data` and `content-changed-after-signing`
-rows need the planned revision classifier, and the `signingTimeCheck` rows need the planned
-signing-time parser. Until then the parser produces `unclassified-change-after-signing` for
-every unsigned tail and no `signingTimeCheck` at all; the status helpers, labels and dialog
-already handle both, and a signature without `signingTimeCheck` behaves exactly as before
+Implementation status: the `signingTimeCheck` rows need the planned signing-time parser.
+Until then the parser produces no `signingTimeCheck` at all; the status helpers, labels and
+dialog already handle it, and a signature without `signingTimeCheck` behaves exactly as before
 (OK, no extra line). `unsupported` is accepted only as a legacy alias from older caches and is
 normalized to `not-checked-in-viewer`; the parser never produces it.
+
+#### Appended revisions
+
+When a verified signature's ByteRange ends at E before the end of the file and no later
+verified signature covers the rest, `classifyAppendedRevisions`
+(`src/utils/pdfSignatureRevisions.js`) compares the final document NET against the state at
+E. Several appended revisions are compared together; a change that a later revision undoes
+byte for byte counts as unchanged, because the viewer shows the final state. The rules, in
+order:
+
+1. **Revision structure.** At least one cross-reference section (table or xref stream) must
+   follow E. Each appended revision ends with exactly one `startxref` that points at its own
+   section, the first appended trailer's `/Prev` points at the signed revision's section and
+   every later `/Prev` at the previous appended section. An appended trailer without its own
+   table, `/XRefStm` (hybrid cross-reference) or `/Encrypt` in an appended trailer, or a
+   cross-reference stream that cannot be decoded (anything other than no predictor or a PNG
+   predictor with 1 colour and 8 bits) makes the result unclassified.
+2. **Cross-reference consistency (mandatory).** pdf-lib keeps the last physical definition
+   of an object, pdf.js follows the cross-reference offsets. Every appended in-use entry must
+   point at an appended definition of that object at exactly that offset (or, for a type-2
+   entry, at an appended object stream that holds the object exactly once), or at the same
+   offset as the last entry before E. Every appended definition must be listed, and the
+   newest entry for an object must point at its last definition, and an appended object
+   stream may not reuse the number of an object or object stream in use at E (pdf.js
+   resolves compressed objects through the newest entry for the stream number). Otherwise
+   the result is unclassified. A deleted entry (`f` / type 0) for an object in use at E is a content
+   change; pdf-lib does not model deletions, so they are read from the recorded entries.
+3. **Changed set.** An object is unchanged when its final definition is byte-identical to the
+   definition at E (dictionary text, plus the raw bytes for streams). Generations are
+   ignored. Object and xref streams are structural and never compared themselves.
+4. **Trailer.** `/Root` must stay the same object; `/Info`, `/ID`, `/Size` and `/Prev` may
+   change.
+5. **Exempt items.** The catalog may add or change only `/DSS`, `/Metadata` and
+   `/Extensions` (every other catalog entry must stay equal). The AcroForm may change only
+   `/SigFlags` and append to `/Fields`; each appended field must be a new invisible document
+   timestamp: `/FT /Sig`, `/V` a new dictionary with `/Type /DocTimeStamp` and
+   `/SubFilter /ETSI.RFC3161`, and widgets with a zero-area `/Rect` or the Hidden/NoView flag,
+   no `/AP` and only the field/widget keys listed in `DTS_FIELD_KEYS` / `DTS_WIDGET_KEYS`.
+   A page may change only by appending those widgets to `/Annots`. Everything else that
+   changed on a page, the AcroForm or the catalog is a content change.
+6. **Reachability.** Every other changed object is classified by what reaches it in the
+   final state. Reachable from the catalog other than through `/DSS`, `/Metadata` and
+   `/Extensions` (pages, content streams, resources, annotations, form fields, outlines,
+   names, actions) is content, and content wins: an object shared by `/DSS` and a page is a
+   content change. Reachable only from `/DSS`, `/Metadata`, `/Extensions` or the trailer
+   `/Info` is validation data or metadata. Reachable from nothing (an orphan) is
+   unclassified. A new object that a reference already pointed at in the signed revision
+   (a dangling reference filled in later) is a content change.
+7. **Result.** Any content change gives `content-changed-after-signing`, otherwise any
+   unclassified point gives `unclassified-change-after-signing`, otherwise
+   `intact` / `extended-with-validation-data` ("the file was extended after signing with
+   validation data/metadata only").
+
+The classifier is conservative by construction: whatever it cannot classify with certainty
+is a warning, never green. Its parser hooks are installed on the pdf-lib parser instance
+only when every expected method exists (the same guard as the indirect-object header
+probe); a different pdf-lib build, an unattributed object, an unexpected parser shape or
+any exception inside the classifier yields `unclassified-change-after-signing`. An invalid
+object in the file already makes the whole report `indeterminate` (pdf-lib parses with
+`throwOnInvalidObject`). The branch where a later verified signature covers the tail is
+unchanged; it only carries the `extended-by-later-signature` code. Revisions covered by a
+later signature are not classified (outside this campaign's scope), so a DSS revision after
+the last of several approval signatures leaves the earlier approval signatures amber, as
+before.
 
 #### The one site switch: `pdfSignatures.uncheckedSeverity`
 
@@ -414,7 +477,8 @@ Notes:
 `scripts/generate-signature-fixtures.mjs` is the committed generator. It creates a throwaway
 test CA and signer certificates (fixed dates and serial numbers, generated keys - never
 committed, never real-world identities) and signs synthetic one-page PDFs that cover every
-integrity status and format branch:
+integrity status and format branch (the appended-revision fixtures are described after the
+table):
 
 | Fixture | Covers |
 | --- | --- |
@@ -434,6 +498,23 @@ integrity status and format branch:
 | `unsigned.pdf` | no signature fields -> empty list fast path |
 | `visible-appearance.pdf` | signed widget with a blue `/AP /N` appearance stream |
 | `invisible-appearance.pdf` | signed widget with a non-zero rectangle but no appearance stream |
+
+`scripts/signature-revision-fixtures.mjs` appends synthetic unsigned revisions to these
+fixtures for the appended-revision classifier (`createRevisionFixtures`, exposed as
+`createSecurityFixtures().revisions`). `appendRevision` writes object definitions followed
+by a classic xref table or an xref stream (optionally Flate + PNG predictor, optionally
+with an object stream), with negative knobs `free`, `prevOverride`, `xrefPoint`,
+`offsetShift` and `trailerExtras`. `appendDssRevision` adds DSS/VRI, `appendDocTimestamp`
+adds a signed (or unsigned) document timestamp after the approval signature. Names starting
+with `ok` (DSS, `/Info`, XMP `/Metadata`, byte-identical rewrite, each also with an xref
+stream tail, DSS in an object stream, timestamp then DSS, a reverted change) must be
+`extended-with-validation-data`; the content-change fixtures (annotation, page content,
+page entry, form field value, `/OpenAction`, `/NeedAppearances`, visible timestamp widget,
+widget with `/AP`, object shared by DSS and content, dangling reference, deleted live
+object) must be `content-changed-after-signing`; the structural fixtures (shadow object,
+broken `/Prev`, `/XRefStm`, patched xref offset, an object stream reusing a signed object
+number, objects without xref) must be
+`unclassified-change-after-signing`.
 
 The fixtures are generated in the vitest setup instead of being committed as binary files:
 the public repository stays free of binaries that cannot be diff-reviewed, keys are
@@ -505,6 +586,10 @@ with editing or validation of these source files. The runner exits 0 only when a
 mutation groups are detected. Run the unmodified suite again afterwards. Status-model
 groups: re-adding the curve guess, ignoring typed viewer limits, losing a structural limit in
 pdf-lib's error wrapping, an inspector read error failing open, and losing the timeout code.
+Appended-revision groups: removing the cross-reference consistency check, ignoring deleted
+entries, allowing a reused object stream number, letting validation data win over content,
+allowing a visible timestamp widget,
+accepting orphan objects, trusting an unhooked parser, and skipping the `/Prev` chain.
 
 For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
 It checks the reviewed hook baseline and individually breaks result retention, queue
@@ -518,7 +603,8 @@ badges, with storage/rendering/inspection I/O mocked.
 
 The mutation runner additionally checks that renamed/minified PDF classes cannot hide
 signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`
-to inspect thirteen generated signed PDFs (positive, defect and not-checked rows, asserting
+to inspect nineteen generated signed PDFs (positive, defect and not-checked rows, plus
+appended-revision rows that prove the pdf-lib parser hooks survive minification, asserting
 `integrity` and `integrityCode`) through the actual minified worker artifact.
 The harness uses a Node worker with a browser message-protocol adapter and verifies
 both successful inspection and rejection outcomes. PDF types are identified by stable

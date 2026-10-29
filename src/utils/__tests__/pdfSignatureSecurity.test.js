@@ -55,7 +55,8 @@ describe('security regression proofs', () => {
     const report = await collectPdfSignatures(f[name]);
     expect(report.signatures).toHaveLength(2);
     expect(report.signatures[0].integrity).toBe('modified-after-signing');
-    expect(report.signatures[0].integrityCode).toBe('unclassified-change-after-signing');
+    // fakeLater adds an approval signature field, maliciousLater replaces the page content stream.
+    expect(report.signatures[0].integrityCode).toBe('content-changed-after-signing');
     expect(report.signatures[1].integrity).toBe('unreadable');
     expect(report.signatures[1].integrityCode).toBe('cms-malformed');
   });
@@ -111,7 +112,9 @@ describe('security regression proofs', () => {
     const base = f.normal['valid-rsa.pdf'];
     const bytes = new Uint8Array(base.length + 50 * 1024 * 1024);
     bytes.set(base);
-    expect((await first(bytes)).integrity).not.toBe('intact');
+    const sig = await first(bytes);
+    expect(sig.integrity).not.toBe('intact');
+    expect(sig.integrityCode).toBe('unclassified-change-after-signing');
   }, 15000);
   it('50k nested PDF dictionaries cannot become an unsigned report', async () => {
     const base = f.normal['unsigned.pdf'];
@@ -185,6 +188,7 @@ describe('status model rows (design table: viewer limits are information, defect
     expectStatus(await first(f.wrongIssuer), 'unreadable', 'signer-certificate-missing', 'error');
     expectStatus(await first(tamper(f.direct)), 'signature-invalid', 'signature-invalid', 'error');
     expectStatus(await first(f.badEcKey), 'indeterminate', 'key-import-failed', 'warning');
-    expectStatus((await collectPdfSignatures(f.fakeLater)).signatures[0], 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expectStatus((await collectPdfSignatures(f.fakeLater)).signatures[0], 'modified-after-signing', 'content-changed-after-signing', 'warning');
+    expectStatus(await first(f.normal['extended-after-signing.pdf']), 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
   });
 });

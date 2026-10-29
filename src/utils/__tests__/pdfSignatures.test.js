@@ -233,7 +233,7 @@ describe('integrity statuses', () => {
   it('modified-after-signing: incremental update appended after signing', async () => {
     const sig = await one('extended-after-signing.pdf');
     expect(sig.integrity).toBe('modified-after-signing');
-    // Stage 3 (revision classifier) refines this; today any unsigned tail is unclassified.
+    // The appended object is reachable from nothing: the classifier cannot prove it harmless.
     expect(sig.integrityCode).toBe('unclassified-change-after-signing');
     expect(getSignatureSeverity(sig)).toBe('warning');
     expect(sig.coversWholeFile).toBe(false);

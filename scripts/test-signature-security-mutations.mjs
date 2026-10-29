@@ -5,10 +5,12 @@ import { spawnSync } from 'node:child_process';
 
 const parser = 'src/utils/pdfSignatures.js';
 const inspector = 'src/utils/pdfSignatureInspector.js';
-const originals = new Map([parser, inspector].map((file) => [file, readFileSync(file, 'utf8')]));
+const revisions = 'src/utils/pdfSignatureRevisions.js';
+const originals = new Map([parser, inspector, revisions].map((file) => [file, readFileSync(file, 'utf8')]));
 const tests = 'src/utils/__tests__/pdfSignatureSecurity.test.js';
 const workerTests = 'src/utils/__tests__/pdfSignatureWorkerSecurity.test.js';
 const inspectorTests = 'src/utils/__tests__/pdfSignatureInspector.test.js';
+const revisionTests = 'src/utils/__tests__/pdfSignatureRevisions.test.js';
 const mutations = [
   ['F1', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && !encapsulated) {', tests, 'F1'],
   ['F2', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && findAttribute(signerInfo.signedAttrs, OID_ATTR_MESSAGE_DIGEST)) {', tests, 'F2'],
@@ -30,7 +32,21 @@ const mutations = [
   ['Inspector read error fails open', inspector, "return notCheckedSignatureReport('viewer-error', `PDF bytes cannot be read: ${String(err?.message ?? err)}`);",
     'return { signatures: [] };', inspectorTests, 'I2'],
   ['Worker timeout code lost', inspector, "markBroken(handle, `signature worker timeout after ${timeoutMs} ms`, 'timeout');",
-    'markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);', workerTests, 'F6 timeout']
+    'markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);', workerTests, 'F6 timeout'],
+  // Appended-revision classifier (docs-src/pdf-signatures.md "Appended revisions").
+  ['Xref consistency check removed', revisions, 'assertXrefConsistent(log, E, tail, preSections, pre, tailRecords);', '',
+    revisionTests, 'shadow object'],
+  ['Deleted entries ignored', revisions, "if (target === 'free' && inUseAtE(n))", 'if (false)', revisionTests, 'deletes a live object'],
+  ['Object stream number reuse allowed', revisions, 'if (inUseAtE(c.num) || tailRecords.has(c.num)) stop(', 'if (false) stop(',
+    revisionTests, 'reuses a signed object number'],
+  ['Validation data wins over content', revisions, 'if (rContent.has(n)) changes.push(n);',
+    'if (rValidation.has(n)) continue;\n    if (rContent.has(n)) changes.push(n);', revisionTests, 'shared by /DSS'],
+  ['Visible timestamp widget allowed', revisions, 'return hidden || zeroArea;', 'return true;', revisionTests, 'visible timestamp widget'],
+  ['Orphan objects accepted', revisions, 'else if (!rValidation.has(n)) inconclusive.push(n);', 'else if (false) inconclusive.push(n);',
+    revisionTests, 'orphan object'],
+  ['Unhooked parser trusted', revisions, 'if (!log?.hooked) return unclassified(', 'if (false) return unclassified(',
+    revisionTests, 'only trusted while hooked'],
+  ['Prev chain unchecked', revisions, '|| prev.asNumber() !== expected) stop(', '|| false) stop(', revisionTests, 'Prev does not chain']
 ];
 
 function run(file, name) {

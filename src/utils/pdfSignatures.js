@@ -17,6 +17,8 @@
  * @module utils/pdfSignatures
  */
 
+import { classifyAppendedRevisions, createRevisionLog, installRevisionLogHooks } from './pdfSignatureRevisions.js';
+
 /**
  * One inspected PDF signature (level-1 integrity view).
  *
@@ -694,7 +696,7 @@ function pssParameters(algParams) {
   return out;
 }
 
-async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts) {
+async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts, revisions, pdfLib) {
   if (!ctx.pending) return; // dictionary level already decided (format, /Contents, ByteRange)
   ctx.pending = false;
   asn1jsRef = asn1jsLib;
@@ -916,14 +918,15 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
     return;
   }
   info.coversWholeFile = false;
-  // Stage 3 replaces this end-of-file rule with the revision classifier.
   if (extensionCoveredByLaterSignature(ctx, allContexts, bytes.length)) {
     setIntegrity(info, 'intact', 'extended-by-later-signature',
       'file extended by later signature(s) after this one (incremental update)');
-  } else {
-    setIntegrity(info, 'modified-after-signing', 'unclassified-change-after-signing',
-      'file was extended after signing outside the covered byte range (incremental update)');
+    return;
   }
+  // What did the unsigned revision(s) after this signature change? Anything the
+  // classifier cannot prove harmless stays modified-after-signing.
+  const tail = classifyAppendedRevisions(revisions, ctx.byteRange[2] + ctx.byteRange[3], pdfLib);
+  setIntegrity(info, tail.integrity, tail.code, tail.reason);
 }
 
 function trimSerial(b) {
@@ -1243,6 +1246,10 @@ async function parseWithSourceSpans(bytes, pdfLib) {
     parsedDicts.push(dict); // Preserve signatures superseded in later revisions too.
     return dict;
   };
+  // Object positions, cross-reference sections and trailers for the appended-revision
+  // classifier; left uninstalled (classifier answers "unclassified") on an unexpected shape.
+  const revisions = createRevisionLog();
+  installRevisionLogHooks(parser, revisions);
   let depth = 0;
   let count = 0;
   let decodedTotal = 0;
@@ -1277,6 +1284,7 @@ async function parseWithSourceSpans(bytes, pdfLib) {
         const content = decoded.decode();
         decodedTotal += content.length;
         if (content.length > maxDecoded || decodedTotal > 32 * 1024 * 1024) fail('inspection-limit', 'PDF structural stream inspection budget exceeded');
+        revisions.noteStream(pdfText(object.dict.lookup(pdfLib.PDFName.of('Type'))), object.dict, content, depth);
         const dict = object.dict.clone();
         dict.delete(pdfLib.PDFName.of('Filter'));
         dict.delete(pdfLib.PDFName.of('DecodeParms'));
@@ -1293,7 +1301,7 @@ async function parseWithSourceSpans(bytes, pdfLib) {
     throw limit ?? err;
   }
   if (limit) throw limit;
-  return { context, sourceSpans, parsedDicts };
+  return { context, sourceSpans, parsedDicts, revisions };
 }
 
 /**
@@ -1381,7 +1389,7 @@ export async function collectPdfSignatures(pdfBytes) {
     ((contexts[a].byteRange?.[2] ?? 0) + (contexts[a].byteRange?.[3] ?? 0)));
   for (const i of verificationOrder) {
     try {
-      await verifySignatureEntry(entries[i], contexts[i], bytes, pkijsLib, asn1jsLib, contexts);
+      await verifySignatureEntry(entries[i], contexts[i], bytes, pkijsLib, asn1jsLib, contexts, pdfDoc.revisions, pdfLib);
     } catch (err) {
       contexts[i].pending = false;
       setIntegrityFromError(entries[i], err, 'unexpected verification failure');

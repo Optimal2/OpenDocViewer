@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 50. Line count: 20102. JSDoc symbol count: 827.
+File count: 51. Line count: 20812. JSDoc symbol count: 842.
 
 ## src/utils/compareCurtain.js
 
@@ -497,11 +497,34 @@ Symbols:
 - `module:utils/pdfSignatureInspector.getDocumentSignatures` (function) - Inspect the signatures of one document.
 - `module:utils/pdfSignatureInspector.disposePdfSignatureWorker` (function) - Terminate the signature worker \(e.g.
 
+## src/utils/pdfSignatureRevisions.js
+
+Appended\-revision classifier for PDF signatures.
+
+Exports: `createRevisionLog`, `installRevisionLogHooks`, `classifyAppendedRevisions`, `decodeXrefStream`
+
+Symbols:
+
+- `module:utils/pdfSignatureRevisions` (module) - Appended\-revision classifier for PDF signatures.
+- `module:utils/pdfSignatureRevisions~RevisionVerdict` (typedef) - No description.
+- `module:utils/pdfSignatureRevisions~EXEMPT_CATALOG_KEYS` (constant) - Catalog entries an unsigned update may add or change without touching content.
+- `module:utils/pdfSignatureRevisions~DTS_FIELD_KEYS` (constant) - Keys a new document\-timestamp field \(merged with its widget\) may carry.
+- `module:utils/pdfSignatureRevisions~DTS_WIDGET_KEYS` (constant) - Keys a separate widget of a new document\-timestamp field may carry.
+- `module:utils/pdfSignatureRevisions.createRevisionLog` (function) - Create an empty revision log.
+- `module:utils/pdfSignatureRevisions~noteStream` (function) - Called by the structural\-stream decoder for a top\-level ObjStm/XRef stream.
+- `module:utils/pdfSignatureRevisions.installRevisionLogHooks` (function) - Install the revision\-log hooks on a pdf\-lib PDFParser INSTANCE \(never on a prototype\).
+- `module:utils/pdfSignatureRevisions~Verdict` (class) - No description.
+- `module:utils/pdfSignatureRevisions.classifyAppendedRevisions` (function) - Classify the unsigned data appended after a signature's covered range.
+- `module:utils/pdfSignatureRevisions~revisionMaps` (function) - The state at E \( pre : last definition before E\), the appended definitions per object number, and the final state \( post : pdf\-lib's last definition\).
+- `module:utils/pdfSignatureRevisions~assertXrefConsistent` (function) - Step 2 \(mandatory, design flag F\-a\): every appended cross\-reference entry must point at the definition pdf\-lib used, so pdf.js \(offsets\) and pdf\-lib \(last definition\) see the same...
+
 ## src/utils/pdfSignatures.js
 
 PDF signature collection \- level 1 integrity inspection.
 
 Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `notCheckedSignatureReport`, `indeterminateSignatureReport`, `installIndirectObjectHeaderProbe`, `collectPdfSignatures`
+
+Local imports: `src/utils/pdfSignatureRevisions.js`
 
 Symbols:
 
