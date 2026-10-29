@@ -244,7 +244,7 @@ line:
 ```text
 > node tools/site-config-generator/site-config-generator.mjs check --profile <work>\example-hospital.profile.json --config <work>\odv.site.config.js --sample <work>\next-release.sample.js
 Profile: Example Hospital
-Sample:  <work>\next-release.sample.js (OpenDocViewer 2.11.0)
+Sample:  <work>\next-release.sample.js (custom --sample; no version inferred)
 Config:  <work>\odv.site.config.js
 Keys that differ:
   changed   toolbar.largeButtons  regenerated: false  existing: true
@@ -349,8 +349,22 @@ ERROR: The profile does not match the sample:
 
   The same applies to unterminated strings, template literals, regular expressions, block comments
   and unbalanced brackets. A nested block that does not parse as a plain literal is not an error by
-  itself, but its keys cannot be addressed. Values themselves may be any expression; they are
-  replaced as a whole.
+  itself, but its keys cannot be addressed. Values themselves may be expressions, including
+  functions; they are replaced as a whole.
+- **Regular expressions versus division.** The scanner decides whether a `/` starts a regular
+  expression from the previous significant token, ignoring whitespace and comments, the way a
+  JavaScript lexer does: after an identifier, a number, a string, a template, a regex, `)`, `]`,
+  `++` or `--` it is division; after `return`, `typeof`, `instanceof`, `in`, `of`, `delete`,
+  `void`, `new`, `do`, `else`, `case`, `yield`, `await` or `throw` (not as a property name after
+  `.`), after `}`, and after any other operator or punctuator it starts a regex. The residual
+  limit is the context a real parser would need: a regex directly after a `)` that closes a
+  statement head (`if (x) /re/.test(s)`), and a division directly after an object literal
+  (`{} / 2`), are both misread. Both are rare in a configuration file, and when they occur, the
+  sample usually fails with a parse error such as `unterminated regular expression literal`.
+  A misread that does not cause a parse error typically shows up as an addressed key reported as
+  missing although the sample has it, or as a failed verification. The tool never writes a file
+  whose values it has not verified through `node:vm`; that verification compares data values, not
+  the bodies of functions or regular expressions (see below).
 - **`--out` is required.** `generate` without `--out` is a usage error (exit 2). The tool never writes
   `public/odv.site.config.js` or any other file unless you name it.
 - **Overwrite protection.** An existing `--out` file is replaced only when its first line is the

@@ -10,7 +10,9 @@ import {
   HEADER_MARKER,
   evaluateSiteConfig,
   main,
+  normalizeProfile,
   readSampleVersion,
+  verifyGenerated,
 } from './site-config-generator.mjs';
 
 const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -439,5 +441,165 @@ test('a custom sample is named honestly in the generated header', () => {
   assert.ok(header.includes(sample), 'header names the actual custom sample');
   assert.match(header, /custom --sample/);
   assert.equal(header.includes(`OpenDocViewer ${readSampleVersion()}`), false, 'no version is inferred for a custom sample');
-  assert.equal(run(['check', '--profile', EXAMPLE_PROFILE, '--sample', sample, '--config', out]).code, 0);
+  const checked = run(['check', '--profile', EXAMPLE_PROFILE, '--sample', sample, '--config', out]);
+  assert.equal(checked.code, 0);
+
+  // The console status line agrees with the header: no version for a custom sample.
+  const customLine = `Sample:  ${sample} (custom --sample; no version inferred)`;
+  for (const result of [generated, checked]) {
+    assert.ok(result.stdout.split('\n').includes(customLine), result.stdout);
+    assert.equal(result.stdout.includes('OpenDocViewer '), false, result.stdout);
+  }
+  const shipped = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', path.join(dir, 'shipped.site.js')]);
+  assert.equal(shipped.code, 0, shipped.stderr);
+  assert.ok(shipped.stdout.split('\n').includes(`Sample:  ${DEFAULT_SAMPLE} (OpenDocViewer ${readSampleVersion()})`), shipped.stdout);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Scanner: regular expression versus division is decided by the previous token
+// ---------------------------------------------------------------------------------------------
+
+function generateKeep(dir, name, sampleText) {
+  const sample = path.join(dir, `${name}.sample.js`);
+  const out = path.join(dir, `${name}.site.js`);
+  fs.writeFileSync(sample, sampleText, 'utf8');
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { keep: 2 } }, `${name}.profile.json`);
+  return { result: run(['generate', '--profile', profile, '--sample', sample, '--out', out]), out };
+}
+
+test('a "/" after ")", "]", a number, an identifier or "++" is division, not a regex', () => {
+  const dir = tempDir();
+  // One division per line: misread as a regex, it would run to the end of the line and fail.
+  const body = (lines) => `window.__ODV_SITE_CONFIG__ = {\n  cb: function (s, n) {\n${lines.map((l) => `    ${l}\n`).join('')}    return s;\n  },\n  keep: 1\n};\n`;
+  const samples = {
+    'paren-top': 'const scale = (2) / 1;\nwindow.__ODV_SITE_CONFIG__ = { keep: 1 };\n',
+    'bracket-top': 'const pick = [1, 2][1] / 2;\nwindow.__ODV_SITE_CONFIG__ = { keep: 1 };\n',
+    'paren-value': 'window.__ODV_SITE_CONFIG__ = {\n  half: (4) / 2,\n  quarter: [8][0] / 4,\n  keep: 1\n};\n',
+    'value-tokens': 'window.__ODV_SITE_CONFIG__ = {\n  ratio: 6 / 3,\n  third: Math.PI / 3,\n  keep: 1\n};\n',
+    'value-postfix': 'let n = 1;\nwindow.__ODV_SITE_CONFIG__ = {\n  step: n++ / (2),\n  back: n-- / (2),\n  keep: 1\n};\n',
+    'paren-body': body(['const a = (s.length) / 2;', 'const b = [1, 2][1] / 1;']),
+    'postfix': body(['const h = (n++ / 2);', 'const g = (n-- / 2);']),
+    // A reserved word used as a property name after '.' is an identifier, so '/' is division.
+    'keyword-property': body(['const a = (s.in / 2);', 'const b = (s.return / 1);']),
+  };
+  for (const [name, text] of Object.entries(samples)) {
+    const { result, out } = generateKeep(dir, name, text);
+    assert.equal(result.code, 0, `${name}: ${result.stderr}`);
+    assert.match(result.stdout, /set {3}keep {2}1 -> 2/, name);
+    assert.equal(siteOf(out).keep, 2, name);
+  }
+});
+
+test('a "/" after an expression keyword or an operator starts a regex, even across whitespace and comments', () => {
+  const dir = tempDir();
+  // Each regex contains a '}' or ',' that would end the value early if it were read as division.
+  const bodies = {
+    'return': 'return /}/;',
+    'return-comment': 'return /* a comment */ /}/;',
+    'return-newline-comment': 'const r = s;\n    // a comment\n    return /,}/.test(r);',
+    'typeof': 'return typeof /}/;',
+    'void': 'return void /}/;',
+    'throw': 'if (!s) throw /}/; return s;',
+    'operators': 'const a = s || /}/; const b = [/}/, /,/]; return a && b && !/}/.test(s) ? /}/ : (/,/);',
+    'arrow': 'const f = (x) => /}/.test(x); return f(s);',
+  };
+  for (const [name, body] of Object.entries(bodies)) {
+    const text = `window.__ODV_SITE_CONFIG__ = {\n  cb: function (s) {\n    ${body}\n  },\n  keep: 1\n};\n`;
+    const { result, out } = generateKeep(dir, name, text);
+    assert.equal(result.code, 0, `${name}: ${result.stderr}`);
+    assert.equal(siteOf(out).keep, 2, name);
+    assert.ok(readGenerated(out).includes(body), `${name}: the function body is untouched`);
+  }
+
+  // The same rule directly in a property value, outside any bracket.
+  const values = {
+    'value-typeof': "kind: typeof /,}/,\n  text: 'a' + /,/.source,",
+    'value-void-comment': 'none: void /* note */ /,/,',
+  };
+  for (const [name, props] of Object.entries(values)) {
+    const { result, out } = generateKeep(dir, name, `window.__ODV_SITE_CONFIG__ = {\n  ${props}\n  keep: 1\n};\n`);
+    assert.equal(result.code, 0, `${name}: ${result.stderr}`);
+    assert.equal(siteOf(out).keep, 2, name);
+  }
+});
+
+test('"}" is read as a block end: a "/" after it starts a regex', () => {
+  const dir = tempDir();
+  // Block end followed by a regex statement: valid JavaScript and supported.
+  const block = generateKeep(dir, 'block-end',
+    'window.__ODV_SITE_CONFIG__ = {\n  cb: function (s) { if (s) { } /}/.test(s); return s; },\n  keep: 1\n};\n');
+  assert.equal(block.result.code, 0, block.result.stderr);
+  assert.equal(siteOf(block.out).keep, 2);
+
+  // The opposite reading (an object literal divided by something) is not supported, and fails
+  // loudly instead of silently mis-scanning the brackets.
+  const divided = generateKeep(dir, 'object-divided', 'window.__ODV_SITE_CONFIG__ = {\n  n: {} / 2,\n  keep: 1\n};\n');
+  assert.equal(divided.result.code, 1);
+  assert.match(divided.result.stderr, /Sample parse error at line 2, column 9: unterminated regular expression literal/);
+  assert.equal(fs.existsSync(divided.out), false);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Profile validation and the node:vm verification layer
+// ---------------------------------------------------------------------------------------------
+
+test('a profile without a non-empty name is rejected', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'unnamed.site.js');
+  for (const [i, profile] of [{ set: {} }, { name: '   ', set: {} }, { name: 7 }].entries()) {
+    const file = writeProfile(dir, profile, `unnamed-${i}.json`);
+    const result = run(['generate', '--profile', file, '--out', out]);
+    assert.equal(result.code, 1, JSON.stringify(profile));
+    assert.match(result.stderr, /The profile needs a non-empty "name" string\./);
+    assert.equal(fs.existsSync(out), false);
+  }
+});
+
+test('a dotted path with an empty segment is rejected', () => {
+  for (const p of ['print..defaultPageMode', '.print', 'print.', '+print..exampleFlag']) {
+    assert.throws(() => normalizeProfile({ name: 'Example Hospital', set: { [p]: 1 } }),
+      { name: 'GeneratorError', message: `set: "${p.replace(/^\+/, '')}" is not a valid dotted path.` }, p);
+  }
+  assert.throws(() => normalizeProfile({ name: 'Example Hospital', unset: ['viewer..flag'] }),
+    { name: 'GeneratorError', message: 'unset: "viewer..flag" is not a valid dotted path.' });
+});
+
+const VERIFY_SAMPLE = 'window.__ODV_SITE_CONFIG__ = { a: 1, b: 1, group: { x: 1 } };\n';
+
+function operationsOf(profile) {
+  return normalizeProfile({ name: 'Example Hospital', ...profile }).operations;
+}
+
+function assertVerifyFails(generated, profile, message, loaderText) {
+  assert.throws(() => verifyGenerated(generated, VERIFY_SAMPLE, operationsOf(profile), loaderText),
+    (err) => err.name === 'GeneratorError' && message.test(err.message) && /^Verification of the generated configuration failed:/.test(err.message),
+    `expected ${message}`);
+}
+
+test('verification accepts a text that matches the profile exactly (baseline for the failure tests)', () => {
+  const loader = 'window.__ODV_CONFIG__ = JSON.parse(JSON.stringify(window.__ODV_SITE_CONFIG__));\n';
+  const generated = 'window.__ODV_SITE_CONFIG__ = { a: 2, group: { x: 1 } };\n';
+  assert.equal(verifyGenerated(generated, VERIFY_SAMPLE, operationsOf({ set: { a: 2 }, unset: ['b'] }), loader), 4);
+});
+
+test('verification fails when a value the profile did not address changed', () => {
+  assertVerifyFails('window.__ODV_SITE_CONFIG__ = { a: 2, b: 1, group: { x: 9 } };\n', { set: { a: 2 } },
+    /values not addressed by the profile differ from the sample \(the text edit touched something else\)/);
+});
+
+test('verification fails when an unset key is still present', () => {
+  assertVerifyFails(VERIFY_SAMPLE, { unset: ['b'] }, /\n {2}- b: expected the key to be absent, found 1/);
+});
+
+test('verification fails when a set value differs from the profile value', () => {
+  assertVerifyFails('window.__ODV_SITE_CONFIG__ = { a: 3, b: 1, group: { x: 1 } };\n', { set: { a: 2 } },
+    /\n {2}- a: expected 2, found 3/);
+});
+
+test('verification fails when a correct site value does not survive the odv.config.js merge', () => {
+  // The site object is right; the stand-in loader merges it but overrides group.x, so the merged
+  // group object lacks the profile value (containsDeep recurses into the object).
+  const loader = 'window.__ODV_CONFIG__ = { group: Object.assign({}, window.__ODV_SITE_CONFIG__.group, { x: 0, extra: true }) };\n';
+  assertVerifyFails('window.__ODV_SITE_CONFIG__ = { a: 1, b: 1, group: { x: 5 } };\n', { set: { group: { x: 5 } } },
+    /\n {2}- group: not effective after odv\.config\.js merge \(found \{"x":0,"extra":true\}\)/, loader);
 });

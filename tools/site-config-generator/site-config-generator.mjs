@@ -61,8 +61,10 @@
  *
  * LIMITATIONS
  *   - The sample object literal may contain plain `key: value` properties only (no spread,
- *     shorthand, methods or computed keys). Values may be any expression; they are replaced as a
- *     whole and serialized as JS literals (strings single-quoted).
+ *     shorthand, methods or computed keys). Values may be expressions; they are replaced as a
+ *     whole and serialized as JS literals (strings single-quoted). The scanner decides regex
+ *     versus division from the previous token, so a regex literal directly after ')' (for example
+ *     `if (x) /re/.test(s)`) is misread; see the README for the exact residual limits.
  *   - Profile values must be JSON values: string, number, boolean, null, array or object.
  */
 
@@ -120,11 +122,37 @@ function fromLf(text, eol) {
 
 const IDENT_START = /[A-Za-z_$]/;
 const IDENT_PART = /[\w$]/;
+const DIGIT = /[0-9]/;
+const BRACKET_PAIRS = { '{': '}', '[': ']', '(': ')' };
+
+/**
+ * Reserved words that can be followed by an expression, so a '/' after them starts a regular
+ * expression. After any other identifier a '/' is division.
+ */
+const REGEX_AFTER_WORDS = new Set([
+  'return', 'typeof', 'instanceof', 'in', 'of', 'delete', 'void', 'new', 'do', 'else', 'case',
+  'yield', 'await', 'throw',
+]);
+
+/**
+ * Whether a '/' after a closing bracket starts a regular expression. After ')' and ']' it is
+ * division. '}' is ambiguous in JavaScript (block end or object-literal end); it is read as a
+ * block end, so a '/' after it starts a regex. That reading is the one the top-level scan already
+ * used, and when it is wrong (an object literal divided by something, which is never useful) the
+ * regex scan fails loudly instead of silently swallowing the brackets of a real regex.
+ */
+function regexAllowedAfterClose(c) {
+  return c === '}';
+}
 
 /**
  * Minimal JavaScript scanner over a source text. It understands whitespace, comments, string
- * and template literals (including `${}` nesting), regular-expression literals in value position
- * and bracket nesting. That is all the sample needs; it is not a general JS parser.
+ * and template literals (including `${}` nesting), regular-expression literals and bracket
+ * nesting. That is all the sample needs; it is not a general JS parser.
+ *
+ * Whether a '/' starts a regular expression or is division is decided from the last significant
+ * TOKEN, as a JavaScript lexer does (see scanPlainToken and regexAllowedAfterClose); comments and
+ * whitespace between tokens do not change it.
  */
 class Scanner {
   constructor(text) {
@@ -154,6 +182,40 @@ class Scanner {
         return pos;
       }
     }
+  }
+
+  /**
+   * Consume one plain token at pos: an identifier or reserved word, a number, or a punctuator
+   * (callers handle strings, templates, regular expressions and nested brackets themselves).
+   * Returns the position after the token and whether a following '/' starts a regex:
+   *   - after an identifier, a number, '++' or '--': no (division);
+   *   - after a word in REGEX_AFTER_WORDS: yes, unless it is a property name after '.';
+   *   - after ')' or ']': no; after '}': see regexAllowedAfterClose;
+   *   - after any other punctuator or operator: yes.
+   * @param {number} pos
+   * @param {boolean} afterDot  the previous significant token was '.'
+   * @returns {{ next: number, regexAllowed: boolean, dot: boolean }}
+   */
+  scanPlainToken(pos, afterDot) {
+    const t = this.text;
+    const c = t[pos];
+    if (IDENT_START.test(c)) {
+      let i = pos + 1;
+      while (i < t.length && IDENT_PART.test(t[i])) i++;
+      return { next: i, regexAllowed: !afterDot && REGEX_AFTER_WORDS.has(t.slice(pos, i)), dot: false };
+    }
+    if (DIGIT.test(c) || (c === '.' && DIGIT.test(t[pos + 1] || ''))) {
+      let i = pos + 1;
+      while (i < t.length && (IDENT_PART.test(t[i]) || t[i] === '.')) i++;
+      return { next: i, regexAllowed: false, dot: false };
+    }
+    if ((c === '+' || c === '-') && t[pos + 1] === c) {
+      return { next: pos + 2, regexAllowed: false, dot: false };
+    }
+    if (c === ')' || c === ']' || c === '}') {
+      return { next: pos + 1, regexAllowed: regexAllowedAfterClose(c), dot: false };
+    }
+    return { next: pos + 1, regexAllowed: true, dot: c === '.' };
   }
 
   /** Skip a '...' or "..." string starting at pos; return the position after it. */
@@ -203,27 +265,27 @@ class Scanner {
   /** Skip a bracketed group ({, [ or ( at pos) including nested content; return position after. */
   skipBalanced(pos) {
     const t = this.text;
-    const pairs = { '{': '}', '[': ']', '(': ')' };
-    const stack = [pairs[t[pos]]];
+    const stack = [BRACKET_PAIRS[t[pos]]];
     let i = pos + 1;
     let regexAllowed = true;
+    let afterDot = false;
     while (i < t.length) {
       i = this.skipTrivia(i);
       const c = t[i];
       if (c === undefined) break;
-      if (c === '\'' || c === '"') { i = this.skipString(i); regexAllowed = false; continue; }
-      if (c === '`') { i = this.skipTemplate(i); regexAllowed = false; continue; }
-      if (c === '/' && regexAllowed) { i = this.skipRegex(i); regexAllowed = false; continue; }
-      if (pairs[c]) { stack.push(pairs[c]); i++; regexAllowed = true; continue; }
+      if (c === '\'' || c === '"') { i = this.skipString(i); regexAllowed = false; afterDot = false; continue; }
+      if (c === '`') { i = this.skipTemplate(i); regexAllowed = false; afterDot = false; continue; }
+      if (c === '/' && regexAllowed) { i = this.skipRegex(i); regexAllowed = false; afterDot = false; continue; }
+      if (BRACKET_PAIRS[c]) { stack.push(BRACKET_PAIRS[c]); i++; regexAllowed = true; afterDot = false; continue; }
       if (c === '}' || c === ']' || c === ')') {
         if (stack.pop() !== c) this.fail(i, `unbalanced '${c}'`);
         i++;
         if (stack.length === 0) return i;
-        regexAllowed = false;
+        regexAllowed = regexAllowedAfterClose(c);
+        afterDot = false;
         continue;
       }
-      regexAllowed = !IDENT_PART.test(c);
-      i++;
+      ({ next: i, regexAllowed, dot: afterDot } = this.scanPlainToken(i, afterDot));
     }
     return this.fail(pos, 'unbalanced bracket');
   }
@@ -242,6 +304,7 @@ class Scanner {
     let child = null;
     let tokens = 0;
     let regexAllowed = true;
+    let afterDot = false;
     for (;;) {
       i = this.skipTrivia(i);
       const c = t[i];
@@ -250,27 +313,26 @@ class Scanner {
         if (tokens === 0) this.fail(i, 'missing property value');
         return { end, stop: i, child };
       }
-      if (c === '{') {
-        if (tokens === 0) child = this.tryParseObject(i);
+      if (c === ']' || c === ')') this.fail(i, `unexpected '${c}'`);
+      if (BRACKET_PAIRS[c]) {
+        if (c === '{' && tokens === 0) child = this.tryParseObject(i);
         i = this.skipBalanced(i);
-        regexAllowed = false;
-      } else if (c === '[' || c === '(') {
-        i = this.skipBalanced(i);
-        regexAllowed = false;
+        regexAllowed = regexAllowedAfterClose(BRACKET_PAIRS[c]);
+        afterDot = false;
       } else if (c === '\'' || c === '"') {
         i = this.skipString(i);
         regexAllowed = false;
+        afterDot = false;
       } else if (c === '`') {
         i = this.skipTemplate(i);
         regexAllowed = false;
+        afterDot = false;
       } else if (c === '/' && regexAllowed) {
         i = this.skipRegex(i);
         regexAllowed = false;
-      } else if (c === ']' || c === ')') {
-        this.fail(i, `unexpected '${c}'`);
+        afterDot = false;
       } else {
-        regexAllowed = !IDENT_PART.test(c) && c !== '.';
-        i++;
+        ({ next: i, regexAllowed, dot: afterDot } = this.scanPlainToken(i, afterDot));
       }
       tokens++;
       end = i;
@@ -359,6 +421,7 @@ export function parseSiteConfigText(text) {
   const scanner = new Scanner(text);
   let i = 0;
   let regexAllowed = true;
+  let afterDot = false;
   while (i < text.length) {
     i = scanner.skipTrivia(i);
     const c = text[i];
@@ -366,26 +429,25 @@ export function parseSiteConfigText(text) {
     if (c === '\'' || c === '"') {
       i = scanner.skipString(i);
       regexAllowed = false;
+      afterDot = false;
     } else if (c === '`') {
       i = scanner.skipTemplate(i);
       regexAllowed = false;
+      afterDot = false;
     } else if (c === '/' && regexAllowed) {
       i = scanner.skipRegex(i);
       regexAllowed = false;
-    } else if (IDENT_START.test(c)) {
-      const start = i++;
-      while (i < text.length && IDENT_PART.test(text[i])) i++;
-      if (text.slice(start, i) === ASSIGNMENT_TARGET) {
+      afterDot = false;
+    } else {
+      const start = i;
+      ({ next: i, regexAllowed, dot: afterDot } = scanner.scanPlainToken(i, afterDot));
+      if (IDENT_START.test(c) && text.slice(start, i) === ASSIGNMENT_TARGET) {
         let cursor = scanner.skipTrivia(i);
         if (text[cursor] === '=' && text[cursor + 1] !== '=' && text[cursor + 1] !== '>') {
           cursor = scanner.skipTrivia(cursor + 1);
           if (text[cursor] === '{') return scanner.parseObject(cursor);
         }
       }
-      regexAllowed = false;
-    } else {
-      regexAllowed = !IDENT_PART.test(c) && c !== '.';
-      i++;
     }
   }
   throw new GeneratorError(`Could not find "${ASSIGNMENT_TARGET} = {" in the sample.`);
@@ -1129,6 +1191,13 @@ function buildFromOptions(options, existingText) {
   return { ...result, profile, samplePath, version };
 }
 
+/** Status line naming the sample; claims a version only where the generated header does. */
+function sampleLine(result) {
+  return samePath(result.samplePath, DEFAULT_SAMPLE)
+    ? `Sample:  ${result.samplePath} (OpenDocViewer ${result.version})`
+    : `Sample:  ${path.resolve(result.samplePath)} (custom --sample; no version inferred)`;
+}
+
 function runGenerate(options, log) {
   const out = path.resolve(options.out);
   const samplePath = options.sample || DEFAULT_SAMPLE;
@@ -1142,7 +1211,7 @@ function runGenerate(options, log) {
   }
   const result = buildFromOptions(options, existing);
   log(`Profile: ${result.profile.name}`);
-  log(`Sample:  ${result.samplePath} (OpenDocViewer ${result.version})`);
+  log(sampleLine(result));
   log('Changes (old -> new):');
   for (const line of formatChanges(result.changes)) log(line);
   log(`Verified ${result.verified} assertion(s) through node:vm (site object and odv.config.js merge).`);
@@ -1156,8 +1225,8 @@ function runCheck(options, log) {
   const result = buildFromOptions(options, configText);
   const comparison = compareConfigs(result.text, configText);
   log(`Profile: ${result.profile.name}`);
-  log(`Sample:  ${result.samplePath} (OpenDocViewer ${result.version})`);
-  log(`Config:  ${path.resolve(options.config)}`);
+  log(sampleLine(result));
+  log(`Config:${path.resolve(options.config)}`);
   for (const line of comparison.lines) log(line);
   if (comparison.identical) {
     log('OK: the site configuration matches the sample plus the profile.');
