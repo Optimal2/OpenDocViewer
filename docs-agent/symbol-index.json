@@ -29553,7 +29553,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1434,
+    "line": 1439,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -29617,7 +29617,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1222,
+    "line": 1227,
     "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
     "params": [
       {
@@ -29648,7 +29648,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1211,
+    "line": 1216,
     "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
     "params": [
       {
@@ -29679,7 +29679,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1256,
+    "line": 1261,
     "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
     "params": [
       {
@@ -29711,7 +29711,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1200,
+    "line": 1205,
     "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
     "params": [
       {
@@ -29857,7 +29857,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1182,
+    "line": 1187,
     "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
     "params": [
       {

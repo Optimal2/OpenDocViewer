@@ -125,7 +125,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfSignatureDocuments.js</code> | 255 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 195 | 2 | 5 | high | PDF signature inspection - the single entry point for application code. |
 | <code>src/utils/pdfSignatureRevisions.js</code> | 702 | 1 | 15 | high | Appended-revision classifier for PDF signatures. |
-| <code>src/utils/pdfSignatures.js</code> | 1514 | 3 | 26 | high | PDF signature collection - level 1 integrity inspection. |
+| <code>src/utils/pdfSignatures.js</code> | 1519 | 3 | 26 | high | PDF signature collection - level 1 integrity inspection. |
 | <code>src/utils/pdfSignatureStatus.js</code> | 300 | 6 | 21 | high | Signature UI status helpers for browser integrity. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |

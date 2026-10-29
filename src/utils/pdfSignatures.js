@@ -1135,7 +1135,12 @@ async function verifyCmsSignature(pkijsLib, asn1jsLib, { cert, signerInfo, sigAl
     if (pointSize === null || !WEBCRYPTO_HASHES.has(ecHash)) return 'unsupported';
     const inner = asn1jsLib.fromBER(bufferView(signatureBytes));
     if (inner.offset === -1) return 'malformed';
-    const raw = pkijsLib.createECDSASignatureFromCMS(inner.result, pointSize);
+    let raw;
+    try {
+      raw = pkijsLib.createECDSASignatureFromCMS(inner.result, pointSize);
+    } catch {
+      return 'malformed'; // an INTEGER longer than the curve's point size
+    }
     if (!raw || !raw.byteLength) return 'malformed';
     const namedCurve = curveNameForPointSize(pointSize);
     const key = await subtle.importKey('spki', spkiDer, { name: 'ECDSA', namedCurve, hash: ecHash }, false, ['verify']);

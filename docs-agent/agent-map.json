@@ -89,7 +89,7 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 61711,
+    "sourceLineCount": 61716,
     "docletCount": 1698,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
@@ -558,7 +558,7 @@
     {
       "path": "src/utils/pdfSignatures.js",
       "score": 90,
-      "lines": 1514,
+      "lines": 1519,
       "incomingLocalImports": 3,
       "doclets": 26,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -1568,7 +1568,7 @@
     {
       "name": "src/utils",
       "fileCount": 51,
-      "lineCount": 20925,
+      "lineCount": 20930,
       "docletCount": 845,
       "importantFiles": [
         {
@@ -50822,7 +50822,7 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1514,
+      "lines": 1519,
       "extension": ".js",
       "jsdocBlockCount": 33,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -50852,7 +50852,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1449,
+          "line": 1454,
           "kind": "dynamic"
         }
       ],
@@ -50870,22 +50870,22 @@
         {
           "name": "notCheckedSignatureReport",
           "kind": "function",
-          "line": 1200
+          "line": 1205
         },
         {
           "name": "indeterminateSignatureReport",
           "kind": "function",
-          "line": 1211
+          "line": 1216
         },
         {
           "name": "installIndirectObjectHeaderProbe",
           "kind": "function",
-          "line": 1256
+          "line": 1261
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1434
+          "line": 1439
         }
       ],
       "declarations": [
@@ -51187,102 +51187,102 @@
         {
           "name": "curveNameForPointSize",
           "kind": "function",
-          "line": 1147
+          "line": 1152
         },
         {
           "name": "hashedLength",
           "kind": "function",
-          "line": 1153
+          "line": 1158
         },
         {
           "name": "orderSignatures",
           "kind": "function",
-          "line": 1160
+          "line": 1165
         },
         {
           "name": "placeholderSignatureReport",
           "kind": "function",
-          "line": 1182
+          "line": 1187
         },
         {
           "name": "notCheckedSignatureReport",
           "kind": "function",
-          "line": 1200
+          "line": 1205
         },
         {
           "name": "indeterminateSignatureReport",
           "kind": "function",
-          "line": 1211
+          "line": 1216
         },
         {
           "name": "errorSignatureReport",
           "kind": "function",
-          "line": 1222
+          "line": 1227
         },
         {
           "name": "isPdfWhitespace",
           "kind": "function",
-          "line": 1229
+          "line": 1234
         },
         {
           "name": "isDigit",
           "kind": "function",
-          "line": 1230
+          "line": 1235
         },
         {
           "name": "installIndirectObjectHeaderProbe",
           "kind": "function",
-          "line": 1256
+          "line": 1261
         },
         {
           "name": "ws",
           "kind": "object",
-          "line": 1266
+          "line": 1271
         },
         {
           "name": "run",
           "kind": "object",
-          "line": 1267
+          "line": 1272
         },
         {
           "name": "cmt",
           "kind": "object",
-          "line": 1268
+          "line": 1273
         },
         {
           "name": "skip",
           "kind": "function",
-          "line": 1275
+          "line": 1280
         },
         {
           "name": "digitsEnd",
           "kind": "function",
-          "line": 1297
+          "line": 1302
         },
         {
           "name": "finiteFrom",
           "kind": "function",
-          "line": 1300
+          "line": 1305
         },
         {
           "name": "parseWithSourceSpans",
           "kind": "function",
-          "line": 1335
+          "line": 1340
         },
         {
           "name": "fail",
           "kind": "function",
-          "line": 1372
+          "line": 1377
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1434
+          "line": 1439
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1435
+          "line": 1440
         }
       ],
       "parseError": null,
@@ -51638,7 +51638,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1182,
+          "line": 1187,
           "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
           "params": [
             {
@@ -51675,7 +51675,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1200,
+          "line": 1205,
           "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
           "params": [
             {
@@ -51706,7 +51706,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1211,
+          "line": 1216,
           "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
           "params": [
             {
@@ -51737,7 +51737,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1222,
+          "line": 1227,
           "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
           "params": [
             {
@@ -51768,7 +51768,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1256,
+          "line": 1261,
           "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
           "params": [
             {
@@ -51800,7 +51800,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1434,
+          "line": 1439,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -51849,7 +51849,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1449,
+          "line": 1454,
           "kind": "dynamic"
         }
       ],
@@ -99468,7 +99468,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1434,
+      "line": 1439,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {
@@ -99532,7 +99532,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1222,
+      "line": 1227,
       "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
       "params": [
         {
@@ -99563,7 +99563,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1211,
+      "line": 1216,
       "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
       "params": [
         {
@@ -99594,7 +99594,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1256,
+      "line": 1261,
       "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
       "params": [
         {
@@ -99626,7 +99626,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1200,
+      "line": 1205,
       "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
       "params": [
         {
@@ -99772,7 +99772,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1182,
+      "line": 1187,
       "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
       "params": [
         {
