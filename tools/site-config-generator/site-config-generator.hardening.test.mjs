@@ -9,6 +9,7 @@ import {
   DEFAULT_LOADER,
   DEFAULT_SAMPLE,
   HEADER_MARKER,
+  PROFILE_TEMPLATE,
   REPO_ROOT,
   buildHeader,
   generateText,
@@ -768,4 +769,130 @@ test('the copied permission bits are the mode the regenerated file ends up with 
   assert.equal(result.code, 0, result.stderr);
   assert.equal(ops.statSync(real).mode & 0o7777, 0o600);
   assert.deepEqual([...modes.keys()], [real], 'no mode left behind on a temporary name');
+});
+
+// ---------------------------------------------------------------------------------------------
+// new-profile has the same destination protections and atomic write as the generation commands
+// ---------------------------------------------------------------------------------------------
+
+for (const [what, file, pattern] of [
+  ['sample', DEFAULT_SAMPLE, /must not be the sample file itself/],
+  ['loader', DEFAULT_LOADER, /must not be the loader \(odv\.config\.js\) itself/],
+]) {
+  test(`new-profile refuses the ${what} with and without --force`, () => {
+    const before = fs.readFileSync(file);
+    const calls = [];
+    const io = { writeFile: guardedWriter, fileOps: guardedOps(calls) };
+    for (const extra of [[], ['--force']]) {
+      const result = run(['new-profile', '--out', file, ...extra], io);
+      assert.equal(result.code, 1, extra.join(' '));
+      assert.match(result.stderr, new RegExp(`ERROR: --out ${pattern.source}`));
+    }
+    assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+    assert.deepEqual(fs.readFileSync(file), before);
+  });
+
+  test(`new-profile refuses a link to the ${what} with and without --force`, () => {
+    const dir = tempDir();
+    const link = path.join(dir, `${what}-link.json`);
+    fs.writeFileSync(link, '// stand-in for a symbolic link\n', 'utf8');
+    const target = fs.realpathSync(file);
+    const before = fs.readFileSync(file);
+    const calls = [];
+    const ops = guardedOps(calls, { realpathSync: linkTo(link, target), lstatSync: lstatAsLink(link) });
+    for (const extra of [[], ['--force']]) {
+      const result = run(['new-profile', '--out', link, ...extra], { writeFile: guardedWriter, fileOps: ops });
+      assert.equal(result.code, 1, extra.join(' '));
+      assert.match(result.stderr, new RegExp(`ERROR: --out ${pattern.source} \\(it is a link to `));
+      assert.ok(result.stderr.includes(target), 'the error names the link target');
+    }
+    assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+    assert.deepEqual(fs.readFileSync(file), before);
+  });
+}
+
+test('new-profile refuses a dangling symbolic link', () => {
+  const dir = tempDir();
+  const link = path.join(dir, 'dangling.json');
+  const calls = [];
+  const ops = recordingOps(calls, {
+    realpathSync: (f) => { if (path.resolve(f) === link) throw enoent(f); return fs.realpathSync(f); },
+    lstatSync: lstatAsLink(link),
+  });
+  for (const extra of [[], ['--force']]) {
+    const result = run(['new-profile', '--out', link, ...extra], { fileOps: ops });
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /is a symbolic link whose target does not exist/);
+  }
+  assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+  assert.deepEqual(fs.readdirSync(dir), []);
+});
+
+test('new-profile resolves the destination exactly once', () => {
+  const dir = tempDir();
+  const checked = path.join(dir, 'checked.json');
+  const other = path.join(dir, 'other.json');
+  const link = path.join(dir, 'link.json');
+  fs.writeFileSync(checked, 'checked before\n', 'utf8');
+  fs.writeFileSync(other, 'other before\n', 'utf8');
+  fs.writeFileSync(link, 'link stand-in\n', 'utf8');
+  const calls = [];
+  let resolutions = 0;
+  const ops = recordingOps(calls, {
+    realpathSync: (f) => {
+      if (path.resolve(f) !== link) return fs.realpathSync(f);
+      resolutions += 1;
+      return resolutions === 1 ? checked : other;
+    },
+  });
+  const result = run(['new-profile', '--out', link, '--force'], { fileOps: ops });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(resolutions, 1, 'the destination is resolved exactly once');
+  assert.equal(calls.find(([name]) => name === 'renameSync')[2], checked);
+  assert.equal(fs.readFileSync(checked, 'utf8'), PROFILE_TEMPLATE);
+  assert.equal(fs.readFileSync(other, 'utf8'), 'other before\n', 'no write uses a second resolution');
+  assert.equal(fs.readFileSync(link, 'utf8'), 'link stand-in\n');
+});
+
+test('new-profile writes the unchanged template and status line for a new file', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'example.profile.json');
+  const result = run(['new-profile', '--out', out]);
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(result.stdout, `Wrote example profile ${path.resolve(out)}`);
+  assert.equal(result.stderr, '');
+  assert.equal(fs.readFileSync(out, 'utf8'), PROFILE_TEMPLATE);
+});
+
+test('new-profile writes a temporary file and renames it instead of writing the target directly', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'example.profile.json');
+  const writes = [];
+  const calls = [];
+  const writeFile = (file, text) => {
+    writes.push([file, text]);
+    fs.writeFileSync(file, text, { encoding: 'utf8', flag: 'wx' });
+  };
+  const result = run(['new-profile', '--out', out], { writeFile, fileOps: recordingOps(calls) });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(writes.length, 1);
+  assert.notEqual(path.resolve(writes[0][0]), path.resolve(out), 'the destination is never opened for writing');
+  assert.equal(path.dirname(writes[0][0]), path.dirname(out));
+  assert.equal(writes[0][1], PROFILE_TEMPLATE);
+  const renames = calls.filter(([name]) => name === 'renameSync');
+  assert.equal(renames.length, 1);
+  assert.deepEqual(renames[0].slice(1), [writes[0][0], fs.realpathSync(out)]);
+  assert.deepEqual(fs.readdirSync(dir), ['example.profile.json']);
+});
+
+test('new-profile keeps the exact existing-file error without --force', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'existing.profile.json');
+  fs.writeFileSync(out, 'keep this profile\n', 'utf8');
+  const result = run(['new-profile', '--out', out]);
+  assert.equal(result.code, 1);
+  assert.equal(result.stderr, `ERROR: "${path.resolve(out)}" already exists. Re-run with --force to replace it.`);
+  assert.equal(result.stdout, '');
+  assert.equal(fs.readFileSync(out, 'utf8'), 'keep this profile\n');
+  assert.deepEqual(fs.readdirSync(dir), ['existing.profile.json']);
 });

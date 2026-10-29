@@ -93,13 +93,13 @@
  *     a failure to read or apply them fails the write instead of loosening them silently. A
  *     symlinked destination is written through: the rename goes onto the link's target (with the
  *     temporary file in the target's directory), so the link stays intact; a dangling link is
- *     refused. The destination is resolved exactly ONCE per output file (generate and every
- *     version of generate-all); the overwrite protection, --force, the sample/loader refusal and
- *     the rename all use that one resolved target, never a second resolution. The temporary file
- *     is removed after a failure only when this run created it, and a failed removal is reported
- *     next to the original error, never instead of it.
- *   - generate and generate-all refuse, also with --force, an output that is or leads (through a
- *     link) to the shipped sample public/odv.site.config.sample.js or the loader
+ *     refused. The destination is resolved exactly ONCE per output file (generate, every version
+ *     of generate-all and new-profile); the overwrite protection, --force, the sample/loader
+ *     refusal and the rename all use that one resolved target, never a second resolution. The
+ *     temporary file is removed after a failure only when this run created it, and a failed removal
+ *     is reported next to the original error, never instead of it.
+ *   - generate, generate-all and new-profile refuse, also with --force, an output that is or leads
+ *     (through a link) to the shipped sample public/odv.site.config.sample.js or the loader
  *     public/odv.config.js; generate also refuses its own --sample and --loader files.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
  *     profile value is asserted on `window.__ODV_SITE_CONFIG__`; then the selected odv.config.js is
@@ -1651,12 +1651,14 @@ function runCheck(options, log) {
   return 1;
 }
 
-function runNewProfile(options, log) {
+function runNewProfile(options, log, files) {
   const out = path.resolve(options.out);
-  if (fs.existsSync(out) && !options.force) {
+  const dest = resolveDestination(out, files);
+  assertNotProtected(dest, protectedFilesFor({}), '--out');
+  if (fs.existsSync(dest.target) && !options.force) {
     throw new GeneratorError(`"${out}" already exists. Re-run with --force to replace it.`);
   }
-  fs.writeFileSync(out, PROFILE_TEMPLATE, 'utf8');
+  writeFileAtomically(dest, PROFILE_TEMPLATE, files);
   log(`Wrote example profile ${out}`);
   return 0;
 }
@@ -1686,7 +1688,7 @@ export function main(argv, io = {}) {
     if (parsed.command === 'generate') return runGenerate(parsed.options, log, files);
     if (parsed.command === 'check') return runCheck(parsed.options, log);
     if (parsed.command === 'generate-all') return runGenerateAll(parsed.options, log, files);
-    return runNewProfile(parsed.options, log);
+    return runNewProfile(parsed.options, log, files);
   } catch (err) {
     if (err instanceof GeneratorError) {
       error(`ERROR: ${err.message}`);
