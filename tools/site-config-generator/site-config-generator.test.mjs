@@ -16,7 +16,8 @@ import {
 const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(TOOL_DIR, 'site-config-generator.mjs');
 const EXAMPLE_PROFILE = path.join(TOOL_DIR, 'example.profile.json');
-const SAMPLE_TEXT = fs.readFileSync(DEFAULT_SAMPLE, 'utf8');
+// LF-normalised, like readGenerated() below, so fragments and line diffs match on CRLF checkouts.
+const SAMPLE_TEXT = fs.readFileSync(DEFAULT_SAMPLE, 'utf8').replace(/\r\n/g, '\n');
 
 const tempRoots = [];
 
@@ -47,6 +48,12 @@ function siteOf(file) {
   return evaluateSiteConfig(fs.readFileSync(file, 'utf8')).site;
 }
 
+// The generator keeps the sample's line endings, so a Windows checkout with core.autocrlf=true
+// produces CRLF output. Assertions below are written with LF; normalise before matching.
+function readGenerated(file) {
+  return fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+}
+
 function replaceOnce(text, before, after) {
   const first = text.indexOf(before);
   assert.notEqual(first, -1, `expected sample fragment: ${before}`);
@@ -68,7 +75,7 @@ test('sample round-trip with example.profile.json: generate, verify through node
   }
   for (const p of profile.unset) assert.match(gen.stdout, new RegExp(`unset ${p.replace(/\./g, '\\.')}\\s`));
 
-  const text = fs.readFileSync(out, 'utf8');
+  const text = readGenerated(out);
   assert.ok(text.startsWith(HEADER_MARKER));
   assert.match(text, /\/\/ Site profile: Example Hospital\n/);
   assert.ok(text.includes(`OpenDocViewer ${readSampleVersion()}`));
@@ -152,7 +159,7 @@ test('the add marker inserts the key in the addressed block and it reads back th
   assert.equal(result.code, 0, result.stderr);
   assert.match(result.stdout, /add\s+print\.pdf\.exampleFlag\s+\(absent\) -> true/);
 
-  const text = fs.readFileSync(out, 'utf8');
+  const text = readGenerated(out);
   // Appended as the last entry of print.pdf: after prebuildAllPages, before the pdf block closes.
   const added = text.indexOf('exampleFlag: true');
   assert.ok(added > text.indexOf('prebuildAllPages: {'));
@@ -182,7 +189,7 @@ test('check detects drift: exit code 1 and a diff summary naming the changed key
   const dir = tempDir();
   const out = path.join(dir, 'odv.site.config.js');
   assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
-  const text = fs.readFileSync(out, 'utf8');
+  const text = readGenerated(out);
   assert.ok(text.includes("defaultPageMode: 'all',"));
   fs.writeFileSync(out, text.replace("defaultPageMode: 'all',", "defaultPageMode: 'active',"), 'utf8');
 
@@ -290,7 +297,7 @@ test('unset comments the property out, or removes it inline when it shares a lin
   });
   const result = run(['generate', '--profile', profile, '--out', out]);
   assert.equal(result.code, 0, result.stderr);
-  const text = fs.readFileSync(out, 'utf8');
+  const text = readGenerated(out);
   assert.match(text, /\n {6}\/\/ css: `\n/);
   assert.match(text, /fineTune: \{ \}/);
   assert.match(text, /\n {8}\/\/ print: \{ enabled: false \}\n/);
