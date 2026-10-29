@@ -25,7 +25,11 @@
  *                [--name <file>] [--force]
  *       Writes <out-dir>/<version>/<name> (default name: odv.site.config.js), verifies each file
  *       against its own tag's loader, prints per-version skips, and stops at the first failure.
- *       --name must be a plain file name. Missing/malformed/duplicate version lists are usage errors.
+ *       --name must be a plain, ordinary file name: not empty, no path separator, no colon (drive
+ *       letter or NTFS stream), no character Windows forbids, no trailing space or dot, and not a
+ *       Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, with or without an extension).
+ *       --out-dir is the operator's deliberate choice and may be any directory, absolute or relative.
+ *       Missing/malformed/duplicate version lists and a rejected --name are usage errors (exit 2).
  *   new-profile --out <file> [--force]
  *       Writes a commented example profile to start from.
  *
@@ -34,7 +38,9 @@
  *   second checkout. The header version is the version in the tag name. An explicit --loader wins
  *   over the tag for merge verification only; the sample and header still come from the tag.
  *   --version + --sample is a usage error (exit 2), because the header would falsely attribute a
- *   custom sample to that release. Without --version, --sample and --loader behave as before.
+ *   custom sample to that release. Without --version, --sample and --loader behave as before:
+ *   the shipped sample (also when --sample names it explicitly) gets the repository package.json
+ *   version, and any other --sample has no inferred version. generate and check share this rule.
  *
  * PROFILE FORMAT (JSON)
  *   {
@@ -64,7 +70,7 @@
  *   documentation stays in place. A property that shares a line with other code is removed inline.
  *
  *   VERSION GATES: since/until keys name paths in set or unset (without the addition marker) and
- *   use numeric x.y.z comparison. Excluded entries are skipped and explicitly printed as
+ *   use exact numeric x.y.z comparison (BigInt, so components of any length). Excluded entries are skipped and explicitly printed as
  *   "skipped (since x.y.z)" or "skipped (until x.y.z)" for generate and generate-all; check uses
  *   the same filter. A gate naming no set/unset path is an error. Gates use --version when given,
  *   otherwise the shipped sample's package.json version. A gated custom --sample with no known
@@ -77,7 +83,11 @@
  *     output file when there is one, otherwise those of the sample.
  *   - The output header names the profile and actual sample. The current shipped sample uses the
  *     repository package.json version, a tagged sample uses the tag-name version, and a custom
- *     --sample omits the version rather than implying a release.
+ *     --sample omits the version rather than implying a release. An unknown version is written as
+ *     "no version inferred"; the word "undefined" never appears in a header or status line.
+ *   - Output files are written to a temporary file in the destination directory and renamed into
+ *     place, so a failed write leaves the previous file unchanged and no partial file behind. The
+ *     overwrite protection and --force run before that and are unchanged.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
  *     profile value is asserted on `window.__ODV_SITE_CONFIG__`; then the selected odv.config.js is
  *     executed on top of it and every active set/added value is asserted on the merged config.
@@ -95,6 +105,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { spawnSync } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -688,10 +699,13 @@ export function normalizeProfile(profile) {
   return { name: profile.name.trim(), description: (profile.description || '').trim(), operations };
 }
 
-/** Numeric x.y.z comparison, so 2.9.0 sorts before 2.10.0. */
+/**
+ * Numeric x.y.z comparison, so 2.9.0 sorts before 2.10.0. BigInt keeps components above
+ * Number.MAX_SAFE_INTEGER exact; VERSION_PATTERN guarantees digits only.
+ */
 function compareVersions(a, b) {
-  const aa = a.split('.').map(Number);
-  const bb = b.split('.').map(Number);
+  const aa = a.split('.').map(BigInt);
+  const bb = b.split('.').map(BigInt);
   for (let i = 0; i < 3; i++) {
     if (aa[i] !== bb[i]) return aa[i] < bb[i] ? -1 : 1;
   }
@@ -895,11 +909,26 @@ function oneLine(s) {
   return s.replace(/\s+/g, ' ').trim();
 }
 
+function isKnownVersion(version) {
+  return typeof version === 'string' && version !== '';
+}
+
+/**
+ * "OpenDocViewer <version> (version from <source>)", or the words "no version inferred" when the
+ * version is unknown, so the literal "undefined" never reaches a generated file.
+ */
+function releaseLabel(version, source) {
+  return isKnownVersion(version)
+    ? `OpenDocViewer ${version} (version from ${source})`
+    : 'OpenDocViewer (no version inferred)';
+}
+
 /**
  * Build the generated header comment (LF).
  * @param {{ name: string, description: string }} profile
- * @param {string} version
+ * @param {string} [version] header version; without one the header says "no version inferred"
  * @param {string} [samplePath] sample actually used
+ * @param {string} [tag] release tag that supplied the sample
  */
 export function buildHeader(profile, version, samplePath = DEFAULT_SAMPLE, tag) {
   const lines = [
@@ -908,9 +937,9 @@ export function buildHeader(profile, version, samplePath = DEFAULT_SAMPLE, tag) 
   ];
   if (profile.description) lines.push(`// Description:  ${oneLine(profile.description)}`);
   const builtFrom = tag
-    ? `public/odv.site.config.sample.js of OpenDocViewer ${version} (version from tag ${tag})`
+    ? `public/odv.site.config.sample.js of ${releaseLabel(version, `tag ${tag}`)}`
     : samePath(samplePath, DEFAULT_SAMPLE)
-      ? `public/odv.site.config.sample.js of OpenDocViewer ${version} (version from repository package.json)`
+      ? `public/odv.site.config.sample.js of ${releaseLabel(version, 'repository package.json')}`
       : `${path.resolve(samplePath)} (custom --sample; no version inferred)`;
   lines.push(
     `// Built from:   ${builtFrom}`,
@@ -1292,12 +1321,31 @@ function parseArgs(argv) {
       throw new GeneratorError('--versions must not contain duplicate versions.');
     }
     options.versionList = versions;
-    options.name = options.name || 'odv.site.config.js';
-    if (options.name === '.' || options.name === '..' || /[\\/\0]/.test(options.name)) {
-      throw new GeneratorError('--name must be a plain file name without path separators or parent-directory segments.');
-    }
+    options.name = options.name === undefined ? 'odv.site.config.js' : options.name;
+    const problem = plainFileNameProblem(options.name);
+    if (problem) throw new GeneratorError(`--name must be a plain file name: "${options.name}" ${problem}.`);
   }
   return { command, options };
+}
+
+/** Windows reserved device names; matched against the part before the first dot. */
+const WINDOWS_DEVICE_NAME = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+
+/**
+ * Why a name is not a plain, ordinary file name on every platform, or '' when it is one.
+ * @param {string} name
+ */
+export function plainFileNameProblem(name) {
+  if (name === '') return 'is empty';
+  if (name === '.' || name === '..') return 'is a directory reference';
+  if (/[\\/]/.test(name)) return 'contains a path separator';
+  if (name.includes(':')) return 'contains a colon (drive letter or alternate data stream)';
+  // eslint-disable-next-line no-control-regex
+  if (/[<>"|?*\u0000-\u001f]/.test(name)) return 'contains a character that Windows does not allow in file names';
+  if (/[ .]$/.test(name)) return 'ends with a space or a dot, which Windows strips silently';
+  // Windows ignores the extension and trailing spaces before it: "nul.js" and "NUL .js" are NUL.
+  if (WINDOWS_DEVICE_NAME.test(name.split('.')[0].trimEnd())) return 'is a reserved Windows device name';
+  return '';
 }
 
 function samePath(a, b) {
@@ -1344,8 +1392,9 @@ function buildFromOptions(options, existingText) {
   } else {
     sampleText = readText(samplePath, 'sample');
     loaderText = readText(options.loader || DEFAULT_LOADER, 'loader');
-    const packageVersion = readSampleVersion();
-    version = options.sample ? undefined : packageVersion;
+    // The shipped sample takes its version from package.json, also when --sample names it
+    // explicitly; a custom sample has no inferred version. Decided by path, as in the header.
+    version = samePath(samplePath, DEFAULT_SAMPLE) ? readSampleVersion() : undefined;
   }
   // Keep the line endings of an existing output file; otherwise follow the sample.
   const eol = existingText !== undefined ? detectEol(existingText) : undefined;
@@ -1356,11 +1405,15 @@ function buildFromOptions(options, existingText) {
 /** Status line naming the sample; claims a version only where the generated header does. */
 function sampleLine(result) {
   if (result.tag) {
+    // The tag is built from --version, so a tagged sample always has a version.
     return `Sample:  ${result.tag}:public/odv.site.config.sample.js (OpenDocViewer ${result.version}; version from tag)`;
   }
-  return samePath(result.samplePath, DEFAULT_SAMPLE)
+  if (!samePath(result.samplePath, DEFAULT_SAMPLE)) {
+    return `Sample:  ${path.resolve(result.samplePath)} (custom --sample; no version inferred)`;
+  }
+  return isKnownVersion(result.version)
     ? `Sample:  ${result.samplePath} (OpenDocViewer ${result.version})`
-    : `Sample:  ${path.resolve(result.samplePath)} (custom --sample; no version inferred)`;
+    : `Sample:  ${result.samplePath} (OpenDocViewer; no version inferred)`;
 }
 
 function readExistingOutput(out, force) {
@@ -1372,7 +1425,32 @@ function readExistingOutput(out, force) {
   return existing;
 }
 
-function runGenerate(options, log) {
+/**
+ * Write a file without ever leaving it half written: the text goes to a new temporary file in the
+ * same directory, which is renamed over the destination only after the write succeeded. On any
+ * failure the temporary file is removed and the destination keeps its previous content. Callers
+ * run the overwrite protection (readExistingOutput) first; this function does not bypass it.
+ * @param {string} out
+ * @param {string} text
+ * @param {(file: string, text: string) => void} writeFile  writes a NEW file (injectable for tests)
+ */
+function writeFileAtomically(out, text, writeFile) {
+  const temp = path.join(path.dirname(out), `.${path.basename(out)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`);
+  try {
+    writeFile(temp, text);
+    fs.renameSync(temp, out);
+  } catch (err) {
+    fs.rmSync(temp, { force: true });
+    throw new GeneratorError(`Cannot write "${out}": ${err.message}. The previous file, if any, is unchanged.`);
+  }
+}
+
+/** Default writer: 'wx' refuses to reuse an existing path, so a temporary name never clobbers a file. */
+function writeNewFile(file, text) {
+  fs.writeFileSync(file, text, { encoding: 'utf8', flag: 'wx' });
+}
+
+function runGenerate(options, log, writeFile) {
   const out = path.resolve(options.out);
   const samplePath = options.sample || DEFAULT_SAMPLE;
   if (samePath(out, samplePath)) throw new GeneratorError('--out must not be the sample file itself.');
@@ -1384,12 +1462,12 @@ function runGenerate(options, log) {
   for (const line of formatChanges(result.changes, result.skipped)) log(line);
   for (const line of formatSkipped(result.skipped)) log(line);
   log(`Verified ${result.verified} assertion(s) through node:vm (site object and odv.config.js merge).`);
-  fs.writeFileSync(out, result.text, 'utf8');
+  writeFileAtomically(out, result.text, writeFile);
   log(`Wrote ${out}`);
   return 0;
 }
 
-function runGenerateAll(options, log) {
+function runGenerateAll(options, log, writeFile) {
   const outDir = path.resolve(options['out-dir']);
   for (const version of options.versionList) {
     const out = path.join(outDir, version, options.name);
@@ -1398,7 +1476,7 @@ function runGenerateAll(options, log) {
       const result = buildFromOptions({ profile: options.profile, version }, existing);
       // Do not create the version directory until generation and merge verification have passed.
       fs.mkdirSync(path.dirname(out), { recursive: true });
-      fs.writeFileSync(out, result.text, 'utf8');
+      writeFileAtomically(out, result.text, writeFile);
       log(`${version}: wrote ${out}; verified ${result.verified} assertion(s); ${result.skipped.length} skipped gated entr${result.skipped.length === 1 ? 'y' : 'ies'}.`);
       for (const line of formatSkipped(result.skipped)) log(`${version}: ${line}`);
     } catch (err) {
@@ -1439,12 +1517,15 @@ function runNewProfile(options, log) {
 /**
  * CLI entry point.
  * @param {string[]} argv  arguments after the script name
- * @param {{ log?: (s: string) => void, error?: (s: string) => void }} [io]
+ * @param {{ log?: (s: string) => void, error?: (s: string) => void,
+ *   writeFile?: (file: string, text: string) => void }} [io]
+ *   writeFile creates the temporary file of a generated configuration; tests inject failures here.
  * @returns {number} process exit code (0 ok, 1 drift or error, 2 usage error)
  */
 export function main(argv, io = {}) {
   const log = io.log || ((s) => process.stdout.write(`${s}\n`));
   const error = io.error || ((s) => process.stderr.write(`${s}\n`));
+  const writeFile = io.writeFile || writeNewFile;
   let parsed;
   try {
     parsed = parseArgs(argv);
@@ -1453,9 +1534,9 @@ export function main(argv, io = {}) {
     return 2;
   }
   try {
-    if (parsed.command === 'generate') return runGenerate(parsed.options, log);
+    if (parsed.command === 'generate') return runGenerate(parsed.options, log, writeFile);
     if (parsed.command === 'check') return runCheck(parsed.options, log);
-    if (parsed.command === 'generate-all') return runGenerateAll(parsed.options, log);
+    if (parsed.command === 'generate-all') return runGenerateAll(parsed.options, log, writeFile);
     return runNewProfile(parsed.options, log);
   } catch (err) {
     if (err instanceof GeneratorError) {

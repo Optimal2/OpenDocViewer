@@ -47,8 +47,8 @@ node tools/site-config-generator/site-config-generator.mjs new-profile --out <fi
 | `--config <file>` | Existing site configuration to compare (`check` only). |
 | `--version <x.y.z>` | Read the sample, loader and header version from existing tag `v<x.y.z>` (`generate` and `check`). |
 | `--versions <a,b,...>` | Comma-separated release versions (`generate-all` only). Empty, malformed and duplicate versions are usage errors. |
-| `--out-dir <dir>` | Parent output directory (`generate-all` only). |
-| `--name <file>` | Plain file name for each version folder. Default: `odv.site.config.js`; path separators and parent-directory segments are rejected. |
+| `--out-dir <dir>` | Parent output directory (`generate-all` only). Any directory you choose, absolute or relative; it is not restricted. |
+| `--name <file>` | Plain file name for each version folder. Default: `odv.site.config.js`. Rejected: an empty name, `.`/`..`, path separators, a colon anywhere (drive letter or NTFS stream), characters Windows forbids (`<>"\|?*`, control characters), a trailing space or dot, and Windows device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, with or without an extension, any case). |
 | `--sample <file>` | Sample to build from. Default: `public/odv.site.config.sample.js`; cannot be combined with `--version`. |
 | `--loader <file>` | `odv.config.js` used for merge verification. Overrides both the current default and the loader selected by `--version`. |
 | `--force` | `generate`/`generate-all`: replace an output file that this tool did not produce. `new-profile`: replace an existing file. |
@@ -121,8 +121,10 @@ node tools/site-config-generator/site-config-generator.mjs check --profile <work
 - `--version` with `--sample` is a usage error (exit 2). Otherwise the header could claim that a
   custom sample came from a release that did not supply it. Use one input mechanism or the other.
 - Without `--version`, existing behaviour is unchanged: `--sample` and `--loader` select local files,
-  the current shipped sample gets its header version from `package.json`, and a custom sample has no
-  inferred version.
+  the current shipped sample gets its header version from `package.json` (also when `--sample`
+  names `public/odv.site.config.sample.js` explicitly), and a custom sample has no inferred version.
+  `generate` and `check` apply the same rule. A version that cannot be determined is written as
+  `no version inferred`, never as `undefined`.
 
 ## Workflow on a new release
 
@@ -189,7 +191,9 @@ with `//` are ignored too, which lets you disable an entry by prefixing it with 
 `since` and `until` can gate paths in both `set` and `unset`. A gate key is the actual dotted path,
 without the `+` addition marker used in `set`. The boundaries are inclusive: `since: "2.11.0"`
 applies at 2.11.0 and later, while `until: "2.9.0"` applies at 2.9.0 and earlier. Versions are
-compared as three numeric components, not as strings, so 2.9.0 is older than 2.10.0.
+compared as three numeric components, not as strings, so 2.9.0 is older than 2.10.0. The
+comparison is exact for components of any length (it uses `BigInt`), so even components above
+JavaScript's safe-integer range never compare as equal when they differ.
 
 An excluded entry is never ignored silently. `generate` and `generate-all` print its path as
 `skipped (since 2.11.0)` or `skipped (until 2.9.0)`, and `check` applies the same filter so the
@@ -478,6 +482,11 @@ ERROR: The profile does not match the sample:
   ERROR: --out must not be the sample file itself.
   ```
 
+- **No half-written files.** `generate` and `generate-all` write each output to a temporary file in
+  the destination folder and rename it into place only after the write succeeded. If writing fails,
+  the temporary file is removed, the command exits 1, and an existing configuration keeps its
+  previous content. The overwrite protection above runs first, so the rename never replaces a file
+  that the tool would otherwise refuse.
 - **Hand edits are lost.** `generate` rebuilds the file from the sample and the profile. Move every
   intended change into the profile.
 - **Line endings.** LF and CRLF are both supported. The output keeps the line endings of the existing
@@ -486,7 +495,8 @@ ERROR: The profile does not match the sample:
   sample is kept. `check` treats files that differ only in line endings or the byte-order mark as
   identical (exit 0) and says so.
 - **Header.** The header names the profile and the sample actually used. For the current shipped
-  `public/odv.site.config.sample.js`, it names the version from the repository's `package.json`.
+  `public/odv.site.config.sample.js`, it names the version from the repository's `package.json`,
+  whether or not you pass that path with `--sample`.
   For `--version`, it names the version from the tag name. For a custom `--sample`, it names that
   file and omits the version rather than implying that the custom file came from that release.
 - **What the `node:vm` verification asserts.** After building the text, and before writing anything,
