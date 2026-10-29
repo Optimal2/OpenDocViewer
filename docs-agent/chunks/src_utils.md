@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 50. Line count: 19765. JSDoc symbol count: 804.
+File count: 50. Line count: 20102. JSDoc symbol count: 827.
 
 ## src/utils/compareCurtain.js
 
@@ -492,6 +492,7 @@ Local imports: `../workers/pdfSignatureWorker.js?worker`, `src/utils/pdfSignatur
 Symbols:
 
 - `module:utils/pdfSignatureInspector` (module) - PDF signature inspection \- the single entry point for application code.
+- `module:utils/pdfSignatureInspector~InspectionError` (class) - Rejection reason that carries the integrity code for the placeholder report.
 - `module:utils/pdfSignatureInspector~workerHandle` (member) - Lazily created worker handle: \{ worker, broken, pending \} where pending maps requestId to its resolve/reject callbacks.
 - `module:utils/pdfSignatureInspector.getDocumentSignatures` (function) - Inspect the signatures of one document.
 - `module:utils/pdfSignatureInspector.disposePdfSignatureWorker` (function) - Terminate the signature worker \(e.g.
@@ -500,41 +501,43 @@ Symbols:
 
 PDF signature collection \- level 1 integrity inspection.
 
-Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `unreadableSignatureReport`, `installIndirectObjectHeaderProbe`, `collectPdfSignatures`
+Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `notCheckedSignatureReport`, `indeterminateSignatureReport`, `installIndirectObjectHeaderProbe`, `collectPdfSignatures`
 
 Symbols:
 
 - `module:utils/pdfSignatures` (module) - PDF signature collection \- level 1 integrity inspection.
 - `module:utils/pdfSignatures~PdfSignatureInfo` (typedef) - One inspected PDF signature \(level\-1 integrity view\).
+- `module:utils/pdfSignatures~PdfSignatureIntegrity` (typedef) - Produced integrity values.
+- `module:utils/pdfSignatures~PdfSignatureIntegrityCode` (typedef) - Closed set of integrity codes \(see INTEGRITY\_CODES in utils/pdfSignatureStatus.js\).
 - `module:utils/pdfSignatures~PdfSignatureReport` (typedef) - No description.
 - `module:utils/pdfSignatures.SUPPORTED_SUBFILTERS` (constant) - SubFilters with level\-1 handling.
+- `module:utils/pdfSignatures~WEBCRYPTO_HASHES` (constant) - Hash names WebCrypto implements.
+- `module:utils/pdfSignatures~DECODABLE_STREAM_FILTERS` (constant) - Structural stream filters pdf\-lib's decodePDFRawStream can decode.
+- `module:utils/pdfSignatures~ViewerLimitError` (class) - A check the viewer could not perform because of its own limits \(budget, missing algorithm, failing machinery\), with no evidence of a defect.
 - `module:utils/pdfSignatures~pdfText` (function) - Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF\-16BE byte\-order mark.
 - `module:utils/pdfSignatures.parsePdfDateString` (function) - Parse a PDF date string \(&quot;D:YYYYMMDDHHmmSS\+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone \- a missing timezone is treated as UTC\).
 - `module:utils/pdfSignatures~discoverSignatures` (function) - Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\).
-- `module:utils/pdfSignatures.unreadableSignatureReport` (function) - Report an inspection failure without claiming that the document is unsigned.
-- `module:utils/pdfSignatures.installIndirectObjectHeaderProbe` (function) - pdf\-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws \(building an Error\) on each miss: \~17 us per byte, so a 64 KiB prefix cost a...
-- `module:utils/pdfSignatures.collectPdfSignatures` (function) - Collect signature information from PDF bytes.
 
 ## src/utils/pdfSignatureStatus.js
 
 Signature UI status helpers for browser integrity.
 
-Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `formatSignatureTime`
+Exports: `INTEGRITY_CODES`, `SIGNING_TIME_CODES`, `normalizeSignatureIntegrity`, `normalizeUncheckedSeverity`, `normalizeSigningTimeCheck`, `getSignatureSeverity`, `getReportSignatureSeverity`, `getIntegrityLabel`, `getIntegrityCodeText`, `getSigningTimeCheckLabel`, `getSigningTimeWarningSignature`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `formatSignatureTime`
 
 Symbols:
 
 - `module:utils/pdfSignatureStatus` (module) - Signature UI status helpers for browser integrity.
-- `module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY` (constant) - Severity classes used for colours/icons: intact is neutral/positive, modified\-after\-signing and unsupported are warnings, and digest\-mismatch, signature\-invalid and unreadable are...
+- `module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY` (constant) - Severity class per integrity status.
+- `module:utils/pdfSignatureStatus~INTEGRITY_ALIASES` (constant) - Legacy values accepted from older caches.
 - `module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST` (constant) - Integrity statuses ordered worst\-first.
-- `module:utils/pdfSignatureStatus.getSignatureSeverity` (function) - Map one integrity status to its severity class.
-- `module:utils/pdfSignatureStatus.getReportSignatureSeverity` (function) - Worst severity across integrity for all signatures.
-- `module:utils/pdfSignatureStatus.normalizeSignatureIntegrity` (function) - Fail closed for missing, unexpected and inherited property names.
-- `module:utils/pdfSignatureStatus.getIntegrityLabel` (function) - Shared localized status text for the badge tooltip and details dialog.
-- `module:utils/pdfSignatureStatus.getWorstSignatureIntegrity` (function) - The worst integrity status among a document's signatures, or null when there are none.
-- `module:utils/pdfSignatureStatus.getSignatureCount` (function) - No description.
-- `module:utils/pdfSignatureStatus.reportHasSignatures` (function) - No description.
-- `module:utils/pdfSignatureStatus~pad2` (function) - No description.
-- `module:utils/pdfSignatureStatus.formatSignatureTime` (function) - Format a signature\-related ISO time \(signing, validation, certificate validity\) as local time, &quot;2022\-04\-27 19:55&quot;, in both supported languages.
+- `module:utils/pdfSignatureStatus.INTEGRITY_CODES` (constant) - Closed set of integrityCode values produced by utils/pdfSignatures.js and utils/pdfSignatureInspector.js.
+- `module:utils/pdfSignatureStatus~SEVERITY_BY_SIGNING_TIME_CHECK` (constant) - Severity per signing\-time check.
+- `module:utils/pdfSignatureStatus.SIGNING_TIME_CODES` (constant) - Closed set of signingTimeCode values; texts under signatures.signingTimeCode.&lt;code&gt; .
+- `module:utils/pdfSignatureStatus.normalizeSignatureIntegrity` (function) - Fail closed for missing, unexpected and inherited property names: anything outside the known set \(after resolving legacy aliases\) is unreadable .
+- `module:utils/pdfSignatureStatus.normalizeUncheckedSeverity` (function) - The site switch pdfSignatures.uncheckedSeverity : exactly 'warning' shows not\-checked signatures as warnings; anything else keeps them 'ok'.
+- `module:utils/pdfSignatureStatus.normalizeSigningTimeCheck` (function) - Missing values mean the check was not performed; an unknown string fails closed to outside\-validity \(a warning\).
+- `module:utils/pdfSignatureStatus.getSignatureSeverity` (function) - Severity of one signature: the worse of its integrity and its signing\-time check.
+- `module:utils/pdfSignatureStatus.getReportSignatureSeverity` (function) - Worst severity across all signatures.
 
 ## src/utils/pdfWorkerDispatcher.js
 

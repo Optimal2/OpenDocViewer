@@ -11,7 +11,8 @@
  * web worker and in Node (tests). Heavy dependencies (pdf-lib, pkijs,
  * asn1js) are loaded through dynamic imports. Unsigned PDFs skip the CMS
  * stack; inspection failures produce a document-level or per-signature
- * `unreadable` report instead of claiming that signatures are absent.
+ * placeholder (`not-checked-in-viewer` for viewer limits, `indeterminate` for
+ * unclassifiable failures) instead of claiming that signatures are absent.
  *
  * @module utils/pdfSignatures
  */
@@ -23,6 +24,9 @@
  * @property {string|null} fieldName AcroForm signature field name (/T).
  * @property {string|null} signer Signer certificate subject CN; falls back to
  * the signature dictionary /Name when no certificate could be read.
+ * @property {'certificate'|'pdf-name'|null} signerSource Where `signer` came
+ * from: the certificate subject CN, the self-declared signature dictionary
+ * /Name (never verified), or nowhere (null).
  * @property {string|null} signerOrganization Signer certificate subject O.
  * @property {string|null} issuer Signer certificate issuer CN (else full issuer DN).
  * @property {string|null} serial Certificate serial number, colon-separated hex.
@@ -38,13 +42,26 @@
  * @property {'approval'|'certification'|'timestamp'} kind Certification
  * signature (signature dictionary carries /Reference), document timestamp
  * (ETSI.RFC3161), otherwise approval.
- * @property {'intact'|'modified-after-signing'|'digest-mismatch'|'signature-invalid'|'unsupported'|'unreadable'} integrity
- * Level-1 integrity verdict; the rules are documented in docs-src/pdf-signatures.md.
- * @property {string|null} integrityReason Short human-readable explanation;
- * null when the status needs no explanation.
+ * @property {PdfSignatureIntegrity} integrity Level-1 integrity verdict; the
+ * rules are documented in docs-src/pdf-signatures.md.
+ * @property {PdfSignatureIntegrityCode|null} integrityCode Machine-readable
+ * reason from a closed kebab-case set; null only for a plain `intact`.
+ * @property {string|null} integrityReason Short English detail line (may carry
+ * OIDs or exception text for support staff); null when no detail is needed.
  * @property {boolean|null} coversWholeFile Whether the ByteRange reaches the
  * end of the file (false = the file was extended after this signature;
  * null = the ByteRange could not be read).
+ */
+
+/**
+ * Produced integrity values. `unsupported` is a legacy alias that the status
+ * helpers normalize to `not-checked-in-viewer`; the parser never produces it.
+ * @typedef {'intact'|'not-checked-in-viewer'|'indeterminate'|'modified-after-signing'|'digest-mismatch'|'signature-invalid'|'unreadable'} PdfSignatureIntegrity
+ */
+
+/**
+ * Closed set of integrity codes (see INTEGRITY_CODES in utils/pdfSignatureStatus.js).
+ * @typedef {'format-unsupported'|'algorithm-unsupported'|'inspection-limit'|'timeout'|'structure-unsupported'|'encrypted'|'viewer-error'|'unexpected-error'|'key-import-failed'|'content-changed-after-signing'|'unclassified-change-after-signing'|'extended-with-validation-data'|'extended-by-later-signature'|'contents-missing'|'byte-range-invalid'|'cms-malformed'|'cms-content-mismatch'|'message-digest-attribute'|'signer-certificate-missing'|'content-digest-mismatch'|'document-digest-mismatch'|'signature-invalid'} PdfSignatureIntegrityCode
  */
 
 /**
@@ -99,6 +116,24 @@ const CURVE_OID_TO_POINT_SIZE = new Map([
   ['1.3.132.0.34', 48], // P-384
   ['1.3.132.0.35', 66] // P-521
 ]);
+/** Hash names WebCrypto implements. SHA-224 is a known OID but not one of them. */
+const WEBCRYPTO_HASHES = new Set(['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512']);
+/** Structural stream filters pdf-lib's decodePDFRawStream can decode. */
+const DECODABLE_STREAM_FILTERS = new Set(['FlateDecode', 'LZWDecode', 'ASCII85Decode', 'ASCIIHexDecode', 'RunLengthDecode']);
+
+/**
+ * A check the viewer could not perform because of its own limits (budget,
+ * missing algorithm, failing machinery), with no evidence of a defect. Carries
+ * a `not-checked-in-viewer` integrity code. Decided by `instanceof` and the
+ * code, never by parsing messages (class names are minified in production).
+ */
+class ViewerLimitError extends Error {
+  /** @param {PdfSignatureIntegrityCode} code @param {string} message */
+  constructor(code, message) {
+    super(message);
+    this.code = code;
+  }
+}
 
 const RDN_CN = '2.5.4.3';
 const RDN_O = '2.5.4.10';
@@ -148,11 +183,26 @@ function normalizeSerialHex(a) {
   return bytesToHex(a).replace(/^0+(?=.)/, '');
 }
 
-async function subtleDigest(algName, data) {
-  if (typeof crypto === 'undefined' || !crypto.subtle) {
-    throw new Error('WebCrypto (crypto.subtle) is not available in this environment');
+function requireSubtle() {
+  if (typeof crypto === 'undefined' || !crypto?.subtle) {
+    throw new ViewerLimitError('viewer-error', 'WebCrypto (crypto.subtle) is not available in this environment');
   }
-  return new Uint8Array(await crypto.subtle.digest(algName, data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)));
+  return crypto.subtle;
+}
+
+async function subtleDigest(algName, data) {
+  const subtle = requireSubtle();
+  if (!WEBCRYPTO_HASHES.has(algName)) {
+    throw new ViewerLimitError('algorithm-unsupported', `hash algorithm not available in WebCrypto: ${algName}`);
+  }
+  try {
+    return new Uint8Array(await subtle.digest(algName, data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)));
+  } catch (err) {
+    if (err?.name === 'NotSupportedError') {
+      throw new ViewerLimitError('algorithm-unsupported', `hash algorithm not available in WebCrypto: ${algName}`);
+    }
+    throw err;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -274,7 +324,7 @@ function discoverSignatures(pdfDoc, pdfLib) {
     const obj = queue[i];
     if (!obj || visited.has(obj)) continue;
     visited.add(obj);
-    if (visited.size > 100000) throw new Error('PDF object inspection limit exceeded');
+    if (visited.size > 100000) throw new ViewerLimitError('inspection-limit', 'PDF object inspection limit exceeded');
     if (obj instanceof pdfLib.PDFDict) {
       indirect.push({ obj });
       for (const [, value] of obj.entries()) queue.push(value);
@@ -367,6 +417,7 @@ function dictionaryInfo(item, bytes, pdfLib, sourceSpans) {
   const info = {
     fieldName: item.fieldName,
     signer: fields.signerName || null,
+    signerSource: fields.signerName ? 'pdf-name' : null,
     signerOrganization: null,
     issuer: null,
     serial: null,
@@ -378,29 +429,56 @@ function dictionaryInfo(item, bytes, pdfLib, sourceSpans) {
     location: fields.location,
     subFilter: fields.subFilter,
     kind,
+    // Fail-closed default: every return path below sets integrity and code explicitly.
     integrity: 'unreadable',
+    integrityCode: null,
     integrityReason: null,
     coversWholeFile
   };
 
   if (!fields.subFilter || !SUPPORTED_SUBFILTER_SET.has(fields.subFilter)) {
-    info.integrity = 'unsupported';
-    info.integrityReason = fields.subFilter
+    setIntegrity(info, 'not-checked-in-viewer', 'format-unsupported', fields.subFilter
       ? `signature present, format not supported (${fields.subFilter})`
-      : 'signature present, format not supported (missing /SubFilter)';
-    return { info, ctx: { byteRange, contents, mDate, fields } };
+      : 'signature present, format not supported (missing /SubFilter)');
+    return { info, ctx: { byteRange, contents, mDate, fields, pending: false } };
   }
   if (!contents || contents.length === 0) {
-    info.integrityReason = 'signature present, /Contents missing or empty';
-    return { info, ctx: { byteRange, contents, mDate, fields } };
+    setIntegrity(info, 'unreadable', 'contents-missing', 'signature present, /Contents missing or empty');
+    return { info, ctx: { byteRange, contents, mDate, fields, pending: false } };
   }
   if (!rangeValid) {
-    info.integrityReason = 'signature present, /ByteRange malformed or gap does not exactly match this /Contents hex string';
-    return { info, ctx: { byteRange, contents, mDate, fields } };
+    setIntegrity(info, 'unreadable', 'byte-range-invalid',
+      'signature present, /ByteRange malformed or gap does not exactly match this /Contents hex string');
+    return { info, ctx: { byteRange, contents, mDate, fields, pending: false } };
   }
-  info.integrity = 'intact'; // provisional; replaced by verification result below
-  info.integrityReason = 'pending-verification';
-  return { info, ctx: { byteRange, contents, mDate, fields } };
+  // Provisional; verifySignatureEntry replaces it with the verification result.
+  setIntegrity(info, 'intact', null, null);
+  return { info, ctx: { byteRange, contents, mDate, fields, pending: true } };
+}
+
+/**
+ * @param {PdfSignatureInfo} info
+ * @param {PdfSignatureIntegrity} integrity
+ * @param {PdfSignatureIntegrityCode|null} code
+ * @param {string|null} reason
+ */
+function setIntegrity(info, integrity, code, reason) {
+  info.integrity = integrity;
+  info.integrityCode = code;
+  info.integrityReason = reason;
+}
+
+/**
+ * Classify an exception: a ViewerLimitError is `not-checked-in-viewer` with its
+ * own code, anything else cannot be classified and is `indeterminate`.
+ * @param {PdfSignatureInfo} info
+ * @param {*} err
+ * @param {string} prefix
+ */
+function setIntegrityFromError(info, err, prefix) {
+  const message = `${prefix}: ${String(err?.message ?? err)}`;
+  if (err instanceof ViewerLimitError) setIntegrity(info, 'not-checked-in-viewer', err.code, message);
+  else setIntegrity(info, 'indeterminate', 'unexpected-error', message);
 }
 
 function validByteRange(bytes, br, contents, sourceSpans) {
@@ -433,7 +511,7 @@ function extensionCoveredByLaterSignature(self, all, fileLength) {
     (other) =>
       other !== self &&
       other.info?.integrity === 'intact' &&
-      other.info.integrityReason !== 'pending-verification' &&
+      !other.pending &&
       other.byteRange &&
       other.byteRange[0] === 0 &&
       other.byteRange[1] >= selfEnd &&
@@ -565,32 +643,42 @@ function decodeOidBytes(b) {
   return parts.join('.');
 }
 
-function curvePointSize(cert, asn1jsLib) {
-  try {
-    const spki = cert.subjectPublicKeyInfo;
-    const paramsOid = elementOid(spki?.algorithm?.algorithmParams);
-    if (paramsOid && CURVE_OID_TO_POINT_SIZE.has(paramsOid)) return CURVE_OID_TO_POINT_SIZE.get(paramsOid);
-    const keyBytes = new Uint8Array(spki?.subjectPublicKey?.valueBlock?.valueCutOffFromStartView ?? []);
-    if (keyBytes.length > 1 && keyBytes[0] === 0x04 && (keyBytes.length - 1) % 2 === 0) {
-      return (keyBytes.length - 1) / 2;
-    }
-  } catch {
-    /* ignore, defaults below */
+/** Dotted OID of an asn1js ObjectIdentifier (or raw OID element), else null. */
+function oidOf(element) {
+  if (typeof element?.getValue === 'function') {
+    const value = element.getValue();
+    if (typeof value === 'string' && value) return value;
   }
-  void asn1jsLib;
-  return 32;
+  return elementOid(element);
+}
+
+/**
+ * Point size of the certificate's named curve, or null when the SPKI does not
+ * name one of the WebCrypto curves. Never guessed from the key length: an
+ * unknown curve (brainpool, explicit parameters, ...) verified as P-256/384/521
+ * would produce a false `signature-invalid`.
+ */
+function curvePointSize(cert) {
+  try {
+    const params = cert.subjectPublicKeyInfo?.algorithm?.algorithmParams;
+    return CURVE_OID_TO_POINT_SIZE.get(oidOf(params)) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function pssParameters(algParams) {
   // RSASSA-PSS-params ::= SEQUENCE { hashAlgorithm[0], maskGenAlgorithm[1], saltLength[2] }
-  const out = { hash: null, saltLength: null };
+  const out = { hash: null, hashUnknown: false, saltLength: null };
   try {
     const seq = algParams?.valueBlock?.value ?? [];
     for (const tagElem of seq) {
       const inner = tagElem?.valueBlock?.value?.[0] ?? tagElem;
       const tagNumber = tagElem?.idBlock?.tagNumber;
       if (tagNumber === 0) {
-        out.hash = HASH_OID_TO_NAME.get(elementOid(inner)) ?? null;
+        const oid = oidOf(inner);
+        out.hash = HASH_OID_TO_NAME.get(oid) ?? null;
+        out.hashUnknown = Boolean(oid) && !out.hash;
       } else if (tagNumber === 2) {
         const bytes = inner?.valueBlock?.valueHexView;
         if (bytes) {
@@ -607,15 +695,13 @@ function pssParameters(algParams) {
 }
 
 async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts) {
-  if (ctx.contents === null || ctx.byteRange === null) return; // already unreadable/unsupported
-  if (info.integrityReason !== 'pending-verification') return;
-  info.integrityReason = null;
+  if (!ctx.pending) return; // dictionary level already decided (format, /Contents, ByteRange)
+  ctx.pending = false;
   asn1jsRef = asn1jsLib;
 
   const signedBytes = coveredBytes(bytes, ctx.byteRange);
   if (ctx.contents.length > 1024 * 1024) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'CMS exceeds the 1 MiB signature inspection limit';
+    setIntegrity(info, 'not-checked-in-viewer', 'inspection-limit', 'CMS exceeds the 1 MiB signature inspection limit');
     return;
   }
 
@@ -623,41 +709,42 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   let signedData;
   let contentInfo;
   try {
+    // No legitimate CMS gets near depth 64: an ASN.1 limit here means malformed data.
     const der = asn1jsLib.fromBER(bufferView(ctx.contents), { maxDepth: 64, maxNodes: 100000 });
     if (der.offset === -1 || !der.result) {
-      info.integrity = 'unreadable';
-      info.integrityReason = `signature present, CMS (PKCS#7) data not parseable: ${der.result?.error ?? 'unknown ASN.1 error'}`;
+      setIntegrity(info, 'unreadable', 'cms-malformed',
+        `signature present, CMS (PKCS#7) data not parseable: ${der.result?.error ?? 'unknown ASN.1 error'}`);
       return;
     }
     contentInfo = new pkijsLib.ContentInfo({ schema: der.result });
     if (contentInfo.contentType !== OID_SIGNED_DATA) {
-      info.integrity = 'unreadable';
-      info.integrityReason = `signature present, unexpected CMS content type ${contentInfo.contentType} (expected signedData)`;
+      setIntegrity(info, 'unreadable', 'cms-malformed',
+        `signature present, unexpected CMS content type ${contentInfo.contentType} (expected signedData)`);
       return;
     }
     signedData = new pkijsLib.SignedData({ schema: contentInfo.content });
   } catch (err) {
-    info.integrity = 'unreadable';
-    info.integrityReason = `signature present, CMS (PKCS#7) parse failed: ${String(err?.message ?? err)}`;
+    setIntegrity(info, 'unreadable', 'cms-malformed', `signature present, CMS (PKCS#7) parse failed: ${String(err?.message ?? err)}`);
     return;
   }
 
   const signerInfo = signedData.signerInfos?.[0];
   if (!signerInfo || signedData.signerInfos.length !== 1) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'signature present, PDF CMS must contain exactly one signer';
+    setIntegrity(info, 'unreadable', 'cms-malformed', 'signature present, PDF CMS must contain exactly one signer');
     return;
   }
 
   // --- certificate identity -------------------------------------------------
   const cert = await matchCertificate(signedData, signerInfo, asn1jsLib);
   if (!cert) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'CMS contains no certificate matching the signer identifier';
+    setIntegrity(info, 'unreadable', 'signer-certificate-missing', 'CMS contains no certificate matching the signer identifier');
     return;
   }
   const cn = rdnValue(cert.subject, RDN_CN);
-  if (cn) info.signer = cn;
+  if (cn) {
+    info.signer = cn;
+    info.signerSource = 'certificate';
+  }
   info.signerOrganization = rdnValue(cert.subject, RDN_O);
   const issuerCn = rdnValue(cert.issuer, RDN_CN);
   info.issuer = issuerCn ?? dnToString(cert.issuer);
@@ -668,10 +755,13 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
 
   // --- digest algorithm ------------------------------------------------------
   const digestOid = signerInfo.digestAlgorithm?.algorithmId;
-  const hashName = digestOid ? HASH_OID_TO_NAME.get(digestOid) ?? null : null;
+  if (!digestOid) {
+    setIntegrity(info, 'unreadable', 'cms-malformed', 'signature present, digest algorithm missing');
+    return;
+  }
+  const hashName = HASH_OID_TO_NAME.get(digestOid) ?? null;
   if (!hashName) {
-    info.integrity = 'unreadable';
-    info.integrityReason = `signature present, digest algorithm not supported: ${digestOid ?? 'missing'}`;
+    setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported', `signature present, digest algorithm not supported: ${digestOid}`);
     return;
   }
 
@@ -685,8 +775,7 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   const encapsulated = isTimestamp || isSha1Embedded;
   if ((encapsulated && !eContentBytes) || (!encapsulated && signedData.encapContentInfo?.eContent) ||
     (isTimestamp ? eContentType !== OID_TST_INFO : eContentType !== '1.2.840.113549.1.7.1')) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'CMS content does not match the PDF SubFilter';
+    setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'CMS content does not match the PDF SubFilter');
     return;
   }
   const contentToVerify = encapsulated ? eContentBytes : signedBytes;
@@ -696,68 +785,73 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
     const mdAttrs = attrs.filter((attr) => attr.type === OID_ATTR_MESSAGE_DIGEST);
     const md = mdAttrs[0];
     if (mdAttrs.length !== 1 || md.values?.length !== 1 || !(md.values[0] instanceof asn1jsLib.OctetString)) {
-      info.integrity = 'unreadable';
-      info.integrityReason = 'CMS signed attributes require exactly one messageDigest value';
+      setIntegrity(info, 'unreadable', 'message-digest-attribute', 'CMS signed attributes require exactly one messageDigest value');
       return;
     }
+    // A hash WebCrypto lacks (SHA-224) or a missing crypto.subtle throws a
+    // ViewerLimitError, which the caller reports as not checked in the viewer.
     const actual = await subtleDigest(hashName, contentToVerify);
     if (!bytesEqual(actual, attrRawBytes(md))) {
-      info.integrity = 'digest-mismatch';
-      info.integrityReason = 'CMS content digest does not match the signed messageDigest';
+      setIntegrity(info, 'digest-mismatch', 'content-digest-mismatch', 'CMS content digest does not match the signed messageDigest');
       return;
     }
     const contentTypes = attrs.filter((attr) => attr.type === '1.2.840.113549.1.9.3');
     if (contentTypes.length !== 1 || contentTypes[0].values?.length !== 1 ||
       contentTypes[0].values[0].valueBlock?.toString() !== eContentType) {
-      info.integrity = 'unreadable';
-      info.integrityReason = 'CMS signed contentType does not match the encapsulated content type';
+      setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'CMS signed contentType does not match the encapsulated content type');
       return;
     }
   }
 
   if (isTimestamp) {
     // Document timestamp: the TSTInfo messageImprint must match the file bytes.
+    let tst;
+    let imprintAlgOid;
+    let imprintBytes;
     try {
-      if (!eContentBytes) throw new Error('no encapsulated content');
       const tstAsn = asn1jsLib.fromBER(bufferView(eContentBytes));
       if (tstAsn.offset === -1) throw new Error(tstAsn.result?.error ?? 'ASN.1 error');
-      const tst = new pkijsLib.TSTInfo({ schema: tstAsn.result });
+      tst = new pkijsLib.TSTInfo({ schema: tstAsn.result });
       const imprint = tst.messageImprint;
-      const imprintAlgOid = imprint?.hashAlgorithm?.algorithmId ?? imprint?.hashAlg?.algorithmId;
-      const imprintAlg = imprintAlgOid ? HASH_OID_TO_NAME.get(imprintAlgOid) ?? null : null;
-      const imprintBytes = attrRawBytesOfElement(imprint?.hashedMessage);
-      if (!imprintAlg || !imprintBytes) throw new Error('messageImprint incomplete');
-      const actual = await subtleDigest(imprintAlg, signedBytes);
-      documentDigestOk = bytesEqual(actual, imprintBytes);
-      if (!info.signingTime) {
-        const gen = tst.genTime?.value ?? (typeof tst.genTime?.toDate === 'function' ? tst.genTime.toDate() : null) ?? tst.genTime;
-        if (gen instanceof Date && info.signingTimeSource !== 'signed-attribute') {
-          info.signingTime = isoOrNull(gen);
-          info.signingTimeSource = 'signed-attribute';
-        }
-      }
+      imprintAlgOid = imprint?.hashAlgorithm?.algorithmId ?? imprint?.hashAlg?.algorithmId;
+      imprintBytes = attrRawBytesOfElement(imprint?.hashedMessage);
     } catch (err) {
-      info.integrity = 'unreadable';
-      info.integrityReason = `document timestamp not parseable: ${String(err?.message ?? err)}`;
+      setIntegrity(info, 'unreadable', 'cms-malformed', `document timestamp not parseable: ${String(err?.message ?? err)}`);
       return;
     }
+    if (!imprintAlgOid || !imprintBytes) {
+      setIntegrity(info, 'unreadable', 'cms-malformed', 'document timestamp not parseable: messageImprint incomplete');
+      return;
+    }
+    const imprintAlg = HASH_OID_TO_NAME.get(imprintAlgOid) ?? null;
+    if (!imprintAlg) {
+      setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported',
+        `document timestamp imprint algorithm not supported: ${imprintAlgOid}`);
+      return;
+    }
+    const actual = await subtleDigest(imprintAlg, signedBytes);
+    documentDigestOk = bytesEqual(actual, imprintBytes);
+    if (!info.signingTime) {
+      const gen = tst.genTime?.value ?? (typeof tst.genTime?.toDate === 'function' ? tst.genTime.toDate() : null) ?? tst.genTime;
+      if (gen instanceof Date && info.signingTimeSource !== 'signed-attribute') {
+        info.signingTime = isoOrNull(gen);
+        info.signingTimeSource = 'signed-attribute';
+      }
+    }
     if (!documentDigestOk) {
-      info.integrity = 'digest-mismatch';
-      info.integrityReason = 'timestamp messageImprint does not match the document bytes';
+      setIntegrity(info, 'digest-mismatch', 'document-digest-mismatch', 'timestamp messageImprint does not match the document bytes');
       return;
     }
   } else if (isSha1Embedded) {
     // adbe.pkcs7.sha1: the CMS embeds the SHA-1 document digest.
     if (!eContentBytes || eContentBytes.length !== 20) {
-      info.integrity = 'unreadable';
-      info.integrityReason = 'legacy SHA-1 signature without embedded document digest';
+      setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'legacy SHA-1 signature without embedded document digest');
       return;
     }
     const actual = await subtleDigest('SHA-1', signedBytes);
     documentDigestOk = bytesEqual(actual, eContentBytes);
     if (!documentDigestOk) {
-      info.integrity = 'digest-mismatch';
-      info.integrityReason = 'document SHA-1 digest does not match the embedded digest in the CMS';
+      setIntegrity(info, 'digest-mismatch', 'document-digest-mismatch', 'document SHA-1 digest does not match the embedded digest in the CMS');
       return;
     }
   }
@@ -776,8 +870,8 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   if (signerInfo.signedAttrs?.encodedValue?.byteLength) {
     signedRegion = signerInfo.signedAttrs.encodedValue; // pkijs patched tag to SET OF
   } else if (signerInfo.signedAttrs) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'CMS signed attributes have no encoded signature input';
+    // A library parse quirk cannot be told apart from a defect.
+    setIntegrity(info, 'indeterminate', 'unexpected-error', 'CMS signed attributes have no encoded signature input');
     return;
   } else {
     signedRegion = bufferView(contentToVerify);
@@ -785,8 +879,7 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
 
   const signatureBytes = attrRawBytesOfElement(signerInfo.signature);
   if (!signatureBytes) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'CMS signer info carries no signature value';
+    setIntegrity(info, 'unreadable', 'cms-malformed', 'CMS signer info carries no signature value');
     return;
   }
 
@@ -796,34 +889,40 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
       cert, signerInfo, sigAlgOid, hashName, signatureBytes, signedRegion
     });
   } catch (err) {
-    info.integrity = 'unreadable';
-    info.integrityReason = `signature cannot be verified in this environment: ${String(err?.message ?? err)}`;
+    const detail = `signature cannot be verified in this environment: ${String(err?.message ?? err)}`;
+    if (err instanceof ViewerLimitError) setIntegrity(info, 'not-checked-in-viewer', err.code, detail);
+    else if (err?.name === 'NotSupportedError') setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported', detail);
+    else if (err?.name === 'DataError') setIntegrity(info, 'indeterminate', 'key-import-failed', detail);
+    else setIntegrity(info, 'indeterminate', 'unexpected-error', detail);
     return;
   }
-  if (verified !== true) {
-    if (verified === null) {
-      info.integrity = 'unreadable';
-      info.integrityReason = `signature algorithm not verifiable with WebCrypto: ${sigAlgOid ?? 'missing'}`;
-      return;
-    }
-    info.integrity = 'signature-invalid';
-    info.integrityReason = 'CMS signature does not verify against the embedded certificate';
+  if (verified === 'unsupported') {
+    setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported',
+      `signature algorithm or curve not verifiable with WebCrypto: ${sigAlgOid ?? 'missing'}`);
+    return;
+  }
+  if (verified === 'malformed') {
+    setIntegrity(info, 'unreadable', 'cms-malformed', 'CMS signature value is not a valid ECDSA DER signature');
+    return;
+  }
+  if (verified !== 'verified') {
+    setIntegrity(info, 'signature-invalid', 'signature-invalid', 'CMS signature does not verify against the embedded certificate');
     return;
   }
 
   // --- final state -----------------------------------------------------------
   if (ctx.coversWholeFile === true || info.coversWholeFile === true) {
-    info.integrity = 'intact';
-    info.integrityReason = null;
+    setIntegrity(info, 'intact', null, null);
     return;
   }
   info.coversWholeFile = false;
+  // Stage 3 replaces this end-of-file rule with the revision classifier.
   if (extensionCoveredByLaterSignature(ctx, allContexts, bytes.length)) {
-    info.integrity = 'intact';
-    info.integrityReason = 'file extended by later signature(s) after this one (incremental update)';
+    setIntegrity(info, 'intact', 'extended-by-later-signature',
+      'file extended by later signature(s) after this one (incremental update)');
   } else {
-    info.integrity = 'modified-after-signing';
-    info.integrityReason = 'file was extended after signing outside the covered byte range (incremental update)';
+    setIntegrity(info, 'modified-after-signing', 'unclassified-change-after-signing',
+      'file was extended after signing outside the covered byte range (incremental update)');
   }
 }
 
@@ -890,34 +989,44 @@ function bytesEqual(a, b) {
   return true;
 }
 
+/**
+ * Verify the CMS signature value with WebCrypto.
+ * @returns {Promise<'verified'|'invalid'|'unsupported'|'malformed'>} `unsupported`
+ * for an algorithm, hash or curve WebCrypto lacks; `malformed` when an ECDSA
+ * signature value is not DER. Import/verify failures throw (classified by the caller).
+ */
 async function verifyCmsSignature(pkijsLib, asn1jsLib, { cert, signerInfo, sigAlgOid, hashName, signatureBytes, signedRegion }) {
+  const subtle = requireSubtle();
   const spkiDer = bufferView(new Uint8Array(cert.subjectPublicKeyInfo.toSchema().toBER(false)));
   const keyAlgOid = cert.subjectPublicKeyInfo?.algorithm?.algorithmId;
+  const result = (ok) => (ok ? 'verified' : 'invalid');
 
   if (RSA_PKCS1_OIDS.has(sigAlgOid)) {
-    const key = await crypto.subtle.importKey('spki', spkiDer, { name: 'RSASSA-PKCS1-v1_5', hash: hashName }, false, ['verify']);
-    return crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, bufferView(signatureBytes), signedRegion);
+    if (!WEBCRYPTO_HASHES.has(hashName)) return 'unsupported';
+    const key = await subtle.importKey('spki', spkiDer, { name: 'RSASSA-PKCS1-v1_5', hash: hashName }, false, ['verify']);
+    return result(await subtle.verify('RSASSA-PKCS1-v1_5', key, bufferView(signatureBytes), signedRegion));
   }
   if (sigAlgOid === OID_RSA_PSS) {
     const params = pssParameters(signerInfo.signatureAlgorithm?.algorithmParams);
     const hash = params.hash ?? hashName;
+    if (params.hashUnknown || !WEBCRYPTO_HASHES.has(hash)) return 'unsupported';
     const saltLength = params.saltLength ?? hashedLength(hash);
-    const key = await crypto.subtle.importKey('spki', spkiDer, { name: 'RSA-PSS', hash, mgf: { name: 'MGF-1', hash } }, false, ['verify']);
-    return crypto.subtle.verify({ name: 'RSA-PSS', saltLength }, key, bufferView(signatureBytes), signedRegion);
+    const key = await subtle.importKey('spki', spkiDer, { name: 'RSA-PSS', hash, mgf: { name: 'MGF-1', hash } }, false, ['verify']);
+    return result(await subtle.verify({ name: 'RSA-PSS', saltLength }, key, bufferView(signatureBytes), signedRegion));
   }
   if (keyAlgOid === OID_EC_PUBLIC_KEY && ECDSA_HASH_BY_OID.has(sigAlgOid)) {
     const ecHash = ECDSA_HASH_BY_OID.get(sigAlgOid);
-    const pointSize = curvePointSize(cert, asn1jsLib);
+    const pointSize = curvePointSize(cert);
+    if (pointSize === null || !WEBCRYPTO_HASHES.has(ecHash)) return 'unsupported';
     const inner = asn1jsLib.fromBER(bufferView(signatureBytes));
-    if (inner.offset === -1) return null;
+    if (inner.offset === -1) return 'malformed';
     const raw = pkijsLib.createECDSASignatureFromCMS(inner.result, pointSize);
-    if (!raw || !raw.byteLength) return null;
+    if (!raw || !raw.byteLength) return 'malformed';
     const namedCurve = curveNameForPointSize(pointSize);
-    const key = await crypto.subtle.importKey('spki', spkiDer, { name: 'ECDSA', namedCurve, hash: ecHash }, false, ['verify']);
-    return crypto.subtle.verify({ name: 'ECDSA', hash: ecHash }, key, raw, signedRegion);
+    const key = await subtle.importKey('spki', spkiDer, { name: 'ECDSA', namedCurve, hash: ecHash }, false, ['verify']);
+    return result(await subtle.verify({ name: 'ECDSA', hash: ecHash }, key, raw, signedRegion));
   }
-  if (keyAlgOid === OID_EC_PUBLIC_KEY && sigAlgOid === undefined) return null;
-  return null; // Ed25519, DSA, GOST, ...: reported unreadable by the caller
+  return 'unsupported'; // Ed25519, DSA, GOST, ...: not checked in the viewer
 }
 
 function curveNameForPointSize(pointSize) {
@@ -948,18 +1057,57 @@ function orderSignatures(entries, contexts) {
 // ---------------------------------------------------------------------------
 
 /**
- * Report an inspection failure without claiming that the document is unsigned.
- * @param {string} reason Inspection failure reason.
+ * Document-level placeholder: one signature entry without identity fields, so
+ * an inspection failure never claims that the document is unsigned.
+ * @param {PdfSignatureIntegrity} integrity
+ * @param {PdfSignatureIntegrityCode} code
+ * @param {string} detail English detail line (integrityReason).
  * @returns {PdfSignatureReport}
  */
-export function unreadableSignatureReport(reason) {
+function placeholderSignatureReport(integrity, code, detail) {
   return { signatures: [{
-    fieldName: null, signer: null, signerOrganization: null, issuer: null,
+    fieldName: null, signer: null, signerSource: null, signerOrganization: null, issuer: null,
     serial: null, notBefore: null, notAfter: null, signingTime: null,
     signingTimeSource: 'none', reason: null, location: null, subFilter: null,
-    kind: 'approval', integrity: 'unreadable', integrityReason: reason,
+    kind: 'approval', integrity, integrityCode: code, integrityReason: detail,
     coversWholeFile: null
   }] };
+}
+
+/**
+ * The viewer could not inspect the document's signatures because of its own
+ * limits (budget, worker, library, read error); there is no evidence of a defect.
+ * @param {PdfSignatureIntegrityCode} code A `not-checked-in-viewer` code.
+ * @param {string} detail
+ * @returns {PdfSignatureReport}
+ */
+export function notCheckedSignatureReport(code, detail) {
+  return placeholderSignatureReport('not-checked-in-viewer', code, detail);
+}
+
+/**
+ * Inspection failed in a way that is neither a known viewer limit nor proof of
+ * a defect (shown as a warning).
+ * @param {PdfSignatureIntegrityCode} code An `indeterminate` code.
+ * @param {string} detail
+ * @returns {PdfSignatureReport}
+ */
+export function indeterminateSignatureReport(code, detail) {
+  return placeholderSignatureReport('indeterminate', code, detail);
+}
+
+/**
+ * Placeholder for an exception: ViewerLimitError -> not checked with its code,
+ * anything else -> indeterminate.
+ * @param {*} err
+ * @param {string} prefix
+ * @returns {PdfSignatureReport}
+ */
+function errorSignatureReport(err, prefix) {
+  const detail = `${prefix}: ${String(err?.message ?? err)}`;
+  return err instanceof ViewerLimitError
+    ? notCheckedSignatureReport(err.code, detail)
+    : indeterminateSignatureReport('unexpected-error', detail);
 }
 
 const isPdfWhitespace = (b) => b === 0 || b === 9 || b === 10 || b === 12 || b === 13 || b === 32;
@@ -1098,26 +1246,37 @@ async function parseWithSourceSpans(bytes, pdfLib) {
   let depth = 0;
   let count = 0;
   let decodedTotal = 0;
+  // pdf-lib wraps errors thrown inside an indirect object into its own parsing
+  // error, so the first viewer limit is remembered here and rethrown below.
+  let limit = null;
+  const fail = (code, message) => {
+    limit ??= new ViewerLimitError(code, message);
+    throw limit;
+  };
   const parseObject = parser.parseObject;
   parser.parseObject = function () {
-    if (++depth > 128 || ++count > 1000000) throw new Error('PDF inspection complexity limit exceeded');
+    if (++depth > 128 || ++count > 1000000) fail('inspection-limit', 'PDF inspection complexity limit exceeded');
     try {
       const object = parseObject.call(this);
       if (object instanceof pdfLib.PDFRawStream && ['ObjStm', 'XRef'].includes(pdfText(object.dict.lookup(pdfLib.PDFName.of('Type'))))) {
         // Decode parser-owned streams under a memory budget before pdf-lib's
         // object/xref stream parsers consume them. Page/image streams stay opaque.
         const filter = object.dict.lookup(pdfLib.PDFName.of('Filter'));
-        if (filter instanceof pdfLib.PDFArray && filter.size() > 1) throw new Error('Multiple structural stream filters require external inspection');
+        if (filter instanceof pdfLib.PDFArray && filter.size() > 1) fail('structure-unsupported', 'Multiple structural stream filters require external inspection');
+        const filterName = pdfText(filter instanceof pdfLib.PDFArray ? filter.lookup(0) : filter);
+        if (filter && !DECODABLE_STREAM_FILTERS.has(filterName)) {
+          fail('structure-unsupported', `Structural stream filter ${filterName ?? '(unreadable)'} cannot be decoded`);
+        }
         const decoded = pdfLib.decodePDFRawStream(object);
         const maxDecoded = 8 * 1024 * 1024;
         const ensureBuffer = decoded.ensureBuffer;
         if (ensureBuffer) decoded.ensureBuffer = function (size) {
-          if (size > maxDecoded) throw new Error('PDF structural stream exceeds the 8 MiB inspection limit');
+          if (size > maxDecoded) fail('inspection-limit', 'PDF structural stream exceeds the 8 MiB inspection limit');
           return ensureBuffer.call(this, size);
         };
         const content = decoded.decode();
         decodedTotal += content.length;
-        if (content.length > maxDecoded || decodedTotal > 32 * 1024 * 1024) throw new Error('PDF structural stream inspection budget exceeded');
+        if (content.length > maxDecoded || decodedTotal > 32 * 1024 * 1024) fail('inspection-limit', 'PDF structural stream inspection budget exceeded');
         const dict = object.dict.clone();
         dict.delete(pdfLib.PDFName.of('Filter'));
         dict.delete(pdfLib.PDFName.of('DecodeParms'));
@@ -1127,7 +1286,13 @@ async function parseWithSourceSpans(bytes, pdfLib) {
       return object;
     } finally { depth--; }
   };
-  const context = await parser.parseDocument();
+  let context;
+  try {
+    context = await parser.parseDocument();
+  } catch (err) {
+    throw limit ?? err;
+  }
+  if (limit) throw limit;
   return { context, sourceSpans, parsedDicts };
 }
 
@@ -1138,8 +1303,9 @@ async function parseWithSourceSpans(bytes, pdfLib) {
  * `getDocumentSignatures` from `utils/pdfSignatureInspector.js` instead,
  * which offloads this function to a worker.
  *
- * Never throws: inspection failures resolve to a document-level unreadable
- * report; per-signature problems become `unreadable`/`unsupported` entries.
+ * Never throws: inspection failures resolve to a document-level placeholder
+ * (`not-checked-in-viewer` for viewer limits, otherwise `indeterminate`);
+ * per-signature results follow the status model in docs-src/pdf-signatures.md.
  *
  * @param {Uint8Array|ArrayBuffer} pdfBytes Complete PDF document bytes.
  * @returns {Promise<PdfSignatureReport>}
@@ -1154,26 +1320,26 @@ export async function collectPdfSignatures(pdfBytes) {
   }
   // Never gate discovery on a header or strip leading bytes: ByteRange and
   // /Contents positions must be verified against the actual file.
-  if (bytes.length > 64 * 1024 * 1024) return unreadableSignatureReport('PDF exceeds the 64 MiB signature inspection limit');
+  if (bytes.length > 64 * 1024 * 1024) return notCheckedSignatureReport('inspection-limit', 'PDF exceeds the 64 MiB signature inspection limit');
 
   let pdfLib;
   let pdfDoc;
   try {
     pdfLib = await import('pdf-lib');
     pdfDoc = await parseWithSourceSpans(bytes, pdfLib);
-    if (pdfDoc.context.trailerInfo.Encrypt) return unreadableSignatureReport('Encrypted PDF signature inspection is unavailable');
+    if (pdfDoc.context.trailerInfo.Encrypt) return notCheckedSignatureReport('encrypted', 'Encrypted PDF signature inspection is unavailable');
   } catch (err) {
-    return unreadableSignatureReport(`PDF structure cannot be inspected: ${String(err?.message ?? err)}`);
+    return errorSignatureReport(err, 'PDF structure cannot be inspected');
   }
 
   let discovered;
   try {
     discovered = discoverSignatures(pdfDoc, pdfLib);
   } catch (err) {
-    return unreadableSignatureReport(`PDF signatures cannot be discovered: ${String(err?.message ?? err)}`);
+    return errorSignatureReport(err, 'PDF signatures cannot be discovered');
   }
   if (!discovered.length) return empty;
-  if (discovered.length > 256) return unreadableSignatureReport('PDF exceeds the 256 signature inspection limit');
+  if (discovered.length > 256) return notCheckedSignatureReport('inspection-limit', 'PDF exceeds the 256 signature inspection limit');
 
   /** @type {PdfSignatureInfo[]} */
   const entries = [];
@@ -1185,10 +1351,12 @@ export async function collectPdfSignatures(pdfBytes) {
       entries.push(info);
       contexts.push({ ...ctx, info });
     } catch (err) {
-      const info = unreadableSignatureReport(`Signature dictionary cannot be inspected: ${String(err?.message ?? err)}`).signatures[0];
+      // A malformed signature dictionary, but no proof that the signature is defective.
+      const info = indeterminateSignatureReport('unexpected-error',
+        `Signature dictionary cannot be inspected: ${String(err?.message ?? err)}`).signatures[0];
       info.fieldName = item.fieldName;
       entries.push(info);
-      contexts.push({ byteRange: null, contents: null, info });
+      contexts.push({ byteRange: null, contents: null, info, pending: false });
     }
   }
 
@@ -1198,10 +1366,10 @@ export async function collectPdfSignatures(pdfBytes) {
   try {
     [pkijsLib, asn1jsLib] = await Promise.all([loadPkijs(), loadAsn1js()]);
   } catch (err) {
-    for (const entry of entries) {
-      if (entry.integrityReason === 'pending-verification') {
-        entry.integrity = 'unreadable';
-        entry.integrityReason = `signature stack unavailable: ${String(err?.message ?? err)}`;
+    for (const ctx of contexts) {
+      if (ctx.pending) {
+        ctx.pending = false;
+        setIntegrity(ctx.info, 'not-checked-in-viewer', 'viewer-error', `signature stack unavailable: ${String(err?.message ?? err)}`);
       }
     }
     return { signatures: orderSignatures(entries, contexts) };
@@ -1215,8 +1383,8 @@ export async function collectPdfSignatures(pdfBytes) {
     try {
       await verifySignatureEntry(entries[i], contexts[i], bytes, pkijsLib, asn1jsLib, contexts);
     } catch (err) {
-      entries[i].integrity = 'unreadable';
-      entries[i].integrityReason = `unexpected verification failure: ${String(err?.message ?? err)}`;
+      contexts[i].pending = false;
+      setIntegrityFromError(entries[i], err, 'unexpected verification failure');
     }
   }
 

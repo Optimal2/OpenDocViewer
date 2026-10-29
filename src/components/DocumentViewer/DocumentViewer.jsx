@@ -49,6 +49,7 @@ import {
 } from '../../utils/pdfSignatureDocuments.js';
 import {
   getRuntimeConfig,
+  getPdfSignatureUncheckedSeverity,
   getPrintSelectionWorkspaceConfig,
   getViewerEdgeScrollPageTurnConfig,
   isDocumentMetadataUiEnabled,
@@ -272,11 +273,19 @@ const DocumentViewer = () => {
 
   // Signature reports are cached per file; the strip, the dialogs and the toolbar overview work
   // per document (one document can consist of several files).
+  // Site switch for not-checked signatures, read once; severity is presentation, never cached.
+  const signatureUncheckedSeverity = useMemo(() => getPdfSignatureUncheckedSeverity(getRuntimeConfig()), []);
   const signatureDocuments = useMemo(
-    () => buildSignatureDocuments(allPages, signatureReports, { getFileName: getSignatureSourceFileName }),
-    [allPages, getSignatureSourceFileName, signatureReports]
+    () => buildSignatureDocuments(allPages, signatureReports, {
+      getFileName: getSignatureSourceFileName,
+      uncheckedSeverity: signatureUncheckedSeverity,
+    }),
+    [allPages, getSignatureSourceFileName, signatureReports, signatureUncheckedSeverity]
   );
-  const signatureSummary = useMemo(() => summarizeSignatureDocuments(signatureDocuments), [signatureDocuments]);
+  const signatureSummary = useMemo(
+    () => summarizeSignatureDocuments(signatureDocuments, { uncheckedSeverity: signatureUncheckedSeverity }),
+    [signatureDocuments, signatureUncheckedSeverity]
+  );
 
   /**
    * Open the signature details dialog for the document that contains a file (sourceKey), with
@@ -808,6 +817,7 @@ const DocumentViewer = () => {
         onOpenDetails={openSignatureDocumentDetails}
         suspended={!!signatureDialogDocument}
         returnFocusRef={signatureOverviewOpenerRef}
+        uncheckedSeverity={signatureUncheckedSeverity}
       />
 
       <SignatureDetailsDialog
@@ -816,6 +826,7 @@ const DocumentViewer = () => {
         document={signatureDialogDocument}
         initialSourceKey={signatureDialogState?.sourceKey || ''}
         returnFocusRef={signatureOpenerRef}
+        uncheckedSeverity={signatureUncheckedSeverity}
       />
     </div>
   );

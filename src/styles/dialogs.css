@@ -2129,6 +2129,56 @@
   margin: 0;
 }
 
+.odv-signature-info p + p {
+  margin-top: 4px;
+}
+
+.odv-signature-checks {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.odv-signature-checks-heading {
+  margin: 0 0 2px;
+  font-weight: 600;
+}
+
+.odv-signature-checks ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.odv-signature-checks li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.odv-signature-checks .material-icons,
+.odv-signature-status .material-icons {
+  font-size: 16px;
+  vertical-align: text-bottom;
+}
+
+.odv-signature-checks .material-icons,
+.odv-signature-status--ok .material-icons {
+  color: var(--odv-signature-ok-color, #1e7e34);
+}
+
+.odv-signature-status .material-icons {
+  margin-right: 4px;
+}
+
+.odv-signature-status--warning .material-icons {
+  color: var(--odv-signature-warning-color, #b25d00);
+}
+
+.odv-signature-status--error .material-icons {
+  color: var(--odv-signature-error-color, #c62828);
+}
+
 .odv-signature-body {
   flex: 1 1 auto;
   overflow: auto;
@@ -2264,6 +2314,11 @@
   .odv-signature-badge--warning,
   .odv-signature-badge--error {
     color: ButtonText;
+  }
+
+  .odv-signature-checks .material-icons,
+  .odv-signature-status .material-icons {
+    color: CanvasText;
   }
 
   .odv-signature-badge:focus-visible {

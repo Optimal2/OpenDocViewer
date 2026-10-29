@@ -180,7 +180,7 @@ class PdfBuilder {
   }
 }
 
-function sigDictBody({ subFilter, nameHex, nameLiteral, m, reason, location, extra }) {
+function sigDictBody({ subFilter, nameHex, nameLiteral, m, reason, location, extra, capacityHex = CONTENTS_CAPACITY_HEX }) {
   const parts = [`<< /Type /Sig /Filter /Adobe.PPKLite /SubFilter /${subFilter} `];
   if (nameHex) parts.push(`/Name ${nameHex} `);
   if (nameLiteral) parts.push(`/Name (${escapePdfLiteral(nameLiteral)}) `);
@@ -188,7 +188,7 @@ function sigDictBody({ subFilter, nameHex, nameLiteral, m, reason, location, ext
   if (reason) parts.push(`/Reason (${escapePdfLiteral(reason)}) `);
   if (location) parts.push(`/Location (${escapePdfLiteral(location)}) `);
   if (extra) parts.push(extra);
-  parts.push(`/ByteRange [${BYTE_RANGE_PLACEHOLDER}] /Contents <${'0'.repeat(CONTENTS_CAPACITY_HEX)}> >>`);
+  parts.push(`/ByteRange [${BYTE_RANGE_PLACEHOLDER}] /Contents <${'0'.repeat(capacityHex)}> >>`);
   return parts.join('');
 }
 
@@ -230,15 +230,15 @@ function baseSignedPdf({ fieldName, visible, appearance = false, sigOptions }) {
 // write the CMS into the reserved /Contents gap.
 // ---------------------------------------------------------------------------
 
-function sigGap(fileBytes, sigObjOffset) {
+function sigGap(fileBytes, sigObjOffset, capacityHex = CONTENTS_CAPACITY_HEX) {
   const regionStart = indexOfAscii(fileBytes, '/Contents <', sigObjOffset);
   if (regionStart === -1) throw new Error('fixture bug: /Contents placeholder missing');
   const hexStart = regionStart + '/Contents <'.length;
-  return { hexStart, gapEnd: hexStart + CONTENTS_CAPACITY_HEX };
+  return { hexStart, gapEnd: hexStart + capacityHex };
 }
 
-function patchByteRange(fileBytes, sigObjOffset) {
-  const { hexStart, gapEnd } = sigGap(fileBytes, sigObjOffset);
+function patchByteRange(fileBytes, sigObjOffset, capacityHex = CONTENTS_CAPACITY_HEX) {
+  const { hexStart, gapEnd } = sigGap(fileBytes, sigObjOffset, capacityHex);
   const brIdx = indexOfAscii(fileBytes, `/ByteRange [${BYTE_RANGE_PLACEHOLDER}]`, sigObjOffset);
   if (brIdx === -1) throw new Error('fixture bug: /ByteRange placeholder missing');
   const values = [
@@ -408,7 +408,10 @@ async function buildSignedData({
   return new Uint8Array(contentInfo.toSchema().toBER(false));
 }
 
-async function buildTstToken({ signer, certificates = [], docBytes, hashAlg = 'SHA-256', genTime = FIXTURE_SIGNING_TIME }) {
+async function buildTstToken({
+  signer, certificates = [], docBytes, hashAlg = 'SHA-256', genTime = FIXTURE_SIGNING_TIME,
+  imprintOid = '2.16.840.1.101.3.4.2.1' // sha-256; override to write an imprint algorithm the viewer lacks
+}) {
   const imprint = await digestBytes(hashAlg, docBytes);
   const tstInfo = new asn1js.Sequence({
     value: [
@@ -418,7 +421,7 @@ async function buildTstToken({ signer, certificates = [], docBytes, hashAlg = 'S
         value: [
           new asn1js.Sequence({
             value: [
-              new asn1js.ObjectIdentifier({ value: '2.16.840.1.101.3.4.2.1' }), // sha-256
+              new asn1js.ObjectIdentifier({ value: imprintOid }),
               new asn1js.Null()
             ]
           }),
@@ -781,7 +784,7 @@ export async function createSignatureFixtures() {
 }
 
 // Reusable test-only primitives for adversarial fixtures, with fresh keys per run.
-export { createFixturePki, buildSignedData, baseSignedPdf, PdfBuilder, signFile,
+export { createFixturePki, buildSignedData, buildTstToken, baseSignedPdf, PdfBuilder, signFile,
   sigDictBody, latin1, latin1Text, concatBytes, digestBytes, patchContents,
   patchByteRange, findStartxrefOffset, CONTENTS_CAPACITY_HEX };
 

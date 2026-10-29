@@ -86,14 +86,20 @@ describe('SignatureDetailsDialog content', () => {
     container.remove();
   });
 
-  it('shows unsupported formats as signature present, format not supported (never hidden)', async () => {
+  it('shows unsupported formats as not checked in the viewer (never hidden), with a plain info line', async () => {
     const report = await inspect('unsupported-subfilter.pdf');
     expect(report.signatures).toHaveLength(1);
-    expect(report.signatures[0]?.integrity).toBe('unsupported');
+    expect(report.signatures[0]?.integrity).toBe('not-checked-in-viewer');
+    expect(report.signatures[0]?.integrityCode).toBe('format-unsupported');
     const { container, root } = await renderDialog({ isOpen: true, onClose: () => {}, report });
     const text = container.textContent;
-    expect(text).toContain('Signature present, format not supported');
+    expect(text).toContain('Not checked in the viewer');
     expect(text).toContain('ICVN.SADES');
+    const note = container.querySelector('.odv-signature-info[role="note"]');
+    expect(note.textContent).toContain('format-unsupported');
+    // A2 guard: the self-declared /Name is never presented as a verified signer.
+    expect(text).toContain('Name from the PDF, not verified');
+    expect(container.querySelector('.odv-signature-checks')).toBeNull();
     await act(() => root.unmount());
     container.remove();
   });

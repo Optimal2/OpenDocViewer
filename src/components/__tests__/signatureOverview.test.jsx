@@ -161,3 +161,28 @@ describe('SignatureOverviewDialog while the details dialog is on top', () => {
     await cleanup();
   });
 });
+
+describe('SignatureOverviewDialog status model', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+
+  it('labels not-checked documents "Not checked in the viewer" and colours them by the site switch', async () => {
+    const reports = {
+      a1: { signatures: [{ integrity: 'intact' }, { integrity: 'not-checked-in-viewer', integrityCode: 'timeout' }] },
+      b1: { signatures: [{ integrity: 'intact', signingTimeCheck: 'outside-validity' }] },
+    };
+    for (const [uncheckedSeverity, firstClass] of [['ok', 'odv-signature-badge--ok'], ['warning', 'odv-signature-badge--warning']]) {
+      const documents = buildSignatureDocuments(PAGES, reports, { uncheckedSeverity });
+      const { container, cleanup } = await render(createElement(SignatureOverviewDialog, {
+        isOpen: true, onClose: () => {}, documents, onNavigate: () => {}, onOpenDetails: () => {}, uncheckedSeverity,
+      }));
+      const rows = container.querySelectorAll('.odv-signature-overview-row');
+      expect(rows[0].querySelector('.material-icons').className).toContain(firstClass);
+      expect(rows[0].textContent).toContain('Not checked in the viewer');
+      expect(rows[1].querySelector('.material-icons').className).toContain('odv-signature-badge--warning');
+      expect(rows[1].textContent).toContain('Signed outside the certificate validity period');
+      await cleanup();
+    }
+  });
+});

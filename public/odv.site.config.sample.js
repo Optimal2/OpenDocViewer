@@ -83,8 +83,8 @@
       // false hides the per-page signature symbol on thumbnails; the document symbol and the
       // toolbar signature overview remain.
       thumbnailPageBadge: true,
-      // 'ok' (default) or 'warning': colour of the symbol for an intact signature whose validity
-      // (certificate chain, revocation) the viewer does not check.
+      // 'ok' (default) or 'warning': colour of the symbol for a signature the viewer could not
+      // check itself ("Not checked in the viewer"). Problems are never shown as less severe.
       uncheckedSeverity: 'ok'
     },
     ocr: {

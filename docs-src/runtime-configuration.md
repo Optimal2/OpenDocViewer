@@ -244,16 +244,20 @@ pdfSignatures: {
 
 The viewer checks integrity (whether the content is unchanged since signing) in the browser. It never
 checks the certificate chain, revocation status or trust lists, and it makes no network request for
-signatures. `pdfSignatures.uncheckedSeverity` chooses how an intact signature is shown:
+signatures. When the viewer could not check a signature itself (format, algorithm, size or time
+budget, encryption, worker failure: status "Not checked in the viewer"), the symbol is green with
+an information line by default. `pdfSignatures.uncheckedSeverity` chooses how such signatures are
+shown:
 
 ```js
 pdfSignatures: {
-  uncheckedSeverity: 'ok' // 'warning': show intact signatures as "take a closer look"
+  uncheckedSeverity: 'ok' // 'warning': show "not checked in the viewer" as a warning
 }
 ```
 
-`'ok'` (default) keeps the OK symbol; `'warning'` uses the warning symbol. Modified, unreadable or
-invalid signatures keep their own severity. Unknown values fall back to `'ok'`.
+`'ok'` (default) keeps the OK symbol; exactly `'warning'` uses the warning symbol. Intact,
+modified, damaged or invalid signatures keep their own severity, and unknown statuses stay
+errors. Unknown values fall back to `'ok'`. See "Status model" in `docs-src/pdf-signatures.md`.
 
 ## OCR (in-browser, off by default)
 

@@ -382,7 +382,7 @@ function templateCssRuleMatchesElement(element, selectorParts) {
 }
 
 /**
- * Parse only the small CSS subset used by approved print header/footer templates.
+ * Parse only the small CSS subset used by trusted print header/footer templates.
  *
  * This is intentionally not a full CSS parser. Nested at-rules such as `@media` and
  * `@keyframes` are ignored by design, because generated-PDF output supports only inline
@@ -628,7 +628,7 @@ function flattenRichLines(richLines) {
  * Full browser CSS layout is intentionally not attempted here; this supports the formatting
  * commonly used by ODV print headers/footers: line breaks, block breaks, bold, italic and
  * equivalent inline styles. It also recognizes simple left/right/center alignment and
- * two-column space-between rows from approved print-template CSS.
+ * two-column space-between rows from trusted print-template CSS.
  * @param {string} html
  * @param {string=} css
  * @returns {Array<PdfRichLine>}

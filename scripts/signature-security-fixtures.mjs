@@ -3,10 +3,44 @@ import * as asn1js from 'asn1js';
 import * as pkijs from 'pkijs';
 import { PDFDocument, PDFName, PDFHexString } from 'pdf-lib';
 import {
-  createSignatureFixtures, createFixturePki, buildSignedData, baseSignedPdf,
+  createSignatureFixtures, createFixturePki, buildSignedData, buildTstToken, baseSignedPdf,
   PdfBuilder, signFile, sigDictBody, latin1, latin1Text, concatBytes,
   digestBytes, patchContents, patchByteRange, findStartxrefOffset
 } from './generate-signature-fixtures.mjs';
+
+// DER encodings (tag, length, value) of the OIDs the status-model fixtures rewrite.
+export const OID_DER = Object.freeze({
+  sha256: '0609608648016503040201',
+  sha224: '0609608648016503040204',
+  sha3_256: '0609608648016503040208', // a real hash the viewer does not map
+  sha256WithRsa: '06092a864886f70d01010b',
+  sha512_224WithRsa: '06092a864886f70d01010f', // a real RSA algorithm the viewer does not map
+  p256: '06082a8648ce3d030107',
+  prime239v3: '06082a8648ce3d030106' // a real named curve WebCrypto does not implement
+});
+
+/**
+ * Rewrite hex inside the first signature's /Contents gap. The replacement must
+ * have the same length, so the ByteRange and the signed bytes stay valid: only
+ * the CMS (which is outside the signed range) changes.
+ * @param {Uint8Array} bytes
+ * @param {string} fromHex
+ * @param {string} toHex
+ * @param {'all'|'last'|'first'} [which]
+ */
+export function patchContentsHex(bytes, fromHex, toHex, which = 'all') {
+  if (fromHex.length !== toHex.length) throw new Error('fixture bug: replacement must keep the length');
+  const copy = bytes.slice();
+  const br = byteRange(copy);
+  const start = br[1] + 1;
+  const hex = latin1Text(copy.subarray(start, br[2] - 1)).toLowerCase();
+  const positions = [];
+  for (let i = hex.indexOf(fromHex); i >= 0; i = hex.indexOf(fromHex, i + 1)) positions.push(i);
+  if (!positions.length) throw new Error(`fixture bug: ${fromHex} not found in /Contents`);
+  const chosen = which === 'last' ? [positions.at(-1)] : which === 'first' ? [positions[0]] : positions;
+  for (const at of chosen) copy.set(latin1(toHex), start + at);
+  return copy;
+}
 
 export function byteRange(bytes, last = false) {
   const matches = [...latin1Text(bytes).matchAll(/\/ByteRange\s*\[([^\]]+)\]/g)];
@@ -130,7 +164,49 @@ export async function createSecurityFixtures() {
   const fakeUpdate = patchByteRange(concatBytes(base, tail.bytes), tail.offsets.get(10));
   const maliciousLater = patchContents(fakeUpdate.bytes, fakeUpdate.hexStart, new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
 
+  // --- status model: viewer limits (not checked in the viewer), not defects -----
+  const valid = normal['valid-rsa.pdf'];
+  const ecdsa = normal['cades-ecdsa-invisible.pdf'];
+  const unknownDigest = patchContentsHex(valid, OID_DER.sha256, OID_DER.sha3_256);
+  const sha224Digest = patchContentsHex(valid, OID_DER.sha256, OID_DER.sha224);
+  // The signer's signatureAlgorithm is the last sha256WithRSA OID; the certificates keep theirs.
+  const unknownSignatureAlgorithm = patchContentsHex(valid, OID_DER.sha256WithRsa, OID_DER.sha512_224WithRsa, 'last');
+  const unknownCurve = patchContentsHex(ecdsa, OID_DER.p256, OID_DER.prime239v3);
+  // A P-256 point that is not on the curve: the browser rejects the key (DataError).
+  const ecPoint = latin1Text(ecdsa).toLowerCase().indexOf('034200', byteRange(ecdsa)[1]);
+  const badEcKey = ecdsa.slice();
+  badEcKey[ecPoint + 10] = badEcKey[ecPoint + 10] === 0x30 ? 0x31 : 0x30; // hex digit inside X
+  // A document timestamp whose imprint algorithm (SHA3-256 OID) the viewer does not map.
+  const dtsBuilder = baseSignedPdf({ fieldName: 'DocTS', visible: false,
+    sigOptions: { subFilter: 'ETSI.RFC3161', nameLiteral: 'ODV Fixture Timestamping TSA' } });
+  const dtsRev = dtsBuilder.serialize({ trailerExtras: '/Info 9 0 R' });
+  const timestampUnknownImprint = await signFile(dtsRev.bytes, dtsRev.offsets.get(8), (docBytes) =>
+    buildTstToken({ signer: pki.tsa, certificates: [pki.ca.cert], docBytes, imprintOid: '2.16.840.1.101.3.4.2.8' }));
+  // A CMS gap over the 1 MiB inspection budget (zero filled; the budget is checked before parsing).
+  const bigCapacity = 2 * 1024 * 1024 + 64;
+  const bigBuilder = baseSignedPdf({ fieldName: 'Huge', visible: false,
+    sigOptions: { subFilter: 'adbe.pkcs7.detached', capacityHex: bigCapacity } });
+  const bigRev = bigBuilder.serialize();
+  const oversizedCms = patchByteRange(bigRev.bytes, bigRev.offsets.get(8), bigCapacity).bytes;
+  // Encrypted document (/Encrypt in the trailer).
+  const encBuilder = baseSignedPdf({ fieldName: 'Enc', visible: false, sigOptions: { subFilter: 'adbe.pkcs7.detached' } });
+  encBuilder.set(20, '<< /Filter /Standard /V 1 /R 2 /O <00> /U <00> /P -4 >>');
+  const encrypted = encBuilder.serialize({ trailerExtras: '/Encrypt 20 0 R' }).bytes;
+  // Structural (object/xref) streams with a filter chain or a filter the parser cannot decode.
+  const compressedText = latin1Text(await escapedOrCompressed(true));
+  const structureFilterChain = latin1(compressedText.replace('/Filter /FlateDecode', '/Filter [/FlateDecode /FlateDecode]'));
+  const structureFilterUnknown = latin1(compressedText.replace('/Filter /FlateDecode', '/Filter /JBIG2Decode'));
+  // More signature dictionaries than the 256 signature budget.
+  const manyDoc = await PDFDocument.load(normal['unsigned.pdf']);
+  for (let i = 0; i < 257; i++) {
+    manyDoc.context.register(manyDoc.context.obj({ Type: PDFName.of('Sig'),
+      SubFilter: PDFName.of('adbe.pkcs7.detached'), ByteRange: [0, 4, 8, 4], Contents: PDFHexString.of('deadbeef') }));
+  }
+  const tooManySignatures = await manyDoc.save({ useObjectStreams: false });
+
   return { normal, noDigest, direct, wrongIssuer, unknownSerial, serialCollision, fakeLater, maliciousLater, wide, decoy,
+    unknownDigest, sha224Digest, unknownSignatureAlgorithm, unknownCurve, badEcKey, timestampUnknownImprint,
+    oversizedCms, encrypted, structureFilterChain, structureFilterUnknown, tooManySignatures,
     ski: await skiFixture(), skiExtension: await skiFixture(false, true), wrongSki: await skiFixture(true),
     escaped: await escapedOrCompressed(false), compressed: await escapedOrCompressed(true) };
 }

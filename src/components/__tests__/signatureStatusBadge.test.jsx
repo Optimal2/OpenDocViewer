@@ -41,9 +41,9 @@ describe('SignatureStatusBadge', () => {
     const { container, root } = await renderBadge({ report, onOpen: () => {} });
     const badge = container.querySelector('button');
     expect(badge.className).toContain('odv-signature-badge--error');
-    expect(badge.title).toContain('Signature unreadable');
+    expect(badge.title).toContain('Signature data is damaged');
     await act(() => root.render(createElement(SignatureDetailsDialog, { isOpen: true, report, onClose: () => {} })));
-    expect(container.textContent).toContain('Signature unreadable');
+    expect(container.textContent).toContain('Signature data is damaged');
     await act(() => root.unmount());
     container.remove();
   });
@@ -91,7 +91,9 @@ describe('SignatureStatusBadge', () => {
       { signatures: [sig('intact'), sig('signature-invalid')], cls: 'odv-signature-badge--error', icon: 'error' },
       { signatures: [sig('intact'), sig('unreadable')], cls: 'odv-signature-badge--error', icon: 'error' },
       { signatures: [sig('intact'), sig('modified-after-signing')], cls: 'odv-signature-badge--warning', icon: 'warning' },
-      { signatures: [sig('intact'), sig('unsupported')], cls: 'odv-signature-badge--warning', icon: 'warning' },
+      { signatures: [sig('intact'), sig('indeterminate')], cls: 'odv-signature-badge--warning', icon: 'warning' },
+      { signatures: [sig('intact'), sig('not-checked-in-viewer')], cls: 'odv-signature-badge--ok', icon: 'verified' },
+      { signatures: [sig('intact'), sig('unsupported')], cls: 'odv-signature-badge--ok', icon: 'verified' },
       { signatures: [sig('intact'), sig('intact')], cls: 'odv-signature-badge--ok', icon: 'verified' },
     ];
     for (const testCase of cases) {
@@ -132,5 +134,58 @@ describe('SignatureStatusBadge', () => {
     expect(container.querySelector('button').className).toContain('odv-signature-badge--thumbnail');
     await act(() => root.unmount());
     container.remove();
+  });
+});
+
+describe('SignatureStatusBadge status model', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+
+  async function badgeFor(props) {
+    const { container, root } = await renderBadge({ onOpen: () => {}, ...props });
+    const button = container.querySelector('button');
+    const result = { cls: button.className, icon: button.querySelector('.material-icons')?.textContent, title: button.title };
+    await act(() => root.unmount());
+    container.remove();
+    return result;
+  }
+
+  it('not checked is green with the label "Not checked in the viewer", warning with the site switch', async () => {
+    const report = { signatures: [sig('intact'), { integrity: 'not-checked-in-viewer', integrityCode: 'format-unsupported' }] };
+    const ok = await badgeFor({ report });
+    expect(ok.cls).toContain('odv-signature-badge--ok');
+    expect(ok.icon).toBe('verified');
+    expect(ok.title).toContain('Not checked in the viewer');
+    const warn = await badgeFor({ report, uncheckedSeverity: 'warning' });
+    expect(warn.cls).toContain('odv-signature-badge--warning');
+    expect(warn.icon).toBe('warning');
+  });
+
+  it('the switch never lowers an error and never applies to unknown statuses', async () => {
+    for (const integrity of ['digest-mismatch', 'future-status', undefined]) {
+      const result = await badgeFor({ report: { signatures: [sig(integrity)] }, uncheckedSeverity: 'warning' });
+      expect(result.cls).toContain('odv-signature-badge--error');
+    }
+  });
+
+  it('uses a precomputed severity only when it is one of the three classes', async () => {
+    const report = { signatures: [sig('not-checked-in-viewer')] };
+    expect((await badgeFor({ report, severity: 'warning' })).cls).toContain('odv-signature-badge--warning');
+    expect((await badgeFor({ report: { signatures: [sig('digest-mismatch')] }, severity: 'bogus' })).cls)
+      .toContain('odv-signature-badge--error');
+  });
+
+  it('adds a signing-time warning to the tooltip and colours it as a warning', async () => {
+    const report = { signatures: [{ integrity: 'intact', signingTimeCheck: 'outside-validity', signingTimeCode: 'signed-after-certificate-expired' }] };
+    const result = await badgeFor({ report });
+    expect(result.cls).toContain('odv-signature-badge--warning');
+    expect(result.title).toContain('signed-after-certificate-expired');
+  });
+
+  it('signatures without signing-time fields keep today\'s tooltip and colour', async () => {
+    const result = await badgeFor({ report: { signatures: [sig('intact')] } });
+    expect(result.cls).toContain('odv-signature-badge--ok');
+    expect(result.title).toBe('Signed document, 1 signature – show signature details — Intact');
   });
 });

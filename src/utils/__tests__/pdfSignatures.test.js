@@ -11,7 +11,10 @@
 
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { createSignatureFixtures, createFixturePki, baseSignedPdf, signFile, buildSignedData, FIXTURE_SIGNING_TIME, FIXTURE_NOT_BEFORE, FIXTURE_NOT_AFTER } from '../../../scripts/generate-signature-fixtures.mjs';
+import { PDFDocument, PDFName, PDFHexString } from 'pdf-lib';
 import { collectPdfSignatures, installIndirectObjectHeaderProbe, SUPPORTED_SUBFILTERS } from '../pdfSignatures.js';
+import { INTEGRITY_CODES, getSignatureSeverity } from '../pdfSignatureStatus.js';
+import { createSecurityFixtures } from '../../../scripts/signature-security-fixtures.mjs';
 
 let fixtures;
 const prefixLengths = [7, 1024, 4096, 65536];
@@ -160,6 +163,7 @@ describe('F10 PDF headers after leading junk', () => {
       expect(report.signatures).toHaveLength(1);
       expect(report.signatures[0].fieldName).toBeTruthy();
       expect(report.signatures[0].integrity).toBe('unreadable');
+      expect(report.signatures[0].integrityCode).toBe('byte-range-invalid');
       expect(report.signatures[0].integrityReason).toMatch(/ByteRange/i);
     }
   });
@@ -192,6 +196,8 @@ describe('integrity statuses', () => {
   it('intact: valid detached RSA signature covering the whole file', async () => {
     const sig = await one('valid-rsa.pdf');
     expect(sig.integrity).toBe('intact');
+    expect(sig.integrityCode).toBeNull();
+    expect(getSignatureSeverity(sig)).toBe('ok');
     expect(sig.coversWholeFile).toBe(true);
     expect(sig.subFilter).toBe('adbe.pkcs7.detached');
     expect(sig.kind).toBe('approval');
@@ -219,12 +225,17 @@ describe('integrity statuses', () => {
   it('digest-mismatch: a byte inside the signed range was changed', async () => {
     const sig = await one('digest-mismatch.pdf');
     expect(sig.integrity).toBe('digest-mismatch');
+    expect(sig.integrityCode).toBe('content-digest-mismatch');
+    expect(getSignatureSeverity(sig, { uncheckedSeverity: 'warning' })).toBe('error');
     expect(sig.integrityReason).toMatch(/digest/i);
   });
 
   it('modified-after-signing: incremental update appended after signing', async () => {
     const sig = await one('extended-after-signing.pdf');
     expect(sig.integrity).toBe('modified-after-signing');
+    // Stage 3 (revision classifier) refines this; today any unsigned tail is unclassified.
+    expect(sig.integrityCode).toBe('unclassified-change-after-signing');
+    expect(getSignatureSeverity(sig)).toBe('warning');
     expect(sig.coversWholeFile).toBe(false);
     expect(sig.integrityReason).toMatch(/extended after signing/i);
   });
@@ -232,12 +243,17 @@ describe('integrity statuses', () => {
   it('signature-invalid: CMS signed with a foreign key still digests fine', async () => {
     const sig = await one('signature-invalid.pdf');
     expect(sig.integrity).toBe('signature-invalid');
+    expect(sig.integrityCode).toBe('signature-invalid');
+    expect(getSignatureSeverity(sig, { uncheckedSeverity: 'warning' })).toBe('error');
     expect(sig.integrityReason).toMatch(/does not verify/i);
   });
 
-  it('unsupported: signature present with unknown SubFilter is reported, not hidden', async () => {
+  it('format-unsupported: signature with unknown SubFilter is reported as not checked (ok + info), not hidden', async () => {
     const sig = await one('unsupported-subfilter.pdf');
-    expect(sig.integrity).toBe('unsupported');
+    expect(sig.integrity).toBe('not-checked-in-viewer');
+    expect(sig.integrityCode).toBe('format-unsupported');
+    expect(getSignatureSeverity(sig)).toBe('ok');
+    expect(getSignatureSeverity(sig, { uncheckedSeverity: 'warning' })).toBe('warning');
     expect(sig.integrityReason).toMatch(/^signature present, format not supported/);
     expect(sig.integrityReason).toContain('ICVN.SADES');
     expect(sig.subFilter).toBe('ICVN.SADES');
@@ -247,6 +263,8 @@ describe('integrity statuses', () => {
   it('unreadable: corrupt /Contents is reported as unreadable', async () => {
     const sig = await one('corrupt-contents.pdf');
     expect(sig.integrity).toBe('unreadable');
+    expect(sig.integrityCode).toBe('cms-malformed');
+    expect(getSignatureSeverity(sig, { uncheckedSeverity: 'warning' })).toBe('error');
     expect(sig.integrityReason).toMatch(/CMS|parse/i);
   });
 
@@ -271,10 +289,12 @@ describe('integrity statuses', () => {
     const [first, second] = report.signatures;
     expect(first.fieldName).toBe('Signature1');
     expect(first.integrity).toBe('intact');
+    expect(first.integrityCode).toBe('extended-by-later-signature');
     expect(first.coversWholeFile).toBe(false);
     expect(first.integrityReason).toMatch(/later signature/i);
     expect(second.fieldName).toBe('ApprovalTwo');
     expect(second.integrity).toBe('intact');
+    expect(second.integrityCode).toBeNull();
     expect(second.coversWholeFile).toBe(true);
     expect(second.signer).toContain('Approver');
   });
@@ -284,18 +304,20 @@ describe('data contract shape', () => {
   it('every entry has exactly the contract keys and enum-typed values', async () => {
     const report = await collectPdfSignatures(fixtures['two-signatures.pdf']);
     const keys = [
-      'fieldName', 'signer', 'signerOrganization', 'issuer', 'serial',
+      'fieldName', 'signer', 'signerSource', 'signerOrganization', 'issuer', 'serial',
       'notBefore', 'notAfter', 'signingTime', 'signingTimeSource',
-      'reason', 'location', 'subFilter', 'kind', 'integrity',
+      'reason', 'location', 'subFilter', 'kind', 'integrity', 'integrityCode',
       'integrityReason', 'coversWholeFile'
     ];
     for (const sig of report.signatures) {
       expect(Object.keys(sig).sort()).toEqual([...keys].sort());
       expect(['approval', 'certification', 'timestamp']).toContain(sig.kind);
       expect([
-        'intact', 'modified-after-signing', 'digest-mismatch',
-        'signature-invalid', 'unsupported', 'unreadable'
+        'intact', 'not-checked-in-viewer', 'indeterminate', 'modified-after-signing',
+        'digest-mismatch', 'signature-invalid', 'unreadable'
       ]).toContain(sig.integrity);
+      expect(sig.integrityCode === null || INTEGRITY_CODES.includes(sig.integrityCode)).toBe(true);
+      expect(['certificate', 'pdf-name', null]).toContain(sig.signerSource);
       expect(['signed-attribute', 'pdf-M', 'none']).toContain(sig.signingTimeSource);
       expect(typeof sig.coversWholeFile === 'boolean' || sig.coversWholeFile === null).toBe(true);
     }
@@ -306,6 +328,7 @@ describe('certificate identity field group', () => {
   it('reports subject CN, organisation, issuer CN, serial and validity from the certificate', async () => {
     const sig = await one('valid-rsa.pdf');
     expect(sig.signer).toBe('ODV Fixture Signer');
+    expect(sig.signerSource).toBe('certificate');
     expect(sig.signerOrganization).toBe('ODV Fixture Users');
     expect(sig.issuer).toBe('ODV Fixture Signing CA');
     expect(sig.serial).toBe('11');
@@ -322,6 +345,7 @@ describe('certificate identity field group', () => {
   it('falls back to the signature dictionary /Name when no certificate is readable', async () => {
     const sig = await one('unsupported-subfilter.pdf');
     expect(sig.signer).toBe('ODV Fixture Signer');
+    expect(sig.signerSource).toBe('pdf-name');
     expect(sig.signerOrganization).toBeNull();
     expect(sig.issuer).toBeNull();
     expect(sig.serial).toBeNull();
@@ -476,4 +500,52 @@ describe('incremental-update fixture shape (ISO 32000 7.5.6)', () => {
       ['Signature1', 'intact'], ['ApprovalTwo', 'intact']
     ]);
   });
+});
+
+describe('status model guards', () => {
+  it('row 3 /Contents empty -> unreadable / contents-missing (error)', async () => {
+    const doc = await PDFDocument.load(fixtures['unsigned.pdf']);
+    doc.context.register(doc.context.obj({ Type: PDFName.of('Sig'), SubFilter: PDFName.of('adbe.pkcs7.detached'),
+      Name: PDFHexString.fromText('Self Declared'), ByteRange: [0, 4, 8, 4], Contents: PDFHexString.of('') }));
+    const report = await collectPdfSignatures(await doc.save({ useObjectStreams: false }));
+    expect(report.signatures).toHaveLength(1);
+    const [sig] = report.signatures;
+    expect([sig.integrity, sig.integrityCode]).toEqual(['unreadable', 'contents-missing']);
+    expect(getSignatureSeverity(sig, { uncheckedSeverity: 'warning' })).toBe('error');
+    expect([sig.signer, sig.signerSource]).toEqual(['Self Declared', 'pdf-name']);
+  });
+
+  it('row 36 a signature stack that cannot load -> not checked / viewer-error', async () => {
+    vi.resetModules();
+    vi.doMock('pkijs', () => { throw new Error('chunk load failed'); });
+    try {
+      const mod = await import('../pdfSignatures.js');
+      const report = await mod.collectPdfSignatures(fixtures['valid-rsa.pdf']);
+      expect(report.signatures).toHaveLength(1);
+      expect([report.signatures[0].integrity, report.signatures[0].integrityCode]).toEqual(['not-checked-in-viewer', 'viewer-error']);
+      expect(report.signatures[0].integrityReason).toMatch(/signature stack unavailable/);
+    } finally {
+      vi.doUnmock('pkijs');
+      vi.resetModules();
+    }
+  });
+
+  it('no signature leaves the engine with a null integrityCode unless it is intact, and never as legacy unsupported', async () => {
+    const security = await createSecurityFixtures();
+    const inputs = [
+      ...Object.entries(fixtures),
+      ...Object.entries(security.normal).map(([name, bytes]) => [`security/${name}`, bytes]),
+      ...Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array).map(([name, bytes]) => [`security/${name}`, bytes]),
+    ];
+    let checked = 0;
+    for (const [name, bytes] of inputs) {
+      for (const sig of (await collectPdfSignatures(bytes)).signatures) {
+        checked += 1;
+        expect(sig.integrity, name).not.toBe('unsupported');
+        if (sig.integrity !== 'intact') expect(sig.integrityCode, name).not.toBeNull();
+        expect(sig.integrityCode === null || INTEGRITY_CODES.includes(sig.integrityCode), name).toBe(true);
+      }
+    }
+    expect(checked).toBeGreaterThan(40);
+  }, 120000);
 });

@@ -15,7 +15,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getDocumentSignatures } from '../utils/pdfSignatureInspector.js';
-import { unreadableSignatureReport } from '../utils/pdfSignatures.js';
+import { notCheckedSignatureReport } from '../utils/pdfSignatures.js';
 
 const INSPECTION_CONCURRENCY = 1;
 
@@ -100,7 +100,7 @@ export default function usePdfSignatureReports({ allPages, inspectionReady, read
             entry.state = 'done';
           } catch (error) {
             entry.state = 'failed';
-            report = unreadableSignatureReport(String(error?.message || error));
+            report = notCheckedSignatureReport('viewer-error', String(error?.message || error));
           } finally {
             if (isCurrent() && report) {
               setReports((previous) => ({ ...previous, [sourceKey]: report }));

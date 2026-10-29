@@ -284,13 +284,13 @@ export function getPdfSignatureInspectionStart(cfg = getRuntimeConfig()) {
 }
 
 /**
- * Resolve the symbol severity for a signature whose content is intact but whose certificate chain
- * and revocation status the viewer does not check (`pdfSignatures.uncheckedSeverity`).
- * Supported values:
- * - `ok` (default): an intact signature shows the OK symbol
- * - `warning`: an intact signature shows the warning symbol, so users notice that validity is not checked
- * Missing or non-matching values (non-strings, `'error'`, `'warn'`, …) fall back to `ok`. Integrity
- * problems are never shown as less severe because of this setting.
+ * Resolve the symbol severity for a signature the viewer could not check itself (integrity
+ * `not-checked-in-viewer`: format, algorithm, budget, encryption, worker failure), from
+ * `pdfSignatures.uncheckedSeverity`. Supported values:
+ * - `ok` (default): such a signature shows the OK symbol with an information line
+ * - `warning`: such a signature shows the warning symbol
+ * Missing or non-matching values (non-strings, `'error'`, `'warn'`, …) fall back to `ok`. Intact
+ * signatures and integrity problems are never affected (see utils/pdfSignatureStatus.js).
  *
  * @param {Object=} cfg
  * @returns {PdfSignatureUncheckedSeverity}

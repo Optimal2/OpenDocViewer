@@ -33,9 +33,9 @@ Signature dictionaries carry `/SubFilter`, which names the CMS format. Level 1 h
 | `ETSI.RFC3161` | Document timestamp token (RFC 3161 TSTInfo, signed by a TSA) | Reported with `kind: 'timestamp'`; integrity = TSTInfo `messageImprint` matches the digest of the covered bytes and the token signature verifies |
 
 Any other `/SubFilter` (or a missing one) is **never hidden**: the signature is still
-reported with `integrity: 'unsupported'` and the reason `signature present, format not
-supported` plus the raw SubFilter value, so the UI can say "a signature exists but this
-format cannot be checked here".
+reported with `integrity: 'not-checked-in-viewer'`, `integrityCode: 'format-unsupported'`
+and the reason `signature present, format not supported` plus the raw SubFilter value, so
+the UI can say "a signature exists but this format cannot be checked here".
 
 Approval vs certification: a signature whose signature dictionary has a `/Reference` entry
 (DocMDP transform parameters) is a certification signature - it fixes permissions from the
@@ -56,48 +56,123 @@ parser reports this per signature:
 
 Integrity rules, in evaluation order:
 
-1. `/SubFilter` outside the handled formats -> `integrity: 'unsupported'` (signature still
-   reported, never hidden).
-2. `/Contents` missing or the CMS not parseable -> `integrity: 'unreadable'`.
+1. `/SubFilter` outside the handled formats -> `not-checked-in-viewer` /
+   `format-unsupported` (signature still reported, never hidden).
+2. `/Contents` missing -> `unreadable` / `contents-missing`; a CMS that cannot be decoded
+   -> `unreadable` / `cms-malformed`.
 3. ByteRange must contain four non-negative safe integers, start at zero, remain inside
    the file, and exclude exactly the direct `/Contents` hex string including `<` and `>`.
    Source positions come from the same parser objects as the signature dictionary;
    another hex string or a value in an object stream cannot stand in for `/Contents`.
-   A malformed range is `unreadable`, with `coversWholeFile: null`.
+   A malformed range is `unreadable` / `byte-range-invalid`, with `coversWholeFile: null`.
 4. If CMS signed attributes exist, exactly one `messageDigest` value is mandatory and
    must match the hash of the CMS content. For detached signatures that content is the
    ByteRange bytes; for encapsulated signatures it is the eContent bytes. The signed
-   `contentType` must also match. Missing/ambiguous attributes are `unreadable` and a
-   different digest is `digest-mismatch`. Encapsulated SHA-1 / TSTInfo must additionally
-   match the document digest / imprint. These are separate mandatory checks, following
+   `contentType` must also match. Missing/ambiguous attributes are `unreadable`
+   (`message-digest-attribute` / `cms-content-mismatch`) and a different digest is
+   `digest-mismatch` / `content-digest-mismatch`. Encapsulated SHA-1 / TSTInfo must
+   additionally match the document digest / imprint (`document-digest-mismatch`). These are
+   separate mandatory checks, following
    [RFC 5652 section 5.4](https://www.rfc-editor.org/rfc/rfc5652#section-5.4).
 5. The CMS signer signature does not verify over the signed attributes with the embedded
    certificate's public key -> `integrity: 'signature-invalid'`.
    Without signed attributes, verification operates directly on the CMS content.
    Certificates must match SignerInfo issuer **and** serial, or its subject key identifier
    (SKI extension, with SHA-1 of the subjectPublicKey bits as fallback only when the
-   extension is absent). An unmatched identifier is `unreadable`; certificate order
-   never determines signer identity.
+   extension is absent). An unmatched identifier is `unreadable` /
+   `signer-certificate-missing`; certificate order never determines signer identity.
 6. Everything verifies but the ByteRange does not reach the end of the file: the file was
    extended after this signature was applied.
    - If the added bytes are themselves covered by a *verified intact later signature* in the same document
      (the normal case for the first signature of a multi-signature document), the content
      this signature protected is still byte-for-byte intact: `integrity: 'intact'` with
-     `coversWholeFile: false` and an `integrityReason` saying the file was extended by later
-     signature(s).
+     `coversWholeFile: false`, `integrityCode: 'extended-by-later-signature'` and an
+     `integrityReason` saying the file was extended by later signature(s).
      Verification runs from the last revision backwards. The later range must start at
      zero, its first segment must include the entire earlier revision, and its end must
      reach EOF. An unreadable or invalid later CMS cannot authorize an extension.
    - If the extension is **not** covered by any later signature, someone changed the file
-     without signing the change: `integrity: 'modified-after-signing'`.
+     without signing the change: `integrity: 'modified-after-signing'` with
+     `integrityCode: 'unclassified-change-after-signing'` (the tail is not inspected yet; a
+     revision classifier that tells validation-data updates apart from content changes is
+     planned).
 7. Everything verifies and the range reaches EOF -> `integrity: 'intact'`,
    `coversWholeFile: true`.
 
 Signature algorithms are mapped to WebCrypto: RSA PKCS#1 v1.5 (`RSASSA-PKCS1-v1_5`),
 RSA-PSS (`RSA-PSS`, salt length from the PSS parameters when present, otherwise the digest
 length), and ECDSA (`ECDSA`, DER signature converted to the raw `r||s` form WebCrypto
-expects). When the environment or algorithm is not supported by WebCrypto the result is
-`integrity: 'unreadable'` with a reason, never an exception.
+expects). The curve must be one of the named curves P-256, P-384 or P-521 in the
+certificate; it is never guessed from the key length. A hash, signature algorithm or curve
+that WebCrypto lacks (for example SHA-224 or brainpool) is `not-checked-in-viewer` /
+`algorithm-unsupported`; a missing `crypto.subtle` is `not-checked-in-viewer` /
+`viewer-error`; a public key the browser rejects is `indeterminate` / `key-import-failed`.
+These decisions use typed errors and `err.name`, never message text.
+
+### Status model
+
+The viewer warns only when it finds a real problem. What it cannot check is shown as
+information in the details dialog. Issuer trust and revocation are never checked in the
+viewer; every signature carries that information line.
+
+| Situation | `integrity` | `integrityCode` | Severity |
+| --- | --- | --- | --- |
+| Covered bytes and CMS signature verify; the range reaches the end of the file | `intact` | – | OK |
+| As above; the file was extended afterwards only with DSS/VRI, document timestamps, `/Info`, XMP `/Metadata`, or an xref/trailer rewrite without object changes | `intact` | `extended-with-validation-data` | OK + info |
+| As above; the extension is covered by later verified signature(s) and changes no signed content | `intact` | `extended-by-later-signature` | OK + info |
+| `/SubFilter` the viewer cannot check | `not-checked-in-viewer` | `format-unsupported` | OK + info (¹) |
+| Hash/signature algorithm or curve not available in WebCrypto | `not-checked-in-viewer` | `algorithm-unsupported` | OK + info (¹) |
+| Size, count or complexity budget exceeded | `not-checked-in-viewer` | `inspection-limit` | OK + info (¹) |
+| Inspection time limit exceeded | `not-checked-in-viewer` | `timeout` | OK + info (¹) |
+| Structural stream filter the parser cannot decode | `not-checked-in-viewer` | `structure-unsupported` | OK + info (¹) |
+| Encrypted PDF | `not-checked-in-viewer` | `encrypted` | OK + info (¹) |
+| Signature worker/library/WebCrypto/read failure, worker budget exhausted | `not-checked-in-viewer` | `viewer-error` | OK + info (¹) |
+| A later unsigned revision changes pages, content streams, annotations, form fields or the catalog | `modified-after-signing` | `content-changed-after-signing` | Warning |
+| A later revision exists but cannot be proven harmless | `modified-after-signing` | `unclassified-change-after-signing` | Warning |
+| Unexpected condition that cannot be classified | `indeterminate` | `unexpected-error` / `key-import-failed` | Warning |
+| Signing time before the certificate's notBefore | (any) | `signingTimeCheck: outside-validity` / `signed-before-certificate-valid` | Warning |
+| Signing time after the certificate's notAfter | (any) | `signingTimeCheck: outside-validity` / `signed-after-certificate-expired` | Warning |
+| Signature timestamp token does not match or does not verify | (any) | `signingTimeCheck: timestamp-invalid` | Warning |
+| Certificate expired *since* signing | – | – | never a warning |
+| `/Contents` missing or empty | `unreadable` | `contents-missing` | Error |
+| ByteRange malformed, outside the file, or not excluding exactly `/Contents` | `unreadable` | `byte-range-invalid` | Error |
+| CMS/TSTInfo not decodable or structurally invalid (incl. not exactly one SignerInfo) | `unreadable` | `cms-malformed` | Error |
+| CMS content or signed contentType does not match | `unreadable` | `cms-content-mismatch` | Error |
+| messageDigest attribute missing or duplicated | `unreadable` | `message-digest-attribute` | Error |
+| No certificate matches the signer identifier | `unreadable` | `signer-certificate-missing` | Error |
+| Covered bytes do not match the signed digest | `digest-mismatch` | `content-digest-mismatch` | Error |
+| Timestamp imprint / embedded SHA-1 does not match the document | `digest-mismatch` | `document-digest-mismatch` | Error |
+| CMS signature does not verify | `signature-invalid` | `signature-invalid` | Error |
+| Missing or unknown `integrity` value | treated as `unreadable` | – | Error (fail closed) |
+
+(¹) Runtime config `pdfSignatures.uncheckedSeverity: 'warning'` shows these as warnings
+instead. It never lowers an error or warning, and unknown integrity values stay errors.
+
+Signing time for the validity check: verified RFC 3161 signature timestamp `genTime`, else
+the signed `signingTime` attribute, else `/M`. Without any signing time the check is shown
+as not performed (information).
+
+Implementation status: the `extended-with-validation-data` and `content-changed-after-signing`
+rows need the planned revision classifier, and the `signingTimeCheck` rows need the planned
+signing-time parser. Until then the parser produces `unclassified-change-after-signing` for
+every unsigned tail and no `signingTimeCheck` at all; the status helpers, labels and dialog
+already handle both, and a signature without `signingTimeCheck` behaves exactly as before
+(OK, no extra line). `unsupported` is accepted only as a legacy alias from older caches and is
+normalized to `not-checked-in-viewer`; the parser never produces it.
+
+#### The one site switch: `pdfSignatures.uncheckedSeverity`
+
+`pdfSignatures.uncheckedSeverity` (runtime config, see `docs-src/runtime-configuration.md`)
+is the only site setting for signature colours. `'ok'` (default) shows `not-checked-in-viewer`
+signatures green with an information line; exactly `'warning'` shows them amber. It is read
+once in `DocumentViewer` and passed as `{ uncheckedSeverity }` to `buildSignatureDocuments` /
+`summarizeSignatureDocuments`, the badges, the overview and the details dialog. Severity is
+presentation and is never stored in the per-`sourceKey` report cache. Fail-closed guarantee
+(`getSignatureSeverity` in `src/utils/pdfSignatureStatus.js`): the switch is consulted only
+after normalization and only for exactly `not-checked-in-viewer`, so a missing or unknown
+`integrity` is `unreadable` -> error whichever way it is set, and it can never lower an error
+or a warning. The label ranks `not-checked-in-viewer` above `intact`, so a badge says "Not
+checked in the viewer" whenever any signature is unchecked, even while it is green.
 
 ## Where it runs
 
@@ -121,30 +196,39 @@ for (const sig of report.signatures) {
 ```
 
 `getDocumentSignatures` offloads to a lazily created singleton worker when the browser
-`Worker` API is available. Worker construction/execution errors and timeouts return a
-document-level `unreadable` entry; they never start inline parsing. A timeout terminates
+`Worker` API is available. Worker construction/execution errors return a document-level
+`not-checked-in-viewer` / `viewer-error` entry and timeouts a `not-checked-in-viewer` /
+`timeout` entry (typed rejection codes, never message parsing); they never start inline
+parsing. A source that cannot be read (a failing Blob, a wrong type) is also
+`viewer-error`, never an empty "no signatures" report. A timeout terminates
 the worker and settles all pending requests. Later documents may recreate a failed worker
 up to three times per viewer session (including construction failures); successful requests
-do not reset this budget. The failed document remains unreadable. Disposal also settles
+do not reset this budget. The failed document remains not checked. Disposal also settles
 requests and resets the budget for a fresh session. Inline parsing is allowed only without a Worker API
 and for inputs at most 256 KiB. It never rejects for document reasons: a PDF with no signatures, a
 corrupt CMS blob, or an unsupported environment all resolve to a report (an empty
-`signatures` list or per-signature `unreadable`/`unsupported` entries). Callers should fetch
+`signatures` list or per-signature entries following the status model). Callers should fetch
 it once per document and cache the report next to the document state.
 
 Inspection budgets are 64 MiB input (checked before worker cloning or reading a Blob),
 256 signatures, 1 MiB per CMS, ASN.1 depth 64 / 100,000 nodes, and PDF object depth 128.
 Structural streams (ObjStm/XRef) have an 8 MiB decoded limit each and 32 MiB total;
-multiple structural stream filters are conservatively reported unreadable. Page and
-image streams are not decoded by signature inspection. Worker execution has a default
-30-second deadline. Exceeding a budget returns `unreadable`, never an unsigned verdict.
+multiple structural stream filters or a filter pdf-lib cannot decode are reported as
+`not-checked-in-viewer` / `structure-unsupported`. Page and image streams are not decoded
+by signature inspection. Worker execution has a default 30-second deadline. Exceeding a
+budget returns `not-checked-in-viewer` / `inspection-limit` (or `timeout`), never an
+unsigned verdict. Because pdf-lib wraps errors thrown while parsing an indirect object, the
+first structural limit is remembered and rethrown as such. The CMS ASN.1 depth/node limit is
+the exception: no legitimate CMS gets near it, so it counts as `cms-malformed`.
 
 Discovery parses PDF objects rather than relying on raw ASCII name searches: escaped
 names, object streams, nested dictionaries and signatures superseded in later revisions
 remain discoverable. Unsigned documents avoid importing the CMS stack, but still pay
 for PDF structure parsing. If structure/discovery cannot complete, a document-level
-`unreadable` placeholder with null identity fields communicates the incomplete inspection;
-it is not evidence that a particular signature exists.
+placeholder with null identity fields communicates the incomplete inspection
+(`notCheckedSignatureReport(code, detail)` for viewer limits, otherwise
+`indeterminateSignatureReport('unexpected-error', detail)`); it is not evidence that a
+particular signature exists.
 
 Discovery starts at byte zero regardless of where, or whether, a `%PDF-` header
 exists: rendering can recover PDFs whose headers fall outside an initial search window.
@@ -167,17 +251,20 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   A serial queue reads one source at a time, prioritizing the current document and
   then page order. Pending results survive page-list updates; only removal or unmount
   discards them. Recycled source keys get fresh entries. Read/inspection failures are
-  reported as unreadable rather than unsigned. The disposable source-store copy is
+  reported as `not-checked-in-viewer` / `viewer-error` rather than unsigned. The disposable
+  source-store copy is
   transferred to the worker with `{ transfer: true }`; other inspector callers retain
   their buffers by default. No document bytes are retained in the report cache.
-- `src/utils/pdfSignatureStatus.js` maps the contract to presentation: the badge colour and
-  icon follow the *worst* integrity status of a document's signatures (`intact` =
-  neutral/positive, `modified-after-signing`/`unsupported` = warning,
-  `digest-mismatch`/`signature-invalid`/`unreadable` = error; unknown values fail safe to
-  error).
+- `src/utils/pdfSignatureStatus.js` maps the contract to presentation (see "Status model"):
+  the badge colour and icon follow the *worst severity* of a document's signatures
+  (`getSignatureSeverity(signature, { uncheckedSeverity })` over integrity and the
+  signing-time check), and the label follows the worst integrity status
+  (`INTEGRITY_WORST_FIRST`, where `not-checked-in-viewer` outranks `intact`).
   Every signature is normalized before selecting the worst status, so mixing an intact
   signature with a missing or unexpected status still yields unreadable. Tooltip and
-  dialog labels use the same normalization and translation helper.
+  dialog labels use the same normalization and translation helper. `getIntegrityCodeText`
+  maps the closed `INTEGRITY_CODES` set to `signatures.integrityCode.<code>` (unknown codes
+  -> no text), and `getSigningTimeCheckLabel` does the same for the signing-time check.
 - `src/utils/pdfSignatureDocuments.js` folds the per-file reports into per-document entries.
   Reports are keyed per file (`sourceKey`), while the thumbnail strip groups pages into
   documents ("DOK n") and one document can consist of several files. A document entry carries
@@ -228,19 +315,30 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   and every tab shows the file's page range inside the document. The selected file is repeated
   in the group heading ("File k of m: name", or "File k of m" without a name) with its page
   range ("Pages 19–24", the thumbnail "S" numbers), followed by its signatures. With one signed
-  file it is a plain list. Each signature lists signer and organisation, issuer, signing time
-  and its source, reason, location, kind, integrity in plain words with `integrityReason`,
-  whole-document coverage, certificate validity period and format.
+  file it is a plain list. Each signature first lists what was checked and passed (for an
+  intact signature: the content is unchanged and the signature matches the certificate; plus
+  a signing time within the certificate validity when the parser reports it), then the
+  information lines, then signer and organisation, issuer, signing time and its source,
+  reason, location, kind, integrity in plain words (severity icon, the localized
+  `integrityCode` text for a warning or error, and `integrityReason` as the English detail
+  line), whole-document coverage, certificate validity period and format. A signer name that
+  is not backed by a verified signature is marked: "Name from the PDF, not verified" when it
+  comes from the self-declared `/Name` (`signerSource: 'pdf-name'`), or "Name from the
+  certificate; the signature was not confirmed" for a certificate name on a signature that is
+  not intact. This keeps a forced "not checked" from reading as a verified signature.
   All times in the dialog and the overview (signing time and certificate validity) are shown as
   local time, "2022-04-27 19:55", in both languages, with the exact UTC ISO value in the `title`
   attribute and `<time dateTime>` (`formatSignatureTime()` in `pdfSignatureStatus.js`, rendered by
   `SignatureTime.jsx`). Its accessibility mirrors `DocumentMetadataOverlayDialog`: focus moves into
   the dialog, Tab is trapped inside, Escape closes, and focus returns to the symbol that opened it.
-  Unsupported formats are shown as "signature present, format not supported", never hidden.
-- Every signature starts with the neutral information line `signatures.notCheckedInViewer`:
-  English "Not checked in the viewer: issuer trust and revocation status", Swedish "Inte
-  kontrollerat i visaren: utfärdarens förtroende och spärrstatus". It is a `role="note"` with
-  neutral styling, never a warning colour or badge severity.
+  Unsupported formats are shown as "Not checked in the viewer" with the format named, never
+  hidden.
+- The information block (`role="note"`, neutral styling, never a warning colour or badge
+  severity) always starts with `signatures.notCheckedInViewer`: English "Not checked in the
+  viewer: issuer trust and revocation status", Swedish "Inte kontrollerat i visaren:
+  utfärdarens förtroende och spärrstatus". For an intact or not-checked signature it then
+  says in plain words what was not checked (`signatures.integrityCode.<code>`), and a
+  signing-time check that was not performed.
 - Strings live under the `signatures` key (including `signatures.overview`) in
   `public/locales/en/common.json` and `public/locales/sv/common.json`; colours use the
   `--odv-signature-*` theme tokens (light, normal, dark, and the print reset).
@@ -268,6 +366,7 @@ interface PdfSignatureReport {
 interface PdfSignatureInfo {
   fieldName: string | null;              // AcroForm field name (/T)
   signer: string | null;                 // certificate subject CN, else signature /Name
+  signerSource: 'certificate' | 'pdf-name' | null; // where signer came from; /Name is never verified
   signerOrganization: string | null;     // certificate subject O, else null
   issuer: string | null;                 // certificate issuer CN (else issuer DN)
   serial: string | null;                 // certificate serial, colon-separated hex (DER sign padding removed)
@@ -281,12 +380,14 @@ interface PdfSignatureInfo {
   kind: 'approval' | 'certification' | 'timestamp';
   integrity:
     | 'intact'
+    | 'not-checked-in-viewer'
+    | 'indeterminate'
     | 'modified-after-signing'
     | 'digest-mismatch'
     | 'signature-invalid'
-    | 'unsupported'
-    | 'unreadable';
-  integrityReason: string | null;        // short human-readable explanation; null when there is nothing to explain
+    | 'unreadable';                      // 'unsupported' is a legacy alias only, never produced
+  integrityCode: string | null;          // closed kebab-case set (Status model); null only for a plain intact
+  integrityReason: string | null;        // English detail line; null when there is nothing to explain
   coversWholeFile: boolean | null;       // false = file extended after signing
 }
 ```
@@ -297,8 +398,13 @@ Notes:
   rely on the shape.
 - `signer` prefers the certificate subject CN because the PDF `/Name` string is
   self-declared; `/Name` is only used when no certificate could be read.
-- `integrityReason` is a stable, short string intended for display (it is written in
-  English; localization is the UI layer's job via stable integrity values).
+- `integrityCode` drives the localized text (`signatures.integrityCode.<code>`); every
+  non-intact signature carries one (tested as a guard). `integrityReason` stays a short
+  English detail line that may carry OIDs or exception text for support staff.
+- Optional `signingTimeCheck` (`within-validity` | `outside-validity` | `timestamp-invalid` |
+  `not-checked`) and `signingTimeCode` are understood by the status helpers and the UI but are
+  not produced yet (planned signing-time parser). Missing means `not-checked`, which is never
+  a warning; an unknown value fails closed to a warning.
 - Timestamp fields (`ETSI.RFC3161` document timestamps) appear as normal entries with
   `kind: 'timestamp'`, so a document's signature chain (approval signatures plus their
   long-term timestamps) is visible in one list, ordered by ByteRange position.
@@ -322,8 +428,8 @@ integrity status and format branch:
 | `certified-docmdp.pdf` | certification signature (`/Reference` DocMDP) |
 | `doc-timestamp-rfc3161.pdf` | `ETSI.RFC3161` document timestamp token |
 | `pkcs7-sha1.pdf` | legacy `adbe.pkcs7.sha1` embedded digest |
-| `unsupported-subfilter.pdf` | `/SubFilter /ICVN.SADES` -> reported `unsupported`, never hidden |
-| `corrupt-contents.pdf` | invalid CMS bytes (`deadbeef`) -> `unreadable` |
+| `unsupported-subfilter.pdf` | `/SubFilter /ICVN.SADES` -> `not-checked-in-viewer` / `format-unsupported`, never hidden |
+| `corrupt-contents.pdf` | invalid CMS bytes (`deadbeef`) -> `unreadable` / `cms-malformed` |
 | `signature-invalid.pdf` | CMS signed with a foreign key, correct digests -> `signature-invalid` |
 | `unsigned.pdf` | no signature fields -> empty list fast path |
 | `visible-appearance.pdf` | signed widget with a blue `/AP /N` appearance stream |
@@ -377,7 +483,14 @@ absent. Automated fixtures do not establish compatibility with every external PD
 
 `scripts/signature-security-fixtures.mjs` generates eContent swaps, signed attributes
 without messageDigest, invalid later signatures, widened/foreign gaps, mismatched
-certificate identifiers, SKI signatures, and escaped/compressed dictionaries. The
+certificate identifiers, SKI signatures, and escaped/compressed dictionaries. For the
+status model it also rewrites OIDs inside the CMS without touching the signed bytes
+(`patchContentsHex`: unknown digest, SHA-224, unmapped signature algorithm, an unknown
+named curve), corrupts an EC public key, writes a timestamp with an unknown imprint
+algorithm, an over-budget CMS gap, an encrypted trailer, undecodable structural stream
+filters and more than 256 signature dictionaries; each row asserts `integrity`,
+`integrityCode` and both switch settings. A guard test runs every fixture and requires a
+non-null `integrityCode` for every non-intact signature. The
 Vitest security suites also cover nested ASN.1/PDF input, a 50 MiB extension, worker
 timeouts/errors, bounded worker recreation, bounded fallback and disposal. Parser tests
 also generate junk-prefixed signed/tampered PDFs and verify the unsigned fast path.
@@ -389,19 +502,24 @@ loads the original vulnerable parser/inspector and then breaks each reviewed fix
 individually. Every selected regression must fail with an assertion (test exit 1),
 and the runner restores the original source in `finally`. Do not run it concurrently
 with editing or validation of these source files. The runner exits 0 only when all
-mutation groups are detected. Run the unmodified suite again afterwards.
+mutation groups are detected. Run the unmodified suite again afterwards. Status-model
+groups: re-adding the curve guess, ignoring typed viewer limits, losing a structural limit in
+pdf-lib's error wrapping, an inspector read error failing open, and losing the timeout code.
 
 For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
 It checks the reviewed hook baseline and individually breaks result retention, queue
-concurrency, buffer transfer, mixed-status handling, worker disposal, and provider
-report/disposal wiring. Each selected test must fail with an assertion (exit 1);
+concurrency, buffer transfer, mixed-status handling, worker disposal, provider
+report/disposal wiring, and the status model: swapping not checked and intact (colour and
+label ranking), letting `uncheckedSeverity` affect errors or unknown values, and dropping the
+switch from the document aggregation. Each selected test must fail with an assertion (exit 1);
 the runner restores sources and exits 0 only when every mutation is detected.
 The provider integration test uses real React scheduling, ViewerProvider, context and
 badges, with storage/rendering/inspection I/O mocked.
 
 The mutation runner additionally checks that renamed/minified PDF classes cannot hide
 signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`
-to inspect six generated signed PDFs through the actual minified worker artifact.
+to inspect thirteen generated signed PDFs (positive, defect and not-checked rows, asserting
+`integrity` and `integrityCode`) through the actual minified worker artifact.
 The harness uses a Node worker with a browser message-protocol adapter and verifies
 both successful inspection and rejection outcomes. PDF types are identified by stable
 APIs and `instanceof`, never `constructor.name`.

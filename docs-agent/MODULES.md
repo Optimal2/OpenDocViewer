@@ -17,13 +17,13 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 18. Line count: 7832. JSDoc symbol count: 103.
+File count: 18. Line count: 8009. JSDoc symbol count: 108.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/PrintSelectionWorkspace.jsx` - Full\-window print\-selection workspace.
-- `src/components/Resizer.jsx` - OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction.
 - `src/components/SignatureDetailsDialog.jsx` - Signature details dialog \(browser integrity\).
+- `src/components/Resizer.jsx` - OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction.
 - `src/components/LoadingSpinner.jsx` - OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.
 - `src/components/ViewerProblemNotice.jsx` - OpenDocViewer — configurable viewer\-level problem notice.
 - `src/components/SignatureOverviewDialog.jsx` - Signature overview dialog, opened from the toolbar overview button.
@@ -62,7 +62,7 @@ File count: 19. Line count: 8060. JSDoc symbol count: 138.
 
 ## src/components/DocumentViewer
 
-File count: 17. Line count: 7631. JSDoc symbol count: 154.
+File count: 17. Line count: 7642. JSDoc symbol count: 154.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
@@ -150,7 +150,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 50. Line count: 19765. JSDoc symbol count: 804.
+File count: 50. Line count: 20102. JSDoc symbol count: 827.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

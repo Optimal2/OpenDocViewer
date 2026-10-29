@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 18. Line count: 7832. JSDoc symbol count: 103.
+File count: 18. Line count: 8009. JSDoc symbol count: 108.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -186,6 +186,11 @@ Symbols:
 
 - `getKindLabel` (function) - No description.
 - `getSigningTimeSourceLabel` (function) - No description.
+- `getSignerSourceNote` (function) - Note for a signer name that is not backed by a verified signature: a name from the self\-declared PDF /Name, or a certificate name on a signature that did not verify.
+- `getPassedChecks` (function) - What was checked and passed for one signature, in display order.
+- `getInformationLines` (function) - Information lines after the always\-on line: the integrity code of an intact or not\-checked signature \(problems are explained next to the status instead\) and a signing\-time check t...
+- `getProblemLines` (function) - Problem explanation shown next to the status: the integrity code of a warning or error, then a signing\-time warning.
+- `ICON_BY_SEVERITY` (constant) - Material Icons ligature per severity \(same as SignatureStatusBadge\).
 - `module.exports` (function) - No description.
 - `<anonymous>~handleEscape` (function) - No description.
 - `SignatureDetailsDialog~handleTabKeyDown` (function) - Arrow keys, Home and End move between file tabs \(automatic activation\).

@@ -116,10 +116,10 @@
       // document-level symbol next to "DOK n" and the toolbar signature overview stay visible
       // when this is false.
       thumbnailPageBadge: true,
-      // Symbol colour for an intact signature. The viewer checks integrity (is the content unchanged
-      // since signing) but never the certificate chain or revocation status. 'ok' (default) shows
-      // intact signatures as OK; 'warning' shows them as "take a closer look". Integrity problems are
-      // never shown as less severe. Unknown values fall back to 'ok'.
+      // Symbol colour for a signature the viewer could not check itself ("Not checked in the
+      // viewer": format, algorithm, size/time budget, encryption, worker failure). 'ok' (default)
+      // shows it green with an information line; 'warning' shows it as a warning. Integrity
+      // problems are never shown as less severe. Unknown values fall back to 'ok'.
       uncheckedSeverity: 'ok'
     },
     ocr: {

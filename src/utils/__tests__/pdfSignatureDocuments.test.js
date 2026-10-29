@@ -89,7 +89,7 @@ describe('buildSignatureDocuments', () => {
   it('treats each file as its own document when the pages carry no document context', () => {
     const documents = buildSignatureDocuments(
       [page('x', 0), page('y', 1), page('y', 2)],
-      { x: report({ integrity: 'intact' }), y: report({ integrity: 'unsupported' }) }
+      { x: report({ integrity: 'intact' }), y: report({ integrity: 'modified-after-signing' }) }
     );
     expect(documents.map((doc) => [doc.documentNumber, doc.signatureCount, doc.severity]))
       .toEqual([[1, 1, 'ok'], [2, 1, 'warning']]);
@@ -109,13 +109,39 @@ describe('summarizeSignatureDocuments', () => {
   it('counts signed documents and takes the worst severity over all loaded files', () => {
     const documents = buildSignatureDocuments(PAGES, {
       a1: report({ integrity: 'intact' }),
-      b1: report({ integrity: 'unsupported' }),
+      b1: report({ integrity: 'indeterminate' }),
     });
     expect(summarizeSignatureDocuments(documents)).toEqual({
       documentCount: 2,
       signatureCount: 2,
       severity: 'warning',
     });
+  });
+
+  it('threads uncheckedSeverity into every document, file and the summary without touching the reports', () => {
+    const reports = {
+      a1: report({ integrity: 'intact' }),
+      b1: report({ integrity: 'not-checked-in-viewer', integrityCode: 'format-unsupported' }),
+    };
+    const snapshot = JSON.stringify(reports);
+    const okDocuments = buildSignatureDocuments(PAGES, reports);
+    expect(okDocuments.map((doc) => doc.severity)).toEqual(['ok', 'ok']);
+    expect(summarizeSignatureDocuments(okDocuments).severity).toBe('ok');
+    const warnDocuments = buildSignatureDocuments(PAGES, reports, { uncheckedSeverity: 'warning' });
+    expect(warnDocuments.map((doc) => doc.severity)).toEqual(['ok', 'warning']);
+    expect(warnDocuments[1].signedFiles[0].severity).toBe('warning');
+    expect(warnDocuments[1].worstIntegrity).toBe('not-checked-in-viewer');
+    expect(summarizeSignatureDocuments(warnDocuments, { uncheckedSeverity: 'warning' }).severity).toBe('warning');
+    // Severity is presentation: the shared per-sourceKey reports never carry it.
+    expect(JSON.stringify(reports)).toBe(snapshot);
+  });
+
+  it('keeps unknown statuses as errors whichever way the switch is set', () => {
+    for (const uncheckedSeverity of ['ok', 'warning']) {
+      const documents = buildSignatureDocuments(PAGES, { a1: report({ integrity: 'future-status' }) }, { uncheckedSeverity });
+      expect(documents[0].severity).toBe('error');
+      expect(summarizeSignatureDocuments(documents, { uncheckedSeverity }).severity).toBe('error');
+    }
   });
 });
 

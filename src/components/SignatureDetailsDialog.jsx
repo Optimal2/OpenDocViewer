@@ -7,8 +7,11 @@
  * location, kind (approval/certification/timestamp), the integrity status in
  * plain words with its integrityReason, whether the signature covers the
  * whole document, and the certificate validity period. Each signature starts
- * with an information line explaining that issuer validity and revocation status
- * are not checked in the viewer. Times are local ("2022-04-27 19:55") with the
+ * with what was checked and passed, followed by information lines: the always-on
+ * line that issuer trust and revocation status are not checked in the viewer,
+ * and a plain-language line for an informational `integrityCode` (what the
+ * viewer could not check). A signer name that is not backed by a verified
+ * signature is marked as such. Times are local ("2022-04-27 19:55") with the
  * UTC value in the title.
  *
  * The dialog works per document: when a document consists of several files
@@ -25,7 +28,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { getIntegrityLabel } from '../utils/pdfSignatureStatus.js';
+import {
+  getIntegrityCodeText,
+  getIntegrityLabel,
+  getSignatureSeverity,
+  getSigningTimeCheckLabel,
+  normalizeSignatureIntegrity,
+  normalizeSigningTimeCheck,
+} from '../utils/pdfSignatureStatus.js';
 import { getSignatureFileHeading, getSignatureFilePages } from '../utils/pdfSignatureDocuments.js';
 import SignatureTime from './SignatureTime.jsx';
 
@@ -66,6 +76,95 @@ function getSigningTimeSourceLabel(t, source) {
 }
 
 /**
+ * Note for a signer name that is not backed by a verified signature: a name from
+ * the self-declared PDF /Name, or a certificate name on a signature that did not
+ * verify. Null for a certificate name on an intact signature.
+ * @param {Function} t
+ * @param {*} signature
+ * @returns {(string|null)}
+ */
+function getSignerSourceNote(t, signature) {
+  if (!String(signature?.signer ?? '').trim()) return null;
+  if (signature?.signerSource !== 'certificate') {
+    return t('signatures.signerSource.pdfName', { defaultValue: 'Name from the PDF, not verified' });
+  }
+  if (normalizeSignatureIntegrity(signature?.integrity) !== 'intact') {
+    return t('signatures.signerSource.unverifiedCertificate', {
+      defaultValue: 'Name from the certificate; the signature was not confirmed',
+    });
+  }
+  return null;
+}
+
+/**
+ * What was checked and passed for one signature, in display order.
+ * @param {Function} t
+ * @param {*} signature
+ * @returns {Array<string>}
+ */
+function getPassedChecks(t, signature) {
+  const passed = [];
+  if (normalizeSignatureIntegrity(signature?.integrity) === 'intact') {
+    passed.push(t('signatures.checks.contentUnchanged', { defaultValue: 'The signed content is unchanged since signing' }));
+    passed.push(t('signatures.checks.signatureMatches', { defaultValue: "The signature matches the signer's certificate" }));
+  }
+  if (signature?.signingTimeCheck != null && normalizeSigningTimeCheck(signature.signingTimeCheck) === 'within-validity') {
+    passed.push(getSigningTimeCheckLabel(t, signature.signingTimeCheck, signature.signingTimeCode));
+  }
+  return passed;
+}
+
+/**
+ * Information lines after the always-on line: the integrity code of an intact or
+ * not-checked signature (problems are explained next to the status instead) and
+ * a signing-time check that was not performed.
+ * @param {Function} t
+ * @param {*} signature
+ * @returns {Array<string>}
+ */
+function getInformationLines(t, signature) {
+  const lines = [];
+  const integrity = normalizeSignatureIntegrity(signature?.integrity);
+  if (integrity === 'intact' || integrity === 'not-checked-in-viewer') {
+    const codeText = getIntegrityCodeText(t, signature?.integrityCode);
+    if (codeText) lines.push(codeText);
+  }
+  if (signature?.signingTimeCheck != null && normalizeSigningTimeCheck(signature.signingTimeCheck) === 'not-checked') {
+    lines.push(getSigningTimeCheckLabel(t, signature.signingTimeCheck, signature.signingTimeCode));
+  }
+  return lines;
+}
+
+/**
+ * Problem explanation shown next to the status: the integrity code of a warning
+ * or error, then a signing-time warning.
+ * @param {Function} t
+ * @param {*} signature
+ * @returns {Array<string>}
+ */
+function getProblemLines(t, signature) {
+  const lines = [];
+  const integrity = normalizeSignatureIntegrity(signature?.integrity);
+  if (integrity !== 'intact' && integrity !== 'not-checked-in-viewer') {
+    const codeText = getIntegrityCodeText(t, signature?.integrityCode);
+    if (codeText) lines.push(codeText);
+  }
+  const check = normalizeSigningTimeCheck(signature?.signingTimeCheck);
+  if (signature?.signingTimeCheck != null && (check === 'outside-validity' || check === 'timestamp-invalid')) {
+    lines.push(getSigningTimeCheckLabel(t, signature.signingTimeCheck, signature.signingTimeCode));
+  }
+  return lines;
+}
+
+/** Material Icons ligature per severity (same as SignatureStatusBadge).
+ * @type {Object<string, string>} */
+const ICON_BY_SEVERITY = {
+  ok: 'verified',
+  warning: 'warning',
+  error: 'error',
+};
+
+/**
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
@@ -77,6 +176,7 @@ function getSigningTimeSourceLabel(t, source) {
  * @param {(number|null|undefined)} [props.totalDocuments]
  * @param {{ current:(HTMLElement|null) }} [props.returnFocusRef] Element (the signature
  * symbol) that receives focus when the dialog closes.
+ * @param {('ok'|'warning')} [props.uncheckedSeverity] Site switch for not-checked signatures.
  * @returns {(React.ReactElement|null)}
  */
 export default function SignatureDetailsDialog({
@@ -88,6 +188,7 @@ export default function SignatureDetailsDialog({
   documentNumber = null,
   totalDocuments = null,
   returnFocusRef = undefined,
+  uncheckedSeverity = 'ok',
 }) {
   const { t } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -301,6 +402,11 @@ export default function SignatureDetailsDialog({
             ) : null}
             {listedSignatures.map((signature, index) => {
               const integrityLabel = getIntegrityLabel(t, signature?.integrity);
+              const severity = getSignatureSeverity(signature, { uncheckedSeverity });
+              const passedChecks = getPassedChecks(t, signature);
+              const informationLines = getInformationLines(t, signature);
+              const problemLines = getProblemLines(t, signature);
+              const signerNote = getSignerSourceNote(t, signature);
               return (
                 <section
                   className="odv-signature-entry"
@@ -316,15 +422,36 @@ export default function SignatureDetailsDialog({
                       defaultValue: `Signature ${index + 1}`,
                     })}
                   </EntryHeading>
+                  {passedChecks.length > 0 ? (
+                    <div className="odv-signature-checks">
+                      <p className="odv-signature-checks-heading">
+                        {t('signatures.checks.heading', { defaultValue: 'Checked and passed' })}
+                      </p>
+                      <ul>
+                        {passedChecks.map((text) => (
+                          <li key={text}>
+                            <span className="material-icons" aria-hidden="true">check</span>
+                            {text}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   <div className="odv-signature-info" role="note">
                     <p>{t('signatures.notCheckedInViewer', {
-                      defaultValue: 'Not checked in the viewer: issuer and revocation status',
+                      defaultValue: 'Not checked in the viewer: issuer trust and revocation status',
                     })}</p>
+                    {informationLines.map((text) => <p key={text}>{text}</p>)}
                   </div>
                   <dl className="odv-signature-fields">
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.signer', { defaultValue: 'Signer' })}</dt>
-                      <dd>{orEmpty(signature?.signer)}</dd>
+                      <dd>
+                        {orEmpty(signature?.signer)}
+                        {signerNote ? (
+                          <span className="odv-signature-secondary odv-signature-signer-note">{signerNote}</span>
+                        ) : null}
+                      </dd>
                     </div>
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.organization', { defaultValue: 'Organisation' })}</dt>
@@ -357,8 +484,12 @@ export default function SignatureDetailsDialog({
                     </div>
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.integrity', { defaultValue: 'Integrity' })}</dt>
-                      <dd>
+                      <dd className={`odv-signature-status odv-signature-status--${severity}`}>
+                        <span className="material-icons" aria-hidden="true">{ICON_BY_SEVERITY[severity]}</span>
                         {integrityLabel}
+                        {problemLines.map((text) => (
+                          <span key={text} className="odv-signature-secondary odv-signature-problem">{text}</span>
+                        ))}
                         {signature?.integrityReason ? (
                           <span className="odv-signature-secondary">{String(signature.integrityReason)}</span>
                         ) : null}
@@ -425,4 +556,5 @@ SignatureDetailsDialog.propTypes = {
   documentNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   totalDocuments: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   returnFocusRef: PropTypes.shape({ current: PropTypes.any }),
+  uncheckedSeverity: PropTypes.string,
 };

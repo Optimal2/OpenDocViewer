@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 147
-- Source lines: 60351
-- JSDoc symbols: 1652
+- Source lines: 60876
+- JSDoc symbols: 1680
 - Files with JSDoc: 147
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -43,7 +43,7 @@ Source commit: not embedded
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfSignatureDocuments.js` - Per\-document aggregation of PDF signature reports.
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
-- `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
+- `src/utils/pdfSignatures.js` - PDF signature collection \- level 1 integrity inspection.
 
 ## Agent Notes
 

@@ -111,13 +111,16 @@ function pickNewestSignature(signatures) {
  *
  * @param {(Array<*>|null|undefined)} pages Session pages (allPages).
  * @param {(Object<string, *>|null|undefined)} reports Map of sourceKey to PdfSignatureReport.
- * @param {{ getFileName:(function(string): string|undefined) }} [options]
+ * @param {{ getFileName:(function(string): string|undefined), uncheckedSeverity:(string|undefined) }} [options]
+ * `uncheckedSeverity` is the site switch for not-checked signatures (see pdfSignatureStatus.js);
+ * severities are presentation and are computed here, never stored in the report cache.
  * @returns {Array<SignatureDocumentEntry>}
  */
 export function buildSignatureDocuments(pages, reports, options = {}) {
   const list = Array.isArray(pages) ? pages : [];
   const reportMap = reports && typeof reports === 'object' ? reports : {};
   const getFileName = typeof options?.getFileName === 'function' ? options.getFileName : null;
+  const severityOptions = { uncheckedSeverity: options?.uncheckedSeverity };
 
   /** @type {Map<string, { key:string, documentNumber:number, totalDocuments:number, firstPageNumber:number, sourceKeys:Array<string>, pageCount:number }>} */
   const groups = new Map();
@@ -167,7 +170,7 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
         lastPage: pageRanges.get(sourceKey)?.last || 0,
         report,
         signatureCount: signed ? report.signatures.length : 0,
-        severity: signed ? getReportSignatureSeverity(report.signatures) : null,
+        severity: signed ? getReportSignatureSeverity(report.signatures, severityOptions) : null,
       };
     });
     const signedFiles = files.filter((file) => file.signatureCount > 0);
@@ -182,7 +185,7 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
       signedFiles,
       signatures,
       signatureCount: signatures.length,
-      severity: getReportSignatureSeverity(signatures),
+      severity: getReportSignatureSeverity(signatures, severityOptions),
       worstIntegrity: getWorstSignatureIntegrity(signatures),
       newestSignature: pickNewestSignature(signatures),
     });
@@ -194,15 +197,16 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
  * Totals for the toolbar overview button, or null when nothing is signed (the
  * button is then not rendered).
  * @param {(Array<SignatureDocumentEntry>|null|undefined)} documents
+ * @param {{ uncheckedSeverity:(string|undefined) }} [options]
  * @returns {({ documentCount:number, signatureCount:number, severity:('ok'|'warning'|'error') }|null)}
  */
-export function summarizeSignatureDocuments(documents) {
+export function summarizeSignatureDocuments(documents, options = {}) {
   const list = Array.isArray(documents) ? documents : [];
   if (list.length <= 0) return null;
   return {
     documentCount: list.length,
     signatureCount: list.reduce((sum, doc) => sum + doc.signatureCount, 0),
-    severity: getReportSignatureSeverity(list.flatMap((doc) => doc.signatures)),
+    severity: getReportSignatureSeverity(list.flatMap((doc) => doc.signatures), { uncheckedSeverity: options?.uncheckedSeverity }),
   };
 }
 

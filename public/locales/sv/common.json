@@ -837,11 +837,59 @@
     },
     "integrity": {
       "intact": "Intakt",
+      "notCheckedInViewer": "Inte kontrollerad i visaren",
+      "indeterminate": "Kunde inte avgöras",
       "modifiedAfterSigning": "Ändrat efter signering",
       "digestMismatch": "Innehållet matchar inte signaturen",
       "signatureInvalid": "Signaturen är ogiltig",
-      "unsupported": "Signatur finns, formatet stöds inte",
-      "unreadable": "Signaturen kan inte läsas"
+      "unreadable": "Signaturdata är skadad"
+    },
+    "integrityCode": {
+      "format-unsupported": "Visaren kan inte kontrollera det här signaturformatet.",
+      "algorithm-unsupported": "Signaturen använder en algoritm som den här webbläsaren inte kan kontrollera.",
+      "inspection-limit": "Dokumentet eller signaturen är för stor eller för komplex för att kontrolleras i visaren.",
+      "timeout": "Kontrollen tog för lång tid och avbröts.",
+      "structure-unsupported": "Filen har en struktur som visaren inte kan läsa, så signaturen kontrollerades inte.",
+      "encrypted": "Dokumentet är krypterat, så signaturen kan inte kontrolleras i visaren.",
+      "viewer-error": "Signaturkontrollen i visaren kunde inte köras.",
+      "unexpected-error": "Något oväntat hände under kontrollen, så resultatet är osäkert.",
+      "key-import-failed": "Webbläsaren kunde inte använda certifikatets nyckel, så resultatet är osäkert.",
+      "content-changed-after-signing": "Dokumentets innehåll ändrades efter att det signerades.",
+      "unclassified-change-after-signing": "Dokumentet ändrades efter signeringen, och visaren kan inte avgöra om ändringen är ofarlig.",
+      "extended-with-validation-data": "Dokumentet utökades efter signeringen, men bara med valideringsinformation.",
+      "extended-by-later-signature": "Dokumentet utökades efter signeringen med en senare signatur.",
+      "contents-missing": "Signaturvärdet saknas.",
+      "byte-range-invalid": "Signaturen täcker inte dokumentet på rätt sätt.",
+      "cms-malformed": "Signaturdata är skadad och kan inte läsas.",
+      "cms-content-mismatch": "Signaturdata stämmer inte med signaturtypen.",
+      "message-digest-attribute": "Signaturen saknar det obligatoriska fingeravtrycket av innehållet.",
+      "signer-certificate-missing": "Undertecknarens certifikat saknas i signaturen.",
+      "content-digest-mismatch": "Innehållet stämmer inte med det som signerades.",
+      "document-digest-mismatch": "Dokumentet stämmer inte med det som signerades.",
+      "signature-invalid": "Signaturen stämmer inte med undertecknarens certifikat."
+    },
+    "signingTimeCheck": {
+      "withinValidity": "Signerad medan certifikatet var giltigt",
+      "outsideValidity": "Signerad utanför certifikatets giltighetstid",
+      "timestampInvalid": "Signaturens tidsstämpel kunde inte bekräftas",
+      "notChecked": "Signeringstiden kontrollerades inte mot certifikatets giltighetstid"
+    },
+    "signingTimeCode": {
+      "signed-before-certificate-valid": "Signerad innan certifikatet blev giltigt",
+      "signed-after-certificate-expired": "Signerad efter att certifikatet hade gått ut",
+      "timestamp-invalid": "Signaturens tidsstämpel stämmer inte eller kunde inte bekräftas",
+      "signing-time-unknown": "Ingen signeringstid finns, så den kontrollerades inte mot certifikatets giltighetstid",
+      "certificate-dates-unreadable": "Certifikatets giltighetsdatum kunde inte läsas, så signeringstiden kontrollerades inte",
+      "no-certificate": "Inget certifikat kunde läsas, så signeringstiden kontrollerades inte"
+    },
+    "checks": {
+      "heading": "Kontrollerat och godkänt",
+      "contentUnchanged": "Det signerade innehållet är oförändrat sedan signeringen",
+      "signatureMatches": "Signaturen stämmer med undertecknarens certifikat"
+    },
+    "signerSource": {
+      "pdfName": "Namn från PDF:en, inte verifierat",
+      "unverifiedCertificate": "Namn från certifikatet; signaturen bekräftades inte"
     },
     "kind": {
       "approval": "Godkännande",

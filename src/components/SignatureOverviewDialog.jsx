@@ -3,8 +3,9 @@
  * Signature overview dialog, opened from the toolbar overview button.
  *
  * Lists every signed document of the loaded set: "DOK n", file name(s),
- * signature count, the worst integrity status (shared status helpers), and the
- * signer and signing time of the newest signature. The
+ * signature count, the worst integrity status (shared status helpers; "Not
+ * checked in the viewer" outranks "Intact"), a signing-time warning when there is
+ * one, and the signer and signing time of the newest signature. The
  * active document's row is marked. Activating a row navigates the viewer to
  * the document's first page and keeps the dialog open; the secondary
  * "Details" action opens the per-document SignatureDetailsDialog on top.
@@ -20,7 +21,12 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { getIntegrityLabel } from '../utils/pdfSignatureStatus.js';
+import {
+  getIntegrityLabel,
+  getReportSignatureSeverity,
+  getSigningTimeCheckLabel,
+  getSigningTimeWarningSignature,
+} from '../utils/pdfSignatureStatus.js';
 import { getSignatureFileHeading } from '../utils/pdfSignatureDocuments.js';
 import SignatureTime from './SignatureTime.jsx';
 
@@ -44,6 +50,8 @@ const ICON_BY_SEVERITY = {
  * @param {boolean} [props.suspended] True while the details dialog is open on top; the
  * overview then ignores Escape so only the top dialog closes.
  * @param {{ current:(HTMLElement|null) }} [props.returnFocusRef] Toolbar button that gets focus back.
+ * @param {('ok'|'warning')} [props.uncheckedSeverity] Site switch for not-checked signatures; used
+ * when a document entry carries no precomputed severity.
  * @returns {(React.ReactElement|null)}
  */
 export default function SignatureOverviewDialog({
@@ -55,6 +63,7 @@ export default function SignatureOverviewDialog({
   onOpenDetails,
   suspended = false,
   returnFocusRef = undefined,
+  uncheckedSeverity = 'ok',
 }) {
   const { t } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -200,7 +209,13 @@ export default function SignatureOverviewDialog({
               const fileNames = doc.signedFiles
                 .map((file) => file.fileName || getSignatureFileHeading(t, file))
                 .join(', ');
-              const statusText = getIntegrityLabel(t, doc.worstIntegrity);
+              const severity = Object.hasOwn(ICON_BY_SEVERITY, String(doc.severity))
+                ? doc.severity : getReportSignatureSeverity(doc.signatures || [], { uncheckedSeverity });
+              const timeWarning = getSigningTimeWarningSignature(doc.signatures);
+              const statusText = [
+                getIntegrityLabel(t, doc.worstIntegrity),
+                timeWarning ? getSigningTimeCheckLabel(t, timeWarning.signingTimeCheck, timeWarning.signingTimeCode) : null,
+              ].filter(Boolean).join(' · ');
               const signer = String(doc.newestSignature?.signer || '').trim() || emptyValue;
               const countText = t('signatures.overview.signatureCount', {
                 count: doc.signatureCount,
@@ -225,8 +240,8 @@ export default function SignatureOverviewDialog({
                     title={t('signatures.overview.goToDocument', { defaultValue: 'Go to document' })}
                     onClick={() => onNavigate?.(doc)}
                   >
-                    <span className={`material-icons odv-signature-badge--${doc.severity}`} aria-hidden="true">
-                      {ICON_BY_SEVERITY[doc.severity] || 'error'}
+                    <span className={`material-icons odv-signature-badge--${severity}`} aria-hidden="true">
+                      {ICON_BY_SEVERITY[severity]}
                     </span>
                     <span className="odv-signature-overview-main" id={`odv-signature-overview-desc-${rowIndex}`}>
                       <span className="odv-signature-overview-doc">
@@ -282,4 +297,5 @@ SignatureOverviewDialog.propTypes = {
   onOpenDetails: PropTypes.func.isRequired,
   suspended: PropTypes.bool,
   returnFocusRef: PropTypes.shape({ current: PropTypes.any }),
+  uncheckedSeverity: PropTypes.string,
 };

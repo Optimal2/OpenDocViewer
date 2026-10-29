@@ -212,7 +212,7 @@ async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMa
   const maxThumbnailWidth = normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH);
   const maxThumbnailHeight = normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT);
   if (variant === 'full') {
-    // Intentional decode: the worker still needs reliable intrinsic dimensions for layout/math
+    // Intentional decode: the worker still needs trustworthy intrinsic dimensions for layout/math
     // metadata, and the Blob alone does not expose width/height in a cross-format way.
     const bitmap = await createBitmap(sourceBlob);
     try {

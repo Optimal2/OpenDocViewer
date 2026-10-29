@@ -8,18 +8,29 @@ const inspector = 'src/utils/pdfSignatureInspector.js';
 const originals = new Map([parser, inspector].map((file) => [file, readFileSync(file, 'utf8')]));
 const tests = 'src/utils/__tests__/pdfSignatureSecurity.test.js';
 const workerTests = 'src/utils/__tests__/pdfSignatureWorkerSecurity.test.js';
+const inspectorTests = 'src/utils/__tests__/pdfSignatureInspector.test.js';
 const mutations = [
   ['F1', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && !encapsulated) {', tests, 'F1'],
   ['F2', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && findAttribute(signerInfo.signedAttrs, OID_ATTR_MESSAGE_DIGEST)) {', tests, 'F2'],
   ['F3', parser, "other.info?.integrity === 'intact' &&", 'true &&', tests, 'F3'],
   ['F4', parser, 'const rangeValid = validByteRange(bytes, byteRange, fields.contentsRaw, sourceSpans);', 'const rangeValid = true;', tests, 'F4 widened'],
   ['F5', parser, 'const sid = signerInfo.sid;', 'return certs[0];\n  const sid = signerInfo.sid;', tests, 'F5 no certificate fallback: wrongIssuer'],
-  ['F6', inspector, 'return unreadableSignatureReport(String(err?.message ?? err));', 'return collectPdfSignatures(bytes);', workerTests, 'F6 timeout'],
+  ['F6', inspector, "return notCheckedSignatureReport(err?.code === 'timeout' ? 'timeout' : 'viewer-error', String(err?.message ?? err));", 'return collectPdfSignatures(bytes);', workerTests, 'F6 timeout'],
   ['F7', parser, 'let pdfLib;', "if (!new TextDecoder().decode(bytes).includes('/ByteRange')) return empty;\n  let pdfLib;", tests, 'F7'],
   ['F8', inspector, "if (workerHandle) markBroken(workerHandle, 'signature worker disposed');", 'workerHandle?.worker?.terminate();', workerTests, 'F8'],
   ['Minification', parser, 'return obj instanceof pdfLib.PDFDict;', "return obj?.constructor?.name === 'PDFDict';", tests, 'production minification'],
   ['F10b', parser, 'let pdfLib;', "if (!new TextDecoder().decode(bytes.subarray(0, 1028)).includes('%PDF-')) return empty;\n  let pdfLib;", 'src/utils/__tests__/pdfSignatures.test.js', 'F10'],
-  ['F12', inspector, 'if (workerRecreations >= MAX_WORKER_RECREATIONS) return null;', 'return null;', workerTests, 'F12']
+  ['F12', inspector, 'if (workerRecreations >= MAX_WORKER_RECREATIONS) return null;', 'return null;', workerTests, 'F12'],
+  // Status model (docs-src/pdf-signatures.md "Status model").
+  ['Curve OID check dropped (guess the curve from the key)', parser, 'return CURVE_OID_TO_POINT_SIZE.get(oidOf(params)) ?? null;',
+    'return CURVE_OID_TO_POINT_SIZE.get(oidOf(params)) ?? 32;', tests, 'row 24b unknown ECDSA curve'],
+  ['Typed viewer limits ignored', parser, "if (err instanceof ViewerLimitError) setIntegrity(info, 'not-checked-in-viewer', err.code, message);",
+    "if (false) setIntegrity(info, 'not-checked-in-viewer', err.code, message);", tests, 'row 14b'],
+  ['Structural limit lost in pdf-lib wrapping', parser, 'throw limit ?? err;', 'throw err;', tests, '50k nested'],
+  ['Inspector read error fails open', inspector, "return notCheckedSignatureReport('viewer-error', `PDF bytes cannot be read: ${String(err?.message ?? err)}`);",
+    'return { signatures: [] };', inspectorTests, 'I2'],
+  ['Worker timeout code lost', inspector, "markBroken(handle, `signature worker timeout after ${timeoutMs} ms`, 'timeout');",
+    'markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);', workerTests, 'F6 timeout']
 ];
 
 function run(file, name) {

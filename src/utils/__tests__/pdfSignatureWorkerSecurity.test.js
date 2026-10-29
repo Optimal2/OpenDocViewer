@@ -49,14 +49,18 @@ it.each(['error', 'timeout', 'messageerror', 'postMessage'])('F12 recreates work
     if (failure === 'timeout') await vi.advanceTimersByTimeAsync(31);
     else if (failure === 'messageerror') worker.onmessageerror();
     else if (failure === 'error') worker.onerror({ preventDefault() {} });
-    expect((await failed).signatures[0].integrity).toBe('unreadable');
-    expect((await concurrent).signatures[0].integrity).toBe('unreadable');
+    const expectedCode = failure === 'timeout' ? 'timeout' : 'viewer-error';
+    for (const result of [await failed, await concurrent]) {
+      expect(result.signatures[0].integrity).toBe('not-checked-in-viewer');
+      expect(result.signatures[0].integrityCode).toBe(expectedCode);
+    }
     expect(worker.terminate).toHaveBeenCalledOnce();
     expect(vi.getTimerCount()).toBe(0);
   }
   for (let i = 0; i < 3; i++) {
     const blocked = await getDocumentSignatures(new Uint8Array(8));
-    expect(blocked.signatures[0].integrity).toBe('unreadable');
+    expect(blocked.signatures[0].integrity).toBe('not-checked-in-viewer');
+    expect(blocked.signatures[0].integrityCode).toBe('viewer-error');
     expect(blocked.signatures[0].integrityReason).toMatch(/unavailable/);
   }
   expect(state.constructions).toBe(4);
@@ -68,11 +72,11 @@ it('F12 bounds construction retries and disposal starts a fresh session', async 
   const { getDocumentSignatures, disposePdfSignatureWorker, collectPdfSignatures } = await api();
   state.failConstruction = true;
   for (let i = 0; i < 7; i++) {
-    expect((await getDocumentSignatures(new Uint8Array(8))).signatures[0].integrity).toBe('unreadable');
+    expect((await getDocumentSignatures(new Uint8Array(8))).signatures[0].integrity).toBe('not-checked-in-viewer');
   }
   expect(state.constructions).toBe(4);
   state.failConstruction = false;
-  expect((await getDocumentSignatures(new Uint8Array(8))).signatures[0].integrity).toBe('unreadable');
+  expect((await getDocumentSignatures(new Uint8Array(8))).signatures[0].integrity).toBe('not-checked-in-viewer');
   expect(state.constructions).toBe(4);
   disposePdfSignatureWorker();
   const next = getDocumentSignatures(new Uint8Array(8));
@@ -106,8 +110,10 @@ it('F6 timeout terminates the worker, settles all requests, and never parses inl
   const first = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 30 });
   const second = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 30000 });
   await vi.advanceTimersByTimeAsync(31);
-  expect((await first).signatures[0]?.integrity).toBe('unreadable');
-  expect((await second).signatures[0]?.integrity).toBe('unreadable');
+  for (const result of [await first, await second]) {
+    expect(result.signatures[0]?.integrity).toBe('not-checked-in-viewer');
+    expect(result.signatures[0]?.integrityCode).toBe('timeout');
+  }
   expect(state.workers[0].terminate).toHaveBeenCalledOnce();
   expect(collectPdfSignatures).not.toHaveBeenCalled();
 });
@@ -115,21 +121,23 @@ it('F6 worker construction failure never falls through to inline parsing', async
   state.failConstruction = true;
   const { getDocumentSignatures, collectPdfSignatures } = await api();
   const report = await getDocumentSignatures(new Uint8Array(8));
-  expect(report.signatures[0]?.integrity).toBe('unreadable');
+  expect(report.signatures[0]?.integrity).toBe('not-checked-in-viewer');
   expect(collectPdfSignatures).not.toHaveBeenCalled();
 });
-it('F6 worker error terminates and produces an unreadable document', async () => {
+it('F6 worker error terminates and produces a not-checked document', async () => {
   const { getDocumentSignatures, collectPdfSignatures } = await api();
   const promise = getDocumentSignatures(new Uint8Array(8));
   await vi.advanceTimersByTimeAsync(0);
   state.workers[0].onerror({ preventDefault() {} });
-  expect((await promise).signatures[0]?.integrity).toBe('unreadable');
+  expect((await promise).signatures[0]?.integrity).toBe('not-checked-in-viewer');
   expect(collectPdfSignatures).not.toHaveBeenCalled();
 });
 it('F6 Worker-free inline fallback is size bounded', async () => {
   vi.stubGlobal('Worker', undefined);
   const { getDocumentSignatures, collectPdfSignatures } = await api();
-  expect((await getDocumentSignatures(new Uint8Array(1024 * 1024))).signatures[0]?.integrity).toBe('unreadable');
+  const report = await getDocumentSignatures(new Uint8Array(1024 * 1024));
+  expect(report.signatures[0]?.integrity).toBe('not-checked-in-viewer');
+  expect(report.signatures[0]?.integrityCode).toBe('inspection-limit');
   expect(collectPdfSignatures).not.toHaveBeenCalled();
 });
 it('F8 dispose settles every pending promise immediately and permits a new worker', async () => {
@@ -142,7 +150,8 @@ it('F8 dispose settles every pending promise immediately and permits a new worke
   await vi.advanceTimersByTimeAsync(0);
   expect(completed).toHaveLength(2);
   await Promise.all([p1, p2]);
-  expect(completed.every((r) => r.signatures[0]?.integrity === 'unreadable')).toBe(true);
+  expect(completed.every((r) => r.signatures[0]?.integrity === 'not-checked-in-viewer'
+    && r.signatures[0]?.integrityCode === 'viewer-error')).toBe(true);
   expect(state.workers[0].terminate).toHaveBeenCalledOnce();
   expect(vi.getTimerCount()).toBe(0);
   const next = getDocumentSignatures(new Uint8Array(8));
@@ -152,4 +161,28 @@ it('F8 dispose settles every pending promise immediately and permits a new worke
   state.workers[1].onmessage({ data: { type: 'pdfSignaturesResult', requestId: message.requestId, ok: true, report: { signatures: [] } } });
   expect(await next).toEqual({ signatures: [] });
   expect(collectPdfSignatures).not.toHaveBeenCalled();
+});
+it('I3 a worker answer without a report is not checked (viewer-error)', async () => {
+  const { getDocumentSignatures } = await api();
+  const promise = getDocumentSignatures(new Uint8Array(8));
+  await vi.advanceTimersByTimeAsync(0);
+  const message = state.workers[0].postMessage.mock.calls[0][0];
+  state.workers[0].onmessage({ data: { type: 'pdfSignaturesResult', requestId: message.requestId, ok: true } });
+  const report = await promise;
+  expect(report.signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'viewer-error' });
+});
+it('I4 a worker-side failure (ok:false) is not checked (viewer-error)', async () => {
+  const { getDocumentSignatures } = await api();
+  const promise = getDocumentSignatures(new Uint8Array(8));
+  await vi.advanceTimersByTimeAsync(0);
+  const message = state.workers[0].postMessage.mock.calls[0][0];
+  state.workers[0].onmessage({ data: { type: 'pdfSignaturesResult', requestId: message.requestId, ok: false, error: 'boom' } });
+  const report = await promise;
+  expect(report.signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'viewer-error', integrityReason: 'boom' });
+});
+it('I1 a source over 64 MiB is not checked (inspection-limit) without reading it', async () => {
+  const { getDocumentSignatures } = await api();
+  const report = await getDocumentSignatures({ size: 64 * 1024 * 1024 + 1 });
+  expect(report.signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'inspection-limit' });
+  expect(state.workers).toHaveLength(0);
 });

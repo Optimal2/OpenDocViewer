@@ -4552,7 +4552,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 161,
+    "line": 163,
     "description": "Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1.",
     "params": [
       {
@@ -4589,7 +4589,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 74,
+    "line": 76,
     "description": "",
     "params": [
       {
@@ -4626,7 +4626,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 367,
+    "line": 369,
     "description": "The &quot;DOK n&quot; document header with the document signature symbol.",
     "params": [
       {
@@ -4681,7 +4681,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 646,
+    "line": 651,
     "description": "",
     "params": [
       {
@@ -4802,7 +4802,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 118,
+    "line": 120,
     "description": "",
     "params": [
       {
@@ -4833,7 +4833,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 128,
+    "line": 130,
     "description": "",
     "params": [
       {
@@ -4858,7 +4858,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 326,
+    "line": 328,
     "description": "",
     "params": [
       {
@@ -4889,7 +4889,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 340,
+    "line": 342,
     "description": "",
     "params": [
       {
@@ -4920,7 +4920,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 272,
+    "line": 274,
     "description": "",
     "params": [
       {
@@ -4963,7 +4963,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 223,
+    "line": 225,
     "description": "",
     "params": [
       {
@@ -5006,7 +5006,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 195,
+    "line": 197,
     "description": "",
     "params": [
       {
@@ -5043,7 +5043,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 182,
+    "line": 184,
     "description": "",
     "params": [
       {
@@ -5068,7 +5068,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 137,
+    "line": 139,
     "description": "",
     "params": [
       {
@@ -5099,7 +5099,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 97,
+    "line": 99,
     "description": "",
     "params": [
       {
@@ -5136,7 +5136,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1241,
+    "line": 1251,
     "description": "",
     "params": [
       {
@@ -5167,7 +5167,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1334,
+    "line": 1344,
     "description": "",
     "params": [
       {
@@ -5198,7 +5198,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1267,
+    "line": 1277,
     "description": "",
     "params": [
       {
@@ -5229,7 +5229,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1093,
+    "line": 1103,
     "description": "",
     "params": [
       {
@@ -5254,7 +5254,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1280,
+    "line": 1290,
     "description": "",
     "params": [
       {
@@ -5291,7 +5291,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1084,
+    "line": 1094,
     "description": "",
     "params": [
       {
@@ -5316,7 +5316,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1171,
+    "line": 1181,
     "description": "",
     "params": [
       {
@@ -5341,7 +5341,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 148,
+    "line": 150,
     "description": "",
     "params": [
       {
@@ -5372,7 +5372,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 614,
+    "line": 619,
     "description": "Locate a row's inline document-boundary header and its row shell for the sticky-header measurement.",
     "params": [
       {
@@ -5403,7 +5403,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 733,
+    "line": 743,
     "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
     "params": [
       {
@@ -5428,7 +5428,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 855,
+    "line": 865,
     "description": "",
     "params": [
       {
@@ -5453,7 +5453,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 83,
+    "line": 85,
     "description": "",
     "params": [
       {
@@ -5484,7 +5484,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 414,
+    "line": 417,
     "description": "",
     "params": [
       {
@@ -9881,7 +9881,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 485,
+    "line": 494,
     "description": "",
     "params": [
       {
@@ -9906,7 +9906,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 360,
+    "line": 369,
     "description": "",
     "params": [],
     "returns": [
@@ -9924,7 +9924,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 353,
+    "line": 362,
     "description": "",
     "params": [
       {
@@ -9944,7 +9944,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 331,
+    "line": 340,
     "description": "Overview row activation: show the document's first page and keep the overview open.",
     "params": [],
     "returns": [],
@@ -9957,7 +9957,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 364,
+    "line": 373,
     "description": "",
     "params": [
       {
@@ -9977,7 +9977,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 289,
+    "line": 298,
     "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
     "params": [
       {
@@ -13827,7 +13827,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 82,
+    "line": 182,
     "description": "",
     "params": [
       {
@@ -13883,11 +13883,48 @@
         "type": "Object",
         "optional": true,
         "description": "Element (the signature symbol) that receives focus when the dialog closes."
+      },
+      {
+        "name": "props.uncheckedSeverity",
+        "type": "'ok'|'warning'",
+        "optional": true,
+        "description": "Site switch for not-checked signatures."
       }
     ],
     "returns": [
       {
         "type": "React.ReactElement|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getInformationLines",
+    "name": "getInformationLines",
+    "longname": "getInformationLines",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/SignatureDetailsDialog.jsx",
+    "line": 125,
+    "description": "Information lines after the always-on line: the integrity code of an intact or not-checked signature (problems are explained next to the status instead) and a signing-time check t...",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "signature",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
         "description": ""
       }
     ],
@@ -13900,7 +13937,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 39,
+    "line": 49,
     "description": "",
     "params": [
       {
@@ -13925,13 +13962,106 @@
     "examples": 0
   },
   {
+    "id": "getPassedChecks",
+    "name": "getPassedChecks",
+    "longname": "getPassedChecks",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/SignatureDetailsDialog.jsx",
+    "line": 105,
+    "description": "What was checked and passed for one signature, in display order.",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "signature",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getProblemLines",
+    "name": "getProblemLines",
+    "longname": "getProblemLines",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/SignatureDetailsDialog.jsx",
+    "line": 145,
+    "description": "Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning.",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "signature",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getSignerSourceNote",
+    "name": "getSignerSourceNote",
+    "longname": "getSignerSourceNote",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/SignatureDetailsDialog.jsx",
+    "line": 86,
+    "description": "Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify.",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "signature",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "getSigningTimeSourceLabel",
     "name": "getSigningTimeSourceLabel",
     "longname": "getSigningTimeSourceLabel",
     "kind": "function",
     "scope": "global",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 56,
+    "line": 66,
     "description": "",
     "params": [
       {
@@ -13962,7 +14092,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 122,
+    "line": 223,
     "description": "",
     "params": [
       {
@@ -13982,7 +14112,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 148,
+    "line": 249,
     "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
     "params": [],
     "returns": [],
@@ -13995,8 +14125,21 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 164,
+    "line": 265,
     "description": "Keep Tab navigation inside the dialog while it is open.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ICON_BY_SEVERITY",
+    "name": "ICON_BY_SEVERITY",
+    "longname": "ICON_BY_SEVERITY",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/SignatureDetailsDialog.jsx",
+    "line": 161,
+    "description": "Material Icons ligature per severity (same as SignatureStatusBadge).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -14008,7 +14151,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 204,
+    "line": 305,
     "description": "",
     "params": [
       {
@@ -14078,7 +14221,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/SignatureOverviewDialog.jsx",
-    "line": 49,
+    "line": 57,
     "description": "",
     "params": [
       {
@@ -14134,6 +14277,12 @@
         "type": "Object",
         "optional": true,
         "description": "Toolbar button that gets focus back."
+      },
+      {
+        "name": "props.uncheckedSeverity",
+        "type": "'ok'|'warning'",
+        "optional": true,
+        "description": "Site switch for not-checked signatures; used when a document entry carries no precomputed severity."
       }
     ],
     "returns": [
@@ -14151,7 +14300,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureOverviewDialog.jsx",
-    "line": 90,
+    "line": 99,
     "description": "",
     "params": [
       {
@@ -14171,7 +14320,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureOverviewDialog.jsx",
-    "line": 104,
+    "line": 113,
     "description": "Keep Tab navigation inside the dialog while it is open.",
     "params": [],
     "returns": [],
@@ -14184,7 +14333,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/SignatureStatusBadge.jsx",
-    "line": 43,
+    "line": 51,
     "description": "",
     "params": [
       {
@@ -14210,6 +14359,18 @@
         "type": "'thumbnail'|'document'|'toolbar'",
         "optional": true,
         "description": "document also shows the count."
+      },
+      {
+        "name": "props.severity",
+        "type": "'ok'|'warning'|'error'|null",
+        "optional": true,
+        "description": "Precomputed severity (signed-document entries already apply the site switch); computed from the report when absent."
+      },
+      {
+        "name": "props.uncheckedSeverity",
+        "type": "'ok'|'warning'",
+        "optional": true,
+        "description": "Site switch used when severity is absent."
       }
     ],
     "returns": [
@@ -14227,7 +14388,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/SignatureStatusBadge.jsx",
-    "line": 28,
+    "line": 33,
     "description": "Material Icons ligature per severity.",
     "params": [],
     "returns": [],
@@ -28727,7 +28888,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 117,
+    "line": 119,
     "description": "Fold per-file signature reports into per-document entries.",
     "params": [
       {
@@ -28746,7 +28907,7 @@
         "name": "options",
         "type": "Object",
         "optional": true,
-        "description": ""
+        "description": "uncheckedSeverity is the site switch for not-checked signatures (see pdfSignatureStatus.js); severities are presentation and are computed h..."
       }
     ],
     "returns": [
@@ -28764,7 +28925,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 214,
+    "line": 218,
     "description": "",
     "params": [
       {
@@ -28820,7 +28981,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 227,
+    "line": 231,
     "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
     "params": [
       {
@@ -28851,7 +29012,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 242,
+    "line": 246,
     "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
     "params": [
       {
@@ -28958,13 +29119,19 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 199,
+    "line": 203,
     "description": "Totals for the toolbar overview button, or null when nothing is signed (the button is then not rendered).",
     "params": [
       {
         "name": "documents",
         "type": "Array<SignatureDocumentEntry>|null|undefined",
         "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
         "description": ""
       }
     ],
@@ -28996,7 +29163,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 175,
+    "line": 188,
     "description": "Terminate the signature worker (e.g.",
     "params": [],
     "returns": [],
@@ -29009,7 +29176,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 140,
+    "line": 150,
     "description": "Inspect the signatures of one document.",
     "params": [
       {
@@ -29046,6 +29213,26 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureInspector~InspectionError",
+    "name": "InspectionError",
+    "longname": "module:utils/pdfSignatureInspector~InspectionError",
+    "kind": "class",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatureInspector.js",
+    "line": 28,
+    "description": "Rejection reason that carries the integrity code for the placeholder report.",
+    "params": [
+      {
+        "name": "message",
+        "type": "string",
+        "optional": false,
+        "description": "@param {'timeout'|'viewer-error'} code"
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureInspector",
     "name": "utils/pdfSignatureInspector",
     "longname": "module:utils/pdfSignatureInspector",
@@ -29065,7 +29252,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 33,
+    "line": 43,
     "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
     "params": [],
     "returns": [],
@@ -29078,7 +29265,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1147,
+    "line": 1313,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -29097,16 +29284,104 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatures~curvePointSize",
+    "name": "curvePointSize",
+    "longname": "module:utils/pdfSignatures~curvePointSize",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 661,
+    "description": "Point size of the certificate's named curve, or null when the SPKI does not name one of the WebCrypto curves.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~DECODABLE_STREAM_FILTERS",
+    "name": "DECODABLE_STREAM_FILTERS",
+    "longname": "module:utils/pdfSignatures~DECODABLE_STREAM_FILTERS",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 122,
+    "description": "Structural stream filters pdf-lib's decodePDFRawStream can decode.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatures~discoverSignatures",
     "name": "discoverSignatures",
     "longname": "module:utils/pdfSignatures~discoverSignatures",
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 268,
+    "line": 318,
     "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~errorSignatureReport",
+    "name": "errorSignatureReport",
+    "longname": "module:utils/pdfSignatures~errorSignatureReport",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 1106,
+    "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
+    "params": [
+      {
+        "name": "err",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "prefix",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "PdfSignatureReport",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures.indeterminateSignatureReport",
+    "name": "indeterminateSignatureReport",
+    "longname": "module:utils/pdfSignatures.indeterminateSignatureReport",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 1095,
+    "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
+    "params": [
+      {
+        "name": "code",
+        "type": "PdfSignatureIntegrityCode",
+        "optional": false,
+        "description": "An indeterminate code."
+      },
+      {
+        "name": "detail",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "PdfSignatureReport",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -29116,7 +29391,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 992,
+    "line": 1140,
     "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
     "params": [
       {
@@ -29142,13 +29417,57 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatures.notCheckedSignatureReport",
+    "name": "notCheckedSignatureReport",
+    "longname": "module:utils/pdfSignatures.notCheckedSignatureReport",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 1084,
+    "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
+    "params": [
+      {
+        "name": "code",
+        "type": "PdfSignatureIntegrityCode",
+        "optional": false,
+        "description": "A not-checked-in-viewer code."
+      },
+      {
+        "name": "detail",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "PdfSignatureReport",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~oidOf",
+    "name": "oidOf",
+    "longname": "module:utils/pdfSignatures~oidOf",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 647,
+    "description": "Dotted OID of an asn1js ObjectIdentifier (or raw OID element), else null.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatures.parsePdfDateString",
     "name": "parsePdfDateString",
     "longname": "module:utils/pdfSignatures.parsePdfDateString",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 195,
+    "line": 245,
     "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
     "params": [
       {
@@ -29173,8 +29492,34 @@
     "kind": "typedef",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 19,
+    "line": 20,
     "description": "One inspected PDF signature (level-1 integrity view).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~PdfSignatureIntegrity",
+    "name": "PdfSignatureIntegrity",
+    "longname": "module:utils/pdfSignatures~PdfSignatureIntegrity",
+    "kind": "typedef",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 56,
+    "description": "Produced integrity values.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~PdfSignatureIntegrityCode",
+    "name": "PdfSignatureIntegrityCode",
+    "longname": "module:utils/pdfSignatures~PdfSignatureIntegrityCode",
+    "kind": "typedef",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 62,
+    "description": "Closed set of integrity codes (see INTEGRITY_CODES in utils/pdfSignatureStatus.js).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -29186,7 +29531,7 @@
     "kind": "typedef",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 50,
+    "line": 67,
     "description": "",
     "params": [],
     "returns": [],
@@ -29199,7 +29544,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 182,
+    "line": 232,
     "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
     "params": [
       {
@@ -29218,33 +29563,32 @@
     "examples": 0
   },
   {
-    "id": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
-    "name": "SUPPORTED_SUBFILTERS",
-    "longname": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
-    "kind": "constant",
-    "scope": "static",
-    "file": "src/utils/pdfSignatures.js",
-    "line": 58,
-    "description": "SubFilters with level-1 handling.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "module:utils/pdfSignatures.unreadableSignatureReport",
-    "name": "unreadableSignatureReport",
-    "longname": "module:utils/pdfSignatures.unreadableSignatureReport",
+    "id": "module:utils/pdfSignatures~placeholderSignatureReport",
+    "name": "placeholderSignatureReport",
+    "longname": "module:utils/pdfSignatures~placeholderSignatureReport",
     "kind": "function",
-    "scope": "static",
+    "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 955,
-    "description": "Report an inspection failure without claiming that the document is unsigned.",
+    "line": 1067,
+    "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
     "params": [
       {
-        "name": "reason",
+        "name": "integrity",
+        "type": "PdfSignatureIntegrity",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "code",
+        "type": "PdfSignatureIntegrityCode",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "detail",
         "type": "string",
         "optional": false,
-        "description": "Inspection failure reason."
+        "description": "English detail line (integrityReason)."
       }
     ],
     "returns": [
@@ -29253,6 +29597,89 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~setIntegrity",
+    "name": "setIntegrity",
+    "longname": "module:utils/pdfSignatures~setIntegrity",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 465,
+    "description": "",
+    "params": [
+      {
+        "name": "info",
+        "type": "PdfSignatureInfo",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "integrity",
+        "type": "PdfSignatureIntegrity",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "code",
+        "type": "PdfSignatureIntegrityCode|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "reason",
+        "type": "string|null",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~setIntegrityFromError",
+    "name": "setIntegrityFromError",
+    "longname": "module:utils/pdfSignatures~setIntegrityFromError",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 478,
+    "description": "Classify an exception: a ViewerLimitError is not-checked-in-viewer with its own code, anything else cannot be classified and is indeterminate .",
+    "params": [
+      {
+        "name": "info",
+        "type": "PdfSignatureInfo",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "err",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "prefix",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
+    "name": "SUPPORTED_SUBFILTERS",
+    "longname": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
+    "kind": "constant",
+    "scope": "static",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 75,
+    "description": "SubFilters with level-1 handling.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -29269,13 +29696,64 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatures~verifyCmsSignature",
+    "name": "verifyCmsSignature",
+    "longname": "module:utils/pdfSignatures~verifyCmsSignature",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 998,
+    "description": "Verify the CMS signature value with WebCrypto.",
+    "params": [],
+    "returns": [
+      {
+        "type": "Promise.<('verified'|'invalid'|'unsupported'|'malformed')>",
+        "description": "unsupported for an algorithm, hash or curve WebCrypto lacks; malformed when an ECDSA signature value is not DER. Import/verify failures thr..."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~ViewerLimitError",
+    "name": "ViewerLimitError",
+    "longname": "module:utils/pdfSignatures~ViewerLimitError",
+    "kind": "class",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 130,
+    "description": "A check the viewer could not perform because of its own limits (budget, missing algorithm, failing machinery), with no evidence of a defect.",
+    "params": [
+      {
+        "name": "code",
+        "type": "PdfSignatureIntegrityCode",
+        "optional": false,
+        "description": "@param {string} message"
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures~WEBCRYPTO_HASHES",
+    "name": "WEBCRYPTO_HASHES",
+    "longname": "module:utils/pdfSignatures~WEBCRYPTO_HASHES",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 120,
+    "description": "Hash names WebCrypto implements.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureStatus.formatSignatureTime",
     "name": "formatSignatureTime",
     "longname": "module:utils/pdfSignatureStatus.formatSignatureTime",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 137,
+    "line": 289,
     "description": "Format a signature-related ISO time (signing, validation, certificate validity) as local time, &quot;2022-04-27 19:55&quot;, in both supported languages.",
     "params": [
       {
@@ -29294,14 +29772,45 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureStatus.getIntegrityCodeText",
+    "name": "getIntegrityCodeText",
+    "longname": "module:utils/pdfSignatureStatus.getIntegrityCodeText",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 204,
+    "description": "Localized plain-language line for an integrity code, or null for a missing or unknown code (closed set, nothing outside it is ever rendered).",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "code",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureStatus.getIntegrityLabel",
     "name": "getIntegrityLabel",
     "longname": "module:utils/pdfSignatureStatus.getIntegrityLabel",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 80,
-    "description": "Shared localized status text for the badge tooltip and details dialog.",
+    "line": 183,
+    "description": "Shared localized status text for the badge tooltip and the dialogs.",
     "params": [
       {
         "name": "t",
@@ -29331,14 +29840,20 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 59,
-    "description": "Worst severity across integrity for all signatures.",
+    "line": 172,
+    "description": "Worst severity across all signatures.",
     "params": [
       {
         "name": "signatures",
         "type": "Array.<*>",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": "Passed through to getSignatureSeverity."
       }
     ],
     "returns": [
@@ -29356,7 +29871,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 113,
+    "line": 265,
     "description": "",
     "params": [
       {
@@ -29381,13 +29896,19 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 50,
-    "description": "Map one integrity status to its severity class.",
+    "line": 159,
+    "description": "Severity of one signature: the worse of its integrity and its signing-time check.",
     "params": [
       {
-        "name": "integrity",
-        "type": "string|null|undefined",
+        "name": "signature",
+        "type": "*",
         "optional": false,
+        "description": "PdfSignatureInfo-shaped object."
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
         "description": ""
       }
     ],
@@ -29400,13 +29921,75 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureStatus.getSigningTimeCheckLabel",
+    "name": "getSigningTimeCheckLabel",
+    "longname": "module:utils/pdfSignatureStatus.getSigningTimeCheckLabel",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 218,
+    "description": "Localized signing-time check text, or null when the signature carries no signing-time check (the parser has not checked it).",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "check",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "code",
+        "type": "*",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureStatus.getSigningTimeWarningSignature",
+    "name": "getSigningTimeWarningSignature",
+    "longname": "module:utils/pdfSignatureStatus.getSigningTimeWarningSignature",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 239,
+    "description": "The most severe signing-time check among signatures that carry one, or null when none of them is a warning.",
+    "params": [
+      {
+        "name": "signatures",
+        "type": "Array<*>|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "*|null",
+        "description": "The first signature whose signing-time check is a warning."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureStatus.getWorstSignatureIntegrity",
     "name": "getWorstSignatureIntegrity",
     "longname": "module:utils/pdfSignatureStatus.getWorstSignatureIntegrity",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 99,
+    "line": 251,
     "description": "The worst integrity status among a document's signatures, or null when there are none.",
     "params": [
       {
@@ -29425,13 +30008,39 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureStatus~INTEGRITY_ALIASES",
+    "name": "INTEGRITY_ALIASES",
+    "longname": "module:utils/pdfSignatureStatus~INTEGRITY_ALIASES",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 40,
+    "description": "Legacy values accepted from older caches.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureStatus.INTEGRITY_CODES",
+    "name": "INTEGRITY_CODES",
+    "longname": "module:utils/pdfSignatureStatus.INTEGRITY_CODES",
+    "kind": "constant",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 66,
+    "description": "Closed set of integrityCode values produced by utils/pdfSignatures.js and utils/pdfSignatureInspector.js.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST",
     "name": "INTEGRITY_WORST_FIRST",
     "longname": "module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST",
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 36,
+    "line": 50,
     "description": "Integrity statuses ordered worst-first.",
     "params": [],
     "returns": [],
@@ -29444,8 +30053,8 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 69,
-    "description": "Fail closed for missing, unexpected and inherited property names.",
+    "line": 121,
+    "description": "Fail closed for missing, unexpected and inherited property names: anything outside the known set (after resolving legacy aliases) is unreadable .",
     "params": [
       {
         "name": "integrity",
@@ -29463,13 +30072,63 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureStatus.normalizeSigningTimeCheck",
+    "name": "normalizeSigningTimeCheck",
+    "longname": "module:utils/pdfSignatureStatus.normalizeSigningTimeCheck",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 144,
+    "description": "Missing values mean the check was not performed; an unknown string fails closed to outside-validity (a warning).",
+    "params": [
+      {
+        "name": "check",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureStatus.normalizeUncheckedSeverity",
+    "name": "normalizeUncheckedSeverity",
+    "longname": "module:utils/pdfSignatureStatus.normalizeUncheckedSeverity",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 134,
+    "description": "The site switch pdfSignatures.uncheckedSeverity : exactly 'warning' shows not-checked signatures as warnings; anything else keeps them 'ok'.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "'ok'|'warning'",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureStatus~pad2",
     "name": "pad2",
     "longname": "module:utils/pdfSignatureStatus~pad2",
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 126,
+    "line": 278,
     "description": "",
     "params": [
       {
@@ -29489,7 +30148,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 121,
+    "line": 273,
     "description": "",
     "params": [
       {
@@ -29514,8 +30173,34 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 20,
-    "description": "Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are...",
+    "line": 25,
+    "description": "Severity class per integrity status.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureStatus~SEVERITY_BY_SIGNING_TIME_CHECK",
+    "name": "SEVERITY_BY_SIGNING_TIME_CHECK",
+    "longname": "module:utils/pdfSignatureStatus~SEVERITY_BY_SIGNING_TIME_CHECK",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 96,
+    "description": "Severity per signing-time check.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureStatus.SIGNING_TIME_CODES",
+    "name": "SIGNING_TIME_CODES",
+    "longname": "module:utils/pdfSignatureStatus.SIGNING_TIME_CODES",
+    "kind": "constant",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 104,
+    "description": "Closed set of signingTimeCode values; texts under signatures.signingTimeCode.&lt;code&gt; .",
     "params": [],
     "returns": [],
     "examples": 0
@@ -34282,7 +34967,7 @@
     "scope": "global",
     "file": "src/utils/printPdf.js",
     "line": 398,
-    "description": "Parse only the small CSS subset used by approved print header/footer templates.",
+    "description": "Parse only the small CSS subset used by trusted print header/footer templates.",
     "params": [
       {
         "name": "css",
@@ -38145,7 +38830,7 @@
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
     "line": 298,
-    "description": "Resolve the symbol severity for a signature whose content is intact but whose certificate chain and revocation status the viewer does not check ( pdfSignatures.uncheckedSeverity ).",
+    "description": "Resolve the symbol severity for a signature the viewer could not check itself (integrity not-checked-in-viewer : format, algorithm, budget, encryption, worker failure), from pdfSi...",
     "params": [
       {
         "name": "cfg",

@@ -10,7 +10,10 @@ const provider = 'src/contexts/ViewerProvider.jsx';
 const hookTests = 'src/hooks/__tests__/usePdfSignatureReports.test.jsx';
 const workerTests = 'src/utils/__tests__/pdfSignatureWorkerSecurity.test.js';
 const providerTests = 'src/contexts/ViewerProvider.signatures.test.jsx';
-const originals = new Map([hook, status, inspector, provider].map((file) => [file, readFileSync(file, 'utf8')]));
+const statusTests = 'src/utils/__tests__/pdfSignatureStatus.test.js';
+const documentTests = 'src/utils/__tests__/pdfSignatureDocuments.test.js';
+const documents = 'src/utils/pdfSignatureDocuments.js';
+const originals = new Map([hook, status, inspector, provider, documents].map((file) => [file, readFileSync(file, 'utf8')]));
 const mutations = [
   ['F1 cleanup drops pending results', hook, '    pumpRef.current();\n  }, [allPages',
     '    pumpRef.current();\n    return () => entries.clear();\n  }, [allPages', hookTests, 'F1'],
@@ -20,6 +23,18 @@ const mutations = [
   ['F4 disposal no longer settles requests', inspector, "if (workerHandle) markBroken(workerHandle, 'signature worker disposed');", 'workerHandle?.worker?.terminate();', workerTests, 'F8'],
   ['F5 disconnected provider reports', provider, '    signatureReports,', '    signatureReports: {},', providerTests, 'F5'],
   ['F5 missing unmount disposal', provider, '    disposePdfSignatureWorker();', '    // Disposal intentionally disabled for regression proof.', providerTests, 'F5'],
+  // Status model: not checked <-> intact must stay distinct in colour and in label ranking.
+  ['NC<->intact: not checked ignores the switch', status, "'not-checked-in-viewer': 'unchecked',", "'not-checked-in-viewer': 'ok',",
+    statusTests, 'raises not-checked-in-viewer'],
+  ['NC<->intact: intact outranks not checked', status, "  'not-checked-in-viewer',\n  'intact',\n];", "  'intact',\n  'not-checked-in-viewer',\n];",
+    statusTests, 'NC outranks intact'],
+  // Fail closed: the switch must never reach unknown values or errors.
+  ['Switch affects errors and unknown values', status, "if (severity === 'unchecked') severity = normalizeUncheckedSeverity(uncheckedSeverity);",
+    "if (severity === 'unchecked' || severity === 'error') severity = normalizeUncheckedSeverity(uncheckedSeverity);", statusTests, 'fail-closed'],
+  ['Unknown values become not checked', status, "return INTEGRITY_ALIASES[integrity];\n  return 'unreadable';",
+    "return INTEGRITY_ALIASES[integrity];\n  return 'not-checked-in-viewer';", statusTests, 'fail-closed'],
+  ['Switch not threaded into documents', documents, 'const severityOptions = { uncheckedSeverity: options?.uncheckedSeverity };',
+    'const severityOptions = {};', documentTests, 'threads uncheckedSeverity'],
 ];
 
 try {

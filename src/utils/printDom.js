@@ -133,7 +133,7 @@ function enabled(value) {
  */
 function buildPrintCss(extraCss, pageOrientation, printFormatCfg) {
   const safeOrientation = normalizePageOrientation(pageOrientation);
-  const normalizedExtraCss = normalizeTrustedExtraCss(extraCss);
+  const trustedExtraCss = normalizeTrustedExtraCss(extraCss);
   const pageRule = `@page{margin:0;${safeOrientation ? `size:${safeOrientation};` : ''}}`;
   const watermarkExtraCss = normalizeTrustedExtraCss(printFormatCfg?.watermark?.css || '');
   const headerMarkerExtraCss = normalizeTrustedExtraCss(printFormatCfg?.headerMarker?.css || '');
@@ -165,7 +165,7 @@ function buildPrintCss(extraCss, pageOrientation, printFormatCfg) {
       'display:block;width:82vw;max-width:96vw;max-height:42vh;height:auto;object-fit:contain;' +
       'pointer-events:none;user-select:none;z-index:2147483645;}';
 
-  return base + normalizedExtraCss + headerMarkerExtraCss + watermarkExtraCss;
+  return base + trustedExtraCss + headerMarkerExtraCss + watermarkExtraCss;
 }
 
 /**

@@ -6,7 +6,9 @@
  * it to a dedicated ES module worker to keep the main thread free, falling
  * back to size-bounded inline execution only when no Worker API exists. The call
  * never rejects and never throws; documents without signatures resolve to an
- * empty list. See docs-src/pdf-signatures.md for the data contract.
+ * empty list, and any failure of the inspection machinery resolves to a
+ * `not-checked-in-viewer` placeholder (never to "no signatures"). See
+ * docs-src/pdf-signatures.md for the data contract.
  *
  * Usage (one call per document, e.g. from a dialog effect):
  *
@@ -18,10 +20,18 @@
  */
 
 import PdfSignatureWorkerConstructor from '../workers/pdfSignatureWorker.js?worker';
-import { collectPdfSignatures, unreadableSignatureReport } from './pdfSignatures.js';
+import { collectPdfSignatures, notCheckedSignatureReport } from './pdfSignatures.js';
 
-const EMPTY_REPORT = { signatures: [] };
 const MAX_WORKER_RECREATIONS = 3;
+
+/** Rejection reason that carries the integrity code for the placeholder report. */
+class InspectionError extends Error {
+  /** @param {string} message @param {'timeout'|'viewer-error'} code */
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
 
 /**
  * Lazily created worker handle: { worker, broken, pending } where `pending`
@@ -38,10 +48,10 @@ function canUseWorker() {
   return typeof Worker !== 'undefined';
 }
 
-function markBroken(handle, reason) {
+function markBroken(handle, reason, code = 'viewer-error') {
   if (handle.broken) return;
   handle.broken = true;
-  for (const entry of handle.pending.values()) entry.reject(new Error(reason));
+  for (const entry of handle.pending.values()) entry.reject(new InspectionError(reason, code));
   handle.pending.clear();
   try { handle.worker?.terminate(); } catch { /* already stopped */ }
 }
@@ -63,9 +73,9 @@ function ensureWorker() {
       if (!entry) return;
       handle.pending.delete(data.requestId);
       if (data.ok) {
-        entry.resolve(data.report ?? unreadableSignatureReport('signature worker returned no report'));
+        entry.resolve(data.report ?? notCheckedSignatureReport('viewer-error', 'signature worker returned no report'));
       } else {
-        entry.reject(new Error(data.error || 'signature worker failure'));
+        entry.reject(new InspectionError(data.error || 'signature worker failure', 'viewer-error'));
       }
     };
     worker.onerror = (event) => {
@@ -87,7 +97,7 @@ function runInWorker(handle, bytes, timeoutMs, transfer) {
     let settled = false;
     const timer = setTimeout(() => {
       if (settled) return;
-      markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);
+      markBroken(handle, `signature worker timeout after ${timeoutMs} ms`, 'timeout');
     }, timeoutMs);
     handle.pending.set(id, {
       resolve: (value) => {
@@ -139,12 +149,15 @@ async function toBytes(source) {
  */
 export async function getDocumentSignatures(source, options = {}) {
   const sourceSize = source?.size ?? source?.byteLength;
-  if (sourceSize > 64 * 1024 * 1024) return unreadableSignatureReport('PDF exceeds the 64 MiB signature inspection limit');
+  if (sourceSize > 64 * 1024 * 1024) {
+    return notCheckedSignatureReport('inspection-limit', 'PDF exceeds the 64 MiB signature inspection limit');
+  }
   let bytes;
   try {
     bytes = await toBytes(source);
-  } catch {
-    return EMPTY_REPORT;
+  } catch (err) {
+    // Fail closed: a read error must never present a signed document as unsigned.
+    return notCheckedSignatureReport('viewer-error', `PDF bytes cannot be read: ${String(err?.message ?? err)}`);
   }
   const timeoutMs = Number.isFinite(options.timeoutMs) && options.timeoutMs > 0 ? options.timeoutMs : 30000;
   if (canUseWorker()) {
@@ -153,18 +166,18 @@ export async function getDocumentSignatures(source, options = {}) {
       try {
         return await runInWorker(handle, bytes, timeoutMs, options.transfer === true);
       } catch (err) {
-        return unreadableSignatureReport(String(err?.message ?? err));
+        return notCheckedSignatureReport(err?.code === 'timeout' ? 'timeout' : 'viewer-error', String(err?.message ?? err));
       }
     }
-    return unreadableSignatureReport('signature worker is unavailable');
+    return notCheckedSignatureReport('viewer-error', 'signature worker is unavailable');
   }
   if (bytes.byteLength > 256 * 1024) {
-    return unreadableSignatureReport('PDF exceeds the 256 KiB inline signature inspection limit; a Worker is required');
+    return notCheckedSignatureReport('inspection-limit', 'PDF exceeds the 256 KiB inline signature inspection limit; a Worker is required');
   }
   try {
     return await collectPdfSignatures(bytes);
   } catch (err) {
-    return unreadableSignatureReport(String(err?.message ?? err));
+    return notCheckedSignatureReport('viewer-error', String(err?.message ?? err));
   }
 }
 

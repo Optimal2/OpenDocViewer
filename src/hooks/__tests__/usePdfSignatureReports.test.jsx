@@ -143,7 +143,7 @@ describe('usePdfSignatureReports', () => {
     container.remove();
   });
 
-  it('stores an unreadable report when the source bytes are unavailable', async () => {
+  it('stores a not-checked (viewer-error) report when the source bytes are unavailable', async () => {
     const readSourceArrayBuffer = vi.fn().mockResolvedValue(null);
     const { root, container, probe } = await renderProbe({
       allPages: [pdfPage('src-a')],
@@ -152,7 +152,8 @@ describe('usePdfSignatureReports', () => {
     });
     await flushMicrotasks();
     expect(getDocumentSignatures).not.toHaveBeenCalled();
-    expect(probe.reports['src-a'].signatures[0].integrity).toBe('unreadable');
+    expect(probe.reports['src-a'].signatures[0].integrity).toBe('not-checked-in-viewer');
+    expect(probe.reports['src-a'].signatures[0].integrityCode).toBe('viewer-error');
     await act(() => root.unmount());
     container.remove();
   });

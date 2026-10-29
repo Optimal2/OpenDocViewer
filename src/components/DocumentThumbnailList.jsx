@@ -58,6 +58,8 @@ import SignatureStatusBadge from './SignatureStatusBadge.jsx';
  * @property {boolean} fullyRenderOffscreenRows
  * @property {(*|null)} signatureReport - Signature report of this row's file; drives the page symbol.
  * @property {boolean} showSignatureBadge - True when the per-page symbol is enabled (runtime config).
+ * @property {(string|null)} [signatureSeverity] Precomputed severity of this row's file (with the site
+ * `uncheckedSeverity` switch applied), from the signed-document entries.
  * @property {(*|null)} documentSignatures - Signed-document entry of this row's document; drives the
  * document symbol next to the "DOK n" label on the document's first row.
  * @property {(function(string, HTMLElement=): boolean|undefined)} [onOpenSignatures]
@@ -387,6 +389,7 @@ function DocumentBoundaryHeader({ documentContext, documentSignatures = null, on
         <SignatureStatusBadge
           variant="document"
           report={documentSignatures}
+          severity={documentSignatures.severity}
           onOpen={(element) => onOpenSignatures(String(documentSignatures.signedFiles?.[0]?.sourceKey || ''), element)}
         />
       ) : null}
@@ -432,6 +435,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   fullyRenderOffscreenRows,
   signatureReport = null,
   showSignatureBadge = false,
+  signatureSeverity = null,
   documentSignatures = null,
   onOpenSignatures,
   documentHeaderHidden = false,
@@ -591,6 +595,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           <SignatureStatusBadge
             variant="thumbnail"
             report={signatureReport}
+            severity={signatureSeverity}
             onOpen={(element) => onOpenSignatures(String(page?.sourceKey || ''), element)}
           />
         ) : null}
@@ -680,6 +685,11 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const pageSignatureBadgeEnabled = useMemo(() => isSignatureThumbnailPageBadgeEnabled(), []);
   const signatureDocumentsByKey = useMemo(
     () => new Map((Array.isArray(signatureDocuments) ? signatureDocuments : []).map((doc) => [doc.key, doc])),
+    [signatureDocuments]
+  );
+  const signatureSeverityBySourceKey = useMemo(
+    () => new Map((Array.isArray(signatureDocuments) ? signatureDocuments : [])
+      .flatMap((doc) => doc.files.map((file) => [file.sourceKey, file.severity]))),
     [signatureDocuments]
   );
   const activeConfig = documentLoadingConfig || fallbackConfig;
@@ -1370,6 +1380,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         fullyRenderOffscreenRows={fullyRenderOffscreenRows}
         signatureReport={rowSignatureReport}
         showSignatureBadge={pageSignatureBadgeEnabled}
+        signatureSeverity={signatureSeverityBySourceKey.get(rowSourceKey) || null}
         documentSignatures={rowDocumentSignatures}
         onOpenSignatures={onOpenSignatures}
         documentHeaderHidden={index === stickyHeaderRowIndex}
@@ -1555,6 +1566,7 @@ ThumbnailRow.propTypes = {
     signatures: PropTypes.arrayOf(PropTypes.object),
   }),
   showSignatureBadge: PropTypes.bool,
+  signatureSeverity: PropTypes.string,
   documentSignatures: PropTypes.shape({
     key: PropTypes.string,
     signatures: PropTypes.arrayOf(PropTypes.object),

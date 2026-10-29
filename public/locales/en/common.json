@@ -837,11 +837,59 @@
     },
     "integrity": {
       "intact": "Intact",
+      "notCheckedInViewer": "Not checked in the viewer",
+      "indeterminate": "Could not be determined",
       "modifiedAfterSigning": "Modified after signing",
       "digestMismatch": "Digest mismatch",
       "signatureInvalid": "Signature invalid",
-      "unsupported": "Signature present, format not supported",
-      "unreadable": "Signature unreadable"
+      "unreadable": "Signature data is damaged"
+    },
+    "integrityCode": {
+      "format-unsupported": "The viewer cannot check this signature format.",
+      "algorithm-unsupported": "The signature uses an algorithm that this browser cannot check.",
+      "inspection-limit": "The document or the signature is too large or too complex to check in the viewer.",
+      "timeout": "The check took too long and was stopped.",
+      "structure-unsupported": "The file uses a structure the viewer cannot read, so the signature was not checked.",
+      "encrypted": "The document is encrypted, so the signature cannot be checked in the viewer.",
+      "viewer-error": "The signature check in the viewer could not run.",
+      "unexpected-error": "Something unexpected happened during the check, so the result is uncertain.",
+      "key-import-failed": "The browser could not use the certificate's key, so the result is uncertain.",
+      "content-changed-after-signing": "The content of the document was changed after it was signed.",
+      "unclassified-change-after-signing": "The document was changed after signing, and the viewer cannot tell whether the change is harmless.",
+      "extended-with-validation-data": "The document was extended after signing, but only with validation information.",
+      "extended-by-later-signature": "The document was extended after signing by a later signature.",
+      "contents-missing": "The signature value is missing.",
+      "byte-range-invalid": "The signature does not cover the document correctly.",
+      "cms-malformed": "The signature data is damaged and cannot be read.",
+      "cms-content-mismatch": "The signature data does not match the signature type.",
+      "message-digest-attribute": "The signature lacks the required fingerprint of the content.",
+      "signer-certificate-missing": "The signer's certificate is missing from the signature.",
+      "content-digest-mismatch": "The content does not match what was signed.",
+      "document-digest-mismatch": "The document does not match what was signed.",
+      "signature-invalid": "The signature does not match the signer's certificate."
+    },
+    "signingTimeCheck": {
+      "withinValidity": "Signed while the certificate was valid",
+      "outsideValidity": "Signed outside the certificate's validity period",
+      "timestampInvalid": "The signature timestamp could not be confirmed",
+      "notChecked": "The signing time was not checked against the certificate's validity period"
+    },
+    "signingTimeCode": {
+      "signed-before-certificate-valid": "Signed before the certificate became valid",
+      "signed-after-certificate-expired": "Signed after the certificate had expired",
+      "timestamp-invalid": "The signature timestamp does not match or could not be confirmed",
+      "signing-time-unknown": "No signing time is recorded, so it was not checked against the certificate's validity period",
+      "certificate-dates-unreadable": "The certificate's validity dates could not be read, so the signing time was not checked",
+      "no-certificate": "No certificate could be read, so the signing time was not checked"
+    },
+    "checks": {
+      "heading": "Checked and passed",
+      "contentUnchanged": "The signed content is unchanged since signing",
+      "signatureMatches": "The signature matches the signer's certificate"
+    },
+    "signerSource": {
+      "pdfName": "Name from the PDF, not verified",
+      "unverifiedCertificate": "Name from the certificate; the signature was not confirmed"
     },
     "kind": {
       "approval": "Approval",

@@ -28,6 +28,7 @@ describe('pdfSignatureInspector (node fallback path)', () => {
     const report = await getDocumentSignatures(fixtures['valid-rsa.pdf']);
     expect(report.signatures).toHaveLength(1);
     expect(report.signatures[0].integrity).toBe('intact');
+    expect(report.signatures[0].integrityCode).toBeNull();
   });
 
   it('accepts ArrayBuffer and Blob sources', async () => {
@@ -40,11 +41,30 @@ describe('pdfSignatureInspector (node fallback path)', () => {
     expect(fromBlob.signatures[0].fieldName).toBe('Sign2');
   });
 
-  it('never rejects: garbage and null sources resolve to an empty report', async () => {
+  it('never rejects: garbage bytes resolve to an empty report', async () => {
     const { getDocumentSignatures } = await import('../pdfSignatureInspector.js');
     expect(await getDocumentSignatures(new Uint8Array([9, 9, 9]))).toEqual({ signatures: [] });
-    expect(await getDocumentSignatures(null)).toEqual({ signatures: [] });
-    expect(await getDocumentSignatures(undefined)).toEqual({ signatures: [] });
+  });
+
+  it('I2 fails closed: unreadable sources become not-checked placeholders, never "no signatures"', async () => {
+    const { getDocumentSignatures } = await import('../pdfSignatureInspector.js');
+    const failingBlob = new Blob([fixtures['valid-rsa.pdf']], { type: 'application/pdf' });
+    failingBlob.arrayBuffer = () => Promise.reject(new Error('read failed'));
+    for (const source of [null, undefined, 'not bytes', { length: 3 }, failingBlob]) {
+      const report = await getDocumentSignatures(source);
+      expect(report.signatures).toHaveLength(1);
+      expect(report.signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'viewer-error' });
+    }
+  });
+
+  it('I7 an inline inspection that throws is not checked (viewer-error)', async () => {
+    vi.doMock('../pdfSignatures.js', async (load) => ({
+      ...await load(), collectPdfSignatures: async () => { throw new Error('inline boom'); }
+    }));
+    const { getDocumentSignatures } = await import('../pdfSignatureInspector.js');
+    const report = await getDocumentSignatures(new Uint8Array([1, 2, 3]));
+    expect(report.signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'viewer-error' });
+    vi.doUnmock('../pdfSignatures.js');
   });
 });
 
