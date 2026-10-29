@@ -1,0 +1,25 @@
+{
+  "//": "Fictional example site profile. Used by the round-trip test in site-config-generator.test.mjs.",
+  "name": "Example Hospital",
+  "description": "EXAMPLE-TEST environment of the fictional Example Hospital (viewer.example.org).",
+  "set": {
+    "i18n.default": "en",
+    "viewer.defaultZoomMode": "fit-page",
+    "viewer.customFitWidthFactorPercent": null,
+    "viewer.problemNotice.message.en": "The document session may have expired. Open the document again from the Example Hospital records system.",
+    "shortcuts.print.ctrlOrCmdP": "browser",
+    "print.defaultPageMode": "all",
+    "print.pdf.allowDownload": true,
+    "print.pdf.filename": "example-hospital-print.pdf",
+    "compare.overlay.print.enabled": true,
+    "compare.curtain.enabled": true,
+    "documentLoading.fetch.prefetchRetryCount": 2,
+    "documentLoading.renderBenchmark.workerCounts": [0, 4],
+    "help.about.contactEmail": "viewer-support@example.org",
+    "+theme.bridge": { "allowedOrigins": ["https://viewer.example.org"] }
+  },
+  "unset": [
+    "showPerfOverlay",
+    "print.preparationNoticeThresholdPages"
+  ]
+}
