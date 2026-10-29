@@ -46,6 +46,9 @@ const mutations = [
   ['Unverified timestamp accepted as signing time', parser, 'if (!imprintMatches || !tst.genTime) {',
     'if (!tst.genTime) {', signingTimeTests, 'wrong imprint'],
   // Appended-revision classifier (docs-src/pdf-signatures.md "Appended revisions").
+  ['Active signed xref chain reverted to last physical section wins', revisions,
+    'const preSections = activeXrefChain(physicalPreSections, signedSection, pdfLib);',
+    'const preSections = [...physicalPreSections].reverse();', revisionTests, 'unlinked decoy'],
   ['Xref consistency check removed', revisions, 'assertXrefConsistent(log, E, tail, preSections, pre, tailRecords);', '',
     revisionTests, 'shadow object'],
   ['Deleted entries ignored', revisions, "if (target === 'free' && inUseAtE(n))", 'if (false)', revisionTests, 'deletes a live object'],

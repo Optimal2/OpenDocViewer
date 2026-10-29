@@ -24,7 +24,7 @@ const ICON_BY_SEVERITY = {
 
 /**
  * @param {Object} props
- * @param {({ documentCount:number, signatureCount:number, severity:('ok'|'warning'|'error') }|null)} props.summary
+ * @param {({ documentCount:number, signatureCount:number, severity:('ok'|'warning'|'error'), worstIntegrity:string }|null)} props.summary
  * Totals from summarizeSignatureDocuments(); null renders nothing.
  * @param {function(HTMLElement): void} props.onOpen Called with the button so focus can return to it.
  * @returns {(React.ReactElement|null)}
@@ -34,10 +34,13 @@ export default function SignatureOverviewButton({ summary, onOpen }) {
   const documentCount = Math.max(0, Number(summary?.documentCount) || 0);
   if (!summary || documentCount <= 0) return null;
   const severity = ICON_BY_SEVERITY[summary.severity] ? summary.severity : 'error';
-  const label = t('signatures.overview.buttonAriaLabel', {
+  const baseLabel = t('signatures.overview.buttonAriaLabel', {
     count: documentCount,
     defaultValue: `Signatures: ${documentCount} signed ${documentCount === 1 ? 'document' : 'documents'} – show overview`,
   });
+  const label = summary.worstIntegrity === 'not-checked-in-viewer'
+    ? `${baseLabel} — ${t('signatures.integrity.notCheckedInViewer', { defaultValue: 'Not checked in the viewer' })}`
+    : baseLabel;
 
   return (
     <button
@@ -58,6 +61,7 @@ SignatureOverviewButton.propTypes = {
     documentCount: PropTypes.number,
     signatureCount: PropTypes.number,
     severity: PropTypes.oneOf(['ok', 'warning', 'error']),
+    worstIntegrity: PropTypes.string,
   }),
   onOpen: PropTypes.func.isRequired,
 };

@@ -58,10 +58,13 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
   const shownSeverity = Object.hasOwn(ICON_BY_SEVERITY, String(severity))
     ? severity : getReportSignatureSeverity(report.signatures, { uncheckedSeverity });
   const timeWarning = getSigningTimeWarningSignature(report.signatures);
-  const label = t('signatures.badge.ariaLabel', {
+  const baseLabel = t('signatures.badge.ariaLabel', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'}`,
   });
+  const label = integrity === 'not-checked-in-viewer'
+    ? `${baseLabel} — ${getIntegrityLabel(t, integrity)}`
+    : baseLabel;
   const tooltip = t('signatures.badge.tooltip', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'} – show signature details`,

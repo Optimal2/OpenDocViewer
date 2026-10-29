@@ -100,6 +100,9 @@ describe('appended revisions that change content -> warning', () => {
 
 describe('appended revisions that cannot be classified with certainty -> warning', () => {
   it.each([
+    ['an unlinked decoy xref table re-points an object without appending a definition', 'unlinkedDecoyXrefTable', /outside the active \/Prev chain/],
+    ['an unlinked decoy xref stream re-points an object without appending a definition', 'unlinkedDecoyXrefStream', /outside the active \/Prev chain/],
+    ['any pre-E xref section outside the active chain fails closed', 'unlinkedPreSection', /outside the active \/Prev chain/],
     ['shadow object: the xref points at a changed definition, pdf-lib keeps a later identical one', 'shadowObject', /not listed|does not point/],
     ['/Prev does not chain to the signed revision', 'prevOverride', /Prev chain/],
     ['/XRefStm in an appended trailer', 'xrefStmInTail', /XRefStm/],

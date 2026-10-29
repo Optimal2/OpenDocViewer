@@ -104,12 +104,19 @@ const HASH_OID_TO_NAME = new Map([
 ]);
 
 const RSA_PKCS1_OIDS = new Set([
-  '1.2.840.113549.1.1.1', // rsaEncryption
+  '1.2.840.113549.1.1.1', // rsaEncryption: generic; digestAlgorithm selects the hash
   '1.2.840.113549.1.1.5', // sha1WithRSAEncryption
   '1.2.840.113549.1.1.11', // sha256WithRSAEncryption
   '1.2.840.113549.1.1.12', // sha384WithRSAEncryption
   '1.2.840.113549.1.1.13', // sha512WithRSAEncryption
   '1.2.840.113549.1.1.14' // sha224WithRSAEncryption
+]);
+const RSA_PKCS1_HASH_BY_OID = new Map([
+  ['1.2.840.113549.1.1.5', 'SHA-1'],
+  ['1.2.840.113549.1.1.11', 'SHA-256'],
+  ['1.2.840.113549.1.1.12', 'SHA-384'],
+  ['1.2.840.113549.1.1.13', 'SHA-512'],
+  ['1.2.840.113549.1.1.14', 'SHA-224']
 ]);
 const OID_RSA_PSS = '1.2.840.113549.1.1.10';
 const OID_EC_PUBLIC_KEY = '1.2.840.10045.2.1';
@@ -754,6 +761,18 @@ async function verifySignedDataStructure(contentInfoDer, options, pkijsLib, asn1
     return signedDataFailure('not-checked-in-viewer', 'algorithm-unsupported',
       `signature present, digest algorithm not supported: ${digestOid}`, cert);
   }
+  // Preserve the viewer-limit boundary for a known hash WebCrypto cannot use
+  // (SHA-224), including direct CMS signatures without signed attributes.
+  if (!WEBCRYPTO_HASHES.has(hashName)) {
+    return signedDataFailure('not-checked-in-viewer', 'algorithm-unsupported',
+      `signature present, digest algorithm not supported by WebCrypto: ${hashName}`, cert);
+  }
+  const sigAlgOid = signerInfo.signatureAlgorithm?.algorithmId;
+  const pkcs1Hash = RSA_PKCS1_HASH_BY_OID.get(sigAlgOid) ?? null;
+  if (pkcs1Hash && pkcs1Hash !== hashName) {
+    return signedDataFailure('unreadable', 'cms-content-mismatch',
+      `CMS signatureAlgorithm (${sigAlgOid}) and digestAlgorithm (${digestOid}) bind different hashes`, cert);
+  }
 
   const eContentType = signedData.encapContentInfo?.eContentType;
   const eContentBytes = attrRawBytesOfElement(signedData.encapContentInfo?.eContent);
@@ -786,7 +805,6 @@ async function verifySignedDataStructure(contentInfoDer, options, pkijsLib, asn1
     }
   }
 
-  const sigAlgOid = signerInfo.signatureAlgorithm?.algorithmId;
   let signedRegion;
   if (signerInfo.signedAttrs?.encodedValue?.byteLength) {
     signedRegion = signerInfo.signedAttrs.encodedValue; // pkijs patched tag to SET OF
@@ -802,7 +820,7 @@ async function verifySignedDataStructure(contentInfoDer, options, pkijsLib, asn1
   let verified;
   try {
     verified = await verifyCmsSignature(pkijsLib, asn1jsLib, {
-      cert, signerInfo, sigAlgOid, hashName, signatureBytes, signedRegion
+      cert, signerInfo, sigAlgOid, hashName: pkcs1Hash ?? hashName, signatureBytes, signedRegion
     });
   } catch (err) {
     const detail = `signature cannot be verified in this environment: ${String(err?.message ?? err)}`;

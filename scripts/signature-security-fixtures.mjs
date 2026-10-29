@@ -322,10 +322,21 @@ export async function createSecurityFixtures() {
       SubFilter: PDFName.of('adbe.pkcs7.detached'), ByteRange: [0, 4, 8, 4], Contents: PDFHexString.of('deadbeef') }));
   }
   const tooManySignatures = await manyDoc.save({ useObjectStreams: false });
+  // The CMS bytes still verify under SHA-256; only the algorithm identifiers differ.
+  const pkcs1MismatchedOids = await rewriteCms(valid, (_sd, signerInfo) => {
+    signerInfo.signatureAlgorithm = new pkijs.AlgorithmIdentifier({
+      algorithmId: '1.2.840.113549.1.1.13', algorithmParams: new asn1js.Null()
+    });
+  });
+  const pkcs1GenericRsa = await rewriteCms(valid, (_sd, signerInfo) => {
+    signerInfo.signatureAlgorithm = new pkijs.AlgorithmIdentifier({
+      algorithmId: '1.2.840.113549.1.1.1', algorithmParams: new asn1js.Null()
+    });
+  });
 
   return { normal, revisions: await createRevisionFixtures(normal, pki), noDigest, direct, wrongIssuer, unknownSerial, serialCollision, fakeLater, maliciousLater, wide, decoy,
     unknownDigest, sha224Digest, unknownSignatureAlgorithm, unknownCurve, badEcKey, timestampUnknownImprint,
-    oversizedCms, encrypted, structureFilterChain, structureFilterUnknown, tooManySignatures,
+    oversizedCms, encrypted, structureFilterChain, structureFilterUnknown, tooManySignatures, pkcs1MismatchedOids, pkcs1GenericRsa,
     ski: await skiFixture(), skiExtension: await skiFixture(false, true), wrongSki: await skiFixture(true),
     escaped: await escapedOrCompressed(false), compressed: await escapedOrCompressed(true) };
 }

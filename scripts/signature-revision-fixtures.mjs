@@ -50,7 +50,7 @@ export function dssObjects({ certs = '[21 0 R]' } = {}) {
  */
 export function appendRevision(base, defs, {
   xrefStream = false, compress = false, objStm = [], free = [], prevOverride = null,
-  xrefPoint = {}, offsetShift = {}, trailerExtras = '', info = '/Info 9 0 R', objStmNum = null
+  xrefPoint = {}, preXrefPoint = {}, offsetShift = {}, trailerExtras = '', info = '/Info 9 0 R', objStmNum = null
 } = {}) {
   const prev = prevOverride ?? findStartxrefOffset(base);
   let text = '\n';
@@ -65,6 +65,7 @@ export function appendRevision(base, defs, {
   const entries = new Map(); // num -> {type, a, b}
   direct.forEach((d, i) => entries.set(d.num, { type: 1, a: offsets[i], b: d.gen ?? 0 }));
   for (const [num, index] of Object.entries(xrefPoint)) entries.set(Number(num), { type: 1, a: offsets[index], b: 0 });
+  for (const [num, offset] of Object.entries(preXrefPoint)) entries.set(Number(num), { type: 1, a: offset, b: 0 });
   for (const [num, delta] of Object.entries(offsetShift)) entries.get(Number(num)).a += delta;
   const maxNum = Math.max(9, ...defs.map((d) => d.num));
   let streamNum = maxNum + 1;
@@ -148,6 +149,31 @@ async function signBuilder(pki, builder) {
   const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
   return signFile(rev.bytes, rev.offsets.get(8), (signedOverBytes) =>
     buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes }));
+}
+
+/**
+ * Sign a file whose active xref points at the original object 6 while an
+ * unlinked decoy section points at a later, different definition of object 6.
+ * The decoy and both definitions are inside the real CMS signature's range.
+ */
+async function signWithUnlinkedDecoy(pki, kind, content) {
+  const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
+    sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
+  const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
+  const maliciousOffset = rev.bytes.length + 1;
+  const withShadow = concatBytes(rev.bytes, latin1(`\n6 0 obj\n${stream(content)}\nendobj\n`));
+  let decoy;
+  if (kind === 'table') {
+    decoy = latin1(`\nxref\n6 1\n${String(maliciousOffset).padStart(10, '0')} 00000 n \ntrailer\n<< /Size 10 /Root 1 0 R >>\n`);
+  } else {
+    const row = [1, (maliciousOffset >>> 24) & 255, (maliciousOffset >>> 16) & 255,
+      (maliciousOffset >>> 8) & 255, maliciousOffset & 255, 0, 0];
+    const binary = String.fromCharCode(...row);
+    decoy = latin1(`\n30 0 obj\n<< /Type /XRef /Size 31 /W [1 4 2] /Index [6 1] /Root 1 0 R /Length 7 >>\nstream\n${binary}\nendstream\nendobj\n`);
+  }
+  const bytes = await signFile(concatBytes(withShadow, decoy), rev.offsets.get(8), (signedOverBytes) =>
+    buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes }));
+  return { bytes, maliciousOffset, prev: rev.xrefOffset };
 }
 
 /**
@@ -237,6 +263,18 @@ export async function createRevisionFixtures(normal, pki) {
   f.freeLiveObjectXrefStream = appendRevision(signed, dss, { ...xs, free: [6] }).bytes;
 
   // --- unclassifiable (warning) ------------------------------------------------------
+  // No object definitions are appended in these two attacks: only the xref entry
+  // changes which already-signed definition pdf.js resolves for object 6.
+  const decoyTable = await signWithUnlinkedDecoy(pki, 'table', content);
+  f.unlinkedDecoyXrefTable = appendRevision(decoyTable.bytes, [], {
+    preXrefPoint: { 6: decoyTable.maliciousOffset }, prevOverride: decoyTable.prev
+  }).bytes;
+  const decoyStream = await signWithUnlinkedDecoy(pki, 'stream', content);
+  f.unlinkedDecoyXrefStream = appendRevision(decoyStream.bytes, [], {
+    preXrefPoint: { 6: decoyStream.maliciousOffset }, prevOverride: decoyStream.prev
+  }).bytes;
+  // Even a harmless DSS tail must fail closed when a pre-E section is unlinked.
+  f.unlinkedPreSection = appendDssRevision(decoyTable.bytes, { prevOverride: decoyTable.prev });
   // Shadow object: the xref points at a changed definition of 6, pdf-lib keeps the later
   // byte-identical one. Without the xref consistency check this would look like DSS only.
   f.shadowObject = appendRevision(signed, [

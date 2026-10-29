@@ -18,7 +18,8 @@
  *   `unclassified-change-after-signing`.
  *
  * pdf-lib resolves "the last physical definition wins" while pdf.js follows
- * the cross-reference offsets. The cross-reference consistency check makes
+ * the signed revision's active /Prev chain, nearest entry first. The
+ * cross-reference consistency check rejects unlinked pre-E sections and makes
  * both views agree before any object is compared, so a shadow object cannot
  * make a content change look harmless. Rules: docs-src/pdf-signatures.md
  * "Appended revisions".
@@ -236,11 +237,11 @@ function classify(log, E, pdfLib) {
   }
   const signedStartxref = log.startxrefs.filter((s) => s.at < E).at(-1);
   if (!signedStartxref) stop('the signed revision has no startxref');
-  const preSections = sections.filter((s) => s.offset < E);
+  const physicalPreSections = sections.filter((s) => s.offset < E);
   const tail = sections.filter((s) => s.offset >= E);
-  const signedSection = preSections.find((s) => s.offset === signedStartxref.value);
+  const signedSection = physicalPreSections.find((s) => s.offset === signedStartxref.value);
   if (!signedSection) stop('the signed revision startxref does not point at a cross-reference section');
-  if (preSections.some((s) => s.error)) stop('a signed cross-reference stream cannot be decoded');
+  if (physicalPreSections.some((s) => s.error)) stop('a signed cross-reference stream cannot be decoded');
   if (!tail.length) stop('no cross-reference section was appended after the signed range');
   if (log.trailers.some((t) => t.offset >= E && !t.section)) stop('an appended trailer does not belong to a cross-reference table');
   const tailStartxrefs = log.startxrefs.filter((s) => s.at >= E);
@@ -260,6 +261,7 @@ function classify(log, E, pdfLib) {
     if (trailer.has(name('Encrypt'))) stop('an appended trailer adds /Encrypt');
   });
   if (!(signedSection.trailer instanceof PDFDict)) stop('the signed revision has no trailer');
+  const preSections = activeXrefChain(physicalPreSections, signedSection, pdfLib);
   const rootNum = refNum(signedSection.trailer.get(name('Root')));
   if (rootNum === null) stop('the signed revision trailer has no /Root reference');
   for (const section of tail) {
@@ -479,6 +481,41 @@ function revisionMaps(log, E) {
 }
 
 /**
+ * Return the signed revision's active cross-reference sections, newest first.
+ * pdf.js follows only this chain and keeps the nearest entry per object. Any
+ * physically parsed pre-E section outside it is rejected: otherwise an
+ * unlinked decoy could choose the definition used by the comparison below.
+ */
+function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
+  const { PDFDict, PDFName, PDFNumber } = pdfLib;
+  const byOffset = new Map();
+  for (const section of physicalPreSections) {
+    if (byOffset.has(section.offset)) stop(`multiple signed cross-reference sections start at offset ${section.offset}`);
+    byOffset.set(section.offset, section);
+  }
+  const active = [];
+  const activeSet = new Set();
+  let section = signedSection;
+  while (section) {
+    if (activeSet.has(section)) stop('the signed revision /Prev chain contains a cycle');
+    active.push(section);
+    activeSet.add(section);
+    if (!(section.trailer instanceof PDFDict)) stop('a signed cross-reference section has no trailer');
+    const prev = section.trailer.get(PDFName.of('Prev'));
+    if (prev === undefined) break;
+    if (!(prev instanceof PDFNumber) || !Number.isSafeInteger(prev.asNumber()) || prev.asNumber() < 0) {
+      stop('the signed revision has an invalid /Prev entry');
+    }
+    const previous = byOffset.get(prev.asNumber());
+    if (!previous || previous.offset >= section.offset) stop('the signed revision /Prev chain is broken');
+    section = previous;
+  }
+  const outside = physicalPreSections.find((candidate) => !activeSet.has(candidate));
+  if (outside) stop(`cross-reference section at offset ${outside.offset} before signing is outside the active /Prev chain`);
+  return active;
+}
+
+/**
  * Step 2 (mandatory, design flag F-a): every appended cross-reference entry
  * must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib
  * (last definition) see the same objects. A deleted entry for an object in use
@@ -488,7 +525,9 @@ function assertXrefConsistent(log, E, tail, preSections, pre, tailRecords) {
   const tailStructural = log.structural.filter((c) => c.start >= E);
   const preStreamNums = new Set(log.structural.filter((c) => c.start < E && c.type === 'ObjStm').map((c) => c.num));
   const preEntry = new Map();
-  for (const section of preSections) for (const e of section.entries) preEntry.set(e.num, e);
+  for (const section of preSections) {
+    for (const e of section.entries) if (!preEntry.has(e.num)) preEntry.set(e.num, e);
+  }
   const inUseAtE = (n) => pre.has(n) || preStreamNums.has(n);
 
   // pdf.js resolves a type-2 entry through whatever the newest entry for the

@@ -29484,7 +29484,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 218,
+    "line": 220,
     "description": "",
     "params": [
       {
@@ -29540,7 +29540,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 231,
+    "line": 233,
     "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
     "params": [
       {
@@ -29571,7 +29571,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureDocuments.js",
-    "line": 246,
+    "line": 248,
     "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
     "params": [
       {
@@ -29818,13 +29818,26 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureRevisions~activeXrefChain",
+    "name": "activeXrefChain",
+    "longname": "module:utils/pdfSignatureRevisions~activeXrefChain",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatureRevisions.js",
+    "line": 489,
+    "description": "Return the signed revision's active cross-reference sections, newest first.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureRevisions~assertXrefConsistent",
     "name": "assertXrefConsistent",
     "longname": "module:utils/pdfSignatureRevisions~assertXrefConsistent",
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 487,
+    "line": 524,
     "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
     "params": [],
     "returns": [],
@@ -29837,7 +29850,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 212,
+    "line": 213,
     "description": "Classify the unsigned data appended after a signature's covered range.",
     "params": [
       {
@@ -29874,7 +29887,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 595,
+    "line": 634,
     "description": "Every object number referenced directly by the given objects (no resolution).",
     "params": [],
     "returns": [],
@@ -29887,7 +29900,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 52,
+    "line": 53,
     "description": "Create an empty revision log.",
     "params": [],
     "returns": [],
@@ -29900,7 +29913,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 618,
+    "line": 657,
     "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
     "params": [
       {
@@ -29937,7 +29950,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 39,
+    "line": 40,
     "description": "Keys a new document-timestamp field (merged with its widget) may carry.",
     "params": [],
     "returns": [],
@@ -29950,7 +29963,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 41,
+    "line": 42,
     "description": "Keys a separate widget of a new document-timestamp field may carry.",
     "params": [],
     "returns": [],
@@ -29963,7 +29976,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 37,
+    "line": 38,
     "description": "Catalog entries an unsigned update may add or change without touching content.",
     "params": [],
     "returns": [],
@@ -29976,7 +29989,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 95,
+    "line": 96,
     "description": "Install the revision-log hooks on a pdf-lib PDFParser INSTANCE (never on a prototype).",
     "params": [
       {
@@ -30002,7 +30015,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 75,
+    "line": 76,
     "description": "Called by the structural-stream decoder for a top-level ObjStm/XRef stream.",
     "params": [
       {
@@ -30040,7 +30053,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 573,
+    "line": 612,
     "description": "Object numbers reachable from values through map (final state), capped.",
     "params": [],
     "returns": [],
@@ -30053,7 +30066,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 466,
+    "line": 468,
     "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
     "params": [],
     "returns": [],
@@ -30066,7 +30079,7 @@
     "kind": "typedef",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 29,
+    "line": 30,
     "description": "",
     "params": [],
     "returns": [],
@@ -30092,7 +30105,7 @@
     "kind": "class",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 195,
+    "line": 196,
     "description": "",
     "params": [
       {
@@ -30112,7 +30125,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1439,
+    "line": 1457,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -30137,7 +30150,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 673,
+    "line": 680,
     "description": "Point size of the certificate's named curve, or null when the SPKI does not name one of the WebCrypto curves.",
     "params": [],
     "returns": [],
@@ -30150,7 +30163,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 131,
+    "line": 138,
     "description": "Structural stream filters pdf-lib's decodePDFRawStream can decode.",
     "params": [],
     "returns": [],
@@ -30163,7 +30176,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 327,
+    "line": 334,
     "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
     "params": [],
     "returns": [],
@@ -30176,7 +30189,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1227,
+    "line": 1245,
     "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
     "params": [
       {
@@ -30207,7 +30220,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1216,
+    "line": 1234,
     "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
     "params": [
       {
@@ -30238,7 +30251,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1261,
+    "line": 1279,
     "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
     "params": [
       {
@@ -30270,7 +30283,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1205,
+    "line": 1223,
     "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
     "params": [
       {
@@ -30301,7 +30314,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 659,
+    "line": 666,
     "description": "Dotted OID of an asn1js ObjectIdentifier (or raw OID element), else null.",
     "params": [],
     "returns": [],
@@ -30314,7 +30327,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 254,
+    "line": 261,
     "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
     "params": [
       {
@@ -30391,7 +30404,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 241,
+    "line": 248,
     "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
     "params": [
       {
@@ -30416,7 +30429,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1187,
+    "line": 1205,
     "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
     "params": [
       {
@@ -30453,7 +30466,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 477,
+    "line": 484,
     "description": "",
     "params": [
       {
@@ -30491,7 +30504,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 490,
+    "line": 497,
     "description": "Classify an exception: a ViewerLimitError is not-checked-in-viewer with its own code, anything else cannot be classified and is indeterminate .",
     "params": [
       {
@@ -30536,7 +30549,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 845,
+    "line": 863,
     "description": "Compare only the selected signing time with the certificate window, never with now.",
     "params": [],
     "returns": [],
@@ -30562,7 +30575,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1113,
+    "line": 1131,
     "description": "Verify the CMS signature value with WebCrypto.",
     "params": [],
     "returns": [
@@ -30580,7 +30593,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 903,
+    "line": 921,
     "description": "Verify the unsigned id-aa-signatureTimeStampToken attribute, when present.",
     "params": [],
     "returns": [],
@@ -30593,7 +30606,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 719,
+    "line": 726,
     "description": "Parse and verify one CMS SignedData structure.",
     "params": [],
     "returns": [],
@@ -30606,7 +30619,7 @@
     "kind": "class",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 139,
+    "line": 146,
     "description": "A check the viewer could not perform because of its own limits (budget, missing algorithm, failing machinery), with no evidence of a defect.",
     "params": [
       {
@@ -30626,7 +30639,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 129,
+    "line": 136,
     "description": "Hash names WebCrypto implements.",
     "params": [],
     "returns": [],

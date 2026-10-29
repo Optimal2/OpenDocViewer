@@ -8,6 +8,7 @@ import en from '../../../public/locales/en/common.json';
 import sv from '../../../public/locales/sv/common.json';
 import SignatureDetailsDialog from '../SignatureDetailsDialog.jsx';
 import SignatureStatusBadge from '../SignatureStatusBadge.jsx';
+import SignatureOverviewButton from '../SignatureOverviewButton.jsx';
 
 let root, container, i18n;
 beforeEach(async () => {
@@ -42,6 +43,29 @@ it.each([
 it('badge never hides an integrity failure', async () => {
   await render(SignatureStatusBadge, [{ integrity: 'intact' }, { integrity: 'digest-mismatch' }]);
   expect(container.querySelector('button').className).toContain('--error');
+});
+
+it.each(['en', 'sv'])('badge and overview accessible names disclose not-checked signatures in %s', async (language) => {
+  await i18n.changeLanguage(language);
+  const expected = (language === 'sv' ? sv : en).signatures.integrity.notCheckedInViewer;
+  await act(async () => {
+    root.render(createElement(I18nextProvider, { i18n },
+      createElement(SignatureStatusBadge, {
+        report: { signatures: [{ integrity: 'not-checked-in-viewer' }] }, onOpen: () => {}
+      }),
+      createElement(SignatureOverviewButton, {
+        summary: { documentCount: 1, signatureCount: 1, severity: 'ok', worstIntegrity: 'not-checked-in-viewer' },
+        onOpen: () => {}
+      })));
+  });
+  const buttons = container.querySelectorAll('button');
+  expect(buttons).toHaveLength(2);
+  for (const button of buttons) {
+    expect(button.getAttribute('aria-label')).toContain(expected);
+    expect(button.getAttribute('title')).toContain(expected);
+    expect(button.className).toContain('--ok');
+    expect(button.querySelector('.material-icons').textContent).toBe('verified');
+  }
 });
 
 it.each(['en', 'sv'])('dialog shows the localized information line for every signature in %s', async (language) => {

@@ -215,15 +215,18 @@ order:
    cross-reference stream that cannot be decoded (anything other than no predictor or a PNG
    predictor with 1 colour and 8 bits) makes the result unclassified.
 2. **Cross-reference consistency (mandatory).** pdf-lib keeps the last physical definition
-   of an object, pdf.js follows the cross-reference offsets. Every appended in-use entry must
-   point at an appended definition of that object at exactly that offset (or, for a type-2
-   entry, at an appended object stream that holds the object exactly once), or at the same
-   offset as the last entry before E. Every appended definition must be listed, and the
-   newest entry for an object must point at its last definition, and an appended object
-   stream may not reuse the number of an object or object stream in use at E (pdf.js
-   resolves compressed objects through the newest entry for the stream number). Otherwise
-   the result is unclassified. A deleted entry (`f` / type 0) for an object in use at E is a content
-   change; pdf-lib does not model deletions, so they are read from the recorded entries.
+   of an object, while pdf.js follows the signed revision's active `/Prev` chain and keeps
+   the nearest section's entry per object. Every parsed pre-E section must belong to that
+   chain; an unlinked decoy table or xref stream makes the result unclassified. Every
+   appended in-use entry must point at an appended definition of that object at exactly
+   that offset (or, for a type-2 entry, at an appended object stream that holds the object
+   exactly once), or at the same offset as the entry reached through the active chain.
+   Every appended definition must be listed, and the newest entry for an object must point
+   at its last definition, and an appended object stream may not reuse the number of an
+   object or object stream in use at E (pdf.js resolves compressed objects through the
+   newest entry for the stream number). Otherwise the result is unclassified. A deleted
+   entry (`f` / type 0) for an object in use at E is a content change; pdf-lib does not model
+   deletions, so they are read from the recorded entries.
 3. **Changed set.** An object is unchanged when its final definition is byte-identical to the
    definition at E (dictionary text, plus the raw bytes for streams). Generations are
    ignored. Object and xref streams are structural and never compared themselves.

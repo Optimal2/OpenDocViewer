@@ -51,6 +51,15 @@ describe('security regression proofs', () => {
     expect(tampered.integrity).toBe('signature-invalid');
     expect(tampered.integrityCode).toBe('signature-invalid');
   });
+  it('PKCS#1 accepts matching hash OIDs and generic rsaEncryption', async () => {
+    expectStatus(await first(f.normal['valid-rsa.pdf']), 'intact', null, 'ok');
+    expectStatus(await first(f.pkcs1GenericRsa), 'intact', null, 'ok');
+  });
+  it('PKCS#1 rejects signatureAlgorithm and digestAlgorithm OIDs that bind different hashes', async () => {
+    const sig = await first(f.pkcs1MismatchedOids);
+    expectStatus(sig, 'unreadable', 'cms-content-mismatch', 'error');
+    expect(sig.integrityReason).toMatch(/bind different hashes/);
+  });
   it.each(['fakeLater', 'maliciousLater'])('F3 invalid later signature cannot launder an extension: %s', async (name) => {
     const report = await collectPdfSignatures(f[name]);
     expect(report.signatures).toHaveLength(2);

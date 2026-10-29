@@ -115,6 +115,7 @@ describe('summarizeSignatureDocuments', () => {
       documentCount: 2,
       signatureCount: 2,
       severity: 'warning',
+      worstIntegrity: 'indeterminate',
     });
   });
 

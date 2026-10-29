@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 155,
-    "sourceLineCount": 62395,
-    "docletCount": 1730,
+    "sourceLineCount": 62461,
+    "docletCount": 1731,
     "documentedFileCount": 154,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -572,7 +572,7 @@
     {
       "path": "src/utils/pdfSignatureDocuments.js",
       "score": 96,
-      "lines": 255,
+      "lines": 257,
       "incomingLocalImports": 5,
       "doclets": 11,
       "summary": "Per-document aggregation of PDF signature reports.",
@@ -590,7 +590,7 @@
     {
       "path": "src/utils/pdfSignatures.js",
       "score": 90,
-      "lines": 1519,
+      "lines": 1537,
       "incomingLocalImports": 3,
       "doclets": 26,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -955,7 +955,7 @@
     {
       "name": "src/components",
       "fileCount": 18,
-      "lineCount": 8021,
+      "lineCount": 8028,
       "docletCount": 108,
       "importantFiles": [
         {
@@ -1659,8 +1659,8 @@
     {
       "name": "src/utils",
       "fileCount": 52,
-      "lineCount": 21053,
-      "docletCount": 854,
+      "lineCount": 21112,
+      "docletCount": 855,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -27379,7 +27379,7 @@
     },
     {
       "path": "src/components/SignatureOverviewButton.jsx",
-      "lines": 64,
+      "lines": 68,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "Toolbar signature overview button.",
@@ -27797,7 +27797,7 @@
     },
     {
       "path": "src/components/SignatureStatusBadge.jsx",
-      "lines": 104,
+      "lines": 107,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "Small signature symbol shown next to a document's \"DOK n\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
@@ -51042,7 +51042,7 @@
     },
     {
       "path": "src/utils/pdfSignatureDocuments.js",
-      "lines": 255,
+      "lines": 257,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": "Per-document aggregation of PDF signature reports.",
@@ -51082,17 +51082,17 @@
         {
           "name": "findSignatureDocumentBySourceKey",
           "kind": "function",
-          "line": 218
+          "line": 220
         },
         {
           "name": "getSignatureFileHeading",
           "kind": "function",
-          "line": 231
+          "line": 233
         },
         {
           "name": "getSignatureFilePages",
           "kind": "function",
-          "line": 246
+          "line": 248
         }
       ],
       "declarations": [
@@ -51129,17 +51129,17 @@
         {
           "name": "findSignatureDocumentBySourceKey",
           "kind": "function",
-          "line": 218
+          "line": 220
         },
         {
           "name": "getSignatureFileHeading",
           "kind": "function",
-          "line": 231
+          "line": 233
         },
         {
           "name": "getSignatureFilePages",
           "kind": "function",
-          "line": 246
+          "line": 248
         }
       ],
       "parseError": null,
@@ -51337,7 +51337,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 218,
+          "line": 220,
           "description": "",
           "params": [
             {
@@ -51368,7 +51368,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 231,
+          "line": 233,
           "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
           "params": [
             {
@@ -51399,7 +51399,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 246,
+          "line": 248,
           "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
           "params": [
             {
@@ -51674,203 +51674,208 @@
     },
     {
       "path": "src/utils/pdfSignatureRevisions.js",
-      "lines": 702,
+      "lines": 741,
       "extension": ".js",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 16,
       "sourceSummary": "Appended-revision classifier for PDF signatures.",
       "imports": [],
       "exports": [
         {
           "name": "createRevisionLog",
           "kind": "function",
-          "line": 52
+          "line": 53
         },
         {
           "name": "installRevisionLogHooks",
           "kind": "function",
-          "line": 95
+          "line": 96
         },
         {
           "name": "classifyAppendedRevisions",
           "kind": "function",
-          "line": 212
+          "line": 213
         },
         {
           "name": "decodeXrefStream",
           "kind": "function",
-          "line": 618
+          "line": 657
         }
       ],
       "declarations": [
         {
           "name": "createRevisionLog",
           "kind": "function",
-          "line": 52
+          "line": 53
         },
         {
           "name": "installRevisionLogHooks",
           "kind": "function",
-          "line": 95
+          "line": 96
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 103
+          "line": 104
         },
         {
           "name": "Verdict",
           "kind": "class",
-          "line": 193
+          "line": 194
         },
         {
           "name": "unclassified",
           "kind": "function",
-          "line": 197
+          "line": 198
         },
         {
           "name": "contentChanged",
           "kind": "function",
-          "line": 199
+          "line": 200
         },
         {
           "name": "stop",
           "kind": "function",
-          "line": 201
+          "line": 202
         },
         {
           "name": "classifyAppendedRevisions",
           "kind": "function",
-          "line": 212
+          "line": 213
         },
         {
           "name": "classify",
           "kind": "function",
-          "line": 224
+          "line": 225
         },
         {
           "name": "name",
           "kind": "function",
-          "line": 226
+          "line": 227
         },
         {
           "name": "refNum",
           "kind": "function",
-          "line": 227
+          "line": 228
         },
         {
           "name": "str",
           "kind": "function",
-          "line": 228
+          "line": 229
         },
         {
           "name": "resolve",
           "kind": "function",
-          "line": 284
+          "line": 286
         },
         {
           "name": "resolveArray",
           "kind": "function",
-          "line": 285
+          "line": 287
         },
         {
           "name": "isNamed",
           "kind": "function",
-          "line": 290
+          "line": 292
         },
         {
           "name": "reach",
           "kind": "function",
-          "line": 311
+          "line": 313
         },
         {
           "name": "arrayAppend",
           "kind": "function",
-          "line": 326
+          "line": 328
         },
         {
           "name": "widgetOk",
           "kind": "function",
-          "line": 331
+          "line": 333
         },
         {
           "name": "allowNewField",
           "kind": "function",
-          "line": 343
+          "line": 345
         },
         {
           "name": "acroFormRule",
           "kind": "function",
-          "line": 374
+          "line": 376
         },
         {
           "name": "pageRule",
           "kind": "function",
-          "line": 393
+          "line": 395
         },
         {
           "name": "ownerPageOf",
           "kind": "function",
-          "line": 433
+          "line": 435
         },
         {
           "name": "revisionMaps",
           "kind": "function",
-          "line": 466
+          "line": 468
+        },
+        {
+          "name": "activeXrefChain",
+          "kind": "function",
+          "line": 489
         },
         {
           "name": "assertXrefConsistent",
           "kind": "function",
-          "line": 487
+          "line": 524
         },
         {
           "name": "inUseAtE",
           "kind": "function",
-          "line": 492
+          "line": 531
         },
         {
           "name": "sameObject",
           "kind": "function",
-          "line": 555
+          "line": 594
         },
         {
           "name": "children",
           "kind": "function",
-          "line": 565
+          "line": 604
         },
         {
           "name": "reachable",
           "kind": "function",
-          "line": 573
+          "line": 612
         },
         {
           "name": "collectShallowRefs",
           "kind": "function",
-          "line": 595
+          "line": 634
         },
         {
           "name": "decodeXrefStream",
           "kind": "function",
-          "line": 618
+          "line": 657
         },
         {
           "name": "int",
           "kind": "function",
-          "line": 620
+          "line": 659
         },
         {
           "name": "field",
           "kind": "function",
-          "line": 642
+          "line": 681
         },
         {
           "name": "unpredict",
           "kind": "function",
-          "line": 658
+          "line": 697
         },
         {
           "name": "get",
           "kind": "function",
-          "line": 662
+          "line": 701
         }
       ],
       "parseError": null,
@@ -51899,7 +51904,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 29,
+          "line": 30,
           "description": "",
           "params": [],
           "returns": [],
@@ -51912,7 +51917,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 37,
+          "line": 38,
           "description": "Catalog entries an unsigned update may add or change without touching content.",
           "params": [],
           "returns": [],
@@ -51925,7 +51930,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 39,
+          "line": 40,
           "description": "Keys a new document-timestamp field (merged with its widget) may carry.",
           "params": [],
           "returns": [],
@@ -51938,7 +51943,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 41,
+          "line": 42,
           "description": "Keys a separate widget of a new document-timestamp field may carry.",
           "params": [],
           "returns": [],
@@ -51951,7 +51956,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 52,
+          "line": 53,
           "description": "Create an empty revision log.",
           "params": [],
           "returns": [],
@@ -51964,7 +51969,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 75,
+          "line": 76,
           "description": "Called by the structural-stream decoder for a top-level ObjStm/XRef stream.",
           "params": [
             {
@@ -52002,7 +52007,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 95,
+          "line": 96,
           "description": "Install the revision-log hooks on a pdf-lib PDFParser INSTANCE (never on a prototype).",
           "params": [
             {
@@ -52028,7 +52033,7 @@
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 195,
+          "line": 196,
           "description": "",
           "params": [
             {
@@ -52048,7 +52053,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 212,
+          "line": 213,
           "description": "Classify the unsigned data appended after a signature's covered range.",
           "params": [
             {
@@ -52085,8 +52090,21 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 466,
+          "line": 468,
           "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRevisions~activeXrefChain",
+          "name": "activeXrefChain",
+          "longname": "module:utils/pdfSignatureRevisions~activeXrefChain",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureRevisions.js",
+          "line": 489,
+          "description": "Return the signed revision's active cross-reference sections, newest first.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -52098,7 +52116,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 487,
+          "line": 524,
           "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
           "params": [],
           "returns": [],
@@ -52111,7 +52129,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 573,
+          "line": 612,
           "description": "Object numbers reachable from values through map (final state), capped.",
           "params": [],
           "returns": [],
@@ -52124,7 +52142,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 595,
+          "line": 634,
           "description": "Every object number referenced directly by the given objects (no resolution).",
           "params": [],
           "returns": [],
@@ -52137,7 +52155,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 618,
+          "line": 657,
           "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
           "params": [
             {
@@ -52172,14 +52190,14 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 57,
+      "importanceScore": 58,
       "summary": "Appended-revision classifier for PDF signatures.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1519,
+      "lines": 1537,
       "extension": ".js",
       "jsdocBlockCount": 33,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -52197,19 +52215,19 @@
         {
           "source": "pkijs",
           "specifiers": [],
-          "line": 156,
+          "line": 163,
           "kind": "dynamic"
         },
         {
           "source": "asn1js",
           "specifiers": [],
-          "line": 161,
+          "line": 168,
           "kind": "dynamic"
         },
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1454,
+          "line": 1472,
           "kind": "dynamic"
         }
       ],
@@ -52222,424 +52240,424 @@
         {
           "name": "parsePdfDateString",
           "kind": "function",
-          "line": 254
+          "line": 261
         },
         {
           "name": "notCheckedSignatureReport",
           "kind": "function",
-          "line": 1205
+          "line": 1223
         },
         {
           "name": "indeterminateSignatureReport",
           "kind": "function",
-          "line": 1216
+          "line": 1234
         },
         {
           "name": "installIndirectObjectHeaderProbe",
           "kind": "function",
-          "line": 1261
+          "line": 1279
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1439
+          "line": 1457
         }
       ],
       "declarations": [
         {
           "name": "ViewerLimitError",
           "kind": "class",
-          "line": 139
+          "line": 146
         },
         {
           "name": "loadPkijs",
           "kind": "function",
-          "line": 155
+          "line": 162
         },
         {
           "name": "loadAsn1js",
           "kind": "function",
-          "line": 160
+          "line": 167
         },
         {
           "name": "toUint8",
           "kind": "function",
-          "line": 169
+          "line": 176
         },
         {
           "name": "bytesToHex",
           "kind": "function",
-          "line": 178
+          "line": 185
         },
         {
           "name": "colonHex",
           "kind": "function",
-          "line": 184
+          "line": 191
         },
         {
           "name": "normalizeSerialHex",
           "kind": "function",
-          "line": 191
+          "line": 198
         },
         {
           "name": "requireSubtle",
           "kind": "function",
-          "line": 195
+          "line": 202
         },
         {
           "name": "subtleDigest",
           "kind": "function",
-          "line": 202
+          "line": 209
         },
         {
           "name": "decodeTextBytes",
           "kind": "function",
-          "line": 221
+          "line": 228
         },
         {
           "name": "pdfText",
           "kind": "function",
-          "line": 241
+          "line": 248
         },
         {
           "name": "parsePdfDateString",
           "kind": "function",
-          "line": 254
+          "line": 261
         },
         {
           "name": "isoOrNull",
           "kind": "function",
-          "line": 275
+          "line": 282
         },
         {
           "name": "isDict",
           "kind": "function",
-          "line": 283
+          "line": 290
         },
         {
           "name": "dictHas",
           "kind": "function",
-          "line": 287
+          "line": 294
         },
         {
           "name": "signatureDictFields",
           "kind": "function",
-          "line": 291
+          "line": 298
         },
         {
           "name": "readByteRange",
           "kind": "function",
-          "line": 305
+          "line": 312
         },
         {
           "name": "contentsToBytes",
           "kind": "function",
-          "line": 317
+          "line": 324
         },
         {
           "name": "discoverSignatures",
           "kind": "function",
-          "line": 327
+          "line": 334
         },
         {
           "name": "objectKey",
           "kind": "function",
-          "line": 378
+          "line": 385
         },
         {
           "name": "qualifiedFieldName",
           "kind": "function",
-          "line": 389
+          "line": 396
         },
         {
           "name": "dictionaryInfo",
           "kind": "function",
-          "line": 410
+          "line": 417
         },
         {
           "name": "info",
           "kind": "object",
-          "line": 426
+          "line": 433
         },
         {
           "name": "setIntegrity",
           "kind": "function",
-          "line": 477
+          "line": 484
         },
         {
           "name": "setIntegrityFromError",
           "kind": "function",
-          "line": 490
+          "line": 497
         },
         {
           "name": "validByteRange",
           "kind": "function",
-          "line": 496
+          "line": 503
         },
         {
           "name": "coveredBytes",
           "kind": "function",
-          "line": 512
+          "line": 519
         },
         {
           "name": "extensionCoveredByLaterSignature",
           "kind": "function",
-          "line": 520
+          "line": 527
         },
         {
           "name": "findAttribute",
           "kind": "function",
-          "line": 538
+          "line": 545
         },
         {
           "name": "attrRawBytes",
           "kind": "function",
-          "line": 543
+          "line": 550
         },
         {
           "name": "attrDate",
           "kind": "function",
-          "line": 551
+          "line": 558
         },
         {
           "name": "parseAsn1TimeString",
           "kind": "function",
-          "line": 568
+          "line": 575
         },
         {
           "name": "rdnValue",
           "kind": "function",
-          "line": 577
+          "line": 584
         },
         {
           "name": "dnToString",
           "kind": "function",
-          "line": 586
+          "line": 593
         },
         {
           "name": "elementBytesToHex",
           "kind": "function",
-          "line": 591
+          "line": 598
         },
         {
           "name": "matchCertificate",
           "kind": "function",
-          "line": 596
+          "line": 603
         },
         {
           "name": "asn1HexToBytes",
           "kind": "function",
-          "line": 625
+          "line": 632
         },
         {
           "name": "elementOid",
           "kind": "function",
-          "line": 631
+          "line": 638
         },
         {
           "name": "decodeOidBytes",
           "kind": "function",
-          "line": 639
+          "line": 646
         },
         {
           "name": "oidOf",
           "kind": "function",
-          "line": 659
+          "line": 666
         },
         {
           "name": "curvePointSize",
           "kind": "function",
-          "line": 673
+          "line": 680
         },
         {
           "name": "pssParameters",
           "kind": "function",
-          "line": 682
+          "line": 689
         },
         {
           "name": "out",
           "kind": "object",
-          "line": 684
+          "line": 691
         },
         {
           "name": "signedDataFailure",
           "kind": "function",
-          "line": 709
+          "line": 716
         },
         {
           "name": "verifySignedDataStructure",
           "kind": "function",
-          "line": 719
+          "line": 726
         },
         {
           "name": "applyCertificateIdentity",
           "kind": "function",
-          "line": 828
+          "line": 846
         },
         {
           "name": "updateSigningTimeWindow",
           "kind": "function",
-          "line": 845
+          "line": 863
         },
         {
           "name": "readTstInfo",
           "kind": "function",
-          "line": 879
+          "line": 897
         },
         {
           "name": "timestampImprintMatches",
           "kind": "function",
-          "line": 892
+          "line": 910
         },
         {
           "name": "verifyEmbeddedSignatureTimestamp",
           "kind": "function",
-          "line": 903
+          "line": 921
         },
         {
           "name": "verifySignatureEntry",
           "kind": "function",
-          "line": 931
+          "line": 949
         },
         {
           "name": "trimSerial",
           "kind": "function",
-          "line": 1044
+          "line": 1062
         },
         {
           "name": "attrRawBytesOfInteger",
           "kind": "function",
-          "line": 1050
+          "line": 1068
         },
         {
           "name": "attrRawBytesOfElement",
           "kind": "function",
-          "line": 1055
+          "line": 1073
         },
         {
           "name": "asn1jsFromBERCached",
           "kind": "function",
-          "line": 1087
+          "line": 1105
         },
         {
           "name": "bufferView",
           "kind": "function",
-          "line": 1097
+          "line": 1115
         },
         {
           "name": "bytesEqual",
           "kind": "function",
-          "line": 1101
+          "line": 1119
         },
         {
           "name": "verifyCmsSignature",
           "kind": "function",
-          "line": 1113
+          "line": 1131
         },
         {
           "name": "result",
           "kind": "function",
-          "line": 1117
+          "line": 1135
         },
         {
           "name": "curveNameForPointSize",
           "kind": "function",
-          "line": 1152
+          "line": 1170
         },
         {
           "name": "hashedLength",
           "kind": "function",
-          "line": 1158
+          "line": 1176
         },
         {
           "name": "orderSignatures",
           "kind": "function",
-          "line": 1165
+          "line": 1183
         },
         {
           "name": "placeholderSignatureReport",
           "kind": "function",
-          "line": 1187
+          "line": 1205
         },
         {
           "name": "notCheckedSignatureReport",
           "kind": "function",
-          "line": 1205
+          "line": 1223
         },
         {
           "name": "indeterminateSignatureReport",
           "kind": "function",
-          "line": 1216
+          "line": 1234
         },
         {
           "name": "errorSignatureReport",
           "kind": "function",
-          "line": 1227
+          "line": 1245
         },
         {
           "name": "isPdfWhitespace",
           "kind": "function",
-          "line": 1234
+          "line": 1252
         },
         {
           "name": "isDigit",
           "kind": "function",
-          "line": 1235
+          "line": 1253
         },
         {
           "name": "installIndirectObjectHeaderProbe",
           "kind": "function",
-          "line": 1261
+          "line": 1279
         },
         {
           "name": "ws",
           "kind": "object",
-          "line": 1271
+          "line": 1289
         },
         {
           "name": "run",
           "kind": "object",
-          "line": 1272
+          "line": 1290
         },
         {
           "name": "cmt",
           "kind": "object",
-          "line": 1273
+          "line": 1291
         },
         {
           "name": "skip",
           "kind": "function",
-          "line": 1280
+          "line": 1298
         },
         {
           "name": "digitsEnd",
           "kind": "function",
-          "line": 1302
+          "line": 1320
         },
         {
           "name": "finiteFrom",
           "kind": "function",
-          "line": 1305
+          "line": 1323
         },
         {
           "name": "parseWithSourceSpans",
           "kind": "function",
-          "line": 1340
+          "line": 1358
         },
         {
           "name": "fail",
           "kind": "function",
-          "line": 1377
+          "line": 1395
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1439
+          "line": 1457
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1440
+          "line": 1458
         }
       ],
       "parseError": null,
@@ -52733,7 +52751,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 129,
+          "line": 136,
           "description": "Hash names WebCrypto implements.",
           "params": [],
           "returns": [],
@@ -52746,7 +52764,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 131,
+          "line": 138,
           "description": "Structural stream filters pdf-lib's decodePDFRawStream can decode.",
           "params": [],
           "returns": [],
@@ -52759,7 +52777,7 @@
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 139,
+          "line": 146,
           "description": "A check the viewer could not perform because of its own limits (budget, missing algorithm, failing machinery), with no evidence of a defect.",
           "params": [
             {
@@ -52779,7 +52797,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 241,
+          "line": 248,
           "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
           "params": [
             {
@@ -52804,7 +52822,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 254,
+          "line": 261,
           "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
           "params": [
             {
@@ -52829,7 +52847,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 327,
+          "line": 334,
           "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
           "params": [],
           "returns": [],
@@ -52842,7 +52860,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 477,
+          "line": 484,
           "description": "",
           "params": [
             {
@@ -52880,7 +52898,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 490,
+          "line": 497,
           "description": "Classify an exception: a ViewerLimitError is not-checked-in-viewer with its own code, anything else cannot be classified and is indeterminate .",
           "params": [
             {
@@ -52912,7 +52930,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 659,
+          "line": 666,
           "description": "Dotted OID of an asn1js ObjectIdentifier (or raw OID element), else null.",
           "params": [],
           "returns": [],
@@ -52925,7 +52943,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 673,
+          "line": 680,
           "description": "Point size of the certificate's named curve, or null when the SPKI does not name one of the WebCrypto curves.",
           "params": [],
           "returns": [],
@@ -52938,7 +52956,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 719,
+          "line": 726,
           "description": "Parse and verify one CMS SignedData structure.",
           "params": [],
           "returns": [],
@@ -52951,7 +52969,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 845,
+          "line": 863,
           "description": "Compare only the selected signing time with the certificate window, never with now.",
           "params": [],
           "returns": [],
@@ -52964,7 +52982,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 903,
+          "line": 921,
           "description": "Verify the unsigned id-aa-signatureTimeStampToken attribute, when present.",
           "params": [],
           "returns": [],
@@ -52977,7 +52995,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1113,
+          "line": 1131,
           "description": "Verify the CMS signature value with WebCrypto.",
           "params": [],
           "returns": [
@@ -52995,7 +53013,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1187,
+          "line": 1205,
           "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
           "params": [
             {
@@ -53032,7 +53050,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1205,
+          "line": 1223,
           "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
           "params": [
             {
@@ -53063,7 +53081,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1216,
+          "line": 1234,
           "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
           "params": [
             {
@@ -53094,7 +53112,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1227,
+          "line": 1245,
           "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
           "params": [
             {
@@ -53125,7 +53143,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1261,
+          "line": 1279,
           "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
           "params": [
             {
@@ -53157,7 +53175,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1439,
+          "line": 1457,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -53194,19 +53212,19 @@
         {
           "source": "pkijs",
           "specifiers": [],
-          "line": 156,
+          "line": 163,
           "kind": "dynamic"
         },
         {
           "source": "asn1js",
           "specifiers": [],
-          "line": 161,
+          "line": 168,
           "kind": "dynamic"
         },
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1454,
+          "line": 1472,
           "kind": "dynamic"
         }
       ],
@@ -100883,7 +100901,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 218,
+      "line": 220,
       "description": "",
       "params": [
         {
@@ -100939,7 +100957,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 231,
+      "line": 233,
       "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
       "params": [
         {
@@ -100970,7 +100988,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 246,
+      "line": 248,
       "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
       "params": [
         {
@@ -101217,13 +101235,26 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureRevisions~activeXrefChain",
+      "name": "activeXrefChain",
+      "longname": "module:utils/pdfSignatureRevisions~activeXrefChain",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureRevisions.js",
+      "line": 489,
+      "description": "Return the signed revision's active cross-reference sections, newest first.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureRevisions~assertXrefConsistent",
       "name": "assertXrefConsistent",
       "longname": "module:utils/pdfSignatureRevisions~assertXrefConsistent",
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 487,
+      "line": 524,
       "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
       "params": [],
       "returns": [],
@@ -101236,7 +101267,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 212,
+      "line": 213,
       "description": "Classify the unsigned data appended after a signature's covered range.",
       "params": [
         {
@@ -101273,7 +101304,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 595,
+      "line": 634,
       "description": "Every object number referenced directly by the given objects (no resolution).",
       "params": [],
       "returns": [],
@@ -101286,7 +101317,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 52,
+      "line": 53,
       "description": "Create an empty revision log.",
       "params": [],
       "returns": [],
@@ -101299,7 +101330,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 618,
+      "line": 657,
       "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
       "params": [
         {
@@ -101336,7 +101367,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 39,
+      "line": 40,
       "description": "Keys a new document-timestamp field (merged with its widget) may carry.",
       "params": [],
       "returns": [],
@@ -101349,7 +101380,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 41,
+      "line": 42,
       "description": "Keys a separate widget of a new document-timestamp field may carry.",
       "params": [],
       "returns": [],
@@ -101362,7 +101393,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 37,
+      "line": 38,
       "description": "Catalog entries an unsigned update may add or change without touching content.",
       "params": [],
       "returns": [],
@@ -101375,7 +101406,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 95,
+      "line": 96,
       "description": "Install the revision-log hooks on a pdf-lib PDFParser INSTANCE (never on a prototype).",
       "params": [
         {
@@ -101401,7 +101432,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 75,
+      "line": 76,
       "description": "Called by the structural-stream decoder for a top-level ObjStm/XRef stream.",
       "params": [
         {
@@ -101439,7 +101470,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 573,
+      "line": 612,
       "description": "Object numbers reachable from values through map (final state), capped.",
       "params": [],
       "returns": [],
@@ -101452,7 +101483,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 466,
+      "line": 468,
       "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
       "params": [],
       "returns": [],
@@ -101465,7 +101496,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 29,
+      "line": 30,
       "description": "",
       "params": [],
       "returns": [],
@@ -101491,7 +101522,7 @@
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 195,
+      "line": 196,
       "description": "",
       "params": [
         {
@@ -101511,7 +101542,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1439,
+      "line": 1457,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {
@@ -101536,7 +101567,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 673,
+      "line": 680,
       "description": "Point size of the certificate's named curve, or null when the SPKI does not name one of the WebCrypto curves.",
       "params": [],
       "returns": [],
@@ -101549,7 +101580,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 131,
+      "line": 138,
       "description": "Structural stream filters pdf-lib's decodePDFRawStream can decode.",
       "params": [],
       "returns": [],
@@ -101562,7 +101593,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 327,
+      "line": 334,
       "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
       "params": [],
       "returns": [],
@@ -101575,7 +101606,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1227,
+      "line": 1245,
       "description": "Placeholder for an exception: ViewerLimitError -&gt; not checked with its code, anything else -&gt; indeterminate.",
       "params": [
         {
@@ -101606,7 +101637,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1216,
+      "line": 1234,
       "description": "Inspection failed in a way that is neither a known viewer limit nor proof of a defect (shown as a warning).",
       "params": [
         {
@@ -101637,7 +101668,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1261,
+      "line": 1279,
       "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
       "params": [
         {
@@ -101669,7 +101700,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1205,
+      "line": 1223,
       "description": "The viewer could not inspect the document's signatures because of its own limits (budget, worker, library, read error); there is no evidence of a defect.",
       "params": [
         {
@@ -101700,7 +101731,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 659,
+      "line": 666,
       "description": "Dotted OID of an asn1js ObjectIdentifier (or raw OID element), else null.",
       "params": [],
       "returns": [],
@@ -101713,7 +101744,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 254,
+      "line": 261,
       "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
       "params": [
         {
@@ -101790,7 +101821,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 241,
+      "line": 248,
       "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
       "params": [
         {
@@ -101815,7 +101846,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1187,
+      "line": 1205,
       "description": "Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned.",
       "params": [
         {
@@ -101852,7 +101883,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 477,
+      "line": 484,
       "description": "",
       "params": [
         {
@@ -101890,7 +101921,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 490,
+      "line": 497,
       "description": "Classify an exception: a ViewerLimitError is not-checked-in-viewer with its own code, anything else cannot be classified and is indeterminate .",
       "params": [
         {
@@ -101935,7 +101966,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 845,
+      "line": 863,
       "description": "Compare only the selected signing time with the certificate window, never with now.",
       "params": [],
       "returns": [],
@@ -101961,7 +101992,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1113,
+      "line": 1131,
       "description": "Verify the CMS signature value with WebCrypto.",
       "params": [],
       "returns": [
@@ -101979,7 +102010,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 903,
+      "line": 921,
       "description": "Verify the unsigned id-aa-signatureTimeStampToken attribute, when present.",
       "params": [],
       "returns": [],
@@ -101992,7 +102023,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 719,
+      "line": 726,
       "description": "Parse and verify one CMS SignedData structure.",
       "params": [],
       "returns": [],
@@ -102005,7 +102036,7 @@
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 139,
+      "line": 146,
       "description": "A check the viewer could not perform because of its own limits (budget, missing algorithm, failing machinery), with no evidence of a defect.",
       "params": [
         {
@@ -102025,7 +102056,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 129,
+      "line": 136,
       "description": "Hash names WebCrypto implements.",
       "params": [],
       "returns": [],

@@ -198,15 +198,17 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
  * button is then not rendered).
  * @param {(Array<SignatureDocumentEntry>|null|undefined)} documents
  * @param {{ uncheckedSeverity:(string|undefined) }} [options]
- * @returns {({ documentCount:number, signatureCount:number, severity:('ok'|'warning'|'error') }|null)}
+ * @returns {({ documentCount:number, signatureCount:number, severity:('ok'|'warning'|'error'), worstIntegrity:string }|null)}
  */
 export function summarizeSignatureDocuments(documents, options = {}) {
   const list = Array.isArray(documents) ? documents : [];
   if (list.length <= 0) return null;
+  const signatures = list.flatMap((doc) => doc.signatures);
   return {
     documentCount: list.length,
     signatureCount: list.reduce((sum, doc) => sum + doc.signatureCount, 0),
-    severity: getReportSignatureSeverity(list.flatMap((doc) => doc.signatures), { uncheckedSeverity: options?.uncheckedSeverity }),
+    severity: getReportSignatureSeverity(signatures, { uncheckedSeverity: options?.uncheckedSeverity }),
+    worstIntegrity: getWorstSignatureIntegrity(signatures),
   };
 }
 

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 52. Line count: 21053. JSDoc symbol count: 854.
+File count: 52. Line count: 21112. JSDoc symbol count: 855.
 
 ## src/utils/compareCurtain.js
 
@@ -530,7 +530,7 @@ Symbols:
 - `module:utils/pdfSignatureRevisions~Verdict` (class) - No description.
 - `module:utils/pdfSignatureRevisions.classifyAppendedRevisions` (function) - Classify the unsigned data appended after a signature's covered range.
 - `module:utils/pdfSignatureRevisions~revisionMaps` (function) - The state at E \( pre : last definition before E\), the appended definitions per object number, and the final state \( post : pdf\-lib's last definition\).
-- `module:utils/pdfSignatureRevisions~assertXrefConsistent` (function) - Step 2 \(mandatory, design flag F\-a\): every appended cross\-reference entry must point at the definition pdf\-lib used, so pdf.js \(offsets\) and pdf\-lib \(last definition\) see the same...
+- `module:utils/pdfSignatureRevisions~activeXrefChain` (function) - Return the signed revision's active cross\-reference sections, newest first.
 
 ## src/utils/pdfSignatures.js
 
