@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { afterEach, test } from 'vitest';
 import {
+  DEFAULT_LOADER,
   DEFAULT_SAMPLE,
   HEADER_MARKER,
   REPO_ROOT,
@@ -535,4 +536,236 @@ test('gates compare version components above Number.MAX_SAFE_INTEGER exactly', (
   assert.deepEqual(longer.changes.map((c) => c.path), ['i18n.default']);
   const padded = generateText({ profile, sampleText: SAMPLE_TEXT, version: '2.11.09007199254740993' });
   assert.deepEqual(padded.changes.map((c) => c.path), ['i18n.default']);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Review round 3: the destination is resolved once, and generate-all protects the sample and the
+// loader exactly like generate
+// ---------------------------------------------------------------------------------------------
+
+const PUBLIC_DIR_REAL = path.dirname(fs.realpathSync(DEFAULT_SAMPLE));
+
+/** Anything in the repository's public/ folder (the sample, the loader, a temporary file there). */
+function isRepositoryFile(file) {
+  const norm = (p) => (process.platform === 'win32' ? path.resolve(p).toLowerCase() : path.resolve(p));
+  return norm(path.dirname(file)) === norm(PUBLIC_DIR_REAL) || norm(path.dirname(file)) === norm(path.dirname(DEFAULT_SAMPLE));
+}
+
+/**
+ * Guards for specs that point a destination at a repository file: if the code under test ever
+ * tried to write there, the guard throws instead, so even a failing run cannot touch public/.
+ */
+function guardedOps(calls, overrides = {}) {
+  return recordingOps(calls, {
+    ...overrides,
+    renameSync: (from, to) => {
+      if (isRepositoryFile(to)) throw new Error(`test guard: refused to rename onto repository file ${to}`);
+      return fs.renameSync(from, to);
+    },
+  });
+}
+
+function guardedWriter(file, text) {
+  if (isRepositoryFile(file)) throw new Error(`test guard: refused to create ${file}`);
+  fs.writeFileSync(file, text, { encoding: 'utf8', flag: 'wx' });
+}
+
+/** Realpath override: `link` resolves to `to`; everything else resolves for real. */
+function linkTo(link, to) {
+  return (f) => (path.resolve(f) === path.resolve(link) ? to : fs.realpathSync(f));
+}
+
+/** A profile that fits both release tags used by generate-all here (2.10.0 and 2.11.0). */
+function simpleProfile(dir) {
+  return writeProfile(dir, { name: 'Example Hospital', set: { 'i18n.default': 'en' } }, 'simple.profile.json');
+}
+
+/** lstat override: `link` reports itself as a symbolic link. */
+function lstatAsLink(link) {
+  return (f) => (path.resolve(f) === path.resolve(link) ? { isSymbolicLink: () => true } : fs.lstatSync(f));
+}
+
+test('generate resolves the destination once: the write lands on the target the checks used', () => {
+  const dir = tempDir();
+  const checked = path.join(dir, 'checked', 'odv.site.config.js');
+  fs.mkdirSync(path.dirname(checked));
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', checked]).code, 0);
+  // A hand-written file that a SECOND resolution would return: it must never be written.
+  const other = path.join(dir, 'other', 'hand.js');
+  fs.mkdirSync(path.dirname(other));
+  fs.writeFileSync(other, '// hand-written, not produced by this tool\n', 'utf8');
+  const link = path.join(dir, 'link.js');
+  fs.copyFileSync(checked, link); // stand-in for the link itself
+  const linkBefore = fs.readFileSync(link);
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { 'i18n.default': 'sv' } });
+  const calls = [];
+  let resolutions = 0;
+  const ops = recordingOps(calls, {
+    realpathSync: (f) => {
+      if (path.resolve(f) !== link) return fs.realpathSync(f);
+      resolutions += 1;
+      return resolutions === 1 ? checked : other;
+    },
+  });
+  const result = run(['generate', '--profile', profile, '--out', link], { fileOps: ops });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(resolutions, 1, 'the destination is resolved exactly once');
+  const renames = calls.filter(([name]) => name === 'renameSync');
+  assert.equal(renames.length, 1);
+  assert.equal(renames[0][2], checked);
+  assert.match(fs.readFileSync(checked, 'utf8'), /default: 'sv'/);
+  assert.equal(fs.readFileSync(other, 'utf8'), '// hand-written, not produced by this tool\n', 'no write lands on a second resolution');
+  assert.deepEqual(fs.readFileSync(link), linkBefore);
+  assert.deepEqual(fs.readdirSync(path.dirname(other)), ['hand.js']);
+});
+
+test('generate-all resolves each destination once as well', () => {
+  const dir = tempDir();
+  const outDir = path.join(dir, 'out');
+  assert.equal(run(['generate-all', '--profile', simpleProfile(dir), '--versions', '2.10.0', '--out-dir', outDir]).code, 0);
+  const out = path.join(outDir, '2.10.0', 'odv.site.config.js');
+  const checked = path.join(dir, 'checked.js');
+  fs.copyFileSync(out, checked);
+  const other = path.join(dir, 'hand.js');
+  fs.writeFileSync(other, '// hand-written\n', 'utf8');
+  let resolutions = 0;
+  const calls = [];
+  const ops = recordingOps(calls, {
+    realpathSync: (f) => {
+      if (path.resolve(f) !== out) return fs.realpathSync(f);
+      resolutions += 1;
+      return resolutions === 1 ? checked : other;
+    },
+  });
+  const result = run(['generate-all', '--profile', simpleProfile(dir), '--versions', '2.10.0', '--out-dir', outDir], { fileOps: ops });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(resolutions, 1);
+  assert.equal(calls.find(([name]) => name === 'renameSync')[2], checked);
+  assert.equal(fs.readFileSync(other, 'utf8'), '// hand-written\n');
+});
+
+for (const [what, file, pattern] of [
+  ['sample', DEFAULT_SAMPLE, /must not be the sample file itself \(it is a link to /],
+  ['loader', DEFAULT_LOADER, /must not be the loader \(odv\.config\.js\) itself \(it is a link to /],
+]) {
+  test(`generate refuses a link whose target is the ${what}, with and without --force`, () => {
+    const dir = tempDir();
+    const link = path.join(dir, 'link.js');
+    assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', link]).code, 0); // header-carrying stand-in
+    const before = fs.readFileSync(file);
+    const calls = [];
+    const ops = guardedOps(calls, { realpathSync: linkTo(link, fs.realpathSync(file)), lstatSync: lstatAsLink(link) });
+    for (const extra of [[], ['--force']]) {
+      const result = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', link, ...extra], { writeFile: guardedWriter, fileOps: ops });
+      assert.equal(result.code, 1, extra.join(' '));
+      assert.match(result.stderr, new RegExp(`ERROR: --out ${pattern.source}`));
+    }
+    assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+    assert.deepEqual(fs.readFileSync(file), before);
+  });
+
+  test(`generate-all refuses a link whose target is the ${what}, with and without --force, and stops`, () => {
+    const dir = tempDir();
+    const outDir = path.join(dir, 'out');
+    const link = path.join(outDir, '2.10.0', 'odv.site.config.js');
+    fs.mkdirSync(path.dirname(link), { recursive: true });
+    assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', link]).code, 0); // header-carrying stand-in
+    const before = fs.readFileSync(file);
+    const calls = [];
+    const ops = guardedOps(calls, { realpathSync: linkTo(link, fs.realpathSync(file)), lstatSync: lstatAsLink(link) });
+    for (const extra of [[], ['--force']]) {
+      const result = run(['generate-all', '--profile', simpleProfile(dir), '--versions', '2.10.0,2.11.0', '--out-dir', outDir, ...extra],
+        { writeFile: guardedWriter, fileOps: ops });
+      assert.equal(result.code, 1, extra.join(' '));
+      assert.match(result.stderr, new RegExp(`ERROR: Generation for version 2\\.10\\.0 failed: ".*odv\\.site\\.config\\.js" ${pattern.source}`));
+      assert.equal(fs.existsSync(path.join(outDir, '2.11.0')), false, 'no later version is written');
+    }
+    assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+    assert.deepEqual(fs.readFileSync(file), before);
+  });
+}
+
+test('generate-all writes through a link to an ordinary file and refuses a dangling link', () => {
+  const dir = tempDir();
+  const outDir = path.join(dir, 'out');
+  const link = path.join(outDir, '2.10.0', 'odv.site.config.js');
+  fs.mkdirSync(path.dirname(link), { recursive: true });
+  const deploy = path.join(dir, 'deploy');
+  fs.mkdirSync(deploy);
+  const target = path.join(deploy, 'odv.site.config.js');
+  fs.writeFileSync(target, '// hand-written\n', 'utf8');
+  fs.writeFileSync(link, '// stand-in for the link\n', 'utf8');
+  const ops = recordingOps([], { realpathSync: linkTo(link, target) });
+  const argv = ['generate-all', '--profile', simpleProfile(dir), '--versions', '2.10.0', '--out-dir', outDir];
+  const refused = run(argv, { fileOps: ops });
+  assert.equal(refused.code, 1);
+  assert.match(refused.stderr, /exists and was not produced by this tool/, 'the target is judged');
+  assert.equal(fs.readFileSync(target, 'utf8'), '// hand-written\n');
+  const forced = run([...argv, '--force'], { fileOps: ops });
+  assert.equal(forced.code, 0, forced.stderr);
+  assert.ok(readGenerated(target).startsWith(HEADER_MARKER));
+  assert.equal(fs.readFileSync(link, 'utf8'), '// stand-in for the link\n', 'the link itself is not replaced');
+  assert.deepEqual(fs.readdirSync(deploy), ['odv.site.config.js']);
+
+  const dangling = recordingOps([], {
+    realpathSync: (f) => { if (path.resolve(f) === link) throw enoent(f); return fs.realpathSync(f); },
+    lstatSync: lstatAsLink(link),
+  });
+  const result = run([...argv, '--force'], { fileOps: dangling });
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /Generation for version 2\.10\.0 failed: .* is a symbolic link whose target does not exist/);
+});
+
+test('a plain destination is still written by generate and generate-all', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
+  assert.ok(readGenerated(out).startsWith(HEADER_MARKER));
+  const outDir = path.join(dir, 'all');
+  assert.equal(run(['generate-all', '--profile', simpleProfile(dir), '--versions', '2.10.0,2.11.0', '--out-dir', outDir]).code, 0);
+  for (const v of ['2.10.0', '2.11.0']) assert.ok(readGenerated(path.join(outDir, v, 'odv.site.config.js')).startsWith(HEADER_MARKER));
+});
+
+test('real symlinks: generate-all refuses links to the sample and the loader, with and without --force', (ctx) => {
+  const dir = tempDir();
+  if (!canSymlink(dir)) ctx.skip();
+  for (const file of [DEFAULT_SAMPLE, DEFAULT_LOADER]) {
+    const outDir = path.join(dir, path.basename(file));
+    const link = path.join(outDir, '2.10.0', 'odv.site.config.js');
+    fs.mkdirSync(path.dirname(link), { recursive: true });
+    fs.symlinkSync(file, link, 'file');
+    const before = fs.readFileSync(file);
+    for (const extra of [[], ['--force']]) {
+      const result = run(['generate-all', '--profile', simpleProfile(dir), '--versions', '2.10.0,2.11.0', '--out-dir', outDir, ...extra],
+        { writeFile: guardedWriter, fileOps: guardedOps([]) });
+      assert.equal(result.code, 1);
+      assert.match(result.stderr, /must not be the (sample file|loader \(odv\.config\.js\)) itself \(it is a link to /);
+      assert.equal(fs.existsSync(path.join(outDir, '2.11.0')), false);
+    }
+    assert.equal(fs.lstatSync(link).isSymbolicLink(), true);
+    assert.deepEqual(fs.readFileSync(file), before);
+  }
+});
+
+test('the copied permission bits are the mode the regenerated file ends up with (simulated mode table)', () => {
+  // An in-memory mode table behind the seam: chmod sets a mode on the temporary file and the
+  // rename carries it onto the target, so the spec asserts the RESULTING mode, not only the call.
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
+  const real = fs.realpathSync(out);
+  const modes = new Map([[real, 0o100600]]);
+  const ops = recordingOps([], {
+    statSync: (f) => ({ mode: modes.has(f) ? modes.get(f) : 0o100644 }),
+    chmodSync: (f, m) => { modes.set(f, 0o100000 | m); },
+    renameSync: (from, to) => {
+      fs.renameSync(from, to);
+      modes.set(to, modes.has(from) ? modes.get(from) : 0o100644);
+      modes.delete(from);
+    },
+  });
+  const result = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out], { fileOps: ops });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(ops.statSync(real).mode & 0o7777, 0o600);
+  assert.deepEqual([...modes.keys()], [real], 'no mode left behind on a temporary name');
 });

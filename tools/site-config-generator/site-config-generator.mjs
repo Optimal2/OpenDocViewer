@@ -93,8 +93,14 @@
  *     a failure to read or apply them fails the write instead of loosening them silently. A
  *     symlinked destination is written through: the rename goes onto the link's target (with the
  *     temporary file in the target's directory), so the link stays intact; a dangling link is
- *     refused. The temporary file is removed after a failure only when this run created it, and a
- *     failed removal is reported next to the original error, never instead of it.
+ *     refused. The destination is resolved exactly ONCE per output file (generate and every
+ *     version of generate-all); the overwrite protection, --force, the sample/loader refusal and
+ *     the rename all use that one resolved target, never a second resolution. The temporary file
+ *     is removed after a failure only when this run created it, and a failed removal is reported
+ *     next to the original error, never instead of it.
+ *   - generate and generate-all refuse, also with --force, an output that is or leads (through a
+ *     link) to the shipped sample public/odv.site.config.sample.js or the loader
+ *     public/odv.config.js; generate also refuses its own --sample and --loader files.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
  *     profile value is asserted on `window.__ODV_SITE_CONFIG__`; then the selected odv.config.js is
  *     executed on top of it and every active set/added value is asserted on the merged config.
@@ -1426,25 +1432,46 @@ function sampleLine(result) {
     : `Sample:  ${result.samplePath} (OpenDocViewer; no version inferred)`;
 }
 
-function readExistingOutput(out, force) {
-  if (!fs.existsSync(out)) return undefined;
-  const existing = readText(out, 'output file');
+/**
+ * A destination resolved once: `out` as the operator named it, and `target`, the file that a
+ * write really replaces. Every check and the write itself use this one object, so they can never
+ * refer to different files.
+ * @typedef {{ out: string, target: string, viaLink: boolean }} Destination
+ */
+
+/** How a destination is named in messages: both paths when it was reached through a link. */
+function describeDestination(dest) {
+  return dest.viaLink ? `"${dest.out}" (link target "${dest.target}")` : `"${dest.out}"`;
+}
+
+/**
+ * Overwrite protection, applied to the resolved target: an existing file is only replaced when it
+ * carries this tool's header, or with --force.
+ * @param {Destination} dest
+ * @param {boolean} force
+ */
+function readExistingOutput(dest, force) {
+  if (!fs.existsSync(dest.target)) return undefined;
+  const existing = readText(dest.target, 'output file');
   if (!force && !existing.replace(/^﻿/, '').startsWith(HEADER_MARKER)) {
-    throw new GeneratorError(`"${out}" exists and was not produced by this tool. Re-run with --force to replace it.`);
+    throw new GeneratorError(`${describeDestination(dest)} exists and was not produced by this tool. Re-run with --force to replace it.`);
   }
   return existing;
 }
 
 /**
- * The file that a write to `out` really replaces: `out` itself, or the final target of a symbolic
- * link at `out`, so that the link keeps pointing where it did. A link whose target does not exist
- * is refused rather than silently replaced by a regular file.
+ * Resolve the file that a write to `out` really replaces: `out` itself, or the final target of a
+ * symbolic link at `out`, so that the link keeps pointing where it did. A link whose target does
+ * not exist is refused rather than silently replaced by a regular file. Called exactly once per
+ * output; the result is passed to every later check and to the write.
  * @param {string} out
  * @param {FileOps} files
+ * @returns {Destination}
  */
 function resolveDestination(out, files) {
+  let target;
   try {
-    return files.realpathSync(out);
+    target = files.realpathSync(out);
   } catch (err) {
     if (err?.code !== 'ENOENT') throw new GeneratorError(`Cannot resolve "${out}": ${err.message}.`);
   }
@@ -1454,25 +1481,57 @@ function resolveDestination(out, files) {
   } catch {
     // Nothing at `out` (or a missing directory, which the write reports): a new regular file.
   }
-  if (isLink) {
-    throw new GeneratorError(`"${out}" is a symbolic link whose target does not exist. Point it at an existing file or remove it, then re-run.`);
+  if (target === undefined) {
+    if (isLink) {
+      throw new GeneratorError(`"${out}" is a symbolic link whose target does not exist. Point it at an existing file or remove it, then re-run.`);
+    }
+    return { out, target: out, viaLink: false };
   }
-  return out;
+  return { out, target, viaLink: isLink && target !== out };
+}
+
+/**
+ * Refuse a destination that is, or leads to, a file the repository ships: writing a generated
+ * site configuration over the sample or the loader is always wrong, also with --force. Compared
+ * with both the name the operator gave and the resolved target.
+ * @param {Destination} dest
+ * @param {{ file: string, what: string }[]} protectedFiles
+ * @param {string} label  how the destination is named in the error ("--out" or the path)
+ */
+function assertNotProtected(dest, protectedFiles, label) {
+  for (const { file, what } of protectedFiles) {
+    const real = fs.existsSync(file) ? fs.realpathSync(file) : path.resolve(file);
+    if (samePath(dest.out, file) || samePath(dest.target, file) || samePath(dest.target, real)) {
+      const via = dest.viaLink ? ` (it is a link to "${dest.target}")` : '';
+      throw new GeneratorError(`${label} must not be the ${what} itself${via}.`);
+    }
+  }
+}
+
+/** The repository files no generated output may replace, plus a custom --sample/--loader. */
+function protectedFilesFor(options) {
+  const list = [
+    { file: DEFAULT_SAMPLE, what: 'sample file' },
+    { file: DEFAULT_LOADER, what: 'loader (odv.config.js)' },
+  ];
+  if (options.sample) list.push({ file: options.sample, what: 'sample file' });
+  if (options.loader) list.push({ file: options.loader, what: 'loader (odv.config.js)' });
+  return list;
 }
 
 /**
  * Write a file without ever leaving it half written: the text goes to a new temporary file in the
- * directory of the real destination (the symlink target, when `out` is a link), which is renamed
- * over it only after the write succeeded and the destination's permission bits were copied onto
- * it. On any failure, the temporary file is removed (only when this run created it) and the
- * destination keeps its previous content. Callers run the overwrite protection
- * (readExistingOutput) first; this function does not bypass it.
- * @param {string} out
+ * directory of the already resolved target, which is renamed over it only after the write
+ * succeeded and the target's permission bits were copied onto it. On any failure, the temporary
+ * file is removed (only when this run created it) and the target keeps its previous content.
+ * This function never resolves `dest.out` again: it writes exactly the target that the overwrite
+ * protection and the sample/loader check were applied to.
+ * @param {Destination} dest  from resolveDestination
  * @param {string} text
  * @param {FileOps} files  file-system operations (injectable for tests)
  */
-function writeFileAtomically(out, text, files) {
-  const target = resolveDestination(out, files);
+function writeFileAtomically(dest, text, files) {
+  const { target } = dest;
   const temp = path.join(path.dirname(target), `.${path.basename(target)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`);
   let created = false;
   try {
@@ -1502,14 +1561,7 @@ function writeFileAtomically(out, text, files) {
         cleanup = ` The temporary file "${temp}" could not be removed (${rmErr.message}); delete it manually.`;
       }
     }
-    let viaLink = false;
-    try {
-      viaLink = target !== out && files.lstatSync(out).isSymbolicLink();
-    } catch {
-      // Only affects the wording below.
-    }
-    const shown = viaLink ? `"${out}" (link target "${target}")` : `"${out}"`;
-    throw new GeneratorError(`Cannot write ${shown}: ${err?.message ?? String(err)}. The previous file, if any, is unchanged.${cleanup}`);
+    throw new GeneratorError(`Cannot write ${describeDestination(dest)}: ${err?.message ?? String(err)}. The previous file, if any, is unchanged.${cleanup}`);
   }
 }
 
@@ -1542,13 +1594,10 @@ const DEFAULT_FILE_OPS = {
 
 function runGenerate(options, log, files) {
   const out = path.resolve(options.out);
-  const samplePath = options.sample || DEFAULT_SAMPLE;
-  if (samePath(out, samplePath)) throw new GeneratorError('--out must not be the sample file itself.');
-  // A symlink at --out is written through, so it must not lead to the sample either.
-  if (fs.existsSync(samplePath) && samePath(resolveDestination(out, files), fs.realpathSync(samplePath))) {
-    throw new GeneratorError('--out must not be the sample file itself.');
-  }
-  const existing = readExistingOutput(out, options.force);
+  // Resolved once: the checks below and the write all refer to this one target.
+  const dest = resolveDestination(out, files);
+  assertNotProtected(dest, protectedFilesFor(options), '--out');
+  const existing = readExistingOutput(dest, options.force);
   const result = buildFromOptions(options, existing);
   log(`Profile: ${result.profile.name}`);
   log(sampleLine(result));
@@ -1556,7 +1605,7 @@ function runGenerate(options, log, files) {
   for (const line of formatChanges(result.changes, result.skipped)) log(line);
   for (const line of formatSkipped(result.skipped)) log(line);
   log(`Verified ${result.verified} assertion(s) through node:vm (site object and odv.config.js merge).`);
-  writeFileAtomically(out, result.text, files);
+  writeFileAtomically(dest, result.text, files);
   log(`Wrote ${out}`);
   return 0;
 }
@@ -1566,11 +1615,15 @@ function runGenerateAll(options, log, files) {
   for (const version of options.versionList) {
     const out = path.join(outDir, version, options.name);
     try {
-      const existing = readExistingOutput(out, options.force);
+      // Resolved once per version, exactly as in generate.
+      const dest = resolveDestination(out, files);
+      assertNotProtected(dest, protectedFilesFor({}), `"${out}"`);
+      const existing = readExistingOutput(dest, options.force);
       const result = buildFromOptions({ profile: options.profile, version }, existing);
       // Do not create the version directory until generation and merge verification have passed.
+      // A missing directory means nothing was there to resolve, so the target is `out` itself.
       fs.mkdirSync(path.dirname(out), { recursive: true });
-      writeFileAtomically(out, result.text, files);
+      writeFileAtomically(dest, result.text, files);
       log(`${version}: wrote ${out}; verified ${result.verified} assertion(s); ${result.skipped.length} skipped gated entr${result.skipped.length === 1 ? 'y' : 'ies'}.`);
       for (const line of formatSkipped(result.skipped)) log(`${version}: ${line}`);
     } catch (err) {

@@ -476,10 +476,16 @@ ERROR: The profile does not match the sample:
   ERROR: "<work>\handmade.js" exists and was not produced by this tool. Re-run with --force to replace it.
   ```
 
-  `--out` can never be the sample file itself, even with `--force`:
+  An output can never be the shipped sample (`public/odv.site.config.sample.js`) or the loader
+  (`public/odv.config.js`), even with `--force` and also when it only leads there through a
+  symbolic link. Both `generate` and `generate-all` refuse it with exit 1; `generate` also refuses
+  its own `--sample` and `--loader` files. `generate-all` stops at that version, and nothing more
+  is written after it:
 
   ```text
   ERROR: --out must not be the sample file itself.
+  ERROR: --out must not be the loader (odv.config.js) itself (it is a link to "<repo>\public\odv.config.js").
+  ERROR: Generation for version 2.10.0 failed: "<out-dir>\2.10.0\odv.site.config.js" must not be the sample file itself (it is a link to "<repo>\public\odv.site.config.sample.js").
   ```
 
 - **No half-written files.** `generate` and `generate-all` write each output to a temporary file in
@@ -496,8 +502,14 @@ ERROR: The profile does not match the sample:
   - **Symbolic links.** A symlinked `--out` (or `<out-dir>/<version>/<name>`) is written through:
     the tool resolves the link and renames the new file onto the link's target, with the temporary
     file in the target's folder, so the link keeps pointing where it did. The overwrite protection
-    and `--force` judge the target's content, and a link to the sample is refused like the sample
-    itself. A dangling link (whose target does not exist) is refused with exit 1:
+    and `--force` judge the target's content, and a link to the sample or the loader is refused
+    like those files themselves. The link is resolved exactly **once** per output file: the
+    overwrite protection, `--force`, the sample/loader refusal and the rename all use that one
+    resolved target, so the tool never checks one file and writes another. If something else
+    re-points the link while the tool runs, the new file still lands on the target that was
+    checked (the link is not followed a second time). A failed write names both paths
+    (`"<link>" (link target "<target>")`). A dangling link (whose target does not exist) is
+    refused with exit 1:
 
     ```text
     ERROR: "<work>\odv.site.config.js" is a symbolic link whose target does not exist. Point it at an existing file or remove it, then re-run.
