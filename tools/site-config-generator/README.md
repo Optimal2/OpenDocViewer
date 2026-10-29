@@ -26,35 +26,103 @@ it in memory and reports whether an existing site configuration still matches.
 
 The tool is a convenience for developers and operators. It lives in its own folder, has no
 dependencies besides Node.js, and is **not** part of the build output (`dist/`), the published
-artifact, the OMP package or the release zip. To use it, run it from a checkout of the
-OpenDocViewer repository at the release you deploy.
+artifact, the OMP package or the release zip. Run it from a repository checkout. It can use the
+current files or read the sample and loader from any release tag already present in that checkout.
 
 ## Commands
 
 Run all commands from the repository root.
 
 ```text
-node tools/site-config-generator/site-config-generator.mjs generate --profile <file> --out <file> [--force] [--sample <file>] [--loader <file>]
-node tools/site-config-generator/site-config-generator.mjs check --profile <file> --config <file> [--sample <file>] [--loader <file>]
+node tools/site-config-generator/site-config-generator.mjs generate --profile <file> --out <file> [--force] [--version <x.y.z>] [--sample <file>] [--loader <file>]
+node tools/site-config-generator/site-config-generator.mjs check --profile <file> --config <file> [--version <x.y.z>] [--sample <file>] [--loader <file>]
+node tools/site-config-generator/site-config-generator.mjs generate-all --profile <file> --versions <a,b,...> --out-dir <dir> [--name <file>] [--force]
 node tools/site-config-generator/site-config-generator.mjs new-profile --out <file> [--force]
 ```
 
 | Option | Meaning |
 | --- | --- |
 | `--profile <file>` | The site profile (JSON). |
-| `--out <file>` | File to write. Required; the tool never picks a destination itself. |
+| `--out <file>` | File to write. Required for `generate`; the tool never picks a destination itself. |
 | `--config <file>` | Existing site configuration to compare (`check` only). |
-| `--sample <file>` | Sample to build from. Default: `public/odv.site.config.sample.js`. |
-| `--loader <file>` | `odv.config.js` used for the merge verification. Default: `public/odv.config.js`. |
-| `--force` | `generate`: replace an `--out` file that this tool did not produce. `new-profile`: replace an existing file. |
+| `--version <x.y.z>` | Read the sample, loader and header version from existing tag `v<x.y.z>` (`generate` and `check`). |
+| `--versions <a,b,...>` | Comma-separated release versions (`generate-all` only). Empty, malformed and duplicate versions are usage errors. |
+| `--out-dir <dir>` | Parent output directory (`generate-all` only). |
+| `--name <file>` | Plain file name for each version folder. Default: `odv.site.config.js`; path separators and parent-directory segments are rejected. |
+| `--sample <file>` | Sample to build from. Default: `public/odv.site.config.sample.js`; cannot be combined with `--version`. |
+| `--loader <file>` | `odv.config.js` used for merge verification. Overrides both the current default and the loader selected by `--version`. |
+| `--force` | `generate`/`generate-all`: replace an output file that this tool did not produce. `new-profile`: replace an existing file. |
 
 Exit codes:
 
 | Command | 0 | 1 | 2 |
 | --- | --- | --- | --- |
-| `generate` | File written and verified. | Error (bad profile, unknown path, parse error, failed verification, refused overwrite). Nothing is written. | Usage error (unknown command or option, missing required option). |
-| `check` | The configuration matches the sample plus the profile. | Drift (`DRIFT:` on standard output) or an error (`ERROR:` on standard error). | Usage error. |
+| `generate` | File written and verified. | Error (bad profile, unknown path or tag, parse error, failed verification, refused overwrite). Nothing is written. | Usage error (unknown command or option, missing required option, malformed version, `--version` with `--sample`). |
+| `check` | The configuration matches the selected sample plus the profile. | Drift (`DRIFT:` on standard output) or an error (`ERROR:` on standard error). | Usage error. |
+| `generate-all` | Every requested file written and verified. | First generation error; the message names the failed version and no later version is attempted. Earlier files remain. | Usage error (missing options, malformed/duplicate versions, unsafe `--name`). |
 | `new-profile` | Example profile written. | The file already exists and `--force` was not given. | Usage error. |
+
+## Several releases
+
+One profile can produce configurations for sites that run different releases. `generate-all` reads
+each release's own sample and loader through `git show v<x.y.z>:<path>` in the current checkout; no
+separate old checkout and no new dependency is needed. Each output is verified before it is written,
+and the command stops at the first failed version.
+
+For example, this fictional profile changes a setting present in both samples and opts in to
+`toolbar.largeButtons` only from 2.11.0, where that setting first appears:
+
+```json
+{
+  "name": "Example Hospital",
+  "description": "Fictional EXAMPLE-TEST profile for several releases.",
+  "set": {
+    "i18n.default": "en",
+    "toolbar.largeButtons": false
+  },
+  "since": {
+    "toolbar.largeButtons": "2.11.0"
+  }
+}
+```
+
+This is a real run over the repository's v2.10.0 and v2.11.0 tags. `<work>` stands for the absolute
+work folder used for the profile and outputs:
+
+```text
+> node tools/site-config-generator/site-config-generator.mjs generate-all --profile <work>\several-releases.profile.json --versions 2.10.0,2.11.0 --out-dir <work>\releases
+2.10.0: wrote <work>\releases\2.10.0\odv.site.config.js; verified 3 assertion(s); 1 skipped gated entry.
+2.10.0:   skipped (since 2.11.0)  toolbar.largeButtons
+2.11.0: wrote <work>\releases\2.11.0\odv.site.config.js; verified 5 assertion(s); 0 skipped gated entries.
+```
+
+The result is one complete file per release:
+
+```text
+<work>\releases\2.10.0\odv.site.config.js
+<work>\releases\2.11.0\odv.site.config.js
+```
+
+Verify either file against the release it was built from:
+
+```text
+node tools/site-config-generator/site-config-generator.mjs check --profile <work>\several-releases.profile.json --version 2.10.0 --config <work>\releases\2.10.0\odv.site.config.js
+node tools/site-config-generator/site-config-generator.mjs check --profile <work>\several-releases.profile.json --version 2.11.0 --config <work>\releases\2.11.0\odv.site.config.js
+```
+
+### Version input precedence
+
+- `--version <x.y.z>` uses tag `v<x.y.z>` for the sample, the default loader and the header. The
+  **tag name** supplies the header version. A missing/unreadable tag, sample or loader is an error
+  naming the tag and missing input.
+- An explicit `--loader <file>` wins over the tag for merge verification. This combination is
+  allowed: the explicit loader affects verification only, while the sample and header still come
+  from the tag.
+- `--version` with `--sample` is a usage error (exit 2). Otherwise the header could claim that a
+  custom sample came from a release that did not supply it. Use one input mechanism or the other.
+- Without `--version`, existing behaviour is unchanged: `--sample` and `--loader` select local files,
+  the current shipped sample gets its header version from `package.json`, and a custom sample has no
+  inferred version.
 
 ## Workflow on a new release
 
@@ -99,10 +167,39 @@ A profile is a JSON object with these top-level keys:
 | `description` | no | String, written into the header (`// Description: ...`). |
 | `set` | no | Object that maps a dotted path to a new value. |
 | `unset` | no | Array of dotted paths to comment out. |
+| `since` | no | Object that maps a `set`/`unset` path to the first version where it applies, inclusive. |
+| `until` | no | Object that maps a `set`/`unset` path to the last version where it applies, inclusive. |
 
 Any other top-level key is an error, except comment keys. JSON has no comments, so a key that starts
-with `//` (or `$`, top level only) is ignored. Inside `set`, keys that start with `//` are ignored
-too, which lets you disable an entry by prefixing it with `// `.
+with `//` (or `$`, top level only) is ignored. Inside `set`, `since` and `until`, keys that start
+with `//` are ignored too, which lets you disable an entry by prefixing it with `// `.
+
+### Version gates
+
+```json
+{
+  "name": "Example Hospital",
+  "set": { "toolbar.largeButtons": false },
+  "unset": ["showPerfOverlay"],
+  "since": { "toolbar.largeButtons": "2.11.0" },
+  "until": { "showPerfOverlay": "2.9.0" }
+}
+```
+
+`since` and `until` can gate paths in both `set` and `unset`. A gate key is the actual dotted path,
+without the `+` addition marker used in `set`. The boundaries are inclusive: `since: "2.11.0"`
+applies at 2.11.0 and later, while `until: "2.9.0"` applies at 2.9.0 and earlier. Versions are
+compared as three numeric components, not as strings, so 2.9.0 is older than 2.10.0.
+
+An excluded entry is never ignored silently. `generate` and `generate-all` print its path as
+`skipped (since 2.11.0)` or `skipped (until 2.9.0)`, and `check` applies the same filter so the
+generated file checks out. A gate that names no path in `set` or `unset` is an error, because it is
+almost always a typo. An ungated path missing from the selected sample remains an error; gating is
+opt-in per path.
+
+Gates need a known target version. `--version` supplies it explicitly; otherwise the tool uses the
+version it infers from `package.json` for the current shipped sample. A custom `--sample` has no
+inferred version, so using gates with one fails with a readable error rather than guessing.
 
 ### Values
 
@@ -388,19 +485,20 @@ ERROR: The profile does not match the sample:
   mixed line endings is written with its majority style only. A byte-order mark at the start of the
   sample is kept. `check` treats files that differ only in line endings or the byte-order mark as
   identical (exit 0) and says so.
-- **Header.** The header names the profile and the sample actually used. For the shipped
-  `public/odv.site.config.sample.js`, it also names the OpenDocViewer version and identifies the
-  repository's `package.json` as its source. For a custom `--sample`, it names that file and omits
-  the version rather than implying that the custom file came from that release.
+- **Header.** The header names the profile and the sample actually used. For the current shipped
+  `public/odv.site.config.sample.js`, it names the version from the repository's `package.json`.
+  For `--version`, it names the version from the tag name. For a custom `--sample`, it names that
+  file and omits the version rather than implying that the custom file came from that release.
 - **What the `node:vm` verification asserts.** After building the text, and before writing anything,
   the tool runs it in a `node:vm` context with a stub `window` and `document`, and reads
   `window.__ODV_SITE_CONFIG__`. It asserts that:
-  - every `set` and added value is present with exactly the profile value,
-  - every `unset` key is absent,
+  - every active `set` and added value is present with exactly the profile value,
+  - every active `unset` key is absent,
   - every other value equals the sample's value, so the text edit changed nothing else.
 
-  It then runs `odv.config.js` (`--loader`) in the same context and asserts that every `set` and
-  added value is present in the merged `window.__ODV_CONFIG__`.
+  It then runs the selected `odv.config.js` (current, tagged or explicit `--loader`) in the same
+  context and asserts that every active `set` and added value is present in the merged
+  `window.__ODV_CONFIG__`.
 - **What the verification does not assert.** It does not check that a value is valid for the
   setting (for example that a zoom mode exists), it does not check the merged value of an `unset`
   key, and it does not load the viewer in a browser. Values are compared as JSON-compatible data

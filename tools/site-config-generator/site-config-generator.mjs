@@ -12,16 +12,29 @@
  *   output (`dist/`), the OMP package or the release zip, which are all produced from `dist/` only.
  *
  * COMMANDS
- *   generate    --profile <file> --out <file> [--force] [--sample <file>] [--loader <file>]
- *       Writes the site configuration from the CURRENT sample plus the profile. `--out` is
- *       required on purpose: the tool never picks a destination itself, so it can never silently
- *       overwrite `public/odv.site.config.js` or any other live file. An existing `--out` file is
- *       only replaced when it carries this tool's generated header, or when `--force` is given.
- *   check       --profile <file> --config <file> [--sample <file>] [--loader <file>]
- *       Regenerates in memory and compares with the existing configuration. Exit 0 when
- *       identical, exit 1 with a per-key and per-line diff summary when it differs.
+ *   generate    --profile <file> --out <file> [--force] [--version <x.y.z>]
+ *               [--sample <file>] [--loader <file>]
+ *       Writes the site configuration from the current sample, or from existing tag v<x.y.z> when
+ *       --version is given. --out is required on purpose. An existing output is only replaced when
+ *       it carries this tool's generated header, or when --force is given.
+ *   check       --profile <file> --config <file> [--version <x.y.z>]
+ *               [--sample <file>] [--loader <file>]
+ *       Regenerates in memory from the same selected sample and compares with the existing file.
+ *       Exit 0 when identical, exit 1 with a per-key and per-line diff summary when it differs.
+ *   generate-all --profile <file> --versions <a,b,...> --out-dir <dir>
+ *                [--name <file>] [--force]
+ *       Writes <out-dir>/<version>/<name> (default name: odv.site.config.js), verifies each file
+ *       against its own tag's loader, prints per-version skips, and stops at the first failure.
+ *       --name must be a plain file name. Missing/malformed/duplicate version lists are usage errors.
  *   new-profile --out <file> [--force]
  *       Writes a commented example profile to start from.
+ *
+ *   VERSION INPUT PRECEDENCE: --version reads public/odv.site.config.sample.js and
+ *   public/odv.config.js from the existing tag with spawnSync('git', [...]), without a shell or a
+ *   second checkout. The header version is the version in the tag name. An explicit --loader wins
+ *   over the tag for merge verification only; the sample and header still come from the tag.
+ *   --version + --sample is a usage error (exit 2), because the header would falsely attribute a
+ *   custom sample to that release. Without --version, --sample and --loader behave as before.
  *
  * PROFILE FORMAT (JSON)
  *   {
@@ -29,10 +42,12 @@
  *     "description": "Free text",                 // optional, shown in the generated header
  *     "set":   { "print.defaultPageMode": "all",  // dotted path -> new value
  *                "+viewer.exampleFlag": true },   // "+" prefix = deliberate addition
- *     "unset": [ "showPerfOverlay" ]              // dotted paths to comment out
+ *     "unset": [ "showPerfOverlay" ],             // dotted paths to comment out
+ *     "since": { "toolbar.largeButtons": "2.11.0" }, // apply from this version, inclusive
+ *     "until": { "showPerfOverlay": "2.9.0" }        // apply through this version, inclusive
  *   }
- *   Keys starting with "//" or "$" at the top level, and keys starting with "//" inside `set`,
- *   are treated as comments and ignored, because JSON has no comment syntax.
+ *   Keys starting with "//" or "$" at the top level, and keys starting with "//" inside set,
+ *   since and until, are treated as comments and ignored, because JSON has no comment syntax.
  *
  *   Dotted paths address the configuration OBJECT, resolved level by level through brace
  *   nesting, so `shortcuts.print.ctrlOrCmdP` and `print.defaultPageMode` never collide even
@@ -48,16 +63,24 @@
  *   for intentionally inactive keys, so the built-in default from `odv.config.js` applies and the
  *   documentation stays in place. A property that shares a line with other code is removed inline.
  *
+ *   VERSION GATES: since/until keys name paths in set or unset (without the addition marker) and
+ *   use numeric x.y.z comparison. Excluded entries are skipped and explicitly printed as
+ *   "skipped (since x.y.z)" or "skipped (until x.y.z)" for generate and generate-all; check uses
+ *   the same filter. A gate naming no set/unset path is an error. Gates use --version when given,
+ *   otherwise the shipped sample's package.json version. A gated custom --sample with no known
+ *   version is an error. An ungated path missing from the selected sample remains an error.
+ *
  * GUARANTEES
  *   - Values are edited in the TEXT of the sample; comments and layout are preserved and only the
  *     addressed values change.
  *   - CRLF and LF input are both supported. The output keeps the line endings of the existing
  *     output file when there is one, otherwise those of the sample.
- *   - The output starts with a header naming the profile and actual sample. The shipped sample also
- *     names the repository package.json version; a custom --sample omits that version.
- *   - After generating, the text is executed in `node:vm` with a stub `window`, and every profile
- *     value is asserted on `window.__ODV_SITE_CONFIG__`; then `public/odv.config.js` is executed on
- *     top of it and every set/added value is asserted on the merged `window.__ODV_CONFIG__`.
+ *   - The output header names the profile and actual sample. The current shipped sample uses the
+ *     repository package.json version, a tagged sample uses the tag-name version, and a custom
+ *     --sample omits the version rather than implying a release.
+ *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
+ *     profile value is asserted on `window.__ODV_SITE_CONFIG__`; then the selected odv.config.js is
+ *     executed on top of it and every active set/added value is asserted on the merged config.
  *
  * LIMITATIONS
  *   - The sample object literal may contain plain `key: value` properties only (no spread,
@@ -71,6 +94,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { spawnSync } from 'node:child_process';
 import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -552,12 +576,16 @@ export function toJsLiteral(value, indent = '') {
 // Profile
 // ---------------------------------------------------------------------------------------------
 
+const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
+
 /**
  * @typedef {Object} Operation
  * @property {'set'|'add'|'unset'} kind
  * @property {string} path      dotted path without the add marker
  * @property {string[]} segments
  * @property {*} [value]
+ * @property {string} [since]  first version where the operation applies, inclusive
+ * @property {string} [until]  last version where the operation applies, inclusive
  */
 
 function isPlainObject(x) {
@@ -572,6 +600,24 @@ function validatePathText(raw, where) {
   return segments;
 }
 
+/** Validate the optional since/until object and return its non-comment entries. */
+function normalizeGates(value, kind) {
+  if (value === undefined) return [];
+  if (!isPlainObject(value)) {
+    throw new GeneratorError(`"${kind}" must be an object mapping dotted paths to versions.`);
+  }
+  const entries = [];
+  for (const [p, version] of Object.entries(value)) {
+    if (p.startsWith('//')) continue;
+    validatePathText(p, kind);
+    if (typeof version !== 'string' || !VERSION_PATTERN.test(version)) {
+      throw new GeneratorError(`${kind}: "${p}" must name a version with three dot-separated numbers (x.y.z).`);
+    }
+    entries.push([p, version]);
+  }
+  return entries;
+}
+
 /**
  * Validate a parsed profile and turn it into a flat list of operations.
  * @param {*} profile
@@ -579,10 +625,10 @@ function validatePathText(raw, where) {
  */
 export function normalizeProfile(profile) {
   if (!isPlainObject(profile)) throw new GeneratorError('The profile must be a JSON object.');
-  const known = new Set(['name', 'description', 'set', 'unset']);
+  const known = new Set(['name', 'description', 'set', 'unset', 'since', 'until']);
   for (const key of Object.keys(profile)) {
     if (!known.has(key) && !key.startsWith('//') && !key.startsWith('$')) {
-      throw new GeneratorError(`Unknown top-level profile key "${key}". Allowed: name, description, set, unset.`);
+      throw new GeneratorError(`Unknown top-level profile key "${key}". Allowed: name, description, set, unset, since, until.`);
     }
   }
   if (typeof profile.name !== 'string' || profile.name.trim() === '') {
@@ -597,6 +643,10 @@ export function normalizeProfile(profile) {
   if (!Array.isArray(unset) || unset.some((p) => typeof p !== 'string')) {
     throw new GeneratorError('"unset" must be an array of dotted path strings.');
   }
+  const gates = {
+    since: normalizeGates(profile.since, 'since'),
+    until: normalizeGates(profile.until, 'until'),
+  };
 
   /** @type {Operation[]} */
   const operations = [];
@@ -624,7 +674,48 @@ export function normalizeProfile(profile) {
       }
     }
   }
+
+  const operationByPath = new Map(operations.map((op) => [op.path, op]));
+  for (const kind of ['since', 'until']) {
+    for (const [p, version] of gates[kind]) {
+      const op = operationByPath.get(p);
+      if (!op) {
+        throw new GeneratorError(`Gate "${kind}.${p}" does not name a path in set or unset.`);
+      }
+      op[kind] = version;
+    }
+  }
   return { name: profile.name.trim(), description: (profile.description || '').trim(), operations };
+}
+
+/** Numeric x.y.z comparison, so 2.9.0 sorts before 2.10.0. */
+function compareVersions(a, b) {
+  const aa = a.split('.').map(Number);
+  const bb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (aa[i] !== bb[i]) return aa[i] < bb[i] ? -1 : 1;
+  }
+  return 0;
+}
+
+/** Filter operations for one target version and retain an explicit audit list of skipped gates. */
+function applyVersionGates(profile, version) {
+  const gated = profile.operations.some((op) => op.since !== undefined || op.until !== undefined);
+  if (gated && (typeof version !== 'string' || !VERSION_PATTERN.test(version))) {
+    throw new GeneratorError('The profile is version-gated, but no version is known. Use --version <x.y.z>, or use the shipped sample with a version in package.json.');
+  }
+  const operations = [];
+  const skipped = [];
+  for (const op of profile.operations) {
+    if (op.since !== undefined && compareVersions(version, op.since) < 0) {
+      skipped.push({ path: op.path, gate: 'since', version: op.since });
+    } else if (op.until !== undefined && compareVersions(version, op.until) > 0) {
+      skipped.push({ path: op.path, gate: 'until', version: op.until });
+    } else {
+      operations.push(op);
+    }
+  }
+  return { profile: { ...profile, operations }, skipped };
 }
 
 /**
@@ -810,15 +901,17 @@ function oneLine(s) {
  * @param {string} version
  * @param {string} [samplePath] sample actually used
  */
-export function buildHeader(profile, version, samplePath = DEFAULT_SAMPLE) {
+export function buildHeader(profile, version, samplePath = DEFAULT_SAMPLE, tag) {
   const lines = [
     HEADER_MARKER,
     `// Site profile: ${oneLine(profile.name)}`,
   ];
   if (profile.description) lines.push(`// Description:  ${oneLine(profile.description)}`);
-  const builtFrom = samePath(samplePath, DEFAULT_SAMPLE)
-    ? `public/odv.site.config.sample.js of OpenDocViewer ${version} (version from repository package.json)`
-    : `${path.resolve(samplePath)} (custom --sample; no version inferred)`;
+  const builtFrom = tag
+    ? `public/odv.site.config.sample.js of OpenDocViewer ${version} (version from tag ${tag})`
+    : samePath(samplePath, DEFAULT_SAMPLE)
+      ? `public/odv.site.config.sample.js of OpenDocViewer ${version} (version from repository package.json)`
+      : `${path.resolve(samplePath)} (custom --sample; no version inferred)`;
   lines.push(
     `// Built from:   ${builtFrom}`,
     '// Do not edit this file by hand. Change the site profile and regenerate:',
@@ -991,25 +1084,33 @@ export function readSampleVersion(packageJsonFile = DEFAULT_PACKAGE_JSON) {
  * @param {Object} options
  * @param {{ name: string, description: string, operations: Operation[] }} options.profile
  * @param {string} options.sampleText  sample source (any line endings)
- * @param {string} options.version
+ * @param {string} [options.version] target/header version; undefined for a custom sample
  * @param {string} [options.samplePath] sample actually used (default: the shipped sample)
  * @param {string} [options.loaderText]  odv.config.js source for the merged verification
  * @param {'\r\n'|'\n'} [options.eol]   output line ending (default: the sample's)
+ * @param {string} [options.tag]      release tag that supplied the sample and version
  */
-export function generateText({ profile, sampleText, version, samplePath = DEFAULT_SAMPLE, loaderText, eol }) {
+export function generateText({ profile, sampleText, version, samplePath = DEFAULT_SAMPLE, loaderText, eol, tag }) {
   const bom = sampleText.startsWith('﻿') ? '﻿' : '';
   const raw = bom ? sampleText.slice(1) : sampleText;
   const sampleLf = toLf(raw);
-  const { text, changes } = applyOperations(sampleLf, profile.operations);
-  const outputLf = buildHeader(profile, version, samplePath) + text;
-  const verified = verifyGenerated(outputLf, sampleLf, profile.operations, loaderText === undefined ? undefined : toLf(loaderText));
-  return { text: bom + fromLf(outputLf, eol || detectEol(raw)), changes, verified };
+  const gated = applyVersionGates(profile, version);
+  const { text, changes } = applyOperations(sampleLf, gated.profile.operations);
+  const outputLf = buildHeader(profile, version, samplePath, tag) + text;
+  const verified = verifyGenerated(outputLf, sampleLf, gated.profile.operations, loaderText === undefined ? undefined : toLf(loaderText));
+  return { text: bom + fromLf(outputLf, eol || detectEol(raw)), changes, skipped: gated.skipped, verified };
 }
 
-function formatChanges(changes) {
-  if (changes.length === 0) return ['  (the profile has no set or unset entries)'];
+function formatChanges(changes, skipped = []) {
+  if (changes.length === 0) {
+    return [skipped.length > 0 ? '  (no entries apply at this version)' : '  (the profile has no set or unset entries)'];
+  }
   const width = Math.max(...changes.map((c) => c.path.length));
   return changes.map((c) => `  ${c.kind.padEnd(5)} ${c.path.padEnd(width)}  ${c.before} -> ${c.after}`);
+}
+
+function formatSkipped(skipped) {
+  return skipped.map((s) => `  skipped (${s.gate} ${s.version})  ${s.path}`);
 }
 
 /** Line diff (LCS) between two LF texts; returns hunks of '-'/'+' lines with line numbers. */
@@ -1137,18 +1238,24 @@ export const PROFILE_TEMPLATE = `{
 // ---------------------------------------------------------------------------------------------
 
 const USAGE = `Usage:
-  node tools/site-config-generator/site-config-generator.mjs generate --profile <file> --out <file> [--force]
-  node tools/site-config-generator/site-config-generator.mjs check --profile <file> --config <file>
+  node tools/site-config-generator/site-config-generator.mjs generate --profile <file> --out <file> [--force] [--version <x.y.z>] [--sample <file>] [--loader <file>]
+  node tools/site-config-generator/site-config-generator.mjs check --profile <file> --config <file> [--version <x.y.z>] [--sample <file>] [--loader <file>]
+  node tools/site-config-generator/site-config-generator.mjs generate-all --profile <file> --versions <a,b,...> --out-dir <dir> [--name <file>] [--force]
   node tools/site-config-generator/site-config-generator.mjs new-profile --out <file> [--force]
 
 Options:
+  --version <x.y.z> read the sample, loader and header version from existing tag v<x.y.z>
+  --versions <a,b>  comma-separated release versions for generate-all
+  --out-dir <dir>   parent output directory for generate-all
+  --name <file>     plain output file name for generate-all (default: odv.site.config.js)
   --sample <file>   sample to build from (default: public/odv.site.config.sample.js)
   --loader <file>   odv.config.js used for the merged verification (default: public/odv.config.js)
-  --force           replace an existing --out file that was not produced by this tool`;
+  --force           replace an existing output file that was not produced by this tool`;
 
 const COMMAND_OPTIONS = {
-  generate: { required: ['profile', 'out'], allowed: ['profile', 'out', 'force', 'sample', 'loader'] },
-  check: { required: ['profile', 'config'], allowed: ['profile', 'config', 'sample', 'loader'] },
+  generate: { required: ['profile', 'out'], allowed: ['profile', 'out', 'force', 'sample', 'loader', 'version'] },
+  check: { required: ['profile', 'config'], allowed: ['profile', 'config', 'sample', 'loader', 'version'] },
+  'generate-all': { required: ['profile', 'versions', 'out-dir'], allowed: ['profile', 'versions', 'out-dir', 'name', 'force'] },
   'new-profile': { required: ['out'], allowed: ['out', 'force'] },
 };
 
@@ -1170,6 +1277,26 @@ function parseArgs(argv) {
   for (const name of spec.required) {
     if (!options[name]) throw new GeneratorError(`"${command}" requires --${name}.\n\n${USAGE}`);
   }
+  if (options.version !== undefined && !VERSION_PATTERN.test(options.version)) {
+    throw new GeneratorError('--version must have three dot-separated numbers (x.y.z).');
+  }
+  if (options.version !== undefined && options.sample !== undefined) {
+    throw new GeneratorError('--version and --sample cannot be combined: the header would claim a release version for a sample that did not come from that release. Use --version, or use --sample without it.');
+  }
+  if (command === 'generate-all') {
+    const versions = options.versions.split(',').map((v) => v.trim());
+    if (versions.some((v) => !VERSION_PATTERN.test(v))) {
+      throw new GeneratorError('--versions must be a non-empty comma-separated list of versions with three dot-separated numbers (x.y.z).');
+    }
+    if (new Set(versions).size !== versions.length) {
+      throw new GeneratorError('--versions must not contain duplicate versions.');
+    }
+    options.versionList = versions;
+    options.name = options.name || 'odv.site.config.js';
+    if (options.name === '.' || options.name === '..' || /[\\/\0]/.test(options.name)) {
+      throw new GeneratorError('--name must be a plain file name without path separators or parent-directory segments.');
+    }
+  }
   return { command, options };
 }
 
@@ -1178,45 +1305,106 @@ function samePath(a, b) {
   return norm(a) === norm(b);
 }
 
+function git(args) {
+  const result = spawnSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  if (result.error) throw new GeneratorError(`Cannot run git: ${result.error.message}`);
+  return result;
+}
+
+function assertTagExists(tag) {
+  const result = git(['rev-parse', '--verify', '--quiet', `refs/tags/${tag}^{commit}`]);
+  if (result.status !== 0) throw new GeneratorError(`Tag "${tag}" does not exist or is not a readable release commit.`);
+}
+
+function readTagText(tag, repoFile, what) {
+  const result = git(['show', `${tag}:${repoFile}`]);
+  if (result.status !== 0) {
+    const detail = (result.stderr || '').trim();
+    throw new GeneratorError(`Tag "${tag}" lacks ${what} "${repoFile}".${detail ? ` ${detail}` : ''}`);
+  }
+  return result.stdout;
+}
+
 function buildFromOptions(options, existingText) {
   const profile = readProfile(options.profile);
+  const tag = options.version === undefined ? undefined : `v${options.version}`;
   const samplePath = options.sample || DEFAULT_SAMPLE;
-  const sampleText = readText(samplePath, 'sample');
-  const loaderPath = options.loader || DEFAULT_LOADER;
-  const loaderText = readText(loaderPath, 'loader');
-  const version = readSampleVersion();
+  let sampleText;
+  let loaderText;
+  let version;
+  if (tag) {
+    assertTagExists(tag);
+    sampleText = readTagText(tag, 'public/odv.site.config.sample.js', 'sample');
+    // An explicit loader wins over the tag; it affects merge verification only, never the header.
+    loaderText = options.loader
+      ? readText(options.loader, 'loader')
+      : readTagText(tag, 'public/odv.config.js', 'loader');
+    // The tag name is the authoritative header version for a tagged sample.
+    version = options.version;
+  } else {
+    sampleText = readText(samplePath, 'sample');
+    loaderText = readText(options.loader || DEFAULT_LOADER, 'loader');
+    const packageVersion = readSampleVersion();
+    version = options.sample ? undefined : packageVersion;
+  }
   // Keep the line endings of an existing output file; otherwise follow the sample.
   const eol = existingText !== undefined ? detectEol(existingText) : undefined;
-  const result = generateText({ profile, sampleText, version, samplePath, loaderText, eol });
-  return { ...result, profile, samplePath, version };
+  const result = generateText({ profile, sampleText, version, samplePath, loaderText, eol, tag });
+  return { ...result, profile, samplePath, version, tag };
 }
 
 /** Status line naming the sample; claims a version only where the generated header does. */
 function sampleLine(result) {
+  if (result.tag) {
+    return `Sample:  ${result.tag}:public/odv.site.config.sample.js (OpenDocViewer ${result.version}; version from tag)`;
+  }
   return samePath(result.samplePath, DEFAULT_SAMPLE)
     ? `Sample:  ${result.samplePath} (OpenDocViewer ${result.version})`
     : `Sample:  ${path.resolve(result.samplePath)} (custom --sample; no version inferred)`;
+}
+
+function readExistingOutput(out, force) {
+  if (!fs.existsSync(out)) return undefined;
+  const existing = readText(out, 'output file');
+  if (!force && !existing.replace(/^﻿/, '').startsWith(HEADER_MARKER)) {
+    throw new GeneratorError(`"${out}" exists and was not produced by this tool. Re-run with --force to replace it.`);
+  }
+  return existing;
 }
 
 function runGenerate(options, log) {
   const out = path.resolve(options.out);
   const samplePath = options.sample || DEFAULT_SAMPLE;
   if (samePath(out, samplePath)) throw new GeneratorError('--out must not be the sample file itself.');
-  let existing;
-  if (fs.existsSync(out)) {
-    existing = readText(out, 'output file');
-    if (!options.force && !existing.replace(/^﻿/, '').startsWith(HEADER_MARKER)) {
-      throw new GeneratorError(`"${out}" exists and was not produced by this tool. Re-run with --force to replace it.`);
-    }
-  }
+  const existing = readExistingOutput(out, options.force);
   const result = buildFromOptions(options, existing);
   log(`Profile: ${result.profile.name}`);
   log(sampleLine(result));
   log('Changes (old -> new):');
-  for (const line of formatChanges(result.changes)) log(line);
+  for (const line of formatChanges(result.changes, result.skipped)) log(line);
+  for (const line of formatSkipped(result.skipped)) log(line);
   log(`Verified ${result.verified} assertion(s) through node:vm (site object and odv.config.js merge).`);
   fs.writeFileSync(out, result.text, 'utf8');
   log(`Wrote ${out}`);
+  return 0;
+}
+
+function runGenerateAll(options, log) {
+  const outDir = path.resolve(options['out-dir']);
+  for (const version of options.versionList) {
+    const out = path.join(outDir, version, options.name);
+    try {
+      const existing = readExistingOutput(out, options.force);
+      const result = buildFromOptions({ profile: options.profile, version }, existing);
+      // Do not create the version directory until generation and merge verification have passed.
+      fs.mkdirSync(path.dirname(out), { recursive: true });
+      fs.writeFileSync(out, result.text, 'utf8');
+      log(`${version}: wrote ${out}; verified ${result.verified} assertion(s); ${result.skipped.length} skipped gated entr${result.skipped.length === 1 ? 'y' : 'ies'}.`);
+      for (const line of formatSkipped(result.skipped)) log(`${version}: ${line}`);
+    } catch (err) {
+      throw new GeneratorError(`Generation for version ${version} failed: ${err.message}`);
+    }
+  }
   return 0;
 }
 
@@ -1226,6 +1414,7 @@ function runCheck(options, log) {
   const comparison = compareConfigs(result.text, configText);
   log(`Profile: ${result.profile.name}`);
   log(sampleLine(result));
+  for (const line of formatSkipped(result.skipped)) log(line);
   log(`Config:${path.resolve(options.config)}`);
   for (const line of comparison.lines) log(line);
   if (comparison.identical) {
@@ -1266,6 +1455,7 @@ export function main(argv, io = {}) {
   try {
     if (parsed.command === 'generate') return runGenerate(parsed.options, log);
     if (parsed.command === 'check') return runCheck(parsed.options, log);
+    if (parsed.command === 'generate-all') return runGenerateAll(parsed.options, log);
     return runNewProfile(parsed.options, log);
   } catch (err) {
     if (err instanceof GeneratorError) {
