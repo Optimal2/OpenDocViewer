@@ -5,18 +5,29 @@ import { Worker } from 'node:worker_threads';
 import { readdir } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { createSecurityFixtures } from './signature-security-fixtures.mjs';
+import { createBoundaryFixtures, createSecurityFixtures } from './signature-security-fixtures.mjs';
 import { createFixturePki, createSigningTimeFixtures } from './generate-signature-fixtures.mjs';
 
 const entry = (await readdir('dist/assets')).find((name) => /^pdfSignatureWorker-.*\.js$/.test(name));
 assert.ok(entry, 'Build the application before testing the production worker');
 const security = await createSecurityFixtures();
 const signingTimes = await createSigningTimeFixtures(await createFixturePki());
+const boundary = await createBoundaryFixtures();
+const boundaryRows = [
+  ['missingDigestOid', 'unreadable', 'cms-malformed'],
+  ['missingSignatureValue', 'unreadable', 'cms-malformed'],
+  ['ecdsaOversizedInteger', 'unreadable', 'cms-malformed'],
+  ['timestampTstNotBer', 'unreadable', 'cms-malformed'],
+  ['discoveryLimit', 'not-checked-in-viewer', 'inspection-limit'],
+  ['discoveryError', 'indeterminate', 'unexpected-error'],
+  ['dictionaryError', 'indeterminate', 'unexpected-error']
+];
 const fixtures = {
   ...security.normal,
   ...security.revisions,
   ...signingTimes,
-  ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array))
+  ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array)),
+  ...Object.fromEntries(boundaryRows.map(([name]) => [name, boundary[name]]))
 };
 const workerUrl = pathToFileURL(path.resolve('dist/assets', entry)).href;
 const harness = `const { parentPort } = require('node:worker_threads');
@@ -51,7 +62,9 @@ try {
     ['okDssObjectStream', 'intact', 'extended-with-validation-data'],
     ['pageContent', 'modified-after-signing', 'content-changed-after-signing'],
     ['freeLiveObject', 'modified-after-signing', 'content-changed-after-signing'],
-    ['shadowObject', 'modified-after-signing', 'unclassified-change-after-signing']
+    ['shadowObject', 'modified-after-signing', 'unclassified-change-after-signing'],
+    // Error-versus-information boundaries (rows 12, 17, 22, 24, 33, 35).
+    ...boundaryRows
   ]) {
     const message = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => { cleanup(); reject(new Error('Built worker timeout')); }, 15000);

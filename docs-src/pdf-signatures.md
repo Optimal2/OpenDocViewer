@@ -108,7 +108,10 @@ certificate; it is never guessed from the key length. A hash, signature algorith
 that WebCrypto lacks (for example SHA-224 or brainpool) is `not-checked-in-viewer` /
 `algorithm-unsupported`; a missing `crypto.subtle` is `not-checked-in-viewer` /
 `viewer-error`; a public key the browser rejects is `indeterminate` / `key-import-failed`.
-These decisions use typed errors and `err.name`, never message text.
+These decisions use typed errors and `err.name`, never message text. An ECDSA signature
+value that is not a DER SEQUENCE of two INTEGERs, or whose INTEGER is longer than the
+curve's point size, is `unreadable` / `cms-malformed`; an unsupported curve is checked first
+and stays `not-checked-in-viewer`.
 
 ### Status model
 
@@ -179,6 +182,12 @@ window, inclusively. The current clock is never consulted: a certificate that ex
 signing is normal for an archived document. There is deliberately no clock-skew tolerance on
 `notBefore`. Missing time, unreadable certificate dates and a missing certificate are green
 `not-checked` results with their respective information codes.
+
+The `signingTime` attribute is read as the signer stated it. With several `signingTime`
+attributes (RFC 5652 allows one) or several values in one, the first in encoded order is used.
+A value without a usable time (no value, or a string that is not a date) is ignored and the
+next source is used; a string that does read as a date is used as that date. All of these
+are signed by the signer, so they carry the same backdating caveat as a regular attribute.
 
 Unless the source is a verified timestamp, the dialog states as neutral information that the
 signing time is the signer's own claim. This is the residual backdating risk: a signer can
@@ -616,7 +625,14 @@ status model it also rewrites OIDs inside the CMS without touching the signed by
 named curve), corrupts an EC public key, writes a timestamp with an unknown imprint
 algorithm, an over-budget CMS gap, an encrypted trailer, undecodable structural stream
 filters and more than 256 signature dictionaries; each row asserts `integrity`,
-`integrityCode` and both switch settings. A guard test runs every fixture and requires a
+`integrityCode` and both switch settings. `createBoundaryFixtures` (with `rewriteCms`, which
+re-encodes a CMS after signing) covers the error-versus-information boundaries in
+`pdfSignatureErrorBoundaries.test.js`: a missing versus an unknown digest OID, an unparseable
+TSTInfo or empty imprint versus an unknown imprint algorithm, a missing signature value,
+malformed versus unsupported-curve ECDSA, the discovery object limit versus any other
+discovery error, a signature dictionary that cannot be decoded, and several or malformed
+`signingTime` attributes. Two rows cannot be reached through pkijs parsing and use a focused
+pkijs mock: signed attributes without an encoded value and unreadable certificate dates. A guard test runs every fixture and requires a
 non-null `integrityCode` for every non-intact signature. The
 Vitest security suites also cover nested ASN.1/PDF input, a 50 MiB extension, worker
 timeouts/errors, bounded worker recreation, bounded fallback and disposal. Parser tests
@@ -633,7 +649,9 @@ mutation groups are detected. Run the unmodified suite again afterwards. Status-
 groups: re-adding the curve guess, ignoring typed viewer limits, losing a structural limit in
 pdf-lib's error wrapping, an inspector read error failing open, and losing the timeout code.
 The signing-time group accepts a timestamp with a wrong imprint as the signing time and must
-be caught. Appended-revision groups: removing the cross-reference consistency check, ignoring deleted
+be caught. Boundary groups: a missing digest OID or an unparseable TSTInfo falling through to
+green `algorithm-unsupported`, and an oversized ECDSA INTEGER reaching the generic error path.
+Appended-revision groups: removing the cross-reference consistency check, ignoring deleted
 entries, allowing a reused object stream number, letting validation data win over content,
 allowing a visible timestamp widget,
 accepting orphan objects, trusting an unhooked parser, and skipping the `/Prev` chain.
@@ -650,7 +668,7 @@ badges, with storage/rendering/inspection I/O mocked.
 
 The mutation runner additionally checks that renamed/minified PDF classes cannot hide
 signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`
-to inspect 24 generated signed PDFs (positive, defect and not-checked rows, embedded/document
+to inspect 31 generated PDFs (positive, defect and not-checked rows, error boundaries, embedded/document
 timestamp rows, plus appended-revision rows that prove the pdf-lib parser hooks survive
 minification, asserting `integrity`, `integrityCode` and the signing-time fields) through the
 actual minified worker artifact.

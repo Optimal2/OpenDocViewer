@@ -12,6 +12,7 @@ const workerTests = 'src/utils/__tests__/pdfSignatureWorkerSecurity.test.js';
 const inspectorTests = 'src/utils/__tests__/pdfSignatureInspector.test.js';
 const revisionTests = 'src/utils/__tests__/pdfSignatureRevisions.test.js';
 const signingTimeTests = 'src/utils/__tests__/pdfSignatureSigningTime.test.js';
+const boundaryTests = 'src/utils/__tests__/pdfSignatureErrorBoundaries.test.js';
 const mutations = [
   ['F1', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && !encapsulated) {', tests, 'F1'],
   ['F2', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && findAttribute(signerInfo.signedAttrs, OID_ATTR_MESSAGE_DIGEST)) {', tests, 'F2'],
@@ -34,6 +35,13 @@ const mutations = [
     'return { signatures: [] };', inspectorTests, 'I2'],
   ['Worker timeout code lost', inspector, "markBroken(handle, `signature worker timeout after ${timeoutMs} ms`, 'timeout');",
     'markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);', workerTests, 'F6 timeout'],
+  // Error-versus-information boundaries: a defect must never fall through to a green viewer limit.
+  ['Missing digest OID treated as unsupported', parser, 'if (!digestOid) return signedDataFailure(',
+    'if (false) return signedDataFailure(', boundaryTests, 'row 12 missing digest algorithm OID'],
+  ['Unparseable TSTInfo treated as unsupported', parser, "setIntegrity(info, 'unreadable', 'cms-malformed', `document timestamp not parseable",
+    "setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported', `document timestamp not parseable", boundaryTests, 'TSTInfo is not BER'],
+  ['Oversized ECDSA INTEGER left to the generic error path', parser, "return 'malformed'; // an INTEGER longer than the curve's point size",
+    "throw new RangeError('offset is out of bounds');", boundaryTests, 'longer than the curve size'],
   // Signing time: an unverified timestamp must never become the selected time.
   ['Unverified timestamp accepted as signing time', parser, 'if (!imprintMatches || !tst.genTime) {',
     'if (!tst.genTime) {', signingTimeTests, 'wrong imprint'],

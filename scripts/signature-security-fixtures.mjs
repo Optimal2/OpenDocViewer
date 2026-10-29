@@ -78,6 +78,124 @@ export async function swapEncapsulatedDigest(bytes, algorithm) {
   return copy;
 }
 
+/**
+ * Re-encode the first signature's CMS after `mutate(signedData, signerInfo)`.
+ * Only the CMS inside the /Contents gap changes, so ByteRange and signed bytes
+ * stay valid; fields outside the signed attributes keep the signature verifiable.
+ * @param {Uint8Array} bytes
+ * @param {(signedData: any, signerInfo: any) => (void|Promise<void>)} mutate
+ */
+export async function rewriteCms(bytes, mutate) {
+  const br = byteRange(bytes);
+  const der = new Uint8Array(Buffer.from(latin1Text(bytes.subarray(br[1] + 1, br[2] - 1)), 'hex'));
+  const parsed = asn1js.fromBER(der.buffer); // the zero padding after the CMS is ignored
+  if (parsed.offset === -1) throw new Error('fixture CMS parse failed');
+  const contentInfo = new pkijs.ContentInfo({ schema: parsed.result });
+  const signedData = new pkijs.SignedData({ schema: contentInfo.content });
+  await mutate(signedData, signedData.signerInfos[0]);
+  contentInfo.content = signedData.toSchema(true);
+  return patchContents(bytes, br[1] + 1, new Uint8Array(contentInfo.toSchema().toBER(false)));
+}
+
+/** A UTF-16BE PDF hex string long enough that pdf-lib's text decoding throws a RangeError. */
+const OVERSIZED_TEXT_HEX = `<FEFF${'0041'.repeat(1000000)}>`;
+
+/**
+ * Fixtures for the error-versus-information boundaries of the status model
+ * (docs-src/pdf-signatures.md, design rows 12, 17, 21, 22, 24, 33, 35 and the
+ * signing-time edge cases). Each one changes exactly the field its row tests.
+ */
+export async function createBoundaryFixtures() {
+  const normal = await createSignatureFixtures();
+  const pki = await createFixturePki();
+  const valid = normal['valid-rsa.pdf'];
+  const ecdsa = normal['cades-ecdsa-invisible.pdf'];
+  const signature = (bytes) => async (_sd, signerInfo) => {
+    signerInfo.signature = new asn1js.OctetString({ valueHex: new Uint8Array(bytes).buffer });
+  };
+  async function docTimestamp(buildToken) {
+    const builder = baseSignedPdf({ fieldName: 'DocTS', visible: false,
+      sigOptions: { subFilter: 'ETSI.RFC3161', nameLiteral: 'ODV Fixture Timestamping TSA' } });
+    const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
+    return signFile(rev.bytes, rev.offsets.get(8), buildToken);
+  }
+  /** A document timestamp whose encapsulated content is `content` instead of a TSTInfo; the CMS itself verifies. */
+  const docTimestampContent = (content) => docTimestamp(() => buildSignedData({ signer: pki.tsa, certificates: [pki.ca.cert],
+    eContentType: '1.2.840.113549.1.9.16.1.4', eContentBytes: content, signedOverBytes: content }));
+  async function approval({ extra = '', configure = null } = {}) {
+    const builder = baseSignedPdf({ fieldName: 'Boundary', visible: false,
+      sigOptions: { subFilter: 'adbe.pkcs7.detached', extra } });
+    const rev = builder.serialize();
+    return signFile(rev.bytes, rev.offsets.get(8), (signedOverBytes) =>
+      buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes, configure }));
+  }
+  const signingTimeAttr = (...values) => new pkijs.Attribute({ type: '1.2.840.113549.1.9.5', values });
+  const time = (iso) => new asn1js.GeneralizedTime({ valueDate: new Date(iso) });
+  /** Insert extra signingTime attributes before or after the builder's own (2026-03-05T12:30:00Z). */
+  const withSigningTimes = (before, after = []) => ({ configure(sd) {
+    const attrs = sd.signerInfos[0].signedAttrs.attributes;
+    const at = attrs.findIndex((attr) => attr.type === '1.2.840.113549.1.9.5');
+    attrs.splice(at, 0, ...before);
+    attrs.splice(at + before.length + 1, 0, ...after);
+  } });
+  // The builder's signingTime attribute replaced by `attr` (null removes it).
+  const replaceSigningTime = (attr) => ({ configure(sd) {
+    const attrs = sd.signerInfos[0].signedAttrs.attributes;
+    const at = attrs.findIndex((a) => a.type === '1.2.840.113549.1.9.5');
+    attrs.splice(at, 1, ...(attr ? [attr] : []));
+  } });
+  const mDate = '/M (D:20260305123000Z) ';
+
+  return {
+    normal,
+    // Row 12: an empty digestAlgorithm OID (06 00) parses to algorithmId ''.
+    missingDigestOid: await rewriteCms(valid, (_sd, signerInfo) => {
+      signerInfo.digestAlgorithm = new pkijs.AlgorithmIdentifier({ algorithmId: '' });
+    }),
+    unknownDigest: patchContentsHex(valid, OID_DER.sha256, OID_DER.sha3_256),
+    // Row 17: TSTInfo that is not BER, BER that is not a TSTInfo, an empty imprint, an empty imprint OID.
+    timestampTstNotBer: await docTimestampContent(new Uint8Array([0x30, 0x45, 0x02, 0x01])),
+    timestampTstWrongSchema: await docTimestampContent(new Uint8Array(new asn1js.Sequence({
+      value: [new asn1js.Integer({ value: 1 })] }).toBER(false))),
+    timestampEmptyImprint: await docTimestamp((docBytes) => buildTstToken({ signer: pki.tsa, certificates: [pki.ca.cert],
+      docBytes, imprintBytes: new Uint8Array(0) })),
+    timestampEmptyImprintOid: await docTimestamp((docBytes) => buildTstToken({ signer: pki.tsa, certificates: [pki.ca.cert],
+      docBytes, imprintOid: '' })),
+    timestampUnknownImprint: await docTimestamp((docBytes) => buildTstToken({ signer: pki.tsa, certificates: [pki.ca.cert],
+      docBytes, imprintOid: '2.16.840.1.101.3.4.2.8' })),
+    // Row 22: an empty signature OCTET STRING.
+    missingSignatureValue: await rewriteCms(valid, signature([])),
+    // Row 24: ECDSA signature values that are not a DER SEQUENCE of two INTEGERs.
+    ecdsaTruncatedDer: await rewriteCms(ecdsa, signature([0x30, 0x45, 0x02, 0x01])),
+    ecdsaNotSequence: await rewriteCms(ecdsa, signature([0x02, 0x01, 0x01])),
+    ecdsaOversizedInteger: await rewriteCms(ecdsa, signature([0x30, 0x26, 0x02, 0x21, 0x7f, ...new Array(32).fill(1), 0x02, 0x01, 0x01])),
+    unknownCurve: patchContentsHex(ecdsa, OID_DER.p256, OID_DER.prime239v3),
+    // Row 33: more than 100,000 objects reach discovery (PDFNumber instances are distinct).
+    discoveryLimit: await (async () => {
+      const doc = await PDFDocument.load(normal['unsigned.pdf']);
+      doc.context.register(doc.context.obj(new Array(100001).fill(0)));
+      return doc.save({ useObjectStreams: false });
+    })(),
+    // Row 33: discovery decodes every /Type; this one makes pdf-lib's UTF-16 decoding throw.
+    discoveryError: await (async () => {
+      const builder = new PdfBuilder();
+      builder.set(1, '<< /Type /Catalog /Pages 2 0 R >>');
+      builder.set(2, '<< /Type /Pages /Kids [] /Count 0 >>');
+      builder.set(3, `<< /Type ${OVERSIZED_TEXT_HEX} >>`);
+      return builder.serialize().bytes;
+    })(),
+    // Row 35: only dictionaryInfo decodes /Reason; this one makes it throw for this signature.
+    dictionaryError: await approval({ extra: `/Reason ${OVERSIZED_TEXT_HEX} ` }),
+    // Signing-time attribute edge cases (the signer-chosen attribute order decides).
+    signingTimeFirstOfTwo: await approval({ ...withSigningTimes([], [signingTimeAttr(time('2031-01-01T00:00:00Z'))]) }),
+    signingTimeOutsideFirst: await approval({ ...withSigningTimes([signingTimeAttr(time('2031-01-01T00:00:00Z'))]) }),
+    signingTimeTwoValues: await approval({ ...replaceSigningTime(signingTimeAttr(time('2031-01-01T00:00:00Z'), time('2026-03-05T12:30:00Z'))) }),
+    signingTimeNotATime: await approval({ extra: mDate, ...replaceSigningTime(signingTimeAttr(new asn1js.Utf8String({ value: 'not a time' }))) }),
+    signingTimeDigitString: await approval({ extra: mDate, ...replaceSigningTime(signingTimeAttr(new asn1js.Utf8String({ value: '20310101000000Z' }))) }),
+    signingTimeNoValue: await approval({ extra: mDate, ...replaceSigningTime(signingTimeAttr()) })
+  };
+}
+
 export async function createSecurityFixtures() {
   const normal = await createSignatureFixtures();
   const pki = await createFixturePki();
