@@ -274,6 +274,8 @@ describe('integrity statuses', () => {
     expect(sig.subFilter).toBe('ETSI.RFC3161');
     expect(sig.integrity).toBe('intact');
     expect(sig.signer).toContain('TSA');
+    expect(sig.signingTimeSource).toBe('timestamp');
+    expect(sig.signingTimeCheck).toBe('within-validity');
   });
 
   it('kind certification: DocMDP /Reference marks a certification signature', async () => {
@@ -305,8 +307,8 @@ describe('data contract shape', () => {
     const report = await collectPdfSignatures(fixtures['two-signatures.pdf']);
     const keys = [
       'fieldName', 'signer', 'signerSource', 'signerOrganization', 'issuer', 'serial',
-      'notBefore', 'notAfter', 'signingTime', 'signingTimeSource',
-      'reason', 'location', 'subFilter', 'kind', 'integrity', 'integrityCode',
+      'notBefore', 'notAfter', 'signingTime', 'signingTimeSource', 'signingTimeCheck', 'signingTimeCode',
+      'signatureTimestampCheck', 'reason', 'location', 'subFilter', 'kind', 'integrity', 'integrityCode',
       'integrityReason', 'coversWholeFile'
     ];
     for (const sig of report.signatures) {
@@ -318,7 +320,9 @@ describe('data contract shape', () => {
       ]).toContain(sig.integrity);
       expect(sig.integrityCode === null || INTEGRITY_CODES.includes(sig.integrityCode)).toBe(true);
       expect(['certificate', 'pdf-name', null]).toContain(sig.signerSource);
-      expect(['signed-attribute', 'pdf-M', 'none']).toContain(sig.signingTimeSource);
+      expect(['timestamp', 'signed-attribute', 'pdf-M', 'none']).toContain(sig.signingTimeSource);
+      expect(['within-validity', 'outside-validity', 'timestamp-invalid', 'not-checked']).toContain(sig.signingTimeCheck);
+      expect(['verified', 'invalid', 'not-checked', null]).toContain(sig.signatureTimestampCheck);
       expect(typeof sig.coversWholeFile === 'boolean' || sig.coversWholeFile === null).toBe(true);
     }
   });
@@ -369,6 +373,8 @@ describe('signing time field group', () => {
     const sig = await one('corrupt-contents.pdf');
     expect(sig.signingTimeSource).toBe('none');
     expect(sig.signingTime).toBeNull();
+    expect(sig.signingTimeCheck).toBe('not-checked');
+    expect(sig.signingTimeCode).toBe('no-certificate');
   });
 });
 

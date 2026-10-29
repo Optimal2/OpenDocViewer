@@ -809,6 +809,8 @@
       "tooltip": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}} – show signature details"
     },
     "notCheckedInViewer": "Not checked in the viewer: issuer trust and revocation status",
+    "timestampNotChecked": "A timestamp is present, but this browser could not check it.",
+    "signerClaimedSigningTime": "The signing time is the signer's own claim; only a verified timestamp proves it.",
     "dialog": {
       "title": "Signatures",
       "subtitle": "{count, plural, =1 {1 signature in this document.} other {# signatures in this document.}}",
@@ -897,6 +899,7 @@
       "timestamp": "Timestamp"
     },
     "timeSource": {
+      "timestamp": "From a verified timestamp",
       "signedAttribute": "From the signed attributes",
       "pdfM": "From the PDF signature dictionary (/M)",
       "none": "No signing time recorded"

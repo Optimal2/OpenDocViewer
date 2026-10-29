@@ -6,11 +6,18 @@ import { readdir } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { createSecurityFixtures } from './signature-security-fixtures.mjs';
+import { createFixturePki, createSigningTimeFixtures } from './generate-signature-fixtures.mjs';
 
 const entry = (await readdir('dist/assets')).find((name) => /^pdfSignatureWorker-.*\.js$/.test(name));
 assert.ok(entry, 'Build the application before testing the production worker');
 const security = await createSecurityFixtures();
-const fixtures = { ...security.normal, ...security.revisions, ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array)) };
+const signingTimes = await createSigningTimeFixtures(await createFixturePki());
+const fixtures = {
+  ...security.normal,
+  ...security.revisions,
+  ...signingTimes,
+  ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array))
+};
 const workerUrl = pathToFileURL(path.resolve('dist/assets', entry)).href;
 const harness = `const { parentPort } = require('node:worker_threads');
 globalThis.self = { postMessage: message => parentPort.postMessage(message) };
@@ -19,8 +26,8 @@ const worker = new Worker(harness, { eval: true });
 try {
   // integrity + integrityCode per status-model row; minification must not change a verdict
   // (typed limit errors, curve OIDs and the pdf-lib wrapping all survive the production build).
-  for (const [name, expected, expectedCode] of [
-    ['valid-rsa.pdf', 'intact', null], ['doc-timestamp-rfc3161.pdf', 'intact', null],
+  for (const [name, expected, expectedCode, expectedTimeSource, expectedTimeCheck] of [
+    ['valid-rsa.pdf', 'intact', null], ['doc-timestamp-rfc3161.pdf', 'intact', null, 'timestamp', 'within-validity'],
     ['pkcs7-sha1.pdf', 'intact', null], ['cades-ecdsa-invisible.pdf', 'intact', null],
     ['digest-mismatch.pdf', 'digest-mismatch', 'content-digest-mismatch'],
     ['corrupt-contents.pdf', 'unreadable', 'cms-malformed'],
@@ -31,6 +38,12 @@ try {
     ['structureFilterChain', 'not-checked-in-viewer', 'structure-unsupported'],
     ['encrypted', 'not-checked-in-viewer', 'encrypted'],
     ['wrongIssuer', 'unreadable', 'signer-certificate-missing'],
+    // Signing-time verification must survive minification too.
+    ['valid-signature-timestamp.pdf', 'intact', null, 'timestamp', 'within-validity'],
+    ['signature-timestamp-wrong-imprint.pdf', 'intact', null, 'signed-attribute', 'timestamp-invalid'],
+    ['signature-timestamp-bad-authority.pdf', 'intact', null, 'signed-attribute', 'timestamp-invalid'],
+    ['signature-timestamp-unsupported.pdf', 'intact', null, 'signed-attribute', 'within-validity'],
+    ['document-timestamp-gen-time-priority.pdf', 'intact', null, 'timestamp', 'within-validity'],
     // Appended-revision classifier: the pdf-lib parser hooks must survive minification
     // (a missing hook would turn every green row below into a warning, never the reverse).
     ['okDss', 'intact', 'extended-with-validation-data'],
@@ -50,8 +63,11 @@ try {
       worker.postMessage({ type: 'collectPdfSignatures', requestId: 1, bytes: fixtures[name] });
     });
     assert.equal(message.ok, true);
-    assert.equal(message.report?.signatures?.[0]?.integrity, expected, name);
-    assert.equal(message.report?.signatures?.[0]?.integrityCode, expectedCode, name);
+    const signature = message.report?.signatures?.[0];
+    assert.equal(signature?.integrity, expected, name);
+    assert.equal(signature?.integrityCode, expectedCode, name);
+    if (expectedTimeSource) assert.equal(signature?.signingTimeSource, expectedTimeSource, name);
+    if (expectedTimeCheck) assert.equal(signature?.signingTimeCheck, expectedTimeCheck, name);
     console.log(`Production worker: ${name} -> ${expected} / ${expectedCode ?? '-'}`);
   }
 } finally { await worker.terminate(); }

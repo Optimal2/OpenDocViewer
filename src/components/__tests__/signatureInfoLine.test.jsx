@@ -124,3 +124,25 @@ it('dialog shows signing-time results only when the parser provides them', async
   expect(outside.querySelector('.odv-signature-problem').textContent).toBe(r.signingTimeCode['signed-before-certificate-valid']);
   expect(outside.querySelector('.odv-signature-status').className).toContain('--warning');
 });
+
+it.each(['en', 'sv'])('dialog explains claimed times and unchecked timestamps as neutral information (%s)', async (language) => {
+  await i18n.changeLanguage(language);
+  const r = (language === 'sv' ? sv : en).signatures;
+  await render(SignatureDetailsDialog, [
+    {
+      integrity: 'intact', signingTime: '2026-04-05T12:30:00.000Z', signingTimeSource: 'timestamp',
+      signingTimeCheck: 'within-validity', signatureTimestampCheck: 'verified',
+    },
+    {
+      integrity: 'intact', signingTime: '2026-03-05T12:30:00.000Z', signingTimeSource: 'signed-attribute',
+      signingTimeCheck: 'within-validity', signatureTimestampCheck: 'not-checked',
+    },
+  ]);
+  const [verified, claimed] = container.querySelectorAll('.odv-signature-entry');
+  const lines = (entry) => [...entry.querySelectorAll('.odv-signature-info[role="note"] p')].map((p) => p.textContent);
+  expect(lines(verified)).toEqual([r.notCheckedInViewer]);
+  expect(verified.textContent).toContain(r.timeSource.timestamp);
+  expect(lines(claimed)).toEqual([r.notCheckedInViewer, r.timestampNotChecked, r.signerClaimedSigningTime]);
+  expect(claimed.querySelector('.odv-signature-info').className).not.toMatch(/warning|error/);
+  expect(claimed.querySelector('.odv-signature-status').className).toContain('--ok');
+});

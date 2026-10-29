@@ -809,6 +809,8 @@
       "tooltip": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}} – visa signaturdetaljer"
     },
     "notCheckedInViewer": "Inte kontrollerat i visaren: utfärdarens förtroende och spärrstatus",
+    "timestampNotChecked": "En tidsstämpel finns, men webbläsaren kunde inte kontrollera den.",
+    "signerClaimedSigningTime": "Signeringstiden är undertecknarens egen uppgift; bara en verifierad tidsstämpel bevisar den.",
     "dialog": {
       "title": "Signaturer",
       "subtitle": "{count, plural, =1 {1 signatur i detta dokument.} other {# signaturer i detta dokument.}}",
@@ -897,6 +899,7 @@
       "timestamp": "Tidsstämpel"
     },
     "timeSource": {
+      "timestamp": "Från en verifierad tidsstämpel",
       "signedAttribute": "Från de signerade attributen",
       "pdfM": "Från PDF:ens signaturlexikon (/M)",
       "none": "Ingen signeringstid registrerad"

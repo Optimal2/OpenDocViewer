@@ -66,7 +66,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
 | <code>src/components/PrintSelectionWorkspace.jsx</code> | 2504 | 1 | 5 | high | Full-window print-selection workspace. |
 | <code>src/components/Resizer.jsx</code> | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
-| <code>src/components/SignatureDetailsDialog.jsx</code> | 561 | 1 | 12 | high | Signature details dialog \(browser integrity\). |
+| <code>src/components/SignatureDetailsDialog.jsx</code> | 573 | 1 | 12 | high | Signature details dialog \(browser integrity\). |
 | <code>src/components/SignatureOverviewButton.jsx</code> | 64 | 1 | 2 | high | Toolbar signature overview button. |
 | <code>src/components/SignatureOverviewDialog.jsx</code> | 302 | 1 | 3 | high | Signature overview dialog, opened from the toolbar overview button. |
 | <code>src/components/SignatureStatusBadge.jsx</code> | 104 | 1 | 2 | high | Small signature symbol shown next to a document&#39;s &quot;DOK n&quot; label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\). |
@@ -125,7 +125,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfSignatureDocuments.js</code> | 255 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 195 | 2 | 5 | high | PDF signature inspection - the single entry point for application code. |
 | <code>src/utils/pdfSignatureRevisions.js</code> | 702 | 1 | 15 | high | Appended-revision classifier for PDF signatures. |
-| <code>src/utils/pdfSignatures.js</code> | 1401 | 3 | 23 | high | PDF signature collection - level 1 integrity inspection. |
+| <code>src/utils/pdfSignatures.js</code> | 1514 | 3 | 26 | high | PDF signature collection - level 1 integrity inspection. |
 | <code>src/utils/pdfSignatureStatus.js</code> | 300 | 6 | 21 | high | Signature UI status helpers for browser integrity. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |

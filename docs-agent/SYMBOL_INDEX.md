@@ -512,18 +512,18 @@
 | <code>Resizer</code> | constant | <code>src/components/Resizer.jsx:61</code> | Resizer component. |
 | <code>ResizerProps</code> | typedef | <code>src/components/Resizer.jsx:43</code> | Props for . |
 | <code>ResizeStartHandler</code> | typedef | <code>src/components/Resizer.jsx:36</code> | Handler invoked when a resize interaction is initiated. |
-| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:182</code> |  |
-| <code>getInformationLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:125</code> | Information lines after the always-on line: the integrity code of an intact or not-checked signature \(problems are explained next to the status instead\) and a signing-time check t... |
+| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:194</code> |  |
+| <code>getInformationLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:127</code> | Information lines after the always-on line: the integrity code of an intact or not-checked signature \(problems are explained next to the status instead\) and a signing-time check t... |
 | <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:49</code> |  |
-| <code>getPassedChecks</code> | function | <code>src/components/SignatureDetailsDialog.jsx:105</code> | What was checked and passed for one signature, in display order. |
-| <code>getProblemLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:145</code> | Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning. |
-| <code>getSignerSourceNote</code> | function | <code>src/components/SignatureDetailsDialog.jsx:86</code> | Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify. |
+| <code>getPassedChecks</code> | function | <code>src/components/SignatureDetailsDialog.jsx:107</code> | What was checked and passed for one signature, in display order. |
+| <code>getProblemLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:157</code> | Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning. |
+| <code>getSignerSourceNote</code> | function | <code>src/components/SignatureDetailsDialog.jsx:88</code> | Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify. |
 | <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:66</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:223</code> |  |
-| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:249</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
-| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:265</code> | Keep Tab navigation inside the dialog while it is open. |
-| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureDetailsDialog.jsx:161</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
-| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:305</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:235</code> |  |
+| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:261</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
+| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:277</code> | Keep Tab navigation inside the dialog while it is open. |
+| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureDetailsDialog.jsx:173</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
+| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:317</code> |  |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewButton.jsx:32</code> |  |
 | <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureOverviewButton.jsx:19</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewDialog.jsx:57</code> |  |
@@ -1194,29 +1194,32 @@
 | <code>module:utils/pdfSignatureRevisions~RevisionVerdict</code> | typedef | <code>src/utils/pdfSignatureRevisions.js:29</code> |  |
 | <code>module:utils/pdfSignatureRevisions</code> | module | <code>src/utils/pdfSignatureRevisions.js:1</code> | Appended-revision classifier for PDF signatures. |
 | <code>module:utils/pdfSignatureRevisions~Verdict</code> | class | <code>src/utils/pdfSignatureRevisions.js:195</code> |  |
-| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1321</code> | Collect signature information from PDF bytes. |
-| <code>module:utils/pdfSignatures~curvePointSize</code> | function | <code>src/utils/pdfSignatures.js:663</code> | Point size of the certificate&#39;s named curve, or null when the SPKI does not name one of the WebCrypto curves. |
-| <code>module:utils/pdfSignatures~DECODABLE_STREAM_FILTERS</code> | constant | <code>src/utils/pdfSignatures.js:124</code> | Structural stream filters pdf-lib&#39;s decodePDFRawStream can decode. |
-| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:320</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
-| <code>module:utils/pdfSignatures~errorSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1109</code> | Placeholder for an exception: ViewerLimitError -&amp;gt; not checked with its code, anything else -&amp;gt; indeterminate. |
-| <code>module:utils/pdfSignatures.indeterminateSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1098</code> | Inspection failed in a way that is neither a known viewer limit nor proof of a defect \(shown as a warning\). |
-| <code>module:utils/pdfSignatures.installIndirectObjectHeaderProbe</code> | function | <code>src/utils/pdfSignatures.js:1143</code> | pdf-lib&#39;s skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws \(building an Error\) on each miss: ~17 us per byte, so a 64 KiB prefix cost a... |
-| <code>module:utils/pdfSignatures.notCheckedSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1087</code> | The viewer could not inspect the document&#39;s signatures because of its own limits \(budget, worker, library, read error\); there is no evidence of a defect. |
-| <code>module:utils/pdfSignatures~oidOf</code> | function | <code>src/utils/pdfSignatures.js:649</code> | Dotted OID of an asn1js ObjectIdentifier \(or raw OID element\), else null. |
-| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:247</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
+| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1434</code> | Collect signature information from PDF bytes. |
+| <code>module:utils/pdfSignatures~curvePointSize</code> | function | <code>src/utils/pdfSignatures.js:673</code> | Point size of the certificate&#39;s named curve, or null when the SPKI does not name one of the WebCrypto curves. |
+| <code>module:utils/pdfSignatures~DECODABLE_STREAM_FILTERS</code> | constant | <code>src/utils/pdfSignatures.js:131</code> | Structural stream filters pdf-lib&#39;s decodePDFRawStream can decode. |
+| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:327</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
+| <code>module:utils/pdfSignatures~errorSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1222</code> | Placeholder for an exception: ViewerLimitError -&amp;gt; not checked with its code, anything else -&amp;gt; indeterminate. |
+| <code>module:utils/pdfSignatures.indeterminateSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1211</code> | Inspection failed in a way that is neither a known viewer limit nor proof of a defect \(shown as a warning\). |
+| <code>module:utils/pdfSignatures.installIndirectObjectHeaderProbe</code> | function | <code>src/utils/pdfSignatures.js:1256</code> | pdf-lib&#39;s skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws \(building an Error\) on each miss: ~17 us per byte, so a 64 KiB prefix cost a... |
+| <code>module:utils/pdfSignatures.notCheckedSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1200</code> | The viewer could not inspect the document&#39;s signatures because of its own limits \(budget, worker, library, read error\); there is no evidence of a defect. |
+| <code>module:utils/pdfSignatures~oidOf</code> | function | <code>src/utils/pdfSignatures.js:659</code> | Dotted OID of an asn1js ObjectIdentifier \(or raw OID element\), else null. |
+| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:254</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
 | <code>module:utils/pdfSignatures~PdfSignatureInfo</code> | typedef | <code>src/utils/pdfSignatures.js:22</code> | One inspected PDF signature \(level-1 integrity view\). |
-| <code>module:utils/pdfSignatures~PdfSignatureIntegrity</code> | typedef | <code>src/utils/pdfSignatures.js:58</code> | Produced integrity values. |
-| <code>module:utils/pdfSignatures~PdfSignatureIntegrityCode</code> | typedef | <code>src/utils/pdfSignatures.js:64</code> | Closed set of integrity codes \(see INTEGRITY_CODES in utils/pdfSignatureStatus.js\). |
-| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:69</code> |  |
-| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:234</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
-| <code>module:utils/pdfSignatures~placeholderSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1070</code> | Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned. |
-| <code>module:utils/pdfSignatures~setIntegrity</code> | function | <code>src/utils/pdfSignatures.js:467</code> |  |
-| <code>module:utils/pdfSignatures~setIntegrityFromError</code> | function | <code>src/utils/pdfSignatures.js:480</code> | Classify an exception: a ViewerLimitError is not-checked-in-viewer with its own code, anything else cannot be classified and is indeterminate . |
-| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:77</code> | SubFilters with level-1 handling. |
+| <code>module:utils/pdfSignatures~PdfSignatureIntegrity</code> | typedef | <code>src/utils/pdfSignatures.js:64</code> | Produced integrity values. |
+| <code>module:utils/pdfSignatures~PdfSignatureIntegrityCode</code> | typedef | <code>src/utils/pdfSignatures.js:70</code> | Closed set of integrity codes \(see INTEGRITY_CODES in utils/pdfSignatureStatus.js\). |
+| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:75</code> |  |
+| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:241</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
+| <code>module:utils/pdfSignatures~placeholderSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:1182</code> | Document-level placeholder: one signature entry without identity fields, so an inspection failure never claims that the document is unsigned. |
+| <code>module:utils/pdfSignatures~setIntegrity</code> | function | <code>src/utils/pdfSignatures.js:477</code> |  |
+| <code>module:utils/pdfSignatures~setIntegrityFromError</code> | function | <code>src/utils/pdfSignatures.js:490</code> | Classify an exception: a ViewerLimitError is not-checked-in-viewer with its own code, anything else cannot be classified and is indeterminate . |
+| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:83</code> | SubFilters with level-1 handling. |
+| <code>module:utils/pdfSignatures~updateSigningTimeWindow</code> | function | <code>src/utils/pdfSignatures.js:845</code> | Compare only the selected signing time with the certificate window, never with now. |
 | <code>module:utils/pdfSignatures</code> | module | <code>src/utils/pdfSignatures.js:1</code> | PDF signature collection - level 1 integrity inspection. |
-| <code>module:utils/pdfSignatures~verifyCmsSignature</code> | function | <code>src/utils/pdfSignatures.js:1001</code> | Verify the CMS signature value with WebCrypto. |
-| <code>module:utils/pdfSignatures~ViewerLimitError</code> | class | <code>src/utils/pdfSignatures.js:132</code> | A check the viewer could not perform because of its own limits \(budget, missing algorithm, failing machinery\), with no evidence of a defect. |
-| <code>module:utils/pdfSignatures~WEBCRYPTO_HASHES</code> | constant | <code>src/utils/pdfSignatures.js:122</code> | Hash names WebCrypto implements. |
+| <code>module:utils/pdfSignatures~verifyCmsSignature</code> | function | <code>src/utils/pdfSignatures.js:1113</code> | Verify the CMS signature value with WebCrypto. |
+| <code>module:utils/pdfSignatures~verifyEmbeddedSignatureTimestamp</code> | function | <code>src/utils/pdfSignatures.js:903</code> | Verify the unsigned id-aa-signatureTimeStampToken attribute, when present. |
+| <code>module:utils/pdfSignatures~verifySignedDataStructure</code> | function | <code>src/utils/pdfSignatures.js:719</code> | Parse and verify one CMS SignedData structure. |
+| <code>module:utils/pdfSignatures~ViewerLimitError</code> | class | <code>src/utils/pdfSignatures.js:139</code> | A check the viewer could not perform because of its own limits \(budget, missing algorithm, failing machinery\), with no evidence of a defect. |
+| <code>module:utils/pdfSignatures~WEBCRYPTO_HASHES</code> | constant | <code>src/utils/pdfSignatures.js:129</code> | Hash names WebCrypto implements. |
 | <code>module:utils/pdfSignatureStatus.formatSignatureTime</code> | function | <code>src/utils/pdfSignatureStatus.js:289</code> | Format a signature-related ISO time \(signing, validation, certificate validity\) as local time, &amp;quot;2022-04-27 19:55&amp;quot;, in both supported languages. |
 | <code>module:utils/pdfSignatureStatus.getIntegrityCodeText</code> | function | <code>src/utils/pdfSignatureStatus.js:204</code> | Localized plain-language line for an integrity code, or null for a missing or unknown code \(closed set, nothing outside it is ever rendered\). |
 | <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:183</code> | Shared localized status text for the badge tooltip and the dialogs. |

@@ -314,13 +314,17 @@ async function createFixturePki() {
     ]
   });
 
-  async function leaf(subject, serial, keys, { tsa = false } = {}) {
+  async function leaf(subject, serial, keys, {
+    tsa = false,
+    notBefore = FIXTURE_NOT_BEFORE,
+    notAfter = FIXTURE_NOT_AFTER
+  } = {}) {
     const extensions = [new x509.KeyUsagesExtension(x509.KeyUsageFlags.digitalSignature, true)];
     if (tsa) extensions.push(new x509.ExtendedKeyUsageExtension(['1.3.6.1.5.5.7.3.8'], true));
     return x509.X509CertificateGenerator.create({
       serialNumber: serial,
-      notBefore: FIXTURE_NOT_BEFORE,
-      notAfter: FIXTURE_NOT_AFTER,
+      notBefore,
+      notAfter,
       subject,
       issuer: caCert.subject,
       publicKey: keys.publicKey,
@@ -340,6 +344,7 @@ async function createFixturePki() {
 
   return {
     ca: { cert: caCert },
+    leaf,
     rsa: { keys: rsaKeys, cert: await leaf('CN=ODV Fixture Signer, O=ODV Fixture Users', '11', rsaKeys) },
     ec: { keys: ecKeys, cert: await leaf('CN=ODV Fixture Signer EC, O=ODV Fixture Users', '12', ecKeys) },
     rsa2: { keys: rsa2Keys, cert: await leaf('CN=ODV Fixture Approver, O=ODV Fixture Users', '13', rsa2Keys) },
@@ -410,9 +415,10 @@ async function buildSignedData({
 
 async function buildTstToken({
   signer, certificates = [], docBytes, hashAlg = 'SHA-256', genTime = FIXTURE_SIGNING_TIME,
+  signingTime = genTime, wrongKey = null, imprintBytes = null,
   imprintOid = '2.16.840.1.101.3.4.2.1' // sha-256; override to write an imprint algorithm the viewer lacks
 }) {
-  const imprint = await digestBytes(hashAlg, docBytes);
+  const imprint = imprintBytes ?? await digestBytes(hashAlg, docBytes);
   const tstInfo = new asn1js.Sequence({
     value: [
       new asn1js.Integer({ value: 1 }), // version
@@ -438,11 +444,35 @@ async function buildTstToken({
     signer,
     certificates,
     hashAlg,
-    signingTime: genTime,
+    signingTime,
+    wrongKey,
     eContentType: OID_TST_INFO,
     eContentBytes: tstInfoDer,
     signedOverBytes: tstInfoDer
   });
+}
+
+/**
+ * Add an RFC 3161 signature timestamp to a CMS without re-signing the outer
+ * signature. The token imprints the signature value OCTET STRING contents.
+ */
+async function addSignatureTimestamp(cms, tsa, genTime, options = {}) {
+  const parsed = asn1js.fromBER(bufferOf(cms));
+  if (parsed.offset === -1) throw new Error('fixture CMS parse failed');
+  const contentInfo = new pkijs.ContentInfo({ schema: parsed.result });
+  const signedData = new pkijs.SignedData({ schema: contentInfo.content });
+  const signerInfo = signedData.signerInfos[0];
+  const signatureBytes = new Uint8Array(signerInfo.signature.valueBlock.valueHexView);
+  const tokenDer = await buildTstToken({ signer: tsa, docBytes: signatureBytes, genTime, ...options });
+  const tokenAsn = asn1js.fromBER(bufferOf(tokenDer));
+  if (tokenAsn.offset === -1) throw new Error('fixture timestamp parse failed');
+  const attributes = [...(signerInfo.unsignedAttrs?.attributes ?? []), new pkijs.Attribute({
+    type: '1.2.840.113549.1.9.16.2.14',
+    values: [tokenAsn.result]
+  })];
+  signerInfo.unsignedAttrs = new pkijs.SignedAndUnsignedAttributes({ type: 1, attributes });
+  contentInfo.content = signedData.toSchema(true);
+  return new Uint8Array(contentInfo.toSchema().toBER(false));
 }
 
 // ---------------------------------------------------------------------------
@@ -509,6 +539,92 @@ async function twoSignaturesPdf(pki, { bumpRewrittenGeneration = false } = {}) {
   return signFile(file2, rev2.offsets.get(11), (signedBytes) =>
     buildSignedData({ signer: pki.rsa2, certificates: [pki.ca.cert], signedOverBytes: signedBytes })
   );
+}
+
+export const SIGNING_TIME_FIXTURE_TIMES = Object.freeze({
+  before: new Date(FIXTURE_NOT_BEFORE.getTime() - 60000),
+  after: new Date(FIXTURE_NOT_AFTER.getTime() + 60000),
+  timestamp: new Date(Date.UTC(2026, 3, 5, 12, 30, 0)),
+  expiredSigning: new Date(Date.UTC(2020, 5, 1, 12, 0, 0))
+});
+
+/** Synthetic signing-time and embedded-signature-timestamp fixtures. */
+export async function createSigningTimeFixtures(pki = null) {
+  const material = pki ?? await createFixturePki();
+  const fixtures = {};
+  async function approval({ signer = material.rsa, signingTime = FIXTURE_SIGNING_TIME,
+    timestampGenTime = null, timestampOptions = {} } = {}) {
+    const builder = baseSignedPdf({
+      fieldName: 'SigningTime', visible: false,
+      sigOptions: {
+        subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer',
+        m: signingTime ? pdfDateString(signingTime) : null
+      }
+    });
+    const revision = builder.serialize();
+    return signFile(revision.bytes, revision.offsets.get(8), async (signedOverBytes) => {
+      const cms = await buildSignedData({
+        signer, certificates: [material.ca.cert], signedOverBytes, signingTime
+      });
+      return timestampGenTime
+        ? addSignatureTimestamp(cms, material.tsa, timestampGenTime, timestampOptions)
+        : cms;
+    });
+  }
+
+  fixtures['signing-before-certificate.pdf'] = await approval({ signingTime: SIGNING_TIME_FIXTURE_TIMES.before });
+  fixtures['signing-after-certificate.pdf'] = await approval({ signingTime: SIGNING_TIME_FIXTURE_TIMES.after });
+  fixtures['signing-within-certificate.pdf'] = await approval();
+  fixtures['no-signing-time.pdf'] = await approval({ signingTime: null });
+
+  const expiredSigner = {
+    keys: material.rsa.keys,
+    cert: await material.leaf('CN=ODV Fixture Expired Signer, O=ODV Fixture Users', '21', material.rsa.keys, {
+      notBefore: new Date(Date.UTC(2020, 0, 1)),
+      notAfter: new Date(Date.UTC(2021, 0, 1))
+    })
+  };
+  fixtures['certificate-expired-after-signing.pdf'] = await approval({
+    signer: expiredSigner, signingTime: SIGNING_TIME_FIXTURE_TIMES.expiredSigning
+  });
+
+  fixtures['valid-signature-timestamp.pdf'] = await approval({
+    timestampGenTime: SIGNING_TIME_FIXTURE_TIMES.timestamp
+  });
+  fixtures['signature-timestamp-controls-window.pdf'] = await approval({
+    timestampGenTime: SIGNING_TIME_FIXTURE_TIMES.after
+  });
+  fixtures['signature-timestamp-wrong-imprint.pdf'] = await approval({
+    timestampGenTime: SIGNING_TIME_FIXTURE_TIMES.timestamp,
+    timestampOptions: { imprintBytes: new Uint8Array(32).fill(0x5a) }
+  });
+  fixtures['signature-timestamp-bad-authority.pdf'] = await approval({
+    timestampGenTime: SIGNING_TIME_FIXTURE_TIMES.timestamp,
+    timestampOptions: { wrongKey: material.rsa2.keys }
+  });
+  fixtures['signature-timestamp-unsupported.pdf'] = await approval({
+    timestampGenTime: SIGNING_TIME_FIXTURE_TIMES.timestamp,
+    timestampOptions: { imprintOid: '2.16.840.1.101.3.4.2.8' } // SHA3-256, not mapped by the viewer
+  });
+
+  {
+    const builder = baseSignedPdf({
+      fieldName: 'DocTimePriority', visible: false,
+      sigOptions: {
+        subFilter: 'ETSI.RFC3161', nameLiteral: 'ODV Fixture Timestamping TSA',
+        m: pdfDateString(FIXTURE_SIGNING_TIME)
+      }
+    });
+    const revision = builder.serialize();
+    fixtures['document-timestamp-gen-time-priority.pdf'] = await signFile(
+      revision.bytes, revision.offsets.get(8), (signedOverBytes) => buildTstToken({
+        signer: material.tsa, docBytes: signedOverBytes,
+        genTime: SIGNING_TIME_FIXTURE_TIMES.timestamp,
+        signingTime: FIXTURE_SIGNING_TIME
+      })
+    );
+  }
+  return fixtures;
 }
 
 export async function createSignatureFixtures() {
@@ -784,7 +900,7 @@ export async function createSignatureFixtures() {
 }
 
 // Reusable test-only primitives for adversarial fixtures, with fresh keys per run.
-export { createFixturePki, buildSignedData, buildTstToken, baseSignedPdf, PdfBuilder, signFile,
+export { createFixturePki, buildSignedData, buildTstToken, addSignatureTimestamp, baseSignedPdf, PdfBuilder, signFile,
   sigDictBody, latin1, latin1Text, concatBytes, digestBytes, patchContents,
   patchByteRange, findStartxrefOffset, CONTENTS_CAPACITY_HEX };
 

@@ -11,6 +11,7 @@ const tests = 'src/utils/__tests__/pdfSignatureSecurity.test.js';
 const workerTests = 'src/utils/__tests__/pdfSignatureWorkerSecurity.test.js';
 const inspectorTests = 'src/utils/__tests__/pdfSignatureInspector.test.js';
 const revisionTests = 'src/utils/__tests__/pdfSignatureRevisions.test.js';
+const signingTimeTests = 'src/utils/__tests__/pdfSignatureSigningTime.test.js';
 const mutations = [
   ['F1', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && !encapsulated) {', tests, 'F1'],
   ['F2', parser, 'if (signerInfo.signedAttrs) {', 'if (signerInfo.signedAttrs && findAttribute(signerInfo.signedAttrs, OID_ATTR_MESSAGE_DIGEST)) {', tests, 'F2'],
@@ -33,6 +34,9 @@ const mutations = [
     'return { signatures: [] };', inspectorTests, 'I2'],
   ['Worker timeout code lost', inspector, "markBroken(handle, `signature worker timeout after ${timeoutMs} ms`, 'timeout');",
     'markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);', workerTests, 'F6 timeout'],
+  // Signing time: an unverified timestamp must never become the selected time.
+  ['Unverified timestamp accepted as signing time', parser, 'if (!imprintMatches || !tst.genTime) {',
+    'if (!tst.genTime) {', signingTimeTests, 'wrong imprint'],
   // Appended-revision classifier (docs-src/pdf-signatures.md "Appended revisions").
   ['Xref consistency check removed', revisions, 'assertXrefConsistent(log, E, tail, preSections, pre, tailRecords);', '',
     revisionTests, 'shadow object'],

@@ -65,6 +65,8 @@ function getKindLabel(t, kind) {
  */
 function getSigningTimeSourceLabel(t, source) {
   switch (String(source || '')) {
+    case 'timestamp':
+      return t('signatures.timeSource.timestamp', { defaultValue: 'From a verified timestamp' });
     case 'signed-attribute':
       return t('signatures.timeSource.signedAttribute', { defaultValue: 'From the signed attributes' });
     case 'pdf-M':
@@ -131,6 +133,16 @@ function getInformationLines(t, signature) {
   }
   if (signature?.signingTimeCheck != null && normalizeSigningTimeCheck(signature.signingTimeCheck) === 'not-checked') {
     lines.push(getSigningTimeCheckLabel(t, signature.signingTimeCheck, signature.signingTimeCode));
+  }
+  if (signature?.signatureTimestampCheck === 'not-checked') {
+    lines.push(t('signatures.timestampNotChecked', {
+      defaultValue: 'A timestamp is present, but this browser could not check it.',
+    }));
+  }
+  if (signature?.signingTime && signature?.signingTimeSource !== 'timestamp') {
+    lines.push(t('signatures.signerClaimedSigningTime', {
+      defaultValue: "The signing time is the signer's own claim; only a verified timestamp proves it.",
+    }));
   }
   return lines;
 }

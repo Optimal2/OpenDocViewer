@@ -131,10 +131,15 @@ viewer; every signature carries that information line.
 | A later unsigned revision changes pages, content streams, annotations, form fields or the catalog | `modified-after-signing` | `content-changed-after-signing` | Warning |
 | A later revision exists but cannot be proven harmless | `modified-after-signing` | `unclassified-change-after-signing` | Warning |
 | Unexpected condition that cannot be classified | `indeterminate` | `unexpected-error` / `key-import-failed` | Warning |
+| Signing time inside the certificate's notBefore..notAfter window (inclusive) | (any) | `signingTimeCheck: within-validity` | OK |
 | Signing time before the certificate's notBefore | (any) | `signingTimeCheck: outside-validity` / `signed-before-certificate-valid` | Warning |
 | Signing time after the certificate's notAfter | (any) | `signingTimeCheck: outside-validity` / `signed-after-certificate-expired` | Warning |
-| Signature timestamp token does not match or does not verify | (any) | `signingTimeCheck: timestamp-invalid` | Warning |
-| Certificate expired *since* signing | – | – | never a warning |
+| Signature timestamp token does not match or does not verify | (any) | `signingTimeCheck: timestamp-invalid` / `timestamp-invalid` | Warning |
+| Signature timestamp uses an algorithm the viewer cannot check | (any) | `signatureTimestampCheck: not-checked`; the fallback time source is used | OK + info |
+| No signing time is available | (any) | `signingTimeCheck: not-checked` / `signing-time-unknown` | OK + info |
+| Certificate validity dates are unreadable | (any) | `signingTimeCheck: not-checked` / `certificate-dates-unreadable` | OK + info |
+| No certificate can be read | (any) | `signingTimeCheck: not-checked` / `no-certificate` | OK + info |
+| Certificate expired *since* signing, but the selected signing time is inside its window | (any) | `signingTimeCheck: within-validity` | OK; never a warning |
 | `/Contents` missing or empty | `unreadable` | `contents-missing` | Error |
 | ByteRange malformed, outside the file, or not excluding exactly `/Contents` | `unreadable` | `byte-range-invalid` | Error |
 | CMS/TSTInfo not decodable or structurally invalid (incl. not exactly one SignerInfo) | `unreadable` | `cms-malformed` | Error |
@@ -149,15 +154,40 @@ viewer; every signature carries that information line.
 (¹) Runtime config `pdfSignatures.uncheckedSeverity: 'warning'` shows these as warnings
 instead. It never lowers an error or warning, and unknown integrity values stay errors.
 
-Signing time for the validity check: verified RFC 3161 signature timestamp `genTime`, else
-the signed `signingTime` attribute, else `/M`. Without any signing time the check is shown
-as not performed (information).
+#### Signing time and certificate validity
 
-Implementation status: the `signingTimeCheck` rows need the planned signing-time parser.
-Until then the parser produces no `signingTimeCheck` at all; the status helpers, labels and
-dialog already handle it, and a signature without `signingTimeCheck` behaves exactly as before
-(OK, no extra line). `unsupported` is accepted only as a legacy alias from older caches and is
-normalized to `not-checked-in-viewer`; the parser never produces it.
+The signing time is selected in exactly this priority order: verified RFC 3161 `genTime`,
+else the signed CMS `signingTime` attribute, else the PDF signature dictionary `/M`.
+`signingTimeSource: 'timestamp'` is emitted only after the timestamp actually verified.
+
+For an approval or certification signature, the unsigned attribute
+`id-aa-signatureTimeStampToken` (`1.2.840.113549.1.9.16.2.14`) is parsed when present. Its
+TSA CMS is verified by the same `verifySignedDataStructure` helper as the PDF CMS, and its
+TSTInfo `messageImprint` must equal the hash of the outer signature value OCTET STRING
+contents (RFC 3161 Appendix A). A wrong imprint or an invalid TSA signature gives
+`signingTimeCheck: 'timestamp-invalid'` (warning); the next time source is then used for the
+window comparison. An unsupported timestamp algorithm is a viewer limitation, not a defect:
+the token is ignored, `signatureTimestampCheck: 'not-checked'` produces neutral information,
+and the fallback time is used without a warning.
+
+For an `ETSI.RFC3161` document timestamp, verified TSTInfo `genTime` always wins, including
+when `/M` or a CMS `signingTime` attribute is also present. The previous implementation could
+accidentally prefer `/M`; that priority bug is covered by a dedicated fixture.
+
+The selected time is compared only with the signer certificate's `notBefore..notAfter`
+window, inclusively. The current clock is never consulted: a certificate that expired after
+signing is normal for an archived document. There is deliberately no clock-skew tolerance on
+`notBefore`. Missing time, unreadable certificate dates and a missing certificate are green
+`not-checked` results with their respective information codes.
+
+Unless the source is a verified timestamp, the dialog states as neutral information that the
+signing time is the signer's own claim. This is the residual backdating risk: a signer can
+choose a `signingTime` attribute or `/M` inside the certificate window even when the actual
+signing happened later. Only a verified RFC 3161 timestamp provides independent time proof;
+the viewer does not treat a signer-asserted time as such proof.
+
+`unsupported` is accepted only as a legacy alias from older caches and is normalized to
+`not-checked-in-viewer`; the parser never produces it.
 
 #### Appended revisions
 
@@ -400,8 +430,9 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   severity) always starts with `signatures.notCheckedInViewer`: English "Not checked in the
   viewer: issuer trust and revocation status", Swedish "Inte kontrollerat i visaren:
   utfärdarens förtroende och spärrstatus". For an intact or not-checked signature it then
-  says in plain words what was not checked (`signatures.integrityCode.<code>`), and a
-  signing-time check that was not performed.
+  says in plain words what was not checked (`signatures.integrityCode.<code>`), a signing-time
+  check that was not performed, an embedded timestamp the browser could not check, and—when
+  the selected time is not a verified timestamp—that the time is the signer's own claim.
 - Strings live under the `signatures` key (including `signatures.overview`) in
   `public/locales/en/common.json` and `public/locales/sv/common.json`; colours use the
   `--odv-signature-*` theme tokens (light, normal, dark, and the print reset).
@@ -436,7 +467,12 @@ interface PdfSignatureInfo {
   notBefore: string | null;              // ISO 8601, certificate validity start
   notAfter: string | null;               // ISO 8601, certificate validity end
   signingTime: string | null;            // ISO 8601 signing time (see signingTimeSource)
-  signingTimeSource: 'signed-attribute' | 'pdf-M' | 'none';
+  signingTimeSource: 'timestamp' | 'signed-attribute' | 'pdf-M' | 'none';
+  signingTimeCheck: 'within-validity' | 'outside-validity' | 'timestamp-invalid' | 'not-checked';
+  signingTimeCode: 'signed-before-certificate-valid' | 'signed-after-certificate-expired'
+    | 'timestamp-invalid' | 'signing-time-unknown' | 'certificate-dates-unreadable'
+    | 'no-certificate' | null;
+  signatureTimestampCheck: 'verified' | 'invalid' | 'not-checked' | null; // null = no embedded token
   reason: string | null;                 // signature dictionary /Reason
   location: string | null;               // signature dictionary /Location
   subFilter: string | null;              // raw /SubFilter value, e.g. "adbe.pkcs7.detached"
@@ -464,10 +500,11 @@ Notes:
 - `integrityCode` drives the localized text (`signatures.integrityCode.<code>`); every
   non-intact signature carries one (tested as a guard). `integrityReason` stays a short
   English detail line that may carry OIDs or exception text for support staff.
-- Optional `signingTimeCheck` (`within-validity` | `outside-validity` | `timestamp-invalid` |
-  `not-checked`) and `signingTimeCode` are understood by the status helpers and the UI but are
-  not produced yet (planned signing-time parser). Missing means `not-checked`, which is never
-  a warning; an unknown value fails closed to a warning.
+- The parser always produces `signingTimeCheck` and `signingTimeCode`; older cached reports may
+  omit them, which the status helpers normalize to `not-checked` (never a warning). An unknown
+  check value fails closed to a warning. `signatureTimestampCheck` is `null` when no embedded
+  signature timestamp is present, `verified` only after both the TSA CMS and imprint verify,
+  `invalid` for a defective token and `not-checked` for a viewer algorithm limitation.
 - Timestamp fields (`ETSI.RFC3161` document timestamps) appear as normal entries with
   `kind: 'timestamp'`, so a document's signature chain (approval signatures plus their
   long-term timestamps) is visible in one list, ordered by ByteRange position.
@@ -498,6 +535,15 @@ table):
 | `unsigned.pdf` | no signature fields -> empty list fast path |
 | `visible-appearance.pdf` | signed widget with a blue `/AP /N` appearance stream |
 | `invisible-appearance.pdf` | signed widget with a non-zero rectangle but no appearance stream |
+
+`createSigningTimeFixtures` in the same generator covers before/after/inside the certificate
+window, a certificate that expired years after signing, no time source, a valid embedded
+signature timestamp, genTime controlling the window, wrong imprint, bad TSA signature,
+unsupported imprint algorithm and the DocTimeStamp `/M` priority regression. The fixture PKI
+`leaf` helper accepts `notBefore`/`notAfter`; `addSignatureTimestamp(cms, tsa, genTime)` builds
+the token over the signature value OCTET STRING contents and adds it to `unsignedAttrs`.
+`src/utils/__tests__/pdfSignatureSigningTime.test.js` asserts the source, check, code and
+severity for every row, including that an unverified token can never produce source `timestamp`.
 
 `scripts/signature-revision-fixtures.mjs` appends synthetic unsigned revisions to these
 fixtures for the appended-revision classifier (`createRevisionFixtures`, exposed as
@@ -586,7 +632,8 @@ with editing or validation of these source files. The runner exits 0 only when a
 mutation groups are detected. Run the unmodified suite again afterwards. Status-model
 groups: re-adding the curve guess, ignoring typed viewer limits, losing a structural limit in
 pdf-lib's error wrapping, an inspector read error failing open, and losing the timeout code.
-Appended-revision groups: removing the cross-reference consistency check, ignoring deleted
+The signing-time group accepts a timestamp with a wrong imprint as the signing time and must
+be caught. Appended-revision groups: removing the cross-reference consistency check, ignoring deleted
 entries, allowing a reused object stream number, letting validation data win over content,
 allowing a visible timestamp widget,
 accepting orphan objects, trusting an unhooked parser, and skipping the `/Prev` chain.
@@ -603,9 +650,10 @@ badges, with storage/rendering/inspection I/O mocked.
 
 The mutation runner additionally checks that renamed/minified PDF classes cannot hide
 signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`
-to inspect nineteen generated signed PDFs (positive, defect and not-checked rows, plus
-appended-revision rows that prove the pdf-lib parser hooks survive minification, asserting
-`integrity` and `integrityCode`) through the actual minified worker artifact.
+to inspect 24 generated signed PDFs (positive, defect and not-checked rows, embedded/document
+timestamp rows, plus appended-revision rows that prove the pdf-lib parser hooks survive
+minification, asserting `integrity`, `integrityCode` and the signing-time fields) through the
+actual minified worker artifact.
 The harness uses a Node worker with a browser message-protocol adapter and verifies
 both successful inspection and rejection outcomes. PDF types are identified by stable
 APIs and `instanceof`, never `constructor.name`.

@@ -35,9 +35,15 @@ import { classifyAppendedRevisions, createRevisionLog, installRevisionLogHooks }
  * @property {string|null} notBefore Certificate validity start, ISO 8601.
  * @property {string|null} notAfter Certificate validity end, ISO 8601.
  * @property {string|null} signingTime Signing time, ISO 8601 (see signingTimeSource).
- * @property {'signed-attribute'|'pdf-M'|'none'} signingTimeSource Where
- * `signingTime` came from: the CMS signingTime signed attribute (for document
- * timestamps: the TSTInfo genTime), the PDF signature dictionary /M date, or nowhere.
+ * @property {'timestamp'|'signed-attribute'|'pdf-M'|'none'} signingTimeSource Where
+ * `signingTime` came from: a verified RFC 3161 genTime, the CMS signingTime
+ * signed attribute, the PDF signature dictionary /M date, or nowhere.
+ * @property {'within-validity'|'outside-validity'|'timestamp-invalid'|'not-checked'} signingTimeCheck
+ * Result of comparing the selected signing time with the signer certificate window.
+ * @property {'signed-before-certificate-valid'|'signed-after-certificate-expired'|'timestamp-invalid'|'signing-time-unknown'|'certificate-dates-unreadable'|'no-certificate'|null} signingTimeCode
+ * Machine-readable detail for signingTimeCheck.
+ * @property {'verified'|'invalid'|'not-checked'|null} signatureTimestampCheck
+ * Embedded signature-timestamp result; null means no token was present.
  * @property {string|null} reason Signature dictionary /Reason text.
  * @property {string|null} location Signature dictionary /Location text.
  * @property {string|null} subFilter Raw /SubFilter value (without slash).
@@ -87,6 +93,7 @@ const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
 const OID_TST_INFO = '1.2.840.113549.1.9.16.1.4';
 const OID_ATTR_MESSAGE_DIGEST = '1.2.840.113549.1.9.4';
 const OID_ATTR_SIGNING_TIME = '1.2.840.113549.1.9.5';
+const OID_SIGNATURE_TIMESTAMP = '1.2.840.113549.1.9.16.2.14';
 
 const HASH_OID_TO_NAME = new Map([
   ['1.3.14.3.2.26', 'SHA-1'],
@@ -427,6 +434,9 @@ function dictionaryInfo(item, bytes, pdfLib, sourceSpans) {
     notAfter: null,
     signingTime: isoOrNull(mDate),
     signingTimeSource: mDate ? 'pdf-M' : 'none',
+    signingTimeCheck: 'not-checked',
+    signingTimeCode: 'no-certificate',
+    signatureTimestampCheck: null,
     reason: fields.reason,
     location: fields.location,
     subFilter: fields.subFilter,
@@ -696,52 +706,127 @@ function pssParameters(algParams) {
   return out;
 }
 
-async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts, revisions, pdfLib) {
-  if (!ctx.pending) return; // dictionary level already decided (format, /Contents, ByteRange)
-  ctx.pending = false;
-  asn1jsRef = asn1jsLib;
+function signedDataFailure(integrity, integrityCode, integrityReason, cert = null) {
+  return { status: 'failed', integrity, integrityCode, integrityReason, cert };
+}
 
-  const signedBytes = coveredBytes(bytes, ctx.byteRange);
-  if (ctx.contents.length > 1024 * 1024) {
-    setIntegrity(info, 'not-checked-in-viewer', 'inspection-limit', 'CMS exceeds the 1 MiB signature inspection limit');
-    return;
-  }
-
-  // --- parse CMS -----------------------------------------------------------
+/**
+ * Parse and verify one CMS SignedData structure. PDF signatures and embedded
+ * RFC 3161 signature timestamps share these checks: exactly one signer, the
+ * matching certificate, content/messageDigest binding and the CMS signature.
+ * Document-specific imprint checks remain with the caller.
+ */
+async function verifySignedDataStructure(contentInfoDer, options, pkijsLib, asn1jsLib) {
+  const { expectedEContentType, encapsulated, detachedContent = null } = options;
   let signedData;
-  let contentInfo;
   try {
     // No legitimate CMS gets near depth 64: an ASN.1 limit here means malformed data.
-    const der = asn1jsLib.fromBER(bufferView(ctx.contents), { maxDepth: 64, maxNodes: 100000 });
+    const der = asn1jsLib.fromBER(bufferView(contentInfoDer), { maxDepth: 64, maxNodes: 100000 });
     if (der.offset === -1 || !der.result) {
-      setIntegrity(info, 'unreadable', 'cms-malformed',
+      return signedDataFailure('unreadable', 'cms-malformed',
         `signature present, CMS (PKCS#7) data not parseable: ${der.result?.error ?? 'unknown ASN.1 error'}`);
-      return;
     }
-    contentInfo = new pkijsLib.ContentInfo({ schema: der.result });
+    const contentInfo = new pkijsLib.ContentInfo({ schema: der.result });
     if (contentInfo.contentType !== OID_SIGNED_DATA) {
-      setIntegrity(info, 'unreadable', 'cms-malformed',
+      return signedDataFailure('unreadable', 'cms-malformed',
         `signature present, unexpected CMS content type ${contentInfo.contentType} (expected signedData)`);
-      return;
     }
     signedData = new pkijsLib.SignedData({ schema: contentInfo.content });
   } catch (err) {
-    setIntegrity(info, 'unreadable', 'cms-malformed', `signature present, CMS (PKCS#7) parse failed: ${String(err?.message ?? err)}`);
-    return;
+    return signedDataFailure('unreadable', 'cms-malformed',
+      `signature present, CMS (PKCS#7) parse failed: ${String(err?.message ?? err)}`);
   }
 
   const signerInfo = signedData.signerInfos?.[0];
   if (!signerInfo || signedData.signerInfos.length !== 1) {
-    setIntegrity(info, 'unreadable', 'cms-malformed', 'signature present, PDF CMS must contain exactly one signer');
-    return;
+    return signedDataFailure('unreadable', 'cms-malformed', 'signature present, CMS must contain exactly one signer');
   }
-
-  // --- certificate identity -------------------------------------------------
   const cert = await matchCertificate(signedData, signerInfo, asn1jsLib);
   if (!cert) {
-    setIntegrity(info, 'unreadable', 'signer-certificate-missing', 'CMS contains no certificate matching the signer identifier');
-    return;
+    return signedDataFailure('unreadable', 'signer-certificate-missing',
+      'CMS contains no certificate matching the signer identifier');
   }
+
+  const digestOid = signerInfo.digestAlgorithm?.algorithmId;
+  if (!digestOid) return signedDataFailure('unreadable', 'cms-malformed', 'signature present, digest algorithm missing', cert);
+  const hashName = HASH_OID_TO_NAME.get(digestOid) ?? null;
+  if (!hashName) {
+    return signedDataFailure('not-checked-in-viewer', 'algorithm-unsupported',
+      `signature present, digest algorithm not supported: ${digestOid}`, cert);
+  }
+
+  const eContentType = signedData.encapContentInfo?.eContentType;
+  const eContentBytes = attrRawBytesOfElement(signedData.encapContentInfo?.eContent);
+  if ((encapsulated && !eContentBytes) || (!encapsulated && signedData.encapContentInfo?.eContent) ||
+    eContentType !== expectedEContentType) {
+    return signedDataFailure('unreadable', 'cms-content-mismatch', 'CMS content does not match the expected content type', cert);
+  }
+  const contentToVerify = encapsulated ? eContentBytes : detachedContent;
+  // RFC 5652 section 5.4: signed attributes MUST bind the exact CMS content.
+  if (signerInfo.signedAttrs) {
+    const attrs = signerInfo.signedAttrs.attributes ?? [];
+    const mdAttrs = attrs.filter((attr) => attr.type === OID_ATTR_MESSAGE_DIGEST);
+    const md = mdAttrs[0];
+    if (mdAttrs.length !== 1 || md.values?.length !== 1 || !(md.values[0] instanceof asn1jsLib.OctetString)) {
+      return signedDataFailure('unreadable', 'message-digest-attribute',
+        'CMS signed attributes require exactly one messageDigest value', cert);
+    }
+    // A hash WebCrypto lacks (SHA-224) or a missing crypto.subtle throws a
+    // ViewerLimitError, which the caller reports as not checked in the viewer.
+    const actual = await subtleDigest(hashName, contentToVerify);
+    if (!bytesEqual(actual, attrRawBytes(md))) {
+      return signedDataFailure('digest-mismatch', 'content-digest-mismatch',
+        'CMS content digest does not match the signed messageDigest', cert);
+    }
+    const contentTypes = attrs.filter((attr) => attr.type === '1.2.840.113549.1.9.3');
+    if (contentTypes.length !== 1 || contentTypes[0].values?.length !== 1 ||
+      contentTypes[0].values[0].valueBlock?.toString() !== eContentType) {
+      return signedDataFailure('unreadable', 'cms-content-mismatch',
+        'CMS signed contentType does not match the encapsulated content type', cert);
+    }
+  }
+
+  const sigAlgOid = signerInfo.signatureAlgorithm?.algorithmId;
+  let signedRegion;
+  if (signerInfo.signedAttrs?.encodedValue?.byteLength) {
+    signedRegion = signerInfo.signedAttrs.encodedValue; // pkijs patched tag to SET OF
+  } else if (signerInfo.signedAttrs) {
+    return signedDataFailure('indeterminate', 'unexpected-error',
+      'CMS signed attributes have no encoded signature input', cert);
+  } else {
+    signedRegion = bufferView(contentToVerify);
+  }
+  const signatureBytes = attrRawBytesOfElement(signerInfo.signature);
+  if (!signatureBytes) return signedDataFailure('unreadable', 'cms-malformed', 'CMS signer info carries no signature value', cert);
+
+  let verified;
+  try {
+    verified = await verifyCmsSignature(pkijsLib, asn1jsLib, {
+      cert, signerInfo, sigAlgOid, hashName, signatureBytes, signedRegion
+    });
+  } catch (err) {
+    const detail = `signature cannot be verified in this environment: ${String(err?.message ?? err)}`;
+    if (err instanceof ViewerLimitError) return signedDataFailure('not-checked-in-viewer', err.code, detail, cert);
+    if (err?.name === 'NotSupportedError') return signedDataFailure('not-checked-in-viewer', 'algorithm-unsupported', detail, cert);
+    if (err?.name === 'DataError') return signedDataFailure('indeterminate', 'key-import-failed', detail, cert);
+    return signedDataFailure('indeterminate', 'unexpected-error', detail, cert);
+  }
+  if (verified === 'unsupported') {
+    return signedDataFailure('not-checked-in-viewer', 'algorithm-unsupported',
+      `signature algorithm or curve not verifiable with WebCrypto: ${sigAlgOid ?? 'missing'}`, cert);
+  }
+  if (verified === 'malformed') {
+    return signedDataFailure('unreadable', 'cms-malformed', 'CMS signature value is not a valid ECDSA DER signature', cert);
+  }
+  if (verified !== 'verified') {
+    return signedDataFailure('signature-invalid', 'signature-invalid',
+      'CMS signature does not verify against the embedded certificate', cert);
+  }
+  return { status: 'verified', cert, signerInfo, signedData, eContentBytes, signatureBytes };
+}
+
+function applyCertificateIdentity(info, cert) {
+  if (!cert) return;
   const cn = rdnValue(cert.subject, RDN_CN);
   if (cn) {
     info.signer = cn;
@@ -754,179 +839,206 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   info.serial = serialBytes ? colonHex(trimSerial(serialBytes)) : null;
   info.notBefore = isoOrNull(cert.notBefore?.value ?? null);
   info.notAfter = isoOrNull(cert.notAfter?.value ?? null);
+}
 
-  // --- digest algorithm ------------------------------------------------------
-  const digestOid = signerInfo.digestAlgorithm?.algorithmId;
-  if (!digestOid) {
-    setIntegrity(info, 'unreadable', 'cms-malformed', 'signature present, digest algorithm missing');
-    return;
-  }
-  const hashName = HASH_OID_TO_NAME.get(digestOid) ?? null;
-  if (!hashName) {
-    setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported', `signature present, digest algorithm not supported: ${digestOid}`);
-    return;
-  }
-
-  const isTimestamp = ctx.fields.subFilter === 'ETSI.RFC3161';
-  const isSha1Embedded = ctx.fields.subFilter === 'adbe.pkcs7.sha1';
-
-  // --- document integrity (digest over the covered bytes) -------------------
-  const eContentType = signedData.encapContentInfo?.eContentType;
-  const eContentBytes = attrRawBytesOfElement(signedData.encapContentInfo?.eContent);
-  let documentDigestOk;
-  const encapsulated = isTimestamp || isSha1Embedded;
-  if ((encapsulated && !eContentBytes) || (!encapsulated && signedData.encapContentInfo?.eContent) ||
-    (isTimestamp ? eContentType !== OID_TST_INFO : eContentType !== '1.2.840.113549.1.7.1')) {
-    setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'CMS content does not match the PDF SubFilter');
-    return;
-  }
-  const contentToVerify = encapsulated ? eContentBytes : signedBytes;
-  // RFC 5652 section 5.4: signed attributes MUST bind the exact CMS content.
-  if (signerInfo.signedAttrs) {
-    const attrs = signerInfo.signedAttrs.attributes ?? [];
-    const mdAttrs = attrs.filter((attr) => attr.type === OID_ATTR_MESSAGE_DIGEST);
-    const md = mdAttrs[0];
-    if (mdAttrs.length !== 1 || md.values?.length !== 1 || !(md.values[0] instanceof asn1jsLib.OctetString)) {
-      setIntegrity(info, 'unreadable', 'message-digest-attribute', 'CMS signed attributes require exactly one messageDigest value');
-      return;
-    }
-    // A hash WebCrypto lacks (SHA-224) or a missing crypto.subtle throws a
-    // ViewerLimitError, which the caller reports as not checked in the viewer.
-    const actual = await subtleDigest(hashName, contentToVerify);
-    if (!bytesEqual(actual, attrRawBytes(md))) {
-      setIntegrity(info, 'digest-mismatch', 'content-digest-mismatch', 'CMS content digest does not match the signed messageDigest');
-      return;
-    }
-    const contentTypes = attrs.filter((attr) => attr.type === '1.2.840.113549.1.9.3');
-    if (contentTypes.length !== 1 || contentTypes[0].values?.length !== 1 ||
-      contentTypes[0].values[0].valueBlock?.toString() !== eContentType) {
-      setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'CMS signed contentType does not match the encapsulated content type');
-      return;
+/** Compare only the selected signing time with the certificate window, never with now. */
+function updateSigningTimeWindow(info, cert) {
+  const timestampInvalid = info.signingTimeCheck === 'timestamp-invalid';
+  let check;
+  let code;
+  if (!cert) {
+    check = 'not-checked';
+    code = 'no-certificate';
+  } else {
+    const notBefore = Date.parse(info.notBefore);
+    const notAfter = Date.parse(info.notAfter);
+    const signingTime = Date.parse(info.signingTime);
+    if (!Number.isFinite(notBefore) || !Number.isFinite(notAfter)) {
+      check = 'not-checked';
+      code = 'certificate-dates-unreadable';
+    } else if (!Number.isFinite(signingTime)) {
+      check = 'not-checked';
+      code = 'signing-time-unknown';
+    } else if (signingTime < notBefore) {
+      check = 'outside-validity';
+      code = 'signed-before-certificate-valid';
+    } else if (signingTime > notAfter) {
+      check = 'outside-validity';
+      code = 'signed-after-certificate-expired';
+    } else {
+      check = 'within-validity';
+      code = null;
     }
   }
+  // The fallback source is always evaluated above. A defective timestamp remains
+  // the visible warning even when that fallback lies inside the certificate window.
+  info.signingTimeCheck = timestampInvalid ? 'timestamp-invalid' : check;
+  info.signingTimeCode = timestampInvalid ? 'timestamp-invalid' : code;
+}
 
-  if (isTimestamp) {
-    // Document timestamp: the TSTInfo messageImprint must match the file bytes.
-    let tst;
-    let imprintAlgOid;
-    let imprintBytes;
-    try {
-      const tstAsn = asn1jsLib.fromBER(bufferView(eContentBytes));
-      if (tstAsn.offset === -1) throw new Error(tstAsn.result?.error ?? 'ASN.1 error');
-      tst = new pkijsLib.TSTInfo({ schema: tstAsn.result });
-      const imprint = tst.messageImprint;
-      imprintAlgOid = imprint?.hashAlgorithm?.algorithmId ?? imprint?.hashAlg?.algorithmId;
-      imprintBytes = attrRawBytesOfElement(imprint?.hashedMessage);
-    } catch (err) {
-      setIntegrity(info, 'unreadable', 'cms-malformed', `document timestamp not parseable: ${String(err?.message ?? err)}`);
+function readTstInfo(eContentBytes, pkijsLib, asn1jsLib) {
+  const tstAsn = asn1jsLib.fromBER(bufferView(eContentBytes));
+  if (tstAsn.offset === -1) throw new Error(tstAsn.result?.error ?? 'ASN.1 error');
+  const tst = new pkijsLib.TSTInfo({ schema: tstAsn.result });
+  const imprint = tst.messageImprint;
+  const gen = tst.genTime?.value ?? (typeof tst.genTime?.toDate === 'function' ? tst.genTime.toDate() : null) ?? tst.genTime;
+  return {
+    imprintAlgOid: imprint?.hashAlgorithm?.algorithmId ?? imprint?.hashAlg?.algorithmId ?? null,
+    imprintBytes: attrRawBytesOfElement(imprint?.hashedMessage),
+    genTime: gen instanceof Date && !Number.isNaN(gen.getTime()) ? gen : null
+  };
+}
+
+async function timestampImprintMatches(tst, sourceBytes) {
+  if (!tst.imprintAlgOid || !tst.imprintBytes) throw new Error('timestamp messageImprint incomplete');
+  const imprintAlg = HASH_OID_TO_NAME.get(tst.imprintAlgOid) ?? null;
+  if (!imprintAlg) {
+    throw new ViewerLimitError('algorithm-unsupported', `timestamp imprint algorithm not supported: ${tst.imprintAlgOid}`);
+  }
+  const actual = await subtleDigest(imprintAlg, sourceBytes);
+  return bytesEqual(actual, tst.imprintBytes);
+}
+
+/** Verify the unsigned id-aa-signatureTimeStampToken attribute, when present. */
+async function verifyEmbeddedSignatureTimestamp(signerInfo, signatureBytes, pkijsLib, asn1jsLib) {
+  const attrs = (signerInfo.unsignedAttrs?.attributes ?? []).filter((attr) => attr.type === OID_SIGNATURE_TIMESTAMP);
+  if (!attrs.length) return { status: 'absent' };
+  if (attrs.length !== 1 || attrs[0].values?.length !== 1 || typeof attrs[0].values[0]?.toBER !== 'function') {
+    return { status: 'invalid', reason: 'signature timestamp attribute is malformed or ambiguous' };
+  }
+  try {
+    const tokenDer = new Uint8Array(attrs[0].values[0].toBER(false));
+    const cms = await verifySignedDataStructure(tokenDer, {
+      expectedEContentType: OID_TST_INFO, encapsulated: true
+    }, pkijsLib, asn1jsLib);
+    if (cms.status !== 'verified') {
+      return cms.integrity === 'not-checked-in-viewer'
+        ? { status: 'not-checked', reason: cms.integrityReason }
+        : { status: 'invalid', reason: cms.integrityReason };
+    }
+    const tst = readTstInfo(cms.eContentBytes, pkijsLib, asn1jsLib);
+    const imprintMatches = await timestampImprintMatches(tst, signatureBytes);
+    if (!imprintMatches || !tst.genTime) {
+      return { status: 'invalid', reason: 'signature timestamp messageImprint does not match the signature value' };
+    }
+    return { status: 'verified', genTime: tst.genTime };
+  } catch (err) {
+    if (err instanceof ViewerLimitError) return { status: 'not-checked', reason: String(err?.message ?? err) };
+    return { status: 'invalid', reason: `signature timestamp cannot be verified: ${String(err?.message ?? err)}` };
+  }
+}
+
+async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts, revisions, pdfLib) {
+  if (!ctx.pending) return; // dictionary level already decided (format, /Contents, ByteRange)
+  ctx.pending = false;
+  asn1jsRef = asn1jsLib;
+  let cert = null;
+  try {
+    const signedBytes = coveredBytes(bytes, ctx.byteRange);
+    if (ctx.contents.length > 1024 * 1024) {
+      setIntegrity(info, 'not-checked-in-viewer', 'inspection-limit', 'CMS exceeds the 1 MiB signature inspection limit');
       return;
     }
-    if (!imprintAlgOid || !imprintBytes) {
-      setIntegrity(info, 'unreadable', 'cms-malformed', 'document timestamp not parseable: messageImprint incomplete');
+
+    const isTimestamp = ctx.fields.subFilter === 'ETSI.RFC3161';
+    const isSha1Embedded = ctx.fields.subFilter === 'adbe.pkcs7.sha1';
+    const encapsulated = isTimestamp || isSha1Embedded;
+    const cms = await verifySignedDataStructure(ctx.contents, {
+      expectedEContentType: isTimestamp ? OID_TST_INFO : '1.2.840.113549.1.7.1',
+      encapsulated,
+      detachedContent: signedBytes
+    }, pkijsLib, asn1jsLib);
+    cert = cms.cert;
+    applyCertificateIdentity(info, cert);
+    if (cms.status !== 'verified') {
+      setIntegrity(info, cms.integrity, cms.integrityCode, cms.integrityReason);
       return;
     }
-    const imprintAlg = HASH_OID_TO_NAME.get(imprintAlgOid) ?? null;
-    if (!imprintAlg) {
-      setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported',
-        `document timestamp imprint algorithm not supported: ${imprintAlgOid}`);
-      return;
-    }
-    const actual = await subtleDigest(imprintAlg, signedBytes);
-    documentDigestOk = bytesEqual(actual, imprintBytes);
-    if (!info.signingTime) {
-      const gen = tst.genTime?.value ?? (typeof tst.genTime?.toDate === 'function' ? tst.genTime.toDate() : null) ?? tst.genTime;
-      if (gen instanceof Date && info.signingTimeSource !== 'signed-attribute') {
-        info.signingTime = isoOrNull(gen);
+    const { signerInfo, eContentBytes, signatureBytes } = cms;
+
+    if (isTimestamp) {
+      // A document timestamp proves genTime only after its CMS and imprint verify.
+      let tst;
+      try {
+        tst = readTstInfo(eContentBytes, pkijsLib, asn1jsLib);
+      } catch (err) {
+        setIntegrity(info, 'unreadable', 'cms-malformed', `document timestamp not parseable: ${String(err?.message ?? err)}`);
+        return;
+      }
+      let imprintMatches;
+      try {
+        imprintMatches = await timestampImprintMatches(tst, signedBytes);
+      } catch (err) {
+        if (err instanceof ViewerLimitError) setIntegrity(info, 'not-checked-in-viewer', err.code, String(err?.message ?? err));
+        else setIntegrity(info, 'unreadable', 'cms-malformed', `document timestamp not parseable: ${String(err?.message ?? err)}`);
+        return;
+      }
+      if (!imprintMatches) {
+        setIntegrity(info, 'digest-mismatch', 'document-digest-mismatch', 'timestamp messageImprint does not match the document bytes');
+        return;
+      }
+      const signingTimeDate = attrDate(findAttribute(signerInfo.signedAttrs, OID_ATTR_SIGNING_TIME));
+      if (signingTimeDate) {
+        info.signingTime = isoOrNull(signingTimeDate);
         info.signingTimeSource = 'signed-attribute';
       }
+      if (tst.genTime) {
+        info.signingTime = isoOrNull(tst.genTime);
+        info.signingTimeSource = 'timestamp';
+      }
+    } else {
+      if (isSha1Embedded) {
+        // adbe.pkcs7.sha1: the CMS embeds the SHA-1 document digest.
+        if (!eContentBytes || eContentBytes.length !== 20) {
+          setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'legacy SHA-1 signature without embedded document digest');
+          return;
+        }
+        const actual = await subtleDigest('SHA-1', signedBytes);
+        if (!bytesEqual(actual, eContentBytes)) {
+          setIntegrity(info, 'digest-mismatch', 'document-digest-mismatch', 'document SHA-1 digest does not match the embedded digest in the CMS');
+          return;
+        }
+      }
+      const signingTimeDate = attrDate(findAttribute(signerInfo.signedAttrs, OID_ATTR_SIGNING_TIME));
+      if (signingTimeDate) {
+        info.signingTime = isoOrNull(signingTimeDate);
+        info.signingTimeSource = 'signed-attribute';
+      }
+
+      // RFC 3161 Appendix A: the embedded token imprints the signature value
+      // OCTET STRING contents, not the whole CMS or the document bytes.
+      const timestamp = await verifyEmbeddedSignatureTimestamp(signerInfo, signatureBytes, pkijsLib, asn1jsLib);
+      if (timestamp.status === 'verified') {
+        info.signatureTimestampCheck = 'verified';
+        info.signingTime = isoOrNull(timestamp.genTime);
+        info.signingTimeSource = 'timestamp';
+      } else if (timestamp.status === 'invalid') {
+        info.signatureTimestampCheck = 'invalid';
+        info.signingTimeCheck = 'timestamp-invalid';
+        info.signingTimeCode = 'timestamp-invalid';
+      } else if (timestamp.status === 'not-checked') {
+        info.signatureTimestampCheck = 'not-checked';
+      }
     }
-    if (!documentDigestOk) {
-      setIntegrity(info, 'digest-mismatch', 'document-digest-mismatch', 'timestamp messageImprint does not match the document bytes');
+
+    // --- final state ---------------------------------------------------------
+    if (ctx.coversWholeFile === true || info.coversWholeFile === true) {
+      setIntegrity(info, 'intact', null, null);
       return;
     }
-  } else if (isSha1Embedded) {
-    // adbe.pkcs7.sha1: the CMS embeds the SHA-1 document digest.
-    if (!eContentBytes || eContentBytes.length !== 20) {
-      setIntegrity(info, 'unreadable', 'cms-content-mismatch', 'legacy SHA-1 signature without embedded document digest');
+    info.coversWholeFile = false;
+    if (extensionCoveredByLaterSignature(ctx, allContexts, bytes.length)) {
+      setIntegrity(info, 'intact', 'extended-by-later-signature',
+        'file extended by later signature(s) after this one (incremental update)');
       return;
     }
-    const actual = await subtleDigest('SHA-1', signedBytes);
-    documentDigestOk = bytesEqual(actual, eContentBytes);
-    if (!documentDigestOk) {
-      setIntegrity(info, 'digest-mismatch', 'document-digest-mismatch', 'document SHA-1 digest does not match the embedded digest in the CMS');
-      return;
-    }
+    // What did the unsigned revision(s) after this signature change? Anything the
+    // classifier cannot prove harmless stays modified-after-signing.
+    const tail = classifyAppendedRevisions(revisions, ctx.byteRange[2] + ctx.byteRange[3], pdfLib);
+    setIntegrity(info, tail.integrity, tail.code, tail.reason);
+  } finally {
+    updateSigningTimeWindow(info, cert);
   }
-
-  // --- signing time from CMS attribute --------------------------------------
-  const signingTimeAttr = findAttribute(signerInfo.signedAttrs, OID_ATTR_SIGNING_TIME);
-  const signingTimeDate = attrDate(signingTimeAttr);
-  if (signingTimeDate) {
-    info.signingTime = isoOrNull(signingTimeDate);
-    info.signingTimeSource = 'signed-attribute';
-  }
-
-  // --- signature value over the signed attributes ----------------------------
-  const sigAlgOid = signerInfo.signatureAlgorithm?.algorithmId;
-  let signedRegion;
-  if (signerInfo.signedAttrs?.encodedValue?.byteLength) {
-    signedRegion = signerInfo.signedAttrs.encodedValue; // pkijs patched tag to SET OF
-  } else if (signerInfo.signedAttrs) {
-    // A library parse quirk cannot be told apart from a defect.
-    setIntegrity(info, 'indeterminate', 'unexpected-error', 'CMS signed attributes have no encoded signature input');
-    return;
-  } else {
-    signedRegion = bufferView(contentToVerify);
-  }
-
-  const signatureBytes = attrRawBytesOfElement(signerInfo.signature);
-  if (!signatureBytes) {
-    setIntegrity(info, 'unreadable', 'cms-malformed', 'CMS signer info carries no signature value');
-    return;
-  }
-
-  let verified;
-  try {
-    verified = await verifyCmsSignature(pkijsLib, asn1jsLib, {
-      cert, signerInfo, sigAlgOid, hashName, signatureBytes, signedRegion
-    });
-  } catch (err) {
-    const detail = `signature cannot be verified in this environment: ${String(err?.message ?? err)}`;
-    if (err instanceof ViewerLimitError) setIntegrity(info, 'not-checked-in-viewer', err.code, detail);
-    else if (err?.name === 'NotSupportedError') setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported', detail);
-    else if (err?.name === 'DataError') setIntegrity(info, 'indeterminate', 'key-import-failed', detail);
-    else setIntegrity(info, 'indeterminate', 'unexpected-error', detail);
-    return;
-  }
-  if (verified === 'unsupported') {
-    setIntegrity(info, 'not-checked-in-viewer', 'algorithm-unsupported',
-      `signature algorithm or curve not verifiable with WebCrypto: ${sigAlgOid ?? 'missing'}`);
-    return;
-  }
-  if (verified === 'malformed') {
-    setIntegrity(info, 'unreadable', 'cms-malformed', 'CMS signature value is not a valid ECDSA DER signature');
-    return;
-  }
-  if (verified !== 'verified') {
-    setIntegrity(info, 'signature-invalid', 'signature-invalid', 'CMS signature does not verify against the embedded certificate');
-    return;
-  }
-
-  // --- final state -----------------------------------------------------------
-  if (ctx.coversWholeFile === true || info.coversWholeFile === true) {
-    setIntegrity(info, 'intact', null, null);
-    return;
-  }
-  info.coversWholeFile = false;
-  if (extensionCoveredByLaterSignature(ctx, allContexts, bytes.length)) {
-    setIntegrity(info, 'intact', 'extended-by-later-signature',
-      'file extended by later signature(s) after this one (incremental update)');
-    return;
-  }
-  // What did the unsigned revision(s) after this signature change? Anything the
-  // classifier cannot prove harmless stays modified-after-signing.
-  const tail = classifyAppendedRevisions(revisions, ctx.byteRange[2] + ctx.byteRange[3], pdfLib);
-  setIntegrity(info, tail.integrity, tail.code, tail.reason);
 }
 
 function trimSerial(b) {
@@ -1071,7 +1183,8 @@ function placeholderSignatureReport(integrity, code, detail) {
   return { signatures: [{
     fieldName: null, signer: null, signerSource: null, signerOrganization: null, issuer: null,
     serial: null, notBefore: null, notAfter: null, signingTime: null,
-    signingTimeSource: 'none', reason: null, location: null, subFilter: null,
+    signingTimeSource: 'none', signingTimeCheck: 'not-checked', signingTimeCode: 'no-certificate',
+    signatureTimestampCheck: null, reason: null, location: null, subFilter: null,
     kind: 'approval', integrity, integrityCode: code, integrityReason: detail,
     coversWholeFile: null
   }] };
