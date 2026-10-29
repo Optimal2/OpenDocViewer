@@ -20,6 +20,10 @@ import {
   getCompareAdjustToolbarMode,
   isPdfSignatureInspectionEnabled,
   getPdfSignatureInspectionStart,
+  DEFAULT_OCR_LANGUAGES,
+  isOcrEnabled,
+  getOcrLanguages,
+  getOcrAssetBaseUrl,
   normalizePrintDefaultMode,
   normalizeCustomFitWidthFactorPercent,
   normalizeOptionalCustomFitFactorPercent,
@@ -231,6 +235,94 @@ describe('runtimeConfig', () => {
     it('accepts allPages case-insensitively', () => {
       expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: 'allPages' } })).toBe('allPages');
       expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: ' ALLPAGES ' } })).toBe('allPages');
+    });
+  });
+
+  describe('isOcrEnabled', () => {
+    it('is off when the section or key is missing', () => {
+      expect(isOcrEnabled({})).toBe(false);
+      expect(isOcrEnabled({ ocr: {} })).toBe(false);
+      expect(isOcrEnabled(null)).toBe(false);
+      expect(isOcrEnabled(undefined)).toBe(false);
+    });
+
+    it('turns on only for the boolean literal true', () => {
+      expect(isOcrEnabled({ ocr: { enabled: true } })).toBe(true);
+      expect(isOcrEnabled({ ocr: { enabled: false } })).toBe(false);
+    });
+
+    it.each([
+      ['the string "true"', 'true'],
+      ['the string "on"', 'on'],
+      ['the number 1', 1],
+      ['the number 0', 0],
+      ['null', null],
+      ['undefined', undefined],
+      ['an object', { enabled: true }],
+      ['an array', [true]],
+    ])('stays off for %s', (_label, value) => {
+      expect(isOcrEnabled({ ocr: { enabled: value } })).toBe(false);
+    });
+  });
+
+  describe('getOcrLanguages', () => {
+    it('defaults to swe and eng in that order', () => {
+      expect(DEFAULT_OCR_LANGUAGES).toEqual(['swe', 'eng']);
+      expect(Object.isFrozen(DEFAULT_OCR_LANGUAGES)).toBe(true);
+      expect(getOcrLanguages({})).toEqual(['swe', 'eng']);
+      expect(getOcrLanguages({ ocr: {} })).toEqual(['swe', 'eng']);
+      expect(getOcrLanguages(null)).toEqual(['swe', 'eng']);
+    });
+
+    it('returns a fresh array, never the frozen default itself', () => {
+      const languages = getOcrLanguages({});
+      expect(languages).not.toBe(DEFAULT_OCR_LANGUAGES);
+      expect(Object.isFrozen(languages)).toBe(false);
+    });
+
+    it.each([
+      ['a string', 'swe+eng'],
+      ['null', null],
+      ['a number', 1],
+      ['an object', { swe: true }],
+      ['an empty array', []],
+      ['an array without valid codes', ['sv', 7, '', 'script/Latin', 'swedish-x']],
+    ])('falls back to the default for %s', (_label, value) => {
+      expect(getOcrLanguages({ ocr: { languages: value } })).toEqual(['swe', 'eng']);
+    });
+
+    it('keeps order, trims, lower-cases, drops malformed entries and duplicates', () => {
+      expect(getOcrLanguages({ ocr: { languages: [' ENG ', 'swe', 'eng', 'chi_sim', 'sv', 7, 'Swe', 'aze_cyrl'] } }))
+        .toEqual(['eng', 'swe', 'chi_sim', 'aze_cyrl']);
+    });
+
+    it('accepts a single language', () => {
+      expect(getOcrLanguages({ ocr: { languages: ['swe'] } })).toEqual(['swe']);
+    });
+  });
+
+  describe('getOcrAssetBaseUrl', () => {
+    it('defaults to null', () => {
+      expect(getOcrAssetBaseUrl({})).toBeNull();
+      expect(getOcrAssetBaseUrl({ ocr: {} })).toBeNull();
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: null } })).toBeNull();
+      expect(getOcrAssetBaseUrl(null)).toBeNull();
+    });
+
+    it.each([
+      ['a number', 1],
+      ['a boolean', true],
+      ['an object', { url: 'x' }],
+      ['an empty string', ''],
+      ['a blank string', '   '],
+    ])('returns null for %s', (_label, value) => {
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: value } })).toBeNull();
+    });
+
+    it('trims and guarantees a trailing slash', () => {
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'https://host.example/odv-ocr' } })).toBe('https://host.example/odv-ocr/');
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: ' /shared/ocr/ ' } })).toBe('/shared/ocr/');
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'ocr' } })).toBe('ocr/');
     });
   });
 

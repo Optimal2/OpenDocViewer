@@ -84,6 +84,20 @@
       // toolbar signature overview remain.
       thumbnailPageBadge: true
     },
+    ocr: {
+      // In-browser OCR for scanned pages. Off by default; only the literal value true turns it on.
+      // Turning it on also needs 'wasm-unsafe-eval' in the script-src of this site's
+      // Content-Security-Policy (web.config, and the ODVGateway CSP when the viewer is served
+      // through it). See docs-src/runtime-configuration.md.
+      enabled: false,
+      // Tesseract language codes tried together on every text line. Arrays replace the default
+      // completely, so list every language the site needs. Each extra language roughly adds its
+      // own recognition time per page.
+      // languages: ['swe', 'eng'],
+      // Serve the engine, worker and language files from the site's own location instead of the
+      // viewer's ocr/ folder (same origin, or CORS-enabled and allowed by the site CSP).
+      // assetBaseUrl: 'https://host.example/odv-ocr/'
+    },
     toolbar: {
       // Default for the "Larger toolbar buttons" checkbox in the theme menu. true (default) keeps
       // the large toolbar buttons; false makes the compact toolbar the default. A user's own

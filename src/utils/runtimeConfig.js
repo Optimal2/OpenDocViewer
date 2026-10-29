@@ -281,6 +281,64 @@ export function getPdfSignatureInspectionStart(cfg = getRuntimeConfig()) {
   return raw === 'allpages' ? 'allPages' : 'firstPage';
 }
 
+/** Default OCR languages (Tesseract language codes), tried together on every text line. */
+export const DEFAULT_OCR_LANGUAGES = Object.freeze(['swe', 'eng']);
+/** Tesseract language codes: three lower-case letters, optionally with _suffixes (chi_sim, aze_cyrl). */
+const OCR_LANGUAGE_CODE_PATTERN = /^[a-z]{3}(?:_[a-z]+)*$/;
+
+/**
+ * Resolve whether in-browser OCR of scanned pages is turned on (`ocr.enabled`).
+ * Only the boolean literal `true` turns it on; a missing section, `false`, strings such as
+ * `"true"`, numbers and objects all keep it off. While off, the OCR module is never imported, so
+ * no engine or language file is downloaded, no worker starts and no OCR UI exists.
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isOcrEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.enabled === true;
+}
+
+/**
+ * Resolve the OCR languages (`ocr.languages`): an array of Tesseract language codes. Entries are
+ * trimmed and lower-cased; non-strings, malformed codes and duplicates are dropped. Anything that
+ * is not an array, or leaves no valid entry, falls back to DEFAULT_OCR_LANGUAGES. The order is
+ * kept because Tesseract reports it as the model order.
+ *
+ * @param {Object=} cfg
+ * @returns {Array<string>}
+ */
+export function getOcrLanguages(cfg = getRuntimeConfig()) {
+  const raw = cfg?.ocr?.languages;
+  if (!Array.isArray(raw)) return [...DEFAULT_OCR_LANGUAGES];
+  const languages = [];
+  for (const entry of raw) {
+    if (typeof entry !== 'string') continue;
+    const code = entry.trim().toLowerCase();
+    if (!OCR_LANGUAGE_CODE_PATTERN.test(code) || languages.includes(code)) continue;
+    languages.push(code);
+  }
+  return languages.length ? languages : [...DEFAULT_OCR_LANGUAGES];
+}
+
+/**
+ * Resolve where the OCR engine, worker and language files are served from (`ocr.assetBaseUrl`).
+ * `null` (default) means the viewer's own `ocr/` folder next to the application. A non-empty
+ * string is trimmed and always returned with a trailing slash; blank or non-string values give
+ * `null`. No URL validation happens here: the browser's same-origin and CSP rules decide whether
+ * a cross-origin base can actually be used.
+ *
+ * @param {Object=} cfg
+ * @returns {(string|null)}
+ */
+export function getOcrAssetBaseUrl(cfg = getRuntimeConfig()) {
+  const raw = cfg?.ocr?.assetBaseUrl;
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  return trimmed.endsWith('/') ? trimmed : `${trimmed}/`;
+}
+
 /**
  * Resolve the site default for the "Larger toolbar buttons" preference (`toolbar.largeButtons`).
  * Only an explicit `false` makes the compact toolbar the default; a user's stored choice in the

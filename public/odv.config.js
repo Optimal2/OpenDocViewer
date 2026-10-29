@@ -117,6 +117,28 @@
       // when this is false.
       thumbnailPageBadge: true
     },
+    toolbar: {      thumbnailPageBadge: true
+    },
+    ocr: {
+      // Opt-in in-browser OCR for scanned pages (TIFF, JPG, PNG and PDF pages without a usable
+      // text layer). Only the literal value true turns it on; anything else keeps it off. While
+      // off (the default) the OCR module is never imported: no extra download, no worker, no UI,
+      // no change in layout, printing, performance or memory. While on, text is recognized in
+      // the browser only, kept in memory for the session and shown as a selectable text layer.
+      // Nothing is sent anywhere and the source files are never modified. Turning it on also
+      // needs 'wasm-unsafe-eval' in the script-src of the site's Content-Security-Policy; see
+      // docs-src/runtime-configuration.md.
+      enabled: false,
+      // Tesseract language codes, tried together on every text line (best match wins). Each
+      // extra language roughly adds its own recognition time per page. An array in
+      // odv.site.config.js replaces this default completely.
+      languages: ['swe', 'eng'],
+      // Where the OCR engine, worker and language files are served from. null (default) uses the
+      // viewer's own ocr/ folder next to the application. A site can point this at its own host
+      // (same origin, or CORS-enabled and allowed by the site CSP) to keep the files out of the
+      // application package.
+      assetBaseUrl: null
+    },
     toolbar: {
       // Default for the "Larger toolbar buttons" checkbox in the theme menu. true (default) keeps
       // the large toolbar buttons; false makes the compact toolbar the default. A user's own

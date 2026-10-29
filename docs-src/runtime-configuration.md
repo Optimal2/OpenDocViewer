@@ -240,6 +240,70 @@ pdfSignatures: {
   as the first page is shown, `'allPages'` only after the whole loading run is complete. Unknown
   values fall back to `'firstPage'`.
 
+## OCR (in-browser, off by default)
+
+OpenDocViewer can recognize text on scanned pages (TIFF, JPG, PNG and PDF pages without a usable
+text layer) inside the browser and show it as a selectable text layer on the page. The feature is
+opt-in and off by default:
+
+```js
+ocr: {
+  enabled: false,              // only the literal true turns OCR on
+  languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
+  assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
+}
+```
+
+- `ocr.enabled`: only the boolean literal `true` turns OCR on. A missing section, `false`,
+  strings such as `"true"`, numbers and objects all keep it off. While off, the OCR module is never
+  imported: no engine or language file is downloaded, no worker starts, no OCR element exists in
+  the DOM, and layout, printing, performance and memory are unchanged. The OCR code is a separate
+  lazy chunk that only the switch loads, so the default code path carries no extra weight.
+- `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
+  non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
+  falls back to `['swe', 'eng']`. Every listed model runs on every text line and the best match
+  wins, so each extra language roughly adds its own recognition time per page. As with every
+  array in the site file, an override replaces the default completely.
+- `ocr.assetBaseUrl`: where the engine, worker and language files are served from. `null`
+  (default) uses the viewer's own `ocr/` folder next to the application. A site can point this at
+  its own host to keep the files out of the application package; the base must be same-origin or
+  CORS-enabled and allowed by the site's CSP. A trailing slash is added when missing.
+
+While on, recognition runs in a Web Worker in the browser only. The input of each page is the page
+image the viewer already rendered, at the site's configured resolution (`pdfResolution.targetDpi`
+for PDF pages, the file's own resolution for raster images), so a lower configured resolution also
+lowers OCR quality. Results stay in memory for the session, keyed by document and page, and are
+dropped when the document changes or the tab closes: nothing is written to localStorage or
+IndexedDB and nothing is sent to any server. The source files are never modified. Only the visible
+page and a fixed number of neighbouring pages are queued, never the whole document; the queue is
+reset when the user scrolls or switches document, and it pauses while a print PDF is being
+prepared.
+
+The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
+only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are
+not searchable until they come into view.
+
+### CSP for OCR
+
+The OCR engine is WebAssembly. The Content-Security-Policy that ships with OpenDocViewer
+(`index.html` and `public/web.config`) is unchanged by this feature and does not allow WebAssembly
+compilation, so a site that turns OCR on must add `'wasm-unsafe-eval'` to the `script-src`
+directive of its own policy:
+
+```text
+script-src 'self' 'wasm-unsafe-eval' 'sha256-...'
+```
+
+Add it in every place the site sets a policy for the viewer: the `Content-Security-Policy` header
+in the site's `web.config`, and, when the viewer is served through ODVGateway, the gateway's
+`contentSecurityPolicy` setting in its appsettings as well. Without the token the engine cannot
+start; OCR then turns itself off for the session and logs one console error naming the missing
+token. Pages still load and render exactly as before.
+
+Status: this version ships the switch and its validation; the OCR module itself arrives in the
+following versions, so `enabled: true` has no visible effect yet.
+
+## Toolbar Button Size
 ## Toolbar Button Size
 
 The theme menu has a "Larger toolbar buttons" checkbox (sv: "Större verktygsknappar"). Ticked keeps

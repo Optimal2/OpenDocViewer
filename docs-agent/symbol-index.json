@@ -38261,7 +38261,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 332,
+    "line": 390,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -38319,6 +38319,19 @@
     "file": "src/utils/runtimeConfig.js",
     "line": 12,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "DEFAULT_OCR_LANGUAGES",
+    "name": "DEFAULT_OCR_LANGUAGES",
+    "longname": "DEFAULT_OCR_LANGUAGES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 285,
+    "description": "Default OCR languages (Tesseract language codes), tried together on every text line.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -38387,13 +38400,63 @@
     "examples": 0
   },
   {
+    "id": "getOcrAssetBaseUrl",
+    "name": "getOcrAssetBaseUrl",
+    "longname": "getOcrAssetBaseUrl",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 334,
+    "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getOcrLanguages",
+    "name": "getOcrLanguages",
+    "longname": "getOcrLanguages",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 311,
+    "description": "Resolve the OCR languages ( ocr.languages ): an array of Tesseract language codes.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "getOmpThemeBridgeAllowedOrigins",
     "name": "getOmpThemeBridgeAllowedOrigins",
     "longname": "getOmpThemeBridgeAllowedOrigins",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 709,
+    "line": 767,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -38443,7 +38506,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 584,
+    "line": 642,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -38468,7 +38531,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 609,
+    "line": 667,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -38511,7 +38574,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 692,
+    "line": 750,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -38536,7 +38599,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 292,
+    "line": 350,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -38561,7 +38624,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 560,
+    "line": 618,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -38586,7 +38649,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 546,
+    "line": 604,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -38611,7 +38674,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 533,
+    "line": 591,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -38636,7 +38699,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 633,
+    "line": 691,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -38661,7 +38724,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 651,
+    "line": 709,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -38830,6 +38893,31 @@
     "examples": 0
   },
   {
+    "id": "isOcrEnabled",
+    "name": "isOcrEnabled",
+    "longname": "isOcrEnabled",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 298,
+    "description": "Resolve whether in-browser OCR of scanned pages is turned on ( ocr.enabled ).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "isPdfSignatureInspectionEnabled",
     "name": "isPdfSignatureInspectionEnabled",
     "longname": "isPdfSignatureInspectionEnabled",
@@ -38912,7 +39000,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 310,
+    "line": 368,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -38943,7 +39031,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 507,
+    "line": 565,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -38968,7 +39056,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 478,
+    "line": 536,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -38999,7 +39087,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 446,
+    "line": 504,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -39030,7 +39118,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 378,
+    "line": 436,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -39073,7 +39161,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 357,
+    "line": 415,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -39116,7 +39204,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 489,
+    "line": 547,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -39147,7 +39235,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 461,
+    "line": 519,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -39178,7 +39266,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 407,
+    "line": 465,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -39203,7 +39291,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 395,
+    "line": 453,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -39234,7 +39322,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 421,
+    "line": 479,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -39250,6 +39338,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_LANGUAGE_CODE_PATTERN",
+    "name": "OCR_LANGUAGE_CODE_PATTERN",
+    "longname": "OCR_LANGUAGE_CODE_PATTERN",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 287,
+    "description": "Tesseract language codes: three lower-case letters, optionally with _suffixes (chi_sim, aze_cyrl).",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -39355,7 +39456,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 432,
+    "line": 490,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
