@@ -43,7 +43,7 @@ node tools/site-config-generator/site-config-generator.mjs new-profile --out <fi
 | Option | Meaning |
 | --- | --- |
 | `--profile <file>` | The site profile (JSON). |
-| `--out <file>` | File to write. Required for `generate` and `new-profile`; the tool never picks a destination itself. |
+| `--out <file>` | File to write. Required for `generate` and `new-profile`; the tool never picks a destination itself. Its file name follows the `--name` rule below (no device name, trailing dot or space, or colon). |
 | `--config <file>` | Existing site configuration to compare (`check` only). |
 | `--version <x.y.z>` | Read the sample, loader and header version from existing tag `v<x.y.z>` (`generate` and `check`). |
 | `--versions <a,b,...>` | Comma-separated release versions (`generate-all` only). Empty, malformed and duplicate versions are usage errors. |
@@ -477,16 +477,38 @@ ERROR: The profile does not match the sample:
   ```
 
   `new-profile` instead refuses every existing file without `--force`; the generated-header rule
-  does not apply to its profile template. An output can never be the shipped sample
-  (`public/odv.site.config.sample.js`) or the loader (`public/odv.config.js`), even with `--force`
-  and also when it only leads there through a symbolic link. `generate`, `generate-all` and
-  `new-profile` refuse it with exit 1; `generate` also refuses its own `--sample` and `--loader`
-  files. `generate-all` stops at that version, and nothing more is written after it:
+  does not apply to its profile template.
+- **The shipped sample and loader are protected.** `generate`, `generate-all` and `new-profile`
+  refuse, with exit 1 and also with `--force`, an output that is the shipped sample
+  (`public/odv.site.config.sample.js`) or the loader (`public/odv.config.js`), or leads there
+  through a symbolic link; `generate` also refuses its own `--sample` and `--loader` files.
+  `generate-all` stops at that version, and nothing more is written after it. How "is" is decided:
+  - When the output already exists, it is compared by **file identity** (the device and file id
+    that `stat` reports), so another spelling of the same file is refused too: a mapped or
+    `subst` drive, a `\\?\` prefix, or a hard link.
+  - Every output is also compared by its normalised path (case-insensitive on Windows), both as
+    named and as resolved through a link. That is what refuses an output that does not exist yet,
+    and the only comparison on a file system that reports no file id.
+  - Not covered: a different spelling of the sample or loader on a file system that reports no
+    file id (`ino` 0), where only the path comparison is left.
 
   ```text
   ERROR: --out must not be the sample file itself.
   ERROR: --out must not be the loader (odv.config.js) itself (it is a link to "<repo>\public\odv.config.js").
+  ERROR: --out must not be the sample file itself (it is the same file as "<repo>\public\odv.site.config.sample.js").
   ERROR: Generation for version 2.10.0 failed: "<out-dir>\2.10.0\odv.site.config.js" must not be the sample file itself (it is a link to "<repo>\public\odv.site.config.sample.js").
+  ```
+
+- **The output file name must be a plain file name.** The last segment of every output path
+  (`--out` for `generate` and `new-profile`, `--name` for `generate-all`) follows the `--name`
+  rule above: a Windows device name (`NUL`, `com1.js`, ...), a trailing dot or space (which Windows
+  strips silently, so the file would land somewhere else or be hard to delete), and a colon (an
+  NTFS alternate data stream such as `odv.config.js:x`) are refused with exit 1 (`--name`: exit 2)
+  before anything is resolved or created, so such a destination never leaves a temporary file
+  behind:
+
+  ```text
+  ERROR: "<work>\odv.site.config.js." is not a usable output file: its file name ends with a space or a dot, which Windows strips silently.
   ```
 
 - **No half-written files.** `generate`, `generate-all` and `new-profile` write each output to a

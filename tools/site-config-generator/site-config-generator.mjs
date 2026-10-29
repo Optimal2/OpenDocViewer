@@ -100,7 +100,13 @@
  *     is reported next to the original error, never instead of it.
  *   - generate, generate-all and new-profile refuse, also with --force, an output that is or leads
  *     (through a link) to the shipped sample public/odv.site.config.sample.js or the loader
- *     public/odv.config.js; generate also refuses its own --sample and --loader files.
+ *     public/odv.config.js; generate also refuses its own --sample and --loader files. An existing
+ *     destination is compared by file identity (statSync dev and inode), so another spelling of
+ *     the same file (a mapped or substituted drive, a \\?\ prefix, a hard link) is refused too; a
+ *     destination that does not exist yet, or a file system that reports no inode number, is
+ *     compared by its normalised path. The output's file name must be a plain file name (the
+ *     --name rule): a Windows device name, a trailing dot or space, or a colon (an NTFS
+ *     alternate data stream) is refused before any file is created.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
  *     profile value is asserted on `window.__ODV_SITE_CONFIG__`; then the selected odv.config.js is
  *     executed on top of it and every active set/added value is asserted on the merged config.
@@ -1463,12 +1469,16 @@ function readExistingOutput(dest, force) {
  * Resolve the file that a write to `out` really replaces: `out` itself, or the final target of a
  * symbolic link at `out`, so that the link keeps pointing where it did. A link whose target does
  * not exist is refused rather than silently replaced by a regular file. Called exactly once per
- * output; the result is passed to every later check and to the write.
+ * output; the result is passed to every later check and to the write. The last segment of `out`
+ * must be a plain file name (plainFileNameProblem): a device name, a trailing dot or space and a
+ * colon (an NTFS alternate data stream) are refused here, before anything is created.
  * @param {string} out
  * @param {FileOps} files
  * @returns {Destination}
  */
 function resolveDestination(out, files) {
+  const problem = plainFileNameProblem(path.basename(out));
+  if (problem) throw new GeneratorError(`"${out}" is not a usable output file: its file name ${problem}.`);
   let target;
   try {
     target = files.realpathSync(out);
@@ -1491,18 +1501,49 @@ function resolveDestination(out, files) {
 }
 
 /**
+ * The identity of an existing file, "dev:ino" from statSync, or undefined when there is none to
+ * compare: the file does not exist or cannot be read, or the file system reports no inode number
+ * (ino 0 or missing). Read as bigint where the seam supports it, because NTFS file ids exceed
+ * Number's safe-integer range.
+ * @param {string} file
+ * @param {FileOps} files
+ */
+function fileIdentity(file, files) {
+  let stats;
+  try {
+    stats = files.statSync(file, { bigint: true });
+  } catch {
+    return undefined;
+  }
+  const dev = stats?.dev;
+  const ino = stats?.ino;
+  if (dev === undefined || dev === null || ino === undefined || ino === null || String(ino) === '0') return undefined;
+  return `${dev}:${ino}`;
+}
+
+/**
  * Refuse a destination that is, or leads to, a file the repository ships: writing a generated
- * site configuration over the sample or the loader is always wrong, also with --force. Compared
- * with both the name the operator gave and the resolved target.
+ * site configuration over the sample or the loader is always wrong, also with --force. Judged by
+ * file identity ({dev, ino} from statSync) when both the resolved target and the protected file
+ * exist, which also catches another spelling of the same file (a mapped or substituted drive, a
+ * \\?\ prefix, a hard link). The normalised path comparison with both the name the operator gave
+ * and the resolved target always applies as well, so a destination that does not exist yet (or a
+ * file system without inode numbers) is still refused by name.
  * @param {Destination} dest
  * @param {{ file: string, what: string }[]} protectedFiles
  * @param {string} label  how the destination is named in the error ("--out" or the path)
+ * @param {FileOps} files
  */
-function assertNotProtected(dest, protectedFiles, label) {
+function assertNotProtected(dest, protectedFiles, label, files) {
+  const destIdentity = fileIdentity(dest.target, files);
   for (const { file, what } of protectedFiles) {
     const real = fs.existsSync(file) ? fs.realpathSync(file) : path.resolve(file);
-    if (samePath(dest.out, file) || samePath(dest.target, file) || samePath(dest.target, real)) {
-      const via = dest.viaLink ? ` (it is a link to "${dest.target}")` : '';
+    const byName = samePath(dest.out, file) || samePath(dest.target, file) || samePath(dest.target, real);
+    const byIdentity = !byName && destIdentity !== undefined && fileIdentity(file, files) === destIdentity;
+    if (byName || byIdentity) {
+      let via = '';
+      if (dest.viaLink) via = ` (it is a link to "${dest.target}")`;
+      else if (byIdentity) via = ` (it is the same file as "${path.resolve(file)}")`;
       throw new GeneratorError(`${label} must not be the ${what} itself${via}.`);
     }
   }
@@ -1575,7 +1616,7 @@ function writeNewFile(file, text) {
  * @property {(file: string, text: string) => void} writeFile  creates a NEW file
  * @property {(file: string) => string} realpathSync
  * @property {(file: string) => fs.Stats} lstatSync
- * @property {(file: string) => fs.Stats} statSync
+ * @property {(file: string, options?: { bigint?: boolean }) => fs.Stats | fs.BigIntStats} statSync
  * @property {(file: string, mode: number) => void} chmodSync
  * @property {(from: string, to: string) => void} renameSync
  * @property {(file: string, options: { force: boolean }) => void} rmSync
@@ -1586,7 +1627,7 @@ const DEFAULT_FILE_OPS = {
   writeFile: writeNewFile,
   realpathSync: (file) => fs.realpathSync(file),
   lstatSync: (file) => fs.lstatSync(file),
-  statSync: (file) => fs.statSync(file),
+  statSync: (file, options) => fs.statSync(file, options),
   chmodSync: (file, mode) => fs.chmodSync(file, mode),
   renameSync: (from, to) => fs.renameSync(from, to),
   rmSync: (file, options) => fs.rmSync(file, options),
@@ -1596,7 +1637,7 @@ function runGenerate(options, log, files) {
   const out = path.resolve(options.out);
   // Resolved once: the checks below and the write all refer to this one target.
   const dest = resolveDestination(out, files);
-  assertNotProtected(dest, protectedFilesFor(options), '--out');
+  assertNotProtected(dest, protectedFilesFor(options), '--out', files);
   const existing = readExistingOutput(dest, options.force);
   const result = buildFromOptions(options, existing);
   log(`Profile: ${result.profile.name}`);
@@ -1617,7 +1658,7 @@ function runGenerateAll(options, log, files) {
     try {
       // Resolved once per version, exactly as in generate.
       const dest = resolveDestination(out, files);
-      assertNotProtected(dest, protectedFilesFor({}), `"${out}"`);
+      assertNotProtected(dest, protectedFilesFor({}), `"${out}"`, files);
       const existing = readExistingOutput(dest, options.force);
       const result = buildFromOptions({ profile: options.profile, version }, existing);
       // Do not create the version directory until generation and merge verification have passed.
@@ -1654,7 +1695,7 @@ function runCheck(options, log) {
 function runNewProfile(options, log, files) {
   const out = path.resolve(options.out);
   const dest = resolveDestination(out, files);
-  assertNotProtected(dest, protectedFilesFor({}), '--out');
+  assertNotProtected(dest, protectedFilesFor({}), '--out', files);
   if (fs.existsSync(dest.target) && !options.force) {
     throw new GeneratorError(`"${out}" already exists. Re-run with --force to replace it.`);
   }
@@ -1669,7 +1710,8 @@ function runNewProfile(options, log, files) {
  * @param {{ log?: (s: string) => void, error?: (s: string) => void,
  *   writeFile?: (file: string, text: string) => void, fileOps?: Partial<FileOps> }} [io]
  *   writeFile creates the temporary file of a generated configuration; fileOps overrides the other
- *   file-system calls of the atomic write (realpath, lstat, stat, chmod, rename, rm). Tests inject
+ *   file-system calls of the destination checks and the atomic write (realpath, lstat, stat,
+ *   chmod, rename, rm). Tests inject
  *   failures and observe calls here.
  * @returns {number} process exit code (0 ok, 1 drift or error, 2 usage error)
  */
