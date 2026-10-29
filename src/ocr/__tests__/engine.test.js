@@ -2,12 +2,21 @@
 // @vitest-environment jsdom
 /**
  * createOcrEngine wraps one tesseract.js worker: created lazily with the self-hosted paths and
- * `cacheMethod: 'none'`, shared by every recognition, classified and remembered on start-up
- * failure (one attempt per session), and released by terminate(). tesseract.js itself is
- * replaced by an injected createWorker so no WebAssembly runs here.
+ * `cacheMethod: 'none'`, shared by every recognition, and released by terminate(). Start-up
+ * failures are made observable even where tesseract.js 7.0.0 stays silent: the WebAssembly probe
+ * reports a CSP refusal before any worker exists, the `errorHandler` carries model failures, and
+ * the start timeout bounds everything else. tesseract.js itself is replaced by an injected
+ * createWorker, so no WebAssembly runs here.
  */
 import { describe, expect, it, vi } from 'vitest';
-import { OCR_STARTUP_FAILURE, classifyOcrStartupError, createOcrEngine, flattenOcrWords } from '../engine.js';
+import {
+  DEFAULT_OCR_START_TIMEOUT_MS,
+  OCR_STARTUP_FAILURE,
+  classifyOcrStartupError,
+  createOcrEngine,
+  flattenOcrWords,
+  probeWebAssemblyCompilation,
+} from '../engine.js';
 
 const ASSET_URLS = Object.freeze({
   workerPath: 'https://host.example/app/ocr/tesseract-7.0.0-core-7.0.0/worker.min.js',
@@ -18,6 +27,8 @@ const ASSET_URLS = Object.freeze({
 // Verbatim from Chromium 152 under the shipped policy (index.html / web.config): note that the
 // browser names 'unsafe-eval', although 'wasm-unsafe-eval' alone is enough to allow the engine.
 const CSP_MESSAGE = "WebAssembly.instantiate(): Compiling or instantiating WebAssembly module violates the following Content Security policy directive because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: \"script-src 'self' 'sha256-VLp8cNctLQHS+quZb8UEJAQpLDhxTlAGTn8HeEru0Zs='\".";
+// What tesseract.js 7.0.0 hands to errorHandler for a missing model (worker-script/index.js).
+const MODEL_404_MESSAGE = 'Error: Network error while fetching https://host.example/app/ocr/tessdata-4.0.0_best_int-0123456789ab/deu.traineddata.gz. Response code: 404';
 
 function fakeResult() {
   return {
@@ -52,16 +63,27 @@ function makeLog() {
   return { error: vi.fn(), warn: vi.fn(), debug: vi.fn(), info: vi.fn() };
 }
 
+/** An engine whose WebAssembly probe passes, so only the injected createWorker decides. */
+function makeEngine(overrides = {}) {
+  return createOcrEngine({
+    languages: ['swe', 'eng'],
+    assetUrls: ASSET_URLS,
+    probeWebAssembly: () => {},
+    log: makeLog(),
+    ...overrides,
+  });
+}
+
 describe('createOcrEngine', () => {
   it('validates its inputs', () => {
     expect(() => createOcrEngine({ languages: [], assetUrls: ASSET_URLS, createWorker: vi.fn() })).toThrow(/at least one language/);
     expect(() => createOcrEngine({ languages: ['swe'], assetUrls: { workerPath: 'x' }, createWorker: vi.fn() })).toThrow(/worker, core and language URLs/);
   });
 
-  it('starts the worker lazily, once, with the self-hosted paths and no model cache', async () => {
+  it('starts the worker lazily, once, with the self-hosted paths, no model cache and an error handler', async () => {
     const worker = makeWorker();
     const createWorker = vi.fn(async () => worker);
-    const engine = createOcrEngine({ languages: ['swe', 'eng'], assetUrls: ASSET_URLS, createWorker, log: makeLog() });
+    const engine = makeEngine({ createWorker });
     expect(createWorker).not.toHaveBeenCalled();
     expect(engine.isStarted()).toBe(false);
 
@@ -82,6 +104,7 @@ describe('createOcrEngine', () => {
       workerBlobURL: true,
     });
     expect(typeof options.logger).toBe('function');
+    expect(typeof options.errorHandler).toBe('function');
     expect(worker.recognize).toHaveBeenCalledTimes(2);
     expect(worker.recognize.mock.calls[0][2]).toEqual({ text: true, blocks: true });
   });
@@ -89,14 +112,14 @@ describe('createOcrEngine', () => {
   it('does not let the caller mutate the language order it was created with', async () => {
     const languages = ['swe'];
     const createWorker = vi.fn(async () => makeWorker());
-    const engine = createOcrEngine({ languages, assetUrls: ASSET_URLS, createWorker, log: makeLog() });
+    const engine = makeEngine({ languages, createWorker });
     languages.push('eng');
     await engine.ensureStarted();
     expect(createWorker.mock.calls[0][0]).toEqual(['swe']);
   });
 
   it('returns text, confidence and the words with boxes, skipping blank words and words without a box', async () => {
-    const engine = createOcrEngine({ languages: ['swe'], assetUrls: ASSET_URLS, createWorker: vi.fn(async () => makeWorker()), log: makeLog() });
+    const engine = makeEngine({ createWorker: vi.fn(async () => makeWorker()) });
     const result = await engine.recognize('page.png');
     expect(result.text).toBe('Hej världen\n');
     expect(result.confidence).toBe(91.5);
@@ -106,16 +129,18 @@ describe('createOcrEngine', () => {
     ]);
   });
 
-  it('classifies a CSP block, logs the token once and stays off without a second worker', async () => {
-    const createWorker = vi.fn(async () => { throw new Error(CSP_MESSAGE); });
+  it('reports a CSP refusal from the WebAssembly probe before any worker is created, once, and stays off', async () => {
+    const createWorker = vi.fn(async () => makeWorker());
     const log = makeLog();
-    const engine = createOcrEngine({ languages: ['swe'], assetUrls: ASSET_URLS, createWorker, log });
+    const probeWebAssembly = vi.fn(() => { throw new Error(CSP_MESSAGE); });
+    const engine = makeEngine({ createWorker, log, probeWebAssembly });
 
     await expect(engine.recognize('page.png')).rejects.toThrow(/'unsafe-eval' is not an allowed source/);
     await expect(engine.recognize('page.png')).rejects.toThrow(/'unsafe-eval' is not an allowed source/);
     await expect(engine.ensureStarted()).rejects.toThrow(/'unsafe-eval' is not an allowed source/);
 
-    expect(createWorker).toHaveBeenCalledTimes(1);
+    expect(probeWebAssembly).toHaveBeenCalledTimes(1);
+    expect(createWorker).not.toHaveBeenCalled();
     expect(engine.isStarted()).toBe(false);
     expect(engine.getFailure()).toMatchObject({ kind: OCR_STARTUP_FAILURE.CSP });
     expect(log.error).toHaveBeenCalledTimes(1);
@@ -126,24 +151,56 @@ describe('createOcrEngine', () => {
     expect(context.hint).toMatch(/script-src/);
   });
 
-  it('classifies missing engine files and names the URLs in the hint', async () => {
+  it('rejects when createWorker rejects (a load failure) and names the URLs in the hint', async () => {
     const log = makeLog();
-    const engine = createOcrEngine({
-      languages: ['swe'],
-      assetUrls: ASSET_URLS,
-      createWorker: vi.fn(async () => { throw new Error('Failed to load TesseractCore'); }),
-      log,
-    });
-    await expect(engine.ensureStarted()).rejects.toThrow();
+    const engine = makeEngine({ createWorker: vi.fn(async () => { throw new Error('Failed to load TesseractCore'); }), log });
+    await expect(engine.ensureStarted()).rejects.toThrow('Failed to load TesseractCore');
     expect(engine.getFailure().kind).toBe(OCR_STARTUP_FAILURE.ASSETS);
     expect(log.error.mock.calls[0][1].hint).toContain(ASSET_URLS.corePath);
     expect(log.error.mock.calls[0][1].hint).toContain(`${ASSET_URLS.langPath}/<lang>.traineddata.gz`);
   });
 
+  it('rejects through errorHandler when tesseract.js never settles createWorker (a missing model)', async () => {
+    // tesseract.js 7.0.0 only settles createWorker for `load` failures; a model that is not
+    // found reaches the errorHandler and would otherwise leave the start pending forever.
+    const createWorker = vi.fn((_langs, _oem, options) => new Promise(() => {
+      setTimeout(() => options.errorHandler(MODEL_404_MESSAGE), 0);
+    }));
+    const log = makeLog();
+    const engine = makeEngine({ createWorker, log });
+    await expect(engine.ensureStarted()).rejects.toThrow(/deu\.traineddata\.gz. Response code: 404/);
+    expect(engine.getFailure().kind).toBe(OCR_STARTUP_FAILURE.ASSETS);
+    expect(log.error).toHaveBeenCalledTimes(1);
+    expect(createWorker).toHaveBeenCalledTimes(1);
+    await expect(engine.recognize('page.png')).rejects.toThrow(/404/);
+    expect(createWorker).toHaveBeenCalledTimes(1);
+  });
+
+  it('bounds a start that stays silent with the timeout and terminates a worker that arrives late', async () => {
+    let resolveLate;
+    const lateWorker = makeWorker();
+    const createWorker = vi.fn(() => new Promise((resolve) => { resolveLate = resolve; }));
+    const log = makeLog();
+    const engine = makeEngine({ createWorker, log, startTimeoutMs: 20 });
+
+    await expect(engine.ensureStarted()).rejects.toThrow(/did not start within 20 ms/);
+    expect(engine.getFailure().kind).toBe(OCR_STARTUP_FAILURE.TIMEOUT);
+    expect(log.error.mock.calls[0][1].kind).toBe('timeout');
+
+    resolveLate(lateWorker);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(lateWorker.terminate).toHaveBeenCalledTimes(1);
+    expect(engine.isStarted()).toBe(false);
+  });
+
+  it('uses the 60 s default bound', () => {
+    expect(DEFAULT_OCR_START_TIMEOUT_MS).toBe(60000);
+  });
+
   it('terminates the worker, releases the started state and can start again', async () => {
     const workers = [makeWorker(), makeWorker()];
     const createWorker = vi.fn(async () => workers[createWorker.mock.calls.length - 1]);
-    const engine = createOcrEngine({ languages: ['swe'], assetUrls: ASSET_URLS, createWorker, log: makeLog() });
+    const engine = makeEngine({ createWorker });
 
     await engine.terminate();
     expect(createWorker).not.toHaveBeenCalled();
@@ -157,15 +214,49 @@ describe('createOcrEngine', () => {
     expect(createWorker).toHaveBeenCalledTimes(2);
     expect(workers[1].recognize).toHaveBeenCalledTimes(1);
   });
+
+  it('rejects a recognition that is in flight or still starting when terminate() is called', async () => {
+    // tesseract.js never settles a job that was in flight when its worker is terminated.
+    const worker = makeWorker();
+    worker.recognize = vi.fn(() => new Promise(() => {}));
+    let resolveStart;
+    const createWorker = vi.fn(() => new Promise((resolve) => { resolveStart = resolve; }));
+    const engine = makeEngine({ createWorker });
+
+    const starting = engine.recognize('page-1.png');
+    await engine.terminate();
+    resolveStart(worker);
+    await expect(starting).rejects.toThrow(/terminated/);
+    expect(worker.recognize).not.toHaveBeenCalled();
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+    expect(engine.getFailure()).toBeNull();
+
+    const second = makeWorker();
+    second.recognize = vi.fn(() => new Promise(() => {}));
+    createWorker.mockImplementation(async () => second);
+    const inFlight = engine.recognize('page-2.png');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(second.recognize).toHaveBeenCalledTimes(1);
+    await engine.terminate();
+    await expect(inFlight).rejects.toThrow(/terminated/);
+    expect(second.terminate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('probeWebAssemblyCompilation', () => {
+  it('passes where WebAssembly compilation is allowed (this test runtime)', () => {
+    expect(() => probeWebAssemblyCompilation()).not.toThrow();
+  });
 });
 
 describe('classifyOcrStartupError', () => {
   it.each([
     [CSP_MESSAGE, OCR_STARTUP_FAILURE.CSP],
-    ["Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source", OCR_STARTUP_FAILURE.CSP],
+    ["Refused to compile or instantiate WebAssembly module because 'wasm-unsafe-eval' is not an allowed source", OCR_STARTUP_FAILURE.CSP],
     ['Failed to load TesseractCore', OCR_STARTUP_FAILURE.ASSETS],
-    ['Error: Network error while fetching swe.traineddata.gz', OCR_STARTUP_FAILURE.ASSETS],
+    [MODEL_404_MESSAGE, OCR_STARTUP_FAILURE.ASSETS],
     ['importScripts failed', OCR_STARTUP_FAILURE.ASSETS],
+    ['OCR worker did not start within 60000 ms', OCR_STARTUP_FAILURE.TIMEOUT],
     ['something else entirely', OCR_STARTUP_FAILURE.UNKNOWN],
     ['', OCR_STARTUP_FAILURE.UNKNOWN],
   ])('classifies %j as %s', (message, expected) => {

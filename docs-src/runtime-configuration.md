@@ -282,8 +282,8 @@ ocr: {
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
   (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
   configuration is read; when OCR starts, codes that name no Tesseract model (a typo such as
-  `sve`) are dropped as well, and every dropped entry and every fallback is reported once as a
-  console warning, so a mistake is never silent. The `ocr/` folder that ships with the viewer
+  `sve`) are dropped as well, and every dropped or repeated entry, a value that is not an array
+  and every fallback is reported once as a console warning, so a mistake is never silent. The `ocr/` folder that ships with the viewer
   contains the Swedish and English models; another language needs `ocr.assetBaseUrl` pointing at
   a folder that has its model (`<lang>.traineddata.gz`). Every listed model runs on every text
   line and the best match wins, so each extra language adds some recognition time per page. As
@@ -295,8 +295,8 @@ ocr: {
   (`//host/odv-ocr/`) and relative values (`/shared/ocr/`, resolved against the page) are accepted
   and get a trailing slash when missing. A value with a query string or fragment is ignored,
   because file names are appended to it; so is any other scheme (`javascript:`, `data:`, `file:`
-  and the like). An ignored value is reported once as a console warning and the viewer's own
-  folder is used instead. A cross-origin base must also be allowed by the site's CSP: the worker
+  and the like) and a value containing whitespace or control characters. An ignored value is
+  reported once as a console warning and the viewer's own folder is used instead. A cross-origin base must also be allowed by the site's CSP: the worker
   and the engine core are loaded as scripts (`script-src`), and the language models are fetched
   (`connect-src`, and the host must send CORS headers).
 
@@ -329,7 +329,10 @@ Add it in every place the site sets a policy for the viewer: the `Content-Securi
 in the site's `web.config`, and, when the viewer is served through ODVGateway, the gateway's
 `contentSecurityPolicy` setting in its appsettings as well. Without the token the engine cannot
 start; OCR then turns itself off for the session and logs one console error naming the missing
-token. Pages still load and render exactly as before. (Chromium reports the block as a
+token (the viewer probes WebAssembly compilation before starting the worker, so the refusal is
+reported at once, not after a timeout). The same applies when the engine files cannot be loaded:
+one console error names the paths, and no second start is attempted in that session. Pages
+still load and render exactly as before. (Chromium reports the block as a
 `CompileError` that names `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is still the right token,
 it allows WebAssembly without allowing `eval`.)
 

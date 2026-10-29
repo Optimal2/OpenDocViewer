@@ -133,7 +133,7 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 
 ## src/ocr
 
-File count: 5. Line count: 386. JSDoc symbol count: 17.
+File count: 5. Line count: 506. JSDoc symbol count: 22.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
@@ -161,7 +161,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 52. Line count: 21031. JSDoc symbol count: 853.
+File count: 52. Line count: 21053. JSDoc symbol count: 854.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

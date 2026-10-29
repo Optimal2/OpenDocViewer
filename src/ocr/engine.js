@@ -7,10 +7,16 @@
  * the site's `ocr.assetBaseUrl`), never from a CDN. `cacheMethod: 'none'` keeps tesseract.js from
  * writing the models to IndexedDB: the only cache is the browser's ordinary HTTP cache.
  *
- * A start-up failure is classified so the caller can tell a Content-Security-Policy that blocks
- * WebAssembly (`'wasm-unsafe-eval'` missing from script-src) from missing files. After a failure
- * the engine stays off: every later call rejects with the same error and no second worker is
- * started, so a misconfigured site pays for one attempt per session.
+ * Start-up failures need care, because tesseract.js 7.0.0's `createWorker` reports only some of
+ * them: a `load` rejection settles its promise, but a missing language model only reaches the
+ * optional `errorHandler`, and a WebAssembly compile refused by the site's Content-Security-Policy
+ * aborts inside the worker without any message to the page. The engine therefore (1) probes
+ * WebAssembly compilation on the main thread first, which yields the browser's own CSP error
+ * at once, (2) passes an `errorHandler` so model and initialisation failures reject the start,
+ * and (3) bounds the start with a timeout as the last resort. A failure is classified so the
+ * caller can tell a policy that lacks `'wasm-unsafe-eval'` from missing files, and it is final:
+ * every later call rejects with the same error and no second worker is started, so a
+ * misconfigured site pays for one attempt per session.
  *
  * Part of the lazy OCR chunk: nothing here is imported while `ocr.enabled` is off.
  */
@@ -23,17 +29,37 @@ export const OCR_STARTUP_FAILURE = Object.freeze({
   CSP: 'csp',
   /** The worker script, engine core or a language model could not be loaded. */
   ASSETS: 'assets',
+  /** The worker gave no answer within the start timeout. */
+  TIMEOUT: 'timeout',
   /** Anything else. */
   UNKNOWN: 'unknown',
 });
 
+/** Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise). */
+export const DEFAULT_OCR_START_TIMEOUT_MS = 60000;
+
+// Chromium phrases the refusal as "'unsafe-eval' is not an allowed source of script" even though
+// 'wasm-unsafe-eval' alone is enough to allow it; Firefox names 'wasm-unsafe-eval'. Both match.
 const CSP_PATTERN = /wasm-unsafe-eval|unsafe-eval|content.security.policy|refused to compile|compileerror/i;
 const ASSETS_PATTERN = /failed to load tesseractcore|importscripts|traineddata|network|fetch|404|failed to load/i;
+const TIMEOUT_PATTERN = /did not start within/i;
+
+/** The smallest valid WebAssembly module: magic number and version, nothing else. */
+const EMPTY_WASM_MODULE = Uint8Array.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
 
 /**
- * Classify a start-up error by its message. Chromium reports a CSP block as a `CompileError`
- * whose message names `'wasm-unsafe-eval'`; tesseract.js reports a missing core as
- * "Failed to load TesseractCore" and a missing model by its `.traineddata` name.
+ * Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which
+ * under a Content-Security-Policy without 'wasm-unsafe-eval' is a CompileError that names the
+ * missing token. Returns normally when compilation is allowed.
+ */
+export function probeWebAssemblyCompilation() {
+  if (typeof WebAssembly === 'undefined') throw new Error('WebAssembly is not available in this browser');
+  // Synchronous on purpose: the module is 8 bytes, and a thrown CompileError is the signal.
+  new WebAssembly.Module(EMPTY_WASM_MODULE);
+}
+
+/**
+ * Classify a start-up error by its message.
  *
  * @param {*} error
  * @returns {string} One of OCR_STARTUP_FAILURE.
@@ -41,6 +67,7 @@ const ASSETS_PATTERN = /failed to load tesseractcore|importscripts|traineddata|n
 export function classifyOcrStartupError(error) {
   const text = String(error?.message ?? error ?? '');
   if (CSP_PATTERN.test(text)) return OCR_STARTUP_FAILURE.CSP;
+  if (TIMEOUT_PATTERN.test(text)) return OCR_STARTUP_FAILURE.TIMEOUT;
   if (ASSETS_PATTERN.test(text)) return OCR_STARTUP_FAILURE.ASSETS;
   return OCR_STARTUP_FAILURE.UNKNOWN;
 }
@@ -71,13 +98,19 @@ export function flattenOcrWords(data) {
   return words;
 }
 
+/** @param {*} reason @returns {Error} */
+function toError(reason) {
+  return reason instanceof Error ? reason : new Error(String(reason?.message ?? reason ?? 'unknown error'));
+}
+
 /**
  * @typedef {Object} OcrEngine
  * @property {function(): Promise<void>} ensureStarted  Create the worker if needed (loads core and models).
  * @property {function(*): Promise<{ text: string, confidence: number, words: Array<Object> }>} recognize
  *   Recognize one page image (anything tesseract.js accepts: canvas, Blob, ImageData, URL).
+ *   Rejects with "terminated" when terminate() is called while it runs or before it starts.
  * @property {function(): Promise<void>} terminate  Stop the worker and release its WebAssembly memory.
- * @property {function(): ({ kind: string, error: * }|null)} getFailure  The start-up failure, if any.
+ * @property {function(): ({ kind: string, error: Error }|null)} getFailure  The start-up failure, if any.
  * @property {function(): boolean} isStarted  True while a worker is running.
  */
 
@@ -89,10 +122,19 @@ export function flattenOcrWords(data) {
  * @param {Array<string>} options.languages  Tesseract language codes, model order.
  * @param {{ workerPath: string, corePath: string, langPath: string }} options.assetUrls
  * @param {Function=} options.createWorker  tesseract.js createWorker (injectable for tests).
+ * @param {Function=} options.probeWebAssembly  Main-thread WebAssembly probe (injectable for tests).
+ * @param {number=} options.startTimeoutMs  Bound on worker start-up (default 60 s).
  * @param {{ error: Function, debug: Function }=} options.log  Logger (injectable for tests).
  * @returns {OcrEngine}
  */
-export function createOcrEngine({ languages, assetUrls, createWorker = Tesseract.createWorker, log = logger }) {
+export function createOcrEngine({
+  languages,
+  assetUrls,
+  createWorker = Tesseract.createWorker,
+  probeWebAssembly = probeWebAssemblyCompilation,
+  startTimeoutMs = DEFAULT_OCR_START_TIMEOUT_MS,
+  log = logger,
+}) {
   if (!Array.isArray(languages) || !languages.length) throw new Error('OCR engine needs at least one language');
   if (!assetUrls?.workerPath || !assetUrls?.corePath || !assetUrls?.langPath) throw new Error('OCR engine needs worker, core and language URLs');
 
@@ -102,28 +144,79 @@ export function createOcrEngine({ languages, assetUrls, createWorker = Tesseract
 
   /** @type {(Promise<Object>|null)} */
   let workerPromise = null;
-  /** @type {({ kind: string, error: * }|null)} */
+  /** @type {({ kind: string, error: Error }|null)} */
   let failure = null;
   let started = false;
+  // Bumped by terminate(): calls that began under an older generation reject instead of
+  // touching a worker that is gone, and in-flight recognitions are released.
+  let generation = 0;
+  /** @type {Array<function(Error): void>} */
+  let releaseInFlight = [];
 
-  async function start() {
-    const worker = await createWorker([...languageList], Tesseract.OEM.LSTM_ONLY, {
-      workerPath: urls.workerPath,
-      corePath: urls.corePath,
-      langPath: urls.langPath,
-      gzip: true,
-      cacheMethod: 'none',
-      workerBlobURL: true,
-      logger: () => {},
+  function startWorker() {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      let timer = null;
+      const finish = (fn) => (value) => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        fn(value);
+      };
+      const succeed = finish(resolve);
+      const fail = finish((reason) => reject(toError(reason)));
+
+      try {
+        probeWebAssembly();
+      } catch (error) {
+        fail(error);
+        return;
+      }
+
+      timer = setTimeout(() => fail(new Error(`OCR worker did not start within ${startTimeoutMs} ms`)), startTimeoutMs);
+
+      let creation;
+      try {
+        creation = Promise.resolve(createWorker([...languageList], Tesseract.OEM.LSTM_ONLY, {
+          workerPath: urls.workerPath,
+          corePath: urls.corePath,
+          langPath: urls.langPath,
+          gzip: true,
+          cacheMethod: 'none',
+          workerBlobURL: true,
+          logger: () => {},
+          // tesseract.js only settles createWorker for `load` failures; model and initialisation
+          // failures arrive here (and would otherwise be thrown unhandled from worker.onmessage).
+          errorHandler: fail,
+        }));
+      } catch (error) {
+        fail(error);
+        return;
+      }
+      creation.then((worker) => {
+        if (settled) {
+          // Arrived after the timeout: do not leave a worker with megabytes of memory behind.
+          Promise.resolve(worker?.terminate?.()).catch(() => {});
+          return;
+        }
+        succeed(worker);
+      }, fail);
     });
-    started = true;
-    return worker;
   }
 
   async function ensureStarted() {
     if (failure) throw failure.error;
     if (!workerPromise) {
-      workerPromise = start().catch((error) => {
+      const startGeneration = generation;
+      workerPromise = startWorker().then((worker) => {
+        if (startGeneration !== generation) {
+          Promise.resolve(worker?.terminate?.()).catch(() => {});
+          throw new Error('OCR engine was terminated during start');
+        }
+        started = true;
+        return worker;
+      }).catch((error) => {
+        if (startGeneration !== generation) throw error;
         failure = { kind: classifyOcrStartupError(error), error };
         workerPromise = null;
         log.error('OCR engine could not start; OCR stays off for this session', {
@@ -143,16 +236,38 @@ export function createOcrEngine({ languages, assetUrls, createWorker = Tesseract
   return {
     ensureStarted,
     async recognize(image) {
+      const callGeneration = generation;
       await ensureStarted();
-      const worker = await workerPromise;
-      const { data } = await worker.recognize(image, {}, { text: true, blocks: true });
-      return { text: String(data?.text ?? ''), confidence: Number(data?.confidence) || 0, words: flattenOcrWords(data) };
+      const pending = workerPromise;
+      if (callGeneration !== generation || !pending) throw new Error('OCR engine was terminated');
+      const worker = await pending;
+      // tesseract.js never settles a job that was in flight when the worker is terminated, so
+      // terminate() releases it here instead of leaving the caller waiting.
+      let release = null;
+      const released = new Promise((_resolve, reject) => { release = reject; releaseInFlight.push(reject); });
+      try {
+        const { data } = await Promise.race([worker.recognize(image, {}, { text: true, blocks: true }), released]);
+        return { text: String(data?.text ?? ''), confidence: Number(data?.confidence) || 0, words: flattenOcrWords(data) };
+      } finally {
+        releaseInFlight = releaseInFlight.filter((entry) => entry !== release);
+      }
     },
     async terminate() {
+      generation += 1;
       const pending = workerPromise;
+      const wasStarted = started;
       workerPromise = null;
       started = false;
+      const waiting = releaseInFlight;
+      releaseInFlight = [];
+      for (const reject of waiting) reject(new Error('OCR engine was terminated'));
       if (!pending) return;
+      if (!wasStarted) {
+        // Still starting: the generation check in ensureStarted terminates the worker when (if)
+        // it arrives. Waiting here would block the caller for as long as the start takes.
+        pending.catch(() => {});
+        return;
+      }
       try {
         const worker = await pending;
         await worker.terminate();

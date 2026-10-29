@@ -64,6 +64,16 @@ describe('describeOcrSetup', () => {
     expect(opts.log.warn).toHaveBeenCalledTimes(2);
   });
 
+  it('warns when languages is not an array and when a code is repeated', () => {
+    const notArray = describeOcrSetup({ ocr: { enabled: true, languages: 'swe' } }, options());
+    expect(notArray.languages).toEqual(['swe', 'eng']);
+    expect(notArray.warnings).toEqual([expect.stringMatching(/must be an array of language codes, not string; using the default/)]);
+
+    const repeated = describeOcrSetup({ ocr: { enabled: true, languages: ['swe', 'eng', 'swe'] } }, options());
+    expect(repeated.languages).toEqual(['swe', 'eng']);
+    expect(repeated.warnings).toEqual([expect.stringMatching(/repeats \["swe"\]; each code is loaded once/)]);
+  });
+
   it('falls back to the default when every configured code is unknown', () => {
     const setup = describeOcrSetup({ ocr: { enabled: true, languages: ['zzz'] } }, options());
     expect(setup.languages).toEqual(['swe', 'eng']);
@@ -78,6 +88,8 @@ describe('describeOcrSetup', () => {
     ['a fragment', 'https://cdn.example/ocr#v1', 'query-or-fragment'],
     ['a javascript: scheme', 'javascript:alert(1)', 'scheme'],
     ['a data: scheme', 'data:text/javascript,1', 'scheme'],
+    ['a scheme hidden behind a line feed', 'java\nscript:alert(1)', 'invalid-characters'],
+    ['a NUL character', 'https://cdn.example/\u0000ocr/', 'invalid-characters'],
   ])('ignores an assetBaseUrl with %s and says why', (_label, assetBaseUrl, reason) => {
     const opts = options();
     const setup = describeOcrSetup({ ocr: { enabled: true, assetBaseUrl } }, opts);

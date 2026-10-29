@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 5. Line count: 386. JSDoc symbol count: 17.
+File count: 5. Line count: 506. JSDoc symbol count: 22.
 
 ## src/ocr/assetUrls.js
 
@@ -19,7 +19,7 @@ Symbols:
 
 Thin wrapper around a tesseract.js worker.
 
-Exports: `OCR_STARTUP_FAILURE`, `classifyOcrStartupError`, `flattenOcrWords`, `createOcrEngine`
+Exports: `OCR_STARTUP_FAILURE`, `DEFAULT_OCR_START_TIMEOUT_MS`, `probeWebAssemblyCompilation`, `classifyOcrStartupError`, `flattenOcrWords`, `createOcrEngine`
 
 Local imports: `src/logging/systemLogger.js`
 
@@ -28,11 +28,15 @@ Symbols:
 - `OCR_STARTUP_FAILURE` (constant) - Why the engine could not start \(see classifyOcrStartupError\).
 - `CSP` (member) - WebAssembly compilation refused: the site CSP lacks 'wasm\-unsafe\-eval' in script\-src.
 - `ASSETS` (member) - The worker script, engine core or a language model could not be loaded.
+- `TIMEOUT` (member) - The worker gave no answer within the start timeout.
 - `UNKNOWN` (member) - Anything else.
+- `DEFAULT_OCR_START_TIMEOUT_MS` (constant) - Default bound on worker start\-up \(core and models are a few MB; a stalled start stays silent otherwise\).
+- `EMPTY_WASM_MODULE` (constant) - The smallest valid WebAssembly module: magic number and version, nothing else.
+- `probeWebAssemblyCompilation` (function) - Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which under a Content\-Security\-Policy without 'wasm\-unsafe\-eval' is a CompileError that nam...
 - `classifyOcrStartupError` (function) - Classify a start\-up error by its message.
 - `flattenOcrWords` (function) - Flatten tesseract.js' block tree into one word list with page\-pixel boxes.
+- `toError` (function) - No description.
 - `OcrEngine` (typedef) - No description.
-- `createOcrEngine` (function) - Create an engine for the given languages and asset URLs.
 
 ## src/ocr/index.js
 

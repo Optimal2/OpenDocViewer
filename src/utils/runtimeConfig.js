@@ -329,21 +329,31 @@ export function isOcrEnabled(cfg = getRuntimeConfig()) {
  * Entries are trimmed and lower-cased; non-strings, malformed codes and duplicates are dropped.
  * Only the form of a code is checked (three letters plus optional `_suffix`); whether a model
  * with that code exists is known to the OCR module, which checks it against tesseract.js' list.
- * `configured` is true when the value is an array at all. `fallback` is true when the value is
+ * `configured` is true when the key is present at all (`undefined` means unconfigured);
+ * `notArray` is true when it is present but not an array. `fallback` is true when the value is
  * missing, not an array, or an array without a usable entry (including `[]`): `languages` is
  * then a copy of DEFAULT_OCR_LANGUAGES, since an empty list could never recognize anything.
- * The order of valid codes is kept because Tesseract reports it as the model order.
+ * `duplicates` lists repeated codes (kept once). The order of valid codes is kept because
+ * Tesseract reports it as the model order.
  *
  * @param {Object=} cfg
- * @returns {{ languages: Array<string>, configured: boolean, fallback: boolean, dropped: Array<*> }}
+ * @returns {{ languages: Array<string>, configured: boolean, notArray: boolean, fallback: boolean, dropped: Array<*>, duplicates: Array<string> }}
  */
 export function describeOcrLanguages(cfg = getRuntimeConfig()) {
   const raw = cfg?.ocr?.languages;
   if (!Array.isArray(raw)) {
-    return { languages: [...DEFAULT_OCR_LANGUAGES], configured: false, fallback: true, dropped: [] };
+    return {
+      languages: [...DEFAULT_OCR_LANGUAGES],
+      configured: raw !== undefined,
+      notArray: raw !== undefined,
+      fallback: true,
+      dropped: [],
+      duplicates: [],
+    };
   }
   const languages = [];
   const dropped = [];
+  const duplicates = [];
   for (const entry of raw) {
     if (typeof entry !== 'string') {
       dropped.push(entry);
@@ -354,12 +364,16 @@ export function describeOcrLanguages(cfg = getRuntimeConfig()) {
       dropped.push(entry);
       continue;
     }
-    if (!languages.includes(code)) languages.push(code);
+    if (languages.includes(code)) {
+      if (!duplicates.includes(code)) duplicates.push(code);
+      continue;
+    }
+    languages.push(code);
   }
   if (!languages.length) {
-    return { languages: [...DEFAULT_OCR_LANGUAGES], configured: true, fallback: true, dropped };
+    return { languages: [...DEFAULT_OCR_LANGUAGES], configured: true, notArray: false, fallback: true, dropped, duplicates };
   }
-  return { languages, configured: true, fallback: false, dropped };
+  return { languages, configured: true, notArray: false, fallback: false, dropped, duplicates };
 }
 
 /**
@@ -378,8 +392,13 @@ export const OCR_ASSET_BASE_URL_REJECTIONS = Object.freeze({
   QUERY_OR_FRAGMENT: 'query-or-fragment',
   /** The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter). */
   SCHEME: 'scheme',
+  /** The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme. */
+  INVALID_CHARACTERS: 'invalid-characters',
 });
 const URL_SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
+// ASCII whitespace and control characters, which the WHATWG URL parser removes before parsing.
+// eslint-disable-next-line no-control-regex
+const URL_UNSAFE_CHARACTER_PATTERN = /[\u0000- \u007f]/;
 
 /**
  * Describe how `ocr.assetBaseUrl` resolves. `url` is the usable base with a trailing slash, or
@@ -399,6 +418,9 @@ export function describeOcrAssetBaseUrl(cfg = getRuntimeConfig()) {
   if (typeof raw !== 'string') return { url: null, rejected: null, value: null };
   const trimmed = raw.trim();
   if (!trimmed) return { url: null, rejected: null, value: null };
+  if (URL_UNSAFE_CHARACTER_PATTERN.test(trimmed)) {
+    return { url: null, rejected: OCR_ASSET_BASE_URL_REJECTIONS.INVALID_CHARACTERS, value: trimmed };
+  }
   if (/[?#]/.test(trimmed)) {
     return { url: null, rejected: OCR_ASSET_BASE_URL_REJECTIONS.QUERY_OR_FRAGMENT, value: trimmed };
   }

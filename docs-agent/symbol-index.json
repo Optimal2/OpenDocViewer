@@ -20407,7 +20407,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 25,
+    "line": 31,
     "description": "The worker script, engine core or a language model could not be loaded.",
     "params": [],
     "returns": [],
@@ -20420,7 +20420,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 41,
+    "line": 67,
     "description": "Classify a start-up error by its message.",
     "params": [
       {
@@ -20445,7 +20445,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 95,
+    "line": 130,
     "description": "Create an engine for the given languages and asset URLs.",
     "params": [
       {
@@ -20473,6 +20473,18 @@
         "description": "tesseract.js createWorker (injectable for tests)."
       },
       {
+        "name": "options.probeWebAssembly",
+        "type": "function",
+        "optional": true,
+        "description": "Main-thread WebAssembly probe (injectable for tests)."
+      },
+      {
+        "name": "options.startTimeoutMs",
+        "type": "number",
+        "optional": true,
+        "description": "Bound on worker start-up (default 60 s)."
+      },
+      {
         "name": "options.log",
         "type": "Object",
         "optional": true,
@@ -20494,8 +20506,34 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 23,
+    "line": 29,
     "description": "WebAssembly compilation refused: the site CSP lacks 'wasm-unsafe-eval' in script-src.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "DEFAULT_OCR_START_TIMEOUT_MS",
+    "name": "DEFAULT_OCR_START_TIMEOUT_MS",
+    "longname": "DEFAULT_OCR_START_TIMEOUT_MS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 39,
+    "description": "Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "EMPTY_WASM_MODULE",
+    "name": "EMPTY_WASM_MODULE",
+    "longname": "EMPTY_WASM_MODULE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 48,
+    "description": "The smallest valid WebAssembly module: magic number and version, nothing else.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -20507,7 +20545,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 54,
+    "line": 81,
     "description": "Flatten tesseract.js' block tree into one word list with page-pixel boxes.",
     "params": [
       {
@@ -20532,7 +20570,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 21,
+    "line": 27,
     "description": "Why the engine could not start (see classifyOcrStartupError).",
     "params": [],
     "returns": [],
@@ -20545,9 +20583,55 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 74,
+    "line": 106,
     "description": "",
     "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "probeWebAssemblyCompilation",
+    "name": "probeWebAssemblyCompilation",
+    "longname": "probeWebAssemblyCompilation",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 55,
+    "description": "Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which under a Content-Security-Policy without 'wasm-unsafe-eval' is a CompileError that nam...",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "TIMEOUT",
+    "name": "TIMEOUT",
+    "longname": "TIMEOUT",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 33,
+    "description": "The worker gave no answer within the start timeout.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "toError",
+    "name": "toError",
+    "longname": "toError",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 102,
+    "description": "",
+    "params": [
+      {
+        "name": "reason",
+        "type": "*",
+        "optional": false,
+        "description": "@returns {Error}"
+      }
+    ],
     "returns": [],
     "examples": 0
   },
@@ -20558,7 +20642,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 27,
+    "line": 35,
     "description": "Anything else.",
     "params": [],
     "returns": [],
@@ -20609,7 +20693,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 85,
+    "line": 90,
     "description": "Create an engine for the configured languages and asset location.",
     "params": [
       {
@@ -39386,7 +39470,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 471,
+    "line": 493,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -39481,7 +39565,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 397,
+    "line": 416,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -39506,7 +39590,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 340,
+    "line": 342,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -39581,7 +39665,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 419,
+    "line": 441,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -39606,7 +39690,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 371,
+    "line": 385,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -39631,7 +39715,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 848,
+    "line": 870,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -39706,7 +39790,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 723,
+    "line": 745,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -39731,7 +39815,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 748,
+    "line": 770,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -39774,7 +39858,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 831,
+    "line": 853,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -39799,7 +39883,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 431,
+    "line": 453,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -39824,7 +39908,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 699,
+    "line": 721,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -39849,7 +39933,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 685,
+    "line": 707,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -39874,7 +39958,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 672,
+    "line": 694,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -39899,7 +39983,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 772,
+    "line": 794,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -39924,7 +40008,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 790,
+    "line": 812,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -39940,6 +40024,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "INVALID_CHARACTERS",
+    "name": "INVALID_CHARACTERS",
+    "longname": "INVALID_CHARACTERS",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 396,
+    "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -40200,7 +40297,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 449,
+    "line": 471,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -40231,7 +40328,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 646,
+    "line": 668,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -40256,7 +40353,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 617,
+    "line": 639,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -40287,7 +40384,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 585,
+    "line": 607,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -40318,7 +40415,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 517,
+    "line": 539,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -40361,7 +40458,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 496,
+    "line": 518,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -40404,7 +40501,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 628,
+    "line": 650,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -40435,7 +40532,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 600,
+    "line": 622,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -40466,7 +40563,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 546,
+    "line": 568,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -40491,7 +40588,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 534,
+    "line": 556,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -40522,7 +40619,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 560,
+    "line": 582,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -40547,7 +40644,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 376,
+    "line": 390,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -40638,7 +40735,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 378,
+    "line": 392,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -40708,7 +40805,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 571,
+    "line": 593,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -40733,7 +40830,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 380,
+    "line": 394,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],

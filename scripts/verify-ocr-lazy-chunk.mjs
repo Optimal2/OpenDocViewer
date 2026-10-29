@@ -5,16 +5,23 @@
  * Runs as the second half of `npm run build` (see package.json), so every build, CI run and
  * scripts/local-ci.ps1 gate performs it. It proves the "off by default" contract at bundle level:
  *
- *  1. Every chunk that mentions tesseract is an `ocr` chunk (`assets/ocr-<hash>.js`), produced
- *     by the `manualChunks` rule in vite.config.js for src/ocr/ and tesseract.js.
- *  2. No ocr chunk is referenced by dist/index.html, and no chunk imports one statically
- *     (`import ... from`, `export ... from`, bare `import "..."`). Only `import("...")` may reach
- *     it, which is exactly what src/utils/ocrLoader.js does after the switch is checked.
+ *  1. Every chunk that mentions tesseract is an `ocr` chunk (`assets/ocr-<hash>.js`): code
+ *     splitting names the chunk of src/ocr/index.js after its folder, and nothing else may
+ *     contain the engine (vite.config.js explains why no manualChunks rule names it).
+ *  2. No ocr chunk is referenced by dist/index.html (script, modulepreload, preload, prefetch),
+ *     and no chunk imports one statically (`import ... from`, `export ... from`, bare
+ *     `import "..."`). Only `import("...")` may reach it, which is what src/utils/ocrLoader.js
+ *     does after the switch is checked.
  *  3. At least one ocr chunk exists, otherwise the check would pass on a broken build.
  *  4. dist/ocr/ holds exactly the files scripts/ocr-assets.mjs describes, byte for byte, unless
  *     the build ran with ODV_OCR_ASSETS=skip, in which case the folder must be absent.
  *
- * Prints the sizes (whole dist, dist/ocr/, the ocr chunk, the eager scripts) so the cost of the
+ * Limit: a dynamic `import("./ocr-...js")` that runs unconditionally at the top level of an
+ * eager chunk looks the same as the gated one in ocrLoader.js. That case is covered at runtime:
+ * src/contexts/ViewerProvider.ocr.test.jsx counts module evaluations with the switch off, and
+ * tests/ui/ocr-off.spec.mjs watches the network in a browser.
+ *
+ * Prints the sizes (whole dist, dist/ocr/, the ocr chunk, every other chunk) so the cost of the
  * feature is visible in every build log. Exit code 0 on success, 1 with a problem list otherwise.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -40,20 +47,34 @@ function listFiles(dir, root = dir) {
 }
 
 /**
+ * Normalize a URL reference from index.html or a chunk to a dist-relative path: no query or
+ * fragment, no leading `./` or `/`.
+ *
+ * @param {string} ref
+ * @returns {string}
+ */
+function distRelative(ref) {
+  return ref.split(/[?#]/)[0].replace(/^\.\//, '').replace(/^\/+/, '');
+}
+
+/**
  * @param {string} html
- * @returns {Array<string>} dist-relative paths of scripts and module preloads index.html loads.
+ * @returns {Array<string>} dist-relative paths of every script index.html loads or hints:
+ *   `<script src>`, and `<link>` with rel modulepreload, preload or prefetch pointing at a script.
  */
 export function eagerScriptsFromHtml(html) {
   const refs = [];
-  const patterns = [
-    /<script\b[^>]*\bsrc=["']([^"']+)["']/gi,
-    /<link\b[^>]*\brel=["']modulepreload["'][^>]*\bhref=["']([^"']+)["']/gi,
-    /<link\b[^>]*\bhref=["']([^"']+)["'][^>]*\brel=["']modulepreload["']/gi,
-  ];
-  for (const pattern of patterns) {
-    for (const match of html.matchAll(pattern)) refs.push(match[1]);
+  for (const match of html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/gi)) refs.push(match[1]);
+  for (const match of html.matchAll(/<link\b[^>]*>/gi)) {
+    const tag = match[0];
+    const rel = /\brel=["']([^"']+)["']/i.exec(tag)?.[1]?.toLowerCase() || '';
+    const href = /\bhref=["']([^"']+)["']/i.exec(tag)?.[1];
+    if (!href) continue;
+    const isScriptHint = rel === 'modulepreload'
+      || ((rel === 'preload' || rel === 'prefetch') && (/\bas=["']script["']/i.test(tag) || /\.m?js(?:[?#]|$)/i.test(href)));
+    if (isScriptHint) refs.push(href);
   }
-  return [...new Set(refs.map((ref) => ref.replace(/^\.\//, '').replace(/^\//, '').split('?')[0]))];
+  return [...new Set(refs.map(distRelative))];
 }
 
 /**
@@ -65,7 +86,12 @@ export function eagerScriptsFromHtml(html) {
  */
 export function importsOfChunk(chunkPath, code) {
   const dir = posix.dirname(chunkPath);
-  const resolveRef = (ref) => posix.normalize(posix.join(dir, ref));
+  // Relative refs resolve against the chunk's folder; root-absolute refs (`/assets/x.js`) against
+  // dist; query strings and fragments never change the file.
+  const resolveRef = (ref) => {
+    const clean = ref.split(/[?#]/)[0];
+    return clean.startsWith('/') ? distRelative(clean) : posix.normalize(posix.join(dir, clean));
+  };
   const staticImports = new Set();
   const dynamicImports = new Set();
   for (const match of code.matchAll(/\bimport\s*\(\s*["']([^"']+)["']\s*\)/g)) dynamicImports.add(resolveRef(match[1]));
@@ -133,7 +159,10 @@ export function analyzeDist(distDir, { nodeModulesUrl = new URL('../node_modules
     distBytes: sum(files),
     ocrAssetBytes: sum(present),
     ocrChunkBytes: sum(ocrChunks),
-    eagerScriptBytes: sum(eager.filter((name) => sizes.has(name))),
+    // Every bundled script except the ocr chunk: the weight of the viewer as the default code
+    // path can ever load it (index.html's entry scripts alone would understate it, because the
+    // bootstrap chunk imports the application dynamically on every start).
+    otherChunkBytes: sum(jsFiles.filter((name) => !ocrChunks.includes(name))),
     ocrChunks,
     eagerScripts: eager,
     skipAssets,
@@ -154,7 +183,8 @@ function main() {
     console.log(`  dist total      ${formatSize(summary.distBytes)}`);
     console.log(`  dist/ocr/       ${formatSize(summary.ocrAssetBytes)}${summary.skipAssets ? ' (ODV_OCR_ASSETS=skip)' : ''}`);
     console.log(`  ocr chunk       ${formatSize(summary.ocrChunkBytes)} ${summary.ocrChunks.join(', ')}`);
-    console.log(`  eager scripts   ${formatSize(summary.eagerScriptBytes)} ${summary.eagerScripts.join(', ')}`);
+    console.log(`  other chunks    ${formatSize(summary.otherChunkBytes)} (every bundled script except the ocr chunk)`);
+    console.log(`  entry scripts   ${summary.eagerScripts.join(', ')}`);
   }
   if (ok) {
     console.log('  OK: OCR code is confined to the lazy ocr chunk and the engine files match their sources');

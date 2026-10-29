@@ -201,11 +201,16 @@ Nothing in this folder is requested unless a site turns `ocr.enabled` on
 (`docs-src/runtime-configuration.md`), so deploying it costs disk space only. Two ways
 to keep it out of the application package:
 
-- Build with `ODV_OCR_ASSETS=skip` (`npm run build`); the folder is then absent and the
-  post-build check `scripts/verify-ocr-lazy-chunk.mjs` expects it to be absent.
+- Build with the environment variable `ODV_OCR_ASSETS` set to `skip`; the folder is then
+  absent and the post-build check `scripts/verify-ocr-lazy-chunk.mjs` expects it to be
+  absent. In PowerShell: `$env:ODV_OCR_ASSETS = 'skip'; npm run build`; in cmd:
+  `set ODV_OCR_ASSETS=skip && npm run build`; in a POSIX shell:
+  `ODV_OCR_ASSETS=skip npm run build`.
 - Host a copy of `dist/ocr/` elsewhere, with the same layout, and point
   `ocr.assetBaseUrl` at it. A cross-origin host must be allowed by the site CSP in
-  `script-src` and send CORS headers for the models.
+  `script-src` and send CORS headers for the models. The copy must be refreshed with
+  every viewer upgrade: the viewer asks for the versioned folder names of its own build,
+  and a stale copy answers 404, which the engine reports as a start-up failure.
 
 `verify-ocr-lazy-chunk.mjs` runs as the second half of `npm run build`. It fails the
 build when any chunk other than the lazy `ocr-<hash>.js` chunk mentions the engine,

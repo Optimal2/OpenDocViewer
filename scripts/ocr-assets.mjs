@@ -7,9 +7,9 @@
  * (@tesseract.js-data). By default tesseract.js fetches all of them from a CDN; OpenDocViewer
  * ships them next to the application instead, so the viewer never talks to a third-party host.
  *
- * Used by vite.config.js (ocrAssetsPlugin copies the files and serves them in dev), by
- * scripts/verify-ocr-lazy-chunk.mjs (checks the built output) and, through the
- * `import.meta.env.ODV_OCR_ASSETS` define, by src/ocr/assetUrls.js at runtime.
+ * Used by vite.config.js (ocrAssetsPlugin copies the files, serves them in dev and exposes the
+ * manifest as the virtual module `virtual:odv-ocr-assets`), by scripts/verify-ocr-lazy-chunk.mjs
+ * (checks the built output) and, through that virtual module, by src/ocr/assetUrls.js at runtime.
  *
  * Folder names carry the package versions and a content hash of the language models. The shipped
  * web.config sends `Cache-Control: immutable` for everything outside index.html and the config

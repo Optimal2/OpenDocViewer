@@ -381,33 +381,53 @@ describe('runtimeConfig', () => {
       ['a blob: scheme', 'blob:https://host.example/abc'],
       ['a file: scheme', 'file:///C:/odv/ocr/'],
       ['a Windows drive letter', 'C:/odv/ocr/'],
+      ['a scheme hidden behind a line feed', 'java\nscript:alert(1)'],
+      ['a scheme hidden behind a NUL', 'java\u0000script:alert(1)'],
+      ['a tab inside the value', 'https://host.example/odv\t-ocr/'],
+      ['a space inside the value', 'https://host.example/odv ocr/'],
     ])('returns null for %s', (_label, value) => {
       expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: value } })).toBeNull();
     });
   });
 
   describe('describeOcrLanguages', () => {
-    it('reports an unconfigured value as the silent default', () => {
-      expect(describeOcrLanguages({})).toEqual({ languages: ['swe', 'eng'], configured: false, fallback: true, dropped: [] });
-      expect(describeOcrLanguages({ ocr: { languages: 'swe' } })).toEqual({ languages: ['swe', 'eng'], configured: false, fallback: true, dropped: [] });
+    const silentDefault = { languages: ['swe', 'eng'], configured: false, notArray: false, fallback: true, dropped: [], duplicates: [] };
+
+    it('reports a missing key as the silent default', () => {
+      expect(describeOcrLanguages({})).toEqual(silentDefault);
+      expect(describeOcrLanguages({ ocr: {} })).toEqual(silentDefault);
+      expect(describeOcrLanguages(null)).toEqual(silentDefault);
+    });
+
+    it.each([
+      ['a string', 'swe'],
+      ['null', null],
+      ['a number', 1],
+      ['an object', { swe: true }],
+    ])('reports %s as configured but not an array', (_label, value) => {
+      expect(describeOcrLanguages({ ocr: { languages: value } })).toEqual({ ...silentDefault, configured: true, notArray: true });
     });
 
     it('reports an explicit empty array as a configured fallback', () => {
-      expect(describeOcrLanguages({ ocr: { languages: [] } })).toEqual({ languages: ['swe', 'eng'], configured: true, fallback: true, dropped: [] });
+      expect(describeOcrLanguages({ ocr: { languages: [] } })).toEqual({ ...silentDefault, configured: true });
     });
 
-    it('lists the entries it dropped, as given, and the fallback when nothing is left', () => {
+    it('lists the entries it dropped, as given, the repeated codes, and the fallback when nothing is left', () => {
       expect(describeOcrLanguages({ ocr: { languages: ['sv', 7, '', 'script/Latin', 'swedish-x'] } })).toEqual({
         languages: ['swe', 'eng'],
         configured: true,
+        notArray: false,
         fallback: true,
         dropped: ['sv', 7, '', 'script/Latin', 'swedish-x'],
+        duplicates: [],
       });
-      expect(describeOcrLanguages({ ocr: { languages: [' ENG ', 'swe', 'eng', 'sv', 'Swe'] } })).toEqual({
+      expect(describeOcrLanguages({ ocr: { languages: [' ENG ', 'swe', 'eng', 'sv', 'Swe', 'swe'] } })).toEqual({
         languages: ['eng', 'swe'],
         configured: true,
+        notArray: false,
         fallback: false,
         dropped: ['sv'],
+        duplicates: ['eng', 'swe'],
       });
     });
 
@@ -432,9 +452,11 @@ describe('runtimeConfig', () => {
     });
 
     it('names the reason for a rejected value and keeps the trimmed value for the log', () => {
-      expect(OCR_ASSET_BASE_URL_REJECTIONS).toEqual({ QUERY_OR_FRAGMENT: 'query-or-fragment', SCHEME: 'scheme' });
+      expect(OCR_ASSET_BASE_URL_REJECTIONS).toEqual({ QUERY_OR_FRAGMENT: 'query-or-fragment', SCHEME: 'scheme', INVALID_CHARACTERS: 'invalid-characters' });
       expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: ' https://h/ocr?token=x ' } }))
         .toEqual({ url: null, rejected: 'query-or-fragment', value: 'https://h/ocr?token=x' });
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'java\nscript:alert(1)' } }))
+        .toEqual({ url: null, rejected: 'invalid-characters', value: 'java\nscript:alert(1)' });
       expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'https://h/ocr/#frag' } }))
         .toEqual({ url: null, rejected: 'query-or-fragment', value: 'https://h/ocr/#frag' });
       expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'javascript:alert(1)' } }))

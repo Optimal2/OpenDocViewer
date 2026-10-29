@@ -67,6 +67,8 @@ test('a lazy ocr chunk with matching engine files passes and is measured', () =>
   assert.ok(result.summary.ocrAssetBytes > 0);
   assert.ok(result.summary.distBytes > result.summary.ocrAssetBytes);
   assert.equal(result.summary.ocrChunkBytes, fs.statSync(path.join(distDir, 'assets/ocr-CCC.js')).size);
+  const otherBytes = fs.statSync(path.join(distDir, 'assets/main-AAA.js')).size + fs.statSync(path.join(distDir, 'assets/bootConfig-BBB.js')).size;
+  assert.equal(result.summary.otherChunkBytes, otherBytes);
 });
 
 test('tesseract in a chunk that is not an ocr chunk fails', () => {
@@ -139,20 +141,34 @@ test('a folder without index.html is reported, not thrown', () => {
   assert.match(result.problems[0], /index\.html not found/);
 });
 
-test('eagerScriptsFromHtml reads script tags and module preloads in either attribute order', () => {
+test('eagerScriptsFromHtml reads script tags and every script hint in either attribute order', () => {
   const html = [
     '<script type="module" src="./assets/a.js"></script>',
     '<link rel="modulepreload" href="/assets/b.js?v=1">',
     '<link href="assets/c.js" rel="modulepreload">',
+    '<link rel="preload" as="script" href="./assets/d.js">',
+    '<link rel="prefetch" href="./assets/e.js#x">',
+    '<link rel="preload" as="font" href="./assets/font.woff2">',
     '<link rel="stylesheet" href="./assets/style.css">',
     '<script>inline()</script>',
   ].join('');
-  assert.deepEqual(eagerScriptsFromHtml(html), ['assets/a.js', 'assets/b.js', 'assets/c.js']);
+  assert.deepEqual(eagerScriptsFromHtml(html), ['assets/a.js', 'assets/b.js', 'assets/c.js', 'assets/d.js', 'assets/e.js']);
 });
 
-test('importsOfChunk separates static from dynamic imports and resolves relative paths', () => {
-  const code = 'import{a}from"./x.js";import b from \'./y.js\';export{c}from"./z.js";import"./w.js";const p=import("./lazy.js");const q=import(\n "../other.js" );';
+test('importsOfChunk separates static from dynamic imports and resolves relative, absolute and query-carrying paths', () => {
+  const code = 'import{a}from"./x.js";import b from \'./y.js?v=2\';export{c}from"/assets/z.js";import"./w.js#frag";const p=import("./lazy.js");const q=import(\n "../other.js" );';
   const result = importsOfChunk('assets/main.js', code);
   assert.deepEqual(result.staticImports, ['assets/x.js', 'assets/y.js', 'assets/z.js', 'assets/w.js']);
   assert.deepEqual(result.dynamicImports, ['assets/lazy.js', 'other.js']);
+});
+
+test('a preload hint, a query string or a root-absolute path do not hide a static import of the ocr chunk', () => {
+  const preload = fakeDist({ html: `${INDEX_HTML}\n<link rel="preload" as="script" href="./assets/ocr-CCC.js">` });
+  assert.deepEqual(analyzeDist(preload.distDir, { nodeModulesUrl: preload.nodeModulesUrl, skipAssets: false }).problems, ['assets/ocr-CCC.js is loaded by dist/index.html']);
+
+  const query = fakeDist({ main: 'import{t}from"./ocr-CCC.js?v=1";console.log(t);' });
+  assert.deepEqual(analyzeDist(query.distDir, { nodeModulesUrl: query.nodeModulesUrl, skipAssets: false }).problems, ['assets/main-AAA.js imports assets/ocr-CCC.js statically']);
+
+  const absolute = fakeDist({ main: 'import{t}from"/assets/ocr-CCC.js";console.log(t);' });
+  assert.deepEqual(analyzeDist(absolute.distDir, { nodeModulesUrl: absolute.nodeModulesUrl, skipAssets: false }).problems, ['assets/main-AAA.js imports assets/ocr-CCC.js statically']);
 });

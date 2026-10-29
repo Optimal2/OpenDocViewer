@@ -49,11 +49,16 @@ export function describeOcrSetup(cfg = getRuntimeConfig(), {
   const warnings = [];
 
   const languageConfig = describeOcrLanguages(cfg);
-  if (languageConfig.configured && languageConfig.fallback) {
+  if (languageConfig.notArray) {
+    warnings.push(`ocr.languages must be an array of language codes, not ${typeof cfg?.ocr?.languages}; using the default ${JSON.stringify([...DEFAULT_OCR_LANGUAGES])}`);
+  } else if (languageConfig.configured && languageConfig.fallback) {
     warnings.push(`ocr.languages has no usable entry; using the default ${JSON.stringify([...DEFAULT_OCR_LANGUAGES])}`);
   }
   if (languageConfig.dropped.length) {
     warnings.push(`ocr.languages entries ignored (not a Tesseract language code): ${JSON.stringify(languageConfig.dropped)}`);
+  }
+  if (languageConfig.duplicates.length) {
+    warnings.push(`ocr.languages repeats ${JSON.stringify(languageConfig.duplicates)}; each code is loaded once`);
   }
   const { known, unknown } = partitionOcrLanguages(languageConfig.languages);
   if (unknown.length) {

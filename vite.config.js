@@ -115,7 +115,13 @@ function ocrAssetsPlugin() {
     },
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const pathname = decodeURIComponent(String(req.url || '').split('?')[0]);
+        let pathname;
+        try {
+          pathname = decodeURIComponent(String(req.url || '').split('?')[0]);
+        } catch {
+          next();
+          return;
+        }
         const file = byPublicPath.get(pathname);
         if (!file) {
           next();
