@@ -29214,7 +29214,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1163,
+    "line": 1156,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -29252,7 +29252,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1008,
+    "line": 1001,
     "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
     "params": [
       {
@@ -29373,7 +29373,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 971,
+    "line": 964,
     "description": "Report an inspection failure without claiming that the document is unsigned.",
     "params": [
       {

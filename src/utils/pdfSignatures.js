@@ -665,17 +665,15 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
     info.integrityReason = 'CMS contains no certificate matching the signer identifier';
     return;
   }
-  if (cert) {
-    const cn = rdnValue(cert.subject, RDN_CN);
-    if (cn) info.signer = cn;
-    info.signerOrganization = rdnValue(cert.subject, RDN_O);
-    const issuerCn = rdnValue(cert.issuer, RDN_CN);
-    info.issuer = issuerCn ?? dnToString(cert.issuer);
-    const serialBytes = attrRawBytesOfInteger(cert.serialNumber);
-    info.serial = serialBytes ? colonHex(trimSerial(serialBytes)) : null;
-    info.notBefore = isoOrNull(cert.notBefore?.value ?? null);
-    info.notAfter = isoOrNull(cert.notAfter?.value ?? null);
-  }
+  const cn = rdnValue(cert.subject, RDN_CN);
+  if (cn) info.signer = cn;
+  info.signerOrganization = rdnValue(cert.subject, RDN_O);
+  const issuerCn = rdnValue(cert.issuer, RDN_CN);
+  info.issuer = issuerCn ?? dnToString(cert.issuer);
+  const serialBytes = attrRawBytesOfInteger(cert.serialNumber);
+  info.serial = serialBytes ? colonHex(trimSerial(serialBytes)) : null;
+  info.notBefore = isoOrNull(cert.notBefore?.value ?? null);
+  info.notAfter = isoOrNull(cert.notAfter?.value ?? null);
 
   // --- digest algorithm ------------------------------------------------------
   const digestOid = signerInfo.digestAlgorithm?.algorithmId;
@@ -798,11 +796,6 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   if (!signatureBytes) {
     info.integrity = 'unreadable';
     info.integrityReason = 'CMS signer info carries no signature value';
-    return;
-  }
-  if (!cert) {
-    info.integrity = 'unreadable';
-    info.integrityReason = 'CMS contains no signer certificate';
     return;
   }
 

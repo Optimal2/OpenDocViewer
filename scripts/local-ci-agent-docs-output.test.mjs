@@ -435,30 +435,13 @@ import { finalFixtures } from './remedy-lock-final-fixtures.mjs';
 const localCiPath = new URL('./local-ci.ps1', import.meta.url);
 const source = fs.readFileSync(localCiPath, 'utf8');
 
-function blockFromAnchor(source, anchor, openChar, closeChar) {
-  const anchorAt = source.indexOf(anchor);
-  assert.ok(anchorAt >= 0, `anchor not found: ${anchor}`);
-  const openAt = source.indexOf(openChar, anchorAt + anchor.length);
-  assert.ok(openAt >= 0, `open char not found after anchor: ${anchor}`);
-  let depth = 0;
-  for (let i = openAt; i < source.length; i++) {
-    const ch = source[i];
-    if (ch === openChar) depth++;
-    else if (ch === closeChar) {
-      depth--;
-      if (depth === 0) return source.substring(openAt, i + 1);
-    }
-  }
-  throw new Error(`unterminated block: ${anchor}`);
-}
-
 /**
  * Walk backwards from `anchorAt` to find the enclosing `{` (skipping string
  * and comment noise so a `{` inside a literal does not match), then return
  * the block from that `{` to the next balanced `}` after the anchor.
  *
  * The if/elseif/elseif/elseif/else chain inside `else {` has no braces, so
- * `blockFromAnchor('$remedy = $null', ...)` would land on the outer `finally`
+ * a naive forward scan from `$remedy = $null` would land on the outer `finally`
  * block. This helper instead finds the ENCLOSING `{`, which is the one
  * introduced by the surrounding `else {`.
  */
@@ -893,7 +876,6 @@ function paramArgument(param, cmd, tree) {
 // write (or alias) a variable given only its NAME, so a statically known
 // remedy/input name there -- or a name that cannot be statically evaluated
 // at all -- means the command is not proven clean.
-const COMMON_VAR_PARAMS = new Set(['outvariable', 'ov', 'errorvariable', 'ev', 'warningvariable', 'wv', 'informationvariable', 'iv', 'pipelinevariable', 'pv']); // common *Variable parameters and their aliases
 const VAR_COMMANDS = new Set(['set-variable', 'sv', 'new-variable', 'nv', 'get-variable', 'gv', 'clear-variable', 'clv', 'remove-variable', 'rv']); // *-Variable cmdlets take the name via -Name or positionally
 const ITEM_COMMANDS = new Set(['set-item', 'set-content', 'add-content', 'clear-item', 'clear-content', 'new-item', 'remove-item', 'rename-item', 'set-itemproperty']); // item/content cmdlets write through a provider path such as variable:remedy
 const PARAM_ALIASES = { ov: 'outvariable', ev: 'errorvariable', wv: 'warningvariable', iv: 'informationvariable', pv: 'pipelinevariable', ea: 'erroraction', wa: 'warningaction', ia: 'informationaction', vb: 'verbose', db: 'debug' };
