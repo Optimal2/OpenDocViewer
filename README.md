@@ -299,6 +299,8 @@ The config covers areas such as:
 
 For the full reference, deployment notes, and precedence rules, see `docs-src/runtime-configuration.md` and `odv.site.config.sample.js`.
 
+To generate `odv.site.config.js` from the sample plus a small site profile, and to re-check it after an upgrade, use the [site configuration generator](tools/site-config-generator/README.md).
+
 ## Printing
 
 The print pipeline lives mainly under:
@@ -430,6 +432,8 @@ OpenDocViewer/
 │  ├─ types/
 │  ├─ utils/
 │  └─ workers/      # imageWorker, pdfWorker, pdfPageWorker, pdfSignatureWorker
+├─ tools/
+│  └─ site-config-generator/  # builds/checks odv.site.config.js from the sample (not shipped)
 ├─ docs-src/        # hand-written maintainer documentation
 ├─ docs-agent/      # generated AI-agent packet (committed)
 ├─ AGENTS.md / CONTRIBUTING.md / SECURITY.md / README.md

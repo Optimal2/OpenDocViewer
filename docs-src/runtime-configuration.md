@@ -11,6 +11,11 @@ OpenDocViewer is designed so operational configuration can change without rebuil
 - optional deployment-specific `odv.site.config.js`
   - fetched before the required default config and then merged on top of those defaults
 
+To derive `odv.site.config.js` from the sample and re-verify it after an upgrade, use
+`tools/site-config-generator/` (see its `README.md`). It applies a small JSON site profile to the
+current sample, keeps the sample's comments, and `check` reports drift against a new sample. The
+tool is not part of the build output or any release package.
+
 ## Load order
 
 `src/app/bootConfig.js` performs runtime config loading before React starts.
