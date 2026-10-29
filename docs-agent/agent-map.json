@@ -89,7 +89,7 @@
   },
   "stats": {
     "fileCount": 148,
-    "sourceLineCount": 60681,
+    "sourceLineCount": 60682,
     "docletCount": 1659,
     "documentedFileCount": 148,
     "lowConfidenceSummaryCount": 0,
@@ -831,7 +831,7 @@
           {
             "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
             "lines": [
-              1279
+              1280
             ],
             "summary": "Manual overlay that loads simple external HTML fragments from the public help folder."
           }
@@ -1103,7 +1103,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 19,
-      "lineCount": 8059,
+      "lineCount": 8060,
       "docletCount": 138,
       "importantFiles": [
         {
@@ -1145,7 +1145,7 @@
         {
           "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
           "score": 47,
-          "lines": 1300,
+          "lines": 1301,
           "incomingLocalImports": 1,
           "doclets": 38,
           "summary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
@@ -12976,7 +12976,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "lines": 1300,
+      "lines": 1301,
       "extension": ".jsx",
       "jsdocBlockCount": 52,
       "sourceSummary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
@@ -13051,7 +13051,7 @@
         {
           "name": "ManualOverlayDialog",
           "kind": "default",
-          "line": 600
+          "line": 601
         }
       ],
       "declarations": [
@@ -13143,57 +13143,57 @@
         {
           "name": "findManualElementById",
           "kind": "function",
-          "line": 514
+          "line": 515
         },
         {
           "name": "isHiddenInManual",
           "kind": "function",
-          "line": 537
+          "line": 538
         },
         {
           "name": "captureScrollPositions",
           "kind": "function",
-          "line": 555
+          "line": 556
         },
         {
           "name": "replaceUrlFragment",
           "kind": "function",
-          "line": 583
+          "line": 584
         },
         {
           "name": "ManualOverlayDialog",
           "kind": "component",
-          "line": 600
+          "line": 601
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 801
+          "line": 802
         },
         {
           "name": "load",
           "kind": "function",
-          "line": 845
+          "line": 846
         },
         {
           "name": "fetchCandidate",
           "kind": "function",
-          "line": 847
+          "line": 848
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 916
+          "line": 917
         },
         {
           "name": "schedule",
           "kind": "function",
-          "line": 936
+          "line": 937
         },
         {
           "name": "renderContentsLink",
           "kind": "component",
-          "line": 1065
+          "line": 1066
         }
       ],
       "parseError": null,
@@ -13204,7 +13204,7 @@
             "key": "dangerouslySetInnerHTML",
             "description": "React raw HTML rendering",
             "lines": [
-              1279
+              1280
             ]
           },
           {
@@ -13769,7 +13769,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 494,
+          "line": 495,
           "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
           "params": [],
           "returns": [],
@@ -13782,7 +13782,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 497,
+          "line": 498,
           "description": "Id of the manual search field.",
           "params": [],
           "returns": [],
@@ -13795,7 +13795,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 500,
+          "line": 501,
           "description": "Id of the dialog title.",
           "params": [],
           "returns": [],
@@ -13808,7 +13808,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 506,
+          "line": 507,
           "description": "Ids the dialog renders around the manual.",
           "params": [],
           "returns": [],
@@ -13821,7 +13821,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 514,
+          "line": 515,
           "description": "",
           "params": [
             {
@@ -13852,7 +13852,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 537,
+          "line": 538,
           "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
           "params": [
             {
@@ -13883,7 +13883,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 555,
+          "line": 556,
           "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
           "params": [
             {
@@ -13908,7 +13908,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 583,
+          "line": 584,
           "description": "Replace the URL fragment without adding a history entry.",
           "params": [
             {
@@ -13928,7 +13928,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 600,
+          "line": 601,
           "description": "",
           "params": [
             {
@@ -13971,7 +13971,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 658,
+          "line": 659,
           "description": "Make the section holding target current and keep it current until the reader scrolls.",
           "params": [
             {
@@ -13991,7 +13991,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 672,
+          "line": 673,
           "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
           "params": [
             {
@@ -14011,7 +14011,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 683,
+          "line": 684,
           "description": "Put back the URL fragment the viewer had before the manual set one.",
           "params": [],
           "returns": [],
@@ -14024,7 +14024,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 704,
+          "line": 705,
           "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
           "params": [
             {
@@ -14044,7 +14044,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 801,
+          "line": 802,
           "description": "",
           "params": [
             {
@@ -14064,7 +14064,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 1065,
+          "line": 1066,
           "description": "",
           "params": [
             {
@@ -75189,7 +75189,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 555,
+      "line": 556,
       "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
       "params": [
         {
@@ -75276,7 +75276,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 600,
+      "line": 601,
       "description": "",
       "params": [
         {
@@ -75319,7 +75319,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 514,
+      "line": 515,
       "description": "",
       "params": [
         {
@@ -75381,7 +75381,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 801,
+      "line": 802,
       "description": "",
       "params": [
         {
@@ -75401,7 +75401,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 537,
+      "line": 538,
       "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
       "params": [
         {
@@ -75457,7 +75457,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 494,
+      "line": 495,
       "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
       "params": [],
       "returns": [],
@@ -75470,7 +75470,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 506,
+      "line": 507,
       "description": "Ids the dialog renders around the manual.",
       "params": [],
       "returns": [],
@@ -75522,7 +75522,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 497,
+      "line": 498,
       "description": "Id of the manual search field.",
       "params": [],
       "returns": [],
@@ -75587,7 +75587,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 500,
+      "line": 501,
       "description": "Id of the dialog title.",
       "params": [],
       "returns": [],
@@ -75600,7 +75600,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 704,
+      "line": 705,
       "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
       "params": [
         {
@@ -75646,7 +75646,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 658,
+      "line": 659,
       "description": "Make the section holding target current and keep it current until the reader scrolls.",
       "params": [
         {
@@ -75717,7 +75717,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 1065,
+      "line": 1066,
       "description": "",
       "params": [
         {
@@ -75748,7 +75748,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 583,
+      "line": 584,
       "description": "Replace the URL fragment without adding a history entry.",
       "params": [
         {
@@ -75768,7 +75768,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 683,
+      "line": 684,
       "description": "Put back the URL fragment the viewer had before the manual set one.",
       "params": [],
       "returns": [],
@@ -75927,7 +75927,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 672,
+      "line": 673,
       "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
       "params": [
         {

@@ -485,7 +485,8 @@ function openDetailsAncestors(target, container) {
  * @param {Element} target
  */
 function scrollPaneToTarget(pane, target) {
-  if (!pane || !target || typeof target.getBoundingClientRect !== 'function') return;
+  if (typeof target?.getBoundingClientRect !== 'function'
+    || typeof pane?.getBoundingClientRect !== 'function') return;
   const offset = target.getBoundingClientRect().top - pane.getBoundingClientRect().top;
   pane.scrollTop = Math.max(0, pane.scrollTop + offset - MANUAL_SECTION_SCROLL_GAP);
 }
