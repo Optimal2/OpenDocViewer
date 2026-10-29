@@ -48,7 +48,7 @@ node tools/site-config-generator/site-config-generator.mjs new-profile --out <fi
 | `--version <x.y.z>` | Read the sample, loader and header version from existing tag `v<x.y.z>` (`generate` and `check`). |
 | `--versions <a,b,...>` | Comma-separated release versions (`generate-all` only). Empty, malformed and duplicate versions are usage errors. |
 | `--out-dir <dir>` | Parent output directory (`generate-all` only). Any directory you choose, absolute or relative; it is not restricted. |
-| `--name <file>` | Plain file name for each version folder. Default: `odv.site.config.js`. Rejected: an empty name, `.`/`..`, path separators, a colon anywhere (drive letter or NTFS stream), characters Windows forbids (`<>"\|?*`, control characters), a trailing space or dot, and Windows device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, with or without an extension, any case). |
+| `--name <file>` | Plain file name for each version folder. Default: `odv.site.config.js`. Rejected: an empty name, `.`/`..`, path separators, a colon anywhere (drive letter or NTFS stream), characters Windows forbids (`<>"\|?*`, control characters), a trailing space or dot, and Windows device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, and the superscript forms `COM¹`-`COM³`, `LPT¹`-`LPT³`, with or without an extension, any case). |
 | `--sample <file>` | Sample to build from. Default: `public/odv.site.config.sample.js`; cannot be combined with `--version`. |
 | `--loader <file>` | `odv.config.js` used for merge verification. Overrides both the current default and the loader selected by `--version`. |
 | `--force` | `generate`/`generate-all`: replace an output file that this tool did not produce. `new-profile`: replace an existing file. |
@@ -487,6 +487,25 @@ ERROR: The profile does not match the sample:
   the temporary file is removed, the command exits 1, and an existing configuration keeps its
   previous content. The overwrite protection above runs first, so the rename never replaces a file
   that the tool would otherwise refuse.
+  - **Permissions.** When the destination already exists, its permission bits (the POSIX mode,
+    such as a deliberately tightened `0600`; on Windows only the read-only attribute, and Windows
+    refuses to replace a read-only file in any case) are copied
+    onto the new file before the rename. Owner, group and ACLs are not copied. If the mode cannot
+    be read or applied, the command fails with exit 1 and the previous file stays as it was, rather
+    than silently loosening its permissions. Delete the file first if you want default permissions.
+  - **Symbolic links.** A symlinked `--out` (or `<out-dir>/<version>/<name>`) is written through:
+    the tool resolves the link and renames the new file onto the link's target, with the temporary
+    file in the target's folder, so the link keeps pointing where it did. The overwrite protection
+    and `--force` judge the target's content, and a link to the sample is refused like the sample
+    itself. A dangling link (whose target does not exist) is refused with exit 1:
+
+    ```text
+    ERROR: "<work>\odv.site.config.js" is a symbolic link whose target does not exist. Point it at an existing file or remove it, then re-run.
+    ```
+
+  - **Cleanup.** The temporary file is removed after a failure only when this run created it (a
+    name that already existed is left alone). If the removal itself fails, the error still names
+    the original cause and adds the temporary file's path so you can delete it.
 - **Hand edits are lost.** `generate` rebuilds the file from the sample and the profile. Move every
   intended change into the profile.
 - **Line endings.** LF and CRLF are both supported. The output keeps the line endings of the existing

@@ -27,7 +27,8 @@
  *       against its own tag's loader, prints per-version skips, and stops at the first failure.
  *       --name must be a plain, ordinary file name: not empty, no path separator, no colon (drive
  *       letter or NTFS stream), no character Windows forbids, no trailing space or dot, and not a
- *       Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, with or without an extension).
+ *       Windows device name (CON, PRN, AUX, NUL, COM1-9, LPT1-9, COM¹-³, LPT¹-³, with or without
+ *       an extension).
  *       --out-dir is the operator's deliberate choice and may be any directory, absolute or relative.
  *       Missing/malformed/duplicate version lists and a rejected --name are usage errors (exit 2).
  *   new-profile --out <file> [--force]
@@ -87,7 +88,13 @@
  *     "no version inferred"; the word "undefined" never appears in a header or status line.
  *   - Output files are written to a temporary file in the destination directory and renamed into
  *     place, so a failed write leaves the previous file unchanged and no partial file behind. The
- *     overwrite protection and --force run before that and are unchanged.
+ *     overwrite protection and --force run before that and are unchanged. An existing file's
+ *     permission bits (POSIX mode; the read-only bit on Windows) are copied onto the new file, and
+ *     a failure to read or apply them fails the write instead of loosening them silently. A
+ *     symlinked destination is written through: the rename goes onto the link's target (with the
+ *     temporary file in the target's directory), so the link stays intact; a dangling link is
+ *     refused. The temporary file is removed after a failure only when this run created it, and a
+ *     failed removal is reported next to the original error, never instead of it.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
  *     profile value is asserted on `window.__ODV_SITE_CONFIG__`; then the selected odv.config.js is
  *     executed on top of it and every active set/added value is asserted on the merged config.
@@ -1328,8 +1335,11 @@ function parseArgs(argv) {
   return { command, options };
 }
 
-/** Windows reserved device names; matched against the part before the first dot. */
-const WINDOWS_DEVICE_NAME = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+/**
+ * Windows reserved device names, including the superscript-digit forms COM¹-COM³ and LPT¹-LPT³
+ * that Microsoft documents as reserved too; matched against the part before the first dot.
+ */
+const WINDOWS_DEVICE_NAME = /^(con|prn|aux|nul|com[1-9\u00b9\u00b2\u00b3]|lpt[1-9\u00b9\u00b2\u00b3])$/i;
 
 /**
  * Why a name is not a plain, ordinary file name on every platform, or '' when it is one.
@@ -1426,22 +1436,80 @@ function readExistingOutput(out, force) {
 }
 
 /**
+ * The file that a write to `out` really replaces: `out` itself, or the final target of a symbolic
+ * link at `out`, so that the link keeps pointing where it did. A link whose target does not exist
+ * is refused rather than silently replaced by a regular file.
+ * @param {string} out
+ * @param {FileOps} files
+ */
+function resolveDestination(out, files) {
+  try {
+    return files.realpathSync(out);
+  } catch (err) {
+    if (err?.code !== 'ENOENT') throw new GeneratorError(`Cannot resolve "${out}": ${err.message}.`);
+  }
+  let isLink = false;
+  try {
+    isLink = files.lstatSync(out).isSymbolicLink();
+  } catch {
+    // Nothing at `out` (or a missing directory, which the write reports): a new regular file.
+  }
+  if (isLink) {
+    throw new GeneratorError(`"${out}" is a symbolic link whose target does not exist. Point it at an existing file or remove it, then re-run.`);
+  }
+  return out;
+}
+
+/**
  * Write a file without ever leaving it half written: the text goes to a new temporary file in the
- * same directory, which is renamed over the destination only after the write succeeded. On any
- * failure the temporary file is removed and the destination keeps its previous content. Callers
- * run the overwrite protection (readExistingOutput) first; this function does not bypass it.
+ * directory of the real destination (the symlink target, when `out` is a link), which is renamed
+ * over it only after the write succeeded and the destination's permission bits were copied onto
+ * it. On any failure, the temporary file is removed (only when this run created it) and the
+ * destination keeps its previous content. Callers run the overwrite protection
+ * (readExistingOutput) first; this function does not bypass it.
  * @param {string} out
  * @param {string} text
- * @param {(file: string, text: string) => void} writeFile  writes a NEW file (injectable for tests)
+ * @param {FileOps} files  file-system operations (injectable for tests)
  */
-function writeFileAtomically(out, text, writeFile) {
-  const temp = path.join(path.dirname(out), `.${path.basename(out)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`);
+function writeFileAtomically(out, text, files) {
+  const target = resolveDestination(out, files);
+  const temp = path.join(path.dirname(target), `.${path.basename(target)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`);
+  let created = false;
   try {
-    writeFile(temp, text);
-    fs.renameSync(temp, out);
+    try {
+      files.writeFile(temp, text);
+      created = true;
+    } catch (err) {
+      // 'wx' failing with EEXIST means the file at that name is someone else's; any other failure
+      // may have happened after this run created the file (for example a disk-full write).
+      created = err?.code !== 'EEXIST';
+      throw err;
+    }
+    let mode;
+    try {
+      mode = files.statSync(target).mode & 0o7777;
+    } catch (err) {
+      if (err?.code !== 'ENOENT') throw err;
+    }
+    if (mode !== undefined) files.chmodSync(temp, mode);
+    files.renameSync(temp, target);
   } catch (err) {
-    fs.rmSync(temp, { force: true });
-    throw new GeneratorError(`Cannot write "${out}": ${err.message}. The previous file, if any, is unchanged.`);
+    let cleanup = '';
+    if (created) {
+      try {
+        files.rmSync(temp, { force: true });
+      } catch (rmErr) {
+        cleanup = ` The temporary file "${temp}" could not be removed (${rmErr.message}); delete it manually.`;
+      }
+    }
+    let viaLink = false;
+    try {
+      viaLink = target !== out && files.lstatSync(out).isSymbolicLink();
+    } catch {
+      // Only affects the wording below.
+    }
+    const shown = viaLink ? `"${out}" (link target "${target}")` : `"${out}"`;
+    throw new GeneratorError(`Cannot write ${shown}: ${err?.message ?? String(err)}. The previous file, if any, is unchanged.${cleanup}`);
   }
 }
 
@@ -1450,10 +1518,36 @@ function writeNewFile(file, text) {
   fs.writeFileSync(file, text, { encoding: 'utf8', flag: 'wx' });
 }
 
-function runGenerate(options, log, writeFile) {
+/**
+ * @typedef {object} FileOps
+ * @property {(file: string, text: string) => void} writeFile  creates a NEW file
+ * @property {(file: string) => string} realpathSync
+ * @property {(file: string) => fs.Stats} lstatSync
+ * @property {(file: string) => fs.Stats} statSync
+ * @property {(file: string, mode: number) => void} chmodSync
+ * @property {(from: string, to: string) => void} renameSync
+ * @property {(file: string, options: { force: boolean }) => void} rmSync
+ */
+
+/** @type {FileOps} */
+const DEFAULT_FILE_OPS = {
+  writeFile: writeNewFile,
+  realpathSync: (file) => fs.realpathSync(file),
+  lstatSync: (file) => fs.lstatSync(file),
+  statSync: (file) => fs.statSync(file),
+  chmodSync: (file, mode) => fs.chmodSync(file, mode),
+  renameSync: (from, to) => fs.renameSync(from, to),
+  rmSync: (file, options) => fs.rmSync(file, options),
+};
+
+function runGenerate(options, log, files) {
   const out = path.resolve(options.out);
   const samplePath = options.sample || DEFAULT_SAMPLE;
   if (samePath(out, samplePath)) throw new GeneratorError('--out must not be the sample file itself.');
+  // A symlink at --out is written through, so it must not lead to the sample either.
+  if (fs.existsSync(samplePath) && samePath(resolveDestination(out, files), fs.realpathSync(samplePath))) {
+    throw new GeneratorError('--out must not be the sample file itself.');
+  }
   const existing = readExistingOutput(out, options.force);
   const result = buildFromOptions(options, existing);
   log(`Profile: ${result.profile.name}`);
@@ -1462,12 +1556,12 @@ function runGenerate(options, log, writeFile) {
   for (const line of formatChanges(result.changes, result.skipped)) log(line);
   for (const line of formatSkipped(result.skipped)) log(line);
   log(`Verified ${result.verified} assertion(s) through node:vm (site object and odv.config.js merge).`);
-  writeFileAtomically(out, result.text, writeFile);
+  writeFileAtomically(out, result.text, files);
   log(`Wrote ${out}`);
   return 0;
 }
 
-function runGenerateAll(options, log, writeFile) {
+function runGenerateAll(options, log, files) {
   const outDir = path.resolve(options['out-dir']);
   for (const version of options.versionList) {
     const out = path.join(outDir, version, options.name);
@@ -1476,7 +1570,7 @@ function runGenerateAll(options, log, writeFile) {
       const result = buildFromOptions({ profile: options.profile, version }, existing);
       // Do not create the version directory until generation and merge verification have passed.
       fs.mkdirSync(path.dirname(out), { recursive: true });
-      writeFileAtomically(out, result.text, writeFile);
+      writeFileAtomically(out, result.text, files);
       log(`${version}: wrote ${out}; verified ${result.verified} assertion(s); ${result.skipped.length} skipped gated entr${result.skipped.length === 1 ? 'y' : 'ies'}.`);
       for (const line of formatSkipped(result.skipped)) log(`${version}: ${line}`);
     } catch (err) {
@@ -1518,14 +1612,16 @@ function runNewProfile(options, log) {
  * CLI entry point.
  * @param {string[]} argv  arguments after the script name
  * @param {{ log?: (s: string) => void, error?: (s: string) => void,
- *   writeFile?: (file: string, text: string) => void }} [io]
- *   writeFile creates the temporary file of a generated configuration; tests inject failures here.
+ *   writeFile?: (file: string, text: string) => void, fileOps?: Partial<FileOps> }} [io]
+ *   writeFile creates the temporary file of a generated configuration; fileOps overrides the other
+ *   file-system calls of the atomic write (realpath, lstat, stat, chmod, rename, rm). Tests inject
+ *   failures and observe calls here.
  * @returns {number} process exit code (0 ok, 1 drift or error, 2 usage error)
  */
 export function main(argv, io = {}) {
   const log = io.log || ((s) => process.stdout.write(`${s}\n`));
   const error = io.error || ((s) => process.stderr.write(`${s}\n`));
-  const writeFile = io.writeFile || writeNewFile;
+  const files = { ...DEFAULT_FILE_OPS, ...io.fileOps, ...(io.writeFile ? { writeFile: io.writeFile } : {}) };
   let parsed;
   try {
     parsed = parseArgs(argv);
@@ -1534,9 +1630,9 @@ export function main(argv, io = {}) {
     return 2;
   }
   try {
-    if (parsed.command === 'generate') return runGenerate(parsed.options, log, writeFile);
+    if (parsed.command === 'generate') return runGenerate(parsed.options, log, files);
     if (parsed.command === 'check') return runCheck(parsed.options, log);
-    if (parsed.command === 'generate-all') return runGenerateAll(parsed.options, log, writeFile);
+    if (parsed.command === 'generate-all') return runGenerateAll(parsed.options, log, files);
     return runNewProfile(parsed.options, log);
   } catch (err) {
     if (err instanceof GeneratorError) {

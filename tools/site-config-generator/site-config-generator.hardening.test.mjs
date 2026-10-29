@@ -171,6 +171,12 @@ test('--name rejects device names, colons, trailing space/dot, empty names and s
     ['com9.js', /reserved Windows device name/],
     ['LPT1.js', /reserved Windows device name/],
     ['lpt9', /reserved Windows device name/],
+    ['COM¹.js', /reserved Windows device name/],
+    ['com²', /reserved Windows device name/],
+    ['COM³.txt', /reserved Windows device name/],
+    ['LPT¹', /reserved Windows device name/],
+    ['lpt².js', /reserved Windows device name/],
+    ['LPT³ .js', /reserved Windows device name/],
     ['NUL .js', /reserved Windows device name/],
     ['file.js:stream', /contains a colon/],
     ['C:other.js', /contains a colon/],
@@ -274,6 +280,233 @@ test('generate-all keeps every previous file and stops after the first failed wr
   assert.equal(calls.length, 1, 'nothing more is written after the first failure');
   files.forEach((f, i) => assert.deepEqual(fs.readFileSync(f), before[i], f));
   for (const v of ['2.10.0', '2.11.0']) assert.deepEqual(fs.readdirSync(path.join(outDir, v)), ['odv.site.config.js']);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Review round 2: the atomic write keeps permissions, symlinks and the original error
+// ---------------------------------------------------------------------------------------------
+
+/** Pass-through file operations that record every call as [name, ...args]. */
+function recordingOps(calls, overrides = {}) {
+  const real = {
+    realpathSync: (f) => fs.realpathSync(f),
+    lstatSync: (f) => fs.lstatSync(f),
+    statSync: (f) => fs.statSync(f),
+    chmodSync: (f, m) => fs.chmodSync(f, m),
+    renameSync: (a, b) => fs.renameSync(a, b),
+    rmSync: (f, o) => fs.rmSync(f, o),
+  };
+  const ops = {};
+  for (const name of Object.keys(real)) {
+    ops[name] = (...args) => {
+      calls.push([name, ...args]);
+      return (overrides[name] || real[name])(...args);
+    };
+  }
+  return ops;
+}
+
+function enoent(file) {
+  return Object.assign(new Error(`ENOENT: no such file or directory, '${file}'`), { code: 'ENOENT' });
+}
+
+/** Can this process create a file symlink? (Windows needs Developer Mode or elevation.) */
+function canSymlink(dir) {
+  const target = path.join(dir, 'probe-target');
+  const probe = path.join(dir, 'probe-link');
+  try {
+    fs.writeFileSync(target, '');
+    fs.symlinkSync(target, probe, 'file');
+    return true;
+  } catch {
+    return false;
+  } finally {
+    fs.rmSync(probe, { force: true });
+    fs.rmSync(target, { force: true });
+  }
+}
+
+test('regeneration copies the destination mode onto the temporary file before the rename', () => {
+  // Asserted through the injected file operations: Windows cannot hold a POSIX 0600 mode.
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  const calls = [];
+  // A new destination has no mode to copy, so chmod is never called.
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out], { fileOps: recordingOps(calls) }).code, 0);
+  assert.equal(calls.some(([name]) => name === 'chmodSync'), false);
+
+  calls.length = 0;
+  const real = fs.realpathSync(out);
+  const tightened = recordingOps(calls, {
+    statSync: (f) => ({ mode: f === real ? 0o100600 : fs.statSync(f).mode }),
+    chmodSync: () => {},
+  });
+  const result = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out], { fileOps: tightened });
+  assert.equal(result.code, 0, result.stderr);
+  const chmods = calls.filter(([name]) => name === 'chmodSync');
+  assert.equal(chmods.length, 1);
+  const [, tempFile, mode] = chmods[0];
+  assert.equal(mode, 0o600, 'only the permission bits, not the file type');
+  assert.notEqual(path.resolve(tempFile), path.resolve(out));
+  assert.equal(path.dirname(tempFile), path.dirname(real));
+  const order = calls.map(([name]) => name);
+  assert.ok(order.indexOf('chmodSync') < order.indexOf('renameSync'), order.join(','));
+  assert.deepEqual(calls.find(([name]) => name === 'renameSync').slice(1), [tempFile, real]);
+});
+
+test.skipIf(process.platform === 'win32')('a tightened POSIX mode survives a real regeneration', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
+  fs.chmodSync(out, 0o600);
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
+  assert.equal(fs.statSync(out).mode & 0o7777, 0o600);
+});
+
+test('a mode that cannot be read or applied fails the write and keeps the previous file', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
+  const before = fs.readFileSync(out);
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { 'i18n.default': 'sv' } });
+  const eperm = () => { throw Object.assign(new Error('EPERM: operation not permitted'), { code: 'EPERM' }); };
+  for (const override of [{ chmodSync: eperm }, { statSync: eperm }]) {
+    const calls = [];
+    const failed = run(['generate', '--profile', profile, '--out', out], { fileOps: recordingOps(calls, override) });
+    assert.equal(failed.code, 1);
+    assert.match(failed.stderr, /ERROR: Cannot write ".*odv\.site\.config\.js": EPERM.*previous file, if any, is unchanged/);
+    assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+    assert.equal(calls.filter(([name]) => name === 'rmSync').length, 1, 'our temporary file is removed');
+    assert.deepEqual(fs.readFileSync(out), before);
+    assert.deepEqual(fs.readdirSync(dir).sort(), ['odv.site.config.js', 'profile.json']);
+  }
+});
+
+test('a symlinked destination is written through to its target, which keeps the link', () => {
+  // Through the injected realpath: "link.js" is a regular file standing in for a symlink to
+  // deploy/odv.site.config.js, so the spec also runs where symlinks need extra privileges.
+  const dir = tempDir();
+  const deploy = path.join(dir, 'deploy');
+  fs.mkdirSync(deploy);
+  const target = path.join(deploy, 'odv.site.config.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', target]).code, 0);
+  const link = path.join(dir, 'link.js');
+  fs.copyFileSync(target, link);
+  const standIn = fs.readFileSync(link);
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { 'i18n.default': 'sv' } });
+  const calls = [];
+  const ops = recordingOps(calls, { realpathSync: (f) => (path.resolve(f) === link ? target : fs.realpathSync(f)) });
+  const result = run(['generate', '--profile', profile, '--out', link], { fileOps: ops });
+  assert.equal(result.code, 0, result.stderr);
+  const [, temp, renamedTo] = calls.find(([name]) => name === 'renameSync');
+  assert.equal(renamedTo, target);
+  assert.equal(path.dirname(temp), deploy, 'the temporary file lives next to the target, never across volumes');
+  assert.match(fs.readFileSync(target, 'utf8'), /default: 'sv'/);
+  assert.deepEqual(fs.readFileSync(link), standIn, 'the link itself is not replaced');
+  assert.deepEqual(fs.readdirSync(deploy), ['odv.site.config.js']);
+});
+
+test('real symlinks: written through, overwrite protection and --force unchanged, sample refused', (ctx) => {
+  const dir = tempDir();
+  if (!canSymlink(dir)) ctx.skip();
+  const target = path.join(dir, 'deploy.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', target]).code, 0);
+  const link = path.join(dir, 'link.js');
+  fs.symlinkSync(target, link, 'file');
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { 'i18n.default': 'sv' } });
+  assert.equal(run(['generate', '--profile', profile, '--out', link]).code, 0);
+  assert.equal(fs.lstatSync(link).isSymbolicLink(), true);
+  assert.match(fs.readFileSync(target, 'utf8'), /default: 'sv'/);
+
+  // A link to a hand-written file is refused without --force and written through with it.
+  const hand = path.join(dir, 'hand.js');
+  fs.writeFileSync(hand, '// hand-written site config\n', 'utf8');
+  const handLink = path.join(dir, 'hand-link.js');
+  fs.symlinkSync(hand, handLink, 'file');
+  assert.match(run(['generate', '--profile', profile, '--out', handLink]).stderr, /exists and was not produced by this tool/);
+  assert.equal(fs.readFileSync(hand, 'utf8'), '// hand-written site config\n');
+  assert.equal(run(['generate', '--profile', profile, '--out', handLink, '--force']).code, 0);
+  assert.equal(fs.lstatSync(handLink).isSymbolicLink(), true);
+  assert.ok(readGenerated(hand).startsWith(HEADER_MARKER));
+
+  // A link to the sample is the sample itself, even with --force.
+  const sampleBefore = fs.readFileSync(DEFAULT_SAMPLE);
+  const sampleLink = path.join(dir, 'sample-link.js');
+  fs.symlinkSync(DEFAULT_SAMPLE, sampleLink, 'file');
+  assert.match(run(['generate', '--profile', profile, '--out', sampleLink, '--force']).stderr, /must not be the sample file itself/);
+  assert.deepEqual(fs.readFileSync(DEFAULT_SAMPLE), sampleBefore);
+});
+
+test('--out resolving to the sample is refused even with --force (injected realpath)', () => {
+  const dir = tempDir();
+  const link = path.join(dir, 'link.js');
+  fs.writeFileSync(link, '// stand-in for a symlink to the sample\n', 'utf8');
+  const sampleBefore = fs.readFileSync(DEFAULT_SAMPLE);
+  const sampleReal = fs.realpathSync(DEFAULT_SAMPLE);
+  const ops = recordingOps([], { realpathSync: (f) => (path.resolve(f) === link ? sampleReal : fs.realpathSync(f)) });
+  const result = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', link, '--force'], { fileOps: ops });
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /--out must not be the sample file itself/);
+  assert.deepEqual(fs.readFileSync(DEFAULT_SAMPLE), sampleBefore);
+});
+
+test('a dangling symlink destination is refused, not replaced by a regular file', () => {
+  const dir = tempDir();
+  const link = path.join(dir, 'dangling.js');
+  const calls = [];
+  const ops = recordingOps(calls, {
+    realpathSync: (f) => { if (path.resolve(f) === link) throw enoent(f); return fs.realpathSync(f); },
+    lstatSync: (f) => (path.resolve(f) === link ? { isSymbolicLink: () => true } : fs.lstatSync(f)),
+  });
+  for (const extra of [[], ['--force']]) {
+    const result = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', link, ...extra], { fileOps: ops });
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /is a symbolic link whose target does not exist/);
+  }
+  assert.equal(calls.some(([name]) => name === 'renameSync'), false);
+  assert.deepEqual(fs.readdirSync(dir), []);
+});
+
+test('a temporary name that already exists (EEXIST) is never removed: it is not ours', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  const calls = [];
+  let stranger;
+  const writer = (file) => {
+    stranger = file;
+    fs.writeFileSync(file, 'someone else\n', 'utf8');
+    throw Object.assign(new Error(`EEXIST: file already exists, open '${file}'`), { code: 'EEXIST' });
+  };
+  const result = run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out], { writeFile: writer, fileOps: recordingOps(calls) });
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /ERROR: Cannot write ".*odv\.site\.config\.js": EEXIST/);
+  assert.equal(calls.some(([name]) => name === 'rmSync'), false);
+  assert.equal(fs.readFileSync(stranger, 'utf8'), 'someone else\n');
+  assert.equal(fs.existsSync(out), false);
+});
+
+test('a failing cleanup never hides the original write error', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--out', out]).code, 0);
+  const before = fs.readFileSync(out);
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { 'i18n.default': 'sv' } });
+  const calls = [];
+  const ops = recordingOps(calls, {
+    rmSync: () => { throw Object.assign(new Error('EPERM: operation not permitted, unlink'), { code: 'EPERM' }); },
+  });
+  const failed = run(['generate', '--profile', profile, '--out', out], { writeFile: partialWriter([]), fileOps: ops });
+  assert.equal(failed.code, 1, 'a GeneratorError, not an escaping exception');
+  assert.match(failed.stderr, /ERROR: Cannot write ".*odv\.site\.config\.js": ENOSPC.*previous file, if any, is unchanged/);
+  assert.match(failed.stderr, /temporary file ".*" could not be removed \(EPERM.*delete it manually/);
+  assert.equal(calls.filter(([name]) => name === 'rmSync').length, 1);
+  assert.deepEqual(fs.readFileSync(out), before);
+
+  // generate-all reports the same way and stops at the first version.
+  const all = run(['generate-all', '--profile', profile, '--versions', '2.10.0,2.11.0', '--out-dir', path.join(dir, 'r')],
+    { writeFile: partialWriter([]), fileOps: ops });
+  assert.equal(all.code, 1);
+  assert.match(all.stderr, /Generation for version 2\.10\.0 failed: Cannot write .*ENOSPC.*could not be removed/);
 });
 
 // ---------------------------------------------------------------------------------------------
