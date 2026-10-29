@@ -66,16 +66,9 @@ describe('buildSignatureDocuments', () => {
 
     const [failed] = buildSignatureDocuments(PAGES, {
       a1: report({ integrity: 'digest-mismatch' }),
-      a2: report({ integrity: 'intact', trust: 'valid' }),
+      a2: report({ integrity: 'intact' }),
     });
     expect(failed.severity).toBe('error');
-
-    const [untrusted] = buildSignatureDocuments(PAGES, {
-      a1: report({ integrity: 'intact', trust: 'valid' }),
-      a2: report({ integrity: 'intact', trust: 'invalid' }),
-    });
-    expect(untrusted.severity).toBe('error');
-    expect(untrusted.worstTrust).toBe('invalid');
   });
 
   it('keeps one entry per signed document in page order and reports the newest signature', () => {

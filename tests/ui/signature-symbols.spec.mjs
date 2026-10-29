@@ -68,8 +68,11 @@ async function loadSession(page, siteConfig = null) {
  * @param {import('@playwright/test').Page} page
  */
 async function openSession(page) {
+  const requestUrls = [];
+  page.on('request', (request) => requestUrls.push(request.url()));
   await loadSession(page);
   await expect(page.locator('[data-thumbnail-row="thumbnail-4"] .odv-signature-badge--thumbnail')).toBeVisible();
+  expect(requestUrls.filter((url) => /\/signatures\//.test(url))).toEqual([]);
 }
 
 /** @param {{x:number,y:number,width:number,height:number}} a @param {{x:number,y:number,width:number,height:number}} b */
@@ -174,8 +177,9 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
   const time = fromPage.locator('.odv-signature-entry time').first();
   await expect(time).toHaveText(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
   await expect(time).toHaveAttribute('title', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
-  // Without ODVGateway the trust note explains why validity is not checked.
-  await expect(fromPage.locator('.odv-signature-trust--unavailable').first()).toContainText('opened through ODVGateway');
+  // Every signature carries the same neutral information line.
+  await expect(fromPage.locator('.odv-signature-info[role="note"]')).toHaveCount(2);
+  await expect(fromPage.locator('.odv-signature-info').first()).toContainText('Not checked in the viewer: issuer trust and revocation status');
 });
 
 test('D3 toolbar overview lists signed documents and navigates without closing', async ({ page }) => {

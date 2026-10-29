@@ -10,6 +10,7 @@
 /** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 /** @typedef {'active'|'all'} PrintDefaultMode */
 /** @typedef {'mirror'|'hide'} CompareAdjustToolbarMode */
+/** @typedef {'ok'|'warning'} PdfSignatureUncheckedSeverity */
 /**
  * Session-reset target for the support/problem notice.
  *
@@ -31,6 +32,8 @@ const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
 /** Runtime validation values for CompareAdjustToolbarMode; the first one is the default. */
 export const COMPARE_ADJUST_TOOLBAR_MODES = Object.freeze(['mirror', 'hide']);
+/** Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default. */
+export const PDF_SIGNATURE_UNCHECKED_SEVERITIES = Object.freeze(['ok', 'warning']);
 /** Runtime validation values for ResetSessionTarget; the typedef documents the public contract. */
 const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', 'parent-or-current', 'none']);
 /** User-facing print default mode aliases mapped to persisted PrintDefaultMode values. */
@@ -255,10 +258,9 @@ export function isSignatureThumbnailPageBadgeEnabled(cfg = getRuntimeConfig()) {
 
 /**
  * Resolve whether PDF signature inspection runs at all (`pdfSignatures.enabled`).
- * Only an explicit `false` turns it off; then no PDF bytes are handed to the signature worker,
- * no gateway trust request is made and no signature symbols or overview button appear.
- * Loading and rendering are never affected either way — inspection always waits for pages first
- * (see getPdfSignatureInspectionStart).
+ * Only an explicit `false` turns it off; then no PDF bytes are handed to the signature worker
+ * and no signature symbols or overview button appear. Loading and rendering are never affected
+ * either way — inspection always waits for pages first (see getPdfSignatureInspectionStart).
  *
  * @param {Object=} cfg
  * @returns {boolean}
@@ -279,6 +281,25 @@ export function isPdfSignatureInspectionEnabled(cfg = getRuntimeConfig()) {
 export function getPdfSignatureInspectionStart(cfg = getRuntimeConfig()) {
   const raw = String(cfg?.pdfSignatures?.inspectAfter || '').trim().toLowerCase();
   return raw === 'allpages' ? 'allPages' : 'firstPage';
+}
+
+/**
+ * Resolve the symbol severity for a signature whose content is intact but whose certificate chain
+ * and revocation status the viewer does not check (`pdfSignatures.uncheckedSeverity`).
+ * Supported values:
+ * - `ok` (default): an intact signature shows the OK symbol
+ * - `warning`: an intact signature shows the warning symbol, so users notice that validity is not checked
+ * Missing or non-matching values (non-strings, `'error'`, `'warn'`, …) fall back to `ok`. Integrity
+ * problems are never shown as less severe because of this setting.
+ *
+ * @param {Object=} cfg
+ * @returns {PdfSignatureUncheckedSeverity}
+ */
+export function getPdfSignatureUncheckedSeverity(cfg = getRuntimeConfig()) {
+  const value = cfg?.pdfSignatures?.uncheckedSeverity;
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return PDF_SIGNATURE_UNCHECKED_SEVERITIES.includes(raw)
+    ? /** @type {PdfSignatureUncheckedSeverity} */ (raw) : 'ok';
 }
 
 /** Default OCR languages (Tesseract language codes), tried together on every text line. */

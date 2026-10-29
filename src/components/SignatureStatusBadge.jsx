@@ -3,11 +3,10 @@
  * Small signature symbol shown next to a document's "DOK n" label (variant
  * `document`, aggregated over all files of the document) and on every page
  * thumbnail of a signed file (variant `thumbnail`). Colour and icon follow the
- * worst integrity or trust status of the document's signatures (see
+ * worst integrity status of the document's signatures (see
  * utils/pdfSignatureStatus.js): intact = neutral/positive,
- * modified-after-signing/unsupported = warning, digest-mismatch/
- * signature-invalid/unreadable or invalid trust = error; unknown trust = warning.
- * The badge is a native button, so
+ * modified-after-signing/unsupported = warning, and digest-mismatch/
+ * signature-invalid/unreadable = error. The badge is a native button, so
  * Enter/Space activate it; it opens the signature details dialog. It lives in
  * the viewer UI only and is never part of printed or exported output (print
  * and export build their own output documents, not the app DOM).
@@ -48,10 +47,6 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
   const count = getSignatureCount(report);
   const integrity = getWorstSignatureIntegrity(report?.signatures);
   const severity = getReportSignatureSeverity(report.signatures);
-  const trustWarning = report.signatures.some((signature) => signature?.trust === 'invalid')
-    ? t('signatures.badge.invalidTrust', { defaultValue: 'Invalid signature' })
-    : report.signatures.some((signature) => signature?.trust === 'unknown')
-      ? t('signatures.badge.unknownTrust', { defaultValue: 'Signature trust unknown' }) : null;
   const label = t('signatures.badge.ariaLabel', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'}`,
@@ -66,7 +61,7 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
       type="button"
       className={`odv-signature-badge odv-signature-badge--${severity} odv-signature-badge--${variant}`}
       aria-label={label}
-      title={[tooltip, getIntegrityLabel(t, integrity), trustWarning].filter(Boolean).join(' — ')}
+      title={[tooltip, getIntegrityLabel(t, integrity)].filter(Boolean).join(' — ')}
       onClick={(event) => {
         event.stopPropagation();
         onOpen?.(event.currentTarget);

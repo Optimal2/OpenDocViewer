@@ -5,7 +5,6 @@ import { createRoot } from 'react-dom/client';
 import DocumentLoader from '../DocumentLoader/DocumentLoader.js';
 import { makeExplicitSource } from '../DocumentLoader/sources/explicitListSource.js';
 import ViewerContext from '../../contexts/viewerContext.js';
-import { createGatewaySignatureClient } from '../../utils/pdfSignatureGateway.js';
 
 vi.mock('../DocumentLoader/documentLoaderUtils.js', () => ({
   getTotalPages: async () => 1, generateDocumentList: () => [], generateDemoList: () => [],
@@ -14,7 +13,6 @@ vi.mock('../DocumentLoader/documentLoaderUtils.js', () => ({
 vi.mock('../DocumentLoader/LoadPressureDialog.jsx', () => ({ default: () => null }));
 vi.mock('../../logging/systemLogger.js', () => ({ default: { info() {}, warn() {}, error() {} } }));
 const packUrl = 'https://example.test/gateway/source-pack/session-pack';
-const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };
 let root;
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
@@ -40,7 +38,7 @@ function packResponse(indexes) {
   } }) };
 }
 
-it.each([[0], [1, 0], [undefined]])('G23 carries actual pack frame indexes through DocumentLoader: %j', async (...indexes) => {
+it.each([[0], [1, 0], [undefined]])('loads ODVSP1 source packs through DocumentLoader: %j', async (...indexes) => {
   // Vitest expands each array row into arguments. Frame order deliberately differs from bundle order.
   const count = indexes.length;
   const bundle = { integration: { sourcePackUrl: packUrl, sourcePackFormat: 'odvsp1' }, documents: [{
@@ -58,23 +56,15 @@ it.each([[0], [1, 0], [undefined]])('G23 carries actual pack frame indexes throu
     registerSourceDescriptor: (descriptor) => descriptors.push(descriptor),
     insertPagesAtIndex: (inserted) => pages.push(...inserted),
   });
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(packResponse(indexes)).mockResolvedValue({
-    ok: true, status: 200, json: async () => ({ signatures: [{ ...signature, trust: 'unknown',
-      validationTime: '2026-10-01T12:00:00Z' }] }),
-  }));
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(packResponse(indexes)));
   await act(async () => { root.render(createElement(ViewerContext.Provider, { value: api },
     createElement(DocumentLoader, { sourceList: makeExplicitSource(bundle).items }))); });
   await vi.waitFor(() => expect(descriptors).toHaveLength(count));
   expect(api.setError.mock.calls.flat().filter(Boolean)).toEqual([]);
   expect(pages).toHaveLength(count);
-  const client = createGatewaySignatureClient();
-  // Check in reverse display order using only the descriptors registered by the real loader.
-  for (const descriptor of [...descriptors].reverse()) {
-    const report = await client.enrich({ signatures: [signature] }, descriptor.sourceUrl, descriptor.sourcePack);
-    expect(report.signatures[0].trust).toBe(indexes[0] === undefined ? 'not-checked' : 'unknown');
-  }
-  expect(fetch.mock.calls.map(([url]) => url)).toEqual([packUrl,
-    ...(indexes[0] === undefined ? [] : Array.from({ length: count }, (_, index) =>
-      `https://example.test/gateway/signatures/session-pack/${count - index - 1}`)),
-  ]);
+  expect(descriptors.map((descriptor) => descriptor.fileIndex)).toEqual(Array.from({ length: count }, (_, index) => index));
+  expect(descriptors.map((descriptor) => descriptor.sourceUrl)).toEqual(
+    Array.from({ length: count }, (_, index) => `https://example.test/files/${index}.pdf`),
+  );
+  expect(fetch.mock.calls.map(([url]) => url)).toEqual([packUrl]);
 });

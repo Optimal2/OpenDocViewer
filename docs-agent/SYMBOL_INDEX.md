@@ -41,64 +41,64 @@
 | <code>WorkerJob</code> | typedef | <code>src/components/DocumentLoader/batchHandler.js:31</code> | A single decoding/rendering unit handed to a worker. |
 | <code>WorkerMessageHandler</code> | typedef | <code>src/components/DocumentLoader/batchHandler.js:59</code> | Handle a worker&#39;s message and insert results. |
 | <code>module.exports</code> | function | <code>src/components/DocumentLoader/DemoControls.jsx:35</code> | DemoControls — wraps DocumentLoader with demo-mode props and a small control UI. |
-| <code>asciiHead</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:255</code> |  |
-| <code>buildInlineSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:848</code> | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
-| <code>createFailedPlaceholder</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1060</code> |  |
-| <code>createInvalidSourcePayloadError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:743</code> | Build a source-validation error. |
-| <code>createLimiter</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:162</code> |  |
-| <code>createPagePlaceholders</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1018</code> |  |
-| <code>createPrefetchHttpError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:683</code> | Build a consistent HTTP error so the retry classifier can inspect the status code. |
-| <code>createPrefetchTimeoutError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:727</code> | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
-| <code>createSourceUnavailableSessionError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:711</code> |  |
-| <code>DocumentLoader</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1170</code> |  |
+| <code>asciiHead</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:254</code> |  |
+| <code>buildInlineSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:847</code> | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
+| <code>createFailedPlaceholder</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1059</code> |  |
+| <code>createInvalidSourcePayloadError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:742</code> | Build a source-validation error. |
+| <code>createLimiter</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:161</code> |  |
+| <code>createPagePlaceholders</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1017</code> |  |
+| <code>createPrefetchHttpError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:682</code> | Build a consistent HTTP error so the retry classifier can inspect the status code. |
+| <code>createPrefetchTimeoutError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:726</code> | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
+| <code>createSourceUnavailableSessionError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:710</code> |  |
+| <code>DocumentLoader</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1169</code> |  |
 | <code>DocumentLoaderProps</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:58</code> |  |
 | <code>DocumentSourceItem</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:35</code> |  |
-| <code>estimateTotalPagesConservatively</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:646</code> | Estimate the final page count conservatively. |
+| <code>estimateTotalPagesConservatively</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:645</code> | Estimate the final page count conservatively. |
 | <code>FailedPlaceholderInput</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:91</code> |  |
-| <code>finalizeDocumentPages</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:994</code> | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
-| <code>getDocumentProgressKey</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:978</code> |  |
-| <code>getEstimatedEntryExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:605</code> | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
-| <code>getInitialTempStoreMode</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:592</code> |  |
-| <code>inferUrlExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:207</code> |  |
-| <code>isReloadCacheEnabled</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:583</code> |  |
-| <code>isSourceUnavailableError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:698</code> | Host integrations often expose short-lived file tickets. |
-| <code>isSupportedSourceExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:239</code> |  |
-| <code>isTextLikeSourceMime</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:247</code> |  |
-| <code>isTransientPrefetchError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:820</code> | Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses. |
+| <code>finalizeDocumentPages</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:993</code> | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
+| <code>getDocumentProgressKey</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:977</code> |  |
+| <code>getEstimatedEntryExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:604</code> | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
+| <code>getInitialTempStoreMode</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:591</code> |  |
+| <code>inferUrlExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:206</code> |  |
+| <code>isReloadCacheEnabled</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:582</code> |  |
+| <code>isSourceUnavailableError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:697</code> | Host integrations often expose short-lived file tickets. |
+| <code>isSupportedSourceExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:238</code> |  |
+| <code>isTextLikeSourceMime</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:246</code> |  |
+| <code>isTransientPrefetchError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:819</code> | Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses. |
 | <code>LoadPressureSummary</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:121</code> |  |
-| <code>looksLikeTextPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:270</code> |  |
-| <code>matchesKnownSourceSignature</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:299</code> |  |
-| <code>&lt;anonymous&gt;~maybePrompt</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1284</code> |  |
-| <code>mimeForExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:924</code> |  |
-| <code>mimeToExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:567</code> |  |
-| <code>needsPageCountAnalysis</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:453</code> |  |
-| <code>normalizeExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:216</code> |  |
+| <code>looksLikeTextPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:269</code> |  |
+| <code>matchesKnownSourceSignature</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:298</code> |  |
+| <code>&lt;anonymous&gt;~maybePrompt</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1283</code> |  |
+| <code>mimeForExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:923</code> |  |
+| <code>mimeToExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:566</code> |  |
+| <code>needsPageCountAnalysis</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:452</code> |  |
+| <code>normalizeExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:215</code> |  |
 | <code>PageEstimateStats</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:134</code> |  |
 | <code>PagePlaceholderInput</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:73</code> |  |
 | <code>PrefetchResult</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:140</code> |  |
-| <code>&lt;anonymous&gt;~prefetchSource</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1305</code> | Fetch and persist one source blob with conservative retry behavior. |
-| <code>DocumentLoader~promptForPressure</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1214</code> |  |
-| <code>readBlobHeadBytes</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:336</code> |  |
-| <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:889</code> |  |
-| <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:549</code> |  |
-| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1585</code> |  |
+| <code>&lt;anonymous&gt;~prefetchSource</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1304</code> | Fetch and persist one source blob with conservative retry behavior. |
+| <code>DocumentLoader~promptForPressure</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1213</code> |  |
+| <code>readBlobHeadBytes</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:335</code> |  |
+| <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:888</code> |  |
+| <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:548</code> |  |
+| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1584</code> |  |
 | <code>ResolvedEntry</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:102</code> |  |
-| <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:952</code> | Extract multi-document source context from an entry or placeholder input. |
-| <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1102</code> |  |
-| <code>resolveExactPlannedPageCount</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:478</code> |  |
-| <code>resolveFetchedSourcePayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:354</code> | Resolve source type information with a cheap signature-first path. |
-| <code>resolvePrefetchedPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:518</code> | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
-| <code>DocumentLoader~resolvePressurePrompt</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1223</code> |  |
-| <code>resolveTrustedEntryPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:463</code> |  |
-| <code>resolveTrustedSourcePackPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:419</code> | Gateway source packs already carry trusted file metadata from the prepared server-side session. |
-| <code>safeMessage</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1162</code> |  |
-| <code>shouldDeferSourceWarmup</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:500</code> | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
-| <code>&lt;anonymous&gt;~shouldStopRun</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1278</code> | Whether this load run is no longer allowed to mutate React state. |
-| <code>sleep</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:668</code> |  |
-| <code>startsWithAscii</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:285</code> |  |
-| <code>toPositiveIntOrUndefined</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:941</code> |  |
-| <code>updatePageEstimateStats</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:620</code> | Update per-extension page-count statistics used by the conservative warning estimator. |
-| <code>validateFetchedSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:765</code> | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
+| <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:951</code> | Extract multi-document source context from an entry or placeholder input. |
+| <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1101</code> |  |
+| <code>resolveExactPlannedPageCount</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:477</code> |  |
+| <code>resolveFetchedSourcePayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:353</code> | Resolve source type information with a cheap signature-first path. |
+| <code>resolvePrefetchedPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:517</code> | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
+| <code>DocumentLoader~resolvePressurePrompt</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1222</code> |  |
+| <code>resolveTrustedEntryPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:462</code> |  |
+| <code>resolveTrustedSourcePackPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:418</code> | Gateway source packs already carry verified file metadata from the prepared server-side session. |
+| <code>safeMessage</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1161</code> |  |
+| <code>shouldDeferSourceWarmup</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:499</code> | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
+| <code>&lt;anonymous&gt;~shouldStopRun</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1277</code> | Whether this load run is no longer allowed to mutate React state. |
+| <code>sleep</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:667</code> |  |
+| <code>startsWithAscii</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:284</code> |  |
+| <code>toPositiveIntOrUndefined</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:940</code> |  |
+| <code>updatePageEstimateStats</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:619</code> | Update per-extension page-count statistics used by the conservative warning estimator. |
+| <code>validateFetchedSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:764</code> | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
 | <code>fetchAndArrayBuffer</code> | constant | <code>src/components/DocumentLoader/documentLoaderUtils.js:170</code> | Fetch a resource and return its ArrayBuffer. |
 | <code>FetchOptions</code> | typedef | <code>src/components/DocumentLoader/documentLoaderUtils.js:105</code> | Options for fetchAndArrayBuffer. |
 | <code>generateDemoList</code> | constant | <code>src/components/DocumentLoader/documentLoaderUtils.js:80</code> | Generate a list of demo document URLs by repeating or mixing sample files. |
@@ -512,20 +512,20 @@
 | <code>Resizer</code> | constant | <code>src/components/Resizer.jsx:61</code> | Resizer component. |
 | <code>ResizerProps</code> | typedef | <code>src/components/Resizer.jsx:43</code> | Props for . |
 | <code>ResizeStartHandler</code> | typedef | <code>src/components/Resizer.jsx:36</code> | Handler invoked when a resize interaction is initiated. |
-| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:85</code> |  |
-| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:40</code> |  |
-| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:57</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:125</code> |  |
-| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:151</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
-| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:167</code> | Keep Tab navigation inside the dialog while it is open. |
-| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:207</code> |  |
+| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:82</code> |  |
+| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:39</code> |  |
+| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:56</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:122</code> |  |
+| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:148</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
+| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:164</code> | Keep Tab navigation inside the dialog while it is open. |
+| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:204</code> |  |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewButton.jsx:32</code> |  |
 | <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureOverviewButton.jsx:19</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewDialog.jsx:49</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureOverviewDialog.jsx:90</code> |  |
 | <code>SignatureOverviewDialog~handleKeyDown</code> | function | <code>src/components/SignatureOverviewDialog.jsx:104</code> | Keep Tab navigation inside the dialog while it is open. |
-| <code>module.exports</code> | function | <code>src/components/SignatureStatusBadge.jsx:44</code> |  |
-| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureStatusBadge.jsx:29</code> | Material Icons ligature per severity. |
+| <code>module.exports</code> | function | <code>src/components/SignatureStatusBadge.jsx:43</code> |  |
+| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureStatusBadge.jsx:28</code> | Material Icons ligature per severity. |
 | <code>module.exports</code> | function | <code>src/components/SignatureTime.jsx:18</code> |  |
 | <code>module.exports</code> | function | <code>src/components/ViewerProblemNotice.jsx:197</code> |  |
 | <code>ProblemNoticeTrigger</code> | typedef | <code>src/components/ViewerProblemNotice.jsx:26</code> |  |
@@ -548,39 +548,39 @@
 | <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
 | <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:115</code> | ThemeProvider component to manage and provide theme-related state and functions. |
 | <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:191</code> | Toggle between the two highest-contrast explicit themes. |
-| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:233</code> |  |
-| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:223</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:240</code> |  |
+| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:232</code> |  |
+| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:222</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:239</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/viewerContext.js:45</code> |  |
-| <code>ViewerContextValue</code> | typedef | <code>src/contexts/viewerContext.js:166</code> |  |
+| <code>ViewerContextValue</code> | typedef | <code>src/contexts/viewerContext.js:165</code> |  |
 | <code>ViewerPageEntry</code> | typedef | <code>src/contexts/viewerContext.js:4</code> |  |
-| <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:156</code> |  |
-| <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:79</code> |  |
+| <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:155</code> |  |
+| <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:78</code> |  |
 | <code>ViewerSourceDescriptor</code> | typedef | <code>src/contexts/viewerContext.js:65</code> |  |
 | <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:1020</code> |  |
-| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1347</code> |  |
+| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1346</code> |  |
 | <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:1035</code> |  |
-| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1497</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1496</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
 | <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1062</code> |  |
 | <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:547</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:217</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2715</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2701</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2710</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2696</code> |  |
 | <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1134</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:59</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:53</code> |  |
-| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1595</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2012</code> | Render one PDF page again at twice its effective PDF scale. |
-| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1819</code> |  |
+| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1594</code> |  |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2011</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1818</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:74</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2720</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2715</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:149</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2409</code> |  |
-| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1475</code> |  |
-| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1571</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2408</code> |  |
+| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1474</code> |  |
+| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1570</code> |  |
 | <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1071</code> |  |
 | <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:866</code> |  |
 | <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:883</code> |  |
@@ -596,33 +596,33 @@
 | <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:110</code> |  |
 | <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:99</code> |  |
 | <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:131</code> |  |
-| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1359</code> |  |
+| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1358</code> |  |
 | <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:228</code> |  |
 | <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:524</code> | Record that a page now has a reusable full-size asset available. |
 | <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:534</code> | Record that a page now has a reusable thumbnail asset available. |
 | <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:970</code> |  |
-| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1406</code> |  |
-| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1549</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2275</code> | Drain background eager-render work without blocking the UI thread. |
-| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1330</code> |  |
-| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1339</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2094</code> |  |
+| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1405</code> |  |
+| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1548</code> |  |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2274</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1329</code> |  |
+| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1338</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2093</code> |  |
 | <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1286</code> |  |
 | <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:946</code> | Release print leases previously acquired through getPrintablePageUrls . |
-| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1727</code> |  |
+| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1726</code> |  |
 | <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:705</code> |  |
 | <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:159</code> |  |
-| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1655</code> |  |
+| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1654</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:678</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2366</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2710</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
-| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1642</code> |  |
-| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1306</code> |  |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2365</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2705</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1641</code> |  |
+| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1305</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:64</code> |  |
 | <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:172</code> |  |
-| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1484</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2116</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1560</code> |  |
+| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1483</code> |  |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2115</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1559</code> |  |
 | <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:500</code> |  |
 | <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:338</code> |  |
 | <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:327</code> |  |
@@ -661,9 +661,9 @@
 | <code>usePageTimer~startPageTimer</code> | constant | <code>src/hooks/usePageTimer.js:75</code> | Start the timer for continuous page navigation. |
 | <code>usePageTimer~stopPageTimer</code> | constant | <code>src/hooks/usePageTimer.js:123</code> | Stop any active delay or interval timer \(idempotent\). |
 | <code>usePageTimer</code> | function | <code>src/hooks/usePageTimer.js:60</code> | Custom hook to handle page change with a timer for continuous navigation. |
-| <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection and optional gateway trust enrichment. |
-| <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:27</code> |  |
-| <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:43</code> |  |
+| <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection. |
+| <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:26</code> |  |
+| <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:40</code> |  |
 | <code>appendQuery</code> | function | <code>src/i18n.js:134</code> | Helper: append query params safely to a URL. |
 | <code>BUNDLED_I18N_RESOURCE_REVISION</code> | constant | <code>src/i18n.js:93</code> | Fallback cache-busting token for bundled locale resources. |
 | <code>computeBaseHref</code> | function | <code>src/i18n.js:366</code> | Compute a normalized base href. |
@@ -1158,58 +1158,43 @@
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
-| <code>module:utils/pdfSignatureDocuments.buildSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:119</code> | Fold per-file signature reports into per-document entries. |
-| <code>module:utils/pdfSignatureDocuments.findSignatureDocumentBySourceKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:217</code> |  |
-| <code>module:utils/pdfSignatureDocuments.getPageSignatureDocumentKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:57</code> | Document key of a page. |
-| <code>module:utils/pdfSignatureDocuments.getSignatureFileHeading</code> | function | <code>src/utils/pdfSignatureDocuments.js:230</code> | Heading for one file of a multi-file document: &amp;quot;File k of m: name&amp;quot;, or &amp;quot;File k of m&amp;quot; when no file name is available. |
-| <code>module:utils/pdfSignatureDocuments.getSignatureFilePages</code> | function | <code>src/utils/pdfSignatureDocuments.js:245</code> | Page range of a file inside its document, &amp;quot;Pages 19–24&amp;quot; or &amp;quot;Page 3&amp;quot;; &#39;&#39; when unknown. |
-| <code>module:utils/pdfSignatureDocuments.getSourceFileNameFromUrl</code> | function | <code>src/utils/pdfSignatureDocuments.js:73</code> | Display file name from a source URL: the last path segment, only when it looks like a file name \(has an extension\). |
-| <code>module:utils/pdfSignatureDocuments~pickNewestSignature</code> | function | <code>src/utils/pdfSignatureDocuments.js:97</code> |  |
-| <code>module:utils/pdfSignatureDocuments~SignatureDocumentEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:35</code> |  |
-| <code>module:utils/pdfSignatureDocuments~SignatureFileEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:21</code> |  |
-| <code>module:utils/pdfSignatureDocuments.summarizeSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:202</code> | Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\). |
+| <code>module:utils/pdfSignatureDocuments.buildSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:117</code> | Fold per-file signature reports into per-document entries. |
+| <code>module:utils/pdfSignatureDocuments.findSignatureDocumentBySourceKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:214</code> |  |
+| <code>module:utils/pdfSignatureDocuments.getPageSignatureDocumentKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:55</code> | Document key of a page. |
+| <code>module:utils/pdfSignatureDocuments.getSignatureFileHeading</code> | function | <code>src/utils/pdfSignatureDocuments.js:227</code> | Heading for one file of a multi-file document: &amp;quot;File k of m: name&amp;quot;, or &amp;quot;File k of m&amp;quot; when no file name is available. |
+| <code>module:utils/pdfSignatureDocuments.getSignatureFilePages</code> | function | <code>src/utils/pdfSignatureDocuments.js:242</code> | Page range of a file inside its document, &amp;quot;Pages 19–24&amp;quot; or &amp;quot;Page 3&amp;quot;; &#39;&#39; when unknown. |
+| <code>module:utils/pdfSignatureDocuments.getSourceFileNameFromUrl</code> | function | <code>src/utils/pdfSignatureDocuments.js:71</code> | Display file name from a source URL: the last path segment, only when it looks like a file name \(has an extension\). |
+| <code>module:utils/pdfSignatureDocuments~pickNewestSignature</code> | function | <code>src/utils/pdfSignatureDocuments.js:95</code> |  |
+| <code>module:utils/pdfSignatureDocuments~SignatureDocumentEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:34</code> |  |
+| <code>module:utils/pdfSignatureDocuments~SignatureFileEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:20</code> |  |
+| <code>module:utils/pdfSignatureDocuments.summarizeSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:199</code> | Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\). |
 | <code>module:utils/pdfSignatureDocuments</code> | module | <code>src/utils/pdfSignatureDocuments.js:2</code> | Per-document aggregation of PDF signature reports. |
-| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:120</code> | Create viewer-local state for disabled gateway sessions. |
-| <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:20</code> | Resolve only HTTP source routes on the viewer&#39;s own origin, preserving the path base. |
-| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:75</code> | Accept only unambiguous server entries. |
-| <code>module:utils/pdfSignatureGateway</code> | module | <code>src/utils/pdfSignatureGateway.js:1</code> | Optional gateway trust enrichment. |
-| <code>module:utils/pdfSignatureGateway~validationDisabled</code> | function | <code>src/utils/pdfSignatureGateway.js:64</code> | The gateway answered that server validation is switched off. |
 | <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:175</code> | Terminate the signature worker \(e.g. |
 | <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:140</code> | Inspect the signatures of one document. |
 | <code>module:utils/pdfSignatureInspector</code> | module | <code>src/utils/pdfSignatureInspector.js:1</code> | PDF signature inspection - the single entry point for application code. |
 | <code>module:utils/pdfSignatureInspector~workerHandle</code> | member | <code>src/utils/pdfSignatureInspector.js:33</code> | Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks. |
-| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1156</code> | Collect signature information from PDF bytes. |
-| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:276</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
-| <code>module:utils/pdfSignatures.installIndirectObjectHeaderProbe</code> | function | <code>src/utils/pdfSignatures.js:1001</code> | pdf-lib&#39;s skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws \(building an Error\) on each miss: ~17 us per byte, so a 64 KiB prefix cost a... |
-| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:203</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
-| <code>module:utils/pdfSignatures~PdfSignatureInfo</code> | typedef | <code>src/utils/pdfSignatures.js:19</code> | One inspected PDF signature \(level-1 integrity view; trust is never evaluated here - see the trust property\). |
-| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:57</code> |  |
-| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:190</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
-| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:66</code> | SubFilters with level-1 handling. |
-| <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:964</code> | Report an inspection failure without claiming that the document is unsigned. |
+| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1147</code> | Collect signature information from PDF bytes. |
+| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:268</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
+| <code>module:utils/pdfSignatures.installIndirectObjectHeaderProbe</code> | function | <code>src/utils/pdfSignatures.js:992</code> | pdf-lib&#39;s skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws \(building an Error\) on each miss: ~17 us per byte, so a 64 KiB prefix cost a... |
+| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:195</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
+| <code>module:utils/pdfSignatures~PdfSignatureInfo</code> | typedef | <code>src/utils/pdfSignatures.js:19</code> | One inspected PDF signature \(level-1 integrity view\). |
+| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:50</code> |  |
+| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:182</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
+| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:58</code> | SubFilters with level-1 handling. |
+| <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:955</code> | Report an inspection failure without claiming that the document is unsigned. |
 | <code>module:utils/pdfSignatures</code> | module | <code>src/utils/pdfSignatures.js:1</code> | PDF signature collection - level 1 integrity inspection. |
-| <code>module:utils/pdfSignatureStatus.formatSignatureTime</code> | function | <code>src/utils/pdfSignatureStatus.js:337</code> | Format a signature-related ISO time \(signing, validation, certificate validity\) as local time, &amp;quot;2022-04-27 19:55&amp;quot;, in both supported languages. |
-| <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:85</code> | Shared localized status text for the badge tooltip and details dialog. |
-| <code>module:utils/pdfSignatureStatus.getReportSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:64</code> | Worst severity across integrity and trust for all signatures. |
-| <code>module:utils/pdfSignatureStatus.getSignatureCount</code> | function | <code>src/utils/pdfSignatureStatus.js:118</code> |  |
-| <code>module:utils/pdfSignatureStatus.getSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:52</code> | Map one integrity status to its severity class. |
-| <code>module:utils/pdfSignatureStatus.getSignatureTrustState</code> | function | <code>src/utils/pdfSignatureStatus.js:238</code> | Which trust situation a signature is in: unavailable : no gateway answered for this document \(viewer opened without ODVGateway\); not-checked : the gateway has server validation di... |
-| <code>module:utils/pdfSignatureStatus.getTrustExplanation</code> | function | <code>src/utils/pdfSignatureStatus.js:263</code> | State-specific trust text for the details dialog. |
-| <code>module:utils/pdfSignatureStatus.getTrustLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:164</code> | Shared localized trust text for the details dialog and the overview. |
-| <code>module:utils/pdfSignatureStatus.getTrustReasonText</code> | function | <code>src/utils/pdfSignatureStatus.js:223</code> | Localized plain-language reason for a gateway trustReason code, or null for an unknown code. |
-| <code>module:utils/pdfSignatureStatus.getWorstSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:104</code> | The worst integrity status among a document&#39;s signatures, or null when there are none. |
-| <code>module:utils/pdfSignatureStatus.getWorstSignatureTrust</code> | function | <code>src/utils/pdfSignatureStatus.js:151</code> | The worst trust verdict among signatures, or null when there are none. |
-| <code>module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST</code> | constant | <code>src/utils/pdfSignatureStatus.js:37</code> | Integrity statuses ordered worst-first. |
-| <code>module:utils/pdfSignatureStatus.normalizeSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:74</code> | Fail closed for missing, unexpected and inherited property names. |
-| <code>module:utils/pdfSignatureStatus.normalizeSignatureTrust</code> | function | <code>src/utils/pdfSignatureStatus.js:142</code> |  |
-| <code>module:utils/pdfSignatureStatus~pad2</code> | function | <code>src/utils/pdfSignatureStatus.js:326</code> |  |
-| <code>module:utils/pdfSignatureStatus.reportHasSignatures</code> | function | <code>src/utils/pdfSignatureStatus.js:126</code> |  |
-| <code>module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY</code> | constant | <code>src/utils/pdfSignatureStatus.js:21</code> | Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are... |
-| <code>module:utils/pdfSignatureStatus.TRUST_REASON_CODES</code> | constant | <code>src/utils/pdfSignatureStatus.js:215</code> | Every trustReason code the gateway can emit. |
-| <code>module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS</code> | constant | <code>src/utils/pdfSignatureStatus.js:185</code> | Plain-language English default per gateway trustReason code. |
-| <code>module:utils/pdfSignatureStatus~TRUST_WORST_FIRST</code> | constant | <code>src/utils/pdfSignatureStatus.js:136</code> | Trust verdicts ordered worst-first. |
-| <code>module:utils/pdfSignatureStatus~TrustExplanation</code> | typedef | <code>src/utils/pdfSignatureStatus.js:246</code> |  |
-| <code>module:utils/pdfSignatureStatus</code> | module | <code>src/utils/pdfSignatureStatus.js:2</code> | Signature UI status helpers for browser integrity and gateway trust. |
+| <code>module:utils/pdfSignatureStatus.formatSignatureTime</code> | function | <code>src/utils/pdfSignatureStatus.js:137</code> | Format a signature-related ISO time \(signing, validation, certificate validity\) as local time, &amp;quot;2022-04-27 19:55&amp;quot;, in both supported languages. |
+| <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:80</code> | Shared localized status text for the badge tooltip and details dialog. |
+| <code>module:utils/pdfSignatureStatus.getReportSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:59</code> | Worst severity across integrity for all signatures. |
+| <code>module:utils/pdfSignatureStatus.getSignatureCount</code> | function | <code>src/utils/pdfSignatureStatus.js:113</code> |  |
+| <code>module:utils/pdfSignatureStatus.getSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:50</code> | Map one integrity status to its severity class. |
+| <code>module:utils/pdfSignatureStatus.getWorstSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:99</code> | The worst integrity status among a document&#39;s signatures, or null when there are none. |
+| <code>module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST</code> | constant | <code>src/utils/pdfSignatureStatus.js:36</code> | Integrity statuses ordered worst-first. |
+| <code>module:utils/pdfSignatureStatus.normalizeSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:69</code> | Fail closed for missing, unexpected and inherited property names. |
+| <code>module:utils/pdfSignatureStatus~pad2</code> | function | <code>src/utils/pdfSignatureStatus.js:126</code> |  |
+| <code>module:utils/pdfSignatureStatus.reportHasSignatures</code> | function | <code>src/utils/pdfSignatureStatus.js:121</code> |  |
+| <code>module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY</code> | constant | <code>src/utils/pdfSignatureStatus.js:20</code> | Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are... |
+| <code>module:utils/pdfSignatureStatus</code> | module | <code>src/utils/pdfSignatureStatus.js:2</code> | Signature UI status helpers for browser integrity. |
 | <code>batchProgressUnitsFromEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:156</code> | Convert worker phases to deterministic job units: 1 unit for loading the PDF engine per batch 1 unit per loaded page image 1 unit per generated page 1 unit for finalizing each par... |
 | <code>clampInteger</code> | function | <code>src/utils/pdfWorkerDispatcher.js:41</code> |  |
 | <code>clampNumber</code> | function | <code>src/utils/pdfWorkerDispatcher.js:114</code> |  |
@@ -1359,7 +1344,7 @@
 | <code>pageFormatForImage</code> | function | <code>src/utils/printPdf.js:1029</code> |  |
 | <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2231</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
 | <code>parseTemplateCssClassSelector</code> | function | <code>src/utils/printPdf.js:335</code> | Parse a supported class-only selector into descendant selector parts. |
-| <code>parseTemplateCssStyleRules</code> | function | <code>src/utils/printPdf.js:398</code> | Parse only the small CSS subset used by trusted print header/footer templates. |
+| <code>parseTemplateCssStyleRules</code> | function | <code>src/utils/printPdf.js:398</code> | Parse only the small CSS subset used by approved print header/footer templates. |
 | <code>parseTextStyleDeclarations</code> | function | <code>src/utils/printPdf.js:305</code> |  |
 | <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2441</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
 | <code>PdfPrintOptions</code> | typedef | <code>src/utils/printPdf.js:157</code> |  |
@@ -1492,61 +1477,64 @@
 | <code>withTimeout</code> | function | <code>src/utils/renderDecodeBenchmark.js:353</code> |  |
 | <code>clampRenderSurfaceSize</code> | function | <code>src/utils/renderSurfaceBounds.js:25</code> | Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio. |
 | <code>MAX_RENDER_SURFACE_DIMENSION</code> | constant | <code>src/utils/renderSurfaceBounds.js:9</code> | OpenDocViewer — conservative raster surface bounds. |
-| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:390</code> | Clamp a numeric config value to a safe range. |
-| <code>COMPARE_ADJUST_TOOLBAR_MODES</code> | constant | <code>src/utils/runtimeConfig.js:33</code> | Runtime validation values for CompareAdjustToolbarMode; the first one is the default. |
+| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:411</code> | Clamp a numeric config value to a safe range. |
+| <code>COMPARE_ADJUST_TOOLBAR_MODES</code> | constant | <code>src/utils/runtimeConfig.js:34</code> | Runtime validation values for CompareAdjustToolbarMode; the first one is the default. |
 | <code>CompareAdjustToolbarMode</code> | typedef | <code>src/utils/runtimeConfig.js:12</code> |  |
-| <code>DEFAULT_OCR_LANGUAGES</code> | constant | <code>src/utils/runtimeConfig.js:285</code> | Default OCR languages \(Tesseract language codes\), tried together on every text line. |
-| <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:47</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
-| <code>getCompareAdjustToolbarMode</code> | function | <code>src/utils/runtimeConfig.js:238</code> | Resolve how the main toolbar&#39;s image controls behave in compare mode \( compare.adjust.toolbarMode \). |
-| <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:139</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:334</code> | Resolve where the OCR engine, worker and language files are served from \( ocr.assetBaseUrl \). |
-| <code>getOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:311</code> | Resolve the OCR languages \( ocr.languages \): an array of Tesseract language codes. |
-| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:767</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
-| <code>getPdfSignatureInspectionStart</code> | function | <code>src/utils/runtimeConfig.js:279</code> | Resolve when PDF signature inspection may start \( pdfSignatures.inspectAfter \): &#39;firstPage&#39; \(default\) starts once the first page is shown, &#39;allPages&#39; waits until every page of the... |
-| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:642</code> | Resolve the default print page mode used when the user has not stored an override. |
-| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:667</code> | Resolve the print-selection workspace configuration. |
-| <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:116</code> | Read the merged runtime configuration from the browser environment. |
-| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:750</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
-| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:350</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
-| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:618</code> | Resolve the configured custom-size limits. |
-| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:604</code> | Resolve the custom-size width factor percentage. |
-| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:591</code> | Resolve the initial page zoom mode. |
-| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:691</code> | Resolve the optional scroll-at-edge page turn gesture. |
-| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:709</code> | Resolve the configurable viewer-level problem notice. |
-| <code>isCompareCurtainEnabled</code> | function | <code>src/utils/runtimeConfig.js:211</code> | Resolve whether the compare curtain view is available \( compare.curtain.enabled \). |
-| <code>isCompareCurtainPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:223</code> | Resolve whether the compare curtain view offers its print action \( compare.curtain.print.enabled \). |
-| <code>isCompareOverlayEnabled</code> | function | <code>src/utils/runtimeConfig.js:187</code> | Resolve whether the compare overlay view is available \( compare.overlay.enabled \). |
-| <code>isCompareOverlayPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:199</code> | Resolve whether the compare overlay view offers its print action \( compare.overlay.print.enabled \). |
-| <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:152</code> | Resolve whether document metadata UI affordances should be available. |
-| <code>isFineTuneEnabled</code> | function | <code>src/utils/runtimeConfig.js:174</code> | Master capability for page fine tuning and calibration-dependent compare views. |
-| <code>isOcrEnabled</code> | function | <code>src/utils/runtimeConfig.js:298</code> | Resolve whether in-browser OCR of scanned pages is turned on \( ocr.enabled \). |
-| <code>isPdfSignatureInspectionEnabled</code> | function | <code>src/utils/runtimeConfig.js:266</code> | Resolve whether PDF signature inspection runs at all \( pdfSignatures.enabled \). |
-| <code>isSignatureThumbnailPageBadgeEnabled</code> | function | <code>src/utils/runtimeConfig.js:252</code> | Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol. |
-| <code>KEYBOARD_PRINT_SHORTCUT_BEHAVIORS</code> | constant | <code>src/utils/runtimeConfig.js:31</code> | Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. |
+| <code>DEFAULT_OCR_LANGUAGES</code> | constant | <code>src/utils/runtimeConfig.js:306</code> | Default OCR languages \(Tesseract language codes\), tried together on every text line. |
+| <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:50</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
+| <code>getCompareAdjustToolbarMode</code> | function | <code>src/utils/runtimeConfig.js:241</code> | Resolve how the main toolbar&#39;s image controls behave in compare mode \( compare.adjust.toolbarMode \). |
+| <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:142</code> | Resolve the configured Ctrl/Cmd+P behavior. |
+| <code>getOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:355</code> | Resolve where the OCR engine, worker and language files are served from \( ocr.assetBaseUrl \). |
+| <code>getOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:332</code> | Resolve the OCR languages \( ocr.languages \): an array of Tesseract language codes. |
+| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:788</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
+| <code>getPdfSignatureInspectionStart</code> | function | <code>src/utils/runtimeConfig.js:281</code> | Resolve when PDF signature inspection may start \( pdfSignatures.inspectAfter \): &#39;firstPage&#39; \(default\) starts once the first page is shown, &#39;allPages&#39; waits until every page of the... |
+| <code>getPdfSignatureUncheckedSeverity</code> | function | <code>src/utils/runtimeConfig.js:298</code> | Resolve the symbol severity for a signature whose content is intact but whose certificate chain and revocation status the viewer does not check \( pdfSignatures.uncheckedSeverity \). |
+| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:663</code> | Resolve the default print page mode used when the user has not stored an override. |
+| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:688</code> | Resolve the print-selection workspace configuration. |
+| <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:119</code> | Read the merged runtime configuration from the browser environment. |
+| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:771</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
+| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:371</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
+| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:639</code> | Resolve the configured custom-size limits. |
+| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:625</code> | Resolve the custom-size width factor percentage. |
+| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:612</code> | Resolve the initial page zoom mode. |
+| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:712</code> | Resolve the optional scroll-at-edge page turn gesture. |
+| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:730</code> | Resolve the configurable viewer-level problem notice. |
+| <code>isCompareCurtainEnabled</code> | function | <code>src/utils/runtimeConfig.js:214</code> | Resolve whether the compare curtain view is available \( compare.curtain.enabled \). |
+| <code>isCompareCurtainPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:226</code> | Resolve whether the compare curtain view offers its print action \( compare.curtain.print.enabled \). |
+| <code>isCompareOverlayEnabled</code> | function | <code>src/utils/runtimeConfig.js:190</code> | Resolve whether the compare overlay view is available \( compare.overlay.enabled \). |
+| <code>isCompareOverlayPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:202</code> | Resolve whether the compare overlay view offers its print action \( compare.overlay.print.enabled \). |
+| <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:155</code> | Resolve whether document metadata UI affordances should be available. |
+| <code>isFineTuneEnabled</code> | function | <code>src/utils/runtimeConfig.js:177</code> | Master capability for page fine tuning and calibration-dependent compare views. |
+| <code>isOcrEnabled</code> | function | <code>src/utils/runtimeConfig.js:319</code> | Resolve whether in-browser OCR of scanned pages is turned on \( ocr.enabled \). |
+| <code>isPdfSignatureInspectionEnabled</code> | function | <code>src/utils/runtimeConfig.js:268</code> | Resolve whether PDF signature inspection runs at all \( pdfSignatures.enabled \). |
+| <code>isSignatureThumbnailPageBadgeEnabled</code> | function | <code>src/utils/runtimeConfig.js:255</code> | Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol. |
+| <code>KEYBOARD_PRINT_SHORTCUT_BEHAVIORS</code> | constant | <code>src/utils/runtimeConfig.js:32</code> | Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. |
 | <code>KeyboardPrintShortcutBehavior</code> | typedef | <code>src/utils/runtimeConfig.js:9</code> |  |
-| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:368</code> | Normalize a runtime flag to a boolean. |
-| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:565</code> | Normalize the optional user custom-size limits. |
-| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:536</code> | Normalize a custom fit-width factor. |
-| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:504</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
-| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:436</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
-| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:415</code> | Normalize an integer config value and clamp it to the supplied range. |
-| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:547</code> | Normalize an optional custom-size limit percentage. |
-| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:519</code> | Normalize a user-facing print default mode. |
-| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:465</code> | Resolve the configured reset-session fallback target. |
-| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:453</code> | Normalize the runtime session-reset target. |
-| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:479</code> | Normalize a user-facing zoom mode string before alias lookup. |
-| <code>OCR_LANGUAGE_CODE_PATTERN</code> | constant | <code>src/utils/runtimeConfig.js:287</code> | Tesseract language codes: three lower-case letters, optionally with _suffixes \(chi_sim, aze_cyrl\). |
-| <code>PRINT_DEFAULT_MODE_ALIASES</code> | constant | <code>src/utils/runtimeConfig.js:37</code> | User-facing print default mode aliases mapped to persisted PrintDefaultMode values. |
+| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:389</code> | Normalize a runtime flag to a boolean. |
+| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:586</code> | Normalize the optional user custom-size limits. |
+| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:557</code> | Normalize a custom fit-width factor. |
+| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:525</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
+| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:457</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
+| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:436</code> | Normalize an integer config value and clamp it to the supplied range. |
+| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:568</code> | Normalize an optional custom-size limit percentage. |
+| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:540</code> | Normalize a user-facing print default mode. |
+| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:486</code> | Resolve the configured reset-session fallback target. |
+| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:474</code> | Normalize the runtime session-reset target. |
+| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:500</code> | Normalize a user-facing zoom mode string before alias lookup. |
+| <code>OCR_LANGUAGE_CODE_PATTERN</code> | constant | <code>src/utils/runtimeConfig.js:308</code> | Tesseract language codes: three lower-case letters, optionally with _suffixes \(chi_sim, aze_cyrl\). |
+| <code>PDF_SIGNATURE_UNCHECKED_SEVERITIES</code> | constant | <code>src/utils/runtimeConfig.js:36</code> | Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default. |
+| <code>PdfSignatureUncheckedSeverity</code> | typedef | <code>src/utils/runtimeConfig.js:13</code> |  |
+| <code>PRINT_DEFAULT_MODE_ALIASES</code> | constant | <code>src/utils/runtimeConfig.js:40</code> | User-facing print default mode aliases mapped to persisted PrintDefaultMode values. |
 | <code>PrintDefaultMode</code> | typedef | <code>src/utils/runtimeConfig.js:11</code> |  |
-| <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:75</code> |  |
-| <code>readBooleanSwitch</code> | function | <code>src/utils/runtimeConfig.js:164</code> | Read a strict boolean switch: only a real boolean counts, anything else \(missing, strings such as &amp;quot;false&amp;quot;, numbers, null, objects\) falls back to defaultValue . |
-| <code>RESET_SESSION_TARGETS</code> | constant | <code>src/utils/runtimeConfig.js:35</code> | Runtime validation values for ResetSessionTarget; the typedef documents the public contract. |
-| <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:13</code> | Session-reset target for the support/problem notice. |
-| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:490</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
-| <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:68</code> |  |
+| <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:78</code> |  |
+| <code>readBooleanSwitch</code> | function | <code>src/utils/runtimeConfig.js:167</code> | Read a strict boolean switch: only a real boolean counts, anything else \(missing, strings such as &amp;quot;false&amp;quot;, numbers, null, objects\) falls back to defaultValue . |
+| <code>RESET_SESSION_TARGETS</code> | constant | <code>src/utils/runtimeConfig.js:38</code> | Runtime validation values for ResetSessionTarget; the typedef documents the public contract. |
+| <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:14</code> | Session-reset target for the support/problem notice. |
+| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:511</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
+| <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:71</code> |  |
 | <code>ViewerDefaultZoomMode</code> | typedef | <code>src/utils/runtimeConfig.js:10</code> |  |
-| <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:82</code> |  |
-| <code>ViewerProblemNoticeConfig</code> | typedef | <code>src/utils/runtimeConfig.js:90</code> |  |
+| <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:85</code> |  |
+| <code>ViewerProblemNoticeConfig</code> | typedef | <code>src/utils/runtimeConfig.js:93</code> |  |
 | <code>BlobLruCache</code> | class | <code>src/utils/sourceTempStore.js:210</code> |  |
 | <code>SourceTempStore#cleanup</code> | function | <code>src/utils/sourceTempStore.js:586</code> |  |
 | <code>SourceTempStore#cleanupStaleSessions</code> | function | <code>src/utils/sourceTempStore.js:636</code> |  |

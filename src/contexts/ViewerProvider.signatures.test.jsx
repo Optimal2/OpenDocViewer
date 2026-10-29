@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { act, createElement, useContext } from 'react';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createRoot } from 'react-dom/client';
 import { ViewerProvider } from './ViewerProvider.jsx';
 import ViewerContext from './viewerContext.js';
@@ -113,35 +115,11 @@ it("pdfSignatures.inspectAfter:'allPages' starts after an aborted run planned wi
   expect(getDocumentSignatures).toHaveBeenCalledTimes(1);
 });
 
-it('G10 provider passes the registered source URL, never the viewer file index', async () => {
+it('never requests the removed signature endpoint for gateway-shaped, pack-shaped or standalone sources', async () => {
+  const forbiddenPath = ['', 'signatures', ''].join('/');
   vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' });
-  const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };
-  getDocumentSignatures.mockResolvedValue({ signatures: [signature] });
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({
-    signatures: [{ ...signature, trust: 'invalid', trustReason: 'Certificate revoked', validationTime: '2026-10-01T12:00:00Z' }],
-  }) }));
-  let api;
-  function Consumer() { api = useContext(ViewerContext); return null; }
-  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
-  await act(async () => { await api.initializeDocumentSession(); });
-  await act(async () => {
-    api.registerSourceDescriptor({ sourceKey: 'signed', fileExtension: 'pdf', fileIndex: 0,
-      sourceUrl: 'https://example.test/gateway/source/session-one/17' });
-    api.insertPagesAtIndex([{ sourceKey: 'signed', fileExtension: 'pdf', pageIndex: 0,
-      fullSizeStatus: 1, fullSizeUrl: 'blob:ready' }], 0);
-  });
-  expect(fetch).toHaveBeenCalledWith('https://example.test/gateway/signatures/session-one/17', expect.any(Object));
-  expect(api.signatureReports.signed.signatures[0].trust).toBe('invalid');
-});
-
-it('G21 source-pack identity survives display reordering and is checked once per document', async () => {
-  vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' });
-  const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };
-  getDocumentSignatures.mockResolvedValue({ signatures: [signature] });
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({
-    signatures: [{ ...signature, trust: 'unknown', trustReason: 'timestamp-responder-not-trusted',
-      validationTime: '2026-10-01T12:00:00Z' }],
-  }) }));
+  vi.stubGlobal('fetch', vi.fn());
+  getDocumentSignatures.mockResolvedValue({ signatures: [{ fieldName: 'Approval', integrity: 'intact' }] });
   let api;
   function Consumer() { api = useContext(ViewerContext); return null; }
   await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
@@ -149,20 +127,32 @@ it('G21 source-pack identity survives display reordering and is checked once per
   const page = (sourceKey) => ({ sourceKey, fileExtension: 'pdf', pageIndex: 0,
     fullSizeStatus: 1, fullSizeUrl: 'blob:ready' });
   await act(async () => {
-    ['first', 'second'].forEach((sourceKey, fileIndex) => api.registerSourceDescriptor({
-      sourceKey, fileExtension: 'pdf', fileIndex: 99 - fileIndex,
-      sourceUrl: `https://example.test/files/${sourceKey}.pdf`,
-      sourcePack: { url: 'https://example.test/gateway/source-pack/session-pack', fileIndex },
-    }));
-    api.insertPagesAtIndex([page('second'), page('first'), page('second')], 0);
+    api.registerSourceDescriptor({ sourceKey: 'gateway', fileExtension: 'pdf', fileIndex: 17,
+      sourceUrl: 'https://example.test/gateway/source/session-one/17' });
+    api.registerSourceDescriptor({ sourceKey: 'pack', fileExtension: 'pdf', fileIndex: 1,
+      sourceUrl: 'https://example.test/gateway/source-pack/session-pack',
+      sourcePack: { url: 'https://example.test/gateway/source-pack/session-pack', fileIndex: 1 } });
+    api.registerSourceDescriptor({ sourceKey: 'plain', fileExtension: 'pdf', fileIndex: 0,
+      sourceUrl: 'https://example.test/files/plain.pdf' });
+    api.insertPagesAtIndex([page('gateway'), page('pack'), page('plain'), page('pack')], 0);
   });
-  await act(async () => { api.patchPageAtIndex(0, { thumbnailStatus: 1 }); });
-  expect(fetch.mock.calls.map(([url]) => url)).toEqual([
-    'https://example.test/gateway/signatures/session-pack/1',
-    'https://example.test/gateway/signatures/session-pack/0',
-  ]);
-  expect(storage.read.mock.calls.map(([key]) => key)).toEqual(['second', 'first']);
-  for (const key of ['first', 'second']) expect(api.signatureReports[key].signatures[0]).toMatchObject({
-    integrity: 'intact', trust: 'unknown', trustReason: 'timestamp-responder-not-trusted',
+  await act(async () => {
+    await vi.waitFor(() => expect(Object.keys(api.signatureReports)).toHaveLength(3));
   });
+  expect(storage.read.mock.calls.map(([key]) => key)).toEqual(['gateway', 'pack', 'plain']);
+  expect(fetch.mock.calls.filter(([url]) => String(url).includes(forbiddenPath))).toEqual([]);
+  expect(fetch).not.toHaveBeenCalled();
+});
+
+it('static guard keeps the removed signature endpoint literal out of src', () => {
+  const forbiddenPath = ['', 'signatures', ''].join('/');
+  const sourceRoot = join(globalThis.process.cwd(), 'src');
+  const visit = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) visit(path);
+      else expect(readFileSync(path, 'utf8').includes(forbiddenPath), path).toBe(false);
+    }
+  };
+  visit(sourceRoot);
 });

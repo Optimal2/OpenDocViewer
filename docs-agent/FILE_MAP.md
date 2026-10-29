@@ -14,7 +14,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentConsumerWrapper.jsx</code> | 172 | 1 | 2 | high | OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: \[{ url, ext?, fileIn |
 | <code>src/components/DocumentLoader/batchHandler.js</code> | 226 | 0 | 7 | high | OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread. |
 | <code>src/components/DocumentLoader/DemoControls.jsx</code> | 101 | 0 | 1 | high | OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: &quot;Total pages/files&quot; + JPG/PNG/TIF/PDF buttons + a new &quot;Mix&quot; button. |
-| <code>src/components/DocumentLoader/DocumentLoader.js</code> | 2175 | 2 | 58 | high | OpenDocViewer — Document loader orchestrator. |
+| <code>src/components/DocumentLoader/DocumentLoader.js</code> | 2172 | 2 | 58 | high | OpenDocViewer — Document loader orchestrator. |
 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code> | 389 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
 | <code>src/components/DocumentLoader/LoadPressureDialog.jsx</code> | 172 | 1 | 4 | medium | Large-load warning dialog shown before / during very heavy loading runs. |
 | <code>src/components/DocumentLoader/mainThreadRenderer.js</code> | 517 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
@@ -66,22 +66,22 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
 | <code>src/components/PrintSelectionWorkspace.jsx</code> | 2504 | 1 | 5 | high | Full-window print-selection workspace. |
 | <code>src/components/Resizer.jsx</code> | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
-| <code>src/components/SignatureDetailsDialog.jsx</code> | 447 | 1 | 7 | high | Signature details dialog \(browser integrity and optional gateway trust\). |
+| <code>src/components/SignatureDetailsDialog.jsx</code> | 429 | 1 | 7 | high | Signature details dialog \(browser integrity\). |
 | <code>src/components/SignatureOverviewButton.jsx</code> | 64 | 1 | 2 | high | Toolbar signature overview button. |
 | <code>src/components/SignatureOverviewDialog.jsx</code> | 286 | 1 | 3 | high | Signature overview dialog, opened from the toolbar overview button. |
-| <code>src/components/SignatureStatusBadge.jsx</code> | 92 | 1 | 2 | high | Small signature symbol shown next to a document&#39;s &quot;DOK n&quot; label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\). |
+| <code>src/components/SignatureStatusBadge.jsx</code> | 87 | 1 | 2 | high | Small signature symbol shown next to a document&#39;s &quot;DOK n&quot; label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\). |
 | <code>src/components/SignatureTime.jsx</code> | 33 | 2 | 1 | high | Local-time rendering of a signature-related ISO time \(signing, validation, certificate validity\) for the signature dialogs: &quot;2022-04-27 19:55&quot; as text, the exact UTC ISO value in the title attribute and \`dateTime\`. |
 | <code>src/components/ViewerProblemNotice.jsx</code> | 285 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 1 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
-| <code>src/contexts/viewerContext.js</code> | 249 | 12 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2822 | 1 | 66 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/viewerContext.js</code> | 248 | 12 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2817 | 1 | 66 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
-| <code>src/hooks/usePdfSignatureReports.js</code> | 127 | 1 | 3 | high | Browser PDF signature inspection and optional gateway trust enrichment. |
+| <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |
 | <code>src/i18n.js</code> | 562 | 2 | 21 | high | i18n bootstrap for OpenDocViewer. |
 | <code>src/index.jsx</code> | 67 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
 | <code>src/integrations/bootstrapRuntime.js</code> | 457 | 1 | 12 | high | Startup mode detection and host-integration entry point. |
@@ -122,11 +122,10 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfPrintCacheKey.js</code> | 117 | 4 | 8 | high | Generated-PDF cache key helpers. |
 | <code>src/utils/pdfResolution.js</code> | 133 | 6 | 7 | high | Pure, per-page PDF display resolution policy shared by browser and worker renderers. |
 | <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
-| <code>src/utils/pdfSignatureDocuments.js</code> | 254 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
-| <code>src/utils/pdfSignatureGateway.js</code> | 158 | 1 | 5 | high | Optional gateway trust enrichment. |
+| <code>src/utils/pdfSignatureDocuments.js</code> | 251 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 182 | 2 | 4 | high | PDF signature inspection - the single entry point for application code. |
-| <code>src/utils/pdfSignatures.js</code> | 1234 | 3 | 10 | high | PDF signature collection - level 1 integrity inspection. |
-| <code>src/utils/pdfSignatureStatus.js</code> | 348 | 7 | 22 | high | Signature UI status helpers for browser integrity and gateway trust. |
+| <code>src/utils/pdfSignatures.js</code> | 1225 | 3 | 10 | high | PDF signature collection - level 1 integrity inspection. |
+| <code>src/utils/pdfSignatureStatus.js</code> | 148 | 6 | 12 | high | Signature UI status helpers for browser integrity. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
 | <code>src/utils/printCore.js</code> | 1058 | 3 | 39 | high | Core print coordinator for the frontend. |
@@ -142,7 +141,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 779 | 23 | 55 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 800 | 23 | 58 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/supportDiagnostics.js</code> | 375 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/toolbarDensity.js</code> | 30 | 2 | 2 | high | Toolbar density on the document root. |

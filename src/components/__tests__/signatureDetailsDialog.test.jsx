@@ -50,12 +50,12 @@ describe('SignatureDetailsDialog content', () => {
     container.remove();
   });
 
-  it('explains why trust is not checked when the viewer has no gateway', async () => {
+  it('shows a neutral information line for a signature', async () => {
     const report = await inspect('valid-rsa.pdf');
     const { container, root } = await renderDialog({ isOpen: true, onClose: () => {}, report });
-    const note = container.querySelector('.odv-signature-trust');
-    expect(note.className).toContain('odv-signature-trust--unavailable');
-    expect(note.textContent).toContain('can only be checked when the document is opened through ODVGateway');
+    const note = container.querySelector('.odv-signature-info[role="note"]');
+    expect(note.textContent).toContain('Not checked in the viewer:');
+    expect(note.className).not.toMatch(/warning|error/);
     await act(() => root.unmount());
     container.remove();
   });
@@ -111,47 +111,15 @@ describe('SignatureDetailsDialog content', () => {
     container.remove();
   });
 
-  it('renders a state-specific trust explanation for every trust state', async () => {
-    const cases = [
-      [{ trust: 'not-checked' }, 'unavailable', 'opened through ODVGateway'],
-      [{ trust: 'not-checked', serverValidationDisabled: true }, 'not-checked', 'signatures.enabled is off'],
-      [{ trust: 'not-checked', serverValidationUnavailable: true, trustReason: 'server validation unavailable' }, 'server-error', 'did not answer'],
-      [{ trust: 'valid' }, 'valid', 'The signature is valid'],
-      [{ trust: 'invalid', trustReason: 'revoked' }, 'invalid', 'The certificate has been revoked'],
-      [{ trust: 'unknown', trustReason: 'timestamp-responder-not-trusted' }, 'unknown', 'The timestamp issuer is not trusted on the server'],
-      [{ trust: 'unknown', trustReason: 'reason text' }, 'unknown', 'reason text'],
-    ];
-    for (const [fields, state, text] of cases) {
-      const report = { signatures: [{ integrity: 'intact', signer: 'A', ...fields }] };
-      const { container, root } = await renderDialog({ isOpen: true, onClose: () => {}, report });
-      const note = container.querySelector('.odv-signature-trust');
-      expect(note.className).toContain(`odv-signature-trust--${state}`);
-      expect(note.textContent).toContain(text);
-      await act(() => root.unmount());
-      container.remove();
-    }
-  });
-
-  it('keeps the raw gateway code on a secondary line and says what unknown does not mean', async () => {
-    const report = { signatures: [{ integrity: 'intact', trust: 'unknown', trustReason: 'revocation-unavailable' }] };
-    const { container, root } = await renderDialog({ isOpen: true, onClose: () => {}, report });
-    expect(container.querySelector('.odv-signature-trust-title').textContent).toBe('Could not determine whether the signature is valid');
-    expect(container.querySelector('.odv-signature-trust-reason').textContent).toBe('The revocation list could not be retrieved');
-    expect(container.querySelector('.odv-signature-trust-code').textContent).toBe('Code: revocation-unavailable');
-    expect(container.querySelector('.odv-signature-trust').textContent).toContain('does not mean');
-    await act(() => root.unmount());
-    container.remove();
-  });
-
-  it('shows signing, validation and certificate times as local time with the UTC value in the title', async () => {
+  it('shows signing and certificate times as local time with the UTC value in the title', async () => {
     const report = { signatures: [{
-      integrity: 'intact', trust: 'valid', signingTime: '2022-04-27T17:55:43.000Z', signingTimeSource: 'signed-attribute',
-      validationTime: '2026-10-01T12:00:00Z', notBefore: '2022-01-01T00:00:00Z', notAfter: '2025-01-01T00:00:00Z',
+      integrity: 'intact', signingTime: '2022-04-27T17:55:43.000Z', signingTimeSource: 'signed-attribute',
+      notBefore: '2022-01-01T00:00:00Z', notAfter: '2025-01-01T00:00:00Z',
     }] };
     const { container, root } = await renderDialog({ isOpen: true, onClose: () => {}, report });
     const times = Array.from(container.querySelectorAll('time'));
     expect(times.map((node) => node.getAttribute('datetime'))).toEqual([
-      '2022-04-27T17:55:43.000Z', '2022-01-01T00:00:00.000Z', '2025-01-01T00:00:00.000Z', '2026-10-01T12:00:00.000Z',
+      '2022-04-27T17:55:43.000Z', '2022-01-01T00:00:00.000Z', '2025-01-01T00:00:00.000Z',
     ]);
     for (const node of times) {
       expect(node.title).toBe(node.getAttribute('datetime'));

@@ -115,7 +115,12 @@
       // Show the small signature symbol on every page thumbnail of a signed PDF file. The
       // document-level symbol next to "DOK n" and the toolbar signature overview stay visible
       // when this is false.
-      thumbnailPageBadge: true
+      thumbnailPageBadge: true,
+      // Symbol colour for an intact signature. The viewer checks integrity (is the content unchanged
+      // since signing) but never the certificate chain or revocation status. 'ok' (default) shows
+      // intact signatures as OK; 'warning' shows them as "take a closer look". Integrity problems are
+      // never shown as less severe. Unknown values fall back to 'ok'.
+      uncheckedSeverity: 'ok'
     },
     ocr: {
       // Opt-in in-browser OCR for scanned pages (TIFF, JPG, PNG and PDF pages without a usable

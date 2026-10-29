@@ -287,7 +287,7 @@ describe('data contract shape', () => {
       'fieldName', 'signer', 'signerOrganization', 'issuer', 'serial',
       'notBefore', 'notAfter', 'signingTime', 'signingTimeSource',
       'reason', 'location', 'subFilter', 'kind', 'integrity',
-      'integrityReason', 'coversWholeFile', 'trust'
+      'integrityReason', 'coversWholeFile'
     ];
     for (const sig of report.signatures) {
       expect(Object.keys(sig).sort()).toEqual([...keys].sort());
@@ -298,13 +298,6 @@ describe('data contract shape', () => {
       ]).toContain(sig.integrity);
       expect(['signed-attribute', 'pdf-M', 'none']).toContain(sig.signingTimeSource);
       expect(typeof sig.coversWholeFile === 'boolean' || sig.coversWholeFile === null).toBe(true);
-    }
-  });
-
-  it('trust is always not-checked at level 1', async () => {
-    for (const name of ['valid-rsa.pdf', 'digest-mismatch.pdf', 'unsupported-subfilter.pdf', 'corrupt-contents.pdf']) {
-      const sig = await one(name);
-      expect(sig.trust).toBe('not-checked');
     }
   });
 });

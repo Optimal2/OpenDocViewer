@@ -23,10 +23,10 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 148
-- Source lines: 60740
-- JSDoc symbols: 1664
-- Files with JSDoc: 148
+- Source files: 147
+- Source lines: 60351
+- JSDoc symbols: 1652
+- Files with JSDoc: 147
 - Low-confidence summaries: 0
 - Parse errors: 0
 
@@ -37,7 +37,7 @@ Source commit: not embedded
 - `src/utils/compareTransform.js` - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
 - `src/utils/imageAdjustments.js` - File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
-- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
+- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.

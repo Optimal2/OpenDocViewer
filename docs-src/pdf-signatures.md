@@ -2,25 +2,24 @@
 
 This document describes OpenDocViewer's level-1 PDF signature support: reading digital
 signature information from PDF documents in the browser, checking integrity only, and
-exposing the result as a stable data contract that the user interface (level 1 UI, a later
-campaign) and trust validation (level 2, server-side in the gateway repository) build on.
+exposing the result as a stable data contract and user interface.
 
-## Scope and trust model
+## Scope and self-sufficiency
 
 pdf.js renders PDF pages and never exposes or verifies signatures: signature widgets carry
 no field value and a visible signature is only page appearance. OpenDocViewer therefore
 reads the AcroForm signature fields and their PKCS#7/CMS payloads itself with `pdf-lib` and
 `pkijs` and verifies integrity with WebCrypto (`crypto.subtle`).
 
-Level 1 answers exactly one question per signature: **"is the content this signature covered
-byte-for-byte intact?"** It never states that a signature is valid, trusted, or that the
-signer is who they claim to be:
+OpenDocViewer is self-sufficient for this inspection. It behaves identically with and without
+ODVGateway, and does not require OpenModulePlatform. It makes **no network request for
+signatures**: inspection uses only the document bytes the viewer already holds.
 
-- Certificate chain building, revocation checking, and trust-list evaluation are level 2 and
-  run server-side (ODVGateway), not in the viewer. The contract reserves the `trust` field
-  for that; at level 1 it is always `'not-checked'`.
-- The design keeps that door open: level 2 only fills in `trust` (and optionally replaces the
-  verification source); no field added later may change the meaning of the existing fields.
+Level 1 answers exactly one question per signature: **"is the content this signature covered
+byte-for-byte intact?"** It never states that a signature is valid or that the signer is who
+they claim to be. Certificate chain building, issuer trust, revocation checking and trust-list
+evaluation are not checked in the viewer. This limitation is accepted and shown as neutral
+information for every signature, not as a warning or an error.
 
 ## Formats handled
 
@@ -57,9 +56,9 @@ parser reports this per signature:
 
 Integrity rules, in evaluation order:
 
-1. `/Contents` missing or the CMS not parseable -> `integrity: 'unreadable'`.
-2. `/SubFilter` outside the handled formats -> `integrity: 'unsupported'` (signature still
+1. `/SubFilter` outside the handled formats -> `integrity: 'unsupported'` (signature still
    reported, never hidden).
+2. `/Contents` missing or the CMS not parseable -> `integrity: 'unreadable'`.
 3. ByteRange must contain four non-negative safe integers, start at zero, remain inside
    the file, and exclude exactly the direct `/Contents` hex string including `<` and `>`.
    Source positions come from the same parser objects as the signature dictionary;
@@ -183,10 +182,9 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   Reports are keyed per file (`sourceKey`), while the thumbnail strip groups pages into
   documents ("DOK n") and one document can consist of several files. A document entry carries
   every file ("File k of m", plus a display file name taken from the last URL path segment when
-  it looks like a file name), the signed files, the total signature count, the worst severity,
-  integrity and trust across all its files, and the newest signature. Pages without document
-  context form one document per file. No signatures means no entry, no symbol and no toolbar
-  button.
+  it looks like a file name), the signed files, the total signature count, the worst severity and
+  integrity across all its files, and the newest signature. Pages without document context form
+  one document per file. No signatures means no entry, no symbol and no toolbar button.
 - `src/components/SignatureStatusBadge.jsx` is the signature symbol, a native button with an
   accessible name that includes the count (for example "Signed document, 3 signatures") and a
   tooltip. It is shown in two places in the thumbnail strip:
@@ -214,8 +212,8 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   severity colour across all loaded files plus the number of signed documents. It is rendered
   only when at least one loaded file has signatures, so unsigned sets see no change.
 - `src/components/SignatureOverviewDialog.jsx` lists every signed document: "DOK n", file
-  name(s), signature count, worst integrity and trust text (the shared status helpers), and
-  signer and signing time of the newest signature. The active document's row is marked
+  name(s), signature count, worst integrity text (the shared status helpers), and signer and
+  signing time of the newest signature. The active document's row is marked
   (`aria-current`). Rows are keyboard navigable (ArrowUp/ArrowDown/Home/End); activating a row
   navigates the viewer to the document's first page through the normal page navigation and
   keeps the dialog open. The secondary "Details" action opens the document's details dialog
@@ -233,131 +231,29 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   file it is a plain list. Each signature lists signer and organisation, issuer, signing time
   and its source, reason, location, kind, integrity in plain words with `integrityReason`,
   whole-document coverage, certificate validity period and format.
-  All times in the dialog and the overview (signing time, validation time, certificate
-  validity) are shown as local time, "2022-04-27 19:55", in both languages, with the exact UTC
-  ISO value in the `title` attribute and `<time dateTime>` (`formatSignatureTime()` in
-  `pdfSignatureStatus.js`, rendered by `SignatureTime.jsx`). Its accessibility mirrors
-  `DocumentMetadataOverlayDialog`: focus moves into the dialog, Tab is trapped inside,
-  Escape closes, and focus returns to the symbol that opened it. Unsupported formats are
-  shown as "signature present, format not supported", never hidden.
-- Each signature starts with a trust explanation (`getTrustExplanation()` in
-  `pdfSignatureStatus.js`) that says why the trust is what it is and what that means. The
-  state comes from `getSignatureTrustState()`:
-
-  | State | When | Text (sv) |
-  | --- | --- | --- |
-  | `unavailable` | no gateway answered for the document (viewer opened without ODVGateway) | "Signaturens giltighet kan bara kontrolleras när dokumentet öppnas via ODVGateway. Här visas vem som signerat och om dokumentet är oförändrat sedan signeringen." |
-  | `not-checked` | the gateway answered that signature validation is disabled (`serverValidationDisabled`) | "Servern kontrollerar inte certifikatkedja och spärrstatus i den här installationen (ODVGateway signatures.enabled är av). Visas: vem som signerat och om dokumentet är oförändrat." plus "En administratör kan aktivera kontrollen i ODVGateways konfiguration." |
-  | `server-error` | the gateway request failed or was unusable (`serverValidationUnavailable`) | "Servern kunde inte kontrollera signaturen den här gången (…)" |
-  | `valid` | gateway verdict | "Signaturen är giltig: servern har kontrollerat certifikatkedja och spärrstatus." |
-  | `invalid` | gateway verdict | "Signaturen är inte giltig" + the reason in plain language |
-  | `unknown` | gateway verdict | "Kunde inte avgöra om signaturen är giltig" + the reason in plain language + what it does not mean (the signature is not necessarily invalid and the document may be unchanged; see Integrity) |
-
-  Every gateway `trustReason` code (ODVGateway `SignatureValidationReasons`, 26 codes such as
-  `timestamp-responder-not-trusted` → "Tidsstämpelns utfärdare är inte betrodd på servern",
-  `revocation-unavailable` → "Spärrlistan kunde inte hämtas", `chain-not-anchored` →
-  "Certifikatkedjan leder inte till en betrodd rot") has a translation under
-  `signatures.trustReason.<code>` in English and Swedish. The raw code stays visible on a
-  smaller secondary line for support ("Kod: timestamp-responder-not-trusted"). An unknown code
-  shows "Okänd orsak" plus the code; reason text that is not a code (older gateways) is shown as
-  given. `src/utils/__tests__/pdfSignatureTrustText.test.js` lists the gateway codes: a code
-  without a translation in the mapping or either locale file fails the test, so new gateway
-  codes cannot reach users untranslated. The Trust field itself keeps the short label
-  (`not-checked`, `valid`, `invalid`, `unknown`).
+  All times in the dialog and the overview (signing time and certificate validity) are shown as
+  local time, "2022-04-27 19:55", in both languages, with the exact UTC ISO value in the `title`
+  attribute and `<time dateTime>` (`formatSignatureTime()` in `pdfSignatureStatus.js`, rendered by
+  `SignatureTime.jsx`). Its accessibility mirrors `DocumentMetadataOverlayDialog`: focus moves into
+  the dialog, Tab is trapped inside, Escape closes, and focus returns to the symbol that opened it.
+  Unsupported formats are shown as "signature present, format not supported", never hidden.
+- Every signature starts with the neutral information line `signatures.notCheckedInViewer`:
+  English "Not checked in the viewer: issuer trust and revocation status", Swedish "Inte
+  kontrollerat i visaren: utfärdarens förtroende och spärrstatus". It is a `role="note"` with
+  neutral styling, never a warning colour or badge severity.
 - Strings live under the `signatures` key (including `signatures.overview`) in
   `public/locales/en/common.json` and `public/locales/sv/common.json`; colours use the
   `--odv-signature-*` theme tokens (light, normal, dark, and the print reset).
 - Verification: `src/utils/__tests__/pdfSignatureDocuments.test.js` (aggregation, page ranges),
-  `src/utils/__tests__/pdfSignatureTrustText.test.js` (trust states and reason codes),
-  `src/components/__tests__/signatureDetailsDialog.test.jsx` (trust notes, local times),
-  `src/components/__tests__/signatureOverview.test.jsx` (button and file tabs), and the
-  Playwright browser suite `tests/ui/*.spec.mjs` (`npm run test:ui`: page symbol placement clear
+  `src/components/__tests__/signatureInfoLine.test.jsx` (localized information lines and badge
+  integrity), `src/components/__tests__/signatureDetailsDialog.test.jsx` (information notes and
+  local times), `src/components/__tests__/signatureOverview.test.jsx` (button and file tabs), and
+  the Playwright browser suite `tests/ui/*.spec.mjs` (`npm run test:ui`: page symbol placement clear
   of the compare markers, rest/hover opacity, document dialog and page-symbol preselection,
-  overview navigation, the runtime flag, the sticky document header, compare-mode zoom controls
-  and toolbar density) using the synthetic fixtures from
+  overview navigation, the runtime flag, no signature-endpoint requests, the sticky document header,
+  compare-mode zoom controls and toolbar density) using the synthetic fixtures from
   `scripts/generate-signature-fixtures.mjs`. The first run needs the Playwright Chromium build
   (`npx playwright install chromium`).
-
-## Level 2 (gateway validation)
-
-When a document comes from the gateway's `/source/{sessionKey}/{fileIndex}` route
-or a `/source-pack/{sessionKey}` stream, the viewer optionally enriches its browser
-report with server trust. `DocumentLoader` registers the actual source URL and, for
-successfully received pack files, the pack URL and raw frame `fileIndex` in the source
-descriptor. `ViewerProvider` passes those lookups to `usePdfSignatureReports`. The gateway bundle can
-arrive through the existing `bundleUrl` / `sessionurl` bootstrap path (which takes
-precedence over parent-page data), or another supported bundle transport. Bootstrap
-mode alone is not evidence that any particular document uses a gateway.
-
-`src/utils/pdfSignatureGateway.js` recognizes the source or source-pack route per document and
-derives `GET /signatures/{sessionKey}/{fileIndex}` only on the viewer page's own
-origin, preserving the source path base. A matching path on another origin makes
-no request and stays at level 1. The document URL and HTML base URI cannot nominate
-a trusted origin; no gateway base URL runtime setting currently exists.
-Per-file delivery uses the index in the source URL. Pack delivery uses the session key
-in the bundle's `integration.sourcePackUrl` actually fetched by the loader, together
-with the received frame's integer `fileIndex`. That index identifies the session's
-source file in the flattened bundle/pack order; frame arrival order, page/display
-order, document ID and source cache key never determine it. The association stays
-with the loaded bytes even when the viewer reorders pages. Merely having pack
-configuration, a session ID, or a pack-shaped document URL is insufficient.
-Missing, malformed or out-of-range frame indexes make no signature request and do
-not fall back to an unrelated per-file URL. Relative URLs use the browser document
-base. Unsupported schemes, ambiguous paths, or missing transport identity leave level 1 unchanged; standalone file,
-demo, and ordinary HTTP PDF sources need no gateway configuration.
-
-After level 1 finds signatures, its report is published immediately. The existing
-serial queue then makes one JSON request for that document, without fetching PDF
-bytes again or blocking rendering. The per-source cache covers both levels. Requests
-use `cache: 'no-store'` and the same `credentials: 'same-origin'` policy as bundle
-loading. A 20-second deadline covers fetch and JSON body reading and aborts the
-request; failure releases the queue. Removed documents cannot receive late results.
-
-The merge uses unique, nonempty `fieldName` values, never array positions. Missing,
-unnamed, or duplicate field identities cannot establish trust. For each matched
-signature it accepts `trust` (`valid`, `invalid`, `unknown`), optional plain-text
-`trustReason`, and an ISO `validationTime`. `validatedAt` is retained when present.
-Signing time changes only for a server `signingTimeSource: 'timestamp'` with a valid
-time. Browser identity, certificate information and coverage remain unchanged.
-Integrity can only worsen, using the existing worst-first order:
-`unreadable`, `signature-invalid`, `digest-mismatch`, `modified-after-signing`,
-`unsupported`, `intact`. A worse server integrity also supplies its explanation;
-an equal or better result preserves the browser explanation.
-
-A 404 with the exact JSON `error` message
-`Signature validation is not enabled on this gateway.` suppresses further requests
-for that gateway session and leaves trust unchecked; the signatures of that session get the
-client-only marker `serverValidationDisabled: true`, which selects the "validation disabled"
-explanation. Server fields cannot set it; a matched verdict clears it. Other 404 responses, HTTP
-errors (including 413/415/422/500), network errors, timeouts and malformed reports
-leave `trust: 'not-checked'` and set `trustReason: 'server validation unavailable'`.
-The separate client-only `serverValidationUnavailable: true` field selects the
-localized failure explanation. Server fields cannot set this marker; a matched verdict
-clears it and displays the server's `trustReason` (translated when it is a known code,
-otherwise as given), even if it matches the legacy failure text.
-They never grant valid trust or disable other documents' checks. This state is local
-to the viewer instance and keyed by gateway base and session, not just session text.
-
-Badge severity combines the worst integrity and trust: invalid trust is an error,
-unknown trust is a warning, and valid trust is OK only when integrity is intact.
-The tooltip includes localized invalid/unknown trust warnings alongside integrity.
-The dialog renders localized trust labels, the trust explanation with the translated reason
-and raw code, and the validation time. The explanation is per signature, so partially matched
-documents still explain their unchecked signatures.
-The unavailable reason and timestamp source label are localized in English and Swedish.
-
-Run `npm test -- pdfSignatureGateway ViewerProvider.signatures` for mocked network,
-merge, queue, provider, badge and localized dialog coverage. Run
-`node scripts/test-signature-gateway-mutations.mjs` in an isolated worktree for
-temporary sabotage proofs (exit 1 with an assertion for each broken rule; runner
-exit 0 after restoring every source). Run the unmodified tests afterwards. No live
-gateway or external trust service is required for these tests.
-Use `node scripts/test-signature-gateway-mutations.mjs --review-fixes` to prove the
-origin restriction, trust tooltip and client-only failure marker independently.
-Use `node scripts/test-signature-gateway-mutations.mjs --source-pack` to prove the
-pack loader/provider wiring and file-index preservation. The pack transport tests
-cover single/multiple files, reversed frame arrival and display order, and missing
-mapping without contacting a gateway.
 
 ## Data contract
 
@@ -367,7 +263,6 @@ Defined as JSDoc typedefs in `src/utils/pdfSignatures.js` (`PdfSignatureInfo`,
 ```ts
 interface PdfSignatureReport {
   signatures: PdfSignatureInfo[]; // [] when the document has no signature fields
-  validatedAt?: string;          // ISO 8601 gateway report validation time
 }
 
 interface PdfSignatureInfo {
@@ -379,7 +274,7 @@ interface PdfSignatureInfo {
   notBefore: string | null;              // ISO 8601, certificate validity start
   notAfter: string | null;               // ISO 8601, certificate validity end
   signingTime: string | null;            // ISO 8601 signing time (see signingTimeSource)
-  signingTimeSource: 'signed-attribute' | 'pdf-M' | 'none' | 'timestamp';
+  signingTimeSource: 'signed-attribute' | 'pdf-M' | 'none';
   reason: string | null;                 // signature dictionary /Reason
   location: string | null;               // signature dictionary /Location
   subFilter: string | null;              // raw /SubFilter value, e.g. "adbe.pkcs7.detached"
@@ -393,11 +288,6 @@ interface PdfSignatureInfo {
     | 'unreadable';
   integrityReason: string | null;        // short human-readable explanation; null when there is nothing to explain
   coversWholeFile: boolean | null;       // false = file extended after signing
-  trust: 'not-checked' | 'valid' | 'invalid' | 'unknown';
-  trustReason?: string | null;          // optional server explanation / unavailable reason
-  serverValidationUnavailable?: boolean; // client-only failure marker, never accepted from the server
-  serverValidationDisabled?: boolean;    // client-only marker: the gateway has validation disabled
-  validationTime?: string | null;       // ISO 8601 server validation time
 }
 ```
 
@@ -524,9 +414,10 @@ signature fields. The certificate helper `@peculiar/x509` (MIT) is a devDependen
 by the fixture generator and tests, never shipped. Licences are recorded in
 [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
 
-## Server responsibilities
+## Checks not performed in the viewer
 
 Certificate chain building to a trust anchor, revocation status (OCSP/CRL), trust-list
-evaluation, and any statement stronger than integrity remain server responsibilities.
-The viewer consumes the gateway verdict; it does not build trust chains, query
-revocation services or maintain a trust store in the browser.
+evaluation, and any statement stronger than integrity are outside the viewer's contract.
+OpenDocViewer does not consume a server or gateway verdict, build certificate chains, query
+revocation services or maintain a trust store in the browser. Other software may perform those
+checks independently, but no such result is part of this data contract or user interface.

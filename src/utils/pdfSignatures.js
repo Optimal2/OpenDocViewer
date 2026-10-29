@@ -4,8 +4,8 @@
  * Reads digital signature information from PDF bytes and returns a stable
  * data contract (see docs-src/pdf-signatures.md). Level 1 answers exactly one
  * question per signature: is the content that the signature covered
- * byte-for-byte intact? Certificate chain building, revocation and trust are
- * level 2 (server-side), optionally merged by pdfSignatureGateway.js.
+ * byte-for-byte intact? Certificate chain building, issuer validity and revocation
+ * are not checked in the viewer.
  *
  * The module is environment-agnostic: it runs on the main thread, inside a
  * web worker and in Node (tests). Heavy dependencies (pdf-lib, pkijs,
@@ -17,8 +17,7 @@
  */
 
 /**
- * One inspected PDF signature (level-1 integrity view; trust is never
- * evaluated here - see the `trust` property).
+ * One inspected PDF signature (level-1 integrity view).
  *
  * @typedef {Object} PdfSignatureInfo
  * @property {string|null} fieldName AcroForm signature field name (/T).
@@ -30,10 +29,9 @@
  * @property {string|null} notBefore Certificate validity start, ISO 8601.
  * @property {string|null} notAfter Certificate validity end, ISO 8601.
  * @property {string|null} signingTime Signing time, ISO 8601 (see signingTimeSource).
- * @property {'signed-attribute'|'pdf-M'|'none'|'timestamp'} signingTimeSource Where
+ * @property {'signed-attribute'|'pdf-M'|'none'} signingTimeSource Where
  * `signingTime` came from: the CMS signingTime signed attribute (for document
- * timestamps: the TSTInfo genTime), the PDF signature dictionary /M date, or
- * nowhere. Gateway enrichment can supply a verified timestamp.
+ * timestamps: the TSTInfo genTime), the PDF signature dictionary /M date, or nowhere.
  * @property {string|null} reason Signature dictionary /Reason text.
  * @property {string|null} location Signature dictionary /Location text.
  * @property {string|null} subFilter Raw /SubFilter value (without slash).
@@ -47,11 +45,6 @@
  * @property {boolean|null} coversWholeFile Whether the ByteRange reaches the
  * end of the file (false = the file was extended after this signature;
  * null = the ByteRange could not be read).
- * @property {'not-checked'|'valid'|'invalid'|'unknown'} trust Always 'not-checked'
- * from this parser; optional gateway enrichment supplies level-2 trust.
- * @property {string|null} [trustReason] Plain-language server trust explanation.
- * @property {boolean} [serverValidationUnavailable] Client-only failure marker; never accepted from server JSON.
- * @property {string|null} [validationTime] ISO 8601 server validation time.
  */
 
 /**
@@ -59,7 +52,6 @@
  * @property {PdfSignatureInfo[]} signatures Signatures ordered by signing
  * chronology (ByteRange end position). Empty array when the document has no
  * signature fields.
- * @property {string} [validatedAt] ISO 8601 gateway report validation time.
  */
 
 /** SubFilters with level-1 handling. Anything else is reported, never hidden. */
@@ -388,8 +380,7 @@ function dictionaryInfo(item, bytes, pdfLib, sourceSpans) {
     kind,
     integrity: 'unreadable',
     integrityReason: null,
-    coversWholeFile,
-    trust: 'not-checked'
+    coversWholeFile
   };
 
   if (!fields.subFilter || !SUPPORTED_SUBFILTER_SET.has(fields.subFilter)) {
@@ -967,7 +958,7 @@ export function unreadableSignatureReport(reason) {
     serial: null, notBefore: null, notAfter: null, signingTime: null,
     signingTimeSource: 'none', reason: null, location: null, subFilter: null,
     kind: 'approval', integrity: 'unreadable', integrityReason: reason,
-    coversWholeFile: null, trust: 'not-checked'
+    coversWholeFile: null
   }] };
 }
 

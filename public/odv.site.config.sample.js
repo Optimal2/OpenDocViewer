@@ -82,7 +82,10 @@
     pdfSignatures: {
       // false hides the per-page signature symbol on thumbnails; the document symbol and the
       // toolbar signature overview remain.
-      thumbnailPageBadge: true
+      thumbnailPageBadge: true,
+      // 'ok' (default) or 'warning': colour of the symbol for an intact signature whose validity
+      // (certificate chain, revocation) the viewer does not check.
+      uncheckedSeverity: 'ok'
     },
     ocr: {
       // In-browser OCR for scanned pages. Off by default; only the literal value true turns it on.

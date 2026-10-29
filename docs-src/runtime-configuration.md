@@ -228,17 +228,32 @@ puts total load time first keep it out of the way entirely:
 
 ```js
 pdfSignatures: {
-  enabled: true,            // false: no inspection, no gateway trust request, no symbols
+  enabled: true,            // false: no inspection, no symbols
   inspectAfter: 'firstPage' // 'allPages': start only when every page of the load is ready
 }
 ```
 
 - `pdfSignatures.enabled: false` turns signature reading off. No PDF bytes are handed to the
-  signature worker, the gateway `/signatures` endpoint is never called, and the document symbol,
-  page symbols and toolbar overview button do not appear. Only an explicit `false` disables it.
+  signature worker, and the document symbol, page symbols and toolbar overview button do not
+  appear. Only an explicit `false` disables it.
 - `pdfSignatures.inspectAfter` chooses when inspection may start: `'firstPage'` (default) as soon
   as the first page is shown, `'allPages'` only after the whole loading run is complete. Unknown
   values fall back to `'firstPage'`.
+
+### Symbol colour for unchecked signatures
+
+The viewer checks integrity (whether the content is unchanged since signing) in the browser. It never
+checks the certificate chain, revocation status or trust lists, and it makes no network request for
+signatures. `pdfSignatures.uncheckedSeverity` chooses how an intact signature is shown:
+
+```js
+pdfSignatures: {
+  uncheckedSeverity: 'ok' // 'warning': show intact signatures as "take a closer look"
+}
+```
+
+`'ok'` (default) keeps the OK symbol; `'warning'` uses the warning symbol. Modified, unreadable or
+invalid signatures keep their own severity. Unknown values fall back to `'ok'`.
 
 ## OCR (in-browser, off by default)
 

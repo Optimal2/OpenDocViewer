@@ -139,7 +139,6 @@ import {
 
 /**
  * @typedef {Object} PrefetchResult
- * @property {{url: string, fileIndex: number}=} sourcePack Actual transport and raw frame index; never a display index.
  * @property {boolean} ok
  * @property {string=} sourceKey
  * @property {string=} fileExtension
@@ -404,7 +403,7 @@ async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' 
 }
 
 /**
- * Gateway source packs already carry trusted file metadata from the prepared server-side session.
+ * Gateway source packs already carry verified file metadata from the prepared server-side session.
  * Keep validation cheap for that path: confirm that the payload does not look like an HTML/error
  * response, then use the gateway extension/content type instead of running a full magic detector for
  * every frame. That keeps large source packs from serializing transport behind per-file type probes.
@@ -604,7 +603,7 @@ function getInitialTempStoreMode(config) {
  */
 function getEstimatedEntryExtension(entry) {
   // Keep the warning estimator conservative. Explicit source-list extension hints can be wrong in
-  // upstream integrations that proxy mixed file types through ticket-style URLs, so only trust an
+  // upstream integrations that proxy mixed file types through ticket-style URLs, so only use an
   // extension that is visible in the URL itself.
   return normalizeExtension(inferUrlExtension(entry?.url || ''));
 }
@@ -1688,7 +1687,6 @@ const DocumentLoader = ({
             stats: stored?.stats || null,
             analysisBlob: blob,
             pageCountHint,
-            sourcePack: { url: sourcePackUrl, fileIndex: header?.fileIndex },
           });
         } catch (error) {
           settle(fileIndex, {
@@ -2011,7 +2009,6 @@ const DocumentLoader = ({
           pageCount,
           mimeType: result.mimeType,
           sourceUrl: result.url,
-          sourcePack: result.sourcePack,
           sizeBytes: result.sizeBytes,
           cacheKeyMode: result.cacheKeyMode,
         });

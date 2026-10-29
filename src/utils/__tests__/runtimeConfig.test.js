@@ -20,6 +20,8 @@ import {
   getCompareAdjustToolbarMode,
   isPdfSignatureInspectionEnabled,
   getPdfSignatureInspectionStart,
+  PDF_SIGNATURE_UNCHECKED_SEVERITIES,
+  getPdfSignatureUncheckedSeverity,
   DEFAULT_OCR_LANGUAGES,
   isOcrEnabled,
   getOcrLanguages,
@@ -235,6 +237,46 @@ describe('runtimeConfig', () => {
     it('accepts allPages case-insensitively', () => {
       expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: 'allPages' } })).toBe('allPages');
       expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: ' ALLPAGES ' } })).toBe('allPages');
+    });
+  });
+
+  describe('getPdfSignatureUncheckedSeverity', () => {
+    const withSeverity = (uncheckedSeverity) => ({ pdfSignatures: { uncheckedSeverity } });
+
+    it('lists exactly the two valid values', () => {
+      expect(PDF_SIGNATURE_UNCHECKED_SEVERITIES).toEqual(['ok', 'warning']);
+      expect(Object.isFrozen(PDF_SIGNATURE_UNCHECKED_SEVERITIES)).toBe(true);
+    });
+
+    it('returns the valid values, lower-cased and trimmed', () => {
+      expect(getPdfSignatureUncheckedSeverity(withSeverity('ok'))).toBe('ok');
+      expect(getPdfSignatureUncheckedSeverity(withSeverity('warning'))).toBe('warning');
+      expect(getPdfSignatureUncheckedSeverity(withSeverity('WARNING'))).toBe('warning');
+      expect(getPdfSignatureUncheckedSeverity(withSeverity(' Warning '))).toBe('warning');
+      expect(getPdfSignatureUncheckedSeverity(withSeverity(' OK'))).toBe('ok');
+    });
+
+    it('falls back to ok when the key or section is missing', () => {
+      expect(getPdfSignatureUncheckedSeverity({})).toBe('ok');
+      expect(getPdfSignatureUncheckedSeverity({ pdfSignatures: {} })).toBe('ok');
+      expect(getPdfSignatureUncheckedSeverity(null)).toBe('ok');
+      expect(getPdfSignatureUncheckedSeverity(undefined)).toBe('ok');
+    });
+
+    it.each([
+      ['undefined', undefined],
+      ['null', null],
+      ['a number', 1],
+      ['zero', 0],
+      ['a boolean', true],
+      ['an object', { value: 'warning' }],
+      ['an array', ['warning']],
+      ['an empty string', ''],
+      ['the string warn', 'warn'],
+      ['the string error', 'error'],
+      ['an unknown string', 'off'],
+    ])('falls back to ok for %s', (_label, value) => {
+      expect(getPdfSignatureUncheckedSeverity(withSeverity(value))).toBe('ok');
     });
   });
 

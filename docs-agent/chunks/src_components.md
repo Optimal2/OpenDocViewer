@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 18. Line count: 7855. JSDoc symbol count: 103.
+File count: 18. Line count: 7832. JSDoc symbol count: 103.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -176,7 +176,7 @@ Symbols:
 
 ## src/components/SignatureDetailsDialog.jsx
 
-Signature details dialog \(browser integrity and optional gateway trust\).
+Signature details dialog \(browser integrity\).
 
 Exports: `SignatureDetailsDialog`
 

@@ -88,15 +88,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 148,
-    "sourceLineCount": 60740,
-    "docletCount": 1664,
-    "documentedFileCount": 148,
+    "fileCount": 147,
+    "sourceLineCount": 60351,
+    "docletCount": 1652,
+    "documentedFileCount": 147,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 23,
     "devDependencyCount": 22,
-    "estimatedSourceTokens": 4894
+    "estimatedSourceTokens": 4856
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -468,9 +468,9 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 120,
-      "lines": 779,
+      "lines": 800,
       "incomingLocalImports": 23,
-      "doclets": 55,
+      "doclets": 58,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
@@ -503,11 +503,11 @@
     },
     {
       "path": "src/utils/pdfSignatureStatus.js",
-      "score": 112,
-      "lines": 348,
-      "incomingLocalImports": 7,
-      "doclets": 22,
-      "summary": "Signature UI status helpers for browser integrity and gateway trust.",
+      "score": 103,
+      "lines": 148,
+      "incomingLocalImports": 6,
+      "doclets": 12,
+      "summary": "Signature UI status helpers for browser integrity.",
       "summaryConfidence": "high"
     },
     {
@@ -540,7 +540,7 @@
     {
       "path": "src/utils/pdfSignatureDocuments.js",
       "score": 96,
-      "lines": 254,
+      "lines": 251,
       "incomingLocalImports": 5,
       "doclets": 11,
       "summary": "Per-document aggregation of PDF signature reports.",
@@ -549,7 +549,7 @@
     {
       "path": "src/contexts/viewerContext.js",
       "score": 91,
-      "lines": 249,
+      "lines": 248,
       "incomingLocalImports": 12,
       "doclets": 12,
       "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
@@ -612,7 +612,7 @@
     {
       "path": "src/utils/pdfSignatures.js",
       "score": 83,
-      "lines": 1234,
+      "lines": 1225,
       "incomingLocalImports": 3,
       "doclets": 10,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -645,13 +645,13 @@
           {
             "path": "src/contexts/viewerContext.js",
             "score": 91,
-            "lines": 249,
+            "lines": 248,
             "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360)."
           },
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2822,
+            "lines": 2817,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -757,9 +757,9 @@
           },
           {
             "path": "src/hooks/usePdfSignatureReports.js",
-            "score": 23,
-            "lines": 127,
-            "summary": "Browser PDF signature inspection and optional gateway trust enrichment."
+            "score": 22,
+            "lines": 119,
+            "summary": "Browser PDF signature inspection."
           },
           {
             "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
@@ -926,7 +926,7 @@
     {
       "name": "src/components",
       "fileCount": 18,
-      "lineCount": 7855,
+      "lineCount": 7832,
       "docletCount": 103,
       "importantFiles": [
         {
@@ -968,10 +968,10 @@
         {
           "path": "src/components/SignatureDetailsDialog.jsx",
           "score": 37,
-          "lines": 447,
+          "lines": 429,
           "incomingLocalImports": 1,
           "doclets": 7,
-          "summary": "Signature details dialog (browser integrity and optional gateway trust).",
+          "summary": "Signature details dialog (browser integrity).",
           "summaryConfidence": "high"
         },
         {
@@ -1023,7 +1023,7 @@
     {
       "name": "src/components/DocumentLoader",
       "fileCount": 8,
-      "lineCount": 4112,
+      "lineCount": 4109,
       "docletCount": 106,
       "importantFiles": [
         {
@@ -1038,7 +1038,7 @@
         {
           "path": "src/components/DocumentLoader/DocumentLoader.js",
           "score": 63,
-          "lines": 2175,
+          "lines": 2172,
           "incomingLocalImports": 2,
           "doclets": 58,
           "summary": "OpenDocViewer — Document loader orchestrator.",
@@ -1263,13 +1263,13 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3455,
+      "lineCount": 3449,
       "docletCount": 95,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
           "score": 91,
-          "lines": 249,
+          "lines": 248,
           "incomingLocalImports": 12,
           "doclets": 12,
           "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
@@ -1278,7 +1278,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2822,
+          "lines": 2817,
           "incomingLocalImports": 1,
           "doclets": 66,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1324,7 +1324,7 @@
     {
       "name": "src/hooks",
       "fileCount": 5,
-      "lineCount": 777,
+      "lineCount": 769,
       "docletCount": 26,
       "importantFiles": [
         {
@@ -1365,11 +1365,11 @@
         },
         {
           "path": "src/hooks/usePdfSignatureReports.js",
-          "score": 23,
-          "lines": 127,
+          "score": 22,
+          "lines": 119,
           "incomingLocalImports": 1,
           "doclets": 3,
-          "summary": "Browser PDF signature inspection and optional gateway trust enrichment.",
+          "summary": "Browser PDF signature inspection.",
           "summaryConfidence": "high"
         }
       ]
@@ -1567,9 +1567,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 51,
-      "lineCount": 20114,
-      "docletCount": 816,
+      "fileCount": 50,
+      "lineCount": 19765,
+      "docletCount": 804,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1583,9 +1583,9 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 120,
-          "lines": 779,
+          "lines": 800,
           "incomingLocalImports": 23,
-          "doclets": 55,
+          "doclets": 58,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
@@ -1618,11 +1618,11 @@
         },
         {
           "path": "src/utils/pdfSignatureStatus.js",
-          "score": 112,
-          "lines": 348,
-          "incomingLocalImports": 7,
-          "doclets": 22,
-          "summary": "Signature UI status helpers for browser integrity and gateway trust.",
+          "score": 103,
+          "lines": 148,
+          "incomingLocalImports": 6,
+          "doclets": 12,
+          "summary": "Signature UI status helpers for browser integrity.",
           "summaryConfidence": "high"
         },
         {
@@ -4071,7 +4071,7 @@
     },
     {
       "path": "src/components/DocumentLoader/DocumentLoader.js",
-      "lines": 2175,
+      "lines": 2172,
       "extension": ".js",
       "jsdocBlockCount": 60,
       "sourceSummary": "OpenDocViewer — Document loader orchestrator.",
@@ -4171,324 +4171,324 @@
         {
           "name": "DocumentLoader",
           "kind": "default",
-          "line": 2174
+          "line": 2171
         }
       ],
       "declarations": [
         {
           "name": "createLimiter",
           "kind": "function",
-          "line": 162
+          "line": 161
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 168
+          "line": 167
         },
         {
           "name": "nowMs",
           "kind": "function",
-          "line": 194
+          "line": 193
         },
         {
           "name": "inferUrlExtension",
           "kind": "function",
-          "line": 207
+          "line": 206
         },
         {
           "name": "normalizeExtension",
           "kind": "function",
-          "line": 216
+          "line": 215
         },
         {
           "name": "isSupportedSourceExtension",
           "kind": "function",
-          "line": 239
+          "line": 238
         },
         {
           "name": "isTextLikeSourceMime",
           "kind": "function",
-          "line": 247
+          "line": 246
         },
         {
           "name": "asciiHead",
           "kind": "function",
-          "line": 255
+          "line": 254
         },
         {
           "name": "looksLikeTextPayload",
           "kind": "function",
-          "line": 270
+          "line": 269
         },
         {
           "name": "startsWithAscii",
           "kind": "function",
-          "line": 285
+          "line": 284
         },
         {
           "name": "matchesKnownSourceSignature",
           "kind": "function",
-          "line": 299
+          "line": 298
         },
         {
           "name": "readBlobHeadBytes",
           "kind": "function",
-          "line": 336
+          "line": 335
         },
         {
           "name": "resolveFetchedSourcePayload",
           "kind": "function",
-          "line": 354
+          "line": 353
         },
         {
           "name": "resolveTrustedSourcePackPayload",
           "kind": "function",
-          "line": 419
+          "line": 418
         },
         {
           "name": "needsPageCountAnalysis",
           "kind": "function",
-          "line": 453
+          "line": 452
         },
         {
           "name": "resolveTrustedEntryPageCountHint",
           "kind": "function",
-          "line": 463
+          "line": 462
         },
         {
           "name": "resolveExactPlannedPageCount",
           "kind": "function",
-          "line": 478
+          "line": 477
         },
         {
           "name": "shouldDeferSourceWarmup",
           "kind": "function",
-          "line": 500
+          "line": 499
         },
         {
           "name": "resolvePrefetchedPageCountHint",
           "kind": "function",
-          "line": 518
+          "line": 517
         },
         {
           "name": "redactUrlForLog",
           "kind": "function",
-          "line": 549
+          "line": 548
         },
         {
           "name": "mimeToExtension",
           "kind": "function",
-          "line": 567
+          "line": 566
         },
         {
           "name": "isReloadCacheEnabled",
           "kind": "function",
-          "line": 583
+          "line": 582
         },
         {
           "name": "getInitialTempStoreMode",
           "kind": "function",
-          "line": 592
+          "line": 591
         },
         {
           "name": "getEstimatedEntryExtension",
           "kind": "function",
-          "line": 605
+          "line": 604
         },
         {
           "name": "updatePageEstimateStats",
           "kind": "function",
-          "line": 620
+          "line": 619
         },
         {
           "name": "estimateTotalPagesConservatively",
           "kind": "function",
-          "line": 646
+          "line": 645
         },
         {
           "name": "sleep",
           "kind": "function",
-          "line": 668
+          "line": 667
         },
         {
           "name": "createPrefetchHttpError",
           "kind": "function",
-          "line": 683
+          "line": 682
         },
         {
           "name": "isSourceUnavailableError",
           "kind": "function",
-          "line": 698
+          "line": 697
         },
         {
           "name": "createSourceUnavailableSessionError",
           "kind": "function",
-          "line": 711
+          "line": 710
         },
         {
           "name": "createPrefetchTimeoutError",
           "kind": "function",
-          "line": 727
+          "line": 726
         },
         {
           "name": "createInvalidSourcePayloadError",
           "kind": "function",
-          "line": 743
+          "line": 742
         },
         {
           "name": "validateFetchedSourceBlob",
           "kind": "function",
-          "line": 765
+          "line": 764
         },
         {
           "name": "details",
           "kind": "object",
-          "line": 775
+          "line": 774
         },
         {
           "name": "isTransientPrefetchError",
           "kind": "function",
-          "line": 820
+          "line": 819
         },
         {
           "name": "buildInlineSourceBlob",
           "kind": "function",
-          "line": 848
+          "line": 847
         },
         {
           "name": "getSourcePackUrl",
           "kind": "function",
-          "line": 879
+          "line": 878
         },
         {
           "name": "readUint32LittleEndian",
           "kind": "function",
-          "line": 889
+          "line": 888
         },
         {
           "name": "readExactStreamBytes",
           "kind": "function",
-          "line": 894
+          "line": 893
         },
         {
           "name": "mimeForExtension",
           "kind": "function",
-          "line": 924
+          "line": 923
         },
         {
           "name": "toPositiveIntOrUndefined",
           "kind": "function",
-          "line": 941
+          "line": 940
         },
         {
           "name": "resolveDocumentSourceContext",
           "kind": "function",
-          "line": 952
+          "line": 951
         },
         {
           "name": "getDocumentProgressKey",
           "kind": "function",
-          "line": 978
+          "line": 977
         },
         {
           "name": "finalizeDocumentPages",
           "kind": "function",
-          "line": 994
+          "line": 993
         },
         {
           "name": "createPagePlaceholders",
           "kind": "function",
-          "line": 1018
+          "line": 1017
         },
         {
           "name": "createFailedPlaceholder",
           "kind": "function",
-          "line": 1060
+          "line": 1059
         },
         {
           "name": "resolveEntries",
           "kind": "function",
-          "line": 1102
+          "line": 1101
         },
         {
           "name": "safeMessage",
           "kind": "function",
-          "line": 1162
+          "line": 1161
         },
         {
           "name": "DocumentLoader",
           "kind": "component",
-          "line": 1170
+          "line": 1169
         },
         {
           "name": "abortAllFetches",
           "kind": "function",
-          "line": 1264
+          "line": 1263
         },
         {
           "name": "shouldStopRun",
           "kind": "function",
-          "line": 1278
+          "line": 1277
         },
         {
           "name": "maybePrompt",
           "kind": "function",
-          "line": 1284
+          "line": 1283
         },
         {
           "name": "prefetchSource",
           "kind": "function",
-          "line": 1305
+          "line": 1304
         },
         {
           "name": "createSourcePackPrefetchTasks",
           "kind": "function",
-          "line": 1582
+          "line": 1581
         },
         {
           "name": "resolve",
           "kind": "function",
-          "line": 1585
+          "line": 1584
         },
         {
           "name": "settle",
           "kind": "function",
-          "line": 1590
+          "line": 1589
         },
         {
           "name": "settleMissing",
           "kind": "function",
-          "line": 1597
+          "line": 1596
         },
         {
           "name": "processSourcePackFrame",
           "kind": "function",
-          "line": 1612
+          "line": 1611
         },
         {
           "name": "queueSourcePackFrame",
           "kind": "function",
-          "line": 1703
+          "line": 1701
         },
         {
           "name": "waitForSourcePackProcessing",
           "kind": "function",
-          "line": 1712
+          "line": 1710
         },
         {
           "name": "runSourcePack",
           "kind": "function",
-          "line": 1718
+          "line": 1716
         },
         {
           "name": "state",
           "kind": "object",
-          "line": 1735
+          "line": 1733
         },
         {
           "name": "run",
           "kind": "function",
-          "line": 1810
+          "line": 1808
         }
       ],
       "parseError": null,
@@ -4608,7 +4608,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 162,
+          "line": 161,
           "description": "",
           "params": [
             {
@@ -4633,7 +4633,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 207,
+          "line": 206,
           "description": "",
           "params": [
             {
@@ -4658,7 +4658,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 216,
+          "line": 215,
           "description": "",
           "params": [
             {
@@ -4683,7 +4683,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 239,
+          "line": 238,
           "description": "",
           "params": [
             {
@@ -4708,7 +4708,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 247,
+          "line": 246,
           "description": "",
           "params": [
             {
@@ -4733,7 +4733,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 255,
+          "line": 254,
           "description": "",
           "params": [
             {
@@ -4758,7 +4758,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 270,
+          "line": 269,
           "description": "",
           "params": [
             {
@@ -4783,7 +4783,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 285,
+          "line": 284,
           "description": "",
           "params": [
             {
@@ -4814,7 +4814,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 299,
+          "line": 298,
           "description": "",
           "params": [
             {
@@ -4845,7 +4845,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 336,
+          "line": 335,
           "description": "",
           "params": [
             {
@@ -4870,7 +4870,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 354,
+          "line": 353,
           "description": "Resolve source type information with a cheap signature-first path.",
           "params": [
             {
@@ -4913,8 +4913,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 419,
-          "description": "Gateway source packs already carry trusted file metadata from the prepared server-side session.",
+          "line": 418,
+          "description": "Gateway source packs already carry verified file metadata from the prepared server-side session.",
           "params": [
             {
               "name": "input",
@@ -4962,7 +4962,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 453,
+          "line": 452,
           "description": "",
           "params": [
             {
@@ -4987,7 +4987,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 463,
+          "line": 462,
           "description": "",
           "params": [
             {
@@ -5018,7 +5018,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 478,
+          "line": 477,
           "description": "",
           "params": [
             {
@@ -5043,7 +5043,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 500,
+          "line": 499,
           "description": "Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources.",
           "params": [
             {
@@ -5086,7 +5086,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 518,
+          "line": 517,
           "description": "Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe...",
           "params": [
             {
@@ -5141,7 +5141,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 549,
+          "line": 548,
           "description": "",
           "params": [
             {
@@ -5166,7 +5166,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 567,
+          "line": 566,
           "description": "",
           "params": [
             {
@@ -5191,7 +5191,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 583,
+          "line": 582,
           "description": "",
           "params": [
             {
@@ -5216,7 +5216,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 592,
+          "line": 591,
           "description": "",
           "params": [
             {
@@ -5241,7 +5241,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 605,
+          "line": 604,
           "description": "Resolve the best-effort extension we can use for page-count estimation before every source has been fetched.",
           "params": [
             {
@@ -5266,7 +5266,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 620,
+          "line": 619,
           "description": "Update per-extension page-count statistics used by the conservative warning estimator.",
           "params": [
             {
@@ -5303,7 +5303,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 646,
+          "line": 645,
           "description": "Estimate the final page count conservatively.",
           "params": [
             {
@@ -5346,7 +5346,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 668,
+          "line": 667,
           "description": "",
           "params": [
             {
@@ -5371,7 +5371,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 683,
+          "line": 682,
           "description": "Build a consistent HTTP error so the retry classifier can inspect the status code.",
           "params": [
             {
@@ -5402,7 +5402,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 698,
+          "line": 697,
           "description": "Host integrations often expose short-lived file tickets.",
           "params": [
             {
@@ -5427,7 +5427,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 711,
+          "line": 710,
           "description": "",
           "params": [
             {
@@ -5464,7 +5464,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 727,
+          "line": 726,
           "description": "Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die.",
           "params": [
             {
@@ -5495,7 +5495,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 743,
+          "line": 742,
           "description": "Build a source-validation error.",
           "params": [
             {
@@ -5526,7 +5526,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 765,
+          "line": 764,
           "description": "Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store.",
           "params": [
             {
@@ -5587,7 +5587,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 820,
+          "line": 819,
           "description": "Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses.",
           "params": [
             {
@@ -5612,7 +5612,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 848,
+          "line": 847,
           "description": "Decode host-provided Base64 source bytes without routing through fetch(data:...) .",
           "params": [
             {
@@ -5637,7 +5637,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 889,
+          "line": 888,
           "description": "",
           "params": [
             {
@@ -5662,7 +5662,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 924,
+          "line": 923,
           "description": "",
           "params": [
             {
@@ -5687,7 +5687,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 941,
+          "line": 940,
           "description": "",
           "params": [
             {
@@ -5712,7 +5712,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 952,
+          "line": 951,
           "description": "Extract multi-document source context from an entry or placeholder input.",
           "params": [
             {
@@ -5737,7 +5737,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 978,
+          "line": 977,
           "description": "",
           "params": [
             {
@@ -5762,7 +5762,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 994,
+          "line": 993,
           "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
           "params": [
             {
@@ -5805,7 +5805,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1018,
+          "line": 1017,
           "description": "",
           "params": [
             {
@@ -5830,7 +5830,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1060,
+          "line": 1059,
           "description": "",
           "params": [
             {
@@ -5855,7 +5855,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1102,
+          "line": 1101,
           "description": "",
           "params": [
             {
@@ -5922,7 +5922,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1162,
+          "line": 1161,
           "description": "",
           "params": [
             {
@@ -5947,7 +5947,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1170,
+          "line": 1169,
           "description": "",
           "params": [
             {
@@ -5972,7 +5972,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1214,
+          "line": 1213,
           "description": "",
           "params": [
             {
@@ -5997,7 +5997,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1223,
+          "line": 1222,
           "description": "",
           "params": [
             {
@@ -6022,7 +6022,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1278,
+          "line": 1277,
           "description": "Whether this load run is no longer allowed to mutate React state.",
           "params": [],
           "returns": [
@@ -6040,7 +6040,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1284,
+          "line": 1283,
           "description": "",
           "params": [
             {
@@ -6065,7 +6065,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1305,
+          "line": 1304,
           "description": "Fetch and persist one source blob with conservative retry behavior.",
           "params": [
             {
@@ -6096,7 +6096,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1585,
+          "line": 1584,
           "description": "",
           "params": [],
           "returns": [],
@@ -26730,10 +26730,10 @@
     },
     {
       "path": "src/components/SignatureDetailsDialog.jsx",
-      "lines": 447,
+      "lines": 429,
       "extension": ".jsx",
       "jsdocBlockCount": 10,
-      "sourceSummary": "Signature details dialog (browser integrity and optional gateway trust).",
+      "sourceSummary": "Signature details dialog (browser integrity).",
       "imports": [
         {
           "source": "react",
@@ -26743,7 +26743,7 @@
             "useRef",
             "useState"
           ],
-          "line": 26,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -26751,7 +26751,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -26759,17 +26759,15 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28,
+          "line": 27,
           "kind": "static"
         },
         {
           "source": "../utils/pdfSignatureStatus.js",
           "specifiers": [
-            "getIntegrityLabel",
-            "getTrustExplanation",
-            "getTrustLabel"
+            "getIntegrityLabel"
           ],
-          "line": 29,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -26778,7 +26776,7 @@
             "getSignatureFileHeading",
             "getSignatureFilePages"
           ],
-          "line": 30,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -26786,7 +26784,7 @@
           "specifiers": [
             "SignatureTime"
           ],
-          "line": 31,
+          "line": 30,
           "kind": "static"
         }
       ],
@@ -26794,44 +26792,44 @@
         {
           "name": "SignatureDetailsDialog",
           "kind": "default",
-          "line": 85
+          "line": 82
         }
       ],
       "declarations": [
         {
           "name": "getKindLabel",
           "kind": "function",
-          "line": 40
+          "line": 39
         },
         {
           "name": "getSigningTimeSourceLabel",
           "kind": "function",
-          "line": 57
+          "line": 56
         },
         {
           "name": "SignatureDetailsDialog",
           "kind": "component",
-          "line": 85
+          "line": 82
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 125
+          "line": 122
         },
         {
           "name": "handleTabKeyDown",
           "kind": "function",
-          "line": 151
+          "line": 148
         },
         {
           "name": "handleTabTrap",
           "kind": "function",
-          "line": 167
+          "line": 164
         },
         {
           "name": "orEmpty",
           "kind": "function",
-          "line": 207
+          "line": 204
         }
       ],
       "parseError": null,
@@ -26847,7 +26845,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 40,
+          "line": 39,
           "description": "",
           "params": [
             {
@@ -26878,7 +26876,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 57,
+          "line": 56,
           "description": "",
           "params": [
             {
@@ -26909,7 +26907,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 85,
+          "line": 82,
           "description": "",
           "params": [
             {
@@ -26982,7 +26980,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 125,
+          "line": 122,
           "description": "",
           "params": [
             {
@@ -27002,7 +27000,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 151,
+          "line": 148,
           "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
           "params": [],
           "returns": [],
@@ -27015,7 +27013,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 167,
+          "line": 164,
           "description": "Keep Tab navigation inside the dialog while it is open.",
           "params": [],
           "returns": [],
@@ -27028,7 +27026,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 207,
+          "line": 204,
           "description": "",
           "params": [
             {
@@ -27047,11 +27045,9 @@
         {
           "source": "../utils/pdfSignatureStatus.js",
           "specifiers": [
-            "getIntegrityLabel",
-            "getTrustExplanation",
-            "getTrustLabel"
+            "getIntegrityLabel"
           ],
-          "line": 29,
+          "line": 28,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureStatus.js"
         },
@@ -27061,7 +27057,7 @@
             "getSignatureFileHeading",
             "getSignatureFilePages"
           ],
-          "line": 30,
+          "line": 29,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
         },
@@ -27070,7 +27066,7 @@
           "specifiers": [
             "SignatureTime"
           ],
-          "line": 31,
+          "line": 30,
           "kind": "static",
           "resolved": "src/components/SignatureTime.jsx"
         }
@@ -27084,7 +27080,7 @@
             "useRef",
             "useState"
           ],
-          "line": 26,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -27092,7 +27088,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -27100,13 +27096,13 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28,
+          "line": 27,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
       "importanceScore": 37,
-      "summary": "Signature details dialog (browser integrity and optional gateway trust).",
+      "summary": "Signature details dialog (browser integrity).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -27288,8 +27284,7 @@
         {
           "source": "../utils/pdfSignatureStatus.js",
           "specifiers": [
-            "getIntegrityLabel",
-            "getTrustLabel"
+            "getIntegrityLabel"
           ],
           "line": 23,
           "kind": "static"
@@ -27458,8 +27453,7 @@
         {
           "source": "../utils/pdfSignatureStatus.js",
           "specifiers": [
-            "getIntegrityLabel",
-            "getTrustLabel"
+            "getIntegrityLabel"
           ],
           "line": 23,
           "kind": "static",
@@ -27520,7 +27514,7 @@
     },
     {
       "path": "src/components/SignatureStatusBadge.jsx",
-      "lines": 92,
+      "lines": 87,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "Small signature symbol shown next to a document's \"DOK n\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
@@ -27530,7 +27524,7 @@
           "specifiers": [
             "React"
           ],
-          "line": 16,
+          "line": 15,
           "kind": "static"
         },
         {
@@ -27538,7 +27532,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 17,
+          "line": 16,
           "kind": "static"
         },
         {
@@ -27546,7 +27540,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 18,
+          "line": 17,
           "kind": "static"
         },
         {
@@ -27558,7 +27552,7 @@
             "getWorstSignatureIntegrity",
             "reportHasSignatures"
           ],
-          "line": 19,
+          "line": 18,
           "kind": "static"
         }
       ],
@@ -27566,19 +27560,19 @@
         {
           "name": "SignatureStatusBadge",
           "kind": "default",
-          "line": 44
+          "line": 43
         }
       ],
       "declarations": [
         {
           "name": "ICON_BY_SEVERITY",
           "kind": "object",
-          "line": 29
+          "line": 28
         },
         {
           "name": "SignatureStatusBadge",
           "kind": "component",
-          "line": 44
+          "line": 43
         }
       ],
       "parseError": null,
@@ -27594,7 +27588,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/SignatureStatusBadge.jsx",
-          "line": 29,
+          "line": 28,
           "description": "Material Icons ligature per severity.",
           "params": [],
           "returns": [],
@@ -27607,7 +27601,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/SignatureStatusBadge.jsx",
-          "line": 44,
+          "line": 43,
           "description": "",
           "params": [
             {
@@ -27655,7 +27649,7 @@
             "getWorstSignatureIntegrity",
             "reportHasSignatures"
           ],
-          "line": 19,
+          "line": 18,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureStatus.js"
         }
@@ -27666,7 +27660,7 @@
           "specifiers": [
             "React"
           ],
-          "line": 16,
+          "line": 15,
           "kind": "static"
         },
         {
@@ -27674,7 +27668,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 17,
+          "line": 16,
           "kind": "static"
         },
         {
@@ -27682,7 +27676,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 18,
+          "line": 17,
           "kind": "static"
         }
       ],
@@ -28776,7 +28770,7 @@
     },
     {
       "path": "src/contexts/viewerContext.js",
-      "lines": 249,
+      "lines": 248,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": null,
@@ -28794,7 +28788,7 @@
         {
           "name": "ViewerContext",
           "kind": "default",
-          "line": 248
+          "line": 247
         }
       ],
       "declarations": [],
@@ -28891,7 +28885,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 79,
+          "line": 78,
           "description": "",
           "params": [],
           "returns": [],
@@ -28904,7 +28898,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 156,
+          "line": 155,
           "description": "",
           "params": [],
           "returns": [],
@@ -28917,7 +28911,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 166,
+          "line": 165,
           "description": "",
           "params": [],
           "returns": [],
@@ -28930,7 +28924,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 223,
+          "line": 222,
           "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
           "params": [],
           "returns": [],
@@ -28943,7 +28937,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 233,
+          "line": 232,
           "description": "",
           "params": [],
           "returns": [],
@@ -28956,7 +28950,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 240,
+          "line": 239,
           "description": "",
           "params": [],
           "returns": [],
@@ -28983,7 +28977,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2822,
+      "lines": 2817,
       "extension": ".jsx",
       "jsdocBlockCount": 71,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -29272,42 +29266,42 @@
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1739
+          "line": 1738
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2154
+          "line": 2153
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2168
+          "line": 2167
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2182
+          "line": 2181
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2215
+          "line": 2214
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2385
+          "line": 2384
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2478
+          "line": 2477
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2480
+          "line": 2479
         }
       ],
       "parseError": null,
@@ -30296,7 +30290,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1306,
+          "line": 1305,
           "description": "",
           "params": [
             {
@@ -30321,7 +30315,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1330,
+          "line": 1329,
           "description": "",
           "params": [
             {
@@ -30346,7 +30340,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1339,
+          "line": 1338,
           "description": "",
           "params": [
             {
@@ -30371,7 +30365,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1347,
+          "line": 1346,
           "description": "",
           "params": [],
           "returns": [
@@ -30389,7 +30383,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1359,
+          "line": 1358,
           "description": "",
           "params": [
             {
@@ -30414,7 +30408,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1406,
+          "line": 1405,
           "description": "",
           "params": [
             {
@@ -30451,7 +30445,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1475,
+          "line": 1474,
           "description": "",
           "params": [
             {
@@ -30476,7 +30470,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1484,
+          "line": 1483,
           "description": "",
           "params": [
             {
@@ -30507,7 +30501,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1497,
+          "line": 1496,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -30544,7 +30538,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1549,
+          "line": 1548,
           "description": "",
           "params": [
             {
@@ -30575,7 +30569,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1560,
+          "line": 1559,
           "description": "",
           "params": [
             {
@@ -30606,7 +30600,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1571,
+          "line": 1570,
           "description": "",
           "params": [
             {
@@ -30631,7 +30625,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1595,
+          "line": 1594,
           "description": "",
           "params": [
             {
@@ -30656,7 +30650,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1642,
+          "line": 1641,
           "description": "",
           "params": [
             {
@@ -30681,7 +30675,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1655,
+          "line": 1654,
           "description": "",
           "params": [
             {
@@ -30718,7 +30712,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1727,
+          "line": 1726,
           "description": "",
           "params": [
             {
@@ -30755,7 +30749,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1819,
+          "line": 1818,
           "description": "",
           "params": [
             {
@@ -30792,7 +30786,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2012,
+          "line": 2011,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -30817,7 +30811,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2094,
+          "line": 2093,
           "description": "",
           "params": [
             {
@@ -30848,7 +30842,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2116,
+          "line": 2115,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -30873,7 +30867,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2275,
+          "line": 2274,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -30891,7 +30885,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2366,
+          "line": 2365,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -30922,7 +30916,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2409,
+          "line": 2408,
           "description": "",
           "params": [
             {
@@ -30947,7 +30941,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2701,
+          "line": 2696,
           "description": "",
           "params": [
             {
@@ -30967,7 +30961,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2710,
+          "line": 2705,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -30993,7 +30987,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2715,
+          "line": 2710,
           "description": "",
           "params": [
             {
@@ -31013,7 +31007,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2720,
+          "line": 2715,
           "description": "",
           "params": [
             {
@@ -32470,10 +32464,10 @@
     },
     {
       "path": "src/hooks/usePdfSignatureReports.js",
-      "lines": 127,
+      "lines": 119,
       "extension": ".js",
       "jsdocBlockCount": 4,
-      "sourceSummary": "Browser PDF signature inspection and optional gateway trust enrichment.",
+      "sourceSummary": "Browser PDF signature inspection.",
       "imports": [
         {
           "source": "react",
@@ -32500,38 +32494,30 @@
           ],
           "line": 18,
           "kind": "static"
-        },
-        {
-          "source": "../utils/pdfSignatureGateway.js",
-          "specifiers": [
-            "createGatewaySignatureClient"
-          ],
-          "line": 19,
-          "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "usePdfSignatureReports",
           "kind": "default",
-          "line": 43
+          "line": 40
         }
       ],
       "declarations": [
         {
           "name": "isPdfPage",
           "kind": "function",
-          "line": 27
+          "line": 26
         },
         {
           "name": "usePdfSignatureReports",
           "kind": "function",
-          "line": 43
+          "line": 40
         },
         {
           "name": "isCurrent",
           "kind": "function",
-          "line": 96
+          "line": 91
         }
       ],
       "parseError": null,
@@ -32550,7 +32536,7 @@
           "scope": null,
           "file": "src/hooks/usePdfSignatureReports.js",
           "line": 2,
-          "description": "Browser PDF signature inspection and optional gateway trust enrichment.",
+          "description": "Browser PDF signature inspection.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -32562,7 +32548,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/hooks/usePdfSignatureReports.js",
-          "line": 27,
+          "line": 26,
           "description": "",
           "params": [
             {
@@ -32587,7 +32573,7 @@
           "kind": "function",
           "scope": null,
           "file": "src/hooks/usePdfSignatureReports.js",
-          "line": 43,
+          "line": 40,
           "description": "",
           "params": [
             {
@@ -32619,18 +32605,6 @@
               "type": "string",
               "optional": true,
               "description": "Visible document, prioritized before queued documents."
-            },
-            {
-              "name": "options.getSourceUrl",
-              "type": "function",
-              "optional": true,
-              "description": "Registered document source URL."
-            },
-            {
-              "name": "options.getSourcePack",
-              "type": "function",
-              "optional": true,
-              "description": "Registered received pack frame identity."
             }
           ],
           "returns": [
@@ -32661,15 +32635,6 @@
           "line": 18,
           "kind": "static",
           "resolved": "src/utils/pdfSignatures.js"
-        },
-        {
-          "source": "../utils/pdfSignatureGateway.js",
-          "specifiers": [
-            "createGatewaySignatureClient"
-          ],
-          "line": 19,
-          "kind": "static",
-          "resolved": "src/utils/pdfSignatureGateway.js"
         }
       ],
       "packageImports": [
@@ -32685,8 +32650,8 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 23,
-      "summary": "Browser PDF signature inspection and optional gateway trust enrichment.",
+      "importanceScore": 22,
+      "summary": "Browser PDF signature inspection.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
@@ -49512,7 +49477,7 @@
     },
     {
       "path": "src/utils/pdfSignatureDocuments.js",
-      "lines": 254,
+      "lines": 251,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": "Per-document aggregation of PDF signature reports.",
@@ -49522,7 +49487,6 @@
           "specifiers": [
             "getReportSignatureSeverity",
             "getWorstSignatureIntegrity",
-            "getWorstSignatureTrust",
             "reportHasSignatures"
           ],
           "line": 14,
@@ -49533,79 +49497,79 @@
         {
           "name": "getPageSignatureDocumentKey",
           "kind": "function",
-          "line": 57
+          "line": 55
         },
         {
           "name": "getSourceFileNameFromUrl",
           "kind": "function",
-          "line": 73
+          "line": 71
         },
         {
           "name": "buildSignatureDocuments",
           "kind": "function",
-          "line": 119
+          "line": 117
         },
         {
           "name": "summarizeSignatureDocuments",
           "kind": "function",
-          "line": 202
+          "line": 199
         },
         {
           "name": "findSignatureDocumentBySourceKey",
           "kind": "function",
-          "line": 217
+          "line": 214
         },
         {
           "name": "getSignatureFileHeading",
           "kind": "function",
-          "line": 230
+          "line": 227
         },
         {
           "name": "getSignatureFilePages",
           "kind": "function",
-          "line": 245
+          "line": 242
         }
       ],
       "declarations": [
         {
           "name": "getPageSignatureDocumentKey",
           "kind": "function",
-          "line": 57
+          "line": 55
         },
         {
           "name": "getSourceFileNameFromUrl",
           "kind": "function",
-          "line": 73
+          "line": 71
         },
         {
           "name": "pickNewestSignature",
           "kind": "function",
-          "line": 97
+          "line": 95
         },
         {
           "name": "buildSignatureDocuments",
           "kind": "function",
-          "line": 119
+          "line": 117
         },
         {
           "name": "summarizeSignatureDocuments",
           "kind": "function",
-          "line": 202
+          "line": 199
         },
         {
           "name": "findSignatureDocumentBySourceKey",
           "kind": "function",
-          "line": 217
+          "line": 214
         },
         {
           "name": "getSignatureFileHeading",
           "kind": "function",
-          "line": 230
+          "line": 227
         },
         {
           "name": "getSignatureFilePages",
           "kind": "function",
-          "line": 245
+          "line": 242
         }
       ],
       "parseError": null,
@@ -49634,7 +49598,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 21,
+          "line": 20,
           "description": "",
           "params": [],
           "returns": [],
@@ -49647,7 +49611,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 35,
+          "line": 34,
           "description": "",
           "params": [],
           "returns": [],
@@ -49660,7 +49624,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 57,
+          "line": 55,
           "description": "Document key of a page.",
           "params": [
             {
@@ -49685,7 +49649,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 73,
+          "line": 71,
           "description": "Display file name from a source URL: the last path segment, only when it looks like a file name (has an extension).",
           "params": [
             {
@@ -49710,7 +49674,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 97,
+          "line": 95,
           "description": "",
           "params": [
             {
@@ -49735,7 +49699,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 119,
+          "line": 117,
           "description": "Fold per-file signature reports into per-document entries.",
           "params": [
             {
@@ -49772,7 +49736,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 202,
+          "line": 199,
           "description": "Totals for the toolbar overview button, or null when nothing is signed (the button is then not rendered).",
           "params": [
             {
@@ -49797,7 +49761,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 217,
+          "line": 214,
           "description": "",
           "params": [
             {
@@ -49828,7 +49792,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 230,
+          "line": 227,
           "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
           "params": [
             {
@@ -49859,7 +49823,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 245,
+          "line": 242,
           "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
           "params": [
             {
@@ -49891,7 +49855,6 @@
           "specifiers": [
             "getReportSignatureSeverity",
             "getWorstSignatureIntegrity",
-            "getWorstSignatureTrust",
             "reportHasSignatures"
           ],
           "line": 14,
@@ -49903,233 +49866,6 @@
       "incomingLocalImports": 5,
       "importanceScore": 96,
       "summary": "Per-document aggregation of PDF signature reports.",
-      "summaryConfidence": "high",
-      "summarySource": "module-doclet"
-    },
-    {
-      "path": "src/utils/pdfSignatureGateway.js",
-      "lines": 158,
-      "extension": ".js",
-      "jsdocBlockCount": 5,
-      "sourceSummary": "Optional gateway trust enrichment.",
-      "imports": [
-        {
-          "source": "./pdfSignatureStatus.js",
-          "specifiers": [
-            "getWorstSignatureIntegrity",
-            "normalizeSignatureIntegrity"
-          ],
-          "line": 6,
-          "kind": "static"
-        }
-      ],
-      "exports": [
-        {
-          "name": "getGatewaySignatureContext",
-          "kind": "function",
-          "line": 20
-        },
-        {
-          "name": "mergeGatewaySignatureReport",
-          "kind": "function",
-          "line": 75
-        },
-        {
-          "name": "createGatewaySignatureClient",
-          "kind": "function",
-          "line": 120
-        }
-      ],
-      "declarations": [
-        {
-          "name": "getGatewaySignatureContext",
-          "kind": "function",
-          "line": 20
-        },
-        {
-          "name": "isTime",
-          "kind": "function",
-          "line": 46
-        },
-        {
-          "name": "unchecked",
-          "kind": "function",
-          "line": 50
-        },
-        {
-          "name": "unavailable",
-          "kind": "function",
-          "line": 54
-        },
-        {
-          "name": "validationDisabled",
-          "kind": "function",
-          "line": 64
-        },
-        {
-          "name": "mergeGatewaySignatureReport",
-          "kind": "function",
-          "line": 75
-        },
-        {
-          "name": "createGatewaySignatureClient",
-          "kind": "function",
-          "line": 120
-        },
-        {
-          "name": "request",
-          "kind": "function",
-          "line": 130
-        }
-      ],
-      "parseError": null,
-      "signals": {
-        "roles": [],
-        "riskPatterns": []
-      },
-      "doclets": [
-        {
-          "id": "module:utils/pdfSignatureGateway",
-          "name": "utils/pdfSignatureGateway",
-          "longname": "module:utils/pdfSignatureGateway",
-          "kind": "module",
-          "scope": null,
-          "file": "src/utils/pdfSignatureGateway.js",
-          "line": 1,
-          "description": "Optional gateway trust enrichment.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureGateway.getGatewaySignatureContext",
-          "name": "getGatewaySignatureContext",
-          "longname": "module:utils/pdfSignatureGateway.getGatewaySignatureContext",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureGateway.js",
-          "line": 20,
-          "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
-          "params": [
-            {
-              "name": "sourceUrl",
-              "type": "string",
-              "optional": false,
-              "description": "The URL already used by DocumentLoader."
-            },
-            {
-              "name": "baseUrl",
-              "type": "string",
-              "optional": true,
-              "description": "Browser base for relative source URLs."
-            },
-            {
-              "name": "sourcePack",
-              "type": "Object",
-              "optional": true,
-              "description": "Actual received pack frame identity."
-            }
-          ],
-          "returns": [
-            {
-              "type": "Object|null",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureGateway~validationDisabled",
-          "name": "validationDisabled",
-          "longname": "module:utils/pdfSignatureGateway~validationDisabled",
-          "kind": "function",
-          "scope": "inner",
-          "file": "src/utils/pdfSignatureGateway.js",
-          "line": 64,
-          "description": "The gateway answered that server validation is switched off.",
-          "params": [
-            {
-              "name": "report",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "*",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
-          "name": "mergeGatewaySignatureReport",
-          "longname": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureGateway.js",
-          "line": 75,
-          "description": "Accept only unambiguous server entries.",
-          "params": [
-            {
-              "name": "report",
-              "type": "*",
-              "optional": false,
-              "description": "Browser report."
-            },
-            {
-              "name": "server",
-              "type": "*",
-              "optional": false,
-              "description": "Gateway JSON report."
-            }
-          ],
-          "returns": [
-            {
-              "type": "*",
-              "description": "Enriched report, or unchecked signatures for malformed data."
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureGateway.createGatewaySignatureClient",
-          "name": "createGatewaySignatureClient",
-          "longname": "module:utils/pdfSignatureGateway.createGatewaySignatureClient",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureGateway.js",
-          "line": 120,
-          "description": "Create viewer-local state for disabled gateway sessions.",
-          "params": [],
-          "returns": [
-            {
-              "type": "Object",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        }
-      ],
-      "moduleKey": "src/utils",
-      "localImports": [
-        {
-          "source": "./pdfSignatureStatus.js",
-          "specifiers": [
-            "getWorstSignatureIntegrity",
-            "normalizeSignatureIntegrity"
-          ],
-          "line": 6,
-          "kind": "static",
-          "resolved": "src/utils/pdfSignatureStatus.js"
-        }
-      ],
-      "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 39,
-      "summary": "Optional gateway trust enrichment.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
@@ -50342,7 +50078,7 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1234,
+      "lines": 1225,
       "extension": ".js",
       "jsdocBlockCount": 16,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -50350,19 +50086,19 @@
         {
           "source": "pkijs",
           "specifiers": [],
-          "line": 120,
+          "line": 112,
           "kind": "dynamic"
         },
         {
           "source": "asn1js",
           "specifiers": [],
-          "line": 125,
+          "line": 117,
           "kind": "dynamic"
         },
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1171,
+          "line": 1162,
           "kind": "dynamic"
         }
       ],
@@ -50370,339 +50106,339 @@
         {
           "name": "SUPPORTED_SUBFILTERS",
           "kind": "variable",
-          "line": 66
+          "line": 58
         },
         {
           "name": "parsePdfDateString",
           "kind": "function",
-          "line": 203
+          "line": 195
         },
         {
           "name": "unreadableSignatureReport",
           "kind": "function",
-          "line": 964
+          "line": 955
         },
         {
           "name": "installIndirectObjectHeaderProbe",
           "kind": "function",
-          "line": 1001
+          "line": 992
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1156
+          "line": 1147
         }
       ],
       "declarations": [
         {
           "name": "loadPkijs",
           "kind": "function",
-          "line": 119
+          "line": 111
         },
         {
           "name": "loadAsn1js",
           "kind": "function",
-          "line": 124
+          "line": 116
         },
         {
           "name": "toUint8",
           "kind": "function",
-          "line": 133
+          "line": 125
         },
         {
           "name": "bytesToHex",
           "kind": "function",
-          "line": 142
+          "line": 134
         },
         {
           "name": "colonHex",
           "kind": "function",
-          "line": 148
+          "line": 140
         },
         {
           "name": "normalizeSerialHex",
           "kind": "function",
-          "line": 155
+          "line": 147
         },
         {
           "name": "subtleDigest",
           "kind": "function",
-          "line": 159
+          "line": 151
         },
         {
           "name": "decodeTextBytes",
           "kind": "function",
-          "line": 170
+          "line": 162
         },
         {
           "name": "pdfText",
           "kind": "function",
-          "line": 190
+          "line": 182
         },
         {
           "name": "parsePdfDateString",
           "kind": "function",
-          "line": 203
+          "line": 195
         },
         {
           "name": "isoOrNull",
           "kind": "function",
-          "line": 224
+          "line": 216
         },
         {
           "name": "isDict",
           "kind": "function",
-          "line": 232
+          "line": 224
         },
         {
           "name": "dictHas",
           "kind": "function",
-          "line": 236
+          "line": 228
         },
         {
           "name": "signatureDictFields",
           "kind": "function",
-          "line": 240
+          "line": 232
         },
         {
           "name": "readByteRange",
           "kind": "function",
-          "line": 254
+          "line": 246
         },
         {
           "name": "contentsToBytes",
           "kind": "function",
-          "line": 266
+          "line": 258
         },
         {
           "name": "discoverSignatures",
           "kind": "function",
-          "line": 276
+          "line": 268
         },
         {
           "name": "objectKey",
           "kind": "function",
-          "line": 327
+          "line": 319
         },
         {
           "name": "qualifiedFieldName",
           "kind": "function",
-          "line": 338
+          "line": 330
         },
         {
           "name": "dictionaryInfo",
           "kind": "function",
-          "line": 359
+          "line": 351
         },
         {
           "name": "info",
           "kind": "object",
-          "line": 375
+          "line": 367
         },
         {
           "name": "validByteRange",
           "kind": "function",
-          "line": 415
+          "line": 406
         },
         {
           "name": "coveredBytes",
           "kind": "function",
-          "line": 431
+          "line": 422
         },
         {
           "name": "extensionCoveredByLaterSignature",
           "kind": "function",
-          "line": 439
+          "line": 430
         },
         {
           "name": "findAttribute",
           "kind": "function",
-          "line": 457
+          "line": 448
         },
         {
           "name": "attrRawBytes",
           "kind": "function",
-          "line": 462
+          "line": 453
         },
         {
           "name": "attrDate",
           "kind": "function",
-          "line": 470
+          "line": 461
         },
         {
           "name": "parseAsn1TimeString",
           "kind": "function",
-          "line": 487
+          "line": 478
         },
         {
           "name": "rdnValue",
           "kind": "function",
-          "line": 496
+          "line": 487
         },
         {
           "name": "dnToString",
           "kind": "function",
-          "line": 505
+          "line": 496
         },
         {
           "name": "elementBytesToHex",
           "kind": "function",
-          "line": 510
+          "line": 501
         },
         {
           "name": "matchCertificate",
           "kind": "function",
-          "line": 515
+          "line": 506
         },
         {
           "name": "asn1HexToBytes",
           "kind": "function",
-          "line": 544
+          "line": 535
         },
         {
           "name": "elementOid",
           "kind": "function",
-          "line": 550
+          "line": 541
         },
         {
           "name": "decodeOidBytes",
           "kind": "function",
-          "line": 558
+          "line": 549
         },
         {
           "name": "curvePointSize",
           "kind": "function",
-          "line": 577
+          "line": 568
         },
         {
           "name": "pssParameters",
           "kind": "function",
-          "line": 593
+          "line": 584
         },
         {
           "name": "out",
           "kind": "object",
-          "line": 595
+          "line": 586
         },
         {
           "name": "verifySignatureEntry",
           "kind": "function",
-          "line": 618
+          "line": 609
         },
         {
           "name": "trimSerial",
           "kind": "function",
-          "line": 839
+          "line": 830
         },
         {
           "name": "attrRawBytesOfInteger",
           "kind": "function",
-          "line": 845
+          "line": 836
         },
         {
           "name": "attrRawBytesOfElement",
           "kind": "function",
-          "line": 850
+          "line": 841
         },
         {
           "name": "asn1jsFromBERCached",
           "kind": "function",
-          "line": 882
+          "line": 873
         },
         {
           "name": "bufferView",
           "kind": "function",
-          "line": 892
+          "line": 883
         },
         {
           "name": "bytesEqual",
           "kind": "function",
-          "line": 896
+          "line": 887
         },
         {
           "name": "verifyCmsSignature",
           "kind": "function",
-          "line": 902
+          "line": 893
         },
         {
           "name": "curveNameForPointSize",
           "kind": "function",
-          "line": 932
+          "line": 923
         },
         {
           "name": "hashedLength",
           "kind": "function",
-          "line": 938
+          "line": 929
         },
         {
           "name": "orderSignatures",
           "kind": "function",
-          "line": 945
+          "line": 936
         },
         {
           "name": "unreadableSignatureReport",
           "kind": "function",
-          "line": 964
+          "line": 955
         },
         {
           "name": "isPdfWhitespace",
           "kind": "function",
-          "line": 974
+          "line": 965
         },
         {
           "name": "isDigit",
           "kind": "function",
-          "line": 975
+          "line": 966
         },
         {
           "name": "installIndirectObjectHeaderProbe",
           "kind": "function",
-          "line": 1001
+          "line": 992
         },
         {
           "name": "ws",
           "kind": "object",
-          "line": 1011
+          "line": 1002
         },
         {
           "name": "run",
           "kind": "object",
-          "line": 1012
+          "line": 1003
         },
         {
           "name": "cmt",
           "kind": "object",
-          "line": 1013
+          "line": 1004
         },
         {
           "name": "skip",
           "kind": "function",
-          "line": 1020
+          "line": 1011
         },
         {
           "name": "digitsEnd",
           "kind": "function",
-          "line": 1042
+          "line": 1033
         },
         {
           "name": "finiteFrom",
           "kind": "function",
-          "line": 1045
+          "line": 1036
         },
         {
           "name": "parseWithSourceSpans",
           "kind": "function",
-          "line": 1080
+          "line": 1071
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1156
+          "line": 1147
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1157
+          "line": 1148
         }
       ],
       "parseError": null,
@@ -50732,7 +50468,7 @@
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
           "line": 19,
-          "description": "One inspected PDF signature (level-1 integrity view; trust is never evaluated here - see the trust property).",
+          "description": "One inspected PDF signature (level-1 integrity view).",
           "params": [],
           "returns": [],
           "examples": 0
@@ -50744,7 +50480,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 57,
+          "line": 50,
           "description": "",
           "params": [],
           "returns": [],
@@ -50757,7 +50493,7 @@
           "kind": "constant",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 66,
+          "line": 58,
           "description": "SubFilters with level-1 handling.",
           "params": [],
           "returns": [],
@@ -50770,7 +50506,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 190,
+          "line": 182,
           "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
           "params": [
             {
@@ -50795,7 +50531,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 203,
+          "line": 195,
           "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
           "params": [
             {
@@ -50820,7 +50556,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 276,
+          "line": 268,
           "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
           "params": [],
           "returns": [],
@@ -50833,7 +50569,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 964,
+          "line": 955,
           "description": "Report an inspection failure without claiming that the document is unsigned.",
           "params": [
             {
@@ -50858,7 +50594,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1001,
+          "line": 992,
           "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
           "params": [
             {
@@ -50890,7 +50626,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1156,
+          "line": 1147,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -50915,19 +50651,19 @@
         {
           "source": "pkijs",
           "specifiers": [],
-          "line": 120,
+          "line": 112,
           "kind": "dynamic"
         },
         {
           "source": "asn1js",
           "specifiers": [],
-          "line": 125,
+          "line": 117,
           "kind": "dynamic"
         },
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1171,
+          "line": 1162,
           "kind": "dynamic"
         }
       ],
@@ -50939,188 +50675,108 @@
     },
     {
       "path": "src/utils/pdfSignatureStatus.js",
-      "lines": 348,
+      "lines": 148,
       "extension": ".js",
-      "jsdocBlockCount": 24,
-      "sourceSummary": "Signature UI status helpers for browser integrity and gateway trust.",
+      "jsdocBlockCount": 12,
+      "sourceSummary": "Signature UI status helpers for browser integrity.",
       "imports": [],
       "exports": [
         {
           "name": "getSignatureSeverity",
           "kind": "function",
-          "line": 52
+          "line": 50
         },
         {
           "name": "getReportSignatureSeverity",
           "kind": "function",
-          "line": 64
+          "line": 59
         },
         {
           "name": "normalizeSignatureIntegrity",
           "kind": "function",
-          "line": 74
+          "line": 69
         },
         {
           "name": "getIntegrityLabel",
           "kind": "function",
-          "line": 85
+          "line": 80
         },
         {
           "name": "getWorstSignatureIntegrity",
           "kind": "function",
-          "line": 104
+          "line": 99
         },
         {
           "name": "getSignatureCount",
           "kind": "function",
-          "line": 118
+          "line": 113
         },
         {
           "name": "reportHasSignatures",
           "kind": "function",
-          "line": 126
-        },
-        {
-          "name": "normalizeSignatureTrust",
-          "kind": "function",
-          "line": 142
-        },
-        {
-          "name": "getWorstSignatureTrust",
-          "kind": "function",
-          "line": 151
-        },
-        {
-          "name": "getTrustLabel",
-          "kind": "function",
-          "line": 164
-        },
-        {
-          "name": "TRUST_REASON_CODES",
-          "kind": "variable",
-          "line": 215
-        },
-        {
-          "name": "getTrustReasonText",
-          "kind": "function",
-          "line": 223
-        },
-        {
-          "name": "getSignatureTrustState",
-          "kind": "function",
-          "line": 238
-        },
-        {
-          "name": "getTrustExplanation",
-          "kind": "function",
-          "line": 263
+          "line": 121
         },
         {
           "name": "formatSignatureTime",
           "kind": "function",
-          "line": 337
+          "line": 137
         }
       ],
       "declarations": [
         {
           "name": "SEVERITY_BY_INTEGRITY",
           "kind": "object",
-          "line": 21
+          "line": 20
         },
         {
           "name": "getSignatureSeverity",
           "kind": "function",
-          "line": 52
+          "line": 50
         },
         {
           "name": "getReportSignatureSeverity",
           "kind": "function",
-          "line": 64
+          "line": 59
         },
         {
           "name": "normalizeSignatureIntegrity",
           "kind": "function",
-          "line": 74
+          "line": 69
         },
         {
           "name": "getIntegrityLabel",
           "kind": "function",
-          "line": 85
+          "line": 80
         },
         {
           "name": "labels",
           "kind": "object",
-          "line": 86
+          "line": 81
         },
         {
           "name": "getWorstSignatureIntegrity",
           "kind": "function",
-          "line": 104
+          "line": 99
         },
         {
           "name": "getSignatureCount",
           "kind": "function",
-          "line": 118
+          "line": 113
         },
         {
           "name": "reportHasSignatures",
           "kind": "function",
-          "line": 126
-        },
-        {
-          "name": "normalizeSignatureTrust",
-          "kind": "function",
-          "line": 142
-        },
-        {
-          "name": "getWorstSignatureTrust",
-          "kind": "function",
-          "line": 151
-        },
-        {
-          "name": "getTrustLabel",
-          "kind": "function",
-          "line": 164
-        },
-        {
-          "name": "TRUST_REASON_DEFAULTS",
-          "kind": "object",
-          "line": 185
-        },
-        {
-          "name": "getTrustReasonText",
-          "kind": "function",
-          "line": 223
-        },
-        {
-          "name": "getSignatureTrustState",
-          "kind": "function",
-          "line": 238
-        },
-        {
-          "name": "getTrustExplanation",
-          "kind": "function",
-          "line": 263
-        },
-        {
-          "name": "result",
-          "kind": "object",
-          "line": 266
-        },
-        {
-          "name": "addReason",
-          "kind": "function",
-          "line": 268
+          "line": 121
         },
         {
           "name": "pad2",
           "kind": "function",
-          "line": 326
+          "line": 126
         },
         {
           "name": "formatSignatureTime",
           "kind": "function",
-          "line": 337
+          "line": 137
         }
       ],
       "parseError": null,
@@ -51137,7 +50793,7 @@
           "scope": null,
           "file": "src/utils/pdfSignatureStatus.js",
           "line": 2,
-          "description": "Signature UI status helpers for browser integrity and gateway trust.",
+          "description": "Signature UI status helpers for browser integrity.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -51149,7 +50805,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 21,
+          "line": 20,
           "description": "Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are...",
           "params": [],
           "returns": [],
@@ -51162,7 +50818,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 37,
+          "line": 36,
           "description": "Integrity statuses ordered worst-first.",
           "params": [],
           "returns": [],
@@ -51175,7 +50831,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 52,
+          "line": 50,
           "description": "Map one integrity status to its severity class.",
           "params": [
             {
@@ -51183,12 +50839,6 @@
               "type": "string|null|undefined",
               "optional": false,
               "description": ""
-            },
-            {
-              "name": "trust",
-              "type": "string",
-              "optional": true,
-              "description": "Optional gateway trust verdict."
             }
           ],
           "returns": [
@@ -51206,8 +50856,8 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 64,
-          "description": "Worst severity across integrity and trust for all signatures.",
+          "line": 59,
+          "description": "Worst severity across integrity for all signatures.",
           "params": [
             {
               "name": "signatures",
@@ -51231,7 +50881,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 74,
+          "line": 69,
           "description": "Fail closed for missing, unexpected and inherited property names.",
           "params": [
             {
@@ -51256,7 +50906,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 85,
+          "line": 80,
           "description": "Shared localized status text for the badge tooltip and details dialog.",
           "params": [
             {
@@ -51287,7 +50937,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 104,
+          "line": 99,
           "description": "The worst integrity status among a document's signatures, or null when there are none.",
           "params": [
             {
@@ -51312,7 +50962,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 118,
+          "line": 113,
           "description": "",
           "params": [
             {
@@ -51337,7 +50987,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 126,
+          "line": 121,
           "description": "",
           "params": [
             {
@@ -51356,233 +51006,13 @@
           "examples": 0
         },
         {
-          "id": "module:utils/pdfSignatureStatus~TRUST_WORST_FIRST",
-          "name": "TRUST_WORST_FIRST",
-          "longname": "module:utils/pdfSignatureStatus~TRUST_WORST_FIRST",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 136,
-          "description": "Trust verdicts ordered worst-first.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.normalizeSignatureTrust",
-          "name": "normalizeSignatureTrust",
-          "longname": "module:utils/pdfSignatureStatus.normalizeSignatureTrust",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 142,
-          "description": "",
-          "params": [
-            {
-              "name": "trust",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.getWorstSignatureTrust",
-          "name": "getWorstSignatureTrust",
-          "longname": "module:utils/pdfSignatureStatus.getWorstSignatureTrust",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 151,
-          "description": "The worst trust verdict among signatures, or null when there are none.",
-          "params": [
-            {
-              "name": "signatures",
-              "type": "Array<*>|null|undefined",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string|null",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.getTrustLabel",
-          "name": "getTrustLabel",
-          "longname": "module:utils/pdfSignatureStatus.getTrustLabel",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 164,
-          "description": "Shared localized trust text for the details dialog and the overview.",
-          "params": [
-            {
-              "name": "t",
-              "type": "function",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "trust",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
-          "name": "TRUST_REASON_DEFAULTS",
-          "longname": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
-          "kind": "constant",
-          "scope": "inner",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 185,
-          "description": "Plain-language English default per gateway trustReason code.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
-          "name": "TRUST_REASON_CODES",
-          "longname": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
-          "kind": "constant",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 215,
-          "description": "Every trustReason code the gateway can emit.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.getTrustReasonText",
-          "name": "getTrustReasonText",
-          "longname": "module:utils/pdfSignatureStatus.getTrustReasonText",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 223,
-          "description": "Localized plain-language reason for a gateway trustReason code, or null for an unknown code.",
-          "params": [
-            {
-              "name": "t",
-              "type": "function",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "code",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string|null",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.getSignatureTrustState",
-          "name": "getSignatureTrustState",
-          "longname": "module:utils/pdfSignatureStatus.getSignatureTrustState",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 238,
-          "description": "Which trust situation a signature is in: unavailable : no gateway answered for this document (viewer opened without ODVGateway); not-checked : the gateway has server validation di...",
-          "params": [
-            {
-              "name": "signature",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "'unavailable'|'not-checked'|'server-error'|'valid'|'invalid'|'unknown'",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus~TrustExplanation",
-          "name": "TrustExplanation",
-          "longname": "module:utils/pdfSignatureStatus~TrustExplanation",
-          "kind": "typedef",
-          "scope": "inner",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 246,
-          "description": "",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "module:utils/pdfSignatureStatus.getTrustExplanation",
-          "name": "getTrustExplanation",
-          "longname": "module:utils/pdfSignatureStatus.getTrustExplanation",
-          "kind": "function",
-          "scope": "static",
-          "file": "src/utils/pdfSignatureStatus.js",
-          "line": 263,
-          "description": "State-specific trust text for the details dialog.",
-          "params": [
-            {
-              "name": "t",
-              "type": "function",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "signature",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "TrustExplanation",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
           "id": "module:utils/pdfSignatureStatus~pad2",
           "name": "pad2",
           "longname": "module:utils/pdfSignatureStatus~pad2",
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 326,
+          "line": 126,
           "description": "",
           "params": [
             {
@@ -51602,7 +51032,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureStatus.js",
-          "line": 337,
+          "line": 137,
           "description": "Format a signature-related ISO time (signing, validation, certificate validity) as local time, &quot;2022-04-27 19:55&quot;, in both supported languages.",
           "params": [
             {
@@ -51624,9 +51054,9 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 7,
-      "importanceScore": 112,
-      "summary": "Signature UI status helpers for browser integrity and gateway trust.",
+      "incomingLocalImports": 6,
+      "importanceScore": 103,
+      "summary": "Signature UI status helpers for browser integrity.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
@@ -56277,7 +55707,7 @@
           "scope": "global",
           "file": "src/utils/printPdf.js",
           "line": 398,
-          "description": "Parse only the small CSS subset used by trusted print header/footer templates.",
+          "description": "Parse only the small CSS subset used by approved print header/footer templates.",
           "params": [
             {
               "name": "css",
@@ -63018,363 +62448,378 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 779,
+      "lines": 800,
       "extension": ".js",
-      "jsdocBlockCount": 59,
+      "jsdocBlockCount": 63,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
         {
           "name": "COMPARE_ADJUST_TOOLBAR_MODES",
           "kind": "variable",
-          "line": 33
+          "line": 34
+        },
+        {
+          "name": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+          "kind": "variable",
+          "line": 36
         },
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 116
+          "line": 119
         },
         {
           "name": "getKeyboardPrintShortcutBehavior",
           "kind": "function",
-          "line": 139
+          "line": 142
         },
         {
           "name": "isDocumentMetadataUiEnabled",
           "kind": "function",
-          "line": 152
+          "line": 155
         },
         {
           "name": "isFineTuneEnabled",
           "kind": "function",
-          "line": 174
+          "line": 177
         },
         {
           "name": "isCompareOverlayEnabled",
           "kind": "function",
-          "line": 187
+          "line": 190
         },
         {
           "name": "isCompareOverlayPrintEnabled",
           "kind": "function",
-          "line": 199
+          "line": 202
         },
         {
           "name": "isCompareCurtainEnabled",
           "kind": "function",
-          "line": 211
+          "line": 214
         },
         {
           "name": "isCompareCurtainPrintEnabled",
           "kind": "function",
-          "line": 223
+          "line": 226
         },
         {
           "name": "getCompareAdjustToolbarMode",
           "kind": "function",
-          "line": 238
+          "line": 241
         },
         {
           "name": "isSignatureThumbnailPageBadgeEnabled",
           "kind": "function",
-          "line": 252
+          "line": 255
         },
         {
           "name": "isPdfSignatureInspectionEnabled",
           "kind": "function",
-          "line": 266
+          "line": 268
         },
         {
           "name": "getPdfSignatureInspectionStart",
           "kind": "function",
-          "line": 279
+          "line": 281
         },
         {
-          "name": "DEFAULT_OCR_LANGUAGES",
-          "kind": "variable",
-          "line": 285
-        },
-        {
-          "name": "isOcrEnabled",
+          "name": "getPdfSignatureUncheckedSeverity",
           "kind": "function",
           "line": 298
         },
         {
+          "name": "DEFAULT_OCR_LANGUAGES",
+          "kind": "variable",
+          "line": 306
+        },
+        {
+          "name": "isOcrEnabled",
+          "kind": "function",
+          "line": 319
+        },
+        {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 311
+          "line": 332
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 334
+          "line": 355
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 350
+          "line": 371
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 519
+          "line": 540
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 536
+          "line": 557
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 547
+          "line": 568
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 565
+          "line": 586
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 591
+          "line": 612
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 604
+          "line": 625
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 618
+          "line": 639
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 642
+          "line": 663
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 667
+          "line": 688
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 691
+          "line": 712
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 709
+          "line": 730
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 750
+          "line": 771
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 767
+          "line": 788
         }
       ],
       "declarations": [
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 116
+          "line": 119
         },
         {
           "name": "getKeyboardPrintShortcutBehavior",
           "kind": "function",
-          "line": 139
+          "line": 142
         },
         {
           "name": "isDocumentMetadataUiEnabled",
           "kind": "function",
-          "line": 152
+          "line": 155
         },
         {
           "name": "readBooleanSwitch",
           "kind": "function",
-          "line": 164
+          "line": 167
         },
         {
           "name": "isFineTuneEnabled",
           "kind": "function",
-          "line": 174
+          "line": 177
         },
         {
           "name": "isCompareOverlayEnabled",
           "kind": "function",
-          "line": 187
+          "line": 190
         },
         {
           "name": "isCompareOverlayPrintEnabled",
           "kind": "function",
-          "line": 199
+          "line": 202
         },
         {
           "name": "isCompareCurtainEnabled",
           "kind": "function",
-          "line": 211
+          "line": 214
         },
         {
           "name": "isCompareCurtainPrintEnabled",
           "kind": "function",
-          "line": 223
+          "line": 226
         },
         {
           "name": "getCompareAdjustToolbarMode",
           "kind": "function",
-          "line": 238
+          "line": 241
         },
         {
           "name": "isSignatureThumbnailPageBadgeEnabled",
           "kind": "function",
-          "line": 252
+          "line": 255
         },
         {
           "name": "isPdfSignatureInspectionEnabled",
           "kind": "function",
-          "line": 266
+          "line": 268
         },
         {
           "name": "getPdfSignatureInspectionStart",
           "kind": "function",
-          "line": 279
+          "line": 281
         },
         {
-          "name": "isOcrEnabled",
+          "name": "getPdfSignatureUncheckedSeverity",
           "kind": "function",
           "line": 298
         },
         {
+          "name": "isOcrEnabled",
+          "kind": "function",
+          "line": 319
+        },
+        {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 311
+          "line": 332
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 334
+          "line": 355
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 350
+          "line": 371
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 368
+          "line": 389
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 390
+          "line": 411
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 415
+          "line": 436
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 436
+          "line": 457
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 453
+          "line": 474
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 465
+          "line": 486
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 479
+          "line": 500
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 490
+          "line": 511
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 504
+          "line": 525
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 519
+          "line": 540
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 536
+          "line": 557
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 547
+          "line": 568
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 565
+          "line": 586
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 591
+          "line": 612
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 604
+          "line": 625
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 618
+          "line": 639
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 642
+          "line": 663
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 667
+          "line": 688
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 691
+          "line": 712
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 709
+          "line": 730
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 750
+          "line": 771
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 767
+          "line": 788
         }
       ],
       "parseError": null,
@@ -63436,13 +62881,26 @@
           "examples": 0
         },
         {
+          "id": "PdfSignatureUncheckedSeverity",
+          "name": "PdfSignatureUncheckedSeverity",
+          "longname": "PdfSignatureUncheckedSeverity",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 13,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "ResetSessionTarget",
           "name": "ResetSessionTarget",
           "longname": "ResetSessionTarget",
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 13,
+          "line": 14,
           "description": "Session-reset target for the support/problem notice.",
           "params": [],
           "returns": [],
@@ -63455,7 +62913,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 31,
+          "line": 32,
           "description": "Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract.",
           "params": [],
           "returns": [],
@@ -63468,8 +62926,21 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 33,
+          "line": 34,
           "description": "Runtime validation values for CompareAdjustToolbarMode; the first one is the default.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+          "name": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+          "longname": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 36,
+          "description": "Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -63481,7 +62952,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 35,
+          "line": 38,
           "description": "Runtime validation values for ResetSessionTarget; the typedef documents the public contract.",
           "params": [],
           "returns": [],
@@ -63494,7 +62965,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 37,
+          "line": 40,
           "description": "User-facing print default mode aliases mapped to persisted PrintDefaultMode values.",
           "params": [],
           "returns": [],
@@ -63507,7 +62978,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 47,
+          "line": 50,
           "description": "User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values.",
           "params": [],
           "returns": [],
@@ -63520,7 +62991,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 68,
+          "line": 71,
           "description": "",
           "params": [],
           "returns": [],
@@ -63533,7 +63004,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 75,
+          "line": 78,
           "description": "",
           "params": [],
           "returns": [],
@@ -63546,7 +63017,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 82,
+          "line": 85,
           "description": "",
           "params": [],
           "returns": [],
@@ -63559,7 +63030,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 90,
+          "line": 93,
           "description": "",
           "params": [],
           "returns": [],
@@ -63572,7 +63043,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 116,
+          "line": 119,
           "description": "Read the merged runtime configuration from the browser environment.",
           "params": [],
           "returns": [
@@ -63590,7 +63061,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 139,
+          "line": 142,
           "description": "Resolve the configured Ctrl/Cmd+P behavior.",
           "params": [
             {
@@ -63615,7 +63086,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 152,
+          "line": 155,
           "description": "Resolve whether document metadata UI affordances should be available.",
           "params": [
             {
@@ -63640,7 +63111,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 164,
+          "line": 167,
           "description": "Read a strict boolean switch: only a real boolean counts, anything else (missing, strings such as &quot;false&quot;, numbers, null, objects) falls back to defaultValue .",
           "params": [
             {
@@ -63671,7 +63142,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 174,
+          "line": 177,
           "description": "Master capability for page fine tuning and calibration-dependent compare views.",
           "params": [
             {
@@ -63696,7 +63167,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 187,
+          "line": 190,
           "description": "Resolve whether the compare overlay view is available ( compare.overlay.enabled ).",
           "params": [
             {
@@ -63721,7 +63192,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 199,
+          "line": 202,
           "description": "Resolve whether the compare overlay view offers its print action ( compare.overlay.print.enabled ).",
           "params": [
             {
@@ -63746,7 +63217,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 211,
+          "line": 214,
           "description": "Resolve whether the compare curtain view is available ( compare.curtain.enabled ).",
           "params": [
             {
@@ -63771,7 +63242,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 223,
+          "line": 226,
           "description": "Resolve whether the compare curtain view offers its print action ( compare.curtain.print.enabled ).",
           "params": [
             {
@@ -63796,7 +63267,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 238,
+          "line": 241,
           "description": "Resolve how the main toolbar's image controls behave in compare mode ( compare.adjust.toolbarMode ).",
           "params": [
             {
@@ -63821,7 +63292,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 252,
+          "line": 255,
           "description": "Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol.",
           "params": [
             {
@@ -63846,7 +63317,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 266,
+          "line": 268,
           "description": "Resolve whether PDF signature inspection runs at all ( pdfSignatures.enabled ).",
           "params": [
             {
@@ -63871,7 +63342,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 279,
+          "line": 281,
           "description": "Resolve when PDF signature inspection may start ( pdfSignatures.inspectAfter ): 'firstPage' (default) starts once the first page is shown, 'allPages' waits until every page of the...",
           "params": [
             {
@@ -63890,13 +63361,38 @@
           "examples": 0
         },
         {
+          "id": "getPdfSignatureUncheckedSeverity",
+          "name": "getPdfSignatureUncheckedSeverity",
+          "longname": "getPdfSignatureUncheckedSeverity",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 298,
+          "description": "Resolve the symbol severity for a signature whose content is intact but whose certificate chain and revocation status the viewer does not check ( pdfSignatures.uncheckedSeverity ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "PdfSignatureUncheckedSeverity",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "DEFAULT_OCR_LANGUAGES",
           "name": "DEFAULT_OCR_LANGUAGES",
           "longname": "DEFAULT_OCR_LANGUAGES",
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 285,
+          "line": 306,
           "description": "Default OCR languages (Tesseract language codes), tried together on every text line.",
           "params": [],
           "returns": [],
@@ -63909,7 +63405,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 287,
+          "line": 308,
           "description": "Tesseract language codes: three lower-case letters, optionally with _suffixes (chi_sim, aze_cyrl).",
           "params": [],
           "returns": [],
@@ -63922,7 +63418,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 298,
+          "line": 319,
           "description": "Resolve whether in-browser OCR of scanned pages is turned on ( ocr.enabled ).",
           "params": [
             {
@@ -63947,7 +63443,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 311,
+          "line": 332,
           "description": "Resolve the OCR languages ( ocr.languages ): an array of Tesseract language codes.",
           "params": [
             {
@@ -63972,7 +63468,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 334,
+          "line": 355,
           "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ).",
           "params": [
             {
@@ -63997,7 +63493,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 350,
+          "line": 371,
           "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
           "params": [
             {
@@ -64022,7 +63518,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 368,
+          "line": 389,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -64053,7 +63549,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 390,
+          "line": 411,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -64096,7 +63592,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 415,
+          "line": 436,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -64139,7 +63635,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 436,
+          "line": 457,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -64182,7 +63678,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 453,
+          "line": 474,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -64213,7 +63709,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 465,
+          "line": 486,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -64238,7 +63734,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 479,
+          "line": 500,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -64263,7 +63759,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 490,
+          "line": 511,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -64288,7 +63784,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 504,
+          "line": 525,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -64319,7 +63815,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 519,
+          "line": 540,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -64350,7 +63846,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 536,
+          "line": 557,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -64381,7 +63877,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 547,
+          "line": 568,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -64412,7 +63908,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 565,
+          "line": 586,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -64437,7 +63933,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 591,
+          "line": 612,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -64462,7 +63958,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 604,
+          "line": 625,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -64487,7 +63983,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 618,
+          "line": 639,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -64512,7 +64008,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 642,
+          "line": 663,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -64537,7 +64033,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 667,
+          "line": 688,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -64562,7 +64058,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 691,
+          "line": 712,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -64587,7 +64083,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 709,
+          "line": 730,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -64612,7 +64108,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 750,
+          "line": 771,
           "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
           "params": [
             {
@@ -64637,7 +64133,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 767,
+          "line": 788,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -69873,7 +69369,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 255,
+      "line": 254,
       "description": "",
       "params": [
         {
@@ -69898,7 +69394,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 848,
+      "line": 847,
       "description": "Decode host-provided Base64 source bytes without routing through fetch(data:...) .",
       "params": [
         {
@@ -69923,7 +69419,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1060,
+      "line": 1059,
       "description": "",
       "params": [
         {
@@ -69948,7 +69444,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 743,
+      "line": 742,
       "description": "Build a source-validation error.",
       "params": [
         {
@@ -69979,7 +69475,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 162,
+      "line": 161,
       "description": "",
       "params": [
         {
@@ -70004,7 +69500,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1018,
+      "line": 1017,
       "description": "",
       "params": [
         {
@@ -70029,7 +69525,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 683,
+      "line": 682,
       "description": "Build a consistent HTTP error so the retry classifier can inspect the status code.",
       "params": [
         {
@@ -70060,7 +69556,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 727,
+      "line": 726,
       "description": "Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die.",
       "params": [
         {
@@ -70091,7 +69587,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 711,
+      "line": 710,
       "description": "",
       "params": [
         {
@@ -70128,7 +69624,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1170,
+      "line": 1169,
       "description": "",
       "params": [
         {
@@ -70179,7 +69675,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 646,
+      "line": 645,
       "description": "Estimate the final page count conservatively.",
       "params": [
         {
@@ -70235,7 +69731,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 994,
+      "line": 993,
       "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
       "params": [
         {
@@ -70278,7 +69774,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 978,
+      "line": 977,
       "description": "",
       "params": [
         {
@@ -70303,7 +69799,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 605,
+      "line": 604,
       "description": "Resolve the best-effort extension we can use for page-count estimation before every source has been fetched.",
       "params": [
         {
@@ -70328,7 +69824,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 592,
+      "line": 591,
       "description": "",
       "params": [
         {
@@ -70353,7 +69849,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 207,
+      "line": 206,
       "description": "",
       "params": [
         {
@@ -70378,7 +69874,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 583,
+      "line": 582,
       "description": "",
       "params": [
         {
@@ -70403,7 +69899,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 698,
+      "line": 697,
       "description": "Host integrations often expose short-lived file tickets.",
       "params": [
         {
@@ -70428,7 +69924,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 239,
+      "line": 238,
       "description": "",
       "params": [
         {
@@ -70453,7 +69949,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 247,
+      "line": 246,
       "description": "",
       "params": [
         {
@@ -70478,7 +69974,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 820,
+      "line": 819,
       "description": "Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses.",
       "params": [
         {
@@ -70516,7 +70012,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 270,
+      "line": 269,
       "description": "",
       "params": [
         {
@@ -70541,7 +70037,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 299,
+      "line": 298,
       "description": "",
       "params": [
         {
@@ -70572,7 +70068,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1284,
+      "line": 1283,
       "description": "",
       "params": [
         {
@@ -70597,7 +70093,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 924,
+      "line": 923,
       "description": "",
       "params": [
         {
@@ -70622,7 +70118,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 567,
+      "line": 566,
       "description": "",
       "params": [
         {
@@ -70647,7 +70143,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 453,
+      "line": 452,
       "description": "",
       "params": [
         {
@@ -70672,7 +70168,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 216,
+      "line": 215,
       "description": "",
       "params": [
         {
@@ -70736,7 +70232,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1305,
+      "line": 1304,
       "description": "Fetch and persist one source blob with conservative retry behavior.",
       "params": [
         {
@@ -70767,7 +70263,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1214,
+      "line": 1213,
       "description": "",
       "params": [
         {
@@ -70792,7 +70288,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 336,
+      "line": 335,
       "description": "",
       "params": [
         {
@@ -70817,7 +70313,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 889,
+      "line": 888,
       "description": "",
       "params": [
         {
@@ -70842,7 +70338,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 549,
+      "line": 548,
       "description": "",
       "params": [
         {
@@ -70867,7 +70363,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1585,
+      "line": 1584,
       "description": "",
       "params": [],
       "returns": [],
@@ -70893,7 +70389,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 952,
+      "line": 951,
       "description": "Extract multi-document source context from an entry or placeholder input.",
       "params": [
         {
@@ -70918,7 +70414,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1102,
+      "line": 1101,
       "description": "",
       "params": [
         {
@@ -70985,7 +70481,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 478,
+      "line": 477,
       "description": "",
       "params": [
         {
@@ -71010,7 +70506,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 354,
+      "line": 353,
       "description": "Resolve source type information with a cheap signature-first path.",
       "params": [
         {
@@ -71053,7 +70549,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 518,
+      "line": 517,
       "description": "Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe...",
       "params": [
         {
@@ -71108,7 +70604,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1223,
+      "line": 1222,
       "description": "",
       "params": [
         {
@@ -71133,7 +70629,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 463,
+      "line": 462,
       "description": "",
       "params": [
         {
@@ -71164,8 +70660,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 419,
-      "description": "Gateway source packs already carry trusted file metadata from the prepared server-side session.",
+      "line": 418,
+      "description": "Gateway source packs already carry verified file metadata from the prepared server-side session.",
       "params": [
         {
           "name": "input",
@@ -71213,7 +70709,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1162,
+      "line": 1161,
       "description": "",
       "params": [
         {
@@ -71238,7 +70734,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 500,
+      "line": 499,
       "description": "Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources.",
       "params": [
         {
@@ -71281,7 +70777,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1278,
+      "line": 1277,
       "description": "Whether this load run is no longer allowed to mutate React state.",
       "params": [],
       "returns": [
@@ -71299,7 +70795,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 668,
+      "line": 667,
       "description": "",
       "params": [
         {
@@ -71324,7 +70820,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 285,
+      "line": 284,
       "description": "",
       "params": [
         {
@@ -71355,7 +70851,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 941,
+      "line": 940,
       "description": "",
       "params": [
         {
@@ -71380,7 +70876,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 620,
+      "line": 619,
       "description": "Update per-extension page-count statistics used by the conservative warning estimator.",
       "params": [
         {
@@ -71417,7 +70913,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 765,
+      "line": 764,
       "description": "Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store.",
       "params": [
         {
@@ -82773,7 +82269,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 85,
+      "line": 82,
       "description": "",
       "params": [
         {
@@ -82846,7 +82342,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 40,
+      "line": 39,
       "description": "",
       "params": [
         {
@@ -82877,7 +82373,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 57,
+      "line": 56,
       "description": "",
       "params": [
         {
@@ -82908,7 +82404,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 125,
+      "line": 122,
       "description": "",
       "params": [
         {
@@ -82928,7 +82424,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 151,
+      "line": 148,
       "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
       "params": [],
       "returns": [],
@@ -82941,7 +82437,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 167,
+      "line": 164,
       "description": "Keep Tab navigation inside the dialog while it is open.",
       "params": [],
       "returns": [],
@@ -82954,7 +82450,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 207,
+      "line": 204,
       "description": "",
       "params": [
         {
@@ -83130,7 +82626,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/SignatureStatusBadge.jsx",
-      "line": 44,
+      "line": 43,
       "description": "",
       "params": [
         {
@@ -83173,7 +82669,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/SignatureStatusBadge.jsx",
-      "line": 29,
+      "line": 28,
       "description": "Material Icons ligature per severity.",
       "params": [],
       "returns": [],
@@ -83699,7 +83195,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 233,
+      "line": 232,
       "description": "",
       "params": [],
       "returns": [],
@@ -83712,7 +83208,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 223,
+      "line": 222,
       "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
       "params": [],
       "returns": [],
@@ -83725,7 +83221,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 240,
+      "line": 239,
       "description": "",
       "params": [],
       "returns": [],
@@ -83790,7 +83286,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 166,
+      "line": 165,
       "description": "",
       "params": [],
       "returns": [],
@@ -83816,7 +83312,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 156,
+      "line": 155,
       "description": "",
       "params": [],
       "returns": [],
@@ -83829,7 +83325,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 79,
+      "line": 78,
       "description": "",
       "params": [],
       "returns": [],
@@ -83880,7 +83376,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1347,
+      "line": 1346,
       "description": "",
       "params": [],
       "returns": [
@@ -83935,7 +83431,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1497,
+      "line": 1496,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -84033,7 +83529,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2715,
+      "line": 2710,
       "description": "",
       "params": [
         {
@@ -84053,7 +83549,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2701,
+      "line": 2696,
       "description": "",
       "params": [
         {
@@ -84124,7 +83620,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1595,
+      "line": 1594,
       "description": "",
       "params": [
         {
@@ -84149,7 +83645,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2012,
+      "line": 2011,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -84174,7 +83670,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1819,
+      "line": 1818,
       "description": "",
       "params": [
         {
@@ -84224,7 +83720,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2720,
+      "line": 2715,
       "description": "",
       "params": [
         {
@@ -84275,7 +83771,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2409,
+      "line": 2408,
       "description": "",
       "params": [
         {
@@ -84300,7 +83796,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1475,
+      "line": 1474,
       "description": "",
       "params": [
         {
@@ -84325,7 +83821,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1571,
+      "line": 1570,
       "description": "",
       "params": [
         {
@@ -84773,7 +84269,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1359,
+      "line": 1358,
       "description": "",
       "params": [
         {
@@ -84904,7 +84400,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1406,
+      "line": 1405,
       "description": "",
       "params": [
         {
@@ -84941,7 +84437,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1549,
+      "line": 1548,
       "description": "",
       "params": [
         {
@@ -84972,7 +84468,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2275,
+      "line": 2274,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -84990,7 +84486,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1330,
+      "line": 1329,
       "description": "",
       "params": [
         {
@@ -85015,7 +84511,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1339,
+      "line": 1338,
       "description": "",
       "params": [
         {
@@ -85040,7 +84536,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2094,
+      "line": 2093,
       "description": "",
       "params": [
         {
@@ -85121,7 +84617,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1727,
+      "line": 1726,
       "description": "",
       "params": [
         {
@@ -85207,7 +84703,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1655,
+      "line": 1654,
       "description": "",
       "params": [
         {
@@ -85262,7 +84758,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2366,
+      "line": 2365,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -85293,7 +84789,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2710,
+      "line": 2705,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -85319,7 +84815,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1642,
+      "line": 1641,
       "description": "",
       "params": [
         {
@@ -85344,7 +84840,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1306,
+      "line": 1305,
       "description": "",
       "params": [
         {
@@ -85413,7 +84909,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1484,
+      "line": 1483,
       "description": "",
       "params": [
         {
@@ -85444,7 +84940,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2116,
+      "line": 2115,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -85469,7 +84965,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1560,
+      "line": 1559,
       "description": "",
       "params": [
         {
@@ -86303,7 +85799,7 @@
       "scope": null,
       "file": "src/hooks/usePdfSignatureReports.js",
       "line": 2,
-      "description": "Browser PDF signature inspection and optional gateway trust enrichment.",
+      "description": "Browser PDF signature inspection.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -86315,7 +85811,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/hooks/usePdfSignatureReports.js",
-      "line": 27,
+      "line": 26,
       "description": "",
       "params": [
         {
@@ -86340,7 +85836,7 @@
       "kind": "function",
       "scope": null,
       "file": "src/hooks/usePdfSignatureReports.js",
-      "line": 43,
+      "line": 40,
       "description": "",
       "params": [
         {
@@ -86372,18 +85868,6 @@
           "type": "string",
           "optional": true,
           "description": "Visible document, prioritized before queued documents."
-        },
-        {
-          "name": "options.getSourceUrl",
-          "type": "function",
-          "optional": true,
-          "description": "Registered document source URL."
-        },
-        {
-          "name": "options.getSourcePack",
-          "type": "function",
-          "optional": true,
-          "description": "Registered received pack frame identity."
         }
       ],
       "returns": [
@@ -97685,7 +97169,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 119,
+      "line": 117,
       "description": "Fold per-file signature reports into per-document entries.",
       "params": [
         {
@@ -97722,7 +97206,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 217,
+      "line": 214,
       "description": "",
       "params": [
         {
@@ -97753,7 +97237,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 57,
+      "line": 55,
       "description": "Document key of a page.",
       "params": [
         {
@@ -97778,7 +97262,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 230,
+      "line": 227,
       "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
       "params": [
         {
@@ -97809,7 +97293,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 245,
+      "line": 242,
       "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
       "params": [
         {
@@ -97840,7 +97324,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 73,
+      "line": 71,
       "description": "Display file name from a source URL: the last path segment, only when it looks like a file name (has an extension).",
       "params": [
         {
@@ -97865,7 +97349,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 97,
+      "line": 95,
       "description": "",
       "params": [
         {
@@ -97890,7 +97374,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 35,
+      "line": 34,
       "description": "",
       "params": [],
       "returns": [],
@@ -97903,7 +97387,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 21,
+      "line": 20,
       "description": "",
       "params": [],
       "returns": [],
@@ -97916,7 +97400,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 202,
+      "line": 199,
       "description": "Totals for the toolbar overview button, or null when nothing is signed (the button is then not rendered).",
       "params": [
         {
@@ -97945,130 +97429,6 @@
       "description": "Per-document aggregation of PDF signature reports.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureGateway.createGatewaySignatureClient",
-      "name": "createGatewaySignatureClient",
-      "longname": "module:utils/pdfSignatureGateway.createGatewaySignatureClient",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureGateway.js",
-      "line": 120,
-      "description": "Create viewer-local state for disabled gateway sessions.",
-      "params": [],
-      "returns": [
-        {
-          "type": "Object",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureGateway.getGatewaySignatureContext",
-      "name": "getGatewaySignatureContext",
-      "longname": "module:utils/pdfSignatureGateway.getGatewaySignatureContext",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureGateway.js",
-      "line": 20,
-      "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
-      "params": [
-        {
-          "name": "sourceUrl",
-          "type": "string",
-          "optional": false,
-          "description": "The URL already used by DocumentLoader."
-        },
-        {
-          "name": "baseUrl",
-          "type": "string",
-          "optional": true,
-          "description": "Browser base for relative source URLs."
-        },
-        {
-          "name": "sourcePack",
-          "type": "Object",
-          "optional": true,
-          "description": "Actual received pack frame identity."
-        }
-      ],
-      "returns": [
-        {
-          "type": "Object|null",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
-      "name": "mergeGatewaySignatureReport",
-      "longname": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureGateway.js",
-      "line": 75,
-      "description": "Accept only unambiguous server entries.",
-      "params": [
-        {
-          "name": "report",
-          "type": "*",
-          "optional": false,
-          "description": "Browser report."
-        },
-        {
-          "name": "server",
-          "type": "*",
-          "optional": false,
-          "description": "Gateway JSON report."
-        }
-      ],
-      "returns": [
-        {
-          "type": "*",
-          "description": "Enriched report, or unchecked signatures for malformed data."
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureGateway",
-      "name": "utils/pdfSignatureGateway",
-      "longname": "module:utils/pdfSignatureGateway",
-      "kind": "module",
-      "scope": null,
-      "file": "src/utils/pdfSignatureGateway.js",
-      "line": 1,
-      "description": "Optional gateway trust enrichment.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureGateway~validationDisabled",
-      "name": "validationDisabled",
-      "longname": "module:utils/pdfSignatureGateway~validationDisabled",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/utils/pdfSignatureGateway.js",
-      "line": 64,
-      "description": "The gateway answered that server validation is switched off.",
-      "params": [
-        {
-          "name": "report",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "*",
-          "description": ""
-        }
-      ],
       "examples": 0
     },
     {
@@ -98160,7 +97520,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1156,
+      "line": 1147,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {
@@ -98185,7 +97545,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 276,
+      "line": 268,
       "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
       "params": [],
       "returns": [],
@@ -98198,7 +97558,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1001,
+      "line": 992,
       "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
       "params": [
         {
@@ -98230,7 +97590,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 203,
+      "line": 195,
       "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
       "params": [
         {
@@ -98256,7 +97616,7 @@
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
       "line": 19,
-      "description": "One inspected PDF signature (level-1 integrity view; trust is never evaluated here - see the trust property).",
+      "description": "One inspected PDF signature (level-1 integrity view).",
       "params": [],
       "returns": [],
       "examples": 0
@@ -98268,7 +97628,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 57,
+      "line": 50,
       "description": "",
       "params": [],
       "returns": [],
@@ -98281,7 +97641,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 190,
+      "line": 182,
       "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
       "params": [
         {
@@ -98306,7 +97666,7 @@
       "kind": "constant",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 66,
+      "line": 58,
       "description": "SubFilters with level-1 handling.",
       "params": [],
       "returns": [],
@@ -98319,7 +97679,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 964,
+      "line": 955,
       "description": "Report an inspection failure without claiming that the document is unsigned.",
       "params": [
         {
@@ -98357,7 +97717,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 337,
+      "line": 137,
       "description": "Format a signature-related ISO time (signing, validation, certificate validity) as local time, &quot;2022-04-27 19:55&quot;, in both supported languages.",
       "params": [
         {
@@ -98382,7 +97742,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 85,
+      "line": 80,
       "description": "Shared localized status text for the badge tooltip and details dialog.",
       "params": [
         {
@@ -98413,8 +97773,8 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 64,
-      "description": "Worst severity across integrity and trust for all signatures.",
+      "line": 59,
+      "description": "Worst severity across integrity for all signatures.",
       "params": [
         {
           "name": "signatures",
@@ -98438,7 +97798,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 118,
+      "line": 113,
       "description": "",
       "params": [
         {
@@ -98463,7 +97823,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 52,
+      "line": 50,
       "description": "Map one integrity status to its severity class.",
       "params": [
         {
@@ -98471,135 +97831,11 @@
           "type": "string|null|undefined",
           "optional": false,
           "description": ""
-        },
-        {
-          "name": "trust",
-          "type": "string",
-          "optional": true,
-          "description": "Optional gateway trust verdict."
         }
       ],
       "returns": [
         {
           "type": "'ok'|'warning'|'error'",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.getSignatureTrustState",
-      "name": "getSignatureTrustState",
-      "longname": "module:utils/pdfSignatureStatus.getSignatureTrustState",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 238,
-      "description": "Which trust situation a signature is in: unavailable : no gateway answered for this document (viewer opened without ODVGateway); not-checked : the gateway has server validation di...",
-      "params": [
-        {
-          "name": "signature",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "'unavailable'|'not-checked'|'server-error'|'valid'|'invalid'|'unknown'",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.getTrustExplanation",
-      "name": "getTrustExplanation",
-      "longname": "module:utils/pdfSignatureStatus.getTrustExplanation",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 263,
-      "description": "State-specific trust text for the details dialog.",
-      "params": [
-        {
-          "name": "t",
-          "type": "function",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "signature",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "TrustExplanation",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.getTrustLabel",
-      "name": "getTrustLabel",
-      "longname": "module:utils/pdfSignatureStatus.getTrustLabel",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 164,
-      "description": "Shared localized trust text for the details dialog and the overview.",
-      "params": [
-        {
-          "name": "t",
-          "type": "function",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "trust",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.getTrustReasonText",
-      "name": "getTrustReasonText",
-      "longname": "module:utils/pdfSignatureStatus.getTrustReasonText",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 223,
-      "description": "Localized plain-language reason for a gateway trustReason code, or null for an unknown code.",
-      "params": [
-        {
-          "name": "t",
-          "type": "function",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "code",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string|null",
           "description": ""
         }
       ],
@@ -98612,33 +97848,8 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 104,
+      "line": 99,
       "description": "The worst integrity status among a document's signatures, or null when there are none.",
-      "params": [
-        {
-          "name": "signatures",
-          "type": "Array<*>|null|undefined",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string|null",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.getWorstSignatureTrust",
-      "name": "getWorstSignatureTrust",
-      "longname": "module:utils/pdfSignatureStatus.getWorstSignatureTrust",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 151,
-      "description": "The worst trust verdict among signatures, or null when there are none.",
       "params": [
         {
           "name": "signatures",
@@ -98662,7 +97873,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 37,
+      "line": 36,
       "description": "Integrity statuses ordered worst-first.",
       "params": [],
       "returns": [],
@@ -98675,36 +97886,11 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 74,
+      "line": 69,
       "description": "Fail closed for missing, unexpected and inherited property names.",
       "params": [
         {
           "name": "integrity",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.normalizeSignatureTrust",
-      "name": "normalizeSignatureTrust",
-      "longname": "module:utils/pdfSignatureStatus.normalizeSignatureTrust",
-      "kind": "function",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 142,
-      "description": "",
-      "params": [
-        {
-          "name": "trust",
           "type": "*",
           "optional": false,
           "description": ""
@@ -98725,7 +97911,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 326,
+      "line": 126,
       "description": "",
       "params": [
         {
@@ -98745,7 +97931,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 126,
+      "line": 121,
       "description": "",
       "params": [
         {
@@ -98770,60 +97956,8 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/utils/pdfSignatureStatus.js",
-      "line": 21,
+      "line": 20,
       "description": "Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are...",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
-      "name": "TRUST_REASON_CODES",
-      "longname": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
-      "kind": "constant",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 215,
-      "description": "Every trustReason code the gateway can emit.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
-      "name": "TRUST_REASON_DEFAULTS",
-      "longname": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 185,
-      "description": "Plain-language English default per gateway trustReason code.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus~TRUST_WORST_FIRST",
-      "name": "TRUST_WORST_FIRST",
-      "longname": "module:utils/pdfSignatureStatus~TRUST_WORST_FIRST",
-      "kind": "constant",
-      "scope": "inner",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 136,
-      "description": "Trust verdicts ordered worst-first.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureStatus~TrustExplanation",
-      "name": "TrustExplanation",
-      "longname": "module:utils/pdfSignatureStatus~TrustExplanation",
-      "kind": "typedef",
-      "scope": "inner",
-      "file": "src/utils/pdfSignatureStatus.js",
-      "line": 246,
-      "description": "",
       "params": [],
       "returns": [],
       "examples": 0
@@ -98836,7 +97970,7 @@
       "scope": null,
       "file": "src/utils/pdfSignatureStatus.js",
       "line": 2,
-      "description": "Signature UI status helpers for browser integrity and gateway trust.",
+      "description": "Signature UI status helpers for browser integrity.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -103590,7 +102724,7 @@
       "scope": "global",
       "file": "src/utils/printPdf.js",
       "line": 398,
-      "description": "Parse only the small CSS subset used by trusted print header/footer templates.",
+      "description": "Parse only the small CSS subset used by approved print header/footer templates.",
       "params": [
         {
           "name": "css",
@@ -107207,7 +106341,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 390,
+      "line": 411,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -107250,7 +106384,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 33,
+      "line": 34,
       "description": "Runtime validation values for CompareAdjustToolbarMode; the first one is the default.",
       "params": [],
       "returns": [],
@@ -107276,7 +106410,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 285,
+      "line": 306,
       "description": "Default OCR languages (Tesseract language codes), tried together on every text line.",
       "params": [],
       "returns": [],
@@ -107289,7 +106423,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 47,
+      "line": 50,
       "description": "User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values.",
       "params": [],
       "returns": [],
@@ -107302,7 +106436,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 238,
+      "line": 241,
       "description": "Resolve how the main toolbar's image controls behave in compare mode ( compare.adjust.toolbarMode ).",
       "params": [
         {
@@ -107327,7 +106461,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 139,
+      "line": 142,
       "description": "Resolve the configured Ctrl/Cmd+P behavior.",
       "params": [
         {
@@ -107352,7 +106486,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 334,
+      "line": 355,
       "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ).",
       "params": [
         {
@@ -107377,7 +106511,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 311,
+      "line": 332,
       "description": "Resolve the OCR languages ( ocr.languages ): an array of Tesseract language codes.",
       "params": [
         {
@@ -107402,7 +106536,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 767,
+      "line": 788,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -107427,7 +106561,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 279,
+      "line": 281,
       "description": "Resolve when PDF signature inspection may start ( pdfSignatures.inspectAfter ): 'firstPage' (default) starts once the first page is shown, 'allPages' waits until every page of the...",
       "params": [
         {
@@ -107446,13 +106580,38 @@
       "examples": 0
     },
     {
+      "id": "getPdfSignatureUncheckedSeverity",
+      "name": "getPdfSignatureUncheckedSeverity",
+      "longname": "getPdfSignatureUncheckedSeverity",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 298,
+      "description": "Resolve the symbol severity for a signature whose content is intact but whose certificate chain and revocation status the viewer does not check ( pdfSignatures.uncheckedSeverity ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "PdfSignatureUncheckedSeverity",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "getPrintDefaultMode",
       "name": "getPrintDefaultMode",
       "longname": "getPrintDefaultMode",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 642,
+      "line": 663,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -107477,7 +106636,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 667,
+      "line": 688,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -107502,7 +106661,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 116,
+      "line": 119,
       "description": "Read the merged runtime configuration from the browser environment.",
       "params": [],
       "returns": [
@@ -107520,7 +106679,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 750,
+      "line": 771,
       "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
       "params": [
         {
@@ -107545,7 +106704,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 350,
+      "line": 371,
       "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
       "params": [
         {
@@ -107570,7 +106729,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 618,
+      "line": 639,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -107595,7 +106754,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 604,
+      "line": 625,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -107620,7 +106779,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 591,
+      "line": 612,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -107645,7 +106804,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 691,
+      "line": 712,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -107670,7 +106829,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 709,
+      "line": 730,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -107695,7 +106854,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 211,
+      "line": 214,
       "description": "Resolve whether the compare curtain view is available ( compare.curtain.enabled ).",
       "params": [
         {
@@ -107720,7 +106879,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 223,
+      "line": 226,
       "description": "Resolve whether the compare curtain view offers its print action ( compare.curtain.print.enabled ).",
       "params": [
         {
@@ -107745,7 +106904,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 187,
+      "line": 190,
       "description": "Resolve whether the compare overlay view is available ( compare.overlay.enabled ).",
       "params": [
         {
@@ -107770,7 +106929,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 199,
+      "line": 202,
       "description": "Resolve whether the compare overlay view offers its print action ( compare.overlay.print.enabled ).",
       "params": [
         {
@@ -107795,7 +106954,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 152,
+      "line": 155,
       "description": "Resolve whether document metadata UI affordances should be available.",
       "params": [
         {
@@ -107820,7 +106979,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 174,
+      "line": 177,
       "description": "Master capability for page fine tuning and calibration-dependent compare views.",
       "params": [
         {
@@ -107845,7 +107004,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 298,
+      "line": 319,
       "description": "Resolve whether in-browser OCR of scanned pages is turned on ( ocr.enabled ).",
       "params": [
         {
@@ -107870,7 +107029,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 266,
+      "line": 268,
       "description": "Resolve whether PDF signature inspection runs at all ( pdfSignatures.enabled ).",
       "params": [
         {
@@ -107895,7 +107054,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 252,
+      "line": 255,
       "description": "Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol.",
       "params": [
         {
@@ -107920,7 +107079,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 31,
+      "line": 32,
       "description": "Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract.",
       "params": [],
       "returns": [],
@@ -107946,7 +107105,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 368,
+      "line": 389,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -107977,7 +107136,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 565,
+      "line": 586,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -108002,7 +107161,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 536,
+      "line": 557,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -108033,7 +107192,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 504,
+      "line": 525,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -108064,7 +107223,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 436,
+      "line": 457,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -108107,7 +107266,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 415,
+      "line": 436,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -108150,7 +107309,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 547,
+      "line": 568,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -108181,7 +107340,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 519,
+      "line": 540,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -108212,7 +107371,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 465,
+      "line": 486,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -108237,7 +107396,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 453,
+      "line": 474,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -108268,7 +107427,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 479,
+      "line": 500,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -108293,8 +107452,34 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 287,
+      "line": 308,
       "description": "Tesseract language codes: three lower-case letters, optionally with _suffixes (chi_sim, aze_cyrl).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+      "name": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+      "longname": "PDF_SIGNATURE_UNCHECKED_SEVERITIES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 36,
+      "description": "Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "PdfSignatureUncheckedSeverity",
+      "name": "PdfSignatureUncheckedSeverity",
+      "longname": "PdfSignatureUncheckedSeverity",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 13,
+      "description": "",
       "params": [],
       "returns": [],
       "examples": 0
@@ -108306,7 +107491,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 37,
+      "line": 40,
       "description": "User-facing print default mode aliases mapped to persisted PrintDefaultMode values.",
       "params": [],
       "returns": [],
@@ -108332,7 +107517,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 75,
+      "line": 78,
       "description": "",
       "params": [],
       "returns": [],
@@ -108345,7 +107530,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 164,
+      "line": 167,
       "description": "Read a strict boolean switch: only a real boolean counts, anything else (missing, strings such as &quot;false&quot;, numbers, null, objects) falls back to defaultValue .",
       "params": [
         {
@@ -108376,7 +107561,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 35,
+      "line": 38,
       "description": "Runtime validation values for ResetSessionTarget; the typedef documents the public contract.",
       "params": [],
       "returns": [],
@@ -108389,7 +107574,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 13,
+      "line": 14,
       "description": "Session-reset target for the support/problem notice.",
       "params": [],
       "returns": [],
@@ -108402,7 +107587,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 490,
+      "line": 511,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {
@@ -108427,7 +107612,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 68,
+      "line": 71,
       "description": "",
       "params": [],
       "returns": [],
@@ -108453,7 +107638,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 82,
+      "line": 85,
       "description": "",
       "params": [],
       "returns": [],
@@ -108466,7 +107651,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 90,
+      "line": 93,
       "description": "",
       "params": [],
       "returns": [],

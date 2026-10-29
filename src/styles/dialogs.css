@@ -2114,7 +2114,7 @@
   line-height: 1.45;
 }
 
-.odv-signature-trust {
+.odv-signature-info {
   margin: 0 0 10px;
   padding: 8px 12px;
   border-left: 4px solid var(--odv-border, #d5dae1);
@@ -2125,37 +2125,8 @@
   color: var(--text-color);
 }
 
-.odv-signature-trust p {
+.odv-signature-info p {
   margin: 0;
-}
-
-.odv-signature-trust p + p {
-  margin-top: 4px;
-}
-
-.odv-signature-trust-title {
-  font-weight: 600;
-}
-
-.odv-signature-trust--valid {
-  border-left-color: var(--odv-signature-ok-color, #1e7e34);
-}
-
-.odv-signature-trust--invalid {
-  border-left-color: var(--odv-signature-error-color, #c62828);
-}
-
-.odv-signature-trust--unknown,
-.odv-signature-trust--server-error {
-  border-left-color: var(--odv-signature-warning-color, #b25d00);
-}
-
-.odv-signature-trust-code {
-  color: var(--text-muted-color);
-  font-size: 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  -webkit-user-select: text;
-  user-select: text;
 }
 
 .odv-signature-body {

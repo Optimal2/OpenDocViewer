@@ -6,8 +6,8 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 ### React Contexts
 
-- `src/contexts/viewerContext.js` (249 lines) - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
-- `src/contexts/ViewerProvider.jsx` (2822 lines) - OpenDocViewer — Viewer state provider.
+- `src/contexts/viewerContext.js` (248 lines) - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
+- `src/contexts/ViewerProvider.jsx` (2817 lines) - OpenDocViewer — Viewer state provider.
 - `src/contexts/ThemeProvider.jsx` (343 lines) - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
 - `src/contexts/themeContext.js` (41 lines) - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 
@@ -27,7 +27,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentViewer/hooks/useCompareTransforms.js` (101 lines) - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` (162 lines) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/hooks/useAcceleratingHoldRepeat.js` (210 lines) - Reusable press\-and\-hold behavior for toolbar buttons.
-- `src/hooks/usePdfSignatureReports.js` (127 lines) - Browser PDF signature inspection and optional gateway trust enrichment.
+- `src/hooks/usePdfSignatureReports.js` (119 lines) - Browser PDF signature inspection.
 
 ### Workers
 

@@ -17,13 +17,13 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 18. Line count: 7855. JSDoc symbol count: 103.
+File count: 18. Line count: 7832. JSDoc symbol count: 103.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/PrintSelectionWorkspace.jsx` - Full\-window print\-selection workspace.
 - `src/components/Resizer.jsx` - OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction.
-- `src/components/SignatureDetailsDialog.jsx` - Signature details dialog \(browser integrity and optional gateway trust\).
+- `src/components/SignatureDetailsDialog.jsx` - Signature details dialog \(browser integrity\).
 - `src/components/LoadingSpinner.jsx` - OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.
 - `src/components/ViewerProblemNotice.jsx` - OpenDocViewer — configurable viewer\-level problem notice.
 - `src/components/SignatureOverviewDialog.jsx` - Signature overview dialog, opened from the toolbar overview button.
@@ -36,7 +36,7 @@ File count: 1. Line count: 36. JSDoc symbol count: 1.
 
 ## src/components/DocumentLoader
 
-File count: 8. Line count: 4112. JSDoc symbol count: 106.
+File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 - `src/components/DocumentLoader/DocumentLoader.js` - OpenDocViewer — Document loader orchestrator.
@@ -75,7 +75,7 @@ File count: 17. Line count: 7631. JSDoc symbol count: 154.
 
 ## src/contexts
 
-File count: 4. Line count: 3455. JSDoc symbol count: 95.
+File count: 4. Line count: 3449. JSDoc symbol count: 95.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -90,13 +90,13 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/hooks
 
-File count: 5. Line count: 777. JSDoc symbol count: 26.
+File count: 5. Line count: 769. JSDoc symbol count: 26.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/hooks/usePageNavigation.js` - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/hooks/useAcceleratingHoldRepeat.js` - Reusable press\-and\-hold behavior for toolbar buttons.
-- `src/hooks/usePdfSignatureReports.js` - Browser PDF signature inspection and optional gateway trust enrichment.
+- `src/hooks/usePdfSignatureReports.js` - Browser PDF signature inspection.
 
 ## src/i18n.js
 
@@ -150,14 +150,14 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 51. Line count: 20114. JSDoc symbol count: 816.
+File count: 50. Line count: 19765. JSDoc symbol count: 804.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/compareTransform.js` - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
 - `src/utils/imageAdjustments.js` - File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
-- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
+- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 5. Line count: 777. JSDoc symbol count: 26.
+File count: 5. Line count: 769. JSDoc symbol count: 26.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -69,14 +69,14 @@ Symbols:
 
 ## src/hooks/usePdfSignatureReports.js
 
-Browser PDF signature inspection and optional gateway trust enrichment.
+Browser PDF signature inspection.
 
 Exports: `usePdfSignatureReports`
 
-Local imports: `src/utils/pdfSignatureInspector.js`, `src/utils/pdfSignatures.js`, `src/utils/pdfSignatureGateway.js`
+Local imports: `src/utils/pdfSignatureInspector.js`, `src/utils/pdfSignatures.js`
 
 Symbols:
 
-- `module:hooks/usePdfSignatureReports` (module) - Browser PDF signature inspection and optional gateway trust enrichment.
+- `module:hooks/usePdfSignatureReports` (module) - Browser PDF signature inspection.
 - `module:hooks/usePdfSignatureReports~isPdfPage` (function) - No description.
 - `module:hooks/usePdfSignatureReports` (function) - No description.

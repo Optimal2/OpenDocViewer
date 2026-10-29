@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 20114. JSDoc symbol count: 816.
+File count: 50. Line count: 19765. JSDoc symbol count: 804.
 
 ## src/utils/compareCurtain.js
 
@@ -481,22 +481,6 @@ Symbols:
 - `module:utils/pdfSignatureDocuments.getSignatureFileHeading` (function) - Heading for one file of a multi\-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.
 - `module:utils/pdfSignatureDocuments.getSignatureFilePages` (function) - Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.
 
-## src/utils/pdfSignatureGateway.js
-
-Optional gateway trust enrichment.
-
-Exports: `getGatewaySignatureContext`, `mergeGatewaySignatureReport`, `createGatewaySignatureClient`
-
-Local imports: `src/utils/pdfSignatureStatus.js`
-
-Symbols:
-
-- `module:utils/pdfSignatureGateway` (module) - Optional gateway trust enrichment.
-- `module:utils/pdfSignatureGateway.getGatewaySignatureContext` (function) - Resolve only HTTP source routes on the viewer's own origin, preserving the path base.
-- `module:utils/pdfSignatureGateway~validationDisabled` (function) - The gateway answered that server validation is switched off.
-- `module:utils/pdfSignatureGateway.mergeGatewaySignatureReport` (function) - Accept only unambiguous server entries.
-- `module:utils/pdfSignatureGateway.createGatewaySignatureClient` (function) - Create viewer\-local state for disabled gateway sessions.
-
 ## src/utils/pdfSignatureInspector.js
 
 PDF signature inspection \- the single entry point for application code.
@@ -521,7 +505,7 @@ Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `unreadableSignatureRepor
 Symbols:
 
 - `module:utils/pdfSignatures` (module) - PDF signature collection \- level 1 integrity inspection.
-- `module:utils/pdfSignatures~PdfSignatureInfo` (typedef) - One inspected PDF signature \(level\-1 integrity view; trust is never evaluated here \- see the trust property\).
+- `module:utils/pdfSignatures~PdfSignatureInfo` (typedef) - One inspected PDF signature \(level\-1 integrity view\).
 - `module:utils/pdfSignatures~PdfSignatureReport` (typedef) - No description.
 - `module:utils/pdfSignatures.SUPPORTED_SUBFILTERS` (constant) - SubFilters with level\-1 handling.
 - `module:utils/pdfSignatures~pdfText` (function) - Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF\-16BE byte\-order mark.
@@ -533,24 +517,24 @@ Symbols:
 
 ## src/utils/pdfSignatureStatus.js
 
-Signature UI status helpers for browser integrity and gateway trust.
+Signature UI status helpers for browser integrity.
 
-Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `normalizeSignatureTrust`, `getWorstSignatureTrust`, `getTrustLabel`, `TRUST_REASON_CODES`, `getTrustReasonText`, `getSignatureTrustState`, `getTrustExplanation`, `formatSignatureTime`
+Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `formatSignatureTime`
 
 Symbols:
 
-- `module:utils/pdfSignatureStatus` (module) - Signature UI status helpers for browser integrity and gateway trust.
+- `module:utils/pdfSignatureStatus` (module) - Signature UI status helpers for browser integrity.
 - `module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY` (constant) - Severity classes used for colours/icons: intact is neutral/positive, modified\-after\-signing and unsupported are warnings, and digest\-mismatch, signature\-invalid and unreadable are...
 - `module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST` (constant) - Integrity statuses ordered worst\-first.
 - `module:utils/pdfSignatureStatus.getSignatureSeverity` (function) - Map one integrity status to its severity class.
-- `module:utils/pdfSignatureStatus.getReportSignatureSeverity` (function) - Worst severity across integrity and trust for all signatures.
+- `module:utils/pdfSignatureStatus.getReportSignatureSeverity` (function) - Worst severity across integrity for all signatures.
 - `module:utils/pdfSignatureStatus.normalizeSignatureIntegrity` (function) - Fail closed for missing, unexpected and inherited property names.
 - `module:utils/pdfSignatureStatus.getIntegrityLabel` (function) - Shared localized status text for the badge tooltip and details dialog.
 - `module:utils/pdfSignatureStatus.getWorstSignatureIntegrity` (function) - The worst integrity status among a document's signatures, or null when there are none.
 - `module:utils/pdfSignatureStatus.getSignatureCount` (function) - No description.
 - `module:utils/pdfSignatureStatus.reportHasSignatures` (function) - No description.
-- `module:utils/pdfSignatureStatus~TRUST_WORST_FIRST` (constant) - Trust verdicts ordered worst\-first.
-- `module:utils/pdfSignatureStatus.normalizeSignatureTrust` (function) - No description.
+- `module:utils/pdfSignatureStatus~pad2` (function) - No description.
+- `module:utils/pdfSignatureStatus.formatSignatureTime` (function) - Format a signature\-related ISO time \(signing, validation, certificate validity\) as local time, &quot;2022\-04\-27 19:55&quot;, in both supported languages.
 
 ## src/utils/pdfWorkerDispatcher.js
 
@@ -812,7 +796,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `getOcrLanguages`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `getOcrLanguages`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 
@@ -820,14 +804,14 @@ Symbols:
 - `ViewerDefaultZoomMode` (typedef) - No description.
 - `PrintDefaultMode` (typedef) - No description.
 - `CompareAdjustToolbarMode` (typedef) - No description.
+- `PdfSignatureUncheckedSeverity` (typedef) - No description.
 - `ResetSessionTarget` (typedef) - Session\-reset target for the support/problem notice.
 - `KEYBOARD_PRINT_SHORTCUT_BEHAVIORS` (constant) - Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract.
 - `COMPARE_ADJUST_TOOLBAR_MODES` (constant) - Runtime validation values for CompareAdjustToolbarMode; the first one is the default.
+- `PDF_SIGNATURE_UNCHECKED_SEVERITIES` (constant) - Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default.
 - `RESET_SESSION_TARGETS` (constant) - Runtime validation values for ResetSessionTarget; the typedef documents the public contract.
 - `PRINT_DEFAULT_MODE_ALIASES` (constant) - User\-facing print default mode aliases mapped to persisted PrintDefaultMode values.
 - `DEFAULT_ZOOM_MODE_ALIAS_ENTRIES` (constant) - User\-facing zoom\-mode aliases mapped to ViewerDefaultZoomMode values.
-- `ViewerCustomFitSizeLimits` (typedef) - No description.
-- `PrintSelectionWorkspaceConfig` (typedef) - No description.
 
 ## src/utils/sourceTempStore.js
 

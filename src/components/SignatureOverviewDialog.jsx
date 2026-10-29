@@ -3,8 +3,8 @@
  * Signature overview dialog, opened from the toolbar overview button.
  *
  * Lists every signed document of the loaded set: "DOK n", file name(s),
- * signature count, the worst integrity and trust status (shared status
- * helpers), and the signer and signing time of the newest signature. The
+ * signature count, the worst integrity status (shared status helpers), and the
+ * signer and signing time of the newest signature. The
  * active document's row is marked. Activating a row navigates the viewer to
  * the document's first page and keeps the dialog open; the secondary
  * "Details" action opens the per-document SignatureDetailsDialog on top.
@@ -20,7 +20,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { getIntegrityLabel, getTrustLabel } from '../utils/pdfSignatureStatus.js';
+import { getIntegrityLabel } from '../utils/pdfSignatureStatus.js';
 import { getSignatureFileHeading } from '../utils/pdfSignatureDocuments.js';
 import SignatureTime from './SignatureTime.jsx';
 
@@ -200,7 +200,7 @@ export default function SignatureOverviewDialog({
               const fileNames = doc.signedFiles
                 .map((file) => file.fileName || getSignatureFileHeading(t, file))
                 .join(', ');
-              const statusText = `${getIntegrityLabel(t, doc.worstIntegrity)} · ${t('signatures.fields.trust', { defaultValue: 'Trust' })}: ${getTrustLabel(t, doc.worstTrust)}`;
+              const statusText = getIntegrityLabel(t, doc.worstIntegrity);
               const signer = String(doc.newestSignature?.signer || '').trim() || emptyValue;
               const countText = t('signatures.overview.signatureCount', {
                 count: doc.signatureCount,

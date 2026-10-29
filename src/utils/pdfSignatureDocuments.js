@@ -14,7 +14,6 @@
 import {
   getReportSignatureSeverity,
   getWorstSignatureIntegrity,
-  getWorstSignatureTrust,
   reportHasSignatures,
 } from './pdfSignatureStatus.js';
 
@@ -44,7 +43,6 @@ import {
  * @property {number} signatureCount
  * @property {('ok'|'warning'|'error')} severity Worst severity across all files.
  * @property {string} worstIntegrity
- * @property {string} worstTrust
  * @property {(*|null)} newestSignature Signature with the latest parseable signing time.
  */
 
@@ -186,7 +184,6 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
       signatureCount: signatures.length,
       severity: getReportSignatureSeverity(signatures),
       worstIntegrity: getWorstSignatureIntegrity(signatures),
-      worstTrust: getWorstSignatureTrust(signatures),
       newestSignature: pickNewestSignature(signatures),
     });
   }

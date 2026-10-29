@@ -1,16 +1,15 @@
 // File: src/components/SignatureDetailsDialog.jsx
 /**
- * Signature details dialog (browser integrity and optional gateway trust).
+ * Signature details dialog (browser integrity).
  *
  * Lists every signature of a document with the phase 1 data contract fields:
  * signer and organisation, issuer, signing time and its source, reason,
  * location, kind (approval/certification/timestamp), the integrity status in
  * plain words with its integrityReason, whether the signature covers the
  * whole document, and the certificate validity period. Each signature starts
- * with a state-specific trust explanation (no gateway, validation disabled,
- * gateway failure, or the gateway verdict with its reason in plain language and
- * the raw code for support). Times are local ("2022-04-27 19:55") with the UTC
- * value in the title; verified timestamps label their time source.
+ * with an information line explaining that issuer validity and revocation status
+ * are not checked in the viewer. Times are local ("2022-04-27 19:55") with the
+ * UTC value in the title.
  *
  * The dialog works per document: when a document consists of several files
  * with signatures, a file selector (tabs) sits above the groups and the
@@ -26,7 +25,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { getIntegrityLabel, getTrustExplanation, getTrustLabel } from '../utils/pdfSignatureStatus.js';
+import { getIntegrityLabel } from '../utils/pdfSignatureStatus.js';
 import { getSignatureFileHeading, getSignatureFilePages } from '../utils/pdfSignatureDocuments.js';
 import SignatureTime from './SignatureTime.jsx';
 
@@ -56,8 +55,6 @@ function getKindLabel(t, kind) {
  */
 function getSigningTimeSourceLabel(t, source) {
   switch (String(source || '')) {
-    case 'timestamp':
-      return t('signatures.timeSource.timestamp', { defaultValue: 'Verified timestamp' });
     case 'signed-attribute':
       return t('signatures.timeSource.signedAttribute', { defaultValue: 'From the signed attributes' });
     case 'pdf-M':
@@ -304,9 +301,6 @@ export default function SignatureDetailsDialog({
             ) : null}
             {listedSignatures.map((signature, index) => {
               const integrityLabel = getIntegrityLabel(t, signature?.integrity);
-              const trustLabel = getTrustLabel(t, signature?.trust);
-              const trust = getTrustExplanation(t, signature);
-              const trustChecked = ['valid', 'invalid', 'unknown'].includes(trust.state);
               return (
                 <section
                   className="odv-signature-entry"
@@ -322,12 +316,10 @@ export default function SignatureDetailsDialog({
                       defaultValue: `Signature ${index + 1}`,
                     })}
                   </EntryHeading>
-                  <div className={`odv-signature-trust odv-signature-trust--${trust.state}`} role="note">
-                    <p className="odv-signature-trust-title">{trust.title}</p>
-                    {trust.reason ? <p className="odv-signature-trust-reason">{trust.reason}</p> : null}
-                    {trust.notMeaning ? <p className="odv-signature-trust-detail">{trust.notMeaning}</p> : null}
-                    {trust.hint ? <p className="odv-signature-trust-detail">{trust.hint}</p> : null}
-                    {trust.codeLine ? <p className="odv-signature-trust-code">{trust.codeLine}</p> : null}
+                  <div className="odv-signature-info" role="note">
+                    <p>{t('signatures.notCheckedInViewer', {
+                      defaultValue: 'Not checked in the viewer: issuer and revocation status',
+                    })}</p>
                   </div>
                   <dl className="odv-signature-fields">
                     <div className="odv-signature-field">
@@ -394,16 +386,6 @@ export default function SignatureDetailsDialog({
                         ) : emptyValue}
                       </dd>
                     </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.trust', { defaultValue: 'Trust' })}</dt>
-                      <dd>{trustLabel}</dd>
-                    </div>
-                    {trustChecked && signature?.validationTime ? (
-                      <div className="odv-signature-field">
-                        <dt>{t('signatures.fields.validationTime', { defaultValue: 'Validation time' })}</dt>
-                        <dd><SignatureTime value={signature.validationTime} fallback={emptyValue} /></dd>
-                      </div>
-                    ) : null}
                     {String(signature?.subFilter || '').trim() ? (
                       <div className="odv-signature-field">
                         <dt>{t('signatures.fields.format', { defaultValue: 'Format' })}</dt>

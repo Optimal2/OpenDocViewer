@@ -1293,7 +1293,6 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       pageCount: Math.max(1, Number(descriptor?.pageCount) || 1),
       mimeType: String(descriptor?.mimeType || ''),
       sourceUrl: String(descriptor?.sourceUrl || ''),
-      sourcePack: descriptor?.sourcePack,
       sizeBytes: Number(descriptor?.sizeBytes || 0),
       cacheKeyMode: String(descriptor?.cacheKeyMode || ''),
     });
@@ -2659,19 +2658,17 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     return undefined;
   }, [allPages, loadingRunActive, pageLoadState, pumpWarmupQueue]);
 
-  const getSignatureSourceUrl = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourceUrl, []);
-  const getSignatureSourcePack = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourcePack, []);
   // Display-only file name for the signature dialogs ("File k of m – name"); '' for opaque URLs.
   const getSignatureSourceFileName = useCallback(
     (sourceKey) => getSourceFileNameFromUrl(sourceDescriptorsRef.current.get(sourceKey)?.sourceUrl),
     []
   );
 
-  // PDF signature inspection and optional gateway trust: starts only after the first page is
-  // ready (page rendering keeps priority) — or after every page when the site configures
-  // `pdfSignatures.inspectAfter: 'allPages'` — runs once per PDF source off the main thread,
-  // and caches one report per document for the session. `pdfSignatures.enabled: false` keeps
-  // it off entirely: no bytes reach the worker and no symbols appear.
+  // PDF signature inspection starts only after the first page is ready (page rendering keeps
+  // priority) — or after every page when the site configures `pdfSignatures.inspectAfter:
+  // 'allPages'` — runs once per PDF source off the main thread, and caches one report per document
+  // for the session. `pdfSignatures.enabled: false` keeps it off entirely: no bytes reach the worker
+  // and no symbols appear.
   const signatureInspectionReady = useMemo(() => {
     if (!isPdfSignatureInspectionEnabled()) return false;
     if (getPdfSignatureInspectionStart() !== 'allPages') return pageLoadState.readyPages > 0;
@@ -2686,8 +2683,6 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     currentSourceKey: signaturePrioritySourceKey,
     inspectionReady: signatureInspectionReady,
     readSourceArrayBuffer,
-    getSourceUrl: getSignatureSourceUrl,
-    getSourcePack: getSignatureSourcePack,
   });
 
   useEffect(() => () => {
