@@ -188,6 +188,30 @@ used by scanned or image-heavy PDFs. Deploy this folder together with the rest
 of `dist/`; otherwise affected PDFs may load as blank pages and the browser
 console may show `JBig2 failed to initialize` or missing `wasmUrl` warnings.
 
+### OCR engine resources
+
+The build also emits the in-browser OCR engine under `dist/ocr/` (about 9 MB): the
+tesseract.js worker script, one WebAssembly engine core and the Swedish and English
+language models, copied from the pinned npm packages (`scripts/ocr-assets.mjs`). The
+folder names carry the package versions and a content hash of the models
+(`ocr/tesseract-<version>-core-<version>/`, `ocr/tessdata-<variant>-<hash>/`), so the
+`immutable` cache header in `web.config` is safe: every upgrade changes the URLs.
+
+Nothing in this folder is requested unless a site turns `ocr.enabled` on
+(`docs-src/runtime-configuration.md`), so deploying it costs disk space only. Two ways
+to keep it out of the application package:
+
+- Build with `ODV_OCR_ASSETS=skip` (`npm run build`); the folder is then absent and the
+  post-build check `scripts/verify-ocr-lazy-chunk.mjs` expects it to be absent.
+- Host a copy of `dist/ocr/` elsewhere, with the same layout, and point
+  `ocr.assetBaseUrl` at it. A cross-origin host must be allowed by the site CSP in
+  `script-src` and send CORS headers for the models.
+
+`verify-ocr-lazy-chunk.mjs` runs as the second half of `npm run build`. It fails the
+build when any chunk other than the lazy `ocr-<hash>.js` chunk mentions the engine,
+when something imports that chunk statically, or when `dist/ocr/` differs from the
+installed packages, and it prints the sizes of `dist/`, `dist/ocr/` and the chunk.
+
 ### Prefetch tuning for proxied source endpoints
 
 If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. This customer-focused bundle keeps concurrency moderate at `4`, disables retries, and aborts individual prefetch requests after `10000` ms so one stalled upstream request does not hold the UI for long. The profile assumes the main VPN/proxy timeout issue has been resolved and now optimizes harder for responsiveness.

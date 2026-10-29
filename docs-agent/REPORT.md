@@ -2,17 +2,17 @@
 
 ## Coverage
 
-- Files: 148
-- Source lines: 61716
-- JSDoc symbols: 1698
-- Files without JSDoc doclets: 0
+- Files: 155
+- Source lines: 62253
+- JSDoc symbols: 1724
+- Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 36 incoming local imports
-- `src/utils/runtimeConfig.js`: 23 incoming local imports
+- `src/logging/systemLogger.js`: 39 incoming local imports
+- `src/utils/runtimeConfig.js`: 26 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
 - `src/contexts/viewerContext.js`: 12 incoming local imports
@@ -29,7 +29,7 @@
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2817 lines
+- `src/contexts/ViewerProvider.jsx`: 2823 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2489 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2172 lines
@@ -46,5 +46,10 @@
 - `src/utils/printCore.js`: 1058 lines
 
 ## Next Iteration Signals
+
+- Files without JSDoc doclets are covered by source-derived summaries only.
+
+Files without JSDoc doclets:
+- `src/ocr/index.js`
 
 - Compare this report after each generator change to confirm signal quality improved.

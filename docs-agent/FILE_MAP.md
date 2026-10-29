@@ -75,10 +75,11 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 1 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | <code>src/contexts/viewerContext.js</code> | 248 | 12 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2817 | 1 | 66 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2823 | 1 | 66 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
+| <code>src/hooks/useOcrModule.js</code> | 44 | 1 | 1 | high | Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true. |
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |
@@ -92,8 +93,13 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/integrations/sessionUrl.js</code> | 166 | 1 | 4 | high | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
 | <code>src/integrations/urlParams.js</code> | 110 | 1 | 5 | high | OpenDocViewer — URL Parameter Reader \(Browser-only\) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e. |
 | <code>src/integrations/viewerEvents.js</code> | 192 | 0 | 8 | high | OpenDocViewer — Tiny Event Emitter/Listener Utilities \(Browser-only\) Lightweight helpers for broadcasting and listening to app-level DOM events. |
-| <code>src/logging/systemLogger.js</code> | 471 | 36 | 31 | high | src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) - Provide a small, dependency-light logging facade for the browser app. |
+| <code>src/logging/systemLogger.js</code> | 471 | 39 | 31 | high | src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) - Provide a small, dependency-light logging facade for the browser app. |
 | <code>src/logging/userLogger.js</code> | 308 | 2 | 17 | high | UserLogController — client-side controller for **user** print logs \(backend-agnostic\). |
+| <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
+| <code>src/ocr/engine.js</code> | 167 | 1 | 8 | high | Thin wrapper around a tesseract.js worker. |
+| <code>src/ocr/index.js</code> | 13 | 1 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
+| <code>src/ocr/languages.js</code> | 29 | 1 | 2 | high | Membership check for OCR language codes against the models tesseract.js knows. |
+| <code>src/ocr/setup.js</code> | 95 | 0 | 3 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
 | <code>src/PerformanceMonitor.jsx</code> | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | <code>src/schemas/portableBundle.js</code> | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
 | <code>src/types/jsdoc-types.js</code> | 102 | 0 | 13 | high | Centralized JSDoc-only type and callback definitions. |
@@ -111,6 +117,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/memoryProfile.js</code> | 75 | 2 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
+| <code>src/utils/ocrLoader.js</code> | 41 | 1 | 3 | high | The only door into the OCR module. |
 | <code>src/utils/ompThemePreference.js</code> | 390 | 3 | 22 | high | Shared OMP theme preference adapter \(OMP_THEME_PREFERENCE\). |
 | <code>src/utils/pageAssetRenderer.js</code> | 918 | 2 | 6 | high | OpenDocViewer — hybrid page-asset renderer. |
 | <code>src/utils/pageAssetStore.js</code> | 746 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |
@@ -142,7 +149,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 800 | 23 | 58 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 860 | 26 | 63 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/supportDiagnostics.js</code> | 375 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/toolbarDensity.js</code> | 30 | 2 | 2 | high | Toolbar density on the document root. |

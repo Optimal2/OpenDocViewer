@@ -15070,7 +15070,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1020,
+    "line": 1021,
     "description": "",
     "params": [
       {
@@ -15095,7 +15095,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1346,
+    "line": 1347,
     "description": "",
     "params": [],
     "returns": [
@@ -15113,7 +15113,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1035,
+    "line": 1036,
     "description": "",
     "params": [
       {
@@ -15150,7 +15150,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1496,
+    "line": 1497,
     "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
     "params": [
       {
@@ -15187,7 +15187,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1062,
+    "line": 1063,
     "description": "",
     "params": [],
     "returns": [
@@ -15205,7 +15205,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 547,
+    "line": 548,
     "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
     "params": [],
     "returns": [
@@ -15223,7 +15223,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 217,
+    "line": 218,
     "description": "",
     "params": [
       {
@@ -15248,7 +15248,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2710,
+    "line": 2716,
     "description": "",
     "params": [
       {
@@ -15268,7 +15268,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2696,
+    "line": 2702,
     "description": "",
     "params": [
       {
@@ -15288,7 +15288,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1134,
+    "line": 1135,
     "description": "",
     "params": [
       {
@@ -15313,7 +15313,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 59,
+    "line": 60,
     "description": "",
     "params": [],
     "returns": [],
@@ -15326,7 +15326,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 53,
+    "line": 54,
     "description": "",
     "params": [],
     "returns": [],
@@ -15339,7 +15339,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1594,
+    "line": 1595,
     "description": "",
     "params": [
       {
@@ -15364,7 +15364,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2011,
+    "line": 2012,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -15389,7 +15389,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1818,
+    "line": 1819,
     "description": "",
     "params": [
       {
@@ -15426,7 +15426,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 74,
+    "line": 75,
     "description": "",
     "params": [],
     "returns": [],
@@ -15439,7 +15439,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2715,
+    "line": 2721,
     "description": "",
     "params": [
       {
@@ -15459,7 +15459,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 149,
+    "line": 150,
     "description": "",
     "params": [
       {
@@ -15490,7 +15490,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2408,
+    "line": 2409,
     "description": "",
     "params": [
       {
@@ -15515,7 +15515,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1474,
+    "line": 1475,
     "description": "",
     "params": [
       {
@@ -15540,7 +15540,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1570,
+    "line": 1571,
     "description": "",
     "params": [
       {
@@ -15565,7 +15565,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1071,
+    "line": 1072,
     "description": "",
     "params": [
       {
@@ -15590,7 +15590,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 866,
+    "line": 867,
     "description": "",
     "params": [
       {
@@ -15621,7 +15621,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 883,
+    "line": 884,
     "description": "",
     "params": [
       {
@@ -15652,7 +15652,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 183,
+    "line": 184,
     "description": "",
     "params": [
       {
@@ -15677,7 +15677,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 922,
+    "line": 923,
     "description": "",
     "params": [
       {
@@ -15702,7 +15702,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 209,
+    "line": 210,
     "description": "",
     "params": [
       {
@@ -15727,7 +15727,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 201,
+    "line": 202,
     "description": "",
     "params": [
       {
@@ -15752,7 +15752,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 120,
+    "line": 121,
     "description": "",
     "params": [
       {
@@ -15777,7 +15777,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 903,
+    "line": 904,
     "description": "",
     "params": [
       {
@@ -15802,7 +15802,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 191,
+    "line": 192,
     "description": "",
     "params": [
       {
@@ -15827,7 +15827,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 912,
+    "line": 913,
     "description": "",
     "params": [
       {
@@ -15852,7 +15852,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 89,
+    "line": 90,
     "description": "",
     "params": [
       {
@@ -15883,7 +15883,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 110,
+    "line": 111,
     "description": "",
     "params": [
       {
@@ -15908,7 +15908,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 99,
+    "line": 100,
     "description": "",
     "params": [
       {
@@ -15945,7 +15945,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 131,
+    "line": 132,
     "description": "",
     "params": [
       {
@@ -15988,7 +15988,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1358,
+    "line": 1359,
     "description": "",
     "params": [
       {
@@ -16013,7 +16013,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 228,
+    "line": 229,
     "description": "",
     "params": [
       {
@@ -16038,7 +16038,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 524,
+    "line": 525,
     "description": "Record that a page now has a reusable full-size asset available.",
     "params": [
       {
@@ -16063,7 +16063,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 534,
+    "line": 535,
     "description": "Record that a page now has a reusable thumbnail asset available.",
     "params": [
       {
@@ -16088,7 +16088,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 970,
+    "line": 971,
     "description": "",
     "params": [
       {
@@ -16119,7 +16119,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1405,
+    "line": 1406,
     "description": "",
     "params": [
       {
@@ -16156,7 +16156,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1548,
+    "line": 1549,
     "description": "",
     "params": [
       {
@@ -16187,7 +16187,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2274,
+    "line": 2275,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -16205,7 +16205,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1329,
+    "line": 1330,
     "description": "",
     "params": [
       {
@@ -16230,7 +16230,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1338,
+    "line": 1339,
     "description": "",
     "params": [
       {
@@ -16255,7 +16255,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2093,
+    "line": 2094,
     "description": "",
     "params": [
       {
@@ -16286,7 +16286,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1286,
+    "line": 1287,
     "description": "",
     "params": [
       {
@@ -16311,7 +16311,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 946,
+    "line": 947,
     "description": "Release print leases previously acquired through getPrintablePageUrls .",
     "params": [
       {
@@ -16336,7 +16336,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1726,
+    "line": 1727,
     "description": "",
     "params": [
       {
@@ -16373,7 +16373,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 705,
+    "line": 706,
     "description": "",
     "params": [],
     "returns": [
@@ -16391,7 +16391,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 159,
+    "line": 160,
     "description": "",
     "params": [
       {
@@ -16422,7 +16422,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1654,
+    "line": 1655,
     "description": "",
     "params": [
       {
@@ -16459,7 +16459,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 678,
+    "line": 679,
     "description": "",
     "params": [],
     "returns": [
@@ -16477,7 +16477,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2365,
+    "line": 2366,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -16508,7 +16508,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2705,
+    "line": 2711,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -16534,7 +16534,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1641,
+    "line": 1642,
     "description": "",
     "params": [
       {
@@ -16559,7 +16559,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1305,
+    "line": 1306,
     "description": "",
     "params": [
       {
@@ -16584,7 +16584,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 64,
+    "line": 65,
     "description": "",
     "params": [],
     "returns": [],
@@ -16597,7 +16597,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 172,
+    "line": 173,
     "description": "",
     "params": [
       {
@@ -16628,7 +16628,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1483,
+    "line": 1484,
     "description": "",
     "params": [
       {
@@ -16659,7 +16659,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2115,
+    "line": 2116,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {
@@ -16684,7 +16684,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1559,
+    "line": 1560,
     "description": "",
     "params": [
       {
@@ -16715,7 +16715,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 500,
+    "line": 501,
     "description": "",
     "params": [
       {
@@ -16740,7 +16740,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 338,
+    "line": 339,
     "description": "",
     "params": [
       {
@@ -16765,7 +16765,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 327,
+    "line": 328,
     "description": "",
     "params": [],
     "returns": [],
@@ -17251,6 +17251,24 @@
       {
         "type": "NavigationModifierState",
         "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/hooks/useOcrModule.js",
+    "line": 21,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": "The OCR module (src/ocr/index.js) once loaded, otherwise null."
       }
     ],
     "examples": 0
@@ -20279,6 +20297,412 @@
     "file": "src/logging/userLogger.js",
     "line": 306,
     "description": "Export singleton instance.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrAssetManifest",
+    "name": "OcrAssetManifest",
+    "longname": "OcrAssetManifest",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/assetUrls.js",
+    "line": 16,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrAssetUrls",
+    "name": "OcrAssetUrls",
+    "longname": "OcrAssetUrls",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/assetUrls.js",
+    "line": 25,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "readOcrAssetManifest",
+    "name": "readOcrAssetManifest",
+    "longname": "readOcrAssetManifest",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/assetUrls.js",
+    "line": 39,
+    "description": "The manifest the build generated, or null when it is unusable.",
+    "params": [],
+    "returns": [
+      {
+        "type": "OcrAssetManifest|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveOcrAssetUrls",
+    "name": "resolveOcrAssetUrls",
+    "longname": "resolveOcrAssetUrls",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/assetUrls.js",
+    "line": 60,
+    "description": "Turn the dist-relative manifest paths into absolute URLs.",
+    "params": [
+      {
+        "name": "manifest",
+        "type": "OcrAssetManifest|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.assetBaseUrl",
+        "type": "string|null",
+        "optional": true,
+        "description": "Validated ocr.assetBaseUrl , or null for the viewer's own folder."
+      },
+      {
+        "name": "options.moduleUrl",
+        "type": "string",
+        "optional": false,
+        "description": "import.meta.url of the calling module (locates the application)."
+      },
+      {
+        "name": "options.documentBaseUrl",
+        "type": "string",
+        "optional": true,
+        "description": "document.baseURI , the base for a relative assetBaseUrl."
+      },
+      {
+        "name": "options.dev",
+        "type": "boolean",
+        "optional": true,
+        "description": "True in the Vite dev server, where the folder is served from the root."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrAssetUrls",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "ASSETS",
+    "name": "ASSETS",
+    "longname": "ASSETS",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 25,
+    "description": "The worker script, engine core or a language model could not be loaded.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "classifyOcrStartupError",
+    "name": "classifyOcrStartupError",
+    "longname": "classifyOcrStartupError",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 41,
+    "description": "Classify a start-up error by its message.",
+    "params": [
+      {
+        "name": "error",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "One of OCR_STARTUP_FAILURE."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "createOcrEngine",
+    "name": "createOcrEngine",
+    "longname": "createOcrEngine",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 95,
+    "description": "Create an engine for the given languages and asset URLs.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.languages",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": "Tesseract language codes, model order."
+      },
+      {
+        "name": "options.assetUrls",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.createWorker",
+        "type": "function",
+        "optional": true,
+        "description": "tesseract.js createWorker (injectable for tests)."
+      },
+      {
+        "name": "options.log",
+        "type": "Object",
+        "optional": true,
+        "description": "Logger (injectable for tests)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrEngine",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "CSP",
+    "name": "CSP",
+    "longname": "CSP",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 23,
+    "description": "WebAssembly compilation refused: the site CSP lacks 'wasm-unsafe-eval' in script-src.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "flattenOcrWords",
+    "name": "flattenOcrWords",
+    "longname": "flattenOcrWords",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 54,
+    "description": "Flatten tesseract.js' block tree into one word list with page-pixel boxes.",
+    "params": [
+      {
+        "name": "data",
+        "type": "Object",
+        "optional": false,
+        "description": "tesseract.js recognition result ( data with blocks )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<{text: string, confidence: number, bbox: {x0: number, y0: number, x1: number, y1: number}}>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_STARTUP_FAILURE",
+    "name": "OCR_STARTUP_FAILURE",
+    "longname": "OCR_STARTUP_FAILURE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 21,
+    "description": "Why the engine could not start (see classifyOcrStartupError).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrEngine",
+    "name": "OcrEngine",
+    "longname": "OcrEngine",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 74,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "UNKNOWN",
+    "name": "UNKNOWN",
+    "longname": "UNKNOWN",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 27,
+    "description": "Anything else.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "KNOWN_OCR_LANGUAGES",
+    "name": "KNOWN_OCR_LANGUAGES",
+    "longname": "KNOWN_OCR_LANGUAGES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/languages.js",
+    "line": 13,
+    "description": "Every language code tesseract.js lists a model for (lower-case, e.g.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "partitionOcrLanguages",
+    "name": "partitionOcrLanguages",
+    "longname": "partitionOcrLanguages",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/languages.js",
+    "line": 21,
+    "description": "Split codes into those tesseract.js knows a model for and the rest.",
+    "params": [
+      {
+        "name": "codes",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "createConfiguredOcrEngine",
+    "name": "createConfiguredOcrEngine",
+    "longname": "createConfiguredOcrEngine",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/setup.js",
+    "line": 85,
+    "description": "Create an engine for the configured languages and asset location.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": "Passed to describeOcrSetup, plus createWorker for createOcrEngine."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "engine is an OcrEngine (see engine.js)."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "describeOcrSetup",
+    "name": "describeOcrSetup",
+    "longname": "describeOcrSetup",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/setup.js",
+    "line": 42,
+    "description": "Resolve languages and asset URLs from the configuration, logging each problem once.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config (defaults to the viewer's)."
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": "Injection points, all optional."
+      },
+      {
+        "name": "options.log",
+        "type": "Object",
+        "optional": true,
+        "description": "Logger with warn (defaults to the system logger)."
+      },
+      {
+        "name": "options.manifest",
+        "type": "Object",
+        "optional": true,
+        "description": "Asset manifest (defaults to the build's)."
+      },
+      {
+        "name": "options.moduleUrl",
+        "type": "string",
+        "optional": true,
+        "description": "Caller location (defaults to this module's import.meta.url )."
+      },
+      {
+        "name": "options.documentBaseUrl",
+        "type": "string",
+        "optional": true,
+        "description": "Base for a relative assetBaseUrl (defaults to document.baseURI )."
+      },
+      {
+        "name": "options.dev",
+        "type": "boolean",
+        "optional": true,
+        "description": "Dev-server mode (defaults to import.meta.env.DEV )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrSetup",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OcrSetup",
+    "name": "OcrSetup",
+    "longname": "OcrSetup",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/setup.js",
+    "line": 23,
+    "description": "",
     "params": [],
     "returns": [],
     "examples": 0
@@ -25158,6 +25582,57 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "isOcrModuleRequested",
+    "name": "isOcrModuleRequested",
+    "longname": "isOcrModuleRequested",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrLoader.js",
+    "line": 33,
+    "description": "True once the module import has been requested in this session.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "loadOcrModule",
+    "name": "loadOcrModule",
+    "longname": "loadOcrModule",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrLoader.js",
+    "line": 20,
+    "description": "",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config; omitted means the viewer's own."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<(Object|null)>",
+        "description": "The OCR module (src/ocr/index.js) or null while OCR is off."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resetOcrModuleForTests",
+    "name": "resetOcrModuleForTests",
+    "longname": "resetOcrModuleForTests",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrLoader.js",
+    "line": 38,
+    "description": "Test hook: forget the cached import so the next call imports again.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -38911,7 +39386,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 411,
+    "line": 471,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -39000,6 +39475,56 @@
     "examples": 0
   },
   {
+    "id": "describeOcrAssetBaseUrl",
+    "name": "describeOcrAssetBaseUrl",
+    "longname": "describeOcrAssetBaseUrl",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 397,
+    "description": "Describe how ocr.assetBaseUrl resolves.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "describeOcrLanguages",
+    "name": "describeOcrLanguages",
+    "longname": "describeOcrLanguages",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 340,
+    "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "getCompareAdjustToolbarMode",
     "name": "getCompareAdjustToolbarMode",
     "longname": "getCompareAdjustToolbarMode",
@@ -39056,8 +39581,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 355,
-    "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ).",
+    "line": 419,
+    "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
         "name": "cfg",
@@ -39081,8 +39606,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 332,
-    "description": "Resolve the OCR languages ( ocr.languages ): an array of Tesseract language codes.",
+    "line": 371,
+    "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
         "name": "cfg",
@@ -39106,7 +39631,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 788,
+    "line": 848,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -39181,7 +39706,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 663,
+    "line": 723,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -39206,7 +39731,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 688,
+    "line": 748,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -39249,7 +39774,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 771,
+    "line": 831,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -39274,7 +39799,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 371,
+    "line": 431,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -39299,7 +39824,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 639,
+    "line": 699,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -39324,7 +39849,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 625,
+    "line": 685,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -39349,7 +39874,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 612,
+    "line": 672,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -39374,7 +39899,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 712,
+    "line": 772,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -39399,7 +39924,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 730,
+    "line": 790,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -39675,7 +40200,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 389,
+    "line": 449,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -39706,7 +40231,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 586,
+    "line": 646,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -39731,7 +40256,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 557,
+    "line": 617,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -39762,7 +40287,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 525,
+    "line": 585,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -39793,7 +40318,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 457,
+    "line": 517,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -39836,7 +40361,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 436,
+    "line": 496,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -39879,7 +40404,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 568,
+    "line": 628,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -39910,7 +40435,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 540,
+    "line": 600,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -39941,7 +40466,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 486,
+    "line": 546,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -39966,7 +40491,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 474,
+    "line": 534,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -39997,7 +40522,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 500,
+    "line": 560,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -40013,6 +40538,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_ASSET_BASE_URL_REJECTIONS",
+    "name": "OCR_ASSET_BASE_URL_REJECTIONS",
+    "longname": "OCR_ASSET_BASE_URL_REJECTIONS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 376,
+    "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -40094,6 +40632,19 @@
     "examples": 0
   },
   {
+    "id": "QUERY_OR_FRAGMENT",
+    "name": "QUERY_OR_FRAGMENT",
+    "longname": "QUERY_OR_FRAGMENT",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 378,
+    "description": "The value carries ?",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "readBooleanSwitch",
     "name": "readBooleanSwitch",
     "longname": "readBooleanSwitch",
@@ -40157,7 +40708,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 511,
+    "line": 571,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -40173,6 +40724,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "SCHEME",
+    "name": "SCHEME",
+    "longname": "SCHEME",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 380,
+    "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {

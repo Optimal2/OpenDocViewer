@@ -321,43 +321,103 @@ export function isOcrEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
- * Resolve the OCR languages (`ocr.languages`): an array of Tesseract language codes. Entries are
- * trimmed and lower-cased; non-strings, malformed codes and duplicates are dropped. Anything that
- * is not an array, or leaves no valid entry, falls back to DEFAULT_OCR_LANGUAGES. The order is
- * kept because Tesseract reports it as the model order.
+ * Describe how `ocr.languages` resolves: the usable codes, the entries that were ignored and
+ * whether the default list stood in. This is the diagnostic form of getOcrLanguages and stays
+ * side-effect free like every accessor here; the OCR module (src/ocr/setup.js) logs the outcome
+ * once when it starts, so a site sees a typo instead of a silent fallback.
+ *
+ * Entries are trimmed and lower-cased; non-strings, malformed codes and duplicates are dropped.
+ * Only the form of a code is checked (three letters plus optional `_suffix`); whether a model
+ * with that code exists is known to the OCR module, which checks it against tesseract.js' list.
+ * `configured` is true when the value is an array at all. `fallback` is true when the value is
+ * missing, not an array, or an array without a usable entry (including `[]`): `languages` is
+ * then a copy of DEFAULT_OCR_LANGUAGES, since an empty list could never recognize anything.
+ * The order of valid codes is kept because Tesseract reports it as the model order.
+ *
+ * @param {Object=} cfg
+ * @returns {{ languages: Array<string>, configured: boolean, fallback: boolean, dropped: Array<*> }}
+ */
+export function describeOcrLanguages(cfg = getRuntimeConfig()) {
+  const raw = cfg?.ocr?.languages;
+  if (!Array.isArray(raw)) {
+    return { languages: [...DEFAULT_OCR_LANGUAGES], configured: false, fallback: true, dropped: [] };
+  }
+  const languages = [];
+  const dropped = [];
+  for (const entry of raw) {
+    if (typeof entry !== 'string') {
+      dropped.push(entry);
+      continue;
+    }
+    const code = entry.trim().toLowerCase();
+    if (!OCR_LANGUAGE_CODE_PATTERN.test(code)) {
+      dropped.push(entry);
+      continue;
+    }
+    if (!languages.includes(code)) languages.push(code);
+  }
+  if (!languages.length) {
+    return { languages: [...DEFAULT_OCR_LANGUAGES], configured: true, fallback: true, dropped };
+  }
+  return { languages, configured: true, fallback: false, dropped };
+}
+
+/**
+ * Resolve the OCR languages (`ocr.languages`): the `languages` of describeOcrLanguages.
  *
  * @param {Object=} cfg
  * @returns {Array<string>}
  */
 export function getOcrLanguages(cfg = getRuntimeConfig()) {
-  const raw = cfg?.ocr?.languages;
-  if (!Array.isArray(raw)) return [...DEFAULT_OCR_LANGUAGES];
-  const languages = [];
-  for (const entry of raw) {
-    if (typeof entry !== 'string') continue;
-    const code = entry.trim().toLowerCase();
-    if (!OCR_LANGUAGE_CODE_PATTERN.test(code) || languages.includes(code)) continue;
-    languages.push(code);
+  return describeOcrLanguages(cfg).languages;
+}
+
+/** Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once. */
+export const OCR_ASSET_BASE_URL_REJECTIONS = Object.freeze({
+  /** The value carries `?` or `#`: file names are appended to the base, so neither can be kept. */
+  QUERY_OR_FRAGMENT: 'query-or-fragment',
+  /** The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter). */
+  SCHEME: 'scheme',
+});
+const URL_SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
+
+/**
+ * Describe how `ocr.assetBaseUrl` resolves. `url` is the usable base with a trailing slash, or
+ * `null` for the viewer's own `ocr/` folder next to the application. Blank and non-string values
+ * are simply unset. A string is ignored (`url` null, `rejected` set) when it carries a query
+ * string or fragment, because the engine appends file names to the base, or when its scheme is
+ * not http or https. Relative (`/shared/ocr/`, `ocr`) and protocol-relative (`//host/ocr/`)
+ * bases are allowed and resolve against the page. Whether a cross-origin base can actually be
+ * used is still decided by the browser: the site CSP must allow the host in `script-src` and the
+ * host must send CORS headers for the language models.
+ *
+ * @param {Object=} cfg
+ * @returns {{ url: (string|null), rejected: (string|null), value: (string|null) }}
+ */
+export function describeOcrAssetBaseUrl(cfg = getRuntimeConfig()) {
+  const raw = cfg?.ocr?.assetBaseUrl;
+  if (typeof raw !== 'string') return { url: null, rejected: null, value: null };
+  const trimmed = raw.trim();
+  if (!trimmed) return { url: null, rejected: null, value: null };
+  if (/[?#]/.test(trimmed)) {
+    return { url: null, rejected: OCR_ASSET_BASE_URL_REJECTIONS.QUERY_OR_FRAGMENT, value: trimmed };
   }
-  return languages.length ? languages : [...DEFAULT_OCR_LANGUAGES];
+  const scheme = URL_SCHEME_PATTERN.exec(trimmed);
+  if (scheme && !/^https?:$/i.test(scheme[0])) {
+    return { url: null, rejected: OCR_ASSET_BASE_URL_REJECTIONS.SCHEME, value: trimmed };
+  }
+  return { url: trimmed.endsWith('/') ? trimmed : `${trimmed}/`, rejected: null, value: trimmed };
 }
 
 /**
- * Resolve where the OCR engine, worker and language files are served from (`ocr.assetBaseUrl`).
- * `null` (default) means the viewer's own `ocr/` folder next to the application. A non-empty
- * string is trimmed and always returned with a trailing slash; blank or non-string values give
- * `null`. No URL validation happens here: the browser's same-origin and CSP rules decide whether
- * a cross-origin base can actually be used.
+ * Resolve where the OCR engine, worker and language files are served from (`ocr.assetBaseUrl`):
+ * the `url` of describeOcrAssetBaseUrl, so `null` both for the default and for an ignored value.
  *
  * @param {Object=} cfg
  * @returns {(string|null)}
  */
 export function getOcrAssetBaseUrl(cfg = getRuntimeConfig()) {
-  const raw = cfg?.ocr?.assetBaseUrl;
-  if (typeof raw !== 'string') return null;
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  return trimmed.endsWith('/') ? trimmed : `${trimmed}/`;
+  return describeOcrAssetBaseUrl(cfg).url;
 }
 
 /**

@@ -94,11 +94,13 @@
       // through it). See docs-src/runtime-configuration.md.
       enabled: false,
       // Tesseract language codes tried together on every text line. Arrays replace the default
-      // completely, so list every language the site needs. Each extra language roughly adds its
-      // own recognition time per page.
+      // completely, so list every language the site needs. Each extra language adds some
+      // recognition time per page. The viewer ships the Swedish and English models; another
+      // language needs assetBaseUrl pointing at a folder that has its <lang>.traineddata.gz.
       // languages: ['swe', 'eng'],
-      // Serve the engine, worker and language files from the site's own location instead of the
-      // viewer's ocr/ folder (same origin, or CORS-enabled and allowed by the site CSP).
+      // Serve the engine, worker and language files from a copy of the viewer's ocr/ folder at
+      // the site's own location (same layout; same origin, or CORS-enabled and allowed by the
+      // site CSP). No query string or fragment, and only http(s) or relative values.
       // assetBaseUrl: 'https://host.example/odv-ocr/'
     },
     toolbar: {

@@ -280,13 +280,25 @@ ocr: {
   lazy chunk that only the switch loads, so the default code path carries no extra weight.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
-  falls back to `['swe', 'eng']`. Every listed model runs on every text line and the best match
-  wins, so each extra language roughly adds its own recognition time per page. As with every
-  array in the site file, an override replaces the default completely.
+  (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
+  configuration is read; when OCR starts, codes that name no Tesseract model (a typo such as
+  `sve`) are dropped as well, and every dropped entry and every fallback is reported once as a
+  console warning, so a mistake is never silent. The `ocr/` folder that ships with the viewer
+  contains the Swedish and English models; another language needs `ocr.assetBaseUrl` pointing at
+  a folder that has its model (`<lang>.traineddata.gz`). Every listed model runs on every text
+  line and the best match wins, so each extra language adds some recognition time per page. As
+  with every array in the site file, an override replaces the default completely.
 - `ocr.assetBaseUrl`: where the engine, worker and language files are served from. `null`
   (default) uses the viewer's own `ocr/` folder next to the application. A site can point this at
-  its own host to keep the files out of the application package; the base must be same-origin or
-  CORS-enabled and allowed by the site's CSP. A trailing slash is added when missing.
+  a copy of that folder on its own host (same layout, see `docs-src/deploy-ops.md`) to keep the
+  files out of the application package. Absolute `http(s)` values, protocol-relative values
+  (`//host/odv-ocr/`) and relative values (`/shared/ocr/`, resolved against the page) are accepted
+  and get a trailing slash when missing. A value with a query string or fragment is ignored,
+  because file names are appended to it; so is any other scheme (`javascript:`, `data:`, `file:`
+  and the like). An ignored value is reported once as a console warning and the viewer's own
+  folder is used instead. A cross-origin base must also be allowed by the site's CSP: the worker
+  and the engine core are loaded as scripts (`script-src`), and the language models are fetched
+  (`connect-src`, and the host must send CORS headers).
 
 While on, recognition runs in a Web Worker in the browser only. The input of each page is the page
 image the viewer already rendered, at the site's configured resolution (`pdfResolution.targetDpi`
@@ -317,10 +329,21 @@ Add it in every place the site sets a policy for the viewer: the `Content-Securi
 in the site's `web.config`, and, when the viewer is served through ODVGateway, the gateway's
 `contentSecurityPolicy` setting in its appsettings as well. Without the token the engine cannot
 start; OCR then turns itself off for the session and logs one console error naming the missing
-token. Pages still load and render exactly as before.
+token. Pages still load and render exactly as before. (Chromium reports the block as a
+`CompileError` that names `'unsafe-eval'`; `'wasm-unsafe-eval'` alone is still the right token,
+it allows WebAssembly without allowing `eval`.)
 
-Status: this version ships the switch and its validation; the OCR module itself arrives in the
-following versions, so `enabled: true` has no visible effect yet.
+The same policy affects pdf.js: its optional JBIG2 and JPX (OpenJPEG) decoders are WebAssembly
+modules in `pdfjs/wasm/`, and under the shipped policy their instantiation is refused in the same
+way. pdf.js then falls back to its JavaScript decoders (`*_nowasm_fallback.js`, slower but
+correct) after one console warning per decoder. Adding `'wasm-unsafe-eval'` therefore also lets
+pdf.js use the faster decoders for scanned PDFs; this is a separate observation and no change to
+the shipped policy.
+
+Status: this version ships the switch, the engine (tesseract.js, self-hosted under `ocr/`, see
+`docs-src/deploy-ops.md`) and the module that loads it. With `enabled: true` the OCR chunk is
+imported, but nothing is recognized yet and no text layer exists: recognition, the page queue and
+the text layer arrive in the following versions, so pages still look exactly as before.
 
 ## Toolbar Button Size
 

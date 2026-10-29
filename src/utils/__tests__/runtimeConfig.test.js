@@ -23,8 +23,11 @@ import {
   PDF_SIGNATURE_UNCHECKED_SEVERITIES,
   getPdfSignatureUncheckedSeverity,
   DEFAULT_OCR_LANGUAGES,
+  OCR_ASSET_BASE_URL_REJECTIONS,
   isOcrEnabled,
+  describeOcrLanguages,
   getOcrLanguages,
+  describeOcrAssetBaseUrl,
   getOcrAssetBaseUrl,
   normalizePrintDefaultMode,
   normalizeCustomFitWidthFactorPercent,
@@ -365,6 +368,77 @@ describe('runtimeConfig', () => {
       expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'https://host.example/odv-ocr' } })).toBe('https://host.example/odv-ocr/');
       expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: ' /shared/ocr/ ' } })).toBe('/shared/ocr/');
       expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'ocr' } })).toBe('ocr/');
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: '//cdn.example/odv-ocr' } })).toBe('//cdn.example/odv-ocr/');
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'HTTP://Host.Example/x' } })).toBe('HTTP://Host.Example/x/');
+    });
+
+    it.each([
+      ['a query string', 'https://host.example/odv-ocr?token=x'],
+      ['a fragment', 'https://host.example/odv-ocr#v1'],
+      ['a query string on a relative base', '/shared/ocr/?v=2'],
+      ['a javascript: scheme', 'javascript:alert(1)'],
+      ['a data: scheme', 'data:text/javascript,1'],
+      ['a blob: scheme', 'blob:https://host.example/abc'],
+      ['a file: scheme', 'file:///C:/odv/ocr/'],
+      ['a Windows drive letter', 'C:/odv/ocr/'],
+    ])('returns null for %s', (_label, value) => {
+      expect(getOcrAssetBaseUrl({ ocr: { assetBaseUrl: value } })).toBeNull();
+    });
+  });
+
+  describe('describeOcrLanguages', () => {
+    it('reports an unconfigured value as the silent default', () => {
+      expect(describeOcrLanguages({})).toEqual({ languages: ['swe', 'eng'], configured: false, fallback: true, dropped: [] });
+      expect(describeOcrLanguages({ ocr: { languages: 'swe' } })).toEqual({ languages: ['swe', 'eng'], configured: false, fallback: true, dropped: [] });
+    });
+
+    it('reports an explicit empty array as a configured fallback', () => {
+      expect(describeOcrLanguages({ ocr: { languages: [] } })).toEqual({ languages: ['swe', 'eng'], configured: true, fallback: true, dropped: [] });
+    });
+
+    it('lists the entries it dropped, as given, and the fallback when nothing is left', () => {
+      expect(describeOcrLanguages({ ocr: { languages: ['sv', 7, '', 'script/Latin', 'swedish-x'] } })).toEqual({
+        languages: ['swe', 'eng'],
+        configured: true,
+        fallback: true,
+        dropped: ['sv', 7, '', 'script/Latin', 'swedish-x'],
+      });
+      expect(describeOcrLanguages({ ocr: { languages: [' ENG ', 'swe', 'eng', 'sv', 'Swe'] } })).toEqual({
+        languages: ['eng', 'swe'],
+        configured: true,
+        fallback: false,
+        dropped: ['sv'],
+      });
+    });
+
+    it('returns fresh arrays', () => {
+      const first = describeOcrLanguages({ ocr: { languages: ['swe'] } });
+      const second = describeOcrLanguages({ ocr: { languages: ['swe'] } });
+      expect(first.languages).not.toBe(second.languages);
+      expect(describeOcrLanguages({}).languages).not.toBe(DEFAULT_OCR_LANGUAGES);
+    });
+  });
+
+  describe('describeOcrAssetBaseUrl', () => {
+    it('reports unset and blank values without a rejection', () => {
+      expect(describeOcrAssetBaseUrl({})).toEqual({ url: null, rejected: null, value: null });
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: '   ' } })).toEqual({ url: null, rejected: null, value: null });
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: 7 } })).toEqual({ url: null, rejected: null, value: null });
+    });
+
+    it('returns the normalized url for accepted values', () => {
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: ' https://host.example/odv-ocr ' } }))
+        .toEqual({ url: 'https://host.example/odv-ocr/', rejected: null, value: 'https://host.example/odv-ocr' });
+    });
+
+    it('names the reason for a rejected value and keeps the trimmed value for the log', () => {
+      expect(OCR_ASSET_BASE_URL_REJECTIONS).toEqual({ QUERY_OR_FRAGMENT: 'query-or-fragment', SCHEME: 'scheme' });
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: ' https://h/ocr?token=x ' } }))
+        .toEqual({ url: null, rejected: 'query-or-fragment', value: 'https://h/ocr?token=x' });
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'https://h/ocr/#frag' } }))
+        .toEqual({ url: null, rejected: 'query-or-fragment', value: 'https://h/ocr/#frag' });
+      expect(describeOcrAssetBaseUrl({ ocr: { assetBaseUrl: 'javascript:alert(1)' } }))
+        .toEqual({ url: null, rejected: 'scheme', value: 'javascript:alert(1)' });
     });
   });
 

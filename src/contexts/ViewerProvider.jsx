@@ -40,6 +40,7 @@ import {
   getTrackedObjectUrlCount,
 } from '../utils/objectUrlRegistry.js';
 import usePdfSignatureReports from '../hooks/usePdfSignatureReports.js';
+import useOcrModule from '../hooks/useOcrModule.js';
 import { disposePdfSignatureWorker } from '../utils/pdfSignatureInspector.js';
 import { getSourceFileNameFromUrl } from '../utils/pdfSignatureDocuments.js';
 import {
@@ -2684,6 +2685,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     inspectionReady: signatureInspectionReady,
     readSourceArrayBuffer,
   });
+
+  // The OCR module (src/ocr/) is imported only after `ocr.enabled` is the literal true; while
+  // off this is a no-op (src/utils/ocrLoader.js). Recognition and the text layer that consume
+  // the module arrive in the following versions.
+  useOcrModule();
 
   useEffect(() => () => {
     disposePdfSignatureWorker();

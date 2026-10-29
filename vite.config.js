@@ -26,6 +26,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { configDefaults } from 'vitest/config';
 import { computeLocaleResourceHash } from './scripts/locale-resource-hash.mjs';
+import { describeOcrAssets, isOcrAssetCopySkipped } from './scripts/ocr-assets.mjs';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const APP_VERSION = String(PKG.version || '0.0.0');
@@ -37,6 +38,11 @@ const ODV_I18N_RESOURCE_HASH = computeLocaleResourceHash(new URL('./', import.me
 const PDFJS_WASM_PUBLIC_PREFIX = '/pdfjs/wasm/';
 const PDFJS_WASM_OUTPUT_PREFIX = 'pdfjs/wasm/';
 const PDFJS_WASM_DIR = new URL('./node_modules/pdfjs-dist/wasm/', import.meta.url);
+// The OCR engine files (tesseract.js worker, WebAssembly core, language models) and the
+// dist-relative paths the app reads them from (the virtual module `virtual:odv-ocr-assets`,
+// see ocrAssetsPlugin). See scripts/ocr-assets.mjs for the layout and why the folder names
+// are versioned.
+const OCR_ASSETS = describeOcrAssets(new URL('./node_modules/', import.meta.url));
 
 function getPdfJsWasmAssetNames() {
   return readdirSync(PDFJS_WASM_DIR)
@@ -48,6 +54,7 @@ function getStaticContentType(fileName) {
   const lower = String(fileName || '').toLowerCase();
   if (lower.endsWith('.wasm')) return 'application/wasm';
   if (lower.endsWith('.js')) return 'text/javascript; charset=utf-8';
+  if (lower.endsWith('.gz')) return 'application/gzip';
   return 'application/octet-stream';
 }
 
@@ -78,6 +85,56 @@ function pdfJsWasmAssetsPlugin() {
           type: 'asset',
           fileName: `${PDFJS_WASM_OUTPUT_PREFIX}${name}`,
           source: readFileSync(new URL(name, PDFJS_WASM_DIR)),
+        });
+      }
+    },
+  };
+}
+
+const OCR_ASSETS_VIRTUAL_ID = 'virtual:odv-ocr-assets';
+const OCR_ASSETS_RESOLVED_ID = `\0${OCR_ASSETS_VIRTUAL_ID}`;
+
+/**
+ * Copies the OCR engine files into dist/ocr/ and serves them in dev at the same paths, like
+ * pdfJsWasmAssetsPlugin does for pdf.js. The files are only ever fetched by the lazy OCR chunk
+ * after `ocr.enabled` is true (src/utils/ocrLoader.js); copying them costs nothing at runtime.
+ * `ODV_OCR_ASSETS=skip` leaves the folder out for sites that host it elsewhere via
+ * `ocr.assetBaseUrl` (scripts/verify-ocr-lazy-chunk.mjs checks both outcomes after the build).
+ */
+function ocrAssetsPlugin() {
+  const byPublicPath = new Map(OCR_ASSETS.files.map((file) => [`/${file.fileName}`, file]));
+  return {
+    name: 'odv-ocr-assets',
+    // `import manifest from 'virtual:odv-ocr-assets'` (src/ocr/assetUrls.js only) gives the app
+    // the dist-relative paths; as a module it is bundled into the lazy ocr chunk, unlike a define.
+    resolveId(id) {
+      return id === OCR_ASSETS_VIRTUAL_ID ? OCR_ASSETS_RESOLVED_ID : null;
+    },
+    load(id) {
+      return id === OCR_ASSETS_RESOLVED_ID ? `export default ${JSON.stringify(OCR_ASSETS.manifest)};\n` : null;
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const pathname = decodeURIComponent(String(req.url || '').split('?')[0]);
+        const file = byPublicPath.get(pathname);
+        if (!file) {
+          next();
+          return;
+        }
+        res.setHeader('Content-Type', getStaticContentType(file.fileName));
+        res.end(readFileSync(file.sourceUrl));
+      });
+    },
+    generateBundle() {
+      if (isOcrAssetCopySkipped()) {
+        this.info(`ODV_OCR_ASSETS=skip: ${OCR_ASSETS.manifest.root} is not copied into the build output`);
+        return;
+      }
+      for (const file of OCR_ASSETS.files) {
+        this.emitFile({
+          type: 'asset',
+          fileName: file.fileName,
+          source: readFileSync(file.sourceUrl),
         });
       }
     },
@@ -178,6 +235,9 @@ export default defineConfig(({ mode }) => {
       // pdf.js loads codec WASM/fallback modules by filename from `wasmUrl`.
       pdfJsWasmAssetsPlugin(),
 
+      // tesseract.js loads its worker, core and language models from dist/ocr/ (lazy, opt-in).
+      ocrAssetsPlugin(),
+
       // Vite emits a small HTML entry chunk that imports bootConfig. Keep the
       // bootstrap data marker on that emitted script so runtime config SRI
       // attributes survive in dist/index.html.
@@ -221,6 +281,14 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (id.includes('pdfjs-dist')) return 'pdfjs';
             if (id.includes('utif2')) return 'utif';
+            // The OCR module (src/ocr/, tesseract.js, virtual:odv-ocr-assets) is
+            // deliberately NOT listed here. It is reached only by the import() in
+            // src/utils/ocrLoader.js, so code splitting puts it in its own chunk,
+            // named `ocr-<hash>.js` after the folder of src/ocr/index.js. A
+            // manualChunks rule or an advancedChunks group would also capture the
+            // module's shared dependencies (logger, runtime config, axios) and make
+            // every eager chunk import the OCR chunk statically, which is exactly
+            // what scripts/verify-ocr-lazy-chunk.mjs forbids after each build.
             return undefined;
           },
         },
@@ -238,6 +306,9 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(APP_VERSION),
       'import.meta.env.ODV_BUILD_ID': JSON.stringify(ODV_BUILD_ID),
       'import.meta.env.ODV_I18N_RESOURCE_HASH': JSON.stringify(ODV_I18N_RESOURCE_HASH),
+      // The OCR asset manifest is deliberately NOT a define: modules that read the whole
+      // import.meta.env object (i18n, loggers) would inline it into the eager chunks. It is the
+      // virtual module `virtual:odv-ocr-assets` (ocrAssetsPlugin) that only src/ocr/ imports.
     },
   };
 });

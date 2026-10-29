@@ -26,6 +26,25 @@ copyright notice, this list of conditions and the following disclaimer in redist
 The MIT licences require the copyright and permission notice in all copies or substantial
 portions of the software. The full licence texts are in the installed packages listed above.
 
+## OCR engine (opt-in; loaded only when `ocr.enabled` is `true`)
+
+The in-browser OCR feature ships two kinds of files: the tesseract.js API bundle inside the lazy
+`ocr-<hash>.js` chunk, and the engine files copied unchanged into `dist/ocr/` by the build
+(`scripts/ocr-assets.mjs`). None of them is downloaded or executed unless a site turns the
+feature on (`docs-src/runtime-configuration.md`).
+
+| Component | Licence | Used for |
+| --- | --- | --- |
+| `tesseract.js` 7.0.0 | Apache-2.0 (Project Naptha, github.com/naptha/tesseract.js) | OCR API (`dist/tesseract.esm.min.js`, in the lazy chunk) and the Web Worker script (`dist/worker.min.js`, copied to `dist/ocr/`). The worker bundle embeds the package's runtime dependencies: `regenerator-runtime` (MIT, Facebook, Inc.), `buffer` (MIT, Feross Aboukhadijeh), `ieee754` (BSD-3-Clause, Feross Aboukhadijeh) and `zlib.js` (MIT, imaya), whose notices are in `node_modules/tesseract.js/dist/worker.min.js.LICENSE.txt`, as well as `idb-keyval` (Apache-2.0, Jake Archibald; unused at runtime because model caching is off), `wasm-feature-detect` (Apache-2.0, Google LLC), `bmp-js` (MIT, shaozilee) and `is-url` (MIT, Segment.io). |
+| `tesseract.js-core` 7.0.0 | Apache-2.0 (github.com/naptha/tesseract.js-core) | The OCR engine compiled to WebAssembly (`tesseract-core-simd-lstm.wasm.js`, copied to `dist/ocr/`): a build of the Tesseract OCR engine (Apache-2.0, Google and contributors) with Leptonica (BSD-2-Clause, Dan Bloomberg). |
+| `@tesseract.js-data/swe` 1.0.0, `@tesseract.js-data/eng` 1.0.0 | MIT (npm packaging, github.com/naptha/tessdata); the models are the integer-quantized `tessdata_best` files of the Tesseract project (Apache-2.0) | Swedish and English language models (`swe.traineddata.gz`, `eng.traineddata.gz`, copied to `dist/ocr/`). Installed as development dependencies because only the build reads them. |
+
+The licence texts ship inside the packages (`node_modules/tesseract.js/LICENSE.md`,
+`node_modules/tesseract.js-core/LICENSE`). OpenDocViewer imports the prebuilt browser bundles
+only; `node-fetch` and `opencollective-postinstall`, also declared by `tesseract.js`, are Node-only
+and never shipped. Language-model caching in IndexedDB is turned off (`cacheMethod: 'none'`), so
+the embedded `idb-keyval` never runs.
+
 ## Development-only dependencies (not shipped)
 
 | Component | Licence | Used for |

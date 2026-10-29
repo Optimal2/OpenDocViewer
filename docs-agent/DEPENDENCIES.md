@@ -29,9 +29,11 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>pdfjs-dist</code> | <code>6.4.299</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
 | <code>pkijs</code> | <code>^4.0.0</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
 | <code>prop-types</code> | <code>^15.8.1</code> | 42 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+37 more, 42 files total) |
-| <code>react</code> | <code>^19.3.1</code> | 67 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+62 more, 67 files total) |
+| <code>react</code> | <code>^19.3.1</code> | 68 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+63 more, 68 files total) |
 | <code>react-dom</code> | <code>^19.3.1</code> | 1 | <code>src/index.jsx</code> |
 | <code>react-i18next</code> | <code>^17.1.8</code> | 43 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+38 more, 43 files total) |
+| <code>tesseract.js</code> | <code>7.0.0</code> | 2 | <code>src/ocr/engine.js</code><br><code>src/ocr/languages.js</code> |
+| <code>tesseract.js-core</code> | <code>7.0.0</code> | 0 | — |
 | <code>utif2</code> | <code>^4.1.0</code> | 4 (1 dynamic) | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/imageWorker.js</code> |
 
 ## Development Dependencies
@@ -45,6 +47,8 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>@peculiar/x509</code> | <code>^2.2.0</code> | 0 |
 | <code>@playwright/test</code> | <code>1.64.1</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.2.4</code> | 0 |
+| <code>@tesseract.js-data/eng</code> | <code>1.0.0</code> | 0 |
+| <code>@tesseract.js-data/swe</code> | <code>1.0.0</code> | 0 |
 | <code>@vitejs/plugin-react</code> | <code>^6.1.1</code> | 0 |
 | <code>concurrently</code> | <code>^10.0.6</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
@@ -63,4 +67,4 @@ the Used In column lists at most 5 files and states the file total whenever it c
 
 ## Imported But Not Declared Directly
 
-No undeclared package imports were detected.
+- `virtual:odv-ocr-assets`: 1 imports in 1 files

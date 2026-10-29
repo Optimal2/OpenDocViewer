@@ -3,7 +3,7 @@
 ## Package Scripts
 
 - `dev`: `vite`
-- `build`: `vite build`
+- `build`: `vite build && node scripts/verify-ocr-lazy-chunk.mjs`
 - `preview`: `vite preview`
 - `lint`: `eslint "src/**/*.{js,jsx}"`
 - `lint:fix`: `eslint "src/**/*.{js,jsx}" --fix`
@@ -30,11 +30,12 @@
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
+- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 36 incoming local imports
-- `src/utils/runtimeConfig.js`: 23 incoming local imports
+- `src/logging/systemLogger.js`: 39 incoming local imports
+- `src/utils/runtimeConfig.js`: 26 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
 - `src/contexts/viewerContext.js`: 12 incoming local imports

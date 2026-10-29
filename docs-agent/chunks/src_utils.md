@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 51. Line count: 20930. JSDoc symbol count: 845.
+File count: 52. Line count: 21031. JSDoc symbol count: 853.
 
 ## src/utils/compareCurtain.js
 
@@ -251,6 +251,20 @@ Symbols:
 - `isTrackedObjectUrl` (function) - Check whether a blob/object URL is still tracked as live by the viewer.
 - `getTrackedObjectUrlCount` (function) - No description.
 - `revokeAllTrackedObjectUrls` (function) - Revoke every tracked object URL.
+
+## src/utils/ocrLoader.js
+
+The only door into the OCR module.
+
+Exports: `loadOcrModule`, `isOcrModuleRequested`, `resetOcrModuleForTests`
+
+Local imports: `src/utils/runtimeConfig.js`, `src/ocr/index.js`
+
+Symbols:
+
+- `loadOcrModule` (function) - No description.
+- `isOcrModuleRequested` (function) - True once the module import has been requested in this session.
+- `resetOcrModuleForTests` (function) - Test hook: forget the cached import so the next call imports again.
 
 ## src/utils/ompThemePreference.js
 
@@ -822,7 +836,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `getOcrLanguages`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 

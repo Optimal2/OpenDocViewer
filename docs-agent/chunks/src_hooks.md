@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 5. Line count: 769. JSDoc symbol count: 26.
+File count: 6. Line count: 813. JSDoc symbol count: 27.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -30,6 +30,18 @@ Symbols:
 - `<anonymous>~clearState` (function) - No description.
 - `<anonymous>~syncModifierState` (function) - No description.
 - `<anonymous>~handleVisibilityChange` (function) - No description.
+
+## src/hooks/useOcrModule.js
+
+Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true.
+
+Exports: `useOcrModule`
+
+Local imports: `src/logging/systemLogger.js`, `src/utils/ocrLoader.js`, `src/utils/runtimeConfig.js`
+
+Symbols:
+
+- `module.exports` (function) - No description.
 
 ## src/hooks/usePageNavigation.js
 

@@ -130,17 +130,19 @@
       // the browser only, kept in memory for the session and shown as a selectable text layer.
       // Nothing is sent anywhere and the source files are never modified. Turning it on also
       // needs 'wasm-unsafe-eval' in the script-src of the site's Content-Security-Policy; see
-      // docs-src/runtime-configuration.md. The OCR module itself ships in a later version;
-      // until then true has no effect.
+      // docs-src/runtime-configuration.md. Recognition and the text layer ship in a later
+      // version; this version only loads the engine when true, so pages look exactly as before.
       enabled: false,
       // Tesseract language codes, tried together on every text line (best match wins). Each
-      // extra language roughly adds its own recognition time per page. An array in
-      // odv.site.config.js replaces this default completely.
+      // extra language adds some recognition time per page. An array in odv.site.config.js
+      // replaces this default completely. The viewer's own ocr/ folder holds the Swedish and
+      // English models; a code with no model is dropped with a console warning when OCR starts.
       languages: ['swe', 'eng'],
       // Where the OCR engine, worker and language files are served from. null (default) uses the
-      // viewer's own ocr/ folder next to the application. A site can point this at its own host
-      // (same origin, or CORS-enabled and allowed by the site CSP) to keep the files out of the
-      // application package.
+      // viewer's own ocr/ folder next to the application. A site can point this at a copy of that
+      // folder on its own host (same layout; same origin, or CORS-enabled and allowed by the site
+      // CSP) to keep the files out of the application package. A value with a query string or
+      // fragment, or a scheme other than http(s), is ignored with a console warning.
       assetBaseUrl: null
     },
     toolbar: {

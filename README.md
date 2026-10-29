@@ -47,7 +47,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 
 - Not a document management system, archive, or search engine.
 - Not an authentication or authorization layer — hosts own permissions, workflow state, and audit rules; the viewer only displays what it is given (`docs-src/integrations.md`).
-- Not a PDF editor or conversion service. Optional in-browser OCR of scanned pages is being added behind a switch that is off by default (`ocr.enabled`; the switch ships first, the OCR module follows); there is no server-side OCR.
+- Not a PDF editor or conversion service. Optional in-browser OCR of scanned pages is being added behind a switch that is off by default (`ocr.enabled`; the switch and the self-hosted engine ship first, recognition and the text layer follow); there is no server-side OCR.
 - Not dependent on any server at runtime — the frontend is fully static; the log servers are opt-in.
 
 ## Screenshots

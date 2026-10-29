@@ -75,7 +75,7 @@ File count: 17. Line count: 7642. JSDoc symbol count: 154.
 
 ## src/contexts
 
-File count: 4. Line count: 3449. JSDoc symbol count: 95.
+File count: 4. Line count: 3455. JSDoc symbol count: 95.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -90,13 +90,14 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/hooks
 
-File count: 5. Line count: 769. JSDoc symbol count: 26.
+File count: 6. Line count: 813. JSDoc symbol count: 27.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/hooks/usePageNavigation.js` - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/hooks/useAcceleratingHoldRepeat.js` - Reusable press\-and\-hold behavior for toolbar buttons.
 - `src/hooks/usePdfSignatureReports.js` - Browser PDF signature inspection.
+- `src/hooks/useOcrModule.js` - Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true.
 
 ## src/i18n.js
 
@@ -130,6 +131,16 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/logging/userLogger.js` - UserLogController — client\-side controller for \*\*user\*\* print logs \(backend\-agnostic\).
 
+## src/ocr
+
+File count: 5. Line count: 386. JSDoc symbol count: 17.
+
+- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+- `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
+- `src/ocr/assetUrls.js` - Resolves where the OCR worker, engine core and language models are loaded from.
+- `src/ocr/languages.js` - Membership check for OCR language codes against the models tesseract.js knows.
+- `src/ocr/setup.js` - Builds an OCR engine from the runtime configuration and reports configuration problems once.
+
 ## src/PerformanceMonitor.jsx
 
 File count: 1. Line count: 1346. JSDoc symbol count: 20.
@@ -150,7 +161,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 51. Line count: 20930. JSDoc symbol count: 845.
+File count: 52. Line count: 21031. JSDoc symbol count: 853.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
