@@ -53,7 +53,8 @@
  *     addressed values change.
  *   - CRLF and LF input are both supported. The output keeps the line endings of the existing
  *     output file when there is one, otherwise those of the sample.
- *   - The output starts with a header naming the profile and the sample version (package.json).
+ *   - The output starts with a header naming the profile and actual sample. The shipped sample also
+ *     names the repository package.json version; a custom --sample omits that version.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every profile
  *     value is asserted on `window.__ODV_SITE_CONFIG__`; then `public/odv.config.js` is executed on
  *     top of it and every set/added value is asserted on the merged `window.__ODV_CONFIG__`.
@@ -356,14 +357,36 @@ class Scanner {
  */
 export function parseSiteConfigText(text) {
   const scanner = new Scanner(text);
-  const re = new RegExp(`\\b${ASSIGNMENT_TARGET}\\s*=\\s*\\{`, 'g');
-  let match;
-  while ((match = re.exec(text))) {
-    // Ignore occurrences inside comments: the first significant code before it must be reachable.
-    const lineStart = text.lastIndexOf('\n', match.index) + 1;
-    const linePrefix = text.slice(lineStart, match.index);
-    if (linePrefix.includes('//') || linePrefix.trimStart().startsWith('*')) continue;
-    return scanner.parseObject(match.index + match[0].length - 1);
+  let i = 0;
+  let regexAllowed = true;
+  while (i < text.length) {
+    i = scanner.skipTrivia(i);
+    const c = text[i];
+    if (c === undefined) break;
+    if (c === '\'' || c === '"') {
+      i = scanner.skipString(i);
+      regexAllowed = false;
+    } else if (c === '`') {
+      i = scanner.skipTemplate(i);
+      regexAllowed = false;
+    } else if (c === '/' && regexAllowed) {
+      i = scanner.skipRegex(i);
+      regexAllowed = false;
+    } else if (IDENT_START.test(c)) {
+      const start = i++;
+      while (i < text.length && IDENT_PART.test(text[i])) i++;
+      if (text.slice(start, i) === ASSIGNMENT_TARGET) {
+        let cursor = scanner.skipTrivia(i);
+        if (text[cursor] === '=' && text[cursor + 1] !== '=' && text[cursor + 1] !== '>') {
+          cursor = scanner.skipTrivia(cursor + 1);
+          if (text[cursor] === '{') return scanner.parseObject(cursor);
+        }
+      }
+      regexAllowed = false;
+    } else {
+      regexAllowed = !IDENT_PART.test(c) && c !== '.';
+      i++;
+    }
   }
   throw new GeneratorError(`Could not find "${ASSIGNMENT_TARGET} = {" in the sample.`);
 }
@@ -413,7 +436,9 @@ function quoteString(s) {
     else if (ch === '\n') out += '\\n';
     else if (ch === '\r') out += '\\r';
     else if (ch === '\t') out += '\\t';
-    else if (code < 0x20 || code === 0x2028 || code === 0x2029 || code === 0x7f) {
+    else if (code < 0x20 || code === 0x2028 || code === 0x2029 || code === 0x7f ||
+      (code >= 0xd800 && code <= 0xdfff)) {
+      // A lone surrogate must be escaped: UTF-8 output would otherwise replace it with U+FFFD.
       out += `\\u${code.toString(16).padStart(4, '0')}`;
     } else out += ch;
   }
@@ -438,7 +463,7 @@ export function toJsLiteral(value, indent = '') {
     case 'boolean': return String(value);
     case 'number':
       if (!Number.isFinite(value)) throw new GeneratorError(`Non-finite number ${value} cannot be written.`);
-      return String(value);
+      return Object.is(value, -0) ? '-0' : String(value);
     case 'object': break;
     default: throw new GeneratorError(`Unsupported value type "${typeof value}".`);
   }
@@ -451,6 +476,9 @@ export function toJsLiteral(value, indent = '') {
     return `[\n${items.map((v) => `${inner}${v}`).join(',\n')}\n${indent}]`;
   }
   const keys = Object.keys(value);
+  if (keys.includes('__proto__')) {
+    throw new GeneratorError('Profile object values cannot contain a "__proto__" key; the configuration loader cannot merge it safely.');
+  }
   if (keys.length === 0) return '{}';
   const entries = keys.map((k) => `${formatKey(k)}: ${toJsLiteral(value[k], inner)}`);
   const inline = `{ ${entries.join(', ')} }`;
@@ -516,8 +544,8 @@ export function normalizeProfile(profile) {
     const p = isAdd ? rawKey.slice(ADD_PREFIX.length) : rawKey;
     const segments = validatePathText(p, 'set');
     toJsLiteral(value); // rejects unsupported values early
-    // Normalise through JSON so the written literal and the verified value are the same data.
-    operations.push({ kind: isAdd ? 'add' : 'set', path: p, segments, value: JSON.parse(JSON.stringify(value)) });
+    // Clone the parsed JSON data without JSON.stringify, which would silently turn -0 into +0.
+    operations.push({ kind: isAdd ? 'add' : 'set', path: p, segments, value: structuredClone(value) });
   }
   for (const p of unset) {
     operations.push({ kind: 'unset', path: p, segments: validatePathText(p, 'unset') });
@@ -673,7 +701,7 @@ export function applyOperations(sampleLf, operations) {
       edits.push({ start: closeLineStart, end: closeLineStart, text: lines.join(''), path: list[0].op.path });
     } else {
       const parts = list.map(({ op }) => `${formatKey(op.segments.at(-1))}: ${toJsLiteral(op.value, indentOf(sampleLf, parent.open))}`);
-      const insertAt = lastProp ? lastProp.valueEnd : parent.open + 1;
+      const insertAt = lastProp ? (lastProp.comma === -1 ? lastProp.valueEnd : lastProp.comma + 1) : parent.open + 1;
       const text = lastProp ? ` ${parts.join(', ')}` : ` ${parts.join(', ')} `;
       edits.push({ start: insertAt, end: insertAt, text, path: list[0].op.path, after: true });
     }
@@ -718,15 +746,19 @@ function oneLine(s) {
  * Build the generated header comment (LF).
  * @param {{ name: string, description: string }} profile
  * @param {string} version
+ * @param {string} [samplePath] sample actually used
  */
-export function buildHeader(profile, version) {
+export function buildHeader(profile, version, samplePath = DEFAULT_SAMPLE) {
   const lines = [
     HEADER_MARKER,
     `// Site profile: ${oneLine(profile.name)}`,
   ];
   if (profile.description) lines.push(`// Description:  ${oneLine(profile.description)}`);
+  const builtFrom = samePath(samplePath, DEFAULT_SAMPLE)
+    ? `public/odv.site.config.sample.js of OpenDocViewer ${version} (version from repository package.json)`
+    : `${path.resolve(samplePath)} (custom --sample; no version inferred)`;
   lines.push(
-    `// Built from:   public/odv.site.config.sample.js of OpenDocViewer ${version}`,
+    `// Built from:   ${builtFrom}`,
     '// Do not edit this file by hand. Change the site profile and regenerate:',
     '//   node tools/site-config-generator/site-config-generator.mjs generate --profile <profile.json> --out <this file>',
     '// After an upgrade, verify it against the new sample:',
@@ -740,9 +772,28 @@ export function buildHeader(profile, version) {
 // Verification through node:vm
 // ---------------------------------------------------------------------------------------------
 
-/** Copy a value out of a vm realm into plain main-realm JSON data. */
+/** Copy a vm value with JSON omission semantics, but preserve numeric negative zero. */
 function toPlain(value) {
-  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
+  if (typeof value === 'number') {
+    if (Object.is(value, -0)) return -0;
+    return Number.isFinite(value) ? value : null;
+  }
+  if (Array.isArray(value)) {
+    return Array.from(value, (item) => {
+      const copy = toPlain(item);
+      return copy === undefined ? null : copy;
+    });
+  }
+  if (typeof value === 'object') {
+    const entries = [];
+    for (const key of Object.keys(value)) {
+      const copy = toPlain(value[key]);
+      if (copy !== undefined) entries.push([key, copy]);
+    }
+    return Object.fromEntries(entries);
+  }
+  return undefined;
 }
 
 function getPath(obj, segments) {
@@ -879,15 +930,16 @@ export function readSampleVersion(packageJsonFile = DEFAULT_PACKAGE_JSON) {
  * @param {{ name: string, description: string, operations: Operation[] }} options.profile
  * @param {string} options.sampleText  sample source (any line endings)
  * @param {string} options.version
+ * @param {string} [options.samplePath] sample actually used (default: the shipped sample)
  * @param {string} [options.loaderText]  odv.config.js source for the merged verification
  * @param {'\r\n'|'\n'} [options.eol]   output line ending (default: the sample's)
  */
-export function generateText({ profile, sampleText, version, loaderText, eol }) {
+export function generateText({ profile, sampleText, version, samplePath = DEFAULT_SAMPLE, loaderText, eol }) {
   const bom = sampleText.startsWith('﻿') ? '﻿' : '';
   const raw = bom ? sampleText.slice(1) : sampleText;
   const sampleLf = toLf(raw);
   const { text, changes } = applyOperations(sampleLf, profile.operations);
-  const outputLf = buildHeader(profile, version) + text;
+  const outputLf = buildHeader(profile, version, samplePath) + text;
   const verified = verifyGenerated(outputLf, sampleLf, profile.operations, loaderText === undefined ? undefined : toLf(loaderText));
   return { text: bom + fromLf(outputLf, eol || detectEol(raw)), changes, verified };
 }
@@ -1073,7 +1125,7 @@ function buildFromOptions(options, existingText) {
   const version = readSampleVersion();
   // Keep the line endings of an existing output file; otherwise follow the sample.
   const eol = existingText !== undefined ? detectEol(existingText) : undefined;
-  const result = generateText({ profile, sampleText, version, loaderText, eol });
+  const result = generateText({ profile, sampleText, version, samplePath, loaderText, eol });
   return { ...result, profile, samplePath, version };
 }
 

@@ -47,6 +47,13 @@ function siteOf(file) {
   return evaluateSiteConfig(fs.readFileSync(file, 'utf8')).site;
 }
 
+function replaceOnce(text, before, after) {
+  const first = text.indexOf(before);
+  assert.notEqual(first, -1, `expected sample fragment: ${before}`);
+  assert.equal(text.indexOf(before, first + 1), -1, `sample fragment must be unique: ${before}`);
+  return text.slice(0, first) + after + text.slice(first + before.length);
+}
+
 test('sample round-trip with example.profile.json: generate, verify through node:vm, then check passes', () => {
   const dir = tempDir();
   const out = path.join(dir, 'odv.site.config.js');
@@ -68,6 +75,30 @@ test('sample round-trip with example.profile.json: generate, verify through node
   // The sample's own comments survive.
   assert.ok(text.includes('// Ctrl/Cmd+P behavior:'));
   assert.ok(text.includes('* IMPORTANT MERGE RULES'));
+
+  // Independent layout oracle: construct the complete expected body from the real sample with
+  // explicit, hand-written edits. Any unaddressed comment or formatting change fails this test.
+  let expectedBody = SAMPLE_TEXT;
+  const expectedEdits = [
+    ["      default: 'sv',", "      default: 'en',"],
+    ["      defaultZoomMode: 'fit-width',", "      defaultZoomMode: 'fit-page',"],
+    ['      customFitWidthFactorPercent: 70,', '      customFitWidthFactorPercent: null,'],
+    ["          en: 'The document session may have expired. Close this viewer and open the document again from the source system.',", "          en: 'The document session may have expired. Open the document again from the Example Hospital records system.',"],
+    ["        ctrlOrCmdP: 'dialog'", "        ctrlOrCmdP: 'browser'"],
+    ["      defaultPageMode: 'active',", "      defaultPageMode: 'all',"],
+    ['        allowDownload: false,', '        allowDownload: true,'],
+    ["        filename: 'opendocviewer-print.pdf',", "        filename: 'example-hospital-print.pdf',"],
+    ["      overlay: {\n        enabled: false,\n        print: { enabled: false }\n      },", "      overlay: {\n        enabled: false,\n        print: { enabled: true }\n      },"],
+    ["      curtain: {\n        enabled: false,", "      curtain: {\n        enabled: true,"],
+    ['        prefetchRetryCount: 0,', '        prefetchRetryCount: 2,'],
+    ["        sampleMode: 'evenly-spaced',\n        // 0 means auto. Add explicit counts to benchmark worker-pool scaling.\n        workerCounts: [0, 8, 16, 24],", "        sampleMode: 'evenly-spaced',\n        // 0 means auto. Add explicit counts to benchmark worker-pool scaling.\n        workerCounts: [0, 4],"],
+    ["        contactEmail: 'dev@optimal2.se'", "        contactEmail: 'viewer-support@example.org'"],
+    ["      // bridge: { allowedOrigins: ['https://portal.example'] },\n    },", "      // bridge: { allowedOrigins: ['https://portal.example'] },\n      // Added by the site profile: not present in the shipped sample.\n      bridge: { allowedOrigins: ['https://viewer.example.org'] }\n    },"],
+    ['    showPerfOverlay: false,', '    // showPerfOverlay: false,'],
+    ['      preparationNoticeThresholdPages: 0,', '      // preparationNoticeThresholdPages: 0,'],
+  ];
+  for (const [before, after] of expectedEdits) expectedBody = replaceOnce(expectedBody, before, after);
+  assert.equal(text.split('\n').slice(8).join('\n'), expectedBody, 'only the addressed sample lines changed');
 
   const site = siteOf(out);
   assert.equal(site.print.defaultPageMode, 'all');
@@ -210,13 +241,17 @@ test('CRLF and LF samples are both supported and their line endings are preserve
   const crlfText = fs.readFileSync(crlfOut, 'utf8');
   assert.equal(lfText.includes('\r'), false);
   assert.equal(/(^|[^\r])\n/.test(crlfText), false, 'no bare LF in the CRLF output');
-  assert.equal(crlfText, lfText.replace(/\n/g, '\r\n'), 'same content, only line endings differ');
+  assert.equal(
+    crlfText.replace(crlfSample, '<sample>'),
+    lfText.replace(lfSample, '<sample>').replace(/\n/g, '\r\n'),
+    'same content except for the honest sample name, and only line endings differ'
+  );
   assert.deepEqual(siteOf(crlfOut), siteOf(lfOut));
 
   assert.equal(run(['check', '--profile', EXAMPLE_PROFILE, '--sample', crlfSample, '--config', crlfOut]).code, 0);
   // Regenerating an existing output keeps that file's line endings, whatever the sample uses.
   assert.equal(run(['generate', '--profile', EXAMPLE_PROFILE, '--sample', lfSample, '--out', crlfOut]).code, 0);
-  assert.equal(fs.readFileSync(crlfOut, 'utf8'), crlfText);
+  assert.equal(fs.readFileSync(crlfOut, 'utf8'), crlfText.replace(crlfSample, lfSample));
   assert.equal(run(['check', '--profile', EXAMPLE_PROFILE, '--sample', lfSample, '--config', crlfOut]).code, 0);
 });
 
@@ -316,4 +351,86 @@ test('new-profile writes a commented example profile that generate accepts', () 
   const result = run(['generate', '--profile', profile, '--out', out]);
   assert.equal(result.code, 0, result.stderr);
   assert.equal(siteOf(out).print.defaultPageMode, 'all');
+});
+
+test('a lone surrogate survives UTF-8 output and an immediate check', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'odv.site.config.js');
+  const profile = writeProfile(dir, {
+    name: 'Example Hospital',
+    set: { 'print.pdf.filename': '\ud800' },
+  });
+  const generated = run(['generate', '--profile', profile, '--out', out]);
+  assert.equal(generated.code, 0, generated.stderr);
+  assert.equal(siteOf(out).print.pdf.filename, '\ud800');
+  const checked = run(['check', '--profile', profile, '--config', out]);
+  assert.equal(checked.code, 0, checked.stdout + checked.stderr);
+});
+
+test('an inline addition after a trailing comma remains executable', () => {
+  const dir = tempDir();
+  const sample = path.join(dir, 'inline.sample.js');
+  const out = path.join(dir, 'inline.site.js');
+  fs.writeFileSync(sample, 'window.__ODV_SITE_CONFIG__ = { group: { old: 1, } };\n', 'utf8');
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { '+group.added': 2 } });
+  const generated = run(['generate', '--profile', profile, '--sample', sample, '--out', out]);
+  assert.equal(generated.code, 0, generated.stderr);
+  assert.deepEqual(siteOf(out).group, { old: 1, added: 2 });
+  assert.equal(run(['check', '--profile', profile, '--sample', sample, '--config', out]).code, 0);
+});
+
+test('only executable root assignments are parsed, not comments or strings', () => {
+  const dir = tempDir();
+  const profile = writeProfile(dir, { name: 'Example Hospital', set: { real: 2 } });
+  const samples = [
+    '/* __ODV_SITE_CONFIG__ = { fake: 1 } */\nwindow.__ODV_SITE_CONFIG__ = { real: 1 };\n',
+    'const exampleUrl = "https://viewer.example.org"; window.__ODV_SITE_CONFIG__ = { real: 1 };\n',
+  ];
+  for (let i = 0; i < samples.length; i++) {
+    const sample = path.join(dir, `lexical-${i}.sample.js`);
+    const out = path.join(dir, `lexical-${i}.site.js`);
+    fs.writeFileSync(sample, samples[i], 'utf8');
+    const generated = run(['generate', '--profile', profile, '--sample', sample, '--out', out]);
+    assert.equal(generated.code, 0, generated.stderr);
+    assert.deepEqual(siteOf(out), { real: 2 });
+  }
+});
+
+test('a nested __proto__ JSON key is rejected before anything is written', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'proto.site.js');
+  const profile = path.join(dir, 'proto.profile.json');
+  fs.writeFileSync(profile, JSON.stringify({
+    name: 'Example Hospital',
+    set: { 'viewer.problemNotice.title': JSON.parse('{"__proto__":{"polluted":true},"en":"ok"}') },
+  }), 'utf8');
+  const generated = run(['generate', '--profile', profile, '--out', out]);
+  assert.equal(generated.code, 1);
+  assert.match(generated.stderr, /Profile object values cannot contain a "__proto__" key; the configuration loader cannot merge it safely\./);
+  assert.equal(fs.existsSync(out), false);
+});
+
+test('negative zero survives profile normalisation, output and vm verification', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'negative-zero.site.js');
+  const profile = path.join(dir, 'negative-zero.profile.json');
+  fs.writeFileSync(profile, '{"name":"Example Hospital","set":{"print.pdf.marginPt":-0}}', 'utf8');
+  const generated = run(['generate', '--profile', profile, '--out', out]);
+  assert.equal(generated.code, 0, generated.stderr);
+  assert.equal(Object.is(siteOf(out).print.pdf.marginPt, -0), true);
+  assert.equal(run(['check', '--profile', profile, '--config', out]).code, 0);
+});
+
+test('a custom sample is named honestly in the generated header', () => {
+  const dir = tempDir();
+  const sample = path.join(dir, 'custom.sample.js');
+  const out = path.join(dir, 'custom.site.js');
+  fs.writeFileSync(sample, SAMPLE_TEXT, 'utf8');
+  const generated = run(['generate', '--profile', EXAMPLE_PROFILE, '--sample', sample, '--out', out]);
+  assert.equal(generated.code, 0, generated.stderr);
+  const header = fs.readFileSync(out, 'utf8').split('\n').slice(0, 9).join('\n');
+  assert.ok(header.includes(sample), 'header names the actual custom sample');
+  assert.match(header, /custom --sample/);
+  assert.equal(header.includes(`OpenDocViewer ${readSampleVersion()}`), false, 'no version is inferred for a custom sample');
+  assert.equal(run(['check', '--profile', EXAMPLE_PROFILE, '--sample', sample, '--config', out]).code, 0);
 });
