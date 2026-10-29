@@ -117,8 +117,6 @@
       // when this is false.
       thumbnailPageBadge: true
     },
-    toolbar: {      thumbnailPageBadge: true
-    },
     ocr: {
       // Opt-in in-browser OCR for scanned pages (TIFF, JPG, PNG and PDF pages without a usable
       // text layer). Only the literal value true turns it on; anything else keeps it off. While
@@ -127,7 +125,8 @@
       // the browser only, kept in memory for the session and shown as a selectable text layer.
       // Nothing is sent anywhere and the source files are never modified. Turning it on also
       // needs 'wasm-unsafe-eval' in the script-src of the site's Content-Security-Policy; see
-      // docs-src/runtime-configuration.md.
+      // docs-src/runtime-configuration.md. The OCR module itself ships in a later version;
+      // until then true has no effect.
       enabled: false,
       // Tesseract language codes, tried together on every text line (best match wins). Each
       // extra language roughly adds its own recognition time per page. An array in

@@ -84,13 +84,17 @@ describe('shipped OCR configuration', () => {
     expect(site.assetBaseUrl).toBe('https://host.example/odv-ocr/');
   });
 
-  it('freezes the merged config so runtime code cannot flip the switch', () => {
+  it('freezes the top level of the merged config, so the ocr section cannot be replaced', () => {
+    // Object.freeze in odv.config.js is shallow: the top-level object is frozen, nested sections
+    // are not. This pins exactly that, so nobody reads a stronger guarantee into the config.
     const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
     try {
       dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
-      expect(Object.isFrozen(dom.window.__ODV_CONFIG__)).toBe(true);
-      expect(() => { 'use strict'; dom.window.__ODV_CONFIG__.ocr = { enabled: true }; }).toThrow();
-      expect(dom.window.__ODV_CONFIG__.ocr.enabled).toBe(false);
+      const cfg = dom.window.__ODV_CONFIG__;
+      expect(Object.isFrozen(cfg)).toBe(true);
+      expect(() => { 'use strict'; cfg.ocr = { enabled: true }; }).toThrow();
+      expect(cfg.ocr.enabled).toBe(false);
+      expect(Object.isFrozen(cfg.ocr)).toBe(false);
     } finally {
       dom.window.close();
     }

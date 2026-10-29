@@ -304,7 +304,6 @@ Status: this version ships the switch and its validation; the OCR module itself 
 following versions, so `enabled: true` has no visible effect yet.
 
 ## Toolbar Button Size
-## Toolbar Button Size
 
 The theme menu has a "Larger toolbar buttons" checkbox (sv: "Större verktygsknappar"). Ticked keeps
 the large toolbar (32px buttons, 62px toolbar); unticked gives the compact toolbar (26px buttons,
