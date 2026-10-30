@@ -6,12 +6,13 @@
  * length follows the page size, the generator yields per band and the async form gives the same
  * pixels as the sync form.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   RULING_LINE_BAND_ROWS,
   RULING_LINE_DILATE_PX,
   RULING_LINE_MIN_ASPECT,
   RULING_LINE_MIN_RUN_FLOOR_PX,
+  createEventLoopYield,
   removeRulingLines,
   removeRulingLinesAsync,
   rulingLineMinRunPx,
@@ -182,6 +183,25 @@ describe('removeRulingLines', () => {
     expect(pixel(page, 45, 28)).toEqual(WHITE);
   });
 
+  it('treats transparent pixels as background whatever their colour, and paints opaque white', () => {
+    // A transparent PNG: black RGB under alpha 0 everywhere, an opaque line across it.
+    const page = whitePage(120, 40);
+    page.data.fill(0);
+    for (let x = 10; x < 100; x += 1) {
+      const offset = (20 * page.width + x) * 4;
+      page.data[offset + 3] = 255; // opaque black: the line
+    }
+    const painted = removeRulingLines(page);
+    // The line (90 px) plus its transparent neighbours within two pixels, all now opaque white.
+    expect(painted).toBe(90 * 5 + 2 * 2 * 5);
+    expect(page.data.slice((20 * page.width + 50) * 4, (20 * page.width + 50) * 4 + 4)).toEqual(new Uint8ClampedArray([255, 255, 255, 255]));
+    expect(page.data.slice((17 * page.width + 50) * 4, (17 * page.width + 50) * 4 + 4)).toEqual(new Uint8ClampedArray([0, 0, 0, 0]));
+    // Nothing opaque and dark: nothing is a line.
+    const transparent = whitePage(120, 40);
+    transparent.data.fill(0);
+    expect(removeRulingLines(transparent)).toBe(0);
+  });
+
   it('returns zero for an empty or undersized image', () => {
     expect(removeRulingLines({ data: new Uint8ClampedArray(0), width: 0, height: 0 })).toBe(0);
     expect(removeRulingLines({ data: new Uint8ClampedArray(16), width: 10, height: 10 })).toBe(0);
@@ -214,9 +234,39 @@ describe('rulingLineRemovalSteps and removeRulingLinesAsync', () => {
     expect(asyncPage.data).toEqual(page.data);
   });
 
-  it('uses a real macrotask yield by default', async () => {
+  it('uses the default yield when none is given', async () => {
     const page = whitePage(20, RULING_LINE_BAND_ROWS + 1);
     verticalLine(page, 10, 0, RULING_LINE_BAND_ROWS);
     await expect(removeRulingLinesAsync(page)).resolves.toBe(RULING_LINE_BAND_ROWS + 1);
+  });
+});
+
+describe('createEventLoopYield', () => {
+  it('does not yield at all in a hidden tab, where timers are throttled and nothing needs to stay responsive', async () => {
+    const timer = vi.fn();
+    const yieldFn = createEventLoopYield({ document: { visibilityState: 'hidden' }, scheduler: { yield: vi.fn() }, MessageChannel: null, setTimeout: timer });
+    await yieldFn();
+    expect(timer).not.toHaveBeenCalled();
+  });
+
+  it('prefers scheduler.yield, then a MessageChannel task, then a zero-delay timer', async () => {
+    const schedulerYield = vi.fn(async () => {});
+    await createEventLoopYield({ document: { visibilityState: 'visible' }, scheduler: { yield: schedulerYield }, MessageChannel: null, setTimeout: vi.fn() })();
+    expect(schedulerYield).toHaveBeenCalledTimes(1);
+
+    const posted = [];
+    class FakeChannel {
+      constructor() {
+        this.port1 = { onmessage: null, close: vi.fn() };
+        this.port2 = { postMessage: (value) => { posted.push(value); queueMicrotask(() => this.port1.onmessage({ data: value })); } };
+      }
+    }
+    const channelYield = createEventLoopYield({ document: null, scheduler: null, MessageChannel: FakeChannel, setTimeout: vi.fn() });
+    await channelYield();
+    expect(posted).toEqual([null]);
+
+    const timer = vi.fn((callback) => callback());
+    await createEventLoopYield({ document: null, scheduler: {}, MessageChannel: null, setTimeout: timer })();
+    expect(timer).toHaveBeenCalledWith(expect.any(Function), 0);
   });
 });

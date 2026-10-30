@@ -354,23 +354,33 @@ run of dark pixels at least 0.2 inch long (taking the page's longer side as an A
 derive the resolution) and at least ten times as long as it is thick at its thinnest point is
 painted white with a two-pixel margin, and the copy, re-encoded as PNG, is what the engine
 receives. The thickness rule keeps the stems and bars of large headline glyphs, which can be
-longer than 0.2 inch but are many pixels thick; a very light-weight font at headline size is the
-exception and may lose a stem. The displayed page and printing never see the copy; it is
-released stepwise while the step runs (the decoded bitmap right after it is drawn, the canvas
-as soon as the cleaned image exists) and completely before recognition starts, since an A4 page
-at 300 dpi is about 35 MB as decoded pixels. A page without lines passes through untouched, with
-nothing re-encoded. The step runs on the main thread in bands of rows that hand control back to
-the event loop between them; it costs a few hundred milliseconds per page at 300 dpi. Limits,
-stated rather than hidden: only solid dark lines are removed; light grey lines and dotted or
-dashed lines are left as they are, and such a page is recognised as it is. A glyph stroke that
-crosses a line (the stem of a letter through an underline) loses the two-pixel band around the
-line. The layer of a page whose copy had lines removed carries `data-ruling-lines-removed` for
-diagnostics; the word boxes are unaffected, since the copy has the page image's size. No
-recognition quality figures are given here: the step has been measured on synthetic pages only,
-not yet on a real document with grey or dotted table lines. If the step is wrong for a site's
-documents, `removeRulingLines: false` turns it off; if the step itself fails in a browser (no
-decoder, no canvas, a canvas that refuses to give its pixels back), the page is recognised as it
-is after one console warning.
+longer than 0.2 inch but are many pixels thick. The displayed page and printing never see the
+copy; it is released stepwise while the step runs (the decoded bitmap right after it is drawn,
+the canvas as soon as the cleaned image exists) and completely before recognition starts. The
+copy costs about 13 bytes per pixel at its peak (bitmap, canvas, pixel data and a one-byte
+mask), so around 110 MB for an A4 page at 300 dpi; a page above 20 million pixels (about A3 at
+300 dpi, or a raster scan at 460 dpi and more) is not copied at all and is recognised as it is,
+which bounds the peak whatever the source's resolution. A page without lines passes through
+untouched, with nothing re-encoded. The step runs on the main thread in bands of rows that hand
+control back to the event loop between them (through `scheduler.yield` or a message task, not a
+timer, so a hidden tab's timer throttling does not stretch it; in a hidden tab it runs straight
+through); it costs a few hundred milliseconds per page at 300 dpi. Limits, stated rather than
+hidden: only solid dark lines are removed; light grey lines and dotted or dashed lines are left
+as they are, and such a page is recognised as it is. The rule cannot tell a long thin stroke of
+real ink from a line: the baseline of connected or cursive handwriting, the stems of a very
+light-weight font at headline size, the bars of a barcode and the edges of a dark band with
+white text in it are removed too, and such text may come out worse than without the step. A
+glyph stroke that crosses a line (the stem of a letter through an underline) loses the
+two-pixel band around the line. The layer of a page whose copy had lines removed carries
+`data-ruling-lines-removed` for diagnostics; the word boxes are unaffected, since the copy has
+the page image's size. No recognition quality figures are given here: the step has been
+measured on synthetic pages only, not yet on a real document with grey or dotted table lines or
+with handwriting. If the step is wrong for a site's documents, `removeRulingLines: false` turns
+it off. A browser without an image decoder or a 2D canvas skips the step silently (a debug
+line) and the page is recognised as it is; if the step fails midway (a canvas that refuses to
+give its pixels back, an error in the removal or the encoding), the page is recognised as it is
+after one console warning. Only a page image that cannot be decoded at all fails that page, as
+it did before.
 
 The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are

@@ -142,11 +142,13 @@ export function* rulingLineRemovalSteps(pixels, width, height, options = {}) {
   // Bit 1: dark pixel. Bit 2: part of a ruling line. One byte per pixel.
   const mask = new Uint8Array(w * h);
 
-  // Pass 1: darkness.
+  // Pass 1: darkness. A transparent pixel (alpha below half) is background whatever its colour:
+  // a transparent PNG keeps black RGB under alpha 0.
   for (let y = 0; y < h; y += 1) {
     const rowStart = y * w;
     for (let x = 0; x < w; x += 1) {
       const offset = (rowStart + x) * 4;
+      if (pixels[offset + 3] < RULING_LINE_DARK_LUMA) continue;
       const luma = (pixels[offset] * 77 + pixels[offset + 1] * 151 + pixels[offset + 2] * 28) >> 8;
       if (luma < RULING_LINE_DARK_LUMA) mask[rowStart + x] = 1;
     }
@@ -202,10 +204,12 @@ export function* rulingLineRemovalSteps(pixels, width, height, options = {}) {
       for (let yy = y0; yy <= y1; yy += 1) {
         for (let xx = x0; xx <= x1; xx += 1) {
           const offset = (yy * w + xx) * 4;
-          if (pixels[offset] !== 255 || pixels[offset + 1] !== 255 || pixels[offset + 2] !== 255) {
+          if (pixels[offset] !== 255 || pixels[offset + 1] !== 255 || pixels[offset + 2] !== 255 || pixels[offset + 3] !== 255) {
+            // Opaque white: also for a transparent neighbour, which is background either way.
             pixels[offset] = 255;
             pixels[offset + 1] = 255;
             pixels[offset + 2] = 255;
+            pixels[offset + 3] = 255;
             painted += 1;
           }
         }
@@ -230,8 +234,42 @@ export function removeRulingLines(imageData, options = {}) {
   return step.value;
 }
 
-/** Hand control back to the event loop once (a macrotask, so rendering and input get a turn). */
-const yieldToEventLoop = () => new Promise((resolve) => { setTimeout(resolve, 0); });
+/**
+ * Build the function that hands control back to the event loop between bands. Not a timer:
+ * browsers throttle timers in a hidden tab to about one per second, which would stretch the
+ * forty-odd yields of an A4 page at 300 dpi to longer than the queue's bound on the page image.
+ * In a hidden tab there is nothing to keep responsive, so the work runs through without
+ * yielding; otherwise `scheduler.yield` where it exists, else a MessageChannel message (a task,
+ * never throttled), else a zero-delay timeout.
+ *
+ * @param {Object=} env  Injectable for tests: `document`, `scheduler`, `MessageChannel`, `setTimeout`.
+ * @returns {function(): Promise<void>}
+ */
+export function createEventLoopYield({
+  document: doc = typeof document !== 'undefined' ? document : null,
+  scheduler: sched = typeof scheduler !== 'undefined' ? scheduler : null,
+  MessageChannel: Channel = typeof MessageChannel === 'function' ? MessageChannel : null,
+  setTimeout: timer = setTimeout,
+} = {}) {
+  return () => {
+    if (doc?.visibilityState === 'hidden') return Promise.resolve();
+    if (typeof sched?.yield === 'function') return sched.yield();
+    if (Channel) {
+      return new Promise((resolve) => {
+        const channel = new Channel();
+        channel.port1.onmessage = () => {
+          channel.port1.close();
+          resolve();
+        };
+        channel.port2.postMessage(null);
+      });
+    }
+    return new Promise((resolve) => { timer(resolve, 0); });
+  };
+}
+
+/** The default yield between bands (see createEventLoopYield). */
+export const yieldToEventLoop = createEventLoopYield();
 
 /**
  * Remove the ruling lines of an ImageData-like object in place, yielding to the event loop
@@ -239,7 +277,7 @@ const yieldToEventLoop = () => new Promise((resolve) => { setTimeout(resolve, 0)
  *
  * @param {{ data: Uint8ClampedArray, width: number, height: number }} imageData
  * @param {RulingLineRemovalOptions=} options
- * @param {function(): Promise<void>=} yieldFn  Default: a zero-delay timeout.
+ * @param {function(): Promise<void>=} yieldFn  Default yieldToEventLoop.
  * @returns {Promise<number>}  Pixels painted white.
  */
 export async function removeRulingLinesAsync(imageData, options = {}, yieldFn = yieldToEventLoop) {

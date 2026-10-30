@@ -134,16 +134,16 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 
 ## src/ocr
 
-File count: 12. Line count: 1575. JSDoc symbol count: 78.
+File count: 12. Line count: 1631. JSDoc symbol count: 80.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
 - `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
 - `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
 - `src/ocr/queue.js` - The OCR page queue: one page at a time, bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
+- `src/ocr/prepareImage.js` - Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
 - `src/ocr/window.js` - Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours.
 - `src/ocr/assetUrls.js` - Resolves where the OCR worker, engine core and language models are loaded from.
-- `src/ocr/prepareImage.js` - Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
 
 ## src/PerformanceMonitor.jsx
 

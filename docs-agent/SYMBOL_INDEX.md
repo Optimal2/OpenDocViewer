@@ -841,8 +841,9 @@
 | <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:35</code> | Anything else. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
-| <code>removeRulingLines</code> | function | <code>src/ocr/lineRemoval.js:226</code> | Remove the ruling lines of an ImageData-like object in place, synchronously. |
-| <code>removeRulingLinesAsync</code> | function | <code>src/ocr/lineRemoval.js:245</code> | Remove the ruling lines of an ImageData-like object in place, yielding to the event loop between bands of rows. |
+| <code>createEventLoopYield</code> | function | <code>src/ocr/lineRemoval.js:248</code> | Build the function that hands control back to the event loop between bands. |
+| <code>removeRulingLines</code> | function | <code>src/ocr/lineRemoval.js:230</code> | Remove the ruling lines of an ImageData-like object in place, synchronously. |
+| <code>removeRulingLinesAsync</code> | function | <code>src/ocr/lineRemoval.js:283</code> | Remove the ruling lines of an ImageData-like object in place, yielding to the event loop between bands of rows. |
 | <code>RULING_LINE_BAND_ROWS</code> | constant | <code>src/ocr/lineRemoval.js:47</code> | Rows between two yields of the generator. |
 | <code>RULING_LINE_DARK_LUMA</code> | constant | <code>src/ocr/lineRemoval.js:37</code> | Dark pixels below this luma \(0..255\) count as ink. |
 | <code>RULING_LINE_DILATE_PX</code> | constant | <code>src/ocr/lineRemoval.js:45</code> | Pixels painted white around every line pixel. |
@@ -855,18 +856,19 @@
 | <code>THICKNESS_SAMPLES</code> | constant | <code>src/ocr/lineRemoval.js:49</code> | Positions along a run at which its thickness is sampled. |
 | <code>thinnestHorizontal</code> | function | <code>src/ocr/lineRemoval.js:83</code> | Thinnest thickness of a horizontal run \(dark rows through it\) sampled along its length. |
 | <code>thinnestVertical</code> | function | <code>src/ocr/lineRemoval.js:106</code> | Thinnest thickness of a vertical run \(dark columns through it\) sampled along its length. |
-| <code>yieldToEventLoop</code> | function | <code>src/ocr/lineRemoval.js:234</code> | Hand control back to the event loop once \(a macrotask, so rendering and input get a turn\). |
+| <code>yieldToEventLoop</code> | constant | <code>src/ocr/lineRemoval.js:272</code> | The default yield between bands \(see createEventLoopYield\). |
 | <code>createPdfTextProber</code> | function | <code>src/ocr/pdfTextProbe.js:54</code> |  |
 | <code>DEFAULT_OPEN_PDF_DOCUMENTS</code> | constant | <code>src/ocr/pdfTextProbe.js:18</code> | Open pdf.js documents kept for neighbouring pages before the least recently used is closed. |
 | <code>defaultGetDocument</code> | function | <code>src/ocr/pdfTextProbe.js:26</code> | pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\). |
 | <code>PdfTextProber</code> | typedef | <code>src/ocr/pdfTextProbe.js:37</code> |  |
-| <code>CLEANED_IMAGE_TYPE</code> | constant | <code>src/ocr/prepareImage.js:28</code> | The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts. |
-| <code>defaultCreateCanvas</code> | function | <code>src/ocr/prepareImage.js:41</code> |  |
-| <code>defaultDecode</code> | function | <code>src/ocr/prepareImage.js:31</code> |  |
-| <code>encodeCanvas</code> | function | <code>src/ocr/prepareImage.js:67</code> |  |
-| <code>PreparedOcrImage</code> | typedef | <code>src/ocr/prepareImage.js:77</code> |  |
-| <code>prepareOcrImage</code> | function | <code>src/ocr/prepareImage.js:96</code> |  |
-| <code>releaseCanvas</code> | function | <code>src/ocr/prepareImage.js:53</code> | Free the canvas backing store. |
+| <code>CLEANED_IMAGE_TYPE</code> | constant | <code>src/ocr/prepareImage.js:35</code> | The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts. |
+| <code>defaultCreateCanvas</code> | function | <code>src/ocr/prepareImage.js:50</code> |  |
+| <code>defaultDecode</code> | function | <code>src/ocr/prepareImage.js:40</code> |  |
+| <code>encodeCanvas</code> | function | <code>src/ocr/prepareImage.js:76</code> |  |
+| <code>OCR_LINE_REMOVAL_MAX_PIXELS</code> | constant | <code>src/ocr/prepareImage.js:37</code> | Pages with more pixels than this are recognised as they are \(no copy\): bounds the peak memory. |
+| <code>PreparedOcrImage</code> | typedef | <code>src/ocr/prepareImage.js:86</code> |  |
+| <code>prepareOcrImage</code> | function | <code>src/ocr/prepareImage.js:106</code> |  |
+| <code>releaseCanvas</code> | function | <code>src/ocr/prepareImage.js:62</code> | Free the canvas backing store. |
 | <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:106</code> |  |
 | <code>OCR_STEP_TIMEOUTS_MS</code> | constant | <code>src/ocr/queue.js:25</code> | Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo... |
 | <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:78</code> |  |

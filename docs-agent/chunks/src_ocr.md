@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 12. Line count: 1575. JSDoc symbol count: 78.
+File count: 12. Line count: 1631. JSDoc symbol count: 80.
 
 ## src/ocr/assetUrls.js
 
@@ -63,7 +63,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
 ## src/ocr/languages.js
 
@@ -80,7 +80,7 @@ Symbols:
 
 Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
 
-Exports: `RULING_LINE_DARK_LUMA`, `RULING_LINE_MIN_RUN_SHARE`, `RULING_LINE_MIN_RUN_FLOOR_PX`, `RULING_LINE_MIN_ASPECT`, `RULING_LINE_DILATE_PX`, `RULING_LINE_BAND_ROWS`, `rulingLineMinRunPx`, `rulingLineRemovalSteps`, `removeRulingLines`, `removeRulingLinesAsync`
+Exports: `RULING_LINE_DARK_LUMA`, `RULING_LINE_MIN_RUN_SHARE`, `RULING_LINE_MIN_RUN_FLOOR_PX`, `RULING_LINE_MIN_ASPECT`, `RULING_LINE_DILATE_PX`, `RULING_LINE_BAND_ROWS`, `rulingLineMinRunPx`, `rulingLineRemovalSteps`, `removeRulingLines`, `createEventLoopYield`, `yieldToEventLoop`, `removeRulingLinesAsync`
 
 Symbols:
 
@@ -116,13 +116,14 @@ Symbols:
 
 Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
 
-Exports: `prepareOcrImage`
+Exports: `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
 Local imports: `src/logging/systemLogger.js`, `src/utils/runtimeConfig.js`, `src/ocr/lineRemoval.js`
 
 Symbols:
 
 - `CLEANED_IMAGE_TYPE` (constant) - The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.
+- `OCR_LINE_REMOVAL_MAX_PIXELS` (constant) - Pages with more pixels than this are recognised as they are \(no copy\): bounds the peak memory.
 - `defaultDecode` (function) - No description.
 - `defaultCreateCanvas` (function) - No description.
 - `releaseCanvas` (function) - Free the canvas backing store.

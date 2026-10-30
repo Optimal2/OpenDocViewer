@@ -21111,13 +21111,38 @@
     "examples": 0
   },
   {
+    "id": "createEventLoopYield",
+    "name": "createEventLoopYield",
+    "longname": "createEventLoopYield",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/lineRemoval.js",
+    "line": 248,
+    "description": "Build the function that hands control back to the event loop between bands.",
+    "params": [
+      {
+        "name": "env",
+        "type": "Object",
+        "optional": true,
+        "description": "Injectable for tests: document , scheduler , MessageChannel , setTimeout ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "removeRulingLines",
     "name": "removeRulingLines",
     "longname": "removeRulingLines",
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/lineRemoval.js",
-    "line": 226,
+    "line": 230,
     "description": "Remove the ruling lines of an ImageData-like object in place, synchronously.",
     "params": [
       {
@@ -21148,7 +21173,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/lineRemoval.js",
-    "line": 245,
+    "line": 283,
     "description": "Remove the ruling lines of an ImageData-like object in place, yielding to the event loop between bands of rows.",
     "params": [
       {
@@ -21167,7 +21192,7 @@
         "name": "yieldFn",
         "type": "function",
         "optional": false,
-        "description": "Default: a zero-delay timeout."
+        "description": "Default yieldToEventLoop."
       }
     ],
     "returns": [
@@ -21476,11 +21501,11 @@
     "id": "yieldToEventLoop",
     "name": "yieldToEventLoop",
     "longname": "yieldToEventLoop",
-    "kind": "function",
+    "kind": "constant",
     "scope": "global",
     "file": "src/ocr/lineRemoval.js",
-    "line": 234,
-    "description": "Hand control back to the event loop once (a macrotask, so rendering and input get a turn).",
+    "line": 272,
+    "description": "The default yield between bands (see createEventLoopYield).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -21586,7 +21611,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 28,
+    "line": 35,
     "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
     "params": [],
     "returns": [],
@@ -21599,7 +21624,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 41,
+    "line": 50,
     "description": "",
     "params": [
       {
@@ -21630,7 +21655,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 31,
+    "line": 40,
     "description": "",
     "params": [
       {
@@ -21650,7 +21675,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 67,
+    "line": 76,
     "description": "",
     "params": [
       {
@@ -21669,13 +21694,26 @@
     "examples": 0
   },
   {
+    "id": "OCR_LINE_REMOVAL_MAX_PIXELS",
+    "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
+    "longname": "OCR_LINE_REMOVAL_MAX_PIXELS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/prepareImage.js",
+    "line": 37,
+    "description": "Pages with more pixels than this are recognised as they are (no copy): bounds the peak memory.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "PreparedOcrImage",
     "name": "PreparedOcrImage",
     "longname": "PreparedOcrImage",
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 77,
+    "line": 86,
     "description": "",
     "params": [],
     "returns": [],
@@ -21688,7 +21726,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 96,
+    "line": 106,
     "description": "",
     "params": [
       {
@@ -21713,7 +21751,13 @@
         "name": "options.fallbackSize",
         "type": "Object",
         "optional": true,
-        "description": "Used when the image cannot be decoded."
+        "description": "Used when the browser has no decoder."
+      },
+      {
+        "name": "options.maxPixels",
+        "type": "number",
+        "optional": true,
+        "description": "Default OCR_LINE_REMOVAL_MAX_PIXELS."
       },
       {
         "name": "options.decode",
@@ -21743,7 +21787,7 @@
     "returns": [
       {
         "type": "Promise.<PreparedOcrImage>",
-        "description": ""
+        "description": "Rejects only when the image cannot be decoded."
       }
     ],
     "examples": 0
@@ -21755,7 +21799,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareImage.js",
-    "line": 53,
+    "line": 62,
     "description": "Free the canvas backing store.",
     "params": [],
     "returns": [],

@@ -7,7 +7,7 @@
  * failed page) when the browser cannot decode, has no canvas or refuses to give pixels back.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { prepareOcrImage } from '../prepareImage.js';
+import { OCR_LINE_REMOVAL_MAX_PIXELS, prepareOcrImage } from '../prepareImage.js';
 
 const config = vi.hoisted(() => ({ removeRulingLines: true }));
 vi.mock('../../utils/runtimeConfig.js', () => ({ isOcrLineRemovalEnabled: () => config.removeRulingLines }));
@@ -31,7 +31,7 @@ function pixels({ line }) {
 }
 
 /** Records the steps of a run: decoder, canvas, context and encoder. */
-function harness({ line = true, width = WIDTH, height = HEIGHT, getImageDataError = null, canvas = true } = {}) {
+function harness({ line = true, width = WIDTH, height = HEIGHT, getImageDataError = null, canvas = true, toBlobOnly = false, encodeError = null } = {}) {
   const events = [];
   const bitmap = { width, height, close: vi.fn(() => events.push('bitmap closed')) };
   let imageData = null;
@@ -53,9 +53,15 @@ function harness({ line = true, width = WIDTH, height = HEIGHT, getImageDataErro
     }),
     convertToBlob: vi.fn(async ({ type }) => {
       events.push(`convertToBlob ${type}`);
+      if (encodeError) throw encodeError;
       return new Blob(['cleaned'], { type });
     }),
+    toBlob: vi.fn((callback, type) => {
+      events.push(`toBlob ${type}`);
+      callback(encodeError ? null : new Blob(['cleaned'], { type }));
+    }),
   };
+  if (toBlobOnly) delete fakeCanvas.convertToBlob;
   return {
     events,
     bitmap,
@@ -117,21 +123,63 @@ describe('prepareOcrImage', () => {
     expect(explicit.rulingLinePixels).toBe(90);
   });
 
-  it('falls back to the caller\'s size and the original image where the browser cannot decode', async () => {
+  it('falls back to the caller\'s size and the original image where the browser has no decoder, with a debug line only', async () => {
     const createCanvas = vi.fn();
-    const prepared = await prepareOcrImage(original, { decode: async () => null, createCanvas, fallbackSize: { width: 220, height: 311 } });
+    const log = { warn: vi.fn(), debug: vi.fn() };
+    const prepared = await prepareOcrImage(original, { decode: async () => null, createCanvas, fallbackSize: { width: 220, height: 311 }, log });
     expect(prepared).toEqual({ blob: original, width: 220, height: 311, rulingLinePixels: 0 });
     expect(createCanvas).not.toHaveBeenCalled();
+    expect(log.warn).not.toHaveBeenCalled();
+    expect(log.debug).toHaveBeenCalledTimes(1);
     const unknown = await prepareOcrImage(original, { decode: async () => null, createCanvas });
     expect(unknown).toEqual({ blob: original, width: 0, height: 0, rulingLinePixels: 0 });
   });
 
-  it('keeps the measured size and the original image without a canvas', async () => {
+  it('keeps the measured size and the original image without a canvas, with a debug line only', async () => {
     const h = harness({ canvas: false });
     const prepared = await prepareOcrImage(original, { decode: h.decode, createCanvas: h.createCanvas, log: h.log });
     expect(prepared).toEqual({ blob: original, width: WIDTH, height: HEIGHT, rulingLinePixels: 0 });
     expect(h.bitmap.close).toHaveBeenCalledTimes(1);
     expect(h.log.warn).not.toHaveBeenCalled();
+    expect(h.log.debug).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not copy a page above the pixel bound, so the peak memory stays bounded', async () => {
+    const h = harness({ line: true, width: 5000, height: 4001 }); // 20 000 001 px, one over the default
+    const prepared = await prepareOcrImage(original, { decode: h.decode, createCanvas: h.createCanvas, log: h.log });
+    expect(prepared).toEqual({ blob: original, width: 5000, height: 4001, rulingLinePixels: 0 });
+    expect(h.createCanvas).not.toHaveBeenCalled();
+    expect(h.bitmap.close).toHaveBeenCalledTimes(1);
+    expect(h.log.debug.mock.calls[0][1]).toEqual({ width: 5000, height: 4001, maxPixels: OCR_LINE_REMOVAL_MAX_PIXELS });
+    expect(OCR_LINE_REMOVAL_MAX_PIXELS).toBe(20000000);
+    // An explicit bound is honoured; the real removal still runs on the fake 120 × 40 pixels.
+    const small = harness({ line: true });
+    const bounded = await prepareOcrImage(original, { decode: small.decode, createCanvas: small.createCanvas, maxPixels: WIDTH * HEIGHT - 1, log: small.log });
+    expect(bounded.rulingLinePixels).toBe(0);
+    expect(small.createCanvas).not.toHaveBeenCalled();
+  });
+
+  it('encodes through canvas.toBlob where convertToBlob does not exist', async () => {
+    const h = harness({ line: true, toBlobOnly: true });
+    const prepared = await prepareOcrImage(original, { decode: h.decode, createCanvas: h.createCanvas, log: h.log });
+    expect(prepared.rulingLinePixels).toBe(90);
+    expect(await prepared.blob.text()).toBe('cleaned');
+    expect(h.events).toContain('toBlob image/png');
+    expect(h.canvas.width).toBe(0);
+  });
+
+  it.each([
+    ['the removal throws', { line: true }, { removeLines: async () => { throw new Error('removal broke'); } }, 'removal broke'],
+    ['convertToBlob throws', { line: true, encodeError: new Error('encode broke') }, {}, 'encode broke'],
+    ['toBlob gives null', { line: true, toBlobOnly: true, encodeError: new Error('x') }, {}, 'canvas.toBlob returned null'],
+  ])('recognises the page as it is, with one warning, when %s', async (_label, harnessOptions, extra, message) => {
+    const h = harness(harnessOptions);
+    const prepared = await prepareOcrImage(original, { decode: h.decode, createCanvas: h.createCanvas, log: h.log, ...extra });
+    expect(prepared).toEqual({ blob: original, width: WIDTH, height: HEIGHT, rulingLinePixels: 0 });
+    expect(h.log.warn).toHaveBeenCalledTimes(1);
+    expect(h.log.warn.mock.calls[0][1]).toEqual({ error: message });
+    expect(h.bitmap.close).toHaveBeenCalledTimes(1);
+    expect(h.canvas.width).toBe(0);
   });
 
   it('recognises the page as it is, with one warning, when the canvas refuses to give pixels back', async () => {
@@ -144,11 +192,13 @@ describe('prepareOcrImage', () => {
     expect(h.canvas.width).toBe(0);
   });
 
-  it('recognises the page as it is when decoding throws', async () => {
+  it('fails the page when the image cannot be decoded, as the hook did before (a guessed size would misplace the layer)', async () => {
     const log = { warn: vi.fn(), debug: vi.fn() };
-    const prepared = await prepareOcrImage(original, { decode: async () => { throw new Error('bad png'); }, fallbackSize: { width: 10, height: 20 }, log });
-    expect(prepared).toEqual({ blob: original, width: 10, height: 20, rulingLinePixels: 0 });
-    expect(log.warn).toHaveBeenCalledTimes(1);
+    const createCanvas = vi.fn();
+    await expect(prepareOcrImage(original, { decode: async () => { throw new Error('bad png'); }, createCanvas, fallbackSize: { width: 10, height: 20 }, log }))
+      .rejects.toThrow('bad png');
+    expect(createCanvas).not.toHaveBeenCalled();
+    expect(log.warn).not.toHaveBeenCalled();
   });
 
   it('uses an injected remover and reports what it painted', async () => {
