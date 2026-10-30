@@ -1531,9 +1531,10 @@ function fileIdentity(file, files) {
  * Refuse a destination that is, or leads to, a file the repository ships: writing a generated
  * site configuration over the sample or the loader is always wrong, also with --force. Judged by
  * file identity ({dev, ino} from statSync) when both the resolved target and the protected file
- * exist, which also catches another spelling of the same file (a mapped or substituted drive, a
- * \\?\ prefix, a hard link). The normalised path comparison with both the name the operator gave
- * and the resolved target always applies as well, so a destination that does not exist yet (or a
+ * yield an available, exact and comparable identity, which also catches another spelling of the
+ * same file (a mapped or substituted drive, a \\?\ prefix, a hard link). The normalised path
+ * comparison with both the name the operator gave and the resolved target always applies as well,
+ * so a destination that does not exist yet (or a
  * file system without inode numbers) is still refused by name.
  * @param {Destination} dest
  * @param {{ file: string, what: string }[]} protectedFiles

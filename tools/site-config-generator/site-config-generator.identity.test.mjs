@@ -241,7 +241,11 @@ test('unsafe numeric identities are not compared and cannot refuse an unrelated 
   assert.equal(fs.readFileSync(out, 'utf8'), PROFILE_TEMPLATE);
 });
 
-test('mixed-precision unsafe identities fall back to the path comparison', () => {
+test('mixed-precision unsafe identities do not refuse an unrelated destination', () => {
+  // Preservation case: the previous `${dev}:${ino}` comparison also allowed this write because
+  // the identity strings differed. The discriminating evidence for the exactness rule is the
+  // unsafe-numeric-identities spec above; this case only proves that an inexactly represented
+  // identity does not refuse an unrelated destination.
   const dir = tempDir();
   const out = path.join(dir, 'mixed-precision.json');
   fs.writeFileSync(out, 'old\n', 'utf8');
