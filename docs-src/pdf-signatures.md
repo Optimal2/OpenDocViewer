@@ -218,13 +218,11 @@ order:
    of an object, while pdf.js follows the signed revision's active `/Prev` chain and keeps
    the nearest section's entry per object. Every parsed pre-E section must belong to that
    chain; an unlinked decoy table or xref stream makes the result unclassified. Every `/Prev`
-   in the chain must point backwards, with one exception: a linearized file (ISO 32000-1
-   Annex F) puts its first-page section first, and that section's `/Prev` points forward to
-   the main section. That link is accepted only in the exact shape: the file's first object
-   is a signed linearization dictionary (`/Linearized` > 0) whose `/H` names a signed hint
-   stream, the first-page section is the physically first section and follows that
-   dictionary with no other object in between, and the main section ends the chain (no
-   `/Prev` of its own). Any other forward `/Prev`, or a cycle, is unclassified.
+   in the chain must point backwards; a forward link or a cycle is unclassified. In
+   particular, the first-page-to-main forward link of a linearized file (ISO 32000-1 Annex F)
+   is no longer excepted. Accepting that shape safely would require a separate pdf.js
+   rendering comparison of the signed and final revisions; until such a comparison exists,
+   even an honest DSS-only append to that linearized shape is a deliberate false warning.
 
    The length of the file is not a safety argument on its own. pdf.js treats a file as
    linearized when its first object is a dictionary with `/Linearized` > 0 and an `/L` equal
@@ -232,16 +230,26 @@ order:
    cross-reference data right after the first `endobj` in the file, an offset the file's
    author chooses (it can sit inside a string), not at the last `startxref`. A signer can
    set `/L` to the length the file will have after a later append and hide a forged xref
-   table there, so the classifier and pdf.js would see different content. Two rules close
+   table there, so the classifier and pdf.js would see different content. Three rules close
    this for every file, linearized or not:
    - the file must start with `%PDF-`. Bytes before the header change the length pdf.js
      measures, and a first object more than 1024 bytes before the header is read by pdf.js
-     but skipped by pdf-lib;
-   - every object with a `/Linearized` key must have a direct numeric `/L` of at most E.
-     Appended data makes the final file longer than E, so pdf.js never accepts the
-     linearization and follows the `/Prev` chain from the last `startxref`, the chain the
-     classifier checks. An `/L` larger than E (for example the final length after the
-     append) is unclassified.
+     but skipped by pdf-lib. Both engines can search beyond byte zero, so requiring the
+     header at byte zero is deliberately stricter: a BOM-prefixed file gets a warning after
+     an unsigned append (known limitation, fail closed);
+   - `allDicts(log, pdfLib)` is the only dictionary-enumeration point for revision rules. It
+     includes ordinary and nested dictionaries, ObjStm members and the ObjStm/XRef stream
+     dictionaries from `log.structural`, none of which may be skipped by assuming they are
+     in `log.records`. Every dictionary with a `/Linearized` key must have a direct numeric
+     `/L` of at most E. Appended data makes the final file longer than E, so pdf.js never
+     accepts the linearization and follows the `/Prev` chain from the last `startxref`, the
+     chain the classifier checks. An `/L` larger than E (for example the final length after
+     the append) is unclassified;
+   - security-key spelling is checked in the raw source bytes, not through pdf-lib's name
+     decoder (which does not decode every lowercase hex escape that pdf.js accepts). Any
+     `#`-escaped name in a dictionary that contains `/Linearized` or `/L`, after decoding
+     either uppercase or lowercase escapes, is unclassified. This rejects duplicate or
+     disguised security keys instead of letting two parsers choose different values.
 
    Two rules then pin the state at E to what pdf.js reads:
    - every object pdf-lib holds at E must be the definition the active chain's entry names
@@ -296,9 +304,12 @@ order:
 The classifier is conservative by construction: whatever it cannot classify with certainty
 is a warning, never green. Known false warnings, kept on purpose: a validly signed hybrid
 file (a signed trailer with `/XRefStm`) stays a warning after a DSS append, because the
-hybrid section is not part of the modelled `/Prev` chain; and an appended revision that
-frees or reuses the number of a signed xref stream is a warning even though no writer
-needs to. Its parser hooks are installed on the pdf-lib parser instance
+hybrid section is not part of the modelled `/Prev` chain; an honest DSS-only append to a
+linearized file whose first-page `/Prev` points forward is a warning because no independent
+rendering comparison authorizes that exception; a BOM-prefixed file is a warning because the
+classifier requires `%PDF-` at byte zero; and an appended revision that frees or reuses the
+number of a signed xref stream is a warning even though no writer needs to. Its parser hooks
+are installed on the pdf-lib parser instance
 only when every expected method exists (the same guard as the indirect-object header
 probe); a different pdf-lib build, an unattributed object, an unexpected parser shape or
 any exception inside the classifier yields `unclassified-change-after-signing`. An invalid
@@ -638,18 +649,21 @@ layout (signed by an incremental update, or with the signature inside the linear
 `qpdfLinearized` signs and extends two small UNSIGNED one-page bases written by a real
 linearizer, qpdf 12.3.2 through pikepdf (`scripts/fixtures/linearized-qpdf-table.pdf` with
 xref tables, `scripts/fixtures/linearized-qpdf-objstm.pdf` with xref and object streams;
-regenerate with `python scripts/generate-linearized-fixture-bases.py`). For every shape a
-DSS-only append must be green and pdf.js must draw the same page text before and after; a
-content change must warn and pdf.js must draw the changed text. A shadow object appended to
-a linearized file stays unclassified, and so does a forward `/Prev` when the first object
-is not a linearization dictionary, `/H` does not name a hint stream, the main section links
-back, or an object sits between the linearization dictionary and the first-page section.
-Two `/L` exploits (`linearizedLengthExploit`) carry a forged xref table after a literal
-`endobj` and set `/L` before signing to the length after a "DSS" append whose certificate
-stream data hides a new page content object: once in the signed linearization dictionary,
-once in a first object more than 1024 bytes before the `%PDF-` header. The signed file is
-green and pdf.js draws the signed text; after the append both must warn while pdf.js draws
-`EXPLOIT CHANGED CONTENT AFTER SIGNING` (5c4636f classified the first as green).
+regenerate with `python scripts/generate-linearized-fixture-bases.py`). For every shape an
+intact signed file is green. A DSS-only append is the documented forward-`/Prev` false
+warning and pdf.js must draw the same page text before and after; a content change must also
+warn and pdf.js must draw the changed text. A shadow object appended to a linearized file
+stays unclassified, and so does a forward `/Prev` when the first object is not a
+linearization dictionary, `/H` does not name a hint stream, the main section links back, or
+an object sits between the linearization dictionary and the first-page section.
+Four `/L` exploits carry a forged xref table after a literal `endobj` and set `/L` before
+signing to the length after a "DSS" append whose certificate stream data hides a new page
+content object: a plain signed linearization dictionary, a duplicate lowercase-escaped
+`/#4c` key, a first-object `/Type /XRef` stream dictionary, and a first object more than 1024
+bytes before the `%PDF-` header. The signed file is green and pdf.js draws the signed text;
+after every append the classifier must warn while pdf.js draws
+`EXPLOIT CHANGED CONTENT AFTER SIGNING`. The plain form was green at 5c4636f; the escaped-name and xref-stream forms
+were both green at b11fa15.
 
 The fixtures are generated in the vitest setup instead of being committed as binary files:
 the public repository stays free of binaries that cannot be diff-reviewed, keys are
@@ -737,11 +751,10 @@ allowing a visible timestamp widget,
 accepting orphan objects, trusting an unhooked parser, skipping the `/Prev` chain, allowing
 a signed structural stream number to be freed, ignoring an appended xref stream that fills
 a dangling reference, counting signed structural streams as filled later, rejecting a tail
-entry that re-lists a signed structural stream at its signed offset, not recognising a
-linearized first-page section, accepting any forward `/Prev`, and recognising linearization
-without a hint stream or with an object before the first-page section, not checking a
-linearization `/L` against E, allowing bytes before the `%PDF-` header, and not calling the
-linearization guard at all.
+entry that re-lists a signed structural stream at its signed offset, accepting a forward
+`/Prev` without a rendering comparison, trusting raw escaped security names, skipping
+structural linearization dictionaries, not checking a linearization `/L` against E, allowing
+bytes before the `%PDF-` header, and not calling the linearization guard at all.
 
 For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
 It checks the reviewed hook baseline and individually breaks result retention, queue

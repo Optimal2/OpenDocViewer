@@ -31525,8 +31525,21 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 504,
+    "line": 540,
     "description": "Return the signed revision's active cross-reference sections, newest first.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureRevisions.allDicts",
+    "name": "allDicts",
+    "longname": "module:utils/pdfSignatureRevisions.allDicts",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureRevisions.js",
+    "line": 207,
+    "description": "The single enumeration point for revision rules.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -31538,7 +31551,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 548,
+    "line": 582,
     "description": "pdf.js reads a file as linearized when its first object is a dictionary with /Linearized &gt; 0 and an /L equal to the length it measures from the %PDF- header (Linearization.crea...",
     "params": [],
     "returns": [],
@@ -31551,7 +31564,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 593,
+    "line": 678,
     "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
     "params": [],
     "returns": [],
@@ -31564,7 +31577,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 217,
+    "line": 254,
     "description": "Classify the unsigned data appended after a signature's covered range.",
     "params": [
       {
@@ -31601,7 +31614,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 725,
+    "line": 810,
     "description": "Every object number referenced directly by the given objects (no resolution).",
     "params": [],
     "returns": [],
@@ -31627,7 +31640,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 748,
+    "line": 833,
     "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
     "params": [
       {
@@ -31697,6 +31710,19 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureRevisions~hasEscapedSecurityName",
+    "name": "hasEscapedSecurityName",
+    "longname": "module:utils/pdfSignatureRevisions~hasEscapedSecurityName",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatureRevisions.js",
+    "line": 600,
+    "description": "Scan source names itself: pdf-lib does not decode lowercase hex escapes.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureRevisions.installRevisionLogHooks",
     "name": "installRevisionLogHooks",
     "longname": "module:utils/pdfSignatureRevisions.installRevisionLogHooks",
@@ -31719,19 +31745,6 @@
         "description": "Revision log from createRevisionLog()."
       }
     ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "module:utils/pdfSignatureRevisions~linearizedFirstPageSection",
-    "name": "linearizedFirstPageSection",
-    "longname": "module:utils/pdfSignatureRevisions~linearizedFirstPageSection",
-    "kind": "function",
-    "scope": "inner",
-    "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 569,
-    "description": "The first-page cross-reference section of a signed linearized file (ISO 32000-1 Annex F), or null.",
-    "params": [],
     "returns": [],
     "examples": 0
   },
@@ -31780,7 +31793,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 703,
+    "line": 788,
     "description": "Object numbers reachable from values through map (final state), capped.",
     "params": [],
     "returns": [],
@@ -31793,7 +31806,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 480,
+    "line": 516,
     "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
     "params": [],
     "returns": [],
@@ -31832,7 +31845,7 @@
     "kind": "class",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 200,
+    "line": 237,
     "description": "",
     "params": [
       {

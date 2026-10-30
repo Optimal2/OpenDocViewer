@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 166,
-    "sourceLineCount": 64269,
-    "docletCount": 1807,
+    "sourceLineCount": 64354,
+    "docletCount": 1808,
     "documentedFileCount": 165,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -1705,8 +1705,8 @@
     {
       "name": "src/utils",
       "fileCount": 54,
-      "lineCount": 21353,
-      "docletCount": 866,
+      "lineCount": 21438,
+      "docletCount": 867,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -54603,9 +54603,9 @@
     },
     {
       "path": "src/utils/pdfSignatureRevisions.js",
-      "lines": 832,
+      "lines": 917,
       "extension": ".js",
-      "jsdocBlockCount": 18,
+      "jsdocBlockCount": 19,
       "sourceSummary": "Appended-revision classifier for PDF signatures.",
       "imports": [],
       "exports": [
@@ -54620,14 +54620,19 @@
           "line": 98
         },
         {
+          "name": "allDicts",
+          "kind": "function",
+          "line": 207
+        },
+        {
           "name": "classifyAppendedRevisions",
           "kind": "function",
-          "line": 217
+          "line": 254
         },
         {
           "name": "decodeXrefStream",
           "kind": "function",
-          "line": 748
+          "line": 833
         }
       ],
       "declarations": [
@@ -54647,174 +54652,204 @@
           "line": 108
         },
         {
+          "name": "allDicts",
+          "kind": "function",
+          "line": 207
+        },
+        {
+          "name": "add",
+          "kind": "function",
+          "line": 210
+        },
+        {
+          "name": "base",
+          "kind": "object",
+          "line": 211
+        },
+        {
           "name": "Verdict",
           "kind": "class",
-          "line": 198
+          "line": 235
         },
         {
           "name": "unclassified",
           "kind": "function",
-          "line": 202
+          "line": 239
         },
         {
           "name": "contentChanged",
           "kind": "function",
-          "line": 204
+          "line": 241
         },
         {
           "name": "stop",
           "kind": "function",
-          "line": 206
+          "line": 243
         },
         {
           "name": "classifyAppendedRevisions",
           "kind": "function",
-          "line": 217
+          "line": 254
         },
         {
           "name": "classify",
           "kind": "function",
-          "line": 229
+          "line": 266
         },
         {
           "name": "name",
           "kind": "function",
-          "line": 231
+          "line": 268
         },
         {
           "name": "refNum",
           "kind": "function",
-          "line": 232
+          "line": 269
         },
         {
           "name": "str",
           "kind": "function",
-          "line": 233
+          "line": 270
         },
         {
           "name": "resolve",
           "kind": "function",
-          "line": 292
+          "line": 328
         },
         {
           "name": "resolveArray",
           "kind": "function",
-          "line": 293
+          "line": 329
         },
         {
           "name": "isNamed",
           "kind": "function",
-          "line": 298
+          "line": 334
         },
         {
           "name": "reach",
           "kind": "function",
-          "line": 325
+          "line": 361
         },
         {
           "name": "arrayAppend",
           "kind": "function",
-          "line": 340
+          "line": 376
         },
         {
           "name": "widgetOk",
           "kind": "function",
-          "line": 345
+          "line": 381
         },
         {
           "name": "allowNewField",
           "kind": "function",
-          "line": 357
+          "line": 393
         },
         {
           "name": "acroFormRule",
           "kind": "function",
-          "line": 388
+          "line": 424
         },
         {
           "name": "pageRule",
           "kind": "function",
-          "line": 407
+          "line": 443
         },
         {
           "name": "ownerPageOf",
           "kind": "function",
-          "line": 447
+          "line": 483
         },
         {
           "name": "revisionMaps",
           "kind": "function",
-          "line": 480
+          "line": 516
         },
         {
           "name": "activeXrefChain",
           "kind": "function",
-          "line": 504
+          "line": 540
         },
         {
           "name": "assertLinearizationIgnored",
           "kind": "function",
-          "line": 548
+          "line": 582
         },
         {
-          "name": "linearizedFirstPageSection",
+          "name": "hasEscapedSecurityName",
           "kind": "function",
-          "line": 569
+          "line": 600
         },
         {
-          "name": "assertXrefConsistent",
+          "name": "whitespace",
           "kind": "function",
-          "line": 593
+          "line": 602
         },
         {
-          "name": "inUseAtE",
+          "name": "delimiter",
           "kind": "function",
           "line": 603
         },
         {
+          "name": "hex",
+          "kind": "function",
+          "line": 604
+        },
+        {
+          "name": "assertXrefConsistent",
+          "kind": "function",
+          "line": 678
+        },
+        {
+          "name": "inUseAtE",
+          "kind": "function",
+          "line": 688
+        },
+        {
           "name": "sameObject",
           "kind": "function",
-          "line": 685
+          "line": 770
         },
         {
           "name": "children",
           "kind": "function",
-          "line": 695
+          "line": 780
         },
         {
           "name": "reachable",
           "kind": "function",
-          "line": 703
+          "line": 788
         },
         {
           "name": "collectShallowRefs",
           "kind": "function",
-          "line": 725
+          "line": 810
         },
         {
           "name": "decodeXrefStream",
           "kind": "function",
-          "line": 748
+          "line": 833
         },
         {
           "name": "int",
           "kind": "function",
-          "line": 750
+          "line": 835
         },
         {
           "name": "field",
           "kind": "function",
-          "line": 772
+          "line": 857
         },
         {
           "name": "unpredict",
           "kind": "function",
-          "line": 788
+          "line": 873
         },
         {
           "name": "get",
           "kind": "function",
-          "line": 792
+          "line": 877
         }
       ],
       "parseError": null,
@@ -54966,13 +55001,26 @@
           "examples": 0
         },
         {
+          "id": "module:utils/pdfSignatureRevisions.allDicts",
+          "name": "allDicts",
+          "longname": "module:utils/pdfSignatureRevisions.allDicts",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRevisions.js",
+          "line": 207,
+          "description": "The single enumeration point for revision rules.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "module:utils/pdfSignatureRevisions~Verdict",
           "name": "Verdict",
           "longname": "module:utils/pdfSignatureRevisions~Verdict",
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 200,
+          "line": 237,
           "description": "",
           "params": [
             {
@@ -54992,7 +55040,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 217,
+          "line": 254,
           "description": "Classify the unsigned data appended after a signature's covered range.",
           "params": [
             {
@@ -55029,7 +55077,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 480,
+          "line": 516,
           "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
           "params": [],
           "returns": [],
@@ -55042,7 +55090,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 504,
+          "line": 540,
           "description": "Return the signed revision's active cross-reference sections, newest first.",
           "params": [],
           "returns": [],
@@ -55055,21 +55103,21 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 548,
+          "line": 582,
           "description": "pdf.js reads a file as linearized when its first object is a dictionary with /Linearized &gt; 0 and an /L equal to the length it measures from the %PDF- header (Linearization.crea...",
           "params": [],
           "returns": [],
           "examples": 0
         },
         {
-          "id": "module:utils/pdfSignatureRevisions~linearizedFirstPageSection",
-          "name": "linearizedFirstPageSection",
-          "longname": "module:utils/pdfSignatureRevisions~linearizedFirstPageSection",
+          "id": "module:utils/pdfSignatureRevisions~hasEscapedSecurityName",
+          "name": "hasEscapedSecurityName",
+          "longname": "module:utils/pdfSignatureRevisions~hasEscapedSecurityName",
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 569,
-          "description": "The first-page cross-reference section of a signed linearized file (ISO 32000-1 Annex F), or null.",
+          "line": 600,
+          "description": "Scan source names itself: pdf-lib does not decode lowercase hex escapes.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -55081,7 +55129,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 593,
+          "line": 678,
           "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
           "params": [],
           "returns": [],
@@ -55094,7 +55142,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 703,
+          "line": 788,
           "description": "Object numbers reachable from values through map (final state), capped.",
           "params": [],
           "returns": [],
@@ -55107,7 +55155,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 725,
+          "line": 810,
           "description": "Every object number referenced directly by the given objects (no resolution).",
           "params": [],
           "returns": [],
@@ -55120,7 +55168,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 748,
+          "line": 833,
           "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
           "params": [
             {
@@ -55155,7 +55203,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 58,
+      "importanceScore": 64,
       "summary": "Appended-revision classifier for PDF signatures.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -105942,8 +105990,21 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 504,
+      "line": 540,
       "description": "Return the signed revision's active cross-reference sections, newest first.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRevisions.allDicts",
+      "name": "allDicts",
+      "longname": "module:utils/pdfSignatureRevisions.allDicts",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRevisions.js",
+      "line": 207,
+      "description": "The single enumeration point for revision rules.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -105955,7 +106016,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 548,
+      "line": 582,
       "description": "pdf.js reads a file as linearized when its first object is a dictionary with /Linearized &gt; 0 and an /L equal to the length it measures from the %PDF- header (Linearization.crea...",
       "params": [],
       "returns": [],
@@ -105968,7 +106029,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 593,
+      "line": 678,
       "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
       "params": [],
       "returns": [],
@@ -105981,7 +106042,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 217,
+      "line": 254,
       "description": "Classify the unsigned data appended after a signature's covered range.",
       "params": [
         {
@@ -106018,7 +106079,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 725,
+      "line": 810,
       "description": "Every object number referenced directly by the given objects (no resolution).",
       "params": [],
       "returns": [],
@@ -106044,7 +106105,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 748,
+      "line": 833,
       "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
       "params": [
         {
@@ -106114,6 +106175,19 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureRevisions~hasEscapedSecurityName",
+      "name": "hasEscapedSecurityName",
+      "longname": "module:utils/pdfSignatureRevisions~hasEscapedSecurityName",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureRevisions.js",
+      "line": 600,
+      "description": "Scan source names itself: pdf-lib does not decode lowercase hex escapes.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureRevisions.installRevisionLogHooks",
       "name": "installRevisionLogHooks",
       "longname": "module:utils/pdfSignatureRevisions.installRevisionLogHooks",
@@ -106136,19 +106210,6 @@
           "description": "Revision log from createRevisionLog()."
         }
       ],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureRevisions~linearizedFirstPageSection",
-      "name": "linearizedFirstPageSection",
-      "longname": "module:utils/pdfSignatureRevisions~linearizedFirstPageSection",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 569,
-      "description": "The first-page cross-reference section of a signed linearized file (ISO 32000-1 Annex F), or null.",
-      "params": [],
       "returns": [],
       "examples": 0
     },
@@ -106197,7 +106258,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 703,
+      "line": 788,
       "description": "Object numbers reachable from values through map (final state), capped.",
       "params": [],
       "returns": [],
@@ -106210,7 +106271,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 480,
+      "line": 516,
       "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
       "params": [],
       "returns": [],
@@ -106249,7 +106310,7 @@
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 200,
+      "line": 237,
       "description": "",
       "params": [
         {

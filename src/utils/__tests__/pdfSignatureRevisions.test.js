@@ -2,11 +2,12 @@
 // Appended-revision classifier (docs-src/pdf-signatures.md "Appended revisions").
 // Synthetic fixtures only: scripts/signature-revision-fixtures.mjs.
 import { beforeAll, describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import * as pdfLib from 'pdf-lib';
 import { collectPdfSignatures } from '../pdfSignatures.js';
 import { getSignatureSeverity } from '../pdfSignatureStatus.js';
 import {
-  classifyAppendedRevisions, createRevisionLog, decodeXrefStream, installRevisionLogHooks
+  allDicts, classifyAppendedRevisions, createRevisionLog, decodeXrefStream, installRevisionLogHooks
 } from '../pdfSignatureRevisions.js';
 import { createSecurityFixtures, byteRange } from '../../../scripts/signature-security-fixtures.mjs';
 
@@ -205,7 +206,7 @@ describe('status model with an xref stream on the signed revision', () => {
   });
 });
 
-describe('linearized signed files (first-page xref /Prev points forward)', () => {
+describe('linearized signed files (forward /Prev fails closed)', () => {
   let pdfjs;
   beforeAll(async () => { pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'); });
   /** What pdf.js draws: the text of page 1 as pdf.js resolves the final file. */
@@ -227,10 +228,10 @@ describe('linearized signed files (first-page xref /Prev points forward)', () =>
     expectStatus(await approval(f.linearized.signed[name]), 'intact', null, 'ok');
   });
 
-  it.each(shapes)('%s: DSS-only append -> ok with information, pdf.js draws the same page', async (_label, name) => {
+  it.each(shapes)('%s: DSS-only append -> documented warning, pdf.js draws the same page', async (_label, name) => {
     const sig = await approval(f.linearized.dss[name]);
-    expectStatus(sig, 'intact', 'extended-with-validation-data', 'ok');
-    expect(sig.integrityReason).toMatch(/validation data\/metadata only/);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(/Prev chain is broken/);
     const before = await pdfjsText(f.linearized.signed[name]);
     expect(before).toContain('ODV SIGNATURE FIXTURE SAMPLE TEXT');
     expect(await pdfjsText(f.linearized.dss[name])).toBe(before);
@@ -238,7 +239,7 @@ describe('linearized signed files (first-page xref /Prev points forward)', () =>
 
   it.each(shapes)('%s: content change -> warning, pdf.js draws the changed page', async (_label, name) => {
     expectStatus(await approval(f.linearized.contentChanged[name]),
-      'modified-after-signing', 'content-changed-after-signing', 'warning');
+      'modified-after-signing', 'unclassified-change-after-signing', 'warning');
     expect(await pdfjsText(f.linearized.contentChanged[name])).toContain('CHANGED AFTER SIGNING');
   });
 
@@ -246,6 +247,8 @@ describe('linearized signed files (first-page xref /Prev points forward)', () =>
   // starts at the first `endobj` + whitespace instead of the last startxref.
   it.each([
     ['/L set before signing to the length after the append', 'lengthExploit', /\/L beyond the signed length/],
+    ['a lowercase hex-escaped duplicate /L key', 'lengthExploitEscapedName', /escaped PDF name/],
+    ['the linearization dictionary is a first-object xref stream', 'lengthExploitXrefStream', /\/L beyond the signed length/],
     ['the linearization dictionary hidden before the %PDF- header', 'lengthExploitBeforeHeader', /%PDF- header/]
   ])('%s: pdf.js reads a forged xref table -> warning', async (_label, name, reason) => {
     const { signed, exploit } = f.linearized[name];
@@ -260,7 +263,7 @@ describe('linearized signed files (first-page xref /Prev points forward)', () =>
   it('a shadow object appended to a linearized file stays unclassified', async () => {
     const sig = await approval(f.linearized.shadowObject);
     expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
-    expect(sig.integrityReason).toMatch(/not listed|does not point/);
+    expect(sig.integrityReason).toMatch(/Prev chain is broken/);
     expect(await pdfjsText(f.linearized.shadowObject)).toContain('CHANGED AFTER SIGNING');
   });
 
@@ -273,6 +276,20 @@ describe('linearized signed files (first-page xref /Prev points forward)', () =>
     const sig = await approval(f.linearized[name]);
     expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
     expect(sig.integrityReason).toMatch(/Prev chain is broken/);
+  });
+});
+
+describe('dictionary enumeration architecture', () => {
+  it('no revision rule bypasses allDicts by iterating log.records directly', () => {
+    const source = readFileSync(new URL('../pdfSignatureRevisions.js', import.meta.url), 'utf8');
+    const start = source.indexOf('export function allDicts');
+    const end = source.indexOf('\nclass Verdict', start);
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThan(start);
+    const outsideHelper = source.slice(0, start) + source.slice(end);
+    expect(outsideHelper).not.toMatch(/for\s*\([^)]*of\s+log\.records\)/);
+    expect(outsideHelper).not.toMatch(/log\.records\.(?:map|filter|forEach|reduce)/);
+    expect(outsideHelper).not.toMatch(/log\.records\s*\[/);
   });
 });
 
@@ -290,6 +307,20 @@ describe('parser hook shape guard (design flag F-f)', () => {
     expect(log.hooked).toBe(false);
     expect(classifyAppendedRevisions(log, 10, pdfLib).code).toBe('unclassified-change-after-signing');
     expect(classifyAppendedRevisions(null, 10, pdfLib).code).toBe('unclassified-change-after-signing');
+  });
+  it('allDicts includes nested dictionaries, ObjStm members and ObjStm/XRef stream dictionaries', () => {
+    const context = pdfLib.PDFContext.create();
+    const objectStream = { num: 23, start: 10, type: 'ObjStm', dict: context.obj({ Type: 'ObjStm' }) };
+    const xrefStream = { num: 24, start: 20, type: 'XRef', dict: context.obj({ Type: 'XRef' }) };
+    const log = {
+      records: [{ num: 20, start: 10, object: context.obj({ Type: 'DSS', Nested: { Linearized: 1 } }), container: objectStream }],
+      structural: [objectStream, xrefStream]
+    };
+    const entries = allDicts(log, pdfLib);
+    expect(entries.some((entry) => entry.nested && entry.dict instanceof pdfLib.PDFDict)).toBe(true);
+    expect(entries.some((entry) => entry.container && entry.dict instanceof pdfLib.PDFDict)).toBe(true);
+    expect(entries.some((entry) => entry.structural && entry.type === 'ObjStm' && entry.dict instanceof pdfLib.PDFDict)).toBe(true);
+    expect(entries.some((entry) => entry.structural && entry.type === 'XRef' && entry.dict instanceof pdfLib.PDFDict)).toBe(true);
   });
   it('a complete log is only trusted while hooked and free of shape errors', async () => {
     const br = byteRange(r.okDss);

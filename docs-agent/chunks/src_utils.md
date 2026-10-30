@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 54. Line count: 21353. JSDoc symbol count: 866.
+File count: 54. Line count: 21438. JSDoc symbol count: 867.
 
 ## src/utils/compareCurtain.js
 
@@ -541,7 +541,7 @@ Symbols:
 
 Appended\-revision classifier for PDF signatures.
 
-Exports: `createRevisionLog`, `installRevisionLogHooks`, `classifyAppendedRevisions`, `decodeXrefStream`
+Exports: `createRevisionLog`, `installRevisionLogHooks`, `allDicts`, `classifyAppendedRevisions`, `decodeXrefStream`
 
 Symbols:
 
@@ -553,10 +553,10 @@ Symbols:
 - `module:utils/pdfSignatureRevisions.createRevisionLog` (function) - Create an empty revision log.
 - `module:utils/pdfSignatureRevisions~noteStream` (function) - Called by the structural\-stream decoder for a top\-level ObjStm/XRef stream.
 - `module:utils/pdfSignatureRevisions.installRevisionLogHooks` (function) - Install the revision\-log hooks on a pdf\-lib PDFParser INSTANCE \(never on a prototype\).
+- `module:utils/pdfSignatureRevisions.allDicts` (function) - The single enumeration point for revision rules.
 - `module:utils/pdfSignatureRevisions~Verdict` (class) - No description.
 - `module:utils/pdfSignatureRevisions.classifyAppendedRevisions` (function) - Classify the unsigned data appended after a signature's covered range.
 - `module:utils/pdfSignatureRevisions~revisionMaps` (function) - The state at E \( pre : last definition before E\), the appended definitions per object number, and the final state \( post : pdf\-lib's last definition\).
-- `module:utils/pdfSignatureRevisions~activeXrefChain` (function) - Return the signed revision's active cross\-reference sections, newest first.
 
 ## src/utils/pdfSignatures.js
 
