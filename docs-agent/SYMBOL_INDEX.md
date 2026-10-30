@@ -826,19 +826,20 @@
 | <code>SKIP</code> | member | <code>src/ocr/classify.js:18</code> | Not a page OCR can work on. |
 | <code>TEXT_LAYER</code> | member | <code>src/ocr/classify.js:23</code> | The PDF page has a usable text layer; the viewer&#39;s own text wins. |
 | <code>UNSUPPORTED</code> | member | <code>src/ocr/classify.js:25</code> | A format the viewer does not rasterise into a page image. |
-| <code>ASSETS</code> | member | <code>src/ocr/engine.js:31</code> | The worker script, engine core or a language model could not be loaded. |
-| <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:67</code> | Classify a start-up error by its message. |
-| <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:130</code> | Create an engine for the given languages and asset URLs. |
-| <code>CSP</code> | member | <code>src/ocr/engine.js:29</code> | WebAssembly compilation refused: the site CSP lacks &#39;wasm-unsafe-eval&#39; in script-src. |
-| <code>DEFAULT_OCR_START_TIMEOUT_MS</code> | constant | <code>src/ocr/engine.js:39</code> | Default bound on worker start-up \(core and models are a few MB; a stalled start stays silent otherwise\). |
-| <code>EMPTY_WASM_MODULE</code> | constant | <code>src/ocr/engine.js:48</code> | The smallest valid WebAssembly module: magic number and version, nothing else. |
-| <code>flattenOcrWords</code> | function | <code>src/ocr/engine.js:81</code> | Flatten tesseract.js&#39; block tree into one word list with page-pixel boxes. |
-| <code>OCR_STARTUP_FAILURE</code> | constant | <code>src/ocr/engine.js:27</code> | Why the engine could not start \(see classifyOcrStartupError\). |
-| <code>OcrEngine</code> | typedef | <code>src/ocr/engine.js:106</code> |  |
-| <code>probeWebAssemblyCompilation</code> | function | <code>src/ocr/engine.js:55</code> | Throw the browser&#39;s own error when WebAssembly modules cannot be compiled on this page, which under a Content-Security-Policy without &#39;wasm-unsafe-eval&#39; is a CompileError that nam... |
-| <code>TIMEOUT</code> | member | <code>src/ocr/engine.js:33</code> | The worker gave no answer within the start timeout. |
-| <code>toError</code> | function | <code>src/ocr/engine.js:102</code> |  |
-| <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:35</code> | Anything else. |
+| <code>ASSETS</code> | member | <code>src/ocr/engine.js:38</code> | The worker script, engine core or a language model could not be loaded. |
+| <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:82</code> | Classify a start-up error by its message. |
+| <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:145</code> | Create an engine for the given languages and asset URLs. |
+| <code>CSP</code> | member | <code>src/ocr/engine.js:36</code> | WebAssembly compilation refused: the site CSP lacks &#39;wasm-unsafe-eval&#39; in script-src. |
+| <code>DEFAULT_OCR_START_TIMEOUT_MS</code> | constant | <code>src/ocr/engine.js:46</code> | Default bound on worker start-up \(core and models are a few MB; a stalled start stays silent otherwise\). |
+| <code>EMPTY_WASM_MODULE</code> | constant | <code>src/ocr/engine.js:63</code> | The smallest valid WebAssembly module: magic number and version, nothing else. |
+| <code>flattenOcrWords</code> | function | <code>src/ocr/engine.js:96</code> | Flatten tesseract.js&#39; block tree into one word list with page-pixel boxes. |
+| <code>OCR_PAGE_SEGMENTATION_MODE</code> | constant | <code>src/ocr/engine.js:54</code> | Tesseract page segmentation mode set on every worker: 3 = fully automatic page segmentation without orientation and script detection \(the mode the tesseract command line uses\). |
+| <code>OCR_STARTUP_FAILURE</code> | constant | <code>src/ocr/engine.js:34</code> | Why the engine could not start \(see classifyOcrStartupError\). |
+| <code>OcrEngine</code> | typedef | <code>src/ocr/engine.js:121</code> |  |
+| <code>probeWebAssemblyCompilation</code> | function | <code>src/ocr/engine.js:70</code> | Throw the browser&#39;s own error when WebAssembly modules cannot be compiled on this page, which under a Content-Security-Policy without &#39;wasm-unsafe-eval&#39; is a CompileError that nam... |
+| <code>TIMEOUT</code> | member | <code>src/ocr/engine.js:40</code> | The worker gave no answer within the start timeout. |
+| <code>toError</code> | function | <code>src/ocr/engine.js:117</code> |  |
+| <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:42</code> | Anything else. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
 | <code>createEventLoopYield</code> | function | <code>src/ocr/lineRemoval.js:248</code> | Build the function that hands control back to the event loop between bands. |

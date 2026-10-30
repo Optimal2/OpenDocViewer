@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 166,
-    "sourceLineCount": 64186,
-    "docletCount": 1804,
+    "sourceLineCount": 64210,
+    "docletCount": 1805,
     "documentedFileCount": 165,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -1574,8 +1574,8 @@
     {
       "name": "src/ocr",
       "fileCount": 12,
-      "lineCount": 1631,
-      "docletCount": 80,
+      "lineCount": 1655,
+      "docletCount": 81,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
@@ -1598,9 +1598,9 @@
         {
           "path": "src/ocr/engine.js",
           "score": 64,
-          "lines": 282,
+          "lines": 306,
           "incomingLocalImports": 1,
-          "doclets": 13,
+          "doclets": 14,
           "summary": "Thin wrapper around a tesseract.js worker.",
           "summaryConfidence": "high"
         },
@@ -38435,9 +38435,9 @@
     },
     {
       "path": "src/ocr/engine.js",
-      "lines": 282,
+      "lines": 306,
       "extension": ".js",
-      "jsdocBlockCount": 17,
+      "jsdocBlockCount": 18,
       "sourceSummary": "Thin wrapper around a tesseract.js worker.",
       "imports": [
         {
@@ -38445,7 +38445,7 @@
           "specifiers": [
             "Tesseract"
           ],
-          "line": 23,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -38453,7 +38453,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 24,
+          "line": 31,
           "kind": "static"
         }
       ],
@@ -38461,74 +38461,79 @@
         {
           "name": "OCR_STARTUP_FAILURE",
           "kind": "variable",
-          "line": 27
+          "line": 34
         },
         {
           "name": "DEFAULT_OCR_START_TIMEOUT_MS",
           "kind": "variable",
-          "line": 39
+          "line": 46
+        },
+        {
+          "name": "OCR_PAGE_SEGMENTATION_MODE",
+          "kind": "variable",
+          "line": 54
         },
         {
           "name": "probeWebAssemblyCompilation",
           "kind": "function",
-          "line": 55
+          "line": 70
         },
         {
           "name": "classifyOcrStartupError",
           "kind": "function",
-          "line": 67
+          "line": 82
         },
         {
           "name": "flattenOcrWords",
           "kind": "function",
-          "line": 81
+          "line": 96
         },
         {
           "name": "createOcrEngine",
           "kind": "function",
-          "line": 130
+          "line": 145
         }
       ],
       "declarations": [
         {
           "name": "probeWebAssemblyCompilation",
           "kind": "function",
-          "line": 55
+          "line": 70
         },
         {
           "name": "classifyOcrStartupError",
           "kind": "function",
-          "line": 67
+          "line": 82
         },
         {
           "name": "flattenOcrWords",
           "kind": "function",
-          "line": 81
+          "line": 96
         },
         {
           "name": "toError",
           "kind": "function",
-          "line": 102
+          "line": 117
         },
         {
           "name": "createOcrEngine",
           "kind": "function",
-          "line": 130
+          "line": 145
         },
         {
           "name": "startWorker",
           "kind": "function",
-          "line": 156
+          "line": 171
         },
         {
           "name": "finish",
           "kind": "function",
-          "line": 160
+          "line": 175
         },
         {
           "name": "ensureStarted",
           "kind": "function",
-          "line": 207
+          "line": 231
         }
       ],
       "parseError": null,
@@ -38544,7 +38549,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 27,
+          "line": 34,
           "description": "Why the engine could not start (see classifyOcrStartupError).",
           "params": [],
           "returns": [],
@@ -38557,7 +38562,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 29,
+          "line": 36,
           "description": "WebAssembly compilation refused: the site CSP lacks 'wasm-unsafe-eval' in script-src.",
           "params": [],
           "returns": [],
@@ -38570,7 +38575,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 31,
+          "line": 38,
           "description": "The worker script, engine core or a language model could not be loaded.",
           "params": [],
           "returns": [],
@@ -38583,7 +38588,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 33,
+          "line": 40,
           "description": "The worker gave no answer within the start timeout.",
           "params": [],
           "returns": [],
@@ -38596,7 +38601,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 35,
+          "line": 42,
           "description": "Anything else.",
           "params": [],
           "returns": [],
@@ -38609,8 +38614,21 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 39,
+          "line": 46,
           "description": "Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_PAGE_SEGMENTATION_MODE",
+          "name": "OCR_PAGE_SEGMENTATION_MODE",
+          "longname": "OCR_PAGE_SEGMENTATION_MODE",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/engine.js",
+          "line": 54,
+          "description": "Tesseract page segmentation mode set on every worker: 3 = fully automatic page segmentation without orientation and script detection (the mode the tesseract command line uses).",
           "params": [],
           "returns": [],
           "examples": 0
@@ -38622,7 +38640,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 48,
+          "line": 63,
           "description": "The smallest valid WebAssembly module: magic number and version, nothing else.",
           "params": [],
           "returns": [],
@@ -38635,7 +38653,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 55,
+          "line": 70,
           "description": "Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which under a Content-Security-Policy without 'wasm-unsafe-eval' is a CompileError that nam...",
           "params": [],
           "returns": [],
@@ -38648,7 +38666,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 67,
+          "line": 82,
           "description": "Classify a start-up error by its message.",
           "params": [
             {
@@ -38673,7 +38691,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 81,
+          "line": 96,
           "description": "Flatten tesseract.js' block tree into one word list with page-pixel boxes.",
           "params": [
             {
@@ -38698,7 +38716,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 102,
+          "line": 117,
           "description": "",
           "params": [
             {
@@ -38718,7 +38736,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 106,
+          "line": 121,
           "description": "",
           "params": [],
           "returns": [],
@@ -38731,7 +38749,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 130,
+          "line": 145,
           "description": "Create an engine for the given languages and asset URLs.",
           "params": [
             {
@@ -38793,7 +38811,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 24,
+          "line": 31,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
@@ -38804,7 +38822,7 @@
           "specifiers": [
             "Tesseract"
           ],
-          "line": 23,
+          "line": 30,
           "kind": "static"
         }
       ],
@@ -38842,6 +38860,12 @@
         },
         {
           "name": "OCR_STARTUP_FAILURE",
+          "kind": "named",
+          "source": "./engine.js",
+          "line": 9
+        },
+        {
+          "name": "OCR_PAGE_SEGMENTATION_MODE",
           "kind": "named",
           "source": "./engine.js",
           "line": 9
@@ -95194,7 +95218,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 31,
+      "line": 38,
       "description": "The worker script, engine core or a language model could not be loaded.",
       "params": [],
       "returns": [],
@@ -95207,7 +95231,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 67,
+      "line": 82,
       "description": "Classify a start-up error by its message.",
       "params": [
         {
@@ -95232,7 +95256,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 130,
+      "line": 145,
       "description": "Create an engine for the given languages and asset URLs.",
       "params": [
         {
@@ -95293,7 +95317,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 29,
+      "line": 36,
       "description": "WebAssembly compilation refused: the site CSP lacks 'wasm-unsafe-eval' in script-src.",
       "params": [],
       "returns": [],
@@ -95306,7 +95330,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 39,
+      "line": 46,
       "description": "Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise).",
       "params": [],
       "returns": [],
@@ -95319,7 +95343,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 48,
+      "line": 63,
       "description": "The smallest valid WebAssembly module: magic number and version, nothing else.",
       "params": [],
       "returns": [],
@@ -95332,7 +95356,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 81,
+      "line": 96,
       "description": "Flatten tesseract.js' block tree into one word list with page-pixel boxes.",
       "params": [
         {
@@ -95351,13 +95375,26 @@
       "examples": 0
     },
     {
+      "id": "OCR_PAGE_SEGMENTATION_MODE",
+      "name": "OCR_PAGE_SEGMENTATION_MODE",
+      "longname": "OCR_PAGE_SEGMENTATION_MODE",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/engine.js",
+      "line": 54,
+      "description": "Tesseract page segmentation mode set on every worker: 3 = fully automatic page segmentation without orientation and script detection (the mode the tesseract command line uses).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "OCR_STARTUP_FAILURE",
       "name": "OCR_STARTUP_FAILURE",
       "longname": "OCR_STARTUP_FAILURE",
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 27,
+      "line": 34,
       "description": "Why the engine could not start (see classifyOcrStartupError).",
       "params": [],
       "returns": [],
@@ -95370,7 +95407,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 106,
+      "line": 121,
       "description": "",
       "params": [],
       "returns": [],
@@ -95383,7 +95420,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 55,
+      "line": 70,
       "description": "Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which under a Content-Security-Policy without 'wasm-unsafe-eval' is a CompileError that nam...",
       "params": [],
       "returns": [],
@@ -95396,7 +95433,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 33,
+      "line": 40,
       "description": "The worker gave no answer within the start timeout.",
       "params": [],
       "returns": [],
@@ -95409,7 +95446,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 102,
+      "line": 117,
       "description": "",
       "params": [
         {
@@ -95429,7 +95466,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 35,
+      "line": 42,
       "description": "Anything else.",
       "params": [],
       "returns": [],

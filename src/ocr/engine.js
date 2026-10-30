@@ -18,6 +18,13 @@
  * every later call rejects with the same error and no second worker is started, so a
  * misconfigured site pays for one attempt per session.
  *
+ * Once the worker is up, the engine sets Tesseract's page segmentation mode to automatic layout
+ * analysis (`OCR_PAGE_SEGMENTATION_MODE`). The Tesseract API defaults to "a single uniform block
+ * of text" (mode 6), which reads a page with a short text line beside a large graphic, or with
+ * columns, as one block and returns fragments; the automatic mode finds the text regions first.
+ * Mode 1 (automatic with orientation and script detection) is not used: it needs the `osd`
+ * model, which the viewer does not ship.
+ *
  * Part of the lazy OCR chunk: nothing here is imported while `ocr.enabled` is off.
  */
 import Tesseract from 'tesseract.js/dist/tesseract.esm.min.js';
@@ -37,6 +44,14 @@ export const OCR_STARTUP_FAILURE = Object.freeze({
 
 /** Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise). */
 export const DEFAULT_OCR_START_TIMEOUT_MS = 60000;
+
+/**
+ * Tesseract page segmentation mode set on every worker: 3 = fully automatic page segmentation
+ * without orientation and script detection (the mode the `tesseract` command line uses). The
+ * API default, 6, treats the whole page as one text block. Kept as a string because that is how
+ * tesseract.js passes `tessedit_pageseg_mode`.
+ */
+export const OCR_PAGE_SEGMENTATION_MODE = '3';
 
 // Chromium phrases the refusal as "'unsafe-eval' is not an allowed source of script" even though
 // 'wasm-unsafe-eval' alone is enough to allow it; Firefox names 'wasm-unsafe-eval'. Both match.
@@ -193,7 +208,16 @@ export function createOcrEngine({
         fail(error);
         return;
       }
-      creation.then((worker) => {
+      creation.then(async (worker) => {
+        if (!settled) {
+          try {
+            await worker.setParameters({ tessedit_pageseg_mode: OCR_PAGE_SEGMENTATION_MODE });
+          } catch (error) {
+            Promise.resolve(worker?.terminate?.()).catch(() => {});
+            fail(error);
+            return;
+          }
+        }
         if (settled) {
           // Arrived after the timeout: do not leave a worker with megabytes of memory behind.
           Promise.resolve(worker?.terminate?.()).catch(() => {});

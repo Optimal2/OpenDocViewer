@@ -11,6 +11,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_OCR_START_TIMEOUT_MS,
+  OCR_PAGE_SEGMENTATION_MODE,
   OCR_STARTUP_FAILURE,
   classifyOcrStartupError,
   createOcrEngine,
@@ -107,6 +108,36 @@ describe('createOcrEngine', () => {
     expect(typeof options.errorHandler).toBe('function');
     expect(worker.recognize).toHaveBeenCalledTimes(2);
     expect(worker.recognize.mock.calls[0][2]).toEqual({ text: true, blocks: true });
+  });
+
+  it('switches the worker to automatic page segmentation before the first recognition', async () => {
+    const order = [];
+    const worker = makeWorker();
+    worker.setParameters.mockImplementation(async (params) => { order.push(['setParameters', params]); });
+    worker.recognize.mockImplementation(async () => { order.push(['recognize']); return fakeResult(); });
+    const engine = makeEngine({ createWorker: vi.fn(async () => worker) });
+
+    await engine.recognize('page-1.png');
+    await engine.recognize('page-2.png');
+
+    expect(OCR_PAGE_SEGMENTATION_MODE).toBe('3');
+    expect(worker.setParameters).toHaveBeenCalledTimes(1);
+    expect(order[0]).toEqual(['setParameters', { tessedit_pageseg_mode: '3' }]);
+    expect(order.slice(1)).toEqual([['recognize'], ['recognize']]);
+  });
+
+  it('fails the start and terminates the worker when the segmentation mode cannot be set', async () => {
+    const worker = makeWorker();
+    worker.setParameters.mockRejectedValue(new Error('SetVariable refused'));
+    const log = makeLog();
+    const engine = makeEngine({ createWorker: vi.fn(async () => worker), log });
+
+    await expect(engine.recognize('page-1.png')).rejects.toThrow(/SetVariable refused/);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+    expect(worker.recognize).not.toHaveBeenCalled();
+    expect(engine.isStarted()).toBe(false);
+    expect(engine.getFailure()).toMatchObject({ kind: OCR_STARTUP_FAILURE.UNKNOWN });
+    expect(log.error).toHaveBeenCalledTimes(1);
   });
 
   it('does not let the caller mutate the language order it was created with', async () => {

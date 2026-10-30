@@ -386,6 +386,18 @@ The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are
 not searchable until they come into view.
 
+### Page layout analysis
+
+The engine runs Tesseract in its fully automatic page segmentation mode (mode 3, the mode the
+`tesseract` command line uses) rather than the API default, "a single uniform block of text"
+(mode 6). The default reads the whole page as one block and returns fragments when a page has a
+short text line beside a large graphic, columns, or text in several places; the automatic mode
+finds the text regions first and recognises each. Mode 1, automatic analysis with orientation
+and script detection, is not used because it needs the `osd` model, which the viewer does not
+ship; a page that is upside down or sideways is recognised as it is displayed, so rotate it
+first. The mode is set once per worker, before the first recognition; if Tesseract refuses the
+setting the start fails like any other start-up failure and OCR stays off for the session.
+
 ### CSP for OCR
 
 The OCR engine is WebAssembly. The Content-Security-Policy that ships with OpenDocViewer
