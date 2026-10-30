@@ -122,7 +122,8 @@ viewer; every signature carries that information line.
 | Situation | `integrity` | `integrityCode` | Severity |
 | --- | --- | --- | --- |
 | Covered bytes and CMS signature verify; the range reaches the end of the file | `intact` | – | OK |
-| As above; the file was extended afterwards only with DSS/VRI, document timestamps, `/Info`, XMP `/Metadata`, or an xref/trailer rewrite without object changes | `intact` | `extended-with-validation-data` | OK + info |
+| As above; the file was extended afterwards only with DSS/VRI, document timestamps, `/Info`, XMP `/Metadata`, or an xref/trailer rewrite without object changes, and pdf.js shows the same document for the signed revision and the full file | `intact` | `extended-with-validation-data` | OK + info |
+| As above, but the pdf.js comparison of the signed revision and the full file could not be completed (pdf.js failed to load or threw, time or page budget) | `indeterminate` | `viewer-error` / `timeout` / `inspection-limit` | Warning (neutral text) |
 | As above; the extension is covered by later verified signature(s) and changes no signed content | `intact` | `extended-by-later-signature` | OK + info |
 | `/SubFilter` the viewer cannot check | `not-checked-in-viewer` | `format-unsupported` | OK + info (¹) |
 | Hash/signature algorithm or curve not available in WebCrypto | `not-checked-in-viewer` | `algorithm-unsupported` | OK + info (¹) |
@@ -131,7 +132,7 @@ viewer; every signature carries that information line.
 | Structural stream filter the parser cannot decode | `not-checked-in-viewer` | `structure-unsupported` | OK + info (¹) |
 | Encrypted PDF | `not-checked-in-viewer` | `encrypted` | OK + info (¹) |
 | Signature worker/library/WebCrypto/read failure, worker budget exhausted | `not-checked-in-viewer` | `viewer-error` | OK + info (¹) |
-| A later unsigned revision changes pages, content streams, annotations, form fields or the catalog | `modified-after-signing` | `content-changed-after-signing` | Warning |
+| A later unsigned revision changes pages, content streams, annotations, form fields or the catalog, or pdf.js shows a different document than the signed revision | `modified-after-signing` | `content-changed-after-signing` | Warning |
 | A later revision exists but cannot be proven harmless | `modified-after-signing` | `unclassified-change-after-signing` | Warning |
 | Unexpected condition that cannot be classified | `indeterminate` | `unexpected-error` / `key-import-failed` | Warning |
 | Signing time inside the certificate's notBefore..notAfter window (inclusive) | (any) | `signingTimeCheck: within-validity` | OK |
@@ -201,11 +202,19 @@ the viewer does not treat a signer-asserted time as such proof.
 #### Appended revisions
 
 When a verified signature's ByteRange ends at E before the end of the file and no later
-verified signature covers the rest, `classifyAppendedRevisions`
-(`src/utils/pdfSignatureRevisions.js`) compares the final document NET against the state at
-E. Several appended revisions are compared together; a change that a later revision undoes
-byte for byte counts as unchanged, because the viewer shows the final state. The rules, in
-order:
+verified signature covers the rest, two independent checks decide. First,
+`classifyAppendedRevisions` (`src/utils/pdfSignatureRevisions.js`) compares the final
+document NET against the state at E in pdf-lib's object graph. Second, when the classifier
+would answer green, the **pdf.js differential confirmation** (next section) loads the signed
+revision and the full file with pdf.js, the engine that renders, and the result is green
+only when pdf.js shows the same document for both. The classifier is defense in depth: three
+review rounds in a row found files where pdf-lib and pdf.js read different objects (objects
+pdf-lib never assigns, names pdf-lib decodes differently, bytes pdf-lib skips by `/Length`),
+so a green verdict never rests on the pdf-lib model alone.
+
+Several appended revisions are compared together; a change that a later revision undoes
+byte for byte counts as unchanged, because the viewer shows the final state. The classifier
+rules, in order:
 
 1. **Revision structure.** At least one cross-reference section (table or xref stream) must
    follow E. Each appended revision ends with exactly one `startxref` that points at its own
@@ -213,16 +222,23 @@ order:
    every later `/Prev` at the previous appended section. An appended trailer without its own
    table, `/XRefStm` (hybrid cross-reference) or `/Encrypt` in an appended trailer, or a
    cross-reference stream that cannot be decoded (anything other than no predictor or a PNG
-   predictor with 1 colour and 8 bits) makes the result unclassified.
+   predictor with 1 colour and 8 bits) makes the result unclassified. pdf.js starts at the
+   LAST `startxref` it finds in the raw bytes, including bytes inside stream data that
+   pdf-lib skips by `/Length`; every textual `startxref` after E must therefore be one the
+   parser validated as the end of an appended revision, otherwise the result is
+   unclassified (a forged xref table hidden in DSS certificate data, round 7).
 2. **Cross-reference consistency (mandatory).** pdf-lib keeps the last physical definition
    of an object, while pdf.js follows the signed revision's active `/Prev` chain and keeps
    the nearest section's entry per object. Every parsed pre-E section must belong to that
    chain; an unlinked decoy table or xref stream makes the result unclassified. Every `/Prev`
-   in the chain must point backwards; a forward link or a cycle is unclassified. In
-   particular, the first-page-to-main forward link of a linearized file (ISO 32000-1 Annex F)
-   is no longer excepted. Accepting that shape safely would require a separate pdf.js
-   rendering comparison of the signed and final revisions; until such a comparison exists,
-   even an honest DSS-only append to that linearized shape is a deliberate false warning.
+   in the chain must point backwards; a forward link or a cycle is unclassified. The one
+   exception is the first-page-to-main forward link of a linearized file (ISO 32000-1
+   Annex F) in its exact shape: the file's first object is a signed `/Linearized`
+   dictionary whose `/H` names a signed hint stream, the first-page section is the
+   physically first section with no other object before it, and the main section ends the
+   chain. A green verdict on that path, like every other, still needs the pdf.js
+   differential confirmation; with it, an honest DSS-only append to a linearized file is
+   green again (it was a deliberate false warning while no rendering comparison existed).
 
    The length of the file is not a safety argument on its own. pdf.js treats a file as
    linearized when its first object is a dictionary with `/Linearized` > 0 and an `/L` equal
@@ -238,18 +254,26 @@ order:
      header at byte zero is deliberately stricter: a BOM-prefixed file gets a warning after
      an unsigned append (known limitation, fail closed);
    - `allDicts(log, pdfLib)` is the only dictionary-enumeration point for revision rules. It
-     includes ordinary and nested dictionaries, ObjStm members and the ObjStm/XRef stream
-     dictionaries from `log.structural`, none of which may be skipped by assuming they are
-     in `log.records`. Every dictionary with a `/Linearized` key must have a direct numeric
-     `/L` of at most E. Appended data makes the final file longer than E, so pdf.js never
-     accepts the linearization and follows the `/Prev` chain from the last `startxref`, the
-     chain the classifier checks. An `/L` larger than E (for example the final length after
-     the append) is unclassified;
+     includes ordinary and nested dictionaries, ObjStm members, the ObjStm/XRef stream
+     dictionaries from `log.structural` and the classic trailer dictionaries from
+     `log.trailers`, none of which may be skipped by assuming they are in `log.records`.
+     Every dictionary with a `/Linearized` key must have a direct numeric `/L` of at most E.
+     Appended data makes the final file longer than E, so pdf.js does not accept that
+     linearization for the final file and reads the cross-reference data from the last
+     `startxref` instead. That alone does not prove pdf.js reads the chain the classifier
+     checked (pdf.js can also fall back to reconstructing the cross-reference table, or find a
+     `startxref` inside stream data); the raw `startxref` rule above and the pdf.js
+     differential confirmation close that gap. An `/L` larger than E (for example the final
+     length after the append) is unclassified;
    - security-key spelling is checked in the raw source bytes, not through pdf-lib's name
-     decoder (which does not decode every lowercase hex escape that pdf.js accepts). Any
-     `#`-escaped name in a dictionary that contains `/Linearized` or `/L`, after decoding
-     either uppercase or lowercase escapes, is unclassified. This rejects duplicate or
-     disguised security keys instead of letting two parsers choose different values.
+     decoder (pdf-lib decodes only uppercase `#xx` escapes, pdf.js both cases). The raw
+     source of EVERY dictionary the classifier decides from (objects, ObjStm members, xref
+     streams and trailers) is tokenized; a dictionary KEY that is a `#`-escaped spelling of
+     `/Root`, `/Prev`, `/Size`, `/Linearized`, `/L`, `/Encrypt`, `/XRefStm`, `/Type`,
+     `/Length`, `/W`, `/Index`, `/N`, `/First` or `/Extends` is unclassified (round 7 found an
+     appended trailer whose `/R#6fot` key was `/Root` to pdf.js and an unknown key to pdf-lib).
+     The rule applies to keys only: `/L` as a value or a Line annotation's `/L` key next to an
+     unrelated escaped name such as `/My#20Key` stays green (a false warning in round 7).
 
    Two rules then pin the state at E to what pdf.js reads:
    - every object pdf-lib holds at E must be the definition the active chain's entry names
@@ -297,18 +321,20 @@ order:
    object or xref stream with that number: pdf-lib does not record structural streams as
    objects, but pdf.js resolves the signed reference to the stream and draws its data.
 7. **Result.** Any content change gives `content-changed-after-signing`, otherwise any
-   unclassified point gives `unclassified-change-after-signing`, otherwise
-   `intact` / `extended-with-validation-data` ("the file was extended after signing with
-   validation data/metadata only").
+   unclassified point gives `unclassified-change-after-signing`, otherwise the classifier
+   proposes `intact` / `extended-with-validation-data` ("the file was extended after signing
+   with validation data/metadata only"), which the pdf.js differential confirmation must
+   then confirm.
 
 The classifier is conservative by construction: whatever it cannot classify with certainty
 is a warning, never green. Known false warnings, kept on purpose: a validly signed hybrid
 file (a signed trailer with `/XRefStm`) stays a warning after a DSS append, because the
-hybrid section is not part of the modelled `/Prev` chain; an honest DSS-only append to a
-linearized file whose first-page `/Prev` points forward is a warning because no independent
-rendering comparison authorizes that exception; a BOM-prefixed file is a warning because the
-classifier requires `%PDF-` at byte zero; and an appended revision that frees or reuses the
-number of a signed xref stream is a warning even though no writer needs to. Its parser hooks
+hybrid section is not part of the modelled `/Prev` chain; a BOM-prefixed file is a warning
+because the classifier requires `%PDF-` at byte zero; an appended revision that frees or
+reuses the number of a signed xref stream is a warning even though no writer needs to; and
+structural changes that pdf.js happens to draw identically (an xref stream filling a
+dangling content reference without drawable data, a zero-area timestamp widget with an
+`/AP` reference) stay warnings because the classifier rules see them. Its parser hooks
 are installed on the pdf-lib parser instance
 only when every expected method exists (the same guard as the indirect-object header
 probe); a different pdf-lib build, an unattributed object, an unexpected parser shape or
@@ -319,6 +345,90 @@ unchanged; it only carries the `extended-by-later-signature` code. Revisions cov
 later signature are not classified (outside this campaign's scope), so a DSS revision after
 the last of several approval signatures leaves the earlier approval signatures amber, as
 before.
+
+#### pdf.js differential confirmation
+
+`createRenderComparator` (`src/utils/pdfSignatureRenderCheck.js`) is the safety mechanism
+for appended revisions. Whenever the classifier would return green for a signature whose
+signed range ends at E before the end of the file, it loads BOTH the signed revision (bytes
+0..E, exactly what the signer signed) and the full file with the viewer's bundled pdf.js
+(the same `pdfjs-dist` legacy build, with the page worker's document options from
+`withPdfJsDocumentOptions`, `disableFontFace` and no system fonts) and compares what pdf.js
+produces:
+
+- page count;
+- per page: view box, rotation and user unit; the display operator list (`fnArray` and
+  `argsArray`, the operator list the viewer renders); `getAnnotations()` (all fields,
+  including type, rectangle, flags, contents and appearance-relevant data);
+  `getTextContent()`; page JavaScript actions;
+- per document: `getFieldObjects()`, `getJSActions()`, `getOpenAction()`,
+  `getAttachments()` (including the file data), `getOutline()`, `getDestinations()`,
+  `getPageLabels()` and the optional-content configuration (group names, intents and
+  default visibility).
+
+pdf.js names fonts, images and patterns with per-document ids (`g_d0_f1`, `img_p0_1`). The
+comparison replaces every such id with its order of first use on the page and appends the
+resolved object (decoded image pixels, the font program and its glyph-relevant properties,
+pattern data), so a renumbered but identical resource does not differ while a swapped image
+or font does. For this the comparison asks pdf.js for readable image data and font programs
+(`isOffscreenCanvasSupported: false`, `isImageDecoderSupported: false`,
+`fontExtraProperties: true`); that changes how pdf.js hands data to the caller, not what it
+parses or draws. Each section is encoded deterministically and compared by SHA-256; the
+first difference becomes the detail line ("page 3 operator list", "document open action").
+
+The only differences a validation-data append may add are an invisible document-timestamp
+signature widget (a `/Sig` widget that is Hidden/NoView or has a zero-area rectangle, without
+actions or links) and its signature field. Such widgets and signature-typed form fields are
+left out on BOTH sides; whatever a signature widget draws is still in the operator list, and
+a visible one is still compared through `getAnnotations()`. DSS/VRI, `/Metadata`,
+`/Extensions` and `/Info` are not part of anything above, so honest appends compare equal.
+
+Results: `same` keeps the classifier's green verdict (the detail line adds "pdf.js shows the
+same document as the signed revision"); `different` is `modified-after-signing` /
+`content-changed-after-signing`. **Fail closed:** when pdf.js cannot load either revision,
+throws, exceeds the time budget (20 s per comparison) or the page budget (1,000 pages), or
+returns data the comparison cannot encode, the signature is `indeterminate` with the neutral
+code `viewer-error`, `timeout` or `inspection-limit`: amber with a "could not be checked"
+explanation, never green and never an error. The site switch `uncheckedSeverity` does not
+affect it.
+
+The comparison runs only for signed files with an appended revision the classifier accepts
+(rare), inside the signature worker, off the main thread. The worker loads pdf.js on first
+use with a dynamic import and sets its worker source exactly like the page worker; pdf.js
+then starts a nested worker or uses its in-thread loopback. The full file is loaded once per
+inspection and its fingerprints are reused for every signature. Measured with
+`node scripts/measure-signature-render-check.mjs` (Node 22, the same code the worker runs; the
+first comparison also pays for loading pdf.js):
+
+| File | Pages | Size | Outcome | Comparison | Whole inspection |
+| --- | --- | --- | --- | --- | --- |
+| Largest appended-revision fixture (`okDocTimestampThenDss`, two signatures) | 1 | 35 KB | same | 439 ms (first, includes pdf.js load) | 96 ms |
+| Synthetic signed report, DSS-only append | 20 | 273 KB | same | 496 ms | 447 ms |
+| The same, content change on page 17 | 20 | 278 KB | different | 395 ms | 15 ms (classifier) |
+| Synthetic signed report, DSS-only append | 50 | 380 KB | same | 1,073 ms | 1,184 ms |
+| The same, content change on page 47 | 50 | 384 KB | different | 1,060 ms | 21 ms (classifier) |
+
+Each page carries 45 text lines, vector graphics and one shared 256x256 RGB image. A content
+change the classifier already detects never reaches the comparison, which is why the whole
+inspection of the changed files is fast.
+
+Limits. The comparison proves what pdf.js shows, nothing more:
+
+- it describes pdf.js 6.4 as bundled; another reader (Acrobat, a printer driver, an archive
+  tool) can resolve a crafted file differently and show content pdf.js does not. The
+  verdict is "OpenDocViewer shows what was signed", not a statement about other software;
+- it compares the display intent the viewer renders. Print-only annotation appearances,
+  XFA forms (pdf.js renders them only when XFA is enabled, which the viewer does not do) and
+  JavaScript behaviour beyond the compared action lists are not rendered and therefore not
+  compared;
+- metadata (`/Info`, XMP), the DSS itself and anything else that does not change what pdf.js
+  produces may differ by design;
+- a change that pdf.js draws identically is, for the differential, no change. The pdf-lib
+  classifier still warns about the structural cases it recognises (defense in depth).
+
+`src/utils/__tests__/pdfSignatureRenderCheckGuardsDisabled.test.js` mocks the classifier
+to always answer green and proves that every known attack file is still a warning through
+the differential alone, while every honest DSS-only append (all chain forms) stays green.
 
 #### The one site switch: `pdfSignatures.uncheckedSeverity`
 
@@ -341,7 +451,10 @@ thread, in a worker, and in Node/vitest). To keep the main thread free it is nor
 executed inside a dedicated module worker, exactly like the PDF page worker pool:
 
 - `src/workers/pdfSignatureWorker.js` - worker entry; calls the parser on the received
-  document bytes and posts the report back.
+  document bytes and posts the report back. It passes the viewer's pdf.js build (loaded on
+  first use) and document options for the pdf.js differential confirmation. The inline
+  fallback without a Worker API loads the same build without a worker source; if pdf.js
+  cannot start there, the comparison fails closed (`indeterminate`).
 - `src/utils/pdfSignatureInspector.js` - the single entry point for callers:
 
 ```js
@@ -650,9 +763,9 @@ layout (signed by an incremental update, or with the signature inside the linear
 linearizer, qpdf 12.3.2 through pikepdf (`scripts/fixtures/linearized-qpdf-table.pdf` with
 xref tables, `scripts/fixtures/linearized-qpdf-objstm.pdf` with xref and object streams;
 regenerate with `python scripts/generate-linearized-fixture-bases.py`). For every shape an
-intact signed file is green. A DSS-only append is the documented forward-`/Prev` false
-warning and pdf.js must draw the same page text before and after; a content change must also
-warn and pdf.js must draw the changed text. A shadow object appended to a linearized file
+intact signed file is green. A DSS-only append is green with the information line once the
+pdf.js comparison confirms it, and pdf.js must draw the same page text before and after; a
+content change must warn and pdf.js must draw the changed text. A shadow object appended to a linearized file
 stays unclassified, and so does a forward `/Prev` when the first object is not a
 linearization dictionary, `/H` does not name a hint stream, the main section links back, or
 an object sits between the linearization dictionary and the first-page section.
@@ -665,8 +778,39 @@ after every append the classifier must warn while pdf.js draws
 `EXPLOIT CHANGED CONTENT AFTER SIGNING`. The plain form was green at 5c4636f; the escaped-name and xref-stream forms
 were both green at b11fa15.
 
-The fixtures are generated in the vitest setup instead of being committed as binary files:
-the public repository stays free of binaries that cannot be diff-reviewed, keys are
+`createMultiPageFixtures(pki, pageCount)` writes a realistic signed report (45 text lines,
+vector graphics and one shared Flate image per page) with a DSS-only append, a content
+change on a late page, and a replaced image behind unchanged drawing operators; the tests
+use 6 pages and the timing script 20 and 50. `appendRevision`'s `xrefTrailingData` puts bytes
+after the entries of an uncompressed xref stream:
+`danglingReferenceFilledByDrawingXrefStream` fills a signed dangling content reference with
+an xref stream whose trailing data pdf.js draws as text.
+
+The pdf.js differential tests (`src/utils/__tests__/pdfSignatureRenderCheck.test.js`, with
+the shared case list `pdfSignatureRenderCheck.cases.js`) take TWO measurements for every
+known attack: the full pipeline gives a warning, and pdf.js draws the changed text in the
+final file but not in the signed revision. The attacks: the two round-7 files, shadow objects
+(plain, on a signed xref stream, on a linearized file), unlinked decoy xref table and stream,
+dangling references filled by an object, an object stream and a drawing xref stream, the four
+linearized `/L` exploits (plain, `#4c`-escaped duplicate, `/Linearized` in an xref stream,
+before the header), a replaced content stream, a linearized content change and a late-page
+change in the multi-page document. Every honest DSS-only append (all chain forms, linearized,
+multi-page, and the two round-7 false-warning files) must compare `same` and stay green;
+the fail-closed paths (pdf.js does not load, cannot load a revision, throws, time budget, page
+budget) must be `indeterminate` with the matching code.
+
+Committed regression files in `scripts/fixtures/` (synthetic, signed with a throwaway fixture
+PKI, no personal data), copied from the round-7 review of e2935c0:
+
+| File | Shape | Before this round | Now |
+| --- | --- | --- | --- |
+| `attack-escaped-root-key.pdf` | appended trailer `/R#6fot 30 0 R`: `/Root` to pdf.js, an unknown key to pdf-lib; pdf.js draws `CHANGED AFTER SIGNING VIA ESCAPED ROOT` | green | warning (escaped security key; pdf.js: document form fields differ) |
+| `attack-startxref-in-stream-data.pdf` | forged xref table and `startxref` inside the data of an appended DSS certificate stream; pdf.js draws `CHANGED AFTER SIGNING VIA TRAILING STARTXREF` | green | warning (raw `startxref`; pdf.js: page 1 operator list differs) |
+| `dss-escaped-name-with-line-key.pdf` | DSS-only append; a dictionary with `/My#20Key` and a Line-annotation `/L [...]` key | false warning | green |
+| `dss-escaped-name-with-nested-l-value.pdf` | DSS-only append; `/My#20Key` next to `/Inner << /S /L >>` | false warning | green |
+
+The other fixtures are generated in the vitest setup instead of being committed as binary
+files: the public repository stays free of binaries that cannot be diff-reviewed, keys are
 regenerated per run, and the generator CLI (`node
 scripts/generate-signature-fixtures.mjs --out <dir>`) reproduces any fixture on demand for
 manual inspection.
@@ -731,7 +875,8 @@ non-null `integrityCode` for every non-intact signature. The
 Vitest security suites also cover nested ASN.1/PDF input, a 50 MiB extension, worker
 timeouts/errors, bounded worker recreation, bounded fallback and disposal. Parser tests
 also generate junk-prefixed signed/tampered PDFs and verify the unsigned fast path.
-The only committed binary fixtures are the two unsigned qpdf-linearized bases above.
+The only committed binary fixtures are the two unsigned qpdf-linearized bases and the four
+round-7 regression files above.
 
 Run `npm test -- pdfSignature` for both positive and hostile inputs. In an isolated
 worktree, `node scripts/test-signature-security-mutations.mjs --baseline` temporarily
@@ -752,9 +897,18 @@ accepting orphan objects, trusting an unhooked parser, skipping the `/Prev` chai
 a signed structural stream number to be freed, ignoring an appended xref stream that fills
 a dangling reference, counting signed structural streams as filled later, rejecting a tail
 entry that re-lists a signed structural stream at its signed offset, accepting a forward
-`/Prev` without a rendering comparison, trusting raw escaped security names, skipping
+`/Prev` outside the exact linearized shape, rejecting the linearized forward `/Prev` again,
+trusting raw escaped security keys, leaving trailer dictionaries out of `allDicts`, applying
+the escape rule to values, ignoring raw `startxref` keywords in stream data, skipping
 structural linearization dictionaries, not checking a linearization `/L` against E, allowing
 bytes before the `%PDF-` header, and not calling the linearization guard at all.
+Differential groups: skipping the pdf.js comparison, treating an incomplete comparison as
+`same`, dropping visible signature widgets from the comparison, not comparing resolved
+resources (a swapped image), and not comparing document-level data (an added `/OpenAction`).
+Each classifier content-change test also requires the classifier's own reason, so a
+mutation is caught even though the differential would still warn. `--only=<regex>` runs a
+subset of mutation ids; all 48 groups were killed at the commit that introduced the
+differential.
 
 For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
 It checks the reviewed hook baseline and individually breaks result retention, queue
@@ -768,10 +922,14 @@ badges, with storage/rendering/inspection I/O mocked.
 
 The mutation runner additionally checks that renamed/minified PDF classes cannot hide
 signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`
-to inspect 31 generated PDFs (positive, defect and not-checked rows, error boundaries, embedded/document
-timestamp rows, plus appended-revision rows that prove the pdf-lib parser hooks survive
-minification, asserting `integrity`, `integrityCode` and the signing-time fields) through the
-actual minified worker artifact.
+to inspect 35 PDFs (positive, defect and not-checked rows, error boundaries, embedded/document
+timestamp rows, appended-revision rows that prove the pdf-lib parser hooks survive
+minification, and differential rows - a linearized DSS-only append, a round-7 false-warning
+file and both round-7 attacks - that prove the pdf.js comparison runs inside the built worker,
+asserting `integrity`, `integrityCode` and the signing-time fields) through the actual
+minified worker artifact. Node cannot start pdf.js's worker from the built URL, so the harness
+hands pdf.js the built `pdf.worker.min-*.mjs` chunk through pdf.js's `globalThis.pdfjsWorker`
+hook.
 The harness uses a Node worker with a browser message-protocol adapter and verifies
 both successful inspection and rejection outcomes. PDF types are identified by stable
 APIs and `instanceof`, never `constructor.name`.

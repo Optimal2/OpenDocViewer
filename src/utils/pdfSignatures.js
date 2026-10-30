@@ -18,6 +18,7 @@
  */
 
 import { classifyAppendedRevisions, createRevisionLog, installRevisionLogHooks } from './pdfSignatureRevisions.js';
+import { createRenderComparator, renderCheckVerdict } from './pdfSignatureRenderCheck.js';
 
 /**
  * One inspected PDF signature (level-1 integrity view).
@@ -946,7 +947,7 @@ async function verifyEmbeddedSignatureTimestamp(signerInfo, signatureBytes, pkij
   }
 }
 
-async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts, revisions, pdfLib) {
+async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allContexts, revisions, pdfLib, renderCheck) {
   if (!ctx.pending) return; // dictionary level already decided (format, /Contents, ByteRange)
   ctx.pending = false;
   asn1jsRef = asn1jsLib;
@@ -1052,8 +1053,17 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
     }
     // What did the unsigned revision(s) after this signature change? Anything the
     // classifier cannot prove harmless stays modified-after-signing.
-    const tail = classifyAppendedRevisions(revisions, ctx.byteRange[2] + ctx.byteRange[3], pdfLib);
-    setIntegrity(info, tail.integrity, tail.code, tail.reason);
+    const signedEnd = ctx.byteRange[2] + ctx.byteRange[3];
+    const tail = classifyAppendedRevisions(revisions, signedEnd, pdfLib);
+    if (tail.integrity !== 'intact') {
+      setIntegrity(info, tail.integrity, tail.code, tail.reason);
+      return;
+    }
+    // Green only when pdf.js, the engine that renders, shows the same document
+    // for the signed revision and the full file (docs-src/pdf-signatures.md).
+    const rendered = renderCheckVerdict(await renderCheck().compare(signedEnd));
+    if (rendered) setIntegrity(info, rendered.integrity, rendered.code, rendered.reason);
+    else setIntegrity(info, tail.integrity, tail.code, `${tail.reason}; pdf.js shows the same document as the signed revision`);
   } finally {
     updateSigningTimeWindow(info, cert);
   }
@@ -1452,9 +1462,14 @@ async function parseWithSourceSpans(bytes, pdfLib) {
  * per-signature results follow the status model in docs-src/pdf-signatures.md.
  *
  * @param {Uint8Array|ArrayBuffer} pdfBytes Complete PDF document bytes.
+ * @param {Object} [options]
+ * @param {Object} [options.renderCheck] Options for the pdf.js differential
+ * confirmation of appended revisions (`loadPdfjs`, `documentOptions`,
+ * `budgetMs`; see utils/pdfSignatureRenderCheck.js). The signature worker
+ * passes the viewer's pdf.js build and document options.
  * @returns {Promise<PdfSignatureReport>}
  */
-export async function collectPdfSignatures(pdfBytes) {
+export async function collectPdfSignatures(pdfBytes, options = {}) {
   const empty = { signatures: [] };
   let bytes;
   try {
@@ -1523,13 +1538,20 @@ export async function collectPdfSignatures(pdfBytes) {
   const verificationOrder = contexts.map((_, i) => i).sort((a, b) =>
     ((contexts[b].byteRange?.[2] ?? 0) + (contexts[b].byteRange?.[3] ?? 0)) -
     ((contexts[a].byteRange?.[2] ?? 0) + (contexts[a].byteRange?.[3] ?? 0)));
-  for (const i of verificationOrder) {
-    try {
-      await verifySignatureEntry(entries[i], contexts[i], bytes, pkijsLib, asn1jsLib, contexts, pdfDoc.revisions, pdfLib);
-    } catch (err) {
-      contexts[i].pending = false;
-      setIntegrityFromError(entries[i], err, 'unexpected verification failure');
+  // Created on first use: only a green appended-revision verdict needs pdf.js.
+  let comparator = null;
+  const renderCheck = () => (comparator ??= createRenderComparator(bytes, options.renderCheck));
+  try {
+    for (const i of verificationOrder) {
+      try {
+        await verifySignatureEntry(entries[i], contexts[i], bytes, pkijsLib, asn1jsLib, contexts, pdfDoc.revisions, pdfLib, renderCheck);
+      } catch (err) {
+        contexts[i].pending = false;
+        setIntegrityFromError(entries[i], err, 'unexpected verification failure');
+      }
     }
+  } finally {
+    await comparator?.destroy();
   }
 
   return { signatures: orderSignatures(entries, contexts) };

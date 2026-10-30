@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 54. Line count: 21438. JSDoc symbol count: 867.
+File count: 55. Line count: 21973. JSDoc symbol count: 885.
 
 ## src/utils/compareCurtain.js
 
@@ -537,11 +537,32 @@ Symbols:
 - `module:utils/pdfSignatureInspector.getDocumentSignatures` (function) - Inspect the signatures of one document.
 - `module:utils/pdfSignatureInspector.disposePdfSignatureWorker` (function) - Terminate the signature worker \(e.g.
 
+## src/utils/pdfSignatureRenderCheck.js
+
+pdf.js differential confirmation for appended revisions.
+
+Exports: `RENDER_CHECK_BUDGET_MS`, `RENDER_CHECK_MAX_PAGES`, `renderCheckVerdict`, `createRenderComparator`
+
+Symbols:
+
+- `module:utils/pdfSignatureRenderCheck` (module) - pdf.js differential confirmation for appended revisions.
+- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS` (constant) - Wall\-clock budget for one comparison \(both revisions\), in ms.
+- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_PAGES` (constant) - Page budget: larger documents are not compared \(fail closed\).
+- `module:utils/pdfSignatureRenderCheck~RenderCheckError` (class) - Raised for anything that prevents a complete comparison.
+- `module:utils/pdfSignatureRenderCheck~RenderCheckResult` (typedef) - No description.
+- `module:utils/pdfSignatureRenderCheck.renderCheckVerdict` (function) - Map a comparison result to a signature verdict.
+- `module:utils/pdfSignatureRenderCheck~RenderComparator` (typedef) - No description.
+- `module:utils/pdfSignatureRenderCheck.createRenderComparator` (function) - Create a comparator for one file.
+- `module:utils/pdfSignatureRenderCheck~fingerprinted` (function) - Wrap a loaded pdf.js document with cached, id\-independent digests.
+- `module:utils/pdfSignatureRenderCheck~isInvisibleSignatureWidget` (function) - A widget a document\-timestamp append may add: a signature field that shows nothing.
+- `module:utils/pdfSignatureRenderCheck~withoutSignatureFields` (function) - Signature\-typed form fields are dropped; what they show is in the page annotations.
+- `module:utils/pdfSignatureRenderCheck~resourceValue` (function) - Plain data for a resolved pdf.js object; fonts expose their state through getters.
+
 ## src/utils/pdfSignatureRevisions.js
 
 Appended\-revision classifier for PDF signatures.
 
-Exports: `createRevisionLog`, `installRevisionLogHooks`, `allDicts`, `classifyAppendedRevisions`, `decodeXrefStream`
+Exports: `createRevisionLog`, `installRevisionLogHooks`, `allDicts`, `classifyAppendedRevisions`, `hasEscapedSecurityKey`, `decodeXrefStream`
 
 Symbols:
 
@@ -550,13 +571,13 @@ Symbols:
 - `module:utils/pdfSignatureRevisions~EXEMPT_CATALOG_KEYS` (constant) - Catalog entries an unsigned update may add or change without touching content.
 - `module:utils/pdfSignatureRevisions~DTS_FIELD_KEYS` (constant) - Keys a new document\-timestamp field \(merged with its widget\) may carry.
 - `module:utils/pdfSignatureRevisions~DTS_WIDGET_KEYS` (constant) - Keys a separate widget of a new document\-timestamp field may carry.
+- `module:utils/pdfSignatureRevisions~SECURITY_KEYS` (constant) - Keys whose spelling must agree between pdf\-lib and pdf.js \(see hasEscapedSecurityKey\).
 - `module:utils/pdfSignatureRevisions.createRevisionLog` (function) - Create an empty revision log.
 - `module:utils/pdfSignatureRevisions~noteStream` (function) - Called by the structural\-stream decoder for a top\-level ObjStm/XRef stream.
 - `module:utils/pdfSignatureRevisions.installRevisionLogHooks` (function) - Install the revision\-log hooks on a pdf\-lib PDFParser INSTANCE \(never on a prototype\).
 - `module:utils/pdfSignatureRevisions.allDicts` (function) - The single enumeration point for revision rules.
 - `module:utils/pdfSignatureRevisions~Verdict` (class) - No description.
 - `module:utils/pdfSignatureRevisions.classifyAppendedRevisions` (function) - Classify the unsigned data appended after a signature's covered range.
-- `module:utils/pdfSignatureRevisions~revisionMaps` (function) - The state at E \( pre : last definition before E\), the appended definitions per object number, and the final state \( post : pdf\-lib's last definition\).
 
 ## src/utils/pdfSignatures.js
 
@@ -564,7 +585,7 @@ PDF signature collection \- level 1 integrity inspection.
 
 Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `notCheckedSignatureReport`, `indeterminateSignatureReport`, `installIndirectObjectHeaderProbe`, `collectPdfSignatures`
 
-Local imports: `src/utils/pdfSignatureRevisions.js`
+Local imports: `src/utils/pdfSignatureRevisions.js`, `src/utils/pdfSignatureRenderCheck.js`
 
 Symbols:
 

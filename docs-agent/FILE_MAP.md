@@ -134,7 +134,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pageAssetStore.js</code> | 746 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |
 | <code>src/utils/pageAssetWorkerPool.js</code> | 320 | 1 | 15 | high | OpenDocViewer — Page-asset worker pool. |
 | <code>src/utils/pdfBenchmark.js</code> | 970 | 1 | 36 | high | Opt-in generated-PDF benchmark tooling. |
-| <code>src/utils/pdfjsDocumentOptions.js</code> | 30 | 5 | 2 | high | Shared pdf.js document-loading options. |
+| <code>src/utils/pdfjsDocumentOptions.js</code> | 30 | 6 | 2 | high | Shared pdf.js document-loading options. |
 | <code>src/utils/pdfPageWorkerPool.js</code> | 479 | 2 | 3 | high | OpenDocViewer - PDF page-image worker pool. |
 | <code>src/utils/pdfPrebuildPlan.js</code> | 343 | 2 | 17 | high | OpenDocViewer - generated-PDF prebuild planning. |
 | <code>src/utils/pdfPrintCacheKey.js</code> | 117 | 4 | 8 | high | Generated-PDF cache key helpers. |
@@ -142,8 +142,9 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
 | <code>src/utils/pdfSignatureDocuments.js</code> | 257 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 195 | 2 | 5 | high | PDF signature inspection - the single entry point for application code. |
-| <code>src/utils/pdfSignatureRevisions.js</code> | 917 | 1 | 19 | high | Appended-revision classifier for PDF signatures. |
-| <code>src/utils/pdfSignatures.js</code> | 1537 | 3 | 26 | high | PDF signature collection - level 1 integrity inspection. |
+| <code>src/utils/pdfSignatureRenderCheck.js</code> | 415 | 1 | 14 | high | pdf.js differential confirmation for appended revisions. |
+| <code>src/utils/pdfSignatureRevisions.js</code> | 1015 | 1 | 23 | high | Appended-revision classifier for PDF signatures. |
+| <code>src/utils/pdfSignatures.js</code> | 1559 | 3 | 26 | high | PDF signature collection - level 1 integrity inspection. |
 | <code>src/utils/pdfSignatureStatus.js</code> | 300 | 6 | 21 | high | Signature UI status helpers for browser integrity. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
@@ -168,7 +169,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/zoomUtils.js</code> | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |
 | <code>src/workers/imageWorker.js</code> | 500 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
 | <code>src/workers/pdfPageWorker.js</code> | 441 | 0 | 1 | high | OpenDocViewer - PDF page image worker. |
-| <code>src/workers/pdfSignatureWorker.js</code> | 40 | 0 | 1 | high | Web worker entry for PDF signature inspection. |
+| <code>src/workers/pdfSignatureWorker.js</code> | 68 | 0 | 2 | high | Web worker entry for PDF signature inspection. |
 | <code>src/workers/pdfWorker.js</code> | 628 | 0 | 1 | high | OpenDocViewer - generated PDF worker. |
 
 ## Parse Errors

@@ -2,7 +2,7 @@
 // Node supplies WebCrypto and a small worker-scope adapter; no browser/server needed.
 import assert from 'node:assert/strict';
 import { Worker } from 'node:worker_threads';
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { createBoundaryFixtures, createSecurityFixtures } from './signature-security-fixtures.mjs';
@@ -29,10 +29,23 @@ const fixtures = {
   ...Object.fromEntries(Object.entries(security).filter(([, bytes]) => bytes instanceof Uint8Array)),
   ...Object.fromEntries(boundaryRows.map(([name]) => [name, boundary[name]]))
 };
+for (const name of ['attack-escaped-root-key.pdf', 'attack-startxref-in-stream-data.pdf', 'dss-escaped-name-with-line-key.pdf']) {
+  fixtures[name] = new Uint8Array(await readFile(path.resolve('scripts/fixtures', name)));
+}
+fixtures.linearizedDss = security.linearized.dss.qpdfObjStm;
 const workerUrl = pathToFileURL(path.resolve('dist/assets', entry)).href;
+// The built pdf.js worker chunk. A browser starts it from its URL (or a nested
+// worker); Node cannot import that URL path, so the harness hands pdf.js the
+// module through its documented `globalThis.pdfjsWorker` hook instead.
+const pdfjsWorkerEntry = (await readdir('dist/assets')).find((name) => /^pdf\.worker\.min-.*\.mjs$/.test(name));
+assert.ok(pdfjsWorkerEntry, 'the build must emit the pdf.js worker chunk');
+const pdfjsWorkerUrl = pathToFileURL(path.resolve('dist/assets', pdfjsWorkerEntry)).href;
+// The worker-scope adapter is installed after the pdf.js worker module loaded.
 const harness = `const { parentPort } = require('node:worker_threads');
-globalThis.self = { postMessage: message => parentPort.postMessage(message) };
-import(${JSON.stringify(workerUrl)}).then(() => parentPort.on('message', data => self.onmessage({ data })));`;
+import(${JSON.stringify(pdfjsWorkerUrl)}).then((pdfjsWorker) => {
+  globalThis.pdfjsWorker = pdfjsWorker;
+  globalThis.self = { postMessage: message => parentPort.postMessage(message) };
+}).then(() => import(${JSON.stringify(workerUrl)})).then(() => parentPort.on('message', data => self.onmessage({ data })));`;
 const worker = new Worker(harness, { eval: true });
 try {
   // integrity + integrityCode per status-model row; minification must not change a verdict
@@ -63,6 +76,11 @@ try {
     ['pageContent', 'modified-after-signing', 'content-changed-after-signing'],
     ['freeLiveObject', 'modified-after-signing', 'content-changed-after-signing'],
     ['shadowObject', 'modified-after-signing', 'unclassified-change-after-signing'],
+    // pdf.js differential confirmation inside the built worker: green only when pdf.js agrees.
+    ['linearizedDss', 'intact', 'extended-with-validation-data'],
+    ['dss-escaped-name-with-line-key.pdf', 'intact', 'extended-with-validation-data'],
+    ['attack-escaped-root-key.pdf', 'modified-after-signing', 'unclassified-change-after-signing'],
+    ['attack-startxref-in-stream-data.pdf', 'modified-after-signing', 'unclassified-change-after-signing'],
     // Error-versus-information boundaries (rows 12, 17, 22, 24, 33, 35).
     ...boundaryRows
   ]) {

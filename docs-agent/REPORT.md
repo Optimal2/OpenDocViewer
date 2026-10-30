@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 166
-- Source lines: 64354
-- JSDoc symbols: 1808
+- Files: 167
+- Source lines: 64917
+- JSDoc symbols: 1827
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -19,11 +19,11 @@
 - `src/utils/imageAdjustments.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/viewerPreferences.js`: 7 incoming local imports
+- `src/utils/pdfjsDocumentOptions.js`: 6 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
-- `src/utils/pdfjsDocumentOptions.js`: 5 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
 
@@ -35,8 +35,8 @@
 - `src/components/DocumentLoader/DocumentLoader.js`: 2172 lines
 - `src/components/DocumentViewer/useDocumentViewer.js`: 1918 lines
 - `src/components/DocumentThumbnailList.jsx`: 1604 lines
+- `src/utils/pdfSignatures.js`: 1559 lines
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 1551 lines
-- `src/utils/pdfSignatures.js`: 1537 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx`: 1301 lines
 - `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1292 lines

@@ -18,10 +18,12 @@
  *   `unclassified-change-after-signing`.
  *
  * pdf-lib resolves "the last physical definition wins" while pdf.js follows
- * the signed revision's active /Prev chain, nearest entry first. The
- * cross-reference consistency check rejects unlinked pre-E sections and makes
- * both views agree before any object is compared, so a shadow object cannot
- * make a content change look harmless. Rules: docs-src/pdf-signatures.md
+ * the active /Prev chain, nearest entry first. The cross-reference
+ * consistency check rejects unlinked pre-E sections and makes both views agree
+ * before any object is compared. These rules are defense in depth: a green
+ * verdict is final only after the pdf.js differential confirmation
+ * (utils/pdfSignatureRenderCheck.js) shows the same document for the signed
+ * revision and the full file. Rules: docs-src/pdf-signatures.md
  * "Appended revisions".
  *
  * @module utils/pdfSignatureRevisions
@@ -45,6 +47,9 @@ const ANNOT_FLAG_NOVIEW = 32;
 const MAX_REACHABLE = 100000; // objects, the same cap as signature discovery
 const MAX_VALUE_VISITS = 50 * MAX_REACHABLE;
 const MAX_XREF_ENTRIES = 1000000;
+/** Keys whose spelling must agree between pdf-lib and pdf.js (see hasEscapedSecurityKey). */
+const SECURITY_KEYS = new Set(['Root', 'Prev', 'Size', 'Linearized', 'L', 'Encrypt', 'XRefStm',
+  'Type', 'Length', 'W', 'Index', 'N', 'First', 'Extends']);
 
 /**
  * Create an empty revision log. `hooked` stays false unless every parser hook
@@ -57,13 +62,15 @@ export function createRevisionLog() {
     unattributed: false,
     // The file starts with the %PDF- header (no bytes before it).
     headerAtStart: false,
+    // The complete file, for raw keyword checks pdf-lib's tokenizer skips (stream data).
+    fileBytes: null,
     // Object definitions {num, start, object, container, raw} in assign order (pdf-lib's view).
     records: [],
     // ObjStm / XRef stream containers: {num, start, type, members, raw}.
     structural: [],
     // Cross-reference sections: {offset, kind, entries|null, dict|null, content|null, trailer}.
     xrefs: [],
-    // Trailer dictionaries: {offset, dict, section}.
+    // Trailer dictionaries: {offset, dict, section, raw}.
     trailers: [],
     // startxref keywords: {at, value}.
     startxrefs: [],
@@ -102,6 +109,7 @@ export function installRevisionLogHooks(parser, log) {
     typeof parser.bytes?.slice !== 'function' || typeof parser.context?.assign !== 'function') return;
   // pdf.js measures the linearization /L from the %PDF- header (see assertLinearizationIgnored).
   log.headerAtStart = String.fromCharCode(...parser.bytes.slice(0, 5)) === '%PDF-';
+  log.fileBytes = parser.bytes.bytes instanceof Uint8Array ? parser.bytes.bytes : null;
 
   const parseIndirectObject = parser.parseIndirectObject;
   parser.parseIndirectObject = async function () {
@@ -176,7 +184,7 @@ export function installRevisionLogHooks(parser, log) {
       const owner = last && last.kind === 'table' && !last.trailer && last.offset < offset &&
         !(lastStartxref && lastStartxref.at > last.offset) ? last : null;
       if (owner) owner.trailer = trailerDict;
-      log.trailers.push({ offset, dict: trailerDict, section: owner });
+      log.trailers.push({ offset, dict: trailerDict, section: owner, raw: this.bytes.slice(offset, this.bytes.offset()) });
     }
     return result;
   };
@@ -199,10 +207,11 @@ export function installRevisionLogHooks(parser, log) {
 
 /**
  * The single enumeration point for revision rules. Ordinary objects, nested
- * dictionaries, ObjStm members and the ObjStm/XRef stream dictionaries all
- * occur here. `dict` is null for non-dictionary objects; `structural` marks
- * streams pdf-lib never assigns to its object context and `nested` marks
- * direct child dictionaries rather than indirect-object definitions.
+ * dictionaries, ObjStm members, the ObjStm/XRef stream dictionaries and the
+ * trailer dictionaries all occur here. `dict` is null for non-dictionary
+ * objects; `structural` marks streams pdf-lib never assigns to its object
+ * context, `trailer` marks trailer dictionaries and `nested` marks direct
+ * child dictionaries rather than indirect-object definitions or trailers.
  */
 export function allDicts(log, pdfLib) {
   const { PDFArray, PDFDict, PDFRawStream } = pdfLib;
@@ -229,6 +238,9 @@ export function allDicts(log, pdfLib) {
     add(rec, dict, false);
   }
   for (const rec of log.structural) add({ ...rec, object: rec.dict, container: null }, rec.dict, true);
+  for (const t of log.trailers ?? []) {
+    add({ num: null, start: t.offset, object: t.dict, container: null, raw: t.raw, trailer: true }, t.dict, false);
+  }
   return entries;
 }
 
@@ -302,8 +314,11 @@ function classify(log, E, pdfLib) {
     if (trailer.has(name('Encrypt'))) stop('an appended trailer adds /Encrypt');
   });
   if (!(signedSection.trailer instanceof PDFDict)) stop('the signed revision has no trailer');
+  assertRawStartxrefs(log, E, tailStartxrefs);
+  assertNoEscapedSecurityKeys(log, pdfLib);
   assertLinearizationIgnored(log, E, pdfLib);
-  const preSections = activeXrefChain(physicalPreSections, signedSection, pdfLib);
+  const linearizedFirstPage = linearizedFirstPageSection(log, physicalPreSections, E, pdfLib);
+  const preSections = activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage, pdfLib);
   const rootNum = refNum(signedSection.trailer.get(name('Root')));
   if (rootNum === null) stop('the signed revision trailer has no /Root reference');
   for (const section of tail) {
@@ -517,7 +532,7 @@ function revisionMaps(log, E, pdfLib) {
   const pre = new Map();
   const tailRecords = new Map();
   for (const rec of allDicts(log, pdfLib)) {
-    if (rec.structural || rec.nested) continue;
+    if (rec.structural || rec.nested || rec.trailer) continue;
     if (rec.start < E) pre.set(rec.num, rec);
     else {
       if (!tailRecords.has(rec.num)) tailRecords.set(rec.num, []);
@@ -534,10 +549,11 @@ function revisionMaps(log, E, pdfLib) {
  * pdf.js follows only this chain and keeps the nearest entry per object. Any
  * physically parsed pre-E section outside it is rejected: otherwise an
  * unlinked decoy could choose the definition used by the comparison below.
- * Every /Prev must point backwards. Linearized forward links are deliberately
- * not excepted: without a second rendering comparison that path is not green.
+ * Every /Prev must point backwards, except the first-page-to-main link of a
+ * linearized file in its exact shape (linearizedFirstPageSection). A green
+ * verdict on that path, like every other, still needs the pdf.js differential.
  */
-function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
+function activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage, pdfLib) {
   const { PDFDict, PDFName, PDFNumber } = pdfLib;
   const byOffset = new Map();
   for (const section of physicalPreSections) {
@@ -558,7 +574,9 @@ function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
       stop('the signed revision has an invalid /Prev entry');
     }
     const previous = byOffset.get(prev.asNumber());
-    if (!previous || previous.offset >= section.offset) stop('the signed revision /Prev chain is broken');
+    const linearizedLink = !!previous && section === linearizedFirstPage && previous.offset > section.offset &&
+      previous.trailer instanceof PDFDict && !previous.trailer.has(PDFName.of('Prev'));
+    if (!previous || (previous.offset >= section.offset && !linearizedLink)) stop('the signed revision /Prev chain is broken');
     section = previous;
   }
   const outside = physicalPreSections.find((candidate) => !activeSet.has(candidate));
@@ -584,11 +602,7 @@ function assertLinearizationIgnored(log, E, pdfLib) {
   if (!log.headerAtStart) stop('the file does not start with the %PDF- header');
   for (const r of allDicts(log, pdfLib)) {
     const dict = r.dict;
-    if (!(dict instanceof PDFDict)) continue;
-    if (!r.nested && hasEscapedSecurityName(r.raw)) {
-      stop('an escaped PDF name occurs in a dictionary with /Linearized or /L, so raw name decoding cannot be trusted');
-    }
-    if (!dict.has(PDFName.of('Linearized'))) continue;
+    if (!(dict instanceof PDFDict) || !dict.has(PDFName.of('Linearized'))) continue;
     const length = dict.get(PDFName.of('L'));
     if (!(length instanceof PDFNumber) || !(length.asNumber() <= E)) {
       stop('a linearization dictionary has an /L beyond the signed length, so pdf.js may read another cross-reference start');
@@ -596,13 +610,96 @@ function assertLinearizationIgnored(log, E, pdfLib) {
   }
 }
 
-/** Scan source names itself: pdf-lib does not decode lowercase hex escapes. */
-function hasEscapedSecurityName(raw) {
-  if (!(raw instanceof Uint8Array)) stop('raw dictionary bytes are unavailable for security-name validation');
+/**
+ * The first-page cross-reference section of a signed linearized file
+ * (ISO 32000-1 Annex F), or null. Recognised only in the exact shape: the
+ * file's first object is a signed linearization dictionary (/Linearized > 0)
+ * whose /H names a signed hint stream, and the physically first section
+ * follows it with no other object in between. Its trailer /Prev may then
+ * point forward to the main section (see activeXrefChain).
+ */
+function linearizedFirstPageSection(log, physicalPreSections, E, pdfLib) {
+  const { PDFArray, PDFDict, PDFName, PDFNumber, PDFRawStream } = pdfLib;
+  const definitions = allDicts(log, pdfLib).filter((r) => !r.nested && !r.trailer);
+  const objects = definitions.filter((r) => !r.structural);
+  const first = objects[0];
+  const starts = definitions.map((r) => r.start);
+  if (!first || first.container || first.start >= E || starts.some((s) => s < first.start)) return null;
+  const lin = first.object;
+  const linearized = lin instanceof PDFDict ? lin.get(PDFName.of('Linearized')) : undefined;
+  if (!(linearized instanceof PDFNumber) || !(linearized.asNumber() > 0)) return null;
+  const h = lin.get(PDFName.of('H'));
+  const hint = h instanceof PDFArray && (h.size() === 2 || h.size() === 4) ? h.get(0) : undefined;
+  if (!(hint instanceof PDFNumber) || !objects.some((r) => !r.container && r.start < E &&
+    r.start === hint.asNumber() && r.object instanceof PDFRawStream)) return null;
+  const section = physicalPreSections.reduce((a, s) => (!a || s.offset < a.offset ? s : a), null);
+  if (!section || section.offset <= first.start ||
+    starts.some((s) => s !== first.start && s < section.offset)) return null;
+  return section;
+}
+
+/**
+ * pdf.js starts at the LAST `startxref` it finds in the raw bytes, including
+ * bytes inside stream data that pdf-lib skips by /Length. Every textual
+ * `startxref` after E must therefore be one the parser validated.
+ */
+function assertRawStartxrefs(log, E, tailStartxrefs) {
+  const bytes = log.fileBytes;
+  if (!(bytes instanceof Uint8Array)) stop('the raw file bytes are unavailable for the startxref check');
+  const keyword = [115, 116, 97, 114, 116, 120, 114, 101, 102]; // "startxref"
+  const validated = new Set(tailStartxrefs.map((s) => s.at));
+  let count = 0;
+  for (let i = Math.max(0, E - keyword.length + 1); i + keyword.length <= bytes.length; i++) {
+    if (bytes[i] !== keyword[0]) continue;
+    let k = 1;
+    while (k < keyword.length && bytes[i + k] === keyword[k]) k += 1;
+    if (k < keyword.length) continue;
+    if (!validated.has(i)) stop('a startxref keyword after the signed range is not one the parser validated (pdf.js reads the last one)');
+    count += 1;
+  }
+  if (count !== validated.size) stop('the appended startxref keywords do not match the parsed revisions');
+}
+
+/**
+ * pdf-lib and pdf.js decode `#xx` escapes in names differently (pdf-lib only
+ * uppercase hex), so an escaped duplicate of a security key (an escaped
+ * `/Root` in a trailer, `/L` in a linearization dictionary) can mean one value
+ * to the classifier and another to the renderer. The raw source of every
+ * dictionary the classifier decides from (objects, ObjStm members, xref
+ * streams, trailers) is scanned; any such key fails closed. Escaped names in
+ * value position and unrelated escaped keys are fine.
+ */
+function assertNoEscapedSecurityKeys(log, pdfLib) {
+  const scanned = new Set();
+  for (const r of allDicts(log, pdfLib)) {
+    if (r.nested || !r.dict) continue; // the owning definition's raw bytes include nested dictionaries
+    if (!(r.raw instanceof Uint8Array)) stop('raw dictionary bytes are unavailable for security-key validation');
+    if (scanned.has(r.raw)) continue; // ObjStm members share their container's data
+    scanned.add(r.raw);
+    if (hasEscapedSecurityKey(r.raw)) {
+      stop('a security-relevant dictionary key is spelled with #-escapes, so raw name decoding cannot be trusted');
+    }
+  }
+}
+
+/**
+ * Tokenize raw PDF source and report whether a dictionary KEY is a `#`-escaped
+ * spelling (uppercase or lowercase hex, as pdf.js decodes it) of one of
+ * SECURITY_KEYS. Stops at a top-level `stream` keyword: stream data is not
+ * dictionary source.
+ * @param {Uint8Array} raw
+ * @returns {boolean}
+ */
+export function hasEscapedSecurityKey(raw) {
   const whitespace = (c) => c === 0 || c === 9 || c === 10 || c === 12 || c === 13 || c === 32;
   const delimiter = (c) => whitespace(c) || [40, 41, 47, 37, 60, 62, 91, 93, 123, 125].includes(c);
   const hex = (c) => (c >= 48 && c <= 57) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102);
-  const stack = [];
+  const stack = []; // {dict, expectKey}
+  // A complete value in a dictionary makes the next name a key again.
+  const valueDone = () => {
+    const top = stack.at(-1);
+    if (top?.dict) top.expectKey = true;
+  };
   let i = 0;
   while (i < raw.length) {
     const c = raw[i];
@@ -622,23 +719,20 @@ function hasEscapedSecurityName(raw) {
           i += 1;
         }
       }
+      valueDone();
       continue;
     }
-    if (c === 60) {
-      if (raw[i + 1] === 60) { stack.push({ security: false, escaped: false }); i += 2; }
-      else { i += 1; while (i < raw.length && raw[i] !== 62) i += 1; i += 1; }
+    if (c === 60 && raw[i + 1] === 60) { stack.push({ dict: true, expectKey: true }); i += 2; continue; }
+    if (c === 60) { // hex string
+      i += 1;
+      while (i < raw.length && raw[i] !== 62) i += 1;
+      i += 1;
+      valueDone();
       continue;
     }
-    if (c === 62 && raw[i + 1] === 62) {
-      const frame = stack.pop();
-      i += 2;
-      if (frame?.security && frame.escaped) return true;
-      if (frame && stack.length) {
-        stack.at(-1).security ||= frame.security;
-        stack.at(-1).escaped ||= frame.escaped;
-      }
-      continue;
-    }
+    if (c === 62 && raw[i + 1] === 62) { stack.pop(); i += 2; valueDone(); continue; }
+    if (c === 91) { stack.push({ dict: false, expectKey: false }); i += 1; continue; }
+    if (c === 93) { stack.pop(); i += 1; valueDone(); continue; }
     if (c === 47) { // PDF name; decode both uppercase and lowercase #xx ourselves
       i += 1;
       let decoded = '';
@@ -655,18 +749,22 @@ function hasEscapedSecurityName(raw) {
         decoded += String.fromCharCode(raw[i]);
         i += 1;
       }
-      if (stack.length) {
-        stack.at(-1).security ||= decoded === 'Linearized' || decoded === 'L';
-        stack.at(-1).escaped ||= escaped;
-      }
+      const top = stack.at(-1);
+      if (top?.dict && top.expectKey) {
+        if (escaped && SECURITY_KEYS.has(decoded)) return true;
+        top.expectKey = false;
+      } else valueDone();
       continue;
     }
     const start = i;
     while (i < raw.length && !delimiter(raw[i])) i += 1;
+    if (i === start) { i += 1; continue; } // a stray delimiter such as ) { }
     if (!stack.length && String.fromCharCode(...raw.subarray(start, i)) === 'stream') break;
-    if (i === start) i += 1;
+    // A number, boolean, null or R completes a value; the `0 R` after a number is skipped.
+    const top = stack.at(-1);
+    if (top?.dict && !top.expectKey) top.expectKey = true;
   }
-  return stack.some((frame) => frame.security && frame.escaped);
+  return false;
 }
 
 /**

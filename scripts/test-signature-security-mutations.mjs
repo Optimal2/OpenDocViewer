@@ -6,7 +6,10 @@ import { spawnSync } from 'node:child_process';
 const parser = 'src/utils/pdfSignatures.js';
 const inspector = 'src/utils/pdfSignatureInspector.js';
 const revisions = 'src/utils/pdfSignatureRevisions.js';
-const originals = new Map([parser, inspector, revisions].map((file) => [file, readFileSync(file, 'utf8')]));
+const renderCheck = 'src/utils/pdfSignatureRenderCheck.js';
+const originals = new Map([parser, inspector, revisions, renderCheck].map((file) => [file, readFileSync(file, 'utf8')]));
+const renderCheckTests = 'src/utils/__tests__/pdfSignatureRenderCheck.test.js';
+const guardsDisabledTests = 'src/utils/__tests__/pdfSignatureRenderCheckGuardsDisabled.test.js';
 const tests = 'src/utils/__tests__/pdfSignatureSecurity.test.js';
 const workerTests = 'src/utils/__tests__/pdfSignatureWorkerSecurity.test.js';
 const inspectorTests = 'src/utils/__tests__/pdfSignatureInspector.test.js';
@@ -47,7 +50,7 @@ const mutations = [
     'if (!tst.genTime) {', signingTimeTests, 'wrong imprint'],
   // Appended-revision classifier (docs-src/pdf-signatures.md "Appended revisions").
   ['Active signed xref chain reverted to last physical section wins', revisions,
-    'const preSections = activeXrefChain(physicalPreSections, signedSection, pdfLib);',
+    'const preSections = activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage, pdfLib);',
     'const preSections = [...physicalPreSections].reverse();', revisionTests, 'unlinked decoy'],
   ['Xref consistency check removed', revisions, 'assertXrefConsistent(log, E, tail, preSections, pre, tailRecords);', '',
     revisionTests, 'shadow object'],
@@ -76,12 +79,40 @@ const mutations = [
     "log.structural.some((c) => c.start < E && c.num === e.num && c.start === e.offset)) target = 'pre';",
     "false) target = 'pre';",
     revisionTests, 're-lists the signed object and xref streams'],
-  ['Forward /Prev accepted without a rendering comparison', revisions,
-    'if (!previous || previous.offset >= section.offset) stop(', 'if (!previous) stop(',
-    revisionTests, 'DSS-only append -> documented warning'],
-  ['Raw escaped security names trusted', revisions,
-    'if (!r.nested && hasEscapedSecurityName(r.raw)) {', 'if (false) {',
+  ['Forward /Prev accepted outside the exact linearized shape', revisions,
+    'if (!previous || (previous.offset >= section.offset && !linearizedLink)) stop(', 'if (!previous) stop(',
+    revisionTests, 'a forward /Prev where'],
+  ['Linearized forward /Prev rejected again', revisions,
+    'const linearizedLink = !!previous &&', 'const linearizedLink = false &&',
+    revisionTests, 'DSS-only append -> ok with information once pdf.js confirms'],
+  ['Raw escaped security keys trusted', revisions,
+    'if (hasEscapedSecurityKey(r.raw)) {', 'if (false) {',
     revisionTests, 'lowercase hex-escaped'],
+  ['Trailer dictionaries left out of allDicts', revisions,
+    'for (const t of log.trailers ?? []) {', 'for (const t of []) {',
+    renderCheckTests, 'escaped /Root trailer key fails closed'],
+  ['Escape rule applied to values too', revisions,
+    'if (top?.dict && top.expectKey) {', 'if (true) {',
+    renderCheckTests, 'escaped security name used as a value'],
+  ['Raw startxref keywords in stream data ignored', revisions,
+    'assertRawStartxrefs(log, E, tailStartxrefs);', '',
+    renderCheckTests, 'startxref inside appended stream data fails closed'],
+  // pdf.js differential confirmation (docs-src/pdf-signatures.md).
+  ['Differential skipped', parser,
+    'const rendered = renderCheckVerdict(await renderCheck().compare(signedEnd));', 'const rendered = null;',
+    guardsDisabledTests, 'escaped /Root key'],
+  ['Incomplete comparison treated as same', renderCheck,
+    "if (check?.outcome === 'same') return null;", "if (check?.outcome !== 'different') return null;",
+    renderCheckTests, 'fail closed'],
+  ['Visible signature widgets dropped from the comparison', renderCheck,
+    'return hidden || zeroArea;', 'return true;',
+    guardsDisabledTests, 'adds a visible timestamp widget'],
+  ['Resolved resources not compared', renderCheck,
+    'ops.value(resourceValue(await resolveResource(page, labels.ids[i])));', '',
+    guardsDisabledTests, 'replaces the image data'],
+  ['Document-level data not compared', renderCheck,
+    'if (docDiff) return {', 'if (false) return {',
+    guardsDisabledTests, 'adds catalog /OpenAction'],
   ['Structural linearization dictionaries skipped', revisions,
     'function assertLinearizationIgnored(log, E, pdfLib) {',
     'function assertLinearizationIgnored(log, E, pdfLib) {\n  log = { ...log, structural: [] };',
@@ -118,7 +149,10 @@ try {
     run(workerTests, 'F[68]');
     for (const [file, content] of originals) writeFileSync(file, content);
   }
-  for (const [id, file, from, to, testFile, name] of mutations) {
+  // Optional `--only=<regex>` runs a subset of mutation ids (the full list takes several minutes).
+  const only = process.argv.find((arg) => arg.startsWith('--only='))?.slice('--only='.length);
+  const selected = only ? mutations.filter(([id]) => new RegExp(only).test(id)) : mutations;
+  for (const [id, file, from, to, testFile, name] of selected) {
     const original = originals.get(file);
     if (!original.includes(from)) throw new Error(`Mutation ${id} no longer matches source`);
     try {
@@ -126,7 +160,7 @@ try {
       run(testFile, name);
     } finally { writeFileSync(file, original); }
   }
-  console.log(`All ${mutations.length} mutation groups were killed; original sources restored.`);
+  console.log(`All ${selected.length} selected mutation groups were killed; original sources restored.`);
 } finally {
   for (const [file, content] of originals) writeFileSync(file, content);
 }

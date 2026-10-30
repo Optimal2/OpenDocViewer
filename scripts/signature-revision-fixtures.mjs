@@ -8,7 +8,8 @@
 // Negative knobs: `free` (f / type-0 entries), `prevOverride`, `xrefPoint`
 // (point an entry at an earlier duplicate definition), `offsetShift` (patch an
 // xref offset), `trailerExtras` (e.g. /XRefStm), `objStm` (pack objects in
-// an object stream, xref stream only), `xrefNum` (number of the appended xref
+// an object stream, xref stream only), `xrefTrailingData` (bytes after the
+// entries of an uncompressed xref stream), `xrefNum` (number of the appended xref
 // stream), `root` and `size` (the trailer /Root and /Size, for bases not
 // numbered like BASE).
 import { readFileSync } from 'node:fs';
@@ -55,7 +56,7 @@ export function dssObjects({ certs = '[21 0 R]' } = {}) {
 export function appendRevision(base, defs, {
   xrefStream = false, compress = false, objStm = [], free = [], prevOverride = null,
   xrefPoint = {}, preXrefPoint = {}, offsetShift = {}, trailerExtras = '', info = '/Info 9 0 R', objStmNum = null,
-  xrefNum: xrefNumOverride = null, root = '1 0 R', size = null
+  xrefNum: xrefNumOverride = null, root = '1 0 R', size = null, xrefTrailingData = ''
 } = {}) {
   const prev = prevOverride ?? findStartxrefOffset(base);
   let text = '\n';
@@ -122,7 +123,7 @@ export function appendRevision(base, defs, {
     rows.forEach((row, r) => { raw.push(2, ...row.map((v, i) => (v - (r ? rows[r - 1][i] : 0)) & 255)); });
     data = deflateSync(Buffer.from(raw));
     filter = '/Filter /FlateDecode /DecodeParms << /Predictor 12 /Columns 7 >> ';
-  } else data = Buffer.from(rows.flat());
+  } else data = Buffer.concat([Buffer.from(rows.flat()), Buffer.from(xrefTrailingData, 'latin1')]);
   const binary = String.fromCharCode(...data);
   text += `${xrefNum} 0 obj\n<< /Type /XRef /Size ${nums.at(-1) + 1} /W [1 4 2] /Index [${index}] /Root ${root} ${info}${extras} /Prev ${prev} ${filter}/Length ${data.length} >>\nstream\n${binary}\nendstream\nendobj\nstartxref\n${xrefOffset}\n%%EOF\n`;
   return { bytes: concatBytes(base, latin1(text)), offsets };
@@ -339,6 +340,11 @@ export async function createRevisionFixtures(normal, pki) {
     // The same, filled by the appended /Type /XRef stream itself: pdf.js
     // resolves the signed reference to the xref stream and draws its data.
     f.danglingReferenceFilledByXrefStream = appendRevision(dangling, dss, { ...xs, xrefNum: 13 }).bytes;
+    // The same, with drawing operators after the xref entries: pdf.js reads only
+    // the entries it needs and draws the rest of the data as page content.
+    f.danglingReferenceFilledByDrawingXrefStream = appendRevision(dangling, dss, {
+      ...xs, xrefNum: 13, xrefTrailingData: `\n${content}\n`
+    }).bytes;
   }
   // Deleted live object (f entry / type-0 entry) next to an otherwise harmless DSS update.
   f.freeLiveObject = appendRevision(signed, dss, { free: [6] }).bytes;
@@ -645,5 +651,56 @@ export async function createLinearizedFixtures(pki) {
     noHintStream: appendDssRevision(await signLinearized(pki, { hint: false })),
     mainSectionLinksBack: appendDssRevision(await signLinearized(pki, { mainPrev: true })),
     objectBeforeFirstPageXref: appendDssRevision(await signLinearized(pki, { gapObject: true }))
+  };
+}
+
+/**
+ * A realistic multi-page signed document for the pdf.js differential timing:
+ * `pageCount` pages of text, vector graphics and one shared Flate image, signed
+ * like the base fixture, then a DSS-only append, a content change on a late
+ * page and a replaced image (object 11) that leaves every drawing operator
+ * unchanged. Pages are objects 3 and 100, 102, ...; their content streams 6 and
+ * 101, 103, ...
+ */
+export async function createMultiPageFixtures(pki, pageCount = 40) {
+  const imageObject = (blue) => {
+    const pixels = Buffer.alloc(256 * 256 * 3);
+    for (let y = 0; y < 256; y++) {
+      for (let x = 0; x < 256; x++) pixels.set([x, y, blue(x, y)], (y * 256 + x) * 3);
+    }
+    const data = deflateSync(pixels).toString('latin1');
+    return `<< /Type /XObject /Subtype /Image /Width 256 /Height 256 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${data.length} >>\nstream\n${data}\nendstream`;
+  };
+  const pageText = (page, marker = '') => {
+    let body = 'q 0.9 0.9 0.95 rg 40 40 515 762 re f Q\nq 0.2 0.3 0.6 RG 2 w 40 800 m 555 800 l S Q\n';
+    body += 'q 200 0 0 200 355 60 cm /Im1 Do Q\nBT /F1 10 Tf 50 780 Td 12 TL\n';
+    for (let line = 1; line <= 45; line++) {
+      body += `(Page ${page} line ${line}: ODV synthetic multi-page signature fixture text ${marker}) '\n`;
+    }
+    return `${body}ET`;
+  };
+  const pageNum = (p) => (p === 1 ? 3 : 98 + 2 * p);
+  const contentNum = (p) => (p === 1 ? 6 : 99 + 2 * p);
+  const page = (p) => `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> /XObject << /Im1 11 0 R >> >> /Contents ${contentNum(p)} 0 R${p === 1 ? ' /Annots [7 0 R]' : ''} >>`;
+  const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
+    sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
+  const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+  builder.set(2, `<< /Type /Pages /Kids [${pages.map((p) => `${pageNum(p)} 0 R`).join(' ')}] /Count ${pageCount} >>`);
+  builder.set(11, imageObject((x, y) => (x * y) & 255));
+  for (const p of pages) {
+    builder.set(pageNum(p), page(p));
+    builder.set(contentNum(p), stream(pageText(p)));
+  }
+  const signed = await signBuilder(pki, builder);
+  const size = contentNum(pageCount) + 1;
+  const late = Math.max(1, pageCount - 3);
+  return {
+    signed,
+    dss: appendDssRevision(signed, { size }),
+    contentChanged: appendRevision(signed, [
+      { num: contentNum(late), body: stream(pageText(late, 'CHANGED AFTER SIGNING')) }, ...dssObjects()
+    ], { size }).bytes,
+    // Same object number, same drawing operators: only the decoded pixels differ.
+    imageChanged: appendRevision(signed, [{ num: 11, body: imageObject(() => 0) }, ...dssObjects()], { size }).bytes
   };
 }
