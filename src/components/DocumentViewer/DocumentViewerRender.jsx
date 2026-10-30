@@ -80,8 +80,10 @@ const PAN_POINTER_MOVE_THRESHOLD_PX = 3;
  */
 function isPaneInteractiveTarget(target) {
   if (!(target instanceof Element)) return false;
+  // OCR words (components/OcrTextLayer.jsx) are selectable text: a drag that starts on one
+  // must select, not pan.
   return !!target.closest(
-    '.compare-zoom-zone, .odv-pane-selector, button, output, input, textarea, select, [contenteditable="true"], [data-odv-shortcuts="off"], [data-odv-allow-native-contextmenu="true"]'
+    '.compare-zoom-zone, .odv-pane-selector, button, output, input, textarea, select, [contenteditable="true"], [data-odv-shortcuts="off"], [data-odv-allow-native-contextmenu="true"], .ocr-text-layer-word'
   );
 }
 

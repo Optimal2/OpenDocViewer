@@ -63,6 +63,12 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
     transformOrigin: 'center center',
   };
 
+  // A double-click on a word selects the word (native); it must not also toggle the viewport's
+  // fit mode (DocumentRender's onDoubleClick).
+  const stopDoubleClick = (event) => {
+    if (event.target instanceof Element && event.target.closest('.ocr-text-layer-word')) event.stopPropagation();
+  };
+
   return (
     <div
       className="ocr-text-layer"
@@ -71,6 +77,7 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
       role="group"
       aria-label={label}
       style={layerStyle}
+      onDoubleClick={stopDoubleClick}
     >
       <div className="ocr-text-layer-frame" style={frameStyle}>
         {words.map((word, index) => (
@@ -80,7 +87,7 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
             style={{
               left: `${word.left}px`,
               top: `${word.top}px`,
-              width: `${word.width}px`,
+              width: `${word.textWidth}px`,
               height: `${word.height}px`,
               fontSize: `${word.fontSize}px`,
               transform: `scaleX(${word.scaleX})`,

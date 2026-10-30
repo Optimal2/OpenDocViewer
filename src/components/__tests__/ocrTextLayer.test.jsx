@@ -26,7 +26,9 @@ describe('layoutOcrWords', () => {
     const measure = (text, fontSize) => text.length * fontSize * 0.5;
     const placed = layoutOcrWords(WORDS, 2000, 3000, 1000, 1500, measure);
     expect(placed).toHaveLength(2);
-    expect(placed[0]).toEqual({ text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, scaleX: 150 / 75, separator: ' ' });
+    expect(placed[0]).toEqual({ text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, textWidth: 75, scaleX: 150 / 75, separator: ' ' });
+    // Layout width × horizontal scale is the word box, so the scaled span covers exactly the ink.
+    expect(placed[0].textWidth * placed[0].scaleX).toBeCloseTo(150);
     expect(placed[1].left).toBe(250);
     expect(placed[1].width).toBe(300);
     expect(placed[1].scaleX).toBeCloseTo(300 / (7 * 50 * 0.5));
@@ -100,11 +102,38 @@ describe('OcrTextLayer', () => {
     expect(words.map((span) => span.textContent)).toEqual(['Hej ', 'världen']);
     expect(words[0].style.left).toBe('50px');
     expect(words[0].style.top).toBe('100px');
-    expect(words[0].style.width).toBe('150px');
+    // Laid out at the measured text width, scaled to the 150 px box.
+    const textWidth = parseFloat(words[0].style.width);
+    const scaleX = Number(words[0].style.transform.match(/^scaleX\(([\d.]+)\)$/)[1]);
+    expect(textWidth * scaleX).toBeCloseTo(150, 3);
     expect(words[0].style.height).toBe('50px');
     expect(words[0].style.fontSize).toBe('50px');
-    expect(words[0].style.transform).toMatch(/^scaleX\(/);
     expect(layer.textContent).toBe('Hej världen');
+  });
+
+  it('keeps a double-click on a word from reaching the viewport (fit-mode toggle), but lets other clicks through', async () => {
+    const seen = [];
+    await act(async () => {
+      root.render(createElement('div', { onDoubleClick: () => seen.push('viewport') },
+        createElement(OcrTextLayer, { outcome: OUTCOME, renderWidth: 1000, renderHeight: 1500, zoom: 1, label: 'x', pageNumber: 1 })));
+    });
+    const word = container.querySelector('.ocr-text-layer-word');
+    await act(async () => { word.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); });
+    expect(seen).toEqual([]);
+    const frame = container.querySelector('.ocr-text-layer-frame');
+    await act(async () => { frame.dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); });
+    expect(seen).toEqual(['viewport']);
+  });
+
+  it.each([
+    [180, { width: '1000px', height: '1500px', left: '0px', top: '0px', transform: 'rotate(180deg)' }],
+    [270, { width: '1000px', height: '1500px', left: '250px', top: '-250px', transform: 'rotate(270deg)' }],
+    [-90, { width: '1000px', height: '1500px', left: '250px', top: '-250px', transform: 'rotate(270deg)' }],
+  ])('rotates the frame for %s degrees', async (rotation, expected) => {
+    const swap = Math.abs(rotation) % 180 === 90;
+    await render({ renderWidth: swap ? 1500 : 1000, renderHeight: swap ? 1000 : 1500, rotation });
+    const frame = container.querySelector('.ocr-text-layer-frame');
+    for (const [property, value] of Object.entries(expected)) expect(frame.style[property]).toBe(value);
   });
 
   it('rotates the frame about the stage centre like the canvas for a rotated page', async () => {

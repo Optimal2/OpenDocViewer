@@ -10021,7 +10021,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 213,
+    "line": 215,
     "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
     "params": [
       {
@@ -10293,7 +10293,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 130,
+    "line": 132,
     "description": "",
     "params": [
       {
@@ -10324,7 +10324,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 829,
+    "line": 831,
     "description": "",
     "params": [
       {
@@ -10344,7 +10344,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 855,
+    "line": 857,
     "description": "",
     "params": [
       {
@@ -10381,7 +10381,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 490,
+    "line": 492,
     "description": "",
     "params": [
       {
@@ -10412,7 +10412,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 823,
+    "line": 825,
     "description": "",
     "params": [
       {
@@ -10432,7 +10432,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 345,
+    "line": 347,
     "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
     "params": [
       {
@@ -10463,7 +10463,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 150,
+    "line": 152,
     "description": "",
     "params": [
       {
@@ -10488,7 +10488,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 142,
+    "line": 144,
     "description": "",
     "params": [
       {
@@ -10538,7 +10538,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 92,
+    "line": 94,
     "description": "",
     "params": [
       {
@@ -10563,7 +10563,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 103,
+    "line": 105,
     "description": "",
     "params": [
       {
@@ -10594,7 +10594,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 161,
+    "line": 163,
     "description": "",
     "params": [
       {
@@ -10619,7 +10619,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 933,
+    "line": 935,
     "description": "",
     "params": [
       {
@@ -10644,7 +10644,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 956,
+    "line": 958,
     "description": "",
     "params": [
       {
@@ -26701,7 +26701,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 71,
+    "line": 72,
     "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
     "params": [
       {

@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 164,
-    "sourceLineCount": 63696,
+    "sourceLineCount": 63709,
     "docletCount": 1779,
     "documentedFileCount": 163,
     "lowConfidenceSummaryCount": 0,
@@ -965,7 +965,7 @@
     {
       "name": "src/components",
       "fileCount": 19,
-      "lineCount": 8200,
+      "lineCount": 8207,
       "docletCount": 110,
       "importantFiles": [
         {
@@ -1222,7 +1222,7 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 17,
-      "lineCount": 7654,
+      "lineCount": 7656,
       "docletCount": 154,
       "importantFiles": [
         {
@@ -1246,7 +1246,7 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
           "score": 47,
-          "lines": 1290,
+          "lines": 1292,
           "incomingLocalImports": 1,
           "doclets": 18,
           "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -1705,7 +1705,7 @@
     {
       "name": "src/utils",
       "fileCount": 54,
-      "lineCount": 21266,
+      "lineCount": 21270,
       "docletCount": 863,
       "importantFiles": [
         {
@@ -20587,7 +20587,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "lines": 1290,
+      "lines": 1292,
       "extension": ".jsx",
       "jsdocBlockCount": 31,
       "sourceSummary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -20691,7 +20691,7 @@
         {
           "name": "DocumentViewerRender",
           "kind": "default",
-          "line": 1289
+          "line": 1291
         }
       ],
       "declarations": [
@@ -20708,92 +20708,92 @@
         {
           "name": "isPannableViewport",
           "kind": "function",
-          "line": 92
+          "line": 94
         },
         {
           "name": "isPointerOnViewportScrollbar",
           "kind": "function",
-          "line": 103
+          "line": 105
         },
         {
           "name": "getWheelDeltaYPx",
           "kind": "function",
-          "line": 130
+          "line": 132
         },
         {
           "name": "isAtScrollTop",
           "kind": "function",
-          "line": 142
+          "line": 144
         },
         {
           "name": "isAtScrollBottom",
           "kind": "function",
-          "line": 150
+          "line": 152
         },
         {
           "name": "preventDefaultIfCancelable",
           "kind": "function",
-          "line": 161
+          "line": 163
         },
         {
           "name": "DocumentViewerRender",
           "kind": "component",
-          "line": 213
+          "line": 215
         },
         {
           "name": "apply",
           "kind": "function",
-          "line": 430
+          "line": 432
         },
         {
           "name": "tick",
           "kind": "function",
-          "line": 450
+          "line": 452
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 574
+          "line": 576
         },
         {
           "name": "listenerOptions",
           "kind": "object",
-          "line": 595
+          "line": 597
         },
         {
           "name": "removeOptions",
           "kind": "object",
-          "line": 596
+          "line": 598
         },
         {
           "name": "listener",
           "kind": "function",
-          "line": 606
+          "line": 608
         },
         {
           "name": "handleResize",
           "kind": "function",
-          "line": 644
+          "line": 646
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 823
+          "line": 825
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 829
+          "line": 831
         },
         {
           "name": "renderEdgeScrollIndicator",
           "kind": "component",
-          "line": 933
+          "line": 935
         },
         {
           "name": "renderPaneSelector",
           "kind": "component",
-          "line": 956
+          "line": 958
         }
       ],
       "parseError": null,
@@ -20891,7 +20891,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 92,
+          "line": 94,
           "description": "",
           "params": [
             {
@@ -20916,7 +20916,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 103,
+          "line": 105,
           "description": "",
           "params": [
             {
@@ -20947,7 +20947,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 130,
+          "line": 132,
           "description": "",
           "params": [
             {
@@ -20978,7 +20978,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 142,
+          "line": 144,
           "description": "",
           "params": [
             {
@@ -21003,7 +21003,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 150,
+          "line": 152,
           "description": "",
           "params": [
             {
@@ -21028,7 +21028,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 161,
+          "line": 163,
           "description": "",
           "params": [
             {
@@ -21053,7 +21053,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 213,
+          "line": 215,
           "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
           "params": [
             {
@@ -21294,7 +21294,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 345,
+          "line": 347,
           "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
           "params": [
             {
@@ -21325,7 +21325,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 490,
+          "line": 492,
           "description": "",
           "params": [
             {
@@ -21356,7 +21356,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 823,
+          "line": 825,
           "description": "",
           "params": [
             {
@@ -21376,7 +21376,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 829,
+          "line": 831,
           "description": "",
           "params": [
             {
@@ -21396,7 +21396,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 855,
+          "line": 857,
           "description": "",
           "params": [
             {
@@ -21433,7 +21433,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 933,
+          "line": 935,
           "description": "",
           "params": [
             {
@@ -21458,7 +21458,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 956,
+          "line": 958,
           "description": "",
           "params": [
             {
@@ -26080,7 +26080,7 @@
     },
     {
       "path": "src/components/OcrTextLayer.jsx",
-      "lines": 113,
+      "lines": 120,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
       "sourceSummary": "Selectable, invisible text over a recognised page image.",
@@ -26115,7 +26115,7 @@
         {
           "name": "OcrTextLayer",
           "kind": "default",
-          "line": 112
+          "line": 119
         }
       ],
       "declarations": [
@@ -26133,6 +26133,11 @@
           "name": "frameStyle",
           "kind": "object",
           "line": 57
+        },
+        {
+          "name": "stopDoubleClick",
+          "kind": "function",
+          "line": 68
         }
       ],
       "parseError": null,
@@ -26241,7 +26246,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 16,
+      "importanceScore": 17,
       "summary": "Selectable, invisible text over a recognised page image.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -47389,7 +47394,7 @@
     },
     {
       "path": "src/utils/ocrTextLayout.js",
-      "lines": 101,
+      "lines": 105,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box.",
@@ -47408,7 +47413,7 @@
         {
           "name": "layoutOcrWords",
           "kind": "function",
-          "line": 71
+          "line": 72
         }
       ],
       "declarations": [
@@ -47420,7 +47425,7 @@
         {
           "name": "layoutOcrWords",
           "kind": "function",
-          "line": 71
+          "line": 72
         }
       ],
       "parseError": null,
@@ -47506,7 +47511,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 71,
+          "line": 72,
           "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
           "params": [
             {
@@ -83444,7 +83449,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 213,
+      "line": 215,
       "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
       "params": [
         {
@@ -83716,7 +83721,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 130,
+      "line": 132,
       "description": "",
       "params": [
         {
@@ -83747,7 +83752,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 829,
+      "line": 831,
       "description": "",
       "params": [
         {
@@ -83767,7 +83772,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 855,
+      "line": 857,
       "description": "",
       "params": [
         {
@@ -83804,7 +83809,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 490,
+      "line": 492,
       "description": "",
       "params": [
         {
@@ -83835,7 +83840,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 823,
+      "line": 825,
       "description": "",
       "params": [
         {
@@ -83855,7 +83860,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 345,
+      "line": 347,
       "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
       "params": [
         {
@@ -83886,7 +83891,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 150,
+      "line": 152,
       "description": "",
       "params": [
         {
@@ -83911,7 +83916,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 142,
+      "line": 144,
       "description": "",
       "params": [
         {
@@ -83961,7 +83966,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 92,
+      "line": 94,
       "description": "",
       "params": [
         {
@@ -83986,7 +83991,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 103,
+      "line": 105,
       "description": "",
       "params": [
         {
@@ -84017,7 +84022,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 161,
+      "line": 163,
       "description": "",
       "params": [
         {
@@ -84042,7 +84047,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 933,
+      "line": 935,
       "description": "",
       "params": [
         {
@@ -84067,7 +84072,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 956,
+      "line": 958,
       "description": "",
       "params": [
         {
@@ -100124,7 +100129,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 71,
+      "line": 72,
       "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
       "params": [
         {

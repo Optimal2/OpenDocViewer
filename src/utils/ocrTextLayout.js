@@ -49,6 +49,7 @@ export function measureWordWidth(text, fontSize) {
  * @property {number} width
  * @property {number} height
  * @property {number} fontSize  Equal to the box height.
+ * @property {number} textWidth  Measured (unscaled) width of the text; the span's layout width.
  * @property {number} scaleX  Horizontal scale that makes the measured text as wide as the box.
  * @property {string} separator  What follows the word in the DOM text: a space, a newline when
  *   the next word starts a new line, or nothing after the last word. It keeps selection, copy
@@ -92,6 +93,9 @@ export function layoutOcrWords(words, imageWidth, imageHeight, frameWidth, frame
       width,
       height,
       fontSize,
+      // The span is laid out at the text's own width and then scaled horizontally, so the
+      // scaled box is exactly the word box (width × scaleX = box width).
+      textWidth: measured > 0 ? measured : width,
       scaleX: measured > 0 ? width / measured : 1,
       separator: '',
     });

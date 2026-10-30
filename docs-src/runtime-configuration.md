@@ -276,8 +276,10 @@ ocr: {
 - `ocr.enabled`: only the boolean literal `true` turns OCR on. A missing section, `false`,
   strings such as `"true"`, numbers and objects all keep it off. While off, the OCR module is never
   imported: no engine or language file is downloaded, no worker starts, no OCR element exists in
-  the DOM, and layout, printing, performance and memory are unchanged. The OCR code is a separate
-  lazy chunk that only the switch loads, so the default code path carries no extra weight.
+  the DOM, and layout, printing, performance and memory are unchanged. The engine, the page
+  queue and tesseract.js are a separate lazy chunk that only the switch loads; the main bundle
+  carries just the small layer component, its stylesheet and the context fields, which mount
+  and compute nothing while the switch is off.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
   (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the

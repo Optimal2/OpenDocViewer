@@ -41,6 +41,20 @@
   background: rgba(11, 87, 208, 0.3);
 }
 
+/* High-contrast (forced colours) would repaint the transparent text in the system text colour
+   on top of the scan; keep it invisible there too, with the system highlight for selection. */
+@media (forced-colors: active) {
+  .ocr-text-layer-word {
+    forced-color-adjust: none;
+    color: transparent;
+  }
+
+  .ocr-text-layer-word::selection {
+    color: transparent;
+    background: Highlight;
+  }
+}
+
 /* Discreet per-page status in the viewport corner ("Recognising text…", "Text recognised"). */
 .ocr-status {
   position: absolute;
