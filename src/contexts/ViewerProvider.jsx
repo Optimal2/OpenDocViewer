@@ -41,6 +41,7 @@ import {
 } from '../utils/objectUrlRegistry.js';
 import usePdfSignatureReports from '../hooks/usePdfSignatureReports.js';
 import useOcrModule from '../hooks/useOcrModule.js';
+import useOcrTextLayers from '../hooks/useOcrTextLayers.js';
 import { disposePdfSignatureWorker } from '../utils/pdfSignatureInspector.js';
 import { getSourceFileNameFromUrl } from '../utils/pdfSignatureDocuments.js';
 import {
@@ -339,6 +340,11 @@ function nowMs() {
 export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = false }) => {
   const [allPages, setAllPages] = useState([]);
   const [signaturePrioritySourceKey, setSignaturePrioritySourceKey] = useState('');
+  // OCR focus: indexes into allPages of the displayed page(s), set by the viewer; the OCR queue
+  // (hooks/useOcrTextLayers.js) covers them and a fixed number of neighbours. Unused while OCR is off.
+  const [ocrFocusPageIndexes, setOcrFocusPageIndexesState] = useState(/** @type {Array<number>} */ ([]));
+  // True while a print flow holds page URLs or a print PDF is being assembled; OCR pauses meanwhile.
+  const [printActivity, setPrintActivity] = useState(false);
   const [error, setError] = useState(/** @type {(string|null)} */ (null));
   const [workerCount, setWorkerCount] = useState(0);
   const [loadingRunActive, setLoadingRunActive] = useState(false);
@@ -456,6 +462,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // releases them, even when a resolution boost (or eviction) supersedes them meanwhile.
   // Map of object URL to outstanding lease count.
   const printLeasedUrlsRef = useRef(new Map());
+  // Print PDF assemblies in progress (getPrintablePageUrls), counted for the OCR pause signal.
+  const printPreparationsRef = useRef(0);
   const indexedDbModeAnnouncedRef = useRef(false);
   const assetIndexedDbModeAnnouncedRef = useRef(false);
   const releasedRasterSourceKeysRef = useRef(new Set());
@@ -698,6 +706,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pinnedAssetsRef.current.clear();
     ephemeralPrintUrlsRef.current.clear();
     printLeasedUrlsRef.current.clear();
+    setPrintActivity(printPreparationsRef.current > 0);
   }, []);
 
   /**
@@ -897,6 +906,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     });
   }, [updateAllPages]);
 
+  /** Recompute the OCR pause signal from outstanding leases and print PDF assemblies. */
+  const syncPrintActivity = useCallback(() => {
+    setPrintActivity(printPreparationsRef.current > 0 || printLeasedUrlsRef.current.size > 0);
+  }, []);
+
   /**
    * @param {string} url
    * @returns {boolean}
@@ -914,7 +928,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const value = String(url || '').trim();
     if (!value) return;
     printLeasedUrlsRef.current.set(value, Number(printLeasedUrlsRef.current.get(value) || 0) + 1);
-  }, []);
+    syncPrintActivity();
+  }, [syncPrintActivity]);
 
   /**
    * @param {string} url
@@ -961,7 +976,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       ephemeralPrintUrlsRef.current.delete(value);
       revokeTrackedObjectUrl(value);
     }
-  }, [isPageAssetUrlReferenced]);
+    syncPrintActivity();
+  }, [isPageAssetUrlReferenced, syncPrintActivity]);
 
   /**
    * @param {number} index
@@ -2413,48 +2429,54 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     /** @type {Array<string>} */
     const urls = [];
+    printPreparationsRef.current += 1;
+    syncPrintActivity();
+    try {
+      for (const rawIndex of indexes) {
+        const pageIndex = Math.max(0, Number(rawIndex) || 0);
+        const page = getPageAt(allPagesRef.current, pageIndex);
+        if (!page || page.status === -1) continue;
 
-    for (const rawIndex of indexes) {
-      const pageIndex = Math.max(0, Number(rawIndex) || 0);
-      const page = getPageAt(allPagesRef.current, pageIndex);
-      if (!page || page.status === -1) continue;
-
-      if (page.fullSizeUrl && page.fullSizeStatus === 1) {
-        touchPageAsset(pageIndex, 'full');
-        leasePrintablePageUrl(page.fullSizeUrl);
-        urls.push(page.fullSizeUrl);
-        continue;
-      }
-
-      try {
-        let blob = null;
-        const stored = await pageAssetStoreRef.current?.getAsset?.(
-          makePersistedAssetKey(page, 'full', sessionConfigRef.current.render)
-        );
-        if (stored?.blob) {
-          blob = stored.blob;
-        } else {
-          const rendered = await renderPageBlob(pageIndex, 'full', 'high');
-          await persistRenderedAsset(pageIndex, 'full', rendered);
-          blob = rendered.blob;
+        if (page.fullSizeUrl && page.fullSizeStatus === 1) {
+          touchPageAsset(pageIndex, 'full');
+          leasePrintablePageUrl(page.fullSizeUrl);
+          urls.push(page.fullSizeUrl);
+          continue;
         }
 
-        if (blob) {
-          const url = createTrackedObjectUrl(blob);
-          ephemeralPrintUrlsRef.current.add(url);
-          leasePrintablePageUrl(url);
-          urls.push(url);
+        try {
+          let blob = null;
+          const stored = await pageAssetStoreRef.current?.getAsset?.(
+            makePersistedAssetKey(page, 'full', sessionConfigRef.current.render)
+          );
+          if (stored?.blob) {
+            blob = stored.blob;
+          } else {
+            const rendered = await renderPageBlob(pageIndex, 'full', 'high');
+            await persistRenderedAsset(pageIndex, 'full', rendered);
+            blob = rendered.blob;
+          }
+
+          if (blob) {
+            const url = createTrackedObjectUrl(blob);
+            ephemeralPrintUrlsRef.current.add(url);
+            leasePrintablePageUrl(url);
+            urls.push(url);
+          }
+        } catch (e) {
+          logger.warn('Failed to resolve print asset for page', {
+            pageIndex,
+            error: String(e?.message || e),
+          });
         }
-      } catch (e) {
-        logger.warn('Failed to resolve print asset for page', {
-          pageIndex,
-          error: String(e?.message || e),
-        });
       }
+    } finally {
+      printPreparationsRef.current = Math.max(0, printPreparationsRef.current - 1);
+      syncPrintActivity();
     }
 
     return urls;
-  }, [leasePrintablePageUrl, persistRenderedAsset, renderPageBlob, touchPageAsset]);
+  }, [leasePrintablePageUrl, persistRenderedAsset, renderPageBlob, syncPrintActivity, touchPageAsset]);
 
   useEffect(() => {
     syncRendererPdfPageCount();
@@ -2687,9 +2709,30 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   });
 
   // The OCR module (src/ocr/) is imported only after `ocr.enabled` is the literal true; while
-  // off this is a no-op (src/utils/ocrLoader.js). Recognition and the text layer that consume
-  // the module arrive in the following versions.
-  useOcrModule();
+  // off useOcrModule is a no-op (src/utils/ocrLoader.js) and useOcrTextLayers holds an empty map.
+  // With the module, recognition runs for the displayed page(s) and a fixed number of
+  // neighbours, after the first page is shown, never while a print flow holds page URLs or a
+  // print PDF is assembled, and not under hard memory pressure. Outcomes are keyed per page
+  // (utils/ocrPageKey.js) for the text layer.
+  const ocrModule = useOcrModule();
+  const { ocrPages, ocrEngineFailure } = useOcrTextLayers({
+    ocrModule,
+    allPages,
+    focusPageIndexes: ocrFocusPageIndexes,
+    ready: pageLoadState.readyPages > 0,
+    paused: printActivity || memoryPressureStage === 'hard',
+    readSourceArrayBuffer,
+    ensurePageAsset,
+  });
+  /** @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first. */
+  const setOcrFocusPageIndexes = useCallback((indexes) => {
+    const next = (Array.isArray(indexes) ? indexes : [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value) && value >= 0);
+    setOcrFocusPageIndexesState((current) => (
+      current.length === next.length && current.every((value, index) => value === next[index]) ? current : next
+    ));
+  }, []);
 
   useEffect(() => () => {
     disposePdfSignatureWorker();
@@ -2763,6 +2806,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     signatureReports,
     setSignaturePrioritySourceKey,
     getSignatureSourceFileName,
+    ocrPages,
+    ocrEngineFailure,
+    setOcrFocusPageIndexes,
     scheduleSourceWarmup,
     compareTransforms,
     getCompareTransform,
@@ -2805,6 +2851,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pageLoadState,
     signatureReports,
     getSignatureSourceFileName,
+    ocrPages,
+    ocrEngineFailure,
+    setOcrFocusPageIndexes,
     scheduleSourceWarmup,
     compareTransforms,
     getCompareTransform,

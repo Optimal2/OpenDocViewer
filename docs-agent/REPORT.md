@@ -2,16 +2,16 @@
 
 ## Coverage
 
-- Files: 155
-- Source lines: 62485
-- JSDoc symbols: 1731
+- Files: 162
+- Source lines: 63359
+- JSDoc symbols: 1768
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 39 incoming local imports
+- `src/logging/systemLogger.js`: 40 incoming local imports
 - `src/utils/runtimeConfig.js`: 26 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
@@ -23,13 +23,13 @@
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
+- `src/utils/pdfjsDocumentOptions.js`: 5 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
-- `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2823 lines
+- `src/contexts/ViewerProvider.jsx`: 2872 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2489 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2172 lines

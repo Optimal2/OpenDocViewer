@@ -359,12 +359,12 @@
 | <code>COLLAPSE_DELAY_MS</code> | constant | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:40</code> | Delay before the zone collapses after the pointer/focus has left, so it does not flicker. |
 | <code>CompareZoomOverlay</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:58</code> | CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state. |
 | <code>isKeyboardFocus</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:46</code> |  |
-| <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:494</code> |  |
-| <code>&lt;anonymous&gt;~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:369</code> |  |
-| <code>&lt;anonymous&gt;~isEditableTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:362</code> |  |
-| <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:340</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:373</code> |  |
-| <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:298</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
+| <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:506</code> |  |
+| <code>&lt;anonymous&gt;~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:381</code> |  |
+| <code>&lt;anonymous&gt;~isEditableTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:374</code> |  |
+| <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:352</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:385</code> |  |
+| <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:299</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
 | <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:213</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
 | <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:60</code> |  |
 | <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:130</code> |  |
@@ -553,9 +553,9 @@
 | <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
 | <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:115</code> | ThemeProvider component to manage and provide theme-related state and functions. |
 | <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:191</code> | Toggle between the two highest-contrast explicit themes. |
-| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:232</code> |  |
-| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:222</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:239</code> |  |
+| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:241</code> |  |
+| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:231</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:248</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -565,72 +565,74 @@
 | <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:155</code> |  |
 | <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:78</code> |  |
 | <code>ViewerSourceDescriptor</code> | typedef | <code>src/contexts/viewerContext.js:65</code> |  |
-| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:1021</code> |  |
-| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1347</code> |  |
-| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:1036</code> |  |
-| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1497</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
-| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1063</code> |  |
-| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:548</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
-| <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:218</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2716</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2702</code> |  |
-| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1135</code> |  |
-| <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:60</code> |  |
-| <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:54</code> |  |
-| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1595</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2012</code> | Render one PDF page again at twice its effective PDF scale. |
-| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1819</code> |  |
-| <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:75</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2721</code> |  |
-| <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:150</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2409</code> |  |
-| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1475</code> |  |
-| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1571</code> |  |
-| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1072</code> |  |
-| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:867</code> |  |
-| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:884</code> |  |
-| <code>isBlobObjectUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:184</code> |  |
-| <code>ViewerProvider~isPageAssetUrlReferenced</code> | constant | <code>src/contexts/ViewerProvider.jsx:923</code> |  |
-| <code>isPageFailedForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:210</code> |  |
-| <code>isPageReadyForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:202</code> |  |
-| <code>isPdfPageEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:121</code> |  |
-| <code>ViewerProvider~isPrintablePageUrlLeased</code> | constant | <code>src/contexts/ViewerProvider.jsx:904</code> |  |
-| <code>isReusableAssetUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:192</code> |  |
-| <code>ViewerProvider~leasePrintablePageUrl</code> | constant | <code>src/contexts/ViewerProvider.jsx:913</code> |  |
-| <code>makeAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:90</code> |  |
-| <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:111</code> |  |
-| <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:100</code> |  |
-| <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:132</code> |  |
-| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1359</code> |  |
-| <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:229</code> |  |
-| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:525</code> | Record that a page now has a reusable full-size asset available. |
-| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:535</code> | Record that a page now has a reusable thumbnail asset available. |
-| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:971</code> |  |
-| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1406</code> |  |
-| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1549</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2275</code> | Drain background eager-render work without blocking the UI thread. |
-| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1330</code> |  |
-| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1339</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2094</code> |  |
-| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1287</code> |  |
-| <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:947</code> | Release print leases previously acquired through getPrintablePageUrls . |
-| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1727</code> |  |
-| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:706</code> |  |
-| <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:160</code> |  |
-| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1655</code> |  |
-| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:679</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2366</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2711</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
-| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1642</code> |  |
-| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1306</code> |  |
-| <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:65</code> |  |
-| <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:173</code> |  |
-| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1484</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2116</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1560</code> |  |
-| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:501</code> |  |
-| <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:339</code> |  |
-| <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:328</code> |  |
+| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:1037</code> |  |
+| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1363</code> |  |
+| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:1052</code> |  |
+| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1513</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1079</code> |  |
+| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:556</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
+| <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:219</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2759</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2745</code> |  |
+| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1151</code> |  |
+| <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:61</code> |  |
+| <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:55</code> |  |
+| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1611</code> |  |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2028</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1835</code> |  |
+| <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:76</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2764</code> |  |
+| <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:151</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2425</code> |  |
+| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1491</code> |  |
+| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1587</code> |  |
+| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1088</code> |  |
+| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:876</code> |  |
+| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:893</code> |  |
+| <code>isBlobObjectUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:185</code> |  |
+| <code>ViewerProvider~isPageAssetUrlReferenced</code> | constant | <code>src/contexts/ViewerProvider.jsx:938</code> |  |
+| <code>isPageFailedForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:211</code> |  |
+| <code>isPageReadyForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:203</code> |  |
+| <code>isPdfPageEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:122</code> |  |
+| <code>ViewerProvider~isPrintablePageUrlLeased</code> | constant | <code>src/contexts/ViewerProvider.jsx:918</code> |  |
+| <code>isReusableAssetUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:193</code> |  |
+| <code>ViewerProvider~leasePrintablePageUrl</code> | constant | <code>src/contexts/ViewerProvider.jsx:927</code> |  |
+| <code>makeAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:91</code> |  |
+| <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:112</code> |  |
+| <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:101</code> |  |
+| <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:133</code> |  |
+| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1375</code> |  |
+| <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:230</code> |  |
+| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:533</code> | Record that a page now has a reusable full-size asset available. |
+| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:543</code> | Record that a page now has a reusable thumbnail asset available. |
+| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:987</code> |  |
+| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1422</code> |  |
+| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1565</code> |  |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2291</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1346</code> |  |
+| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1355</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2110</code> |  |
+| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1303</code> |  |
+| <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:962</code> | Release print leases previously acquired through getPrintablePageUrls . |
+| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1743</code> |  |
+| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:715</code> |  |
+| <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:161</code> |  |
+| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1671</code> |  |
+| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:687</code> |  |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2382</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2754</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2728</code> |  |
+| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1658</code> |  |
+| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1322</code> |  |
+| <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:66</code> |  |
+| <code>ViewerProvider~syncPrintActivity</code> | constant | <code>src/contexts/ViewerProvider.jsx:910</code> | Recompute the OCR pause signal from outstanding leases and print PDF assemblies. |
+| <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:174</code> |  |
+| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1500</code> |  |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2132</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1576</code> |  |
+| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:509</code> |  |
+| <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:340</code> |  |
+| <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:329</code> |  |
 | <code>componentDidCatch</code> | function | <code>src/ErrorBoundary.jsx:152</code> | Log error details for diagnostics. |
 | <code>module.exports#copyDetails</code> | member | <code>src/ErrorBoundary.jsx:189</code> | Copy a concise diagnostic bundle to the clipboard \(best effort\). |
 | <code>ErrorBoundaryProps</code> | typedef | <code>src/ErrorBoundary.jsx:103</code> | Props for the ErrorBoundary component. |
@@ -653,6 +655,8 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:39</code> |  |
+| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:20</code> | Idle time after which the OCR worker is terminated to free its memory. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |
@@ -805,6 +809,20 @@
 | <code>OcrAssetUrls</code> | typedef | <code>src/ocr/assetUrls.js:25</code> |  |
 | <code>readOcrAssetManifest</code> | function | <code>src/ocr/assetUrls.js:39</code> | The manifest the build generated, or null when it is unusable. |
 | <code>resolveOcrAssetUrls</code> | function | <code>src/ocr/assetUrls.js:60</code> | Turn the dist-relative manifest paths into absolute URLs. |
+| <code>assessPdfTextLayer</code> | function | <code>src/ocr/classify.js:76</code> | Judge the text pdf.js extracted from one page. |
+| <code>classifyPageSource</code> | function | <code>src/ocr/classify.js:46</code> |  |
+| <code>FAILED_PAGE</code> | member | <code>src/ocr/classify.js:27</code> | The page failed to load; there is no image to recognise. |
+| <code>maxPrivateUseShare</code> | member | <code>src/ocr/classify.js:39</code> | Above this share of private-use or replacement characters the layer is garbled. |
+| <code>minCharacters</code> | member | <code>src/ocr/classify.js:35</code> | Fewer visible characters than this counts as an empty layer \(page numbers, a stray header\). |
+| <code>minLetterShare</code> | member | <code>src/ocr/classify.js:37</code> | Below this share of letters and digits among visible characters the layer is garbled. |
+| <code>OCR_PAGE_DECISION</code> | constant | <code>src/ocr/classify.js:12</code> | Decides, per page, whether OCR is worth running. |
+| <code>PDF_TEXT_LAYER_THRESHOLDS</code> | constant | <code>src/ocr/classify.js:33</code> | Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers. |
+| <code>PdfTextLayerAssessment</code> | typedef | <code>src/ocr/classify.js:60</code> |  |
+| <code>PROBE_TEXT</code> | member | <code>src/ocr/classify.js:16</code> | PDF: read the text layer first, recognise only when it is not usable. |
+| <code>RECOGNIZE</code> | member | <code>src/ocr/classify.js:14</code> | Pixels only: recognise. |
+| <code>SKIP</code> | member | <code>src/ocr/classify.js:18</code> | Not a page OCR can work on. |
+| <code>TEXT_LAYER</code> | member | <code>src/ocr/classify.js:23</code> | The PDF page has a usable text layer; the viewer&#39;s own text wins. |
+| <code>UNSUPPORTED</code> | member | <code>src/ocr/classify.js:25</code> | A format the viewer does not rasterise into a page image. |
 | <code>ASSETS</code> | member | <code>src/ocr/engine.js:31</code> | The worker script, engine core or a language model could not be loaded. |
 | <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:67</code> | Classify a start-up error by its message. |
 | <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:130</code> | Create an engine for the given languages and asset URLs. |
@@ -820,9 +838,25 @@
 | <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:35</code> | Anything else. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
+| <code>createPdfTextProber</code> | function | <code>src/ocr/pdfTextProbe.js:54</code> |  |
+| <code>DEFAULT_OPEN_PDF_DOCUMENTS</code> | constant | <code>src/ocr/pdfTextProbe.js:18</code> | Open pdf.js documents kept for neighbouring pages before the least recently used is closed. |
+| <code>defaultGetDocument</code> | function | <code>src/ocr/pdfTextProbe.js:26</code> | pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\). |
+| <code>PdfTextProber</code> | typedef | <code>src/ocr/pdfTextProbe.js:37</code> |  |
+| <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:70</code> |  |
+| <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:44</code> |  |
+| <code>OcrQueueCandidate</code> | typedef | <code>src/ocr/queue.js:28</code> |  |
+| <code>OcrQueueSnapshot</code> | typedef | <code>src/ocr/queue.js:37</code> |  |
+| <code>createOcrQueue~retained</code> | member | <code>src/ocr/queue.js:86</code> | null until retainSources is called: every source is retained. |
+| <code>createOcrResultCache</code> | function | <code>src/ocr/resultCache.js:32</code> |  |
+| <code>DEFAULT_OCR_CACHE_LIMIT</code> | constant | <code>src/ocr/resultCache.js:12</code> | Pages kept per session before the least recently used outcome is dropped. |
+| <code>OcrResultCache</code> | typedef | <code>src/ocr/resultCache.js:14</code> |  |
 | <code>createConfiguredOcrEngine</code> | function | <code>src/ocr/setup.js:90</code> | Create an engine for the configured languages and asset location. |
 | <code>describeOcrSetup</code> | function | <code>src/ocr/setup.js:42</code> | Resolve languages and asset URLs from the configuration, logging each problem once. |
 | <code>OcrSetup</code> | typedef | <code>src/ocr/setup.js:23</code> |  |
+| <code>maxOcrWindowSize</code> | function | <code>src/ocr/window.js:24</code> |  |
+| <code>OCR_WINDOW_AHEAD</code> | constant | <code>src/ocr/window.js:13</code> | Pages queued after each focus page. |
+| <code>OCR_WINDOW_BEHIND</code> | constant | <code>src/ocr/window.js:15</code> | Pages queued before each focus page. |
+| <code>planOcrWindow</code> | function | <code>src/ocr/window.js:39</code> | Ordered page indexes to process: focus pages first, then the pages after them \(nearest first\), then the pages before them. |
 | <code>analyzePageIntegrity</code> | function | <code>src/PerformanceMonitor.jsx:103</code> | Check the flat viewer page list for ordering mistakes that would be user-visible. |
 | <code>copyText</code> | function | <code>src/PerformanceMonitor.jsx:349</code> | Copy best-effort text to clipboard without throwing. |
 | <code>countBundleMetaFields</code> | function | <code>src/PerformanceMonitor.jsx:305</code> |  |
@@ -1036,6 +1070,9 @@
 | <code>isOcrModuleRequested</code> | function | <code>src/utils/ocrLoader.js:33</code> | True once the module import has been requested in this session. |
 | <code>loadOcrModule</code> | function | <code>src/utils/ocrLoader.js:20</code> |  |
 | <code>resetOcrModuleForTests</code> | function | <code>src/utils/ocrLoader.js:38</code> | Test hook: forget the cached import so the next call imports again. |
+| <code>makeOcrPageKey</code> | function | <code>src/utils/ocrPageKey.js:18</code> |  |
+| <code>ocrPageKeyOf</code> | function | <code>src/utils/ocrPageKey.js:29</code> |  |
+| <code>SEPARATOR</code> | constant | <code>src/utils/ocrPageKey.js:11</code> | Key of one document page in the OCR result map \( ocrPages on the viewer context\). |
 | <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
 | <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |
 | <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:262</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |

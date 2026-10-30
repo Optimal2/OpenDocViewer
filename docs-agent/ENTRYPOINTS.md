@@ -34,7 +34,7 @@
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 39 incoming local imports
+- `src/logging/systemLogger.js`: 40 incoming local imports
 - `src/utils/runtimeConfig.js`: 26 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
@@ -46,9 +46,9 @@
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
+- `src/utils/pdfjsDocumentOptions.js`: 5 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
-- `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
 - `src/utils/printSanitize.js`: 4 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports

@@ -305,10 +305,31 @@ image the viewer already rendered, at the site's configured resolution (`pdfReso
 for PDF pages, the file's own resolution for raster images), so a lower configured resolution also
 lowers OCR quality. Results stay in memory for the session, keyed by document and page, and are
 dropped when the document changes or the tab closes: nothing is written to localStorage or
-IndexedDB and nothing is sent to any server. The source files are never modified. Only the visible
-page and a fixed number of neighbouring pages are queued, never the whole document; the queue is
-reset when the user scrolls or switches document, and it pauses while a print PDF is being
-prepared.
+IndexedDB and nothing is sent to any server. The source files are never modified.
+
+Which pages are recognised, and when:
+
+- Raster pages (TIFF, JPEG, PNG and the other image formats the viewer shows) are always
+  recognised. A PDF page is first checked for its own text layer through pdf.js, from the bytes
+  the viewer already holds; a page with a usable layer is skipped and keeps the viewer's text. The
+  layer counts as unusable when it has fewer than 20 visible characters, or when more than a fifth
+  of them are private-use or replacement characters, or when fewer than half are letters or digits
+  (a scanned page wrapped in a PDF, or a font without a usable ToUnicode map). Any other format is
+  skipped.
+- Only the displayed page (both pages in the compare view) and a fixed number of neighbours are
+  queued, never the whole document: after each displayed page the next two pages, then the page
+  before it, so at most four pages per displayed page however long the document is. A page joins
+  the queue once the viewer has rendered it. Recognition starts after the first page is shown.
+- When the user moves to another page, the pages that have not started are dropped and the new
+  window is queued; the page being recognised finishes (a Tesseract worker cannot be interrupted
+  without discarding its loaded models) and its outcome is kept. Switching document drops that
+  document's outcomes and aborts its page in flight.
+- The queue pauses while a print flow holds page images or a print PDF is assembled, and under
+  hard memory pressure; the page in flight finishes, nothing new starts until the pause ends.
+- Outcomes (text, word boxes, a skip or a failure) are cached per page for the session, at most
+  200 pages, least recently used first. A page that failed is not retried in the same session.
+  After a minute without work the worker is terminated to free its WebAssembly memory; the next
+  page starts it again, which costs the model load once more.
 
 The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are
@@ -344,9 +365,11 @@ pdf.js use the faster decoders for scanned PDFs; this is a separate observation 
 the shipped policy.
 
 Status: this version ships the switch, the engine (tesseract.js, self-hosted under `ocr/`, see
-`docs-src/deploy-ops.md`) and the module that loads it. With `enabled: true` the OCR chunk is
-imported, but nothing is recognized yet and no text layer exists: recognition, the page queue and
-the text layer arrive in the following versions, so pages still look exactly as before.
+`docs-src/deploy-ops.md`), the page classification, the bounded queue and the in-memory results.
+With `enabled: true` pages are recognised as described above and the outcomes are available to
+the viewer per page, but no text layer is drawn yet: the selectable text over the page image, its
+status indicator and the translations arrive in the next version, so pages still look exactly as
+before.
 
 ## Toolbar Button Size
 

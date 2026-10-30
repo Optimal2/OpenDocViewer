@@ -68,6 +68,7 @@ const DocumentViewer = () => {
     signatureReports,
     setSignaturePrioritySourceKey,
     getSignatureSourceFileName,
+    setOcrFocusPageIndexes,
     compareTransforms,
     compareOverlay,
     dispatchCompareOverlay,
@@ -324,6 +325,17 @@ const DocumentViewer = () => {
   useEffect(() => {
     setSignaturePrioritySourceKey?.(String(currentPage?.sourceKey || ''));
   }, [currentPage?.sourceKey, setSignaturePrioritySourceKey]);
+
+  // OCR focus (no-op while OCR is off): the rendered page, and the compare page while comparing.
+  useEffect(() => {
+    if (typeof setOcrFocusPageIndexes !== 'function') return;
+    const focus = [];
+    const primary = Number(renderPageNumber) - 1;
+    if (Number.isInteger(primary) && primary >= 0) focus.push(primary);
+    const compare = Number(renderComparePageNumber) - 1;
+    if (isComparing && Number.isInteger(compare) && compare >= 0) focus.push(compare);
+    setOcrFocusPageIndexes(focus);
+  }, [isComparing, renderComparePageNumber, renderPageNumber, setOcrFocusPageIndexes]);
 
   const openSignatureOverview = useCallback((openerElement = null) => {
     if (!signatureSummary) return false;

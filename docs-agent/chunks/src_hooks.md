@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 6. Line count: 813. JSDoc symbol count: 27.
+File count: 7. Line count: 970. JSDoc symbol count: 29.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -41,6 +41,19 @@ Local imports: `src/logging/systemLogger.js`, `src/utils/ocrLoader.js`, `src/uti
 
 Symbols:
 
+- `module.exports` (function) - No description.
+
+## src/hooks/useOcrTextLayers.js
+
+Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
+
+Exports: `OCR_IDLE_SHUTDOWN_MS`, `useOcrTextLayers`
+
+Local imports: `src/logging/systemLogger.js`, `src/utils/ocrPageKey.js`
+
+Symbols:
+
+- `OCR_IDLE_SHUTDOWN_MS` (constant) - Idle time after which the OCR worker is terminated to free its memory.
 - `module.exports` (function) - No description.
 
 ## src/hooks/usePageNavigation.js

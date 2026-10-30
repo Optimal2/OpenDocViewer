@@ -9881,7 +9881,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 494,
+    "line": 506,
     "description": "",
     "params": [
       {
@@ -9906,7 +9906,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 369,
+    "line": 381,
     "description": "",
     "params": [],
     "returns": [
@@ -9924,7 +9924,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 362,
+    "line": 374,
     "description": "",
     "params": [
       {
@@ -9944,7 +9944,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 340,
+    "line": 352,
     "description": "Overview row activation: show the document's first page and keep the overview open.",
     "params": [],
     "returns": [],
@@ -9957,7 +9957,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 373,
+    "line": 385,
     "description": "",
     "params": [
       {
@@ -9977,7 +9977,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 298,
+    "line": 299,
     "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
     "params": [
       {
@@ -14914,7 +14914,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 232,
+    "line": 241,
     "description": "",
     "params": [],
     "returns": [],
@@ -14927,7 +14927,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 222,
+    "line": 231,
     "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
     "params": [],
     "returns": [],
@@ -14940,7 +14940,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 239,
+    "line": 248,
     "description": "",
     "params": [],
     "returns": [],
@@ -15070,7 +15070,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1021,
+    "line": 1037,
     "description": "",
     "params": [
       {
@@ -15095,7 +15095,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1347,
+    "line": 1363,
     "description": "",
     "params": [],
     "returns": [
@@ -15113,7 +15113,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1036,
+    "line": 1052,
     "description": "",
     "params": [
       {
@@ -15150,7 +15150,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1497,
+    "line": 1513,
     "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
     "params": [
       {
@@ -15187,7 +15187,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1063,
+    "line": 1079,
     "description": "",
     "params": [],
     "returns": [
@@ -15205,7 +15205,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 548,
+    "line": 556,
     "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
     "params": [],
     "returns": [
@@ -15223,7 +15223,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 218,
+    "line": 219,
     "description": "",
     "params": [
       {
@@ -15248,7 +15248,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2716,
+    "line": 2759,
     "description": "",
     "params": [
       {
@@ -15268,7 +15268,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2702,
+    "line": 2745,
     "description": "",
     "params": [
       {
@@ -15288,7 +15288,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1135,
+    "line": 1151,
     "description": "",
     "params": [
       {
@@ -15313,7 +15313,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 60,
+    "line": 61,
     "description": "",
     "params": [],
     "returns": [],
@@ -15326,7 +15326,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 54,
+    "line": 55,
     "description": "",
     "params": [],
     "returns": [],
@@ -15339,7 +15339,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1595,
+    "line": 1611,
     "description": "",
     "params": [
       {
@@ -15364,7 +15364,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2012,
+    "line": 2028,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -15389,7 +15389,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1819,
+    "line": 1835,
     "description": "",
     "params": [
       {
@@ -15426,7 +15426,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 75,
+    "line": 76,
     "description": "",
     "params": [],
     "returns": [],
@@ -15439,7 +15439,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2721,
+    "line": 2764,
     "description": "",
     "params": [
       {
@@ -15459,7 +15459,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 150,
+    "line": 151,
     "description": "",
     "params": [
       {
@@ -15490,7 +15490,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2409,
+    "line": 2425,
     "description": "",
     "params": [
       {
@@ -15515,7 +15515,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1475,
+    "line": 1491,
     "description": "",
     "params": [
       {
@@ -15540,7 +15540,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1571,
+    "line": 1587,
     "description": "",
     "params": [
       {
@@ -15565,7 +15565,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1072,
+    "line": 1088,
     "description": "",
     "params": [
       {
@@ -15590,7 +15590,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 867,
+    "line": 876,
     "description": "",
     "params": [
       {
@@ -15621,7 +15621,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 884,
+    "line": 893,
     "description": "",
     "params": [
       {
@@ -15652,7 +15652,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 184,
+    "line": 185,
     "description": "",
     "params": [
       {
@@ -15677,7 +15677,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 923,
+    "line": 938,
     "description": "",
     "params": [
       {
@@ -15702,7 +15702,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 210,
+    "line": 211,
     "description": "",
     "params": [
       {
@@ -15727,7 +15727,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 202,
+    "line": 203,
     "description": "",
     "params": [
       {
@@ -15752,7 +15752,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 121,
+    "line": 122,
     "description": "",
     "params": [
       {
@@ -15777,7 +15777,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 904,
+    "line": 918,
     "description": "",
     "params": [
       {
@@ -15802,7 +15802,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 192,
+    "line": 193,
     "description": "",
     "params": [
       {
@@ -15827,7 +15827,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 913,
+    "line": 927,
     "description": "",
     "params": [
       {
@@ -15852,7 +15852,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 90,
+    "line": 91,
     "description": "",
     "params": [
       {
@@ -15883,7 +15883,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 111,
+    "line": 112,
     "description": "",
     "params": [
       {
@@ -15908,7 +15908,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 100,
+    "line": 101,
     "description": "",
     "params": [
       {
@@ -15945,7 +15945,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 132,
+    "line": 133,
     "description": "",
     "params": [
       {
@@ -15988,7 +15988,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1359,
+    "line": 1375,
     "description": "",
     "params": [
       {
@@ -16013,7 +16013,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 229,
+    "line": 230,
     "description": "",
     "params": [
       {
@@ -16038,7 +16038,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 525,
+    "line": 533,
     "description": "Record that a page now has a reusable full-size asset available.",
     "params": [
       {
@@ -16063,7 +16063,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 535,
+    "line": 543,
     "description": "Record that a page now has a reusable thumbnail asset available.",
     "params": [
       {
@@ -16088,7 +16088,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 971,
+    "line": 987,
     "description": "",
     "params": [
       {
@@ -16119,7 +16119,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1406,
+    "line": 1422,
     "description": "",
     "params": [
       {
@@ -16156,7 +16156,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1549,
+    "line": 1565,
     "description": "",
     "params": [
       {
@@ -16187,7 +16187,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2275,
+    "line": 2291,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -16205,7 +16205,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1330,
+    "line": 1346,
     "description": "",
     "params": [
       {
@@ -16230,7 +16230,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1339,
+    "line": 1355,
     "description": "",
     "params": [
       {
@@ -16255,7 +16255,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2094,
+    "line": 2110,
     "description": "",
     "params": [
       {
@@ -16286,7 +16286,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1287,
+    "line": 1303,
     "description": "",
     "params": [
       {
@@ -16311,7 +16311,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 947,
+    "line": 962,
     "description": "Release print leases previously acquired through getPrintablePageUrls .",
     "params": [
       {
@@ -16336,7 +16336,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1727,
+    "line": 1743,
     "description": "",
     "params": [
       {
@@ -16373,7 +16373,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 706,
+    "line": 715,
     "description": "",
     "params": [],
     "returns": [
@@ -16391,7 +16391,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 160,
+    "line": 161,
     "description": "",
     "params": [
       {
@@ -16422,7 +16422,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1655,
+    "line": 1671,
     "description": "",
     "params": [
       {
@@ -16459,7 +16459,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 679,
+    "line": 687,
     "description": "",
     "params": [],
     "returns": [
@@ -16477,7 +16477,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2366,
+    "line": 2382,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -16508,7 +16508,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2711,
+    "line": 2754,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -16528,13 +16528,33 @@
     "examples": 0
   },
   {
+    "id": "ViewerProvider~setOcrFocusPageIndexes",
+    "name": "setOcrFocusPageIndexes",
+    "longname": "ViewerProvider~setOcrFocusPageIndexes",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/contexts/ViewerProvider.jsx",
+    "line": 2728,
+    "description": "",
+    "params": [
+      {
+        "name": "indexes",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": "Indexes into allPages of the displayed page(s), primary first."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ViewerProvider~shouldReuseFullAssetForThumbnail",
     "name": "shouldReuseFullAssetForThumbnail",
     "longname": "ViewerProvider~shouldReuseFullAssetForThumbnail",
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1642,
+    "line": 1658,
     "description": "",
     "params": [
       {
@@ -16559,7 +16579,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1306,
+    "line": 1322,
     "description": "",
     "params": [
       {
@@ -16584,8 +16604,21 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 65,
+    "line": 66,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ViewerProvider~syncPrintActivity",
+    "name": "syncPrintActivity",
+    "longname": "ViewerProvider~syncPrintActivity",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/contexts/ViewerProvider.jsx",
+    "line": 910,
+    "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -16597,7 +16630,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 173,
+    "line": 174,
     "description": "",
     "params": [
       {
@@ -16628,7 +16661,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1484,
+    "line": 1500,
     "description": "",
     "params": [
       {
@@ -16659,7 +16692,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2116,
+    "line": 2132,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {
@@ -16684,7 +16717,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1560,
+    "line": 1576,
     "description": "",
     "params": [
       {
@@ -16715,7 +16748,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 501,
+    "line": 509,
     "description": "",
     "params": [
       {
@@ -16740,7 +16773,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 339,
+    "line": 340,
     "description": "",
     "params": [
       {
@@ -16765,7 +16798,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 328,
+    "line": 329,
     "description": "",
     "params": [],
     "returns": [],
@@ -17271,6 +17304,92 @@
         "description": "The OCR module (src/ocr/index.js) once loaded, otherwise null."
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/hooks/useOcrTextLayers.js",
+    "line": 39,
+    "description": "",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.ocrModule",
+        "type": "Object|null",
+        "optional": false,
+        "description": "The loaded OCR module, or null while OCR is off."
+      },
+      {
+        "name": "options.allPages",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "Viewer pages."
+      },
+      {
+        "name": "options.focusPageIndexes",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": "Indexes into allPages: displayed page first."
+      },
+      {
+        "name": "options.ready",
+        "type": "boolean",
+        "optional": false,
+        "description": "True once the first page is shown; nothing runs before."
+      },
+      {
+        "name": "options.paused",
+        "type": "boolean",
+        "optional": false,
+        "description": "True while the viewer wants no new OCR work started."
+      },
+      {
+        "name": "options.readSourceArrayBuffer",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.ensurePageAsset",
+        "type": "function",
+        "optional": false,
+        "description": "(pageIndex, 'full') to the rendered page's object URL."
+      },
+      {
+        "name": "options.idleShutdownMs",
+        "type": "number",
+        "optional": true,
+        "description": "Default OCR_IDLE_SHUTDOWN_MS."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "ocrPages maps utils/ocrPageKey.js keys to outcomes ( status done/skipped/failed with text, words and image size, or a transient queued/prob..."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_IDLE_SHUTDOWN_MS",
+    "name": "OCR_IDLE_SHUTDOWN_MS",
+    "longname": "OCR_IDLE_SHUTDOWN_MS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useOcrTextLayers.js",
+    "line": 20,
+    "description": "Idle time after which the OCR worker is terminated to free its memory.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -20401,6 +20520,218 @@
     "examples": 0
   },
   {
+    "id": "assessPdfTextLayer",
+    "name": "assessPdfTextLayer",
+    "longname": "assessPdfTextLayer",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 76,
+    "description": "Judge the text pdf.js extracted from one page.",
+    "params": [
+      {
+        "name": "strings",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": "The str of every text item of the page, in content order."
+      },
+      {
+        "name": "thresholds",
+        "type": "Object",
+        "optional": true,
+        "description": "Overrides of PDF_TEXT_LAYER_THRESHOLDS."
+      }
+    ],
+    "returns": [
+      {
+        "type": "PdfTextLayerAssessment",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "classifyPageSource",
+    "name": "classifyPageSource",
+    "longname": "classifyPageSource",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 46,
+    "description": "",
+    "params": [
+      {
+        "name": "page",
+        "type": "*",
+        "optional": false,
+        "description": "Viewer page entry ( fileExtension , status )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "FAILED_PAGE",
+    "name": "FAILED_PAGE",
+    "longname": "FAILED_PAGE",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 27,
+    "description": "The page failed to load; there is no image to recognise.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "maxPrivateUseShare",
+    "name": "maxPrivateUseShare",
+    "longname": "maxPrivateUseShare",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 39,
+    "description": "Above this share of private-use or replacement characters the layer is garbled.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "minCharacters",
+    "name": "minCharacters",
+    "longname": "minCharacters",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 35,
+    "description": "Fewer visible characters than this counts as an empty layer (page numbers, a stray header).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "minLetterShare",
+    "name": "minLetterShare",
+    "longname": "minLetterShare",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 37,
+    "description": "Below this share of letters and digits among visible characters the layer is garbled.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OCR_PAGE_DECISION",
+    "name": "OCR_PAGE_DECISION",
+    "longname": "OCR_PAGE_DECISION",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 12,
+    "description": "Decides, per page, whether OCR is worth running.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "PDF_TEXT_LAYER_THRESHOLDS",
+    "name": "PDF_TEXT_LAYER_THRESHOLDS",
+    "longname": "PDF_TEXT_LAYER_THRESHOLDS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 33,
+    "description": "Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "PdfTextLayerAssessment",
+    "name": "PdfTextLayerAssessment",
+    "longname": "PdfTextLayerAssessment",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 60,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "PROBE_TEXT",
+    "name": "PROBE_TEXT",
+    "longname": "PROBE_TEXT",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 16,
+    "description": "PDF: read the text layer first, recognise only when it is not usable.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "RECOGNIZE",
+    "name": "RECOGNIZE",
+    "longname": "RECOGNIZE",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 14,
+    "description": "Pixels only: recognise.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "SKIP",
+    "name": "SKIP",
+    "longname": "SKIP",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 18,
+    "description": "Not a page OCR can work on.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "TEXT_LAYER",
+    "name": "TEXT_LAYER",
+    "longname": "TEXT_LAYER",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 23,
+    "description": "The PDF page has a usable text layer; the viewer's own text wins.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "UNSUPPORTED",
+    "name": "UNSUPPORTED",
+    "longname": "UNSUPPORTED",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 25,
+    "description": "A format the viewer does not rasterise into a page image.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ASSETS",
     "name": "ASSETS",
     "longname": "ASSETS",
@@ -20687,6 +21018,288 @@
     "examples": 0
   },
   {
+    "id": "createPdfTextProber",
+    "name": "createPdfTextProber",
+    "longname": "createPdfTextProber",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/pdfTextProbe.js",
+    "line": 54,
+    "description": "",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.readSourceArrayBuffer",
+        "type": "function",
+        "optional": false,
+        "description": "The viewer's reader of already-loaded source bytes."
+      },
+      {
+        "name": "options.getDocument",
+        "type": "function",
+        "optional": false,
+        "description": "pdf.js getDocument (injectable for tests)."
+      },
+      {
+        "name": "options.maxOpenDocuments",
+        "type": "number",
+        "optional": true,
+        "description": "Default DEFAULT_OPEN_PDF_DOCUMENTS."
+      }
+    ],
+    "returns": [
+      {
+        "type": "PdfTextProber",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "DEFAULT_OPEN_PDF_DOCUMENTS",
+    "name": "DEFAULT_OPEN_PDF_DOCUMENTS",
+    "longname": "DEFAULT_OPEN_PDF_DOCUMENTS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/pdfTextProbe.js",
+    "line": 18,
+    "description": "Open pdf.js documents kept for neighbouring pages before the least recently used is closed.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "defaultGetDocument",
+    "name": "defaultGetDocument",
+    "longname": "defaultGetDocument",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/pdfTextProbe.js",
+    "line": 26,
+    "description": "pdf.js loading task for a copy of the bytes (pdf.js takes ownership of the buffer it is given).",
+    "params": [
+      {
+        "name": "bytes",
+        "type": "ArrayBuffer",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "PdfTextProber",
+    "name": "PdfTextProber",
+    "longname": "PdfTextProber",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/pdfTextProbe.js",
+    "line": 37,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createOcrQueue",
+    "name": "createOcrQueue",
+    "longname": "createOcrQueue",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 70,
+    "description": "",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.engine",
+        "type": "Object",
+        "optional": false,
+        "description": "An OcrEngine (engine.js)."
+      },
+      {
+        "name": "options.cache",
+        "type": "Object",
+        "optional": false,
+        "description": "An OcrResultCache (resultCache.js)."
+      },
+      {
+        "name": "options.probeTextLayer",
+        "type": "function",
+        "optional": false,
+        "description": "(sourceKey, pageIndex) to a PdfTextLayerAssessment (pdfTextProbe.js)."
+      },
+      {
+        "name": "options.getPageImage",
+        "type": "function",
+        "optional": false,
+        "description": "The rendered page image and its pixel size."
+      },
+      {
+        "name": "options.classify",
+        "type": "function",
+        "optional": false,
+        "description": "Default classifyPageSource."
+      },
+      {
+        "name": "options.log",
+        "type": "Object",
+        "optional": true,
+        "description": "Logger with warn and debug ."
+      },
+      {
+        "name": "options.onChange",
+        "type": "function",
+        "optional": false,
+        "description": "Called after every state change."
+      },
+      {
+        "name": "options.onBusy",
+        "type": "function",
+        "optional": false,
+        "description": "Called when a page starts."
+      },
+      {
+        "name": "options.onIdle",
+        "type": "function",
+        "optional": false,
+        "description": "Called when nothing is left to do."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrQueue",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OcrQueue",
+    "name": "OcrQueue",
+    "longname": "OcrQueue",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 44,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrQueueCandidate",
+    "name": "OcrQueueCandidate",
+    "longname": "OcrQueueCandidate",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 28,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrQueueSnapshot",
+    "name": "OcrQueueSnapshot",
+    "longname": "OcrQueueSnapshot",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 37,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createOcrQueue~retained",
+    "name": "retained",
+    "longname": "createOcrQueue~retained",
+    "kind": "member",
+    "scope": "inner",
+    "file": "src/ocr/queue.js",
+    "line": 86,
+    "description": "null until retainSources is called: every source is retained.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createOcrResultCache",
+    "name": "createOcrResultCache",
+    "longname": "createOcrResultCache",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/resultCache.js",
+    "line": 32,
+    "description": "",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.limit",
+        "type": "number",
+        "optional": true,
+        "description": "Maximum number of cached pages (default DEFAULT_OCR_CACHE_LIMIT)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrResultCache",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "DEFAULT_OCR_CACHE_LIMIT",
+    "name": "DEFAULT_OCR_CACHE_LIMIT",
+    "longname": "DEFAULT_OCR_CACHE_LIMIT",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/resultCache.js",
+    "line": 12,
+    "description": "Pages kept per session before the least recently used outcome is dropped.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrResultCache",
+    "name": "OcrResultCache",
+    "longname": "OcrResultCache",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/resultCache.js",
+    "line": 14,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "createConfiguredOcrEngine",
     "name": "createConfiguredOcrEngine",
     "longname": "createConfiguredOcrEngine",
@@ -20789,6 +21402,124 @@
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "maxOcrWindowSize",
+    "name": "maxOcrWindowSize",
+    "longname": "maxOcrWindowSize",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/window.js",
+    "line": 24,
+    "description": "",
+    "params": [
+      {
+        "name": "focusCount",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.ahead",
+        "type": "number",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.behind",
+        "type": "number",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": "The most pages a window of that many focus pages can hold."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_WINDOW_AHEAD",
+    "name": "OCR_WINDOW_AHEAD",
+    "longname": "OCR_WINDOW_AHEAD",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/window.js",
+    "line": 13,
+    "description": "Pages queued after each focus page.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OCR_WINDOW_BEHIND",
+    "name": "OCR_WINDOW_BEHIND",
+    "longname": "OCR_WINDOW_BEHIND",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/window.js",
+    "line": 15,
+    "description": "Pages queued before each focus page.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "planOcrWindow",
+    "name": "planOcrWindow",
+    "longname": "planOcrWindow",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/window.js",
+    "line": 39,
+    "description": "Ordered page indexes to process: focus pages first, then the pages after them (nearest first), then the pages before them.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.focusIndexes",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": "Indexes into the viewer's page list, primary first."
+      },
+      {
+        "name": "options.pageCount",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.ahead",
+        "type": "number",
+        "optional": true,
+        "description": "Default OCR_WINDOW_AHEAD."
+      },
+      {
+        "name": "options.behind",
+        "type": "number",
+        "optional": true,
+        "description": "Default OCR_WINDOW_BEHIND."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<number>",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -25715,6 +26446,75 @@
     "file": "src/utils/ocrLoader.js",
     "line": 38,
     "description": "Test hook: forget the cached import so the next call imports again.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "makeOcrPageKey",
+    "name": "makeOcrPageKey",
+    "longname": "makeOcrPageKey",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrPageKey.js",
+    "line": 18,
+    "description": "",
+    "params": [
+      {
+        "name": "sourceKey",
+        "type": "*",
+        "optional": false,
+        "description": "The page's source document key."
+      },
+      {
+        "name": "pageIndex",
+        "type": "*",
+        "optional": false,
+        "description": "The page's index inside that document (0-based)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "'' when the source key is empty."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "ocrPageKeyOf",
+    "name": "ocrPageKeyOf",
+    "longname": "ocrPageKeyOf",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrPageKey.js",
+    "line": 29,
+    "description": "",
+    "params": [
+      {
+        "name": "page",
+        "type": "*",
+        "optional": false,
+        "description": "A viewer page entry ( sourceKey , pageIndex )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "SEPARATOR",
+    "name": "SEPARATOR",
+    "longname": "SEPARATOR",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrPageKey.js",
+    "line": 11,
+    "description": "Key of one document page in the OCR result map ( ocrPages on the viewer context).",
     "params": [],
     "returns": [],
     "examples": 0

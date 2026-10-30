@@ -208,6 +208,15 @@ import { createContext } from 'react';
  * @property {'normal'|'soft'|'hard'} memoryPressureStage
  * @property {ViewerRuntimeDiagnostics} runtimeDiagnostics
  * @property {ViewerPageLoadState} pageLoadState
+ * @property {Object<string, Object>} ocrPages
+ *   OCR outcome per page key (utils/ocrPageKey.js): `status` done (text, words with pixel
+ *   boxes, imageWidth/imageHeight), skipped (reason), failed (reason), or a transient
+ *   queued/probing/recognizing state. Empty while `ocr.enabled` is not the literal true.
+ * @property {(string|null)} ocrEngineFailure
+ *   Why the OCR engine cannot start in this session (src/ocr/engine.js failure codes), else null.
+ * @property {function(Array.<number>): void} setOcrFocusPageIndexes
+ *   Indexes into allPages of the displayed page(s), primary first; the OCR queue covers them
+ *   and a fixed number of neighbours. A no-op while OCR is off.
  * @property {function(number, number): void} scheduleSourceWarmup
  * @property {CompareTransformState} compareTransforms
  *   Free per-page transform of the compare view (docs-src/compare-transform.md).

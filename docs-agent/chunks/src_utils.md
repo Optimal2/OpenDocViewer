@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 52. Line count: 21133. JSDoc symbol count: 855.
+File count: 53. Line count: 21165. JSDoc symbol count: 858.
 
 ## src/utils/compareCurtain.js
 
@@ -265,6 +265,18 @@ Symbols:
 - `loadOcrModule` (function) - No description.
 - `isOcrModuleRequested` (function) - True once the module import has been requested in this session.
 - `resetOcrModuleForTests` (function) - Test hook: forget the cached import so the next call imports again.
+
+## src/utils/ocrPageKey.js
+
+Key of one document page in the OCR result map \(\`ocrPages\` on the viewer context\).
+
+Exports: `makeOcrPageKey`, `ocrPageKeyOf`
+
+Symbols:
+
+- `SEPARATOR` (constant) - Key of one document page in the OCR result map \( ocrPages on the viewer context\).
+- `makeOcrPageKey` (function) - No description.
+- `ocrPageKeyOf` (function) - No description.
 
 ## src/utils/ompThemePreference.js
 

@@ -10,3 +10,8 @@ export { createOcrEngine, classifyOcrStartupError, flattenOcrWords, OCR_STARTUP_
 export { readOcrAssetManifest, resolveOcrAssetUrls } from './assetUrls.js';
 export { KNOWN_OCR_LANGUAGES, partitionOcrLanguages } from './languages.js';
 export { createConfiguredOcrEngine, describeOcrSetup } from './setup.js';
+export { OCR_PAGE_DECISION, OCR_SKIP_REASON, PDF_TEXT_LAYER_THRESHOLDS, assessPdfTextLayer, classifyPageSource } from './classify.js';
+export { DEFAULT_OPEN_PDF_DOCUMENTS, createPdfTextProber } from './pdfTextProbe.js';
+export { DEFAULT_OCR_CACHE_LIMIT, createOcrResultCache } from './resultCache.js';
+export { OCR_WINDOW_AHEAD, OCR_WINDOW_BEHIND, maxOcrWindowSize, planOcrWindow } from './window.js';
+export { OCR_PAGE_STATUS, createOcrQueue } from './queue.js';
