@@ -392,11 +392,15 @@ The engine runs Tesseract in its fully automatic page segmentation mode (mode 3,
 `tesseract` command line uses) rather than the API default, "a single uniform block of text"
 (mode 6). The default reads the whole page as one block and returns fragments when a page has a
 short text line beside a large graphic, columns, or text in several places; the automatic mode
-finds the text regions first and recognises each. Mode 1, automatic analysis with orientation
-and script detection, is not used because it needs the `osd` model, which the viewer does not
-ship; a page that is upside down or sideways is recognised as it is displayed, so rotate it
-first. The mode is set once per worker, before the first recognition; if Tesseract refuses the
-setting the start fails like any other start-up failure and OCR stays off for the session.
+finds the text regions first and recognises each. The mode is part of every worker's start-up
+configuration (the `config` argument of tesseract.js's `createWorker`), so it is in force from
+the first recognition; it is not configurable from the site file.
+
+Orientation is not detected: mode 1, automatic analysis with orientation and script detection,
+needs the `osd` model, which the viewer does not ship. The engine reads the page image as it is
+stored (the same raster the viewer draws, before any rotation), so a page scanned sideways or
+upside down is not recognised, and the viewer's rotate buttons do not change what the engine
+sees or start a new recognition. Such a page has to be rotated at the source.
 
 ### CSP for OCR
 

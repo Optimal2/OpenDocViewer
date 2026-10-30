@@ -110,34 +110,32 @@ describe('createOcrEngine', () => {
     expect(worker.recognize.mock.calls[0][2]).toEqual({ text: true, blocks: true });
   });
 
-  it('switches the worker to automatic page segmentation before the first recognition', async () => {
-    const order = [];
+  it('starts every worker in automatic page segmentation mode through its configuration', async () => {
     const worker = makeWorker();
-    worker.setParameters.mockImplementation(async (params) => { order.push(['setParameters', params]); });
-    worker.recognize.mockImplementation(async () => { order.push(['recognize']); return fakeResult(); });
-    const engine = makeEngine({ createWorker: vi.fn(async () => worker) });
+    const createWorker = vi.fn(async () => worker);
+    const engine = makeEngine({ createWorker });
 
     await engine.recognize('page-1.png');
+    await engine.terminate();
     await engine.recognize('page-2.png');
 
     expect(OCR_PAGE_SEGMENTATION_MODE).toBe('3');
-    expect(worker.setParameters).toHaveBeenCalledTimes(1);
-    expect(order[0]).toEqual(['setParameters', { tessedit_pageseg_mode: '3' }]);
-    expect(order.slice(1)).toEqual([['recognize'], ['recognize']]);
+    expect(createWorker).toHaveBeenCalledTimes(2);
+    for (const call of createWorker.mock.calls) {
+      // The fourth argument is tesseract.js's config, written to the worker's Tesseract
+      // configuration before Init; the API default (mode 6) would read the page as one block.
+      expect(call[3]).toEqual({ tessedit_pageseg_mode: '3' });
+    }
+    expect(worker.setParameters).not.toHaveBeenCalled();
   });
 
-  it('fails the start and terminates the worker when the segmentation mode cannot be set', async () => {
-    const worker = makeWorker();
-    worker.setParameters.mockRejectedValue(new Error('SetVariable refused'));
+  it('tells the operator to read the error when a start-up failure is neither policy, file nor timeout', async () => {
     const log = makeLog();
-    const engine = makeEngine({ createWorker: vi.fn(async () => worker), log });
+    const engine = makeEngine({ createWorker: vi.fn(async () => { throw new Error('Init refused the configuration'); }), log });
 
-    await expect(engine.recognize('page-1.png')).rejects.toThrow(/SetVariable refused/);
-    expect(worker.terminate).toHaveBeenCalledTimes(1);
-    expect(worker.recognize).not.toHaveBeenCalled();
-    expect(engine.isStarted()).toBe(false);
+    await expect(engine.recognize('page-1.png')).rejects.toThrow(/Init refused/);
     expect(engine.getFailure()).toMatchObject({ kind: OCR_STARTUP_FAILURE.UNKNOWN });
-    expect(log.error).toHaveBeenCalledTimes(1);
+    expect(log.error.mock.calls[0][1].hint).toMatch(/see its message/);
   });
 
   it('does not let the caller mutate the language order it was created with', async () => {

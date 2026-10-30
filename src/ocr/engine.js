@@ -18,12 +18,15 @@
  * every later call rejects with the same error and no second worker is started, so a
  * misconfigured site pays for one attempt per session.
  *
- * Once the worker is up, the engine sets Tesseract's page segmentation mode to automatic layout
- * analysis (`OCR_PAGE_SEGMENTATION_MODE`). The Tesseract API defaults to "a single uniform block
- * of text" (mode 6), which reads a page with a short text line beside a large graphic, or with
- * columns, as one block and returns fragments; the automatic mode finds the text regions first.
- * Mode 1 (automatic with orientation and script detection) is not used: it needs the `osd`
- * model, which the viewer does not ship.
+ * The worker is created with Tesseract's page segmentation mode set to automatic layout analysis
+ * (`OCR_PAGE_SEGMENTATION_MODE`), through the `config` argument of `createWorker`, which
+ * tesseract.js writes to the worker's Tesseract configuration before `Init`. The Tesseract API
+ * defaults to "a single uniform block of text" (mode 6), which reads a page with a short text
+ * line beside a large graphic, or with columns, as one block and returns fragments; the
+ * automatic mode finds the text regions first. Mode 1 (automatic with orientation and script
+ * detection) is not used: it needs the `osd` model, which the viewer does not ship. The value is
+ * a fixed constant Tesseract accepts; tesseract.js does not report a rejected variable, so the
+ * engine cannot detect one and does not try to.
  *
  * Part of the lazy OCR chunk: nothing here is imported while `ocr.enabled` is off.
  */
@@ -46,10 +49,10 @@ export const OCR_STARTUP_FAILURE = Object.freeze({
 export const DEFAULT_OCR_START_TIMEOUT_MS = 60000;
 
 /**
- * Tesseract page segmentation mode set on every worker: 3 = fully automatic page segmentation
- * without orientation and script detection (the mode the `tesseract` command line uses). The
- * API default, 6, treats the whole page as one text block. Kept as a string because that is how
- * tesseract.js passes `tessedit_pageseg_mode`.
+ * Tesseract page segmentation mode every worker starts with: 3 = fully automatic page
+ * segmentation without orientation and script detection (the mode the `tesseract` command line
+ * uses). The API default, 6, treats the whole page as one text block. Kept as a string because
+ * that is how tesseract.js writes `tessedit_pageseg_mode` to the worker's configuration.
  */
 export const OCR_PAGE_SEGMENTATION_MODE = '3';
 
@@ -203,21 +206,12 @@ export function createOcrEngine({
           // tesseract.js only settles createWorker for `load` failures; model and initialisation
           // failures arrive here (and would otherwise be thrown unhandled from worker.onmessage).
           errorHandler: fail,
-        }));
+        }, { tessedit_pageseg_mode: OCR_PAGE_SEGMENTATION_MODE }));
       } catch (error) {
         fail(error);
         return;
       }
-      creation.then(async (worker) => {
-        if (!settled) {
-          try {
-            await worker.setParameters({ tessedit_pageseg_mode: OCR_PAGE_SEGMENTATION_MODE });
-          } catch (error) {
-            Promise.resolve(worker?.terminate?.()).catch(() => {});
-            fail(error);
-            return;
-          }
-        }
+      creation.then((worker) => {
         if (settled) {
           // Arrived after the timeout: do not leave a worker with megabytes of memory behind.
           Promise.resolve(worker?.terminate?.()).catch(() => {});
@@ -248,7 +242,9 @@ export function createOcrEngine({
           languages: [...languageList],
           hint: failure.kind === OCR_STARTUP_FAILURE.CSP
             ? "add 'wasm-unsafe-eval' to the script-src of the site Content-Security-Policy"
-            : `check that ${urls.workerPath}, ${urls.corePath} and ${urls.langPath}/<lang>.traineddata.gz are served`,
+            : failure.kind === OCR_STARTUP_FAILURE.UNKNOWN
+              ? 'the error is not a policy, file or timeout failure; see its message'
+              : `check that ${urls.workerPath}, ${urls.corePath} and ${urls.langPath}/<lang>.traineddata.gz are served`,
           error: String(error?.message || error),
         });
         throw error;

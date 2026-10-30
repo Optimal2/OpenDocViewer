@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 12. Line count: 1655. JSDoc symbol count: 81.
+File count: 12. Line count: 1651. JSDoc symbol count: 81.
 
 ## src/ocr/assetUrls.js
 
@@ -52,7 +52,7 @@ Symbols:
 - `TIMEOUT` (member) - The worker gave no answer within the start timeout.
 - `UNKNOWN` (member) - Anything else.
 - `DEFAULT_OCR_START_TIMEOUT_MS` (constant) - Default bound on worker start\-up \(core and models are a few MB; a stalled start stays silent otherwise\).
-- `OCR_PAGE_SEGMENTATION_MODE` (constant) - Tesseract page segmentation mode set on every worker: 3 \= fully automatic page segmentation without orientation and script detection \(the mode the tesseract command line uses\).
+- `OCR_PAGE_SEGMENTATION_MODE` (constant) - Tesseract page segmentation mode every worker starts with: 3 \= fully automatic page segmentation without orientation and script detection \(the mode the tesseract command line uses...
 - `EMPTY_WASM_MODULE` (constant) - The smallest valid WebAssembly module: magic number and version, nothing else.
 - `probeWebAssemblyCompilation` (function) - Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which under a Content\-Security\-Policy without 'wasm\-unsafe\-eval' is a CompileError that nam...
 - `classifyOcrStartupError` (function) - Classify a start\-up error by its message.
@@ -63,7 +63,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `OCR_PAGE_SEGMENTATION_MODE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
 ## src/ocr/languages.js
 
