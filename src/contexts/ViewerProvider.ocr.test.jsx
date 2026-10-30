@@ -28,6 +28,7 @@ vi.mock('../ocr/index.js', async () => {
     createOcrResultCache,
     planOcrWindow,
     createOcrQueue,
+    prepareOcrImage: async (blob, options) => ({ blob, width: options?.fallbackSize?.width || 0, height: options?.fallbackSize?.height || 0, rulingLinePixels: 0 }),
     createConfiguredOcrEngine: () => {
       const engine = {
         recognize: async (image) => {

@@ -83,7 +83,7 @@ describe('createOcrQueue', () => {
 
     engine.pending[0].resolve(result('första'));
     await flush();
-    expect(cache.get(a.key)).toEqual({ status: OCR_PAGE_STATUS.DONE, text: 'första', confidence: 90, words: expect.any(Array), imageWidth: 1240, imageHeight: 1754 });
+    expect(cache.get(a.key)).toEqual({ status: OCR_PAGE_STATUS.DONE, text: 'första', confidence: 90, words: expect.any(Array), imageWidth: 1240, imageHeight: 1754, rulingLinePixels: 0 });
     expect(engine.recognize).toHaveBeenCalledTimes(2);
 
     engine.pending[1].resolve(result('andra'));

@@ -162,6 +162,17 @@ describe('OcrTextLayer', () => {
     expect(container.innerHTML).toBe('');
   });
 
+  it('marks a layer whose copy had ruling lines removed, and only that one', async () => {
+    await render({ outcome: { ...OUTCOME, rulingLinePixels: 1234 } });
+    expect(container.querySelector('.ocr-text-layer').getAttribute('data-ruling-lines-removed')).toBe('true');
+    // Geometry is the same: the copy had the page image's size.
+    expect(container.querySelector('.ocr-text-layer-word').style.left).toBe('50px');
+    await render({ outcome: { ...OUTCOME, rulingLinePixels: 0 } });
+    expect(container.querySelector('.ocr-text-layer').hasAttribute('data-ruling-lines-removed')).toBe(false);
+    await render({ outcome: OUTCOME });
+    expect(container.querySelector('.ocr-text-layer').hasAttribute('data-ruling-lines-removed')).toBe(false);
+  });
+
   it('renders an empty layer for a page recognised without words', async () => {
     await render({ outcome: { ...OUTCOME, words: [], text: '' } });
     const layer = container.querySelector('.ocr-text-layer');

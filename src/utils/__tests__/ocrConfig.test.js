@@ -11,9 +11,9 @@
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getOcrAssetBaseUrl, getOcrLanguages, isOcrEnabled } from '../runtimeConfig.js';
+import { getOcrAssetBaseUrl, getOcrLanguages, isOcrEnabled, isOcrLineRemovalEnabled } from '../runtimeConfig.js';
 
-const SHIPPED_OCR_DEFAULTS = Object.freeze({ enabled: false, languages: ['swe', 'eng'], assetBaseUrl: null });
+const SHIPPED_OCR_DEFAULTS = Object.freeze({ enabled: false, removeRulingLines: true, languages: ['swe', 'eng'], assetBaseUrl: null });
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -34,6 +34,7 @@ function readOcrConfig({ siteConfig, useSampleSiteFile = false } = {}) {
       ocr: JSON.parse(JSON.stringify(dom.window.__ODV_CONFIG__.ocr)),
       siteKeys: [...dom.window.__ODV_SITE_CONFIG_KEYS__],
       enabled: isOcrEnabled(),
+      removeRulingLines: isOcrLineRemovalEnabled(),
       languages: getOcrLanguages(),
       assetBaseUrl: getOcrAssetBaseUrl(),
     };
@@ -47,9 +48,18 @@ describe('shipped OCR configuration', () => {
     const shipped = readOcrConfig();
     expect(shipped.ocr).toEqual(SHIPPED_OCR_DEFAULTS);
     expect(shipped.enabled).toBe(false);
+    expect(shipped.removeRulingLines).toBe(true);
     expect(shipped.languages).toEqual(['swe', 'eng']);
     expect(shipped.assetBaseUrl).toBeNull();
     expect(shipped.siteKeys).toEqual([]);
+  });
+
+  it('keeps the ruling-line removal unless a site file sets the literal false', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } }).removeRulingLines).toBe(true);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, removeRulingLines: 'false' } } }).removeRulingLines).toBe(true);
+    const off = readOcrConfig({ siteConfig: { ocr: { enabled: true, removeRulingLines: false } } });
+    expect(off.removeRulingLines).toBe(false);
+    expect(off.enabled).toBe(true);
   });
 
   it('keeps OCR off with the sample site file applied as-is', () => {
@@ -61,7 +71,7 @@ describe('shipped OCR configuration', () => {
 
   it('lets a site file turn OCR on with the literal true and deep-merges the sub keys', () => {
     const site = readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: ['swe'] } } });
-    expect(site.ocr).toEqual({ enabled: true, languages: ['swe'], assetBaseUrl: null });
+    expect(site.ocr).toEqual({ enabled: true, removeRulingLines: true, languages: ['swe'], assetBaseUrl: null });
     expect(site.enabled).toBe(true);
     expect(site.languages).toEqual(['swe']);
     expect(site.assetBaseUrl).toBeNull();

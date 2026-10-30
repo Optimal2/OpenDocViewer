@@ -11,14 +11,19 @@ import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
 
 const SCAN_TEXT = ['OpenDocViewer OCR', 'Hej världen 2026'];
+/** A ruled two-by-two table below the text: the case the ruling-line removal exists for. */
+const TABLE_CELLS = [['Konto', 'Belopp'], ['Hyra', 'Summa']];
 const SESSION = {
   session: { id: 'ui-ocr-on' },
   documents: [{ documentId: 'scan', files: ['/ui-fixtures/synthetic-scan.png'] }],
 };
 
-/** Draw a clean A4 "scan" at 200 dpi with two lines of large text and return its PNG bytes. */
+/**
+ * Draw a clean A4 "scan" at 200 dpi with two lines of large text and a ruled table, and return
+ * its PNG bytes.
+ */
 async function drawSyntheticScan(page) {
-  const dataUrl = await page.evaluate((lines) => {
+  const dataUrl = await page.evaluate(({ lines, cells }) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1654;
     canvas.height = 2339;
@@ -29,8 +34,22 @@ async function drawSyntheticScan(page) {
     context.font = 'bold 72px Arial, Helvetica, sans-serif';
     context.textBaseline = 'top';
     lines.forEach((line, index) => context.fillText(line, 160, 300 + index * 160));
+    // The table: 4 px solid borders around every cell, text inside each cell.
+    const left = 160;
+    const top = 800;
+    const cellWidth = 620;
+    const cellHeight = 150;
+    context.strokeStyle = '#111111';
+    context.lineWidth = 4;
+    context.font = 'bold 56px Arial, Helvetica, sans-serif';
+    cells.forEach((row, rowIndex) => row.forEach((text, columnIndex) => {
+      const x = left + columnIndex * cellWidth;
+      const y = top + rowIndex * cellHeight;
+      context.strokeRect(x, y, cellWidth, cellHeight);
+      context.fillText(text, x + 40, y + 45);
+    }));
     return canvas.toDataURL('image/png');
-  }, SCAN_TEXT);
+  }, { lines: SCAN_TEXT, cells: TABLE_CELLS });
   return Buffer.from(dataUrl.split(',')[1], 'base64');
 }
 
@@ -71,6 +90,9 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(await words.count()).toBeGreaterThanOrEqual(SCAN_TEXT.join(' ').split(' ').length - 1);
   await expect(layer).toContainText('OpenDocViewer');
   await expect(layer).toContainText('världen');
+  // The ruled table: its lines were removed from the engine's copy and the cell text came out.
+  await expect(layer).toHaveAttribute('data-ruling-lines-removed', 'true');
+  for (const text of TABLE_CELLS.flat()) await expect(layer).toContainText(text);
 
   // The text is transparent and sits where the ink is: the first word's box is inside the page
   // image, towards its top left.
@@ -91,7 +113,9 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     selection.addRange(range);
     return selection.toString();
   });
-  expect(selected.replace(/\s+/g, ' ').trim()).toBe('OpenDocViewer OCR Hej världen 2026');
+  const selectedText = selected.replace(/\s+/g, ' ').trim();
+  expect(selectedText.startsWith('OpenDocViewer OCR Hej världen 2026')).toBe(true);
+  expect(selectedText).toContain('Konto Belopp');
   // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping.
   const found = await page.evaluate(() => {
     window.getSelection().removeAllRanges();

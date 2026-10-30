@@ -32,9 +32,19 @@ function makeEngine() {
 function makeModule(engine, prober) {
   return {
     created: 0,
+    prepared: [],
+    measured: null,
     createOcrResultCache,
     planOcrWindow,
     createOcrQueue,
+    // The real prepareOcrImage decodes and copies the image (prepareImage.test.js); here it
+    // records what the hook hands it and answers with the measured size a test sets, else the
+    // hook's fallback (the page entry).
+    async prepareOcrImage(blob, options) {
+      this.prepared.push({ type: blob.type, fallbackSize: options?.fallbackSize });
+      const size = this.measured || options.fallbackSize;
+      return { blob, width: size.width, height: size.height, rulingLinePixels: 0 };
+    },
     createConfiguredOcrEngine() {
       this.created += 1;
       return { engine, setup: { languages: ['swe', 'eng'], assetUrls: {}, warnings: [] } };
@@ -144,19 +154,18 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(4);
   });
 
-  it('measures the fetched image itself when the browser can decode it, not the page entry', async () => {
-    const closed = [];
-    vi.stubGlobal('createImageBitmap', vi.fn(async (blob) => ({ width: 2480, height: 3508, close: () => closed.push(blob.type) })));
+  it('hands the fetched image to prepareOcrImage with the page entry as size fallback and keeps the measured size', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());
+    ocrModule.measured = { width: 2480, height: 3508 };
     // The page entry carries thumbnail-sized dimensions (a thumbnail commit overwrote them).
     const props = baseProps({ ocrModule, allPages: [page('doc', 0, { realWidth: 220, realHeight: 311 })], focusPageIndexes: [0] });
     await render(props);
     await flush();
     engine.pending[0].resolve(result('mätt'));
     await flush();
-    expect(latest.ocrPages[makeOcrPageKey('doc', 0)]).toMatchObject({ status: 'done', imageWidth: 2480, imageHeight: 3508 });
-    expect(closed).toEqual(['image/png']);
+    expect(ocrModule.prepared).toEqual([{ type: 'image/png', fallbackSize: { width: 220, height: 311 } }]);
+    expect(latest.ocrPages[makeOcrPageKey('doc', 0)]).toMatchObject({ status: 'done', imageWidth: 2480, imageHeight: 3508, rulingLinePixels: 0 });
   });
 
   it('waits for a page to be rendered before queuing it', async () => {

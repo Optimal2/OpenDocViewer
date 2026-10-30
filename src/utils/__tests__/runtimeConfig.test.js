@@ -25,6 +25,7 @@ import {
   DEFAULT_OCR_LANGUAGES,
   OCR_ASSET_BASE_URL_REJECTIONS,
   isOcrEnabled,
+  isOcrLineRemovalEnabled,
   describeOcrLanguages,
   getOcrLanguages,
   describeOcrAssetBaseUrl,
@@ -307,6 +308,23 @@ describe('runtimeConfig', () => {
       ['an array', [true]],
     ])('stays off for %s', (_label, value) => {
       expect(isOcrEnabled({ ocr: { enabled: value } })).toBe(false);
+    });
+  });
+
+  describe('isOcrLineRemovalEnabled', () => {
+    it('is on when the section or key is missing', () => {
+      expect(isOcrLineRemovalEnabled({})).toBe(true);
+      expect(isOcrLineRemovalEnabled({ ocr: {} })).toBe(true);
+      expect(isOcrLineRemovalEnabled(null)).toBe(true);
+      expect(isOcrLineRemovalEnabled(undefined)).toBe(true);
+    });
+
+    it('turns off only for the boolean literal false', () => {
+      expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: false } })).toBe(false);
+      expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: true } })).toBe(true);
+      expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 'false' } })).toBe(true);
+      expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 0 } })).toBe(true);
+      expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: null } })).toBe(true);
     });
   });
 

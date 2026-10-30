@@ -92,15 +92,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 164,
-    "sourceLineCount": 63709,
-    "docletCount": 1779,
-    "documentedFileCount": 163,
+    "fileCount": 166,
+    "sourceLineCount": 64123,
+    "docletCount": 1802,
+    "documentedFileCount": 165,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 5317
+    "estimatedSourceTokens": 5407
   },
   "recommendations": [
     "1 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -495,16 +495,16 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 121,
-      "lines": 882,
-      "incomingLocalImports": 26,
-      "doclets": 64,
+      "lines": 895,
+      "incomingLocalImports": 27,
+      "doclets": 65,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
     {
       "path": "src/ocr/index.js",
       "score": 118,
-      "lines": 18,
+      "lines": 20,
       "incomingLocalImports": 1,
       "doclets": 0,
       "summary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -550,7 +550,7 @@
       "path": "src/logging/systemLogger.js",
       "score": 102,
       "lines": 471,
-      "incomingLocalImports": 40,
+      "incomingLocalImports": 41,
       "doclets": 31,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high"
@@ -785,7 +785,7 @@
           {
             "path": "src/hooks/useOcrTextLayers.js",
             "score": 25,
-            "lines": 164,
+            "lines": 158,
             "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
@@ -965,7 +965,7 @@
     {
       "name": "src/components",
       "fileCount": 19,
-      "lineCount": 8207,
+      "lineCount": 8212,
       "docletCount": 110,
       "importantFiles": [
         {
@@ -1363,7 +1363,7 @@
     {
       "name": "src/hooks",
       "fileCount": 7,
-      "lineCount": 977,
+      "lineCount": 971,
       "docletCount": 29,
       "importantFiles": [
         {
@@ -1405,7 +1405,7 @@
         {
           "path": "src/hooks/useOcrTextLayers.js",
           "score": 25,
-          "lines": 164,
+          "lines": 158,
           "incomingLocalImports": 1,
           "doclets": 2,
           "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -1555,7 +1555,7 @@
           "path": "src/logging/systemLogger.js",
           "score": 102,
           "lines": 471,
-          "incomingLocalImports": 40,
+          "incomingLocalImports": 41,
           "doclets": 31,
           "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
           "summaryConfidence": "high"
@@ -1573,14 +1573,14 @@
     },
     {
       "name": "src/ocr",
-      "fileCount": 10,
-      "lineCount": 1173,
-      "docletCount": 56,
+      "fileCount": 12,
+      "lineCount": 1575,
+      "docletCount": 78,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
           "score": 118,
-          "lines": 18,
+          "lines": 20,
           "incomingLocalImports": 1,
           "doclets": 0,
           "summary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -1605,9 +1605,18 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/ocr/lineRemoval.js",
+          "score": 64,
+          "lines": 254,
+          "incomingLocalImports": 1,
+          "doclets": 15,
+          "summary": "Ruling-line removal before recognition: the pre-processing step for ruled tables and forms.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/ocr/queue.js",
           "score": 41,
-          "lines": 282,
+          "lines": 285,
           "incomingLocalImports": 0,
           "doclets": 8,
           "summary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
@@ -1632,21 +1641,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/ocr/languages.js",
-          "score": 24,
-          "lines": 29,
-          "incomingLocalImports": 1,
-          "doclets": 2,
-          "summary": "Membership check for OCR language codes against the models tesseract.js knows.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/ocr/pdfTextProbe.js",
-          "score": 23,
-          "lines": 139,
+          "path": "src/ocr/prepareImage.js",
+          "score": 27,
+          "lines": 143,
           "incomingLocalImports": 0,
-          "doclets": 4,
-          "summary": "Reads a PDF page's own text layer through pdf.js so classify.js can decide whether OCR is needed at all.",
+          "doclets": 7,
+          "summary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy (lineRemova",
           "summaryConfidence": "high"
         }
       ]
@@ -1705,8 +1705,8 @@
     {
       "name": "src/utils",
       "fileCount": 54,
-      "lineCount": 21270,
-      "docletCount": 863,
+      "lineCount": 21283,
+      "docletCount": 864,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1720,9 +1720,9 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 121,
-          "lines": 882,
-          "incomingLocalImports": 26,
-          "doclets": 64,
+          "lines": 895,
+          "incomingLocalImports": 27,
+          "doclets": 65,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
@@ -26080,7 +26080,7 @@
     },
     {
       "path": "src/components/OcrTextLayer.jsx",
-      "lines": 120,
+      "lines": 125,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
       "sourceSummary": "Selectable, invisible text over a recognised page image.",
@@ -26115,29 +26115,29 @@
         {
           "name": "OcrTextLayer",
           "kind": "default",
-          "line": 119
+          "line": 124
         }
       ],
       "declarations": [
         {
           "name": "OcrTextLayer",
           "kind": "component",
-          "line": 28
+          "line": 31
         },
         {
           "name": "layerStyle",
           "kind": "object",
-          "line": 47
+          "line": 50
         },
         {
           "name": "frameStyle",
           "kind": "object",
-          "line": 57
+          "line": 60
         },
         {
           "name": "stopDoubleClick",
           "kind": "function",
-          "line": 68
+          "line": 71
         }
       ],
       "parseError": null,
@@ -26153,7 +26153,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/OcrTextLayer.jsx",
-          "line": 28,
+          "line": 31,
           "description": "",
           "params": [
             {
@@ -26166,7 +26166,7 @@
               "name": "props.outcome",
               "type": "Object",
               "optional": false,
-              "description": "A done OCR outcome: words , imageWidth , imageHeight ."
+              "description": "A done OCR outcome: words , imageWidth , imageHeight , and rulingLinePixels (exposed as data-ruling-lines-removed when the line removal pai..."
             },
             {
               "name": "props.renderWidth",
@@ -32778,7 +32778,7 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 164,
+      "lines": 158,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -32791,7 +32791,7 @@
             "useRef",
             "useState"
           ],
-          "line": 15,
+          "line": 17,
           "kind": "static"
         },
         {
@@ -32799,7 +32799,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 16,
+          "line": 18,
           "kind": "static"
         },
         {
@@ -32807,7 +32807,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 17,
+          "line": 19,
           "kind": "static"
         }
       ],
@@ -32815,24 +32815,24 @@
         {
           "name": "OCR_IDLE_SHUTDOWN_MS",
           "kind": "variable",
-          "line": 20
+          "line": 22
         },
         {
           "name": "useOcrTextLayers",
           "kind": "default",
-          "line": 39
+          "line": 41
         }
       ],
       "declarations": [
         {
           "name": "useOcrTextLayers",
           "kind": "function",
-          "line": 39
+          "line": 41
         },
         {
           "name": "getPageImage",
           "kind": "function",
-          "line": 75
+          "line": 77
         }
       ],
       "parseError": null,
@@ -32850,7 +32850,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 20,
+          "line": 22,
           "description": "Idle time after which the OCR worker is terminated to free its memory.",
           "params": [],
           "returns": [],
@@ -32863,7 +32863,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 39,
+          "line": 41,
           "description": "",
           "params": [
             {
@@ -32937,7 +32937,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 16,
+          "line": 18,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -32946,7 +32946,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 17,
+          "line": 19,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         }
@@ -32960,7 +32960,7 @@
             "useRef",
             "useState"
           ],
-          "line": 15,
+          "line": 17,
           "kind": "static"
         }
       ],
@@ -37630,7 +37630,7 @@
           "kind": "static"
         }
       ],
-      "incomingLocalImports": 40,
+      "incomingLocalImports": 41,
       "importanceScore": 102,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high",
@@ -38816,7 +38816,7 @@
     },
     {
       "path": "src/ocr/index.js",
-      "lines": 18,
+      "lines": 20,
       "extension": ".js",
       "jsdocBlockCount": 1,
       "sourceSummary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -38971,6 +38971,36 @@
           "kind": "named",
           "source": "./queue.js",
           "line": 17
+        },
+        {
+          "name": "RULING_LINE_DILATE_PX",
+          "kind": "named",
+          "source": "./lineRemoval.js",
+          "line": 18
+        },
+        {
+          "name": "removeRulingLines",
+          "kind": "named",
+          "source": "./lineRemoval.js",
+          "line": 18
+        },
+        {
+          "name": "removeRulingLinesAsync",
+          "kind": "named",
+          "source": "./lineRemoval.js",
+          "line": 18
+        },
+        {
+          "name": "rulingLineMinRunPx",
+          "kind": "named",
+          "source": "./lineRemoval.js",
+          "line": 18
+        },
+        {
+          "name": "prepareOcrImage",
+          "kind": "named",
+          "source": "./prepareImage.js",
+          "line": 19
         }
       ],
       "declarations": [],
@@ -39084,6 +39114,508 @@
       "incomingLocalImports": 1,
       "importanceScore": 24,
       "summary": "Membership check for OCR language codes against the models tesseract.js knows.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/ocr/lineRemoval.js",
+      "lines": 254,
+      "extension": ".js",
+      "jsdocBlockCount": 16,
+      "sourceSummary": "Ruling-line removal before recognition: the pre-processing step for ruled tables and forms.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "RULING_LINE_DARK_LUMA",
+          "kind": "variable",
+          "line": 37
+        },
+        {
+          "name": "RULING_LINE_MIN_RUN_SHARE",
+          "kind": "variable",
+          "line": 39
+        },
+        {
+          "name": "RULING_LINE_MIN_RUN_FLOOR_PX",
+          "kind": "variable",
+          "line": 41
+        },
+        {
+          "name": "RULING_LINE_MIN_ASPECT",
+          "kind": "variable",
+          "line": 43
+        },
+        {
+          "name": "RULING_LINE_DILATE_PX",
+          "kind": "variable",
+          "line": 45
+        },
+        {
+          "name": "RULING_LINE_BAND_ROWS",
+          "kind": "variable",
+          "line": 47
+        },
+        {
+          "name": "rulingLineMinRunPx",
+          "kind": "function",
+          "line": 58
+        },
+        {
+          "name": "rulingLineRemovalSteps",
+          "kind": "function",
+          "line": 130
+        },
+        {
+          "name": "removeRulingLines",
+          "kind": "function",
+          "line": 226
+        },
+        {
+          "name": "removeRulingLinesAsync",
+          "kind": "function",
+          "line": 245
+        }
+      ],
+      "declarations": [
+        {
+          "name": "rulingLineMinRunPx",
+          "kind": "function",
+          "line": 58
+        },
+        {
+          "name": "thinnestHorizontal",
+          "kind": "function",
+          "line": 83
+        },
+        {
+          "name": "thinnestVertical",
+          "kind": "function",
+          "line": 106
+        },
+        {
+          "name": "rulingLineRemovalSteps",
+          "kind": "function",
+          "line": 130
+        },
+        {
+          "name": "bandEnds",
+          "kind": "function",
+          "line": 138
+        },
+        {
+          "name": "thicknessLimit",
+          "kind": "function",
+          "line": 140
+        },
+        {
+          "name": "markVertical",
+          "kind": "function",
+          "line": 159
+        },
+        {
+          "name": "removeRulingLines",
+          "kind": "function",
+          "line": 226
+        },
+        {
+          "name": "yieldToEventLoop",
+          "kind": "function",
+          "line": 234
+        },
+        {
+          "name": "removeRulingLinesAsync",
+          "kind": "function",
+          "line": 245
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "RULING_LINE_DARK_LUMA",
+          "name": "RULING_LINE_DARK_LUMA",
+          "longname": "RULING_LINE_DARK_LUMA",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 37,
+          "description": "Dark pixels below this luma (0..255) count as ink.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "RULING_LINE_MIN_RUN_SHARE",
+          "name": "RULING_LINE_MIN_RUN_SHARE",
+          "longname": "RULING_LINE_MIN_RUN_SHARE",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 39,
+          "description": "Minimum run length as a share of the page's longer side: 0.2 inch on an 11.7 inch (A4) side.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "RULING_LINE_MIN_RUN_FLOOR_PX",
+          "name": "RULING_LINE_MIN_RUN_FLOOR_PX",
+          "longname": "RULING_LINE_MIN_RUN_FLOOR_PX",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 41,
+          "description": "Floor for the minimum run length, so a tiny image never takes glyph strokes for lines.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "RULING_LINE_MIN_ASPECT",
+          "name": "RULING_LINE_MIN_ASPECT",
+          "longname": "RULING_LINE_MIN_ASPECT",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 43,
+          "description": "A run is a line only when its length is at least this many times its thinnest thickness.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "RULING_LINE_DILATE_PX",
+          "name": "RULING_LINE_DILATE_PX",
+          "longname": "RULING_LINE_DILATE_PX",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 45,
+          "description": "Pixels painted white around every line pixel.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "RULING_LINE_BAND_ROWS",
+          "name": "RULING_LINE_BAND_ROWS",
+          "longname": "RULING_LINE_BAND_ROWS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 47,
+          "description": "Rows between two yields of the generator.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "THICKNESS_SAMPLES",
+          "name": "THICKNESS_SAMPLES",
+          "longname": "THICKNESS_SAMPLES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 49,
+          "description": "Positions along a run at which its thickness is sampled.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "rulingLineMinRunPx",
+          "name": "rulingLineMinRunPx",
+          "longname": "rulingLineMinRunPx",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 58,
+          "description": "The minimum run length (px) for a page of the given size.",
+          "params": [
+            {
+              "name": "width",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "height",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "RulingLineRemovalOptions",
+          "name": "RulingLineRemovalOptions",
+          "longname": "RulingLineRemovalOptions",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 63,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "thinnestHorizontal",
+          "name": "thinnestHorizontal",
+          "longname": "thinnestHorizontal",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 83,
+          "description": "Thinnest thickness of a horizontal run (dark rows through it) sampled along its length.",
+          "params": [
+            {
+              "name": "mask",
+              "type": "Uint8Array",
+              "optional": false,
+              "description": "Bit 1 set on dark pixels."
+            },
+            {
+              "name": "w",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "h",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "y",
+              "type": "number",
+              "optional": false,
+              "description": "Row of the run."
+            },
+            {
+              "name": "x0",
+              "type": "number",
+              "optional": false,
+              "description": "First column (inclusive)."
+            },
+            {
+              "name": "length",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "optional": false,
+              "description": "Stop counting at this thickness (anything thicker is not a line anyway)."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "thinnestVertical",
+          "name": "thinnestVertical",
+          "longname": "thinnestVertical",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 106,
+          "description": "Thinnest thickness of a vertical run (dark columns through it) sampled along its length.",
+          "params": [
+            {
+              "name": "mask",
+              "type": "Uint8Array",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "w",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "x",
+              "type": "number",
+              "optional": false,
+              "description": "Column of the run."
+            },
+            {
+              "name": "y0",
+              "type": "number",
+              "optional": false,
+              "description": "First row (inclusive)."
+            },
+            {
+              "name": "length",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "rulingLineRemovalSteps",
+          "name": "rulingLineRemovalSteps",
+          "longname": "rulingLineRemovalSteps",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 130,
+          "description": "Remove the ruling lines of an RGBA image in place, as a generator: each next() processes one band of rows and the final value is the number of pixels painted white (0 when the pag...",
+          "params": [
+            {
+              "name": "pixels",
+              "type": "Uint8ClampedArray",
+              "optional": false,
+              "description": "RGBA, row-major, width * height * 4 bytes; modified in place."
+            },
+            {
+              "name": "width",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "height",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options",
+              "type": "RulingLineRemovalOptions",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Generator.<void, number, void>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "removeRulingLines",
+          "name": "removeRulingLines",
+          "longname": "removeRulingLines",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 226,
+          "description": "Remove the ruling lines of an ImageData-like object in place, synchronously.",
+          "params": [
+            {
+              "name": "imageData",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options",
+              "type": "RulingLineRemovalOptions",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": "Pixels painted white."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "yieldToEventLoop",
+          "name": "yieldToEventLoop",
+          "longname": "yieldToEventLoop",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 234,
+          "description": "Hand control back to the event loop once (a macrotask, so rendering and input get a turn).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "removeRulingLinesAsync",
+          "name": "removeRulingLinesAsync",
+          "longname": "removeRulingLinesAsync",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/lineRemoval.js",
+          "line": 245,
+          "description": "Remove the ruling lines of an ImageData-like object in place, yielding to the event loop between bands of rows.",
+          "params": [
+            {
+              "name": "imageData",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options",
+              "type": "RulingLineRemovalOptions",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "yieldFn",
+              "type": "function",
+              "optional": false,
+              "description": "Default: a zero-delay timeout."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<number>",
+              "description": "Pixels painted white."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/ocr",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 64,
+      "summary": "Ruling-line removal before recognition: the pre-processing step for ruled tables and forms.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -39313,8 +39845,310 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/ocr/prepareImage.js",
+      "lines": 143,
+      "extension": ".js",
+      "jsdocBlockCount": 8,
+      "sourceSummary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy (lineRemova",
+      "imports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 23,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "isOcrLineRemovalEnabled"
+          ],
+          "line": 24,
+          "kind": "static"
+        },
+        {
+          "source": "./lineRemoval.js",
+          "specifiers": [
+            "removeRulingLinesAsync"
+          ],
+          "line": 25,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "prepareOcrImage",
+          "kind": "function",
+          "line": 96
+        }
+      ],
+      "declarations": [
+        {
+          "name": "defaultDecode",
+          "kind": "function",
+          "line": 31
+        },
+        {
+          "name": "defaultCreateCanvas",
+          "kind": "function",
+          "line": 41
+        },
+        {
+          "name": "releaseCanvas",
+          "kind": "function",
+          "line": 53
+        },
+        {
+          "name": "encodeCanvas",
+          "kind": "function",
+          "line": 67
+        },
+        {
+          "name": "prepareOcrImage",
+          "kind": "function",
+          "line": 96
+        },
+        {
+          "name": "fallback",
+          "kind": "object",
+          "line": 104
+        },
+        {
+          "name": "measured",
+          "kind": "object",
+          "line": 118
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "CLEANED_IMAGE_TYPE",
+          "name": "CLEANED_IMAGE_TYPE",
+          "longname": "CLEANED_IMAGE_TYPE",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 28,
+          "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "defaultDecode",
+          "name": "defaultDecode",
+          "longname": "defaultDecode",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 31,
+          "description": "",
+          "params": [
+            {
+              "name": "blob",
+              "type": "Blob",
+              "optional": false,
+              "description": "@returns {Promise&lt;(ImageBitmap|null)&gt;} null when the browser cannot decode."
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "defaultCreateCanvas",
+          "name": "defaultCreateCanvas",
+          "longname": "defaultCreateCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 41,
+          "description": "",
+          "params": [
+            {
+              "name": "width",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "height",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "OffscreenCanvas|HTMLCanvasElement|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "releaseCanvas",
+          "name": "releaseCanvas",
+          "longname": "releaseCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 53,
+          "description": "Free the canvas backing store.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "encodeCanvas",
+          "name": "encodeCanvas",
+          "longname": "encodeCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 67,
+          "description": "",
+          "params": [
+            {
+              "name": "canvas",
+              "type": "OffscreenCanvas|HTMLCanvasElement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<Blob>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "PreparedOcrImage",
+          "name": "PreparedOcrImage",
+          "longname": "PreparedOcrImage",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 77,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "prepareOcrImage",
+          "name": "prepareOcrImage",
+          "longname": "prepareOcrImage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImage.js",
+          "line": 96,
+          "description": "",
+          "params": [
+            {
+              "name": "blob",
+              "type": "Blob",
+              "optional": false,
+              "description": "The rendered page image."
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "options.removeRulingLines",
+              "type": "boolean",
+              "optional": true,
+              "description": "Default from the runtime configuration."
+            },
+            {
+              "name": "options.fallbackSize",
+              "type": "Object",
+              "optional": true,
+              "description": "Used when the image cannot be decoded."
+            },
+            {
+              "name": "options.decode",
+              "type": "function",
+              "optional": false,
+              "description": "Injectable for tests."
+            },
+            {
+              "name": "options.createCanvas",
+              "type": "function",
+              "optional": false,
+              "description": "Injectable for tests."
+            },
+            {
+              "name": "options.removeLines",
+              "type": "function",
+              "optional": false,
+              "description": "Injectable for tests (default removeRulingLinesAsync)."
+            },
+            {
+              "name": "options.log",
+              "type": "Object",
+              "optional": true,
+              "description": "Logger with warn and debug ."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<PreparedOcrImage>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/ocr",
+      "localImports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 23,
+          "kind": "static",
+          "resolved": "src/logging/systemLogger.js"
+        },
+        {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "isOcrLineRemovalEnabled"
+          ],
+          "line": 24,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "./lineRemoval.js",
+          "specifiers": [
+            "removeRulingLinesAsync"
+          ],
+          "line": 25,
+          "kind": "static",
+          "resolved": "src/ocr/lineRemoval.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 0,
+      "importanceScore": 27,
+      "summary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy (lineRemova",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/ocr/queue.js",
-      "lines": 282,
+      "lines": 285,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
@@ -39344,7 +40178,7 @@
         {
           "name": "createOcrQueue",
           "kind": "function",
-          "line": 105
+          "line": 106
         }
       ],
       "declarations": [
@@ -39356,47 +40190,47 @@
         {
           "name": "createOcrQueue",
           "kind": "function",
-          "line": 105
+          "line": 106
         },
         {
           "name": "isRetained",
           "kind": "function",
-          "line": 130
+          "line": 131
         },
         {
           "name": "getSnapshot",
           "kind": "function",
-          "line": 132
+          "line": 133
         },
         {
           "name": "pages",
           "kind": "object",
-          "line": 133
+          "line": 134
         },
         {
           "name": "notify",
           "kind": "function",
-          "line": 139
+          "line": 140
         },
         {
           "name": "setTransient",
           "kind": "function",
-          "line": 148
+          "line": 149
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 153
+          "line": 154
         },
         {
           "name": "run",
           "kind": "function",
-          "line": 172
+          "line": 173
         },
         {
           "name": "job",
           "kind": "object",
-          "line": 173
+          "line": 174
         }
       ],
       "parseError": null,
@@ -39514,7 +40348,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/queue.js",
-          "line": 105,
+          "line": 106,
           "description": "",
           "params": [
             {
@@ -39545,7 +40379,7 @@
               "name": "options.getPageImage",
               "type": "function",
               "optional": false,
-              "description": "The rendered page image and its pixel size."
+              "description": "The image for the engine (the rendered page, or its line-free copy), its pixel size and how many pixels the ruling-line removal painted."
             },
             {
               "name": "options.classify",
@@ -39599,7 +40433,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/ocr/queue.js",
-          "line": 122,
+          "line": 123,
           "description": "null until retainSources is called: every source is retained.",
           "params": [],
           "returns": [],
@@ -67307,9 +68141,9 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 882,
+      "lines": 895,
       "extension": ".js",
-      "jsdocBlockCount": 69,
+      "jsdocBlockCount": 70,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
@@ -67399,99 +68233,104 @@
           "line": 319
         },
         {
+          "name": "isOcrLineRemovalEnabled",
+          "kind": "function",
+          "line": 332
+        },
+        {
           "name": "describeOcrLanguages",
           "kind": "function",
-          "line": 342
+          "line": 355
         },
         {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 385
+          "line": 398
         },
         {
           "name": "OCR_ASSET_BASE_URL_REJECTIONS",
           "kind": "variable",
-          "line": 390
+          "line": 403
         },
         {
           "name": "describeOcrAssetBaseUrl",
           "kind": "function",
-          "line": 416
+          "line": 429
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 441
+          "line": 454
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 453
+          "line": 466
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 622
+          "line": 635
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 639
+          "line": 652
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 650
+          "line": 663
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 668
+          "line": 681
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 694
+          "line": 707
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 707
+          "line": 720
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 721
+          "line": 734
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 745
+          "line": 758
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 770
+          "line": 783
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 794
+          "line": 807
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 812
+          "line": 825
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 853
+          "line": 866
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 870
+          "line": 883
         }
       ],
       "declarations": [
@@ -67571,139 +68410,144 @@
           "line": 319
         },
         {
+          "name": "isOcrLineRemovalEnabled",
+          "kind": "function",
+          "line": 332
+        },
+        {
           "name": "describeOcrLanguages",
           "kind": "function",
-          "line": 342
+          "line": 355
         },
         {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 385
+          "line": 398
         },
         {
           "name": "describeOcrAssetBaseUrl",
           "kind": "function",
-          "line": 416
+          "line": 429
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 441
+          "line": 454
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 453
+          "line": 466
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 471
+          "line": 484
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 493
+          "line": 506
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 518
+          "line": 531
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 539
+          "line": 552
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 556
+          "line": 569
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 568
+          "line": 581
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 582
+          "line": 595
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 593
+          "line": 606
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 607
+          "line": 620
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 622
+          "line": 635
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 639
+          "line": 652
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 650
+          "line": 663
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 668
+          "line": 681
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 694
+          "line": 707
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 707
+          "line": 720
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 721
+          "line": 734
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 745
+          "line": 758
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 770
+          "line": 783
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 794
+          "line": 807
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 812
+          "line": 825
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 853
+          "line": 866
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 870
+          "line": 883
         }
       ],
       "parseError": null,
@@ -68321,13 +69165,38 @@
           "examples": 0
         },
         {
+          "id": "isOcrLineRemovalEnabled",
+          "name": "isOcrLineRemovalEnabled",
+          "longname": "isOcrLineRemovalEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 332,
+          "description": "Resolve whether the ruling lines of tables and forms are removed from a copy of the page image before recognition ( ocr.removeRulingLines ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "describeOcrLanguages",
           "name": "describeOcrLanguages",
           "longname": "describeOcrLanguages",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 342,
+          "line": 355,
           "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
           "params": [
             {
@@ -68352,7 +69221,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 385,
+          "line": 398,
           "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
           "params": [
             {
@@ -68377,7 +69246,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 390,
+          "line": 403,
           "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
           "params": [],
           "returns": [],
@@ -68390,7 +69259,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 392,
+          "line": 405,
           "description": "The value carries ?",
           "params": [],
           "returns": [],
@@ -68403,7 +69272,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 394,
+          "line": 407,
           "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
           "params": [],
           "returns": [],
@@ -68416,7 +69285,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 396,
+          "line": 409,
           "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
           "params": [],
           "returns": [],
@@ -68429,7 +69298,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 416,
+          "line": 429,
           "description": "Describe how ocr.assetBaseUrl resolves.",
           "params": [
             {
@@ -68454,7 +69323,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 441,
+          "line": 454,
           "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
           "params": [
             {
@@ -68479,7 +69348,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 453,
+          "line": 466,
           "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
           "params": [
             {
@@ -68504,7 +69373,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 471,
+          "line": 484,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -68535,7 +69404,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 493,
+          "line": 506,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -68578,7 +69447,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 518,
+          "line": 531,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -68621,7 +69490,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 539,
+          "line": 552,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -68664,7 +69533,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 556,
+          "line": 569,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -68695,7 +69564,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 568,
+          "line": 581,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -68720,7 +69589,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 582,
+          "line": 595,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -68745,7 +69614,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 593,
+          "line": 606,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -68770,7 +69639,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 607,
+          "line": 620,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -68801,7 +69670,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 622,
+          "line": 635,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -68832,7 +69701,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 639,
+          "line": 652,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -68863,7 +69732,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 650,
+          "line": 663,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -68894,7 +69763,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 668,
+          "line": 681,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -68919,7 +69788,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 694,
+          "line": 707,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -68944,7 +69813,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 707,
+          "line": 720,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -68969,7 +69838,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 721,
+          "line": 734,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -68994,7 +69863,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 745,
+          "line": 758,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -69019,7 +69888,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 770,
+          "line": 783,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -69044,7 +69913,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 794,
+          "line": 807,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -69069,7 +69938,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 812,
+          "line": 825,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -69094,7 +69963,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 853,
+          "line": 866,
           "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
           "params": [
             {
@@ -69119,7 +69988,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 870,
+          "line": 883,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -69141,7 +70010,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 26,
+      "incomingLocalImports": 27,
       "importanceScore": 121,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -87025,7 +87894,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/OcrTextLayer.jsx",
-      "line": 28,
+      "line": 31,
       "description": "",
       "params": [
         {
@@ -87038,7 +87907,7 @@
           "name": "props.outcome",
           "type": "Object",
           "optional": false,
-          "description": "A done OCR outcome: words , imageWidth , imageHeight ."
+          "description": "A done OCR outcome: words , imageWidth , imageHeight , and rulingLinePixels (exposed as data-ruling-lines-removed when the line removal pai..."
         },
         {
           "name": "props.renderWidth",
@@ -90821,7 +91690,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 39,
+      "line": 41,
       "description": "",
       "params": [
         {
@@ -90894,7 +91763,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 20,
+      "line": 22,
       "description": "Idle time after which the OCR worker is terminated to free its memory.",
       "params": [],
       "returns": [],
@@ -94539,6 +95408,381 @@
       "examples": 0
     },
     {
+      "id": "removeRulingLines",
+      "name": "removeRulingLines",
+      "longname": "removeRulingLines",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 226,
+      "description": "Remove the ruling lines of an ImageData-like object in place, synchronously.",
+      "params": [
+        {
+          "name": "imageData",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options",
+          "type": "RulingLineRemovalOptions",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": "Pixels painted white."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "removeRulingLinesAsync",
+      "name": "removeRulingLinesAsync",
+      "longname": "removeRulingLinesAsync",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 245,
+      "description": "Remove the ruling lines of an ImageData-like object in place, yielding to the event loop between bands of rows.",
+      "params": [
+        {
+          "name": "imageData",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options",
+          "type": "RulingLineRemovalOptions",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "yieldFn",
+          "type": "function",
+          "optional": false,
+          "description": "Default: a zero-delay timeout."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<number>",
+          "description": "Pixels painted white."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "RULING_LINE_BAND_ROWS",
+      "name": "RULING_LINE_BAND_ROWS",
+      "longname": "RULING_LINE_BAND_ROWS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 47,
+      "description": "Rows between two yields of the generator.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RULING_LINE_DARK_LUMA",
+      "name": "RULING_LINE_DARK_LUMA",
+      "longname": "RULING_LINE_DARK_LUMA",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 37,
+      "description": "Dark pixels below this luma (0..255) count as ink.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RULING_LINE_DILATE_PX",
+      "name": "RULING_LINE_DILATE_PX",
+      "longname": "RULING_LINE_DILATE_PX",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 45,
+      "description": "Pixels painted white around every line pixel.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RULING_LINE_MIN_ASPECT",
+      "name": "RULING_LINE_MIN_ASPECT",
+      "longname": "RULING_LINE_MIN_ASPECT",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 43,
+      "description": "A run is a line only when its length is at least this many times its thinnest thickness.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RULING_LINE_MIN_RUN_FLOOR_PX",
+      "name": "RULING_LINE_MIN_RUN_FLOOR_PX",
+      "longname": "RULING_LINE_MIN_RUN_FLOOR_PX",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 41,
+      "description": "Floor for the minimum run length, so a tiny image never takes glyph strokes for lines.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RULING_LINE_MIN_RUN_SHARE",
+      "name": "RULING_LINE_MIN_RUN_SHARE",
+      "longname": "RULING_LINE_MIN_RUN_SHARE",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 39,
+      "description": "Minimum run length as a share of the page's longer side: 0.2 inch on an 11.7 inch (A4) side.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "rulingLineMinRunPx",
+      "name": "rulingLineMinRunPx",
+      "longname": "rulingLineMinRunPx",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 58,
+      "description": "The minimum run length (px) for a page of the given size.",
+      "params": [
+        {
+          "name": "width",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "RulingLineRemovalOptions",
+      "name": "RulingLineRemovalOptions",
+      "longname": "RulingLineRemovalOptions",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 63,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "rulingLineRemovalSteps",
+      "name": "rulingLineRemovalSteps",
+      "longname": "rulingLineRemovalSteps",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 130,
+      "description": "Remove the ruling lines of an RGBA image in place, as a generator: each next() processes one band of rows and the final value is the number of pixels painted white (0 when the pag...",
+      "params": [
+        {
+          "name": "pixels",
+          "type": "Uint8ClampedArray",
+          "optional": false,
+          "description": "RGBA, row-major, width * height * 4 bytes; modified in place."
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options",
+          "type": "RulingLineRemovalOptions",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Generator.<void, number, void>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "THICKNESS_SAMPLES",
+      "name": "THICKNESS_SAMPLES",
+      "longname": "THICKNESS_SAMPLES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 49,
+      "description": "Positions along a run at which its thickness is sampled.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "thinnestHorizontal",
+      "name": "thinnestHorizontal",
+      "longname": "thinnestHorizontal",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 83,
+      "description": "Thinnest thickness of a horizontal run (dark rows through it) sampled along its length.",
+      "params": [
+        {
+          "name": "mask",
+          "type": "Uint8Array",
+          "optional": false,
+          "description": "Bit 1 set on dark pixels."
+        },
+        {
+          "name": "w",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "h",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "optional": false,
+          "description": "Row of the run."
+        },
+        {
+          "name": "x0",
+          "type": "number",
+          "optional": false,
+          "description": "First column (inclusive)."
+        },
+        {
+          "name": "length",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "optional": false,
+          "description": "Stop counting at this thickness (anything thicker is not a line anyway)."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "thinnestVertical",
+      "name": "thinnestVertical",
+      "longname": "thinnestVertical",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 106,
+      "description": "Thinnest thickness of a vertical run (dark columns through it) sampled along its length.",
+      "params": [
+        {
+          "name": "mask",
+          "type": "Uint8Array",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "optional": false,
+          "description": "Column of the run."
+        },
+        {
+          "name": "y0",
+          "type": "number",
+          "optional": false,
+          "description": "First row (inclusive)."
+        },
+        {
+          "name": "length",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "yieldToEventLoop",
+      "name": "yieldToEventLoop",
+      "longname": "yieldToEventLoop",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/lineRemoval.js",
+      "line": 234,
+      "description": "Hand control back to the event loop once (a macrotask, so rendering and input get a turn).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createPdfTextProber",
       "name": "createPdfTextProber",
       "longname": "createPdfTextProber",
@@ -94633,13 +95877,195 @@
       "examples": 0
     },
     {
+      "id": "CLEANED_IMAGE_TYPE",
+      "name": "CLEANED_IMAGE_TYPE",
+      "longname": "CLEANED_IMAGE_TYPE",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 28,
+      "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "defaultCreateCanvas",
+      "name": "defaultCreateCanvas",
+      "longname": "defaultCreateCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 41,
+      "description": "",
+      "params": [
+        {
+          "name": "width",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "OffscreenCanvas|HTMLCanvasElement|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "defaultDecode",
+      "name": "defaultDecode",
+      "longname": "defaultDecode",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 31,
+      "description": "",
+      "params": [
+        {
+          "name": "blob",
+          "type": "Blob",
+          "optional": false,
+          "description": "@returns {Promise&lt;(ImageBitmap|null)&gt;} null when the browser cannot decode."
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "encodeCanvas",
+      "name": "encodeCanvas",
+      "longname": "encodeCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 67,
+      "description": "",
+      "params": [
+        {
+          "name": "canvas",
+          "type": "OffscreenCanvas|HTMLCanvasElement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<Blob>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "PreparedOcrImage",
+      "name": "PreparedOcrImage",
+      "longname": "PreparedOcrImage",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 77,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "prepareOcrImage",
+      "name": "prepareOcrImage",
+      "longname": "prepareOcrImage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 96,
+      "description": "",
+      "params": [
+        {
+          "name": "blob",
+          "type": "Blob",
+          "optional": false,
+          "description": "The rendered page image."
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "options.removeRulingLines",
+          "type": "boolean",
+          "optional": true,
+          "description": "Default from the runtime configuration."
+        },
+        {
+          "name": "options.fallbackSize",
+          "type": "Object",
+          "optional": true,
+          "description": "Used when the image cannot be decoded."
+        },
+        {
+          "name": "options.decode",
+          "type": "function",
+          "optional": false,
+          "description": "Injectable for tests."
+        },
+        {
+          "name": "options.createCanvas",
+          "type": "function",
+          "optional": false,
+          "description": "Injectable for tests."
+        },
+        {
+          "name": "options.removeLines",
+          "type": "function",
+          "optional": false,
+          "description": "Injectable for tests (default removeRulingLinesAsync)."
+        },
+        {
+          "name": "options.log",
+          "type": "Object",
+          "optional": true,
+          "description": "Logger with warn and debug ."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<PreparedOcrImage>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "releaseCanvas",
+      "name": "releaseCanvas",
+      "longname": "releaseCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImage.js",
+      "line": 53,
+      "description": "Free the canvas backing store.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createOcrQueue",
       "name": "createOcrQueue",
       "longname": "createOcrQueue",
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/queue.js",
-      "line": 105,
+      "line": 106,
       "description": "",
       "params": [
         {
@@ -94670,7 +96096,7 @@
           "name": "options.getPageImage",
           "type": "function",
           "optional": false,
-          "description": "The rendered page image and its pixel size."
+          "description": "The image for the engine (the rendered page, or its line-free copy), its pixel size and how many pixels the ruling-line removal painted."
         },
         {
           "name": "options.classify",
@@ -94776,7 +96202,7 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/ocr/queue.js",
-      "line": 122,
+      "line": 123,
       "description": "null until retainSources is called: every source is retained.",
       "params": [],
       "returns": [],
@@ -113998,7 +115424,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 493,
+      "line": 506,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -114093,7 +115519,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 416,
+      "line": 429,
       "description": "Describe how ocr.assetBaseUrl resolves.",
       "params": [
         {
@@ -114118,7 +115544,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 342,
+      "line": 355,
       "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
       "params": [
         {
@@ -114193,7 +115619,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 441,
+      "line": 454,
       "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
       "params": [
         {
@@ -114218,7 +115644,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 385,
+      "line": 398,
       "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
       "params": [
         {
@@ -114243,7 +115669,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 870,
+      "line": 883,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -114318,7 +115744,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 745,
+      "line": 758,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -114343,7 +115769,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 770,
+      "line": 783,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -114386,7 +115812,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 853,
+      "line": 866,
       "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
       "params": [
         {
@@ -114411,7 +115837,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 453,
+      "line": 466,
       "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
       "params": [
         {
@@ -114436,7 +115862,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 721,
+      "line": 734,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -114461,7 +115887,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 707,
+      "line": 720,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -114486,7 +115912,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 694,
+      "line": 707,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -114511,7 +115937,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 794,
+      "line": 807,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -114536,7 +115962,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 812,
+      "line": 825,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -114561,7 +115987,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 396,
+      "line": 409,
       "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
       "params": [],
       "returns": [],
@@ -114743,6 +116169,31 @@
       "examples": 0
     },
     {
+      "id": "isOcrLineRemovalEnabled",
+      "name": "isOcrLineRemovalEnabled",
+      "longname": "isOcrLineRemovalEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 332,
+      "description": "Resolve whether the ruling lines of tables and forms are removed from a copy of the page image before recognition ( ocr.removeRulingLines ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "isPdfSignatureInspectionEnabled",
       "name": "isPdfSignatureInspectionEnabled",
       "longname": "isPdfSignatureInspectionEnabled",
@@ -114825,7 +116276,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 471,
+      "line": 484,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -114856,7 +116307,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 668,
+      "line": 681,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -114881,7 +116332,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 639,
+      "line": 652,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -114912,7 +116363,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 607,
+      "line": 620,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -114943,7 +116394,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 539,
+      "line": 552,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -114986,7 +116437,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 518,
+      "line": 531,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -115029,7 +116480,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 650,
+      "line": 663,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -115060,7 +116511,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 622,
+      "line": 635,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -115091,7 +116542,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 568,
+      "line": 581,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -115116,7 +116567,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 556,
+      "line": 569,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -115147,7 +116598,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 582,
+      "line": 595,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -115172,7 +116623,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 390,
+      "line": 403,
       "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
       "params": [],
       "returns": [],
@@ -115263,7 +116714,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 392,
+      "line": 405,
       "description": "The value carries ?",
       "params": [],
       "returns": [],
@@ -115333,7 +116784,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 593,
+      "line": 606,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {
@@ -115358,7 +116809,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 394,
+      "line": 407,
       "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
       "params": [],
       "returns": [],

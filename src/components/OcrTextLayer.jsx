@@ -16,7 +16,10 @@ import { layoutOcrWords } from '../utils/ocrTextLayout.js';
 
 /**
  * @param {Object} props
- * @param {Object} props.outcome  A `done` OCR outcome: `words`, `imageWidth`, `imageHeight`.
+ * @param {Object} props.outcome  A `done` OCR outcome: `words`, `imageWidth`, `imageHeight`, and
+ *   `rulingLinePixels` (exposed as `data-ruling-lines-removed` when the line removal painted
+ *   anything, for diagnostics and the end-to-end test; the geometry is unaffected, the copy had
+ *   the same size as the page image).
  * @param {number} props.renderWidth  Stage width before zoom (the rotated page's layout size).
  * @param {number} props.renderHeight
  * @param {number} props.zoom
@@ -74,6 +77,7 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
       className="ocr-text-layer"
       data-odv-ocr="text-layer"
       data-page-number={pageNumber}
+      data-ruling-lines-removed={outcome.rulingLinePixels > 0 ? 'true' : undefined}
       role="group"
       aria-label={label}
       style={layerStyle}
@@ -107,6 +111,7 @@ OcrTextLayer.propTypes = {
     words: PropTypes.array,
     imageWidth: PropTypes.number,
     imageHeight: PropTypes.number,
+    rulingLinePixels: PropTypes.number,
   }),
   renderWidth: PropTypes.number.isRequired,
   renderHeight: PropTypes.number.isRequired,

@@ -93,6 +93,9 @@
       // Content-Security-Policy (web.config, and the ODVGateway CSP when the viewer is served
       // through it). See docs-src/runtime-configuration.md.
       enabled: false,
+      // Ruling lines of tables and forms are removed from a copy of the page image before
+      // recognition. Only the literal false turns the step off.
+      // removeRulingLines: true,
       // Tesseract language codes tried together on every text line. Arrays replace the default
       // completely, so list every language the site needs. Each extra language adds some
       // recognition time per page. The viewer ships the Swedish and English models; another

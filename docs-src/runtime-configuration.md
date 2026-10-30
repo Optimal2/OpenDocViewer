@@ -268,6 +268,7 @@ opt-in and off by default:
 ```js
 ocr: {
   enabled: false,              // only the literal true turns OCR on
+  removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
 }
@@ -280,6 +281,10 @@ ocr: {
   queue and tesseract.js are a separate lazy chunk that only the switch loads; the main bundle
   carries just the small layer component, its stylesheet and the context fields, which mount
   and compute nothing while the switch is off.
+- `ocr.removeRulingLines`: whether the ruling lines of tables and forms are removed from a copy
+  of the page image before recognition (see "Ruled tables" below). `true` by default; only the
+  boolean literal `false` turns the step off, a missing key or any other value keeps it. The key
+  means nothing while OCR is off.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
   (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
@@ -340,6 +345,32 @@ Which pages are recognised, and when:
   work the worker is terminated to free its WebAssembly memory; the next page starts it again,
   which costs the model load once more. An engine that cannot start at all (see CSP below) stops
   the queue for the session and releases the worker and the probed documents the same way.
+
+Ruled tables. Tesseract reads the body of a ruled table badly: the cell borders are taken for
+glyphs or column separators and the text between them comes out garbled or missing. Before a
+page is recognised, the viewer therefore removes the ruling lines from a copy of the page image
+(`ocr.removeRulingLines`, on by default): the copy is binarised, every horizontal or vertical
+run of dark pixels at least 0.2 inch long (taking the page's longer side as an A4 height to
+derive the resolution) and at least ten times as long as it is thick at its thinnest point is
+painted white with a two-pixel margin, and the copy, re-encoded as PNG, is what the engine
+receives. The thickness rule keeps the stems and bars of large headline glyphs, which can be
+longer than 0.2 inch but are many pixels thick; a very light-weight font at headline size is the
+exception and may lose a stem. The displayed page and printing never see the copy; it is
+released stepwise while the step runs (the decoded bitmap right after it is drawn, the canvas
+as soon as the cleaned image exists) and completely before recognition starts, since an A4 page
+at 300 dpi is about 35 MB as decoded pixels. A page without lines passes through untouched, with
+nothing re-encoded. The step runs on the main thread in bands of rows that hand control back to
+the event loop between them; it costs a few hundred milliseconds per page at 300 dpi. Limits,
+stated rather than hidden: only solid dark lines are removed; light grey lines and dotted or
+dashed lines are left as they are, and such a page is recognised as it is. A glyph stroke that
+crosses a line (the stem of a letter through an underline) loses the two-pixel band around the
+line. The layer of a page whose copy had lines removed carries `data-ruling-lines-removed` for
+diagnostics; the word boxes are unaffected, since the copy has the page image's size. No
+recognition quality figures are given here: the step has been measured on synthetic pages only,
+not yet on a real document with grey or dotted table lines. If the step is wrong for a site's
+documents, `removeRulingLines: false` turns it off; if the step itself fails in a browser (no
+decoder, no canvas, a canvas that refuses to give its pixels back), the page is recognised as it
+is after one console warning.
 
 The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are

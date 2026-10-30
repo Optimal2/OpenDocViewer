@@ -27,7 +27,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentViewer/hooks/useCompareTransforms.js` (101 lines) - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` (162 lines) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/hooks/useAcceleratingHoldRepeat.js` (210 lines) - Reusable press\-and\-hold behavior for toolbar buttons.
-- `src/hooks/useOcrTextLayers.js` (164 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
+- `src/hooks/useOcrTextLayers.js` (158 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 
 ### Workers
 

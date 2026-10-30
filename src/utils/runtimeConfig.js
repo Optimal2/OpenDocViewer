@@ -321,6 +321,19 @@ export function isOcrEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether the ruling lines of tables and forms are removed from a copy of the page
+ * image before recognition (`ocr.removeRulingLines`). On by default; only the boolean literal
+ * `false` turns it off, so a missing key keeps the step. Meaningless while OCR is off: the step
+ * lives in the OCR module, which is never imported then.
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isOcrLineRemovalEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.removeRulingLines !== false;
+}
+
+/**
  * Describe how `ocr.languages` resolves: the usable codes, the entries that were ignored and
  * whether the default list stood in. This is the diagnostic form of getOcrLanguages and stays
  * side-effect free like every accessor here; the OCR module (src/ocr/setup.js) logs the outcome

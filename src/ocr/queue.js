@@ -92,8 +92,9 @@ export const OCR_PAGE_STATUS = Object.freeze({
  * @param {Object} options.cache  An OcrResultCache (resultCache.js).
  * @param {function(string, number): Promise<Object>} options.probeTextLayer
  *   `(sourceKey, pageIndex)` to a PdfTextLayerAssessment (pdfTextProbe.js).
- * @param {function(OcrQueueCandidate): Promise<{ blob: Blob, width: number, height: number }>} options.getPageImage
- *   The rendered page image and its pixel size.
+ * @param {function(OcrQueueCandidate): Promise<{ blob: Blob, width: number, height: number, rulingLinePixels: (number|undefined) }>} options.getPageImage
+ *   The image for the engine (the rendered page, or its line-free copy), its pixel size and
+ *   how many pixels the ruling-line removal painted.
  * @param {function(Object): Object=} options.classify  Default classifyPageSource.
  * @param {Object=} options.log  Logger with `warn` and `debug`.
  * @param {function(OcrQueueSnapshot): void=} options.onChange  Called after every state change.
@@ -199,6 +200,8 @@ export function createOcrQueue({
             words: result.words,
             imageWidth: Math.max(0, Number(image.width) || 0),
             imageHeight: Math.max(0, Number(image.height) || 0),
+            // Pixels the ruling-line removal painted white on the engine's copy (0: none ran).
+            rulingLinePixels: Math.max(0, Number(image.rulingLinePixels) || 0),
           };
         }
       }

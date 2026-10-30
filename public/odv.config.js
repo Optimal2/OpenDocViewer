@@ -126,14 +126,17 @@
       // Opt-in in-browser OCR for scanned pages (TIFF, JPG, PNG and PDF pages without a usable
       // text layer). Only the literal value true turns it on; anything else keeps it off. While
       // off (the default) the OCR module is never imported: no extra download, no worker, no UI,
-      // no change in layout, printing, performance or memory. Once the feature is complete, text
-      // is recognized in the browser only, kept in memory for the session and shown as a
-      // selectable text layer; nothing is sent anywhere and the source files are never modified.
+      // no change in layout, printing, performance or memory. With it on, text is recognized in
+      // the browser only, kept in memory for the session and shown as a selectable text layer
+      // over the page; nothing is sent anywhere and the source files are never modified.
       // Turning it on also needs 'wasm-unsafe-eval' in the script-src of the site's
-      // Content-Security-Policy; see docs-src/runtime-configuration.md. Recognition and the text
-      // layer ship in a later version: this version only loads the engine when true, so pages
-      // look exactly as before.
+      // Content-Security-Policy; see docs-src/runtime-configuration.md.
       enabled: false,
+      // Remove the ruling lines of tables and forms from a copy of the page image before
+      // recognition (the displayed page and printing are never touched). true (default) keeps
+      // the step; only the literal false turns it off. Solid dark lines are removed; light grey
+      // and dotted lines are left as they are.
+      removeRulingLines: true,
       // Tesseract language codes, tried together on every text line (best match wins). Each
       // extra language adds some recognition time per page. An array in odv.site.config.js
       // replaces this default completely. The viewer's own ocr/ folder holds the Swedish and

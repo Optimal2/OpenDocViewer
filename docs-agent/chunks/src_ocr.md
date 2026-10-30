@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 10. Line count: 1173. JSDoc symbol count: 56.
+File count: 12. Line count: 1575. JSDoc symbol count: 78.
 
 ## src/ocr/assetUrls.js
 
@@ -63,7 +63,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `prepareOcrImage`
 
 ## src/ocr/languages.js
 
@@ -75,6 +75,27 @@ Symbols:
 
 - `KNOWN_OCR_LANGUAGES` (constant) - Every language code tesseract.js lists a model for \(lower\-case, e.g.
 - `partitionOcrLanguages` (function) - Split codes into those tesseract.js knows a model for and the rest.
+
+## src/ocr/lineRemoval.js
+
+Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
+
+Exports: `RULING_LINE_DARK_LUMA`, `RULING_LINE_MIN_RUN_SHARE`, `RULING_LINE_MIN_RUN_FLOOR_PX`, `RULING_LINE_MIN_ASPECT`, `RULING_LINE_DILATE_PX`, `RULING_LINE_BAND_ROWS`, `rulingLineMinRunPx`, `rulingLineRemovalSteps`, `removeRulingLines`, `removeRulingLinesAsync`
+
+Symbols:
+
+- `RULING_LINE_DARK_LUMA` (constant) - Dark pixels below this luma \(0..255\) count as ink.
+- `RULING_LINE_MIN_RUN_SHARE` (constant) - Minimum run length as a share of the page's longer side: 0.2 inch on an 11.7 inch \(A4\) side.
+- `RULING_LINE_MIN_RUN_FLOOR_PX` (constant) - Floor for the minimum run length, so a tiny image never takes glyph strokes for lines.
+- `RULING_LINE_MIN_ASPECT` (constant) - A run is a line only when its length is at least this many times its thinnest thickness.
+- `RULING_LINE_DILATE_PX` (constant) - Pixels painted white around every line pixel.
+- `RULING_LINE_BAND_ROWS` (constant) - Rows between two yields of the generator.
+- `THICKNESS_SAMPLES` (constant) - Positions along a run at which its thickness is sampled.
+- `rulingLineMinRunPx` (function) - The minimum run length \(px\) for a page of the given size.
+- `RulingLineRemovalOptions` (typedef) - No description.
+- `thinnestHorizontal` (function) - Thinnest thickness of a horizontal run \(dark rows through it\) sampled along its length.
+- `thinnestVertical` (function) - Thinnest thickness of a vertical run \(dark columns through it\) sampled along its length.
+- `rulingLineRemovalSteps` (function) - Remove the ruling lines of an RGBA image in place, as a generator: each next\(\) processes one band of rows and the final value is the number of pixels painted white \(0 when the pag...
 
 ## src/ocr/pdfTextProbe.js
 
@@ -90,6 +111,24 @@ Symbols:
 - `defaultGetDocument` (function) - pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\).
 - `PdfTextProber` (typedef) - No description.
 - `createPdfTextProber` (function) - No description.
+
+## src/ocr/prepareImage.js
+
+Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
+
+Exports: `prepareOcrImage`
+
+Local imports: `src/logging/systemLogger.js`, `src/utils/runtimeConfig.js`, `src/ocr/lineRemoval.js`
+
+Symbols:
+
+- `CLEANED_IMAGE_TYPE` (constant) - The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.
+- `defaultDecode` (function) - No description.
+- `defaultCreateCanvas` (function) - No description.
+- `releaseCanvas` (function) - Free the canvas backing store.
+- `encodeCanvas` (function) - No description.
+- `PreparedOcrImage` (typedef) - No description.
+- `prepareOcrImage` (function) - No description.
 
 ## src/ocr/queue.js
 
