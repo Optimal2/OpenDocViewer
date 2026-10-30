@@ -38,11 +38,22 @@ export const DEFAULT_SESSION = {
 /**
  * Serve the session and fixtures from memory and open the viewer.
  * @param {import('@playwright/test').Page} page
- * @param {{ siteConfig?:Object, session?:Object, query?:string }} [options] `query` is appended
- *   to the viewer URL, e.g. `lng=sv`.
+ * @param {{ siteConfig?:Object, session?:Object, query?:string, extraFixtures?:Map<string, { body:(Uint8Array|Buffer), contentType:string }>, transformIndexHtml?:function(string): string }} [options]
+ *   `query` is appended to the viewer URL, e.g. `lng=sv`. `extraFixtures` adds files under
+ *   `/ui-fixtures/` by name, served with their own content type (e.g. a synthetic PNG scan).
+ *   `transformIndexHtml` rewrites the served index.html, e.g. to add a CSP token a site would add.
  */
-export async function loadSession(page, { siteConfig = null, session = DEFAULT_SESSION, query = '' } = {}) {
+export async function loadSession(page, {
+  siteConfig = null, session = DEFAULT_SESSION, query = '', extraFixtures = null, transformIndexHtml = null,
+} = {}) {
   const fixtures = await getFixtures();
+  if (typeof transformIndexHtml === 'function') {
+    await page.route((url) => url.pathname === '/' || url.pathname === '/index.html', async (route) => {
+      const response = await route.fetch();
+      const html = await response.text();
+      await route.fulfill({ response, body: transformIndexHtml(html), headers: { ...response.headers(), 'content-type': 'text/html; charset=utf-8' } });
+    });
+  }
   if (siteConfig) {
     // Served like a deployment's odv.site.config.js; bootConfig only keeps overrides from that file.
     await page.route((url) => url.pathname === '/odv.site.config.js', (route) => route.fulfill({
@@ -55,6 +66,11 @@ export async function loadSession(page, { siteConfig = null, session = DEFAULT_S
     const name = new URL(route.request().url()).pathname.split('/').pop();
     if (name === 'session.json') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(session) });
+      return;
+    }
+    const extra = extraFixtures?.get?.(name);
+    if (extra) {
+      await route.fulfill({ status: 200, contentType: extra.contentType, body: Buffer.from(extra.body) });
       return;
     }
     const bytes = fixtures.get(name);

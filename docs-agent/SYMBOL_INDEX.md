@@ -1080,7 +1080,7 @@
 | <code>ocrPageKeyOf</code> | function | <code>src/utils/ocrPageKey.js:29</code> |  |
 | <code>SEPARATOR</code> | constant | <code>src/utils/ocrPageKey.js:11</code> | Key of one document page in the OCR result map \( ocrPages on the viewer context\). |
 | <code>FALLBACK_ADVANCE</code> | constant | <code>src/utils/ocrTextLayout.js:10</code> | Average advance per character relative to the font size, used when text cannot be measured. |
-| <code>layoutOcrWords</code> | function | <code>src/utils/ocrTextLayout.js:67</code> | Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px. |
+| <code>layoutOcrWords</code> | function | <code>src/utils/ocrTextLayout.js:71</code> | Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px. |
 | <code>measureWordWidth</code> | function | <code>src/utils/ocrTextLayout.js:23</code> | Width of text at fontSize px, measured with a canvas context when one exists \(jsdom and print have none, then an estimate keeps the layout consistent\). |
 | <code>OCR_LAYER_FONT_FAMILY</code> | constant | <code>src/utils/ocrTextLayout.js:8</code> | Font used for the invisible words; width is fitted per word so the family only affects fallback estimates. |
 | <code>OcrWordPlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:44</code> |  |

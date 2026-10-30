@@ -26701,7 +26701,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 67,
+    "line": 71,
     "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
     "params": [
       {

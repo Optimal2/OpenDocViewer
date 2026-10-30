@@ -372,12 +372,16 @@ correct) after one console warning per decoder. Adding `'wasm-unsafe-eval'` ther
 pdf.js use the faster decoders for scanned PDFs; this is a separate observation and no change to
 the shipped policy.
 
-Status: this version ships the switch, the engine (tesseract.js, self-hosted under `ocr/`, see
-`docs-src/deploy-ops.md`), the page classification, the bounded queue and the in-memory results.
-With `enabled: true` pages are recognised as described above and the outcomes are available to
-the viewer per page, but no text layer is drawn yet: the selectable text over the page image, its
-status indicator and the translations arrive in the next version, so pages still look exactly as
-before.
+What the user sees with OCR on: the page image is unchanged. Over a recognised page lies an
+invisible text layer (one transparent word per recognised word, placed on the ink, with spaces
+between words and line breaks between lines), so dragging over the words selects text, Ctrl+C
+copies it as it reads on the page, and the browser's own find (Ctrl+F) matches it; dragging on a
+blank part of the page still pans. A small status in the corner of the page area says
+"Recognising text…", "Text recognised", "No text found", "The text could not be recognised" or
+"Text recognition is unavailable" (the engine could not start; see CSP below), announced to
+screen readers through a polite live region. A page skipped because it has its own text layer
+shows no status. Printing and PDF export never include the layer or the status. Texts are in
+`public/locales/<lng>/common.json` under `ocr`.
 
 ## Toolbar Button Size
 

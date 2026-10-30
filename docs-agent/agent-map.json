@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 164,
-    "sourceLineCount": 63688,
+    "sourceLineCount": 63696,
     "docletCount": 1779,
     "documentedFileCount": 163,
     "lowConfidenceSummaryCount": 0,
@@ -1705,7 +1705,7 @@
     {
       "name": "src/utils",
       "fileCount": 54,
-      "lineCount": 21258,
+      "lineCount": 21266,
       "docletCount": 863,
       "importantFiles": [
         {
@@ -47389,7 +47389,7 @@
     },
     {
       "path": "src/utils/ocrTextLayout.js",
-      "lines": 93,
+      "lines": 101,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box.",
@@ -47408,7 +47408,7 @@
         {
           "name": "layoutOcrWords",
           "kind": "function",
-          "line": 67
+          "line": 71
         }
       ],
       "declarations": [
@@ -47420,7 +47420,7 @@
         {
           "name": "layoutOcrWords",
           "kind": "function",
-          "line": 67
+          "line": 71
         }
       ],
       "parseError": null,
@@ -47506,7 +47506,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 67,
+          "line": 71,
           "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
           "params": [
             {
@@ -100124,7 +100124,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 67,
+      "line": 71,
       "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
       "params": [
         {

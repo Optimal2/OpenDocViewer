@@ -13,5 +13,8 @@
 /* Dialogs (PrintRangeDialog, etc.) */
 @import './styles/dialogs.css';
 
+/* OCR text layer and status (only present while ocr.enabled is true) */
+@import './styles/ocr.css';
+
 /* Print-only rules */
 @import './styles/print.css';

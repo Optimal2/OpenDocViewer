@@ -126,7 +126,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
 | <code>src/utils/ocrLoader.js</code> | 41 | 1 | 3 | high | The only door into the OCR module. |
 | <code>src/utils/ocrPageKey.js</code> | 32 | 2 | 3 | high | Key of one document page in the OCR result map \(\`ocrPages\` on the viewer context\). |
-| <code>src/utils/ocrTextLayout.js</code> | 93 | 1 | 5 | high | Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box. |
+| <code>src/utils/ocrTextLayout.js</code> | 101 | 1 | 5 | high | Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box. |
 | <code>src/utils/ompThemePreference.js</code> | 390 | 3 | 22 | high | Shared OMP theme preference adapter \(OMP_THEME_PREFERENCE\). |
 | <code>src/utils/pageAssetRenderer.js</code> | 918 | 2 | 6 | high | OpenDocViewer — hybrid page-asset renderer. |
 | <code>src/utils/pageAssetStore.js</code> | 746 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |

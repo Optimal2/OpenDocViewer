@@ -1,0 +1,73 @@
+/* File: src/styles/ocr.css
+   OCR text layer and status (components/OcrTextLayer.jsx, components/DocumentRender.jsx).
+   Mounted only while `ocr.enabled` is the literal true and a page has an outcome; with the
+   switch off none of these selectors match anything. */
+
+/* The layer sits over the page image with the image's own size and zoom transform (inline
+   styles). It takes no pointer events itself, so panning on blank areas works as before; the
+   words do, so a drag that starts on text selects text. */
+.ocr-text-layer {
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.ocr-text-layer-frame {
+  position: absolute;
+}
+
+/* Transparent text positioned per word from the recognised boxes; the width is fitted with a
+   horizontal scale (inline), the height sets the font size. */
+.ocr-text-layer-word {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: transparent;
+  font-family: sans-serif;
+  line-height: 1;
+  white-space: pre;
+  transform-origin: 0 0;
+  pointer-events: auto;
+  cursor: text;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.ocr-text-layer-word::selection {
+  color: transparent;
+  background: rgba(11, 87, 208, 0.3);
+}
+
+/* Discreet per-page status in the viewport corner ("Recognising text…", "Text recognised"). */
+.ocr-status {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  max-width: calc(100% - 24px);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--odv-surface-elevated, rgba(255, 255, 255, 0.9));
+  color: var(--text-muted-color, rgba(0, 0, 0, 0.68));
+  box-shadow: var(--box-shadow, 0 1px 3px rgba(0, 0, 0, 0.2));
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ocr-status[data-ocr-state='failed'],
+.ocr-status[data-ocr-state='unavailable'] {
+  color: var(--odv-signature-warning-color, #b25d00);
+}
+
+/* Printing and PDF export use the page images only: the layer and the status never print. */
+@media print {
+  .ocr-text-layer,
+  .ocr-status {
+    display: none !important;
+  }
+}

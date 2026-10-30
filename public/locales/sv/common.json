@@ -433,6 +433,16 @@
       "viewer": "Startar visaren"
     }
   },
+  "ocr": {
+    "textLayerLabel": "Tolkad text, sida {page}",
+    "status": {
+      "working": "Text tolkas…",
+      "done": "Text tolkad",
+      "noText": "Ingen text hittades",
+      "failed": "Texten kunde inte tolkas",
+      "unavailable": "Texttolkning är inte tillgänglig"
+    }
+  },
   "viewer": {
     "aria": {
       "containerRegion": "Dokumentvisarens område",

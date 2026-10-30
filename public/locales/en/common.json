@@ -433,6 +433,16 @@
       "viewer": "Starting viewer"
     }
   },
+  "ocr": {
+    "textLayerLabel": "Recognised text, page {page}",
+    "status": {
+      "working": "Recognising text…",
+      "done": "Text recognised",
+      "noText": "No text found",
+      "failed": "The text could not be recognised",
+      "unavailable": "Text recognition is unavailable"
+    }
+  },
   "viewer": {
     "aria": {
       "containerRegion": "Document viewer container",
