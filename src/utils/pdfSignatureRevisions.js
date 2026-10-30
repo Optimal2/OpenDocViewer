@@ -523,7 +523,9 @@ function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
  */
 function assertXrefConsistent(log, E, tail, preSections, pre, tailRecords) {
   const tailStructural = log.structural.filter((c) => c.start >= E);
-  const preStreamNums = new Set(log.structural.filter((c) => c.start < E && c.type === 'ObjStm').map((c) => c.num));
+  const preStructural = log.structural.filter((c) => c.start < E);
+  const preStreamNums = new Set(preStructural.filter((c) => c.type === 'ObjStm').map((c) => c.num));
+  const preStructuralOffsets = new Set(preStructural.map((c) => `${c.num}:${c.start}`));
   const preEntry = new Map();
   for (const section of preSections) {
     for (const e of section.entries) if (!preEntry.has(e.num)) preEntry.set(e.num, e);
@@ -539,8 +541,14 @@ function assertXrefConsistent(log, E, tail, preSections, pre, tailRecords) {
       : e?.type === 2 ? p.container?.num === e.stream : false;
     if (!matches) stop(`the signed cross-reference data for object ${n} does not point at the definition used by the parser`);
   }
+  // XRef and object streams have no context.assign record of their own. Exempt
+  // only the exact logged structural definition the active chain points at;
+  // missing content objects and ambiguous structural offsets still fail closed.
   for (const [n, e] of preEntry) {
-    if (e.type !== 0 && !pre.has(n)) stop(`the signed cross-reference entry for object ${n} has no definition used by the parser`);
+    const structural = e.type === 1 && preStructuralOffsets.has(`${n}:${e.offset}`);
+    if (e.type !== 0 && !pre.has(n) && !structural) {
+      stop(`the signed cross-reference entry for object ${n} has no definition used by the parser`);
+    }
   }
 
   // pdf.js resolves a type-2 entry through whatever the newest entry for the

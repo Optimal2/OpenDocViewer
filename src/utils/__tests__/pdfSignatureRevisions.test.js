@@ -135,6 +135,39 @@ describe('appended revisions that cannot be classified with certainty -> warning
   });
 });
 
+describe('status model with an xref stream on the signed revision', () => {
+  it('intact signed bytes -> ok', async () => {
+    expectStatus(await approval(f.signedXrefStream.intact), 'intact', null, 'ok');
+  });
+
+  it.each([
+    ['DSS-only append', 'dssOnly'],
+    ['DSS-only append with a signed object stream', 'dssObjectStream']
+  ])('%s -> ok with information', async (_label, name) => {
+    const sig = await approval(f.signedXrefStream[name]);
+    expectStatus(sig, 'intact', 'extended-with-validation-data', 'ok');
+    expect(sig.integrityReason).toMatch(/validation data\/metadata only/);
+  });
+
+  it('content change -> warning', async () => {
+    expectStatus(await approval(f.signedXrefStream.contentChanged),
+      'modified-after-signing', 'content-changed-after-signing', 'warning');
+  });
+
+  it('shadow object and re-pointing append keep the structural warning', async () => {
+    const sig = await approval(f.signedXrefStream.shadowObject);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(/not listed|does not point/);
+  });
+
+  it.each([
+    ['digest mismatch', 'digestMismatch', 'digest-mismatch', 'content-digest-mismatch'],
+    ['invalid CMS signature', 'invalidSignature', 'signature-invalid', 'signature-invalid']
+  ])('%s -> error', async (_label, name, integrity, code) => {
+    expectStatus(await approval(f.signedXrefStream[name]), integrity, code, 'error');
+  });
+});
+
 describe('parser hook shape guard (design flag F-f)', () => {
   async function hookedLog(bytes) {
     const parser = pdfLib.PDFParser.forBytesWithOptions(bytes, 100, true);

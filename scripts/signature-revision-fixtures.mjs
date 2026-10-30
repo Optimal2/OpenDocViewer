@@ -11,7 +11,7 @@
 // an object stream, xref stream only).
 import { deflateSync } from 'node:zlib';
 import {
-  baseSignedPdf, buildSignedData, buildTstToken, signFile, sigDictBody, latin1, concatBytes, findStartxrefOffset
+  baseSignedPdf, buildSignedData, buildTstToken, signFile, sigDictBody, latin1, latin1Text, concatBytes, findStartxrefOffset
 } from './generate-signature-fixtures.mjs';
 
 // Fake validation material: fixed filler bytes, never a real certificate or OCSP response.
@@ -174,6 +174,42 @@ async function signWithUnlinkedDecoy(pki, kind, content) {
   const bytes = await signFile(concatBytes(withShadow, decoy), rev.offsets.get(8), (signedOverBytes) =>
     buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes }));
   return { bytes, maliciousOffset, prev: rev.xrefOffset };
+}
+
+/**
+ * Status-model fixtures whose signed revision ends in an xref stream. The
+ * appended revisions use classic xref tables so the signed structural stream
+ * is the variable under test.
+ */
+export async function createSignedXrefStreamFixtures(pki) {
+  const original = 'BT /F1 20 Tf 60 780 Td (ODV SIGNATURE FIXTURE SAMPLE TEXT 0123456789) Tj ET';
+  const changed = 'BT /F1 20 Tf 60 780 Td (CHANGED AFTER SIGNING) Tj ET';
+  async function signed({ wrongKey = null, objStm = [] } = {}) {
+    const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
+      sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
+    const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
+    const pre = appendRevision(rev.bytes, [
+      { num: 4, body: BASE.font }, { num: 6, body: stream(original) }
+    ], { xrefStream: true, objStm });
+    return signFile(pre.bytes, rev.offsets.get(8), (signedOverBytes) =>
+      buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes, wrongKey }));
+  }
+  const intact = await signed();
+  const digestMismatch = intact.slice();
+  const textAt = latin1Text(digestMismatch).indexOf('SAMPLE TEXT');
+  if (textAt < 0) throw new Error('fixture bug: missing signed text');
+  digestMismatch[textAt] = 0x73;
+  return {
+    intact,
+    dssOnly: appendDssRevision(intact),
+    dssObjectStream: appendDssRevision(await signed({ objStm: [4] })),
+    contentChanged: appendRevision(intact, [{ num: 6, body: stream(changed) }, ...dssObjects()]).bytes,
+    shadowObject: appendRevision(intact, [
+      { num: 6, body: stream(changed) }, { num: 6, body: stream(original) }, ...dssObjects()
+    ], { xrefPoint: { 6: 0 } }).bytes,
+    digestMismatch,
+    invalidSignature: await signed({ wrongKey: pki.rsa2.keys })
+  };
 }
 
 /**
