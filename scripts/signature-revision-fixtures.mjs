@@ -280,6 +280,21 @@ export async function createRevisionFixtures(normal, pki) {
   f.shadowObject = appendRevision(signed, [
     { num: 6, body: stream(content) }, { num: 6, body: stream(original6) }, ...dss
   ], { xrefPoint: { 6: 0 } }).bytes;
+  // An orphan duplicate is signed but never listed by the active xref chain.
+  // The unsigned tail then points object 6 at byte-identical content; the
+  // baseline must still come from the active chain, not the orphan definition.
+  {
+    const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
+      sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
+    const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
+    const shadowBody = stream(content);
+    const withShadow = concatBytes(rev.bytes, latin1(`\n6 0 obj\n${shadowBody}\nendobj\n`));
+    const orphanSigned = await signFile(withShadow, rev.offsets.get(8), (signedOverBytes) =>
+      buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes }));
+    f.orphanShadowObject = appendRevision(orphanSigned, [{ num: 6, body: shadowBody }], {
+      prevOverride: rev.xrefOffset
+    }).bytes;
+  }
   f.prevOverride = appendRevision(signed, dss, { prevOverride: 17 }).bytes;
   f.xrefStmInTail = appendRevision(signed, dss, { trailerExtras: '/XRefStm 0' }).bytes;
   // The object stream reuses the number of the signed font object 4: pdf.js would resolve 4 to it.

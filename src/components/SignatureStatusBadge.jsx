@@ -62,9 +62,12 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'}`,
   });
+  const severityLabel = t(`signatures.badge.severity.${shownSeverity}`, {
+    defaultValue: { ok: 'OK', warning: 'Warning', error: 'Error' }[shownSeverity],
+  });
   const label = integrity === 'not-checked-in-viewer'
-    ? `${baseLabel} — ${getIntegrityLabel(t, integrity)}`
-    : baseLabel;
+    ? `${baseLabel} — ${severityLabel} — ${getIntegrityLabel(t, integrity)}`
+    : `${baseLabel} — ${severityLabel}`;
   const tooltip = t('signatures.badge.tooltip', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'} – show signature details`,

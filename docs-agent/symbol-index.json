@@ -29887,7 +29887,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 634,
+    "line": 647,
     "description": "Every object number referenced directly by the given objects (no resolution).",
     "params": [],
     "returns": [],
@@ -29913,7 +29913,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 657,
+    "line": 670,
     "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
     "params": [
       {
@@ -30053,7 +30053,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 612,
+    "line": 625,
     "description": "Object numbers reachable from values through map (final state), capped.",
     "params": [],
     "returns": [],

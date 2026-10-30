@@ -530,6 +530,19 @@ function assertXrefConsistent(log, E, tail, preSections, pre, tailRecords) {
   }
   const inUseAtE = (n) => pre.has(n) || preStreamNums.has(n);
 
+  // pdf-lib keeps the last physical definition, including an orphan duplicate
+  // that the signed active chain never references. Never use that definition as
+  // the trusted baseline when it disagrees with the active chain.
+  for (const [n, p] of pre) {
+    const e = preEntry.get(n);
+    const matches = e?.type === 1 ? !p.container && p.start === e.offset
+      : e?.type === 2 ? p.container?.num === e.stream : false;
+    if (!matches) stop(`the signed cross-reference data for object ${n} does not point at the definition used by the parser`);
+  }
+  for (const [n, e] of preEntry) {
+    if (e.type !== 0 && !pre.has(n)) stop(`the signed cross-reference entry for object ${n} has no definition used by the parser`);
+  }
+
   // pdf.js resolves a type-2 entry through whatever the newest entry for the
   // container number points at, so container numbers must never be reused.
   for (const c of tailStructural) {

@@ -806,7 +806,12 @@
   "signatures": {
     "badge": {
       "ariaLabel": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}}",
-      "tooltip": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}} – show signature details"
+      "tooltip": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}} – show signature details",
+      "severity": {
+        "ok": "OK",
+        "warning": "Warning",
+        "error": "Error"
+      }
     },
     "notCheckedInViewer": "Not checked in the viewer: issuer trust and revocation status",
     "timestampNotChecked": "A timestamp is present, but this browser could not check it.",

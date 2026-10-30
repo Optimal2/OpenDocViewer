@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 155,
-    "sourceLineCount": 62461,
+    "sourceLineCount": 62477,
     "docletCount": 1731,
     "documentedFileCount": 154,
     "lowConfidenceSummaryCount": 0,
@@ -955,7 +955,7 @@
     {
       "name": "src/components",
       "fileCount": 18,
-      "lineCount": 8028,
+      "lineCount": 8031,
       "docletCount": 108,
       "importantFiles": [
         {
@@ -1659,7 +1659,7 @@
     {
       "name": "src/utils",
       "fileCount": 52,
-      "lineCount": 21112,
+      "lineCount": 21125,
       "docletCount": 855,
       "importantFiles": [
         {
@@ -27797,7 +27797,7 @@
     },
     {
       "path": "src/components/SignatureStatusBadge.jsx",
-      "lines": 107,
+      "lines": 110,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "Small signature symbol shown next to a document's \"DOK n\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
@@ -51674,7 +51674,7 @@
     },
     {
       "path": "src/utils/pdfSignatureRevisions.js",
-      "lines": 741,
+      "lines": 754,
       "extension": ".js",
       "jsdocBlockCount": 16,
       "sourceSummary": "Appended-revision classifier for PDF signatures.",
@@ -51698,7 +51698,7 @@
         {
           "name": "decodeXrefStream",
           "kind": "function",
-          "line": 657
+          "line": 670
         }
       ],
       "declarations": [
@@ -51835,47 +51835,47 @@
         {
           "name": "sameObject",
           "kind": "function",
-          "line": 594
+          "line": 607
         },
         {
           "name": "children",
           "kind": "function",
-          "line": 604
+          "line": 617
         },
         {
           "name": "reachable",
           "kind": "function",
-          "line": 612
+          "line": 625
         },
         {
           "name": "collectShallowRefs",
           "kind": "function",
-          "line": 634
+          "line": 647
         },
         {
           "name": "decodeXrefStream",
           "kind": "function",
-          "line": 657
+          "line": 670
         },
         {
           "name": "int",
           "kind": "function",
-          "line": 659
+          "line": 672
         },
         {
           "name": "field",
           "kind": "function",
-          "line": 681
+          "line": 694
         },
         {
           "name": "unpredict",
           "kind": "function",
-          "line": 697
+          "line": 710
         },
         {
           "name": "get",
           "kind": "function",
-          "line": 701
+          "line": 714
         }
       ],
       "parseError": null,
@@ -52129,7 +52129,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 612,
+          "line": 625,
           "description": "Object numbers reachable from values through map (final state), capped.",
           "params": [],
           "returns": [],
@@ -52142,7 +52142,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 634,
+          "line": 647,
           "description": "Every object number referenced directly by the given objects (no resolution).",
           "params": [],
           "returns": [],
@@ -52155,7 +52155,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRevisions.js",
-          "line": 657,
+          "line": 670,
           "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
           "params": [
             {
@@ -101304,7 +101304,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 634,
+      "line": 647,
       "description": "Every object number referenced directly by the given objects (no resolution).",
       "params": [],
       "returns": [],
@@ -101330,7 +101330,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 657,
+      "line": 670,
       "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
       "params": [
         {
@@ -101470,7 +101470,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRevisions.js",
-      "line": 612,
+      "line": 625,
       "description": "Object numbers reachable from values through map (final state), capped.",
       "params": [],
       "returns": [],

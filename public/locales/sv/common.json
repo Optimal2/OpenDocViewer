@@ -806,7 +806,12 @@
   "signatures": {
     "badge": {
       "ariaLabel": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}}",
-      "tooltip": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}} – visa signaturdetaljer"
+      "tooltip": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}} – visa signaturdetaljer",
+      "severity": {
+        "ok": "OK",
+        "warning": "Varning",
+        "error": "Fel"
+      }
     },
     "notCheckedInViewer": "Inte kontrollerat i visaren: utfärdarens förtroende och spärrstatus",
     "timestampNotChecked": "En tidsstämpel finns, men webbläsaren kunde inte kontrollera den.",

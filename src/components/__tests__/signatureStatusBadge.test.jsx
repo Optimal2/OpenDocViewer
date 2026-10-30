@@ -145,21 +145,37 @@ describe('SignatureStatusBadge status model', () => {
   async function badgeFor(props) {
     const { container, root } = await renderBadge({ onOpen: () => {}, ...props });
     const button = container.querySelector('button');
-    const result = { cls: button.className, icon: button.querySelector('.material-icons')?.textContent, title: button.title };
+    const result = {
+      cls: button.className,
+      icon: button.querySelector('.material-icons')?.textContent,
+      label: button.getAttribute('aria-label'),
+      title: button.title,
+    };
     await act(() => root.unmount());
     container.remove();
     return result;
   }
+
+  it.each([
+    ['intact', 'OK'],
+    ['modified-after-signing', 'Warning'],
+    ['digest-mismatch', 'Error'],
+  ])('the accessible name states the severity for %s', async (integrity, severityLabel) => {
+    const result = await badgeFor({ report: { signatures: [sig(integrity)] } });
+    expect(result.label).toBe(`Signed document, 1 signature — ${severityLabel}`);
+  });
 
   it('not checked is green with the label "Not checked in the viewer", warning with the site switch', async () => {
     const report = { signatures: [sig('intact'), { integrity: 'not-checked-in-viewer', integrityCode: 'format-unsupported' }] };
     const ok = await badgeFor({ report });
     expect(ok.cls).toContain('odv-signature-badge--ok');
     expect(ok.icon).toBe('verified');
+    expect(ok.label).toContain('OK — Not checked in the viewer');
     expect(ok.title).toContain('Not checked in the viewer');
     const warn = await badgeFor({ report, uncheckedSeverity: 'warning' });
     expect(warn.cls).toContain('odv-signature-badge--warning');
     expect(warn.icon).toBe('warning');
+    expect(warn.label).toContain('Warning — Not checked in the viewer');
   });
 
   it('the switch never lowers an error and never applies to unknown statuses', async () => {
