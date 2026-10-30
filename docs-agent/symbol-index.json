@@ -31525,8 +31525,21 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 499,
+    "line": 504,
     "description": "Return the signed revision's active cross-reference sections, newest first.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureRevisions~assertLinearizationIgnored",
+    "name": "assertLinearizationIgnored",
+    "longname": "module:utils/pdfSignatureRevisions~assertLinearizationIgnored",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/utils/pdfSignatureRevisions.js",
+    "line": 548,
+    "description": "pdf.js reads a file as linearized when its first object is a dictionary with /Linearized &gt; 0 and an /L equal to the length it measures from the %PDF- header (Linearization.crea...",
     "params": [],
     "returns": [],
     "examples": 0
@@ -31538,7 +31551,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 562,
+    "line": 593,
     "description": "Step 2 (mandatory, design flag F-a): every appended cross-reference entry must point at the definition pdf-lib used, so pdf.js (offsets) and pdf-lib (last definition) see the same...",
     "params": [],
     "returns": [],
@@ -31551,7 +31564,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 213,
+    "line": 217,
     "description": "Classify the unsigned data appended after a signature's covered range.",
     "params": [
       {
@@ -31588,7 +31601,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 694,
+    "line": 725,
     "description": "Every object number referenced directly by the given objects (no resolution).",
     "params": [],
     "returns": [],
@@ -31614,7 +31627,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 717,
+    "line": 748,
     "description": "Decode the entries of a cross-reference stream (ISO 32000-1 7.5.8), including the PNG predictors writers commonly use.",
     "params": [
       {
@@ -31690,7 +31703,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 96,
+    "line": 98,
     "description": "Install the revision-log hooks on a pdf-lib PDFParser INSTANCE (never on a prototype).",
     "params": [
       {
@@ -31716,7 +31729,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 538,
+    "line": 569,
     "description": "The first-page cross-reference section of a signed linearized file (ISO 32000-1 Annex F), or null.",
     "params": [],
     "returns": [],
@@ -31729,7 +31742,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 76,
+    "line": 78,
     "description": "Called by the structural-stream decoder for a top-level ObjStm/XRef stream.",
     "params": [
       {
@@ -31767,7 +31780,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 672,
+    "line": 703,
     "description": "Object numbers reachable from values through map (final state), capped.",
     "params": [],
     "returns": [],
@@ -31780,7 +31793,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 475,
+    "line": 480,
     "description": "The state at E ( pre : last definition before E), the appended definitions per object number, and the final state ( post : pdf-lib's last definition).",
     "params": [],
     "returns": [],
@@ -31819,7 +31832,7 @@
     "kind": "class",
     "scope": "inner",
     "file": "src/utils/pdfSignatureRevisions.js",
-    "line": 196,
+    "line": 200,
     "description": "",
     "params": [
       {

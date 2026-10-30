@@ -55,6 +55,8 @@ export function createRevisionLog() {
     hooked: false,
     shapeError: null,
     unattributed: false,
+    // The file starts with the %PDF- header (no bytes before it).
+    headerAtStart: false,
     // Object definitions {num, start, object, container} in assign order (pdf-lib's view).
     records: [],
     // ObjStm / XRef stream containers: {num, start, type, members}.
@@ -96,8 +98,10 @@ export function createRevisionLog() {
 export function installRevisionLogHooks(parser, log) {
   const methods = ['parseIndirectObject', 'maybeParseCrossRefSection', 'maybeParseTrailerDict',
     'maybeParseTrailer', 'parseDict', 'skipWhitespaceAndComments'];
-  if (methods.some((m) => typeof parser?.[m] !== 'function') ||
-    typeof parser.bytes?.offset !== 'function' || typeof parser.context?.assign !== 'function') return;
+  if (methods.some((m) => typeof parser?.[m] !== 'function') || typeof parser.bytes?.offset !== 'function' ||
+    typeof parser.bytes?.slice !== 'function' || typeof parser.context?.assign !== 'function') return;
+  // pdf.js measures the linearization /L from the %PDF- header (see assertLinearizationIgnored).
+  log.headerAtStart = String.fromCharCode(...parser.bytes.slice(0, 5)) === '%PDF-';
 
   const parseIndirectObject = parser.parseIndirectObject;
   parser.parseIndirectObject = async function () {
@@ -261,6 +265,7 @@ function classify(log, E, pdfLib) {
     if (trailer.has(name('Encrypt'))) stop('an appended trailer adds /Encrypt');
   });
   if (!(signedSection.trailer instanceof PDFDict)) stop('the signed revision has no trailer');
+  assertLinearizationIgnored(log, E, pdfLib);
   const linearizedFirstPage = linearizedFirstPageSection(log, physicalPreSections, E, pdfLib);
   const preSections = activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage, pdfLib);
   const rootNum = refNum(signedSection.trailer.get(name('Root')));
@@ -525,6 +530,32 @@ function activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage
   const outside = physicalPreSections.find((candidate) => !activeSet.has(candidate));
   if (outside) stop(`cross-reference section at offset ${outside.offset} before signing is outside the active /Prev chain`);
   return active;
+}
+
+/**
+ * pdf.js reads a file as linearized when its first object is a dictionary with
+ * /Linearized > 0 and an /L equal to the length it measures from the %PDF-
+ * header (Linearization.create). It then starts the cross-reference chain right
+ * after the first `endobj` in the file, an offset the attacker chooses (even
+ * inside a string), not at the last startxref, and the classifier would compare
+ * a state pdf.js never shows. Appended data makes the file longer than E, so an
+ * /L of at most E guarantees pdf.js ignores the linearization of the final file;
+ * a larger /L (set to the final length before signing) is hostile. Bytes before
+ * the header shift what pdf.js measures and can hide a first object pdf-lib
+ * skips, so they fail closed too. (An object pdf-lib cannot parse never gets
+ * here: the parser runs with throwOnInvalidObject.)
+ */
+function assertLinearizationIgnored(log, E, pdfLib) {
+  const { PDFDict, PDFName, PDFNumber, PDFRawStream } = pdfLib;
+  if (!log.headerAtStart) stop('the file does not start with the %PDF- header');
+  for (const r of log.records) {
+    const dict = r.object instanceof PDFRawStream ? r.object.dict : r.object;
+    if (!(dict instanceof PDFDict) || !dict.has(PDFName.of('Linearized'))) continue;
+    const length = dict.get(PDFName.of('L'));
+    if (!(length instanceof PDFNumber) || !(length.asNumber() <= E)) {
+      stop('a linearization dictionary has an /L beyond the signed length, so pdf.js may read another cross-reference start');
+    }
+  }
 }
 
 /**

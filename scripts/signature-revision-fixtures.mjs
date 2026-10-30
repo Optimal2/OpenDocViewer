@@ -408,15 +408,20 @@ const pad10 = (n) => String(n).padStart(10, '0');
  * /Linearized key), `hint: false` (/H names a dictionary, not a stream),
  * `mainPrev` (the main trailer links back to the first-page table) and
  * `gapObject` (an object between the linearization dictionary and the table).
+ * Exploit knobs: `length` (the /L value instead of the real length),
+ * `linExtra` (appended to the linearization dictionary) and `prefix` (bytes
+ * before the %PDF- header); both strings must keep their length across passes.
  */
-function linearizedFile(objects, { linearized = true, hint = true, mainPrev = false, gapObject = false } = {}) {
+function linearizedFile(objects, {
+  linearized = true, hint = true, mainPrev = false, gapObject = false, length = null, linExtra = '', prefix = ''
+} = {}) {
   const render = (v) => {
-    let text = '%PDF-1.7\n%\xE2\xE3\xCF\xD3\n';
+    let text = `${prefix}%PDF-1.7\n%\xE2\xE3\xCF\xD3\n`;
     const offsets = new Map();
     const add = (num, body) => { offsets.set(num, text.length); text += `${num} 0 obj\n${body}\nendobj\n`; };
     const table = (nums) => nums.map((n) => `${n} 1\n${pad10(v.offsets.get(n) ?? 0)} 00000 n \n`).join('');
     const marker = linearized ? '/Linearized 1' : '/ODVFixture 1';
-    add(LINEARIZATION, `<< ${marker} /L ${pad10(v.length)} /H [${pad10(v.hint)} 0000000016] /O 3 /E ${pad10(v.end)} /N 1 /T ${pad10(v.main)} >>`);
+    add(LINEARIZATION, `<< ${marker} /L ${pad10(length ?? v.length)} /H [${pad10(v.hint)} 0000000016] /O 3 /E ${pad10(v.end)} /N 1 /T ${pad10(v.main)}${linExtra} >>`);
     if (gapObject) add(GAP, '<< /ODVFixtureGap true >>');
     const nums = [...offsets.keys(), HINT, ...objects.keys()].sort((a, b) => a - b);
     const firstXref = text.length;
@@ -459,6 +464,46 @@ async function signLinearized(pki, { incremental = true, ...shape } = {}) {
   for (const num of [5, 7, 8]) objects.delete(num);
   const { bytes, offsets } = appendRevision(linearizedFile(objects, shape).bytes, signing, { size: GAP + 1 });
   return signFile(bytes, offsets[4], cms);
+}
+
+/**
+ * The /L exploit: before signing, a linearization dictionary gets an /L equal
+ * to the length the file will have after an appended "DSS" revision, and a
+ * literal string holding `endobj` and then a forged xref table. Once the length
+ * matches, pdf.js accepts the linearization and starts reading right after the
+ * first `endobj` in the file: at the forged table, which points page content 6
+ * at a definition hidden in the appended certificate stream data (pdf-lib
+ * skips stream data via /Length, so the append looks DSS-only). The forged
+ * trailer /Prev links to the real first-page table for every other object;
+ * `startxref 0` feeds the parser's two-token lookahead before the string ends.
+ * `beforeHeader` puts that dictionary in a first object more than 1024 bytes
+ * before the %PDF- header: pdf.js then finds no header and lexes from byte 0,
+ * while pdf-lib skips to the header and sees an honest linearized file.
+ */
+async function linearizedLengthExploit(pki, { beforeHeader = false } = {}) {
+  const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
+    sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
+  const objects = new Map([...builder.objects].map(([num, o]) => [num, o.body]));
+  const cms = (signedOverBytes) => buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes });
+  const hidden = `\n6 0 obj\n${stream('BT /F1 20 Tf 60 780 Td (EXPLOIT CHANGED CONTENT AFTER SIGNING) Tj ET')}\nendobj\n`;
+  const dss = dssObjects();
+  dss[2] = { num: 21, body: stream(`${FAKE_CERT}${hidden}%${FAKE_CERT}`) };
+  let v = { length: 0, hidden: 0, firstXref: 0 };
+  for (let pass = 0; pass < 3; pass += 1) {
+    const forged = ` /ODVFixtureX (endobj\nxref\n6 1\n${pad10(v.hidden)} 00000 n \ntrailer\n<< /Size ${GAP + 1} /Root 1 0 R /Prev ${pad10(v.firstXref)} >>\nstartxref 0\n)`;
+    const shape = beforeHeader
+      ? { prefix: `${LINEARIZATION} 0 obj\n<< /Linearized 1 /L ${pad10(v.length)} /H [1 1] /O 3 /E 1 /N 1 /T 1${forged} >>\nendobj\n%${'-'.repeat(1100)}\n` }
+      : { length: v.length, linExtra: forged };
+    const { bytes, offsets } = linearizedFile(objects, shape);
+    const signed = await signFile(bytes, offsets.get(8), cms);
+    const exploit = appendRevision(signed, dss).bytes;
+    const text = latin1Text(exploit);
+    const next = { length: exploit.length, hidden: text.indexOf(hidden, signed.length) + 1,
+      firstXref: text.indexOf('\nendobj\nxref\n') + '\nendobj\n'.length };
+    if (JSON.stringify(next) === JSON.stringify(v)) return { signed, exploit };
+    v = next;
+  }
+  throw new Error('fixture bug: the /L exploit layout is not stable');
 }
 
 /**
@@ -530,6 +575,9 @@ export async function createLinearizedFixtures(pki) {
     shadowObject: appendRevision(incremental, [
       changed, { num: 6, body: stream('BT /F1 20 Tf 60 780 Td (ODV SIGNATURE FIXTURE SAMPLE TEXT 0123456789) Tj ET') }, ...dssObjects()
     ], { xrefPoint: { 6: 0 } }).bytes,
+    // /L set before signing to the final length: pdf.js reads a forged xref table.
+    lengthExploit: await linearizedLengthExploit(pki),
+    lengthExploitBeforeHeader: await linearizedLengthExploit(pki, { beforeHeader: true }),
     // DSS-only appends to signed files with a forward /Prev that is NOT the linearized shape.
     notLinearized: appendDssRevision(await signLinearized(pki, { linearized: false })),
     noHintStream: appendDssRevision(await signLinearized(pki, { hint: false })),

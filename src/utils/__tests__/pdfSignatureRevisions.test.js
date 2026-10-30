@@ -242,6 +242,21 @@ describe('linearized signed files (first-page xref /Prev points forward)', () =>
     expect(await pdfjsText(f.linearized.contentChanged[name])).toContain('CHANGED AFTER SIGNING');
   });
 
+  // pdf.js accepts a linearization only when /L equals the file length, and then
+  // starts at the first `endobj` + whitespace instead of the last startxref.
+  it.each([
+    ['/L set before signing to the length after the append', 'lengthExploit', /\/L beyond the signed length/],
+    ['the linearization dictionary hidden before the %PDF- header', 'lengthExploitBeforeHeader', /%PDF- header/]
+  ])('%s: pdf.js reads a forged xref table -> warning', async (_label, name, reason) => {
+    const { signed, exploit } = f.linearized[name];
+    expectStatus(await approval(signed), 'intact', null, 'ok');
+    expect(await pdfjsText(signed)).toContain('ODV SIGNATURE FIXTURE SAMPLE TEXT');
+    const sig = await approval(exploit);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(reason);
+    expect(await pdfjsText(exploit)).toContain('EXPLOIT CHANGED CONTENT AFTER SIGNING');
+  });
+
   it('a shadow object appended to a linearized file stays unclassified', async () => {
     const sig = await approval(f.linearized.shadowObject);
     expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');

@@ -224,10 +224,26 @@ order:
    is a signed linearization dictionary (`/Linearized` > 0) whose `/H` names a signed hint
    stream, the first-page section is the physically first section and follows that
    dictionary with no other object in between, and the main section ends the chain (no
-   `/Prev` of its own). Any other forward `/Prev`, or a cycle, is unclassified. (After an
-   incremental update the file length no longer matches `/L`, so pdf.js ignores the
-   linearization and follows the same `/Prev` chain from the last `startxref`.) Two rules
-   then pin the state at E to what pdf.js reads:
+   `/Prev` of its own). Any other forward `/Prev`, or a cycle, is unclassified.
+
+   The length of the file is not a safety argument on its own. pdf.js treats a file as
+   linearized when its first object is a dictionary with `/Linearized` > 0 and an `/L` equal
+   to the length it measures from the `%PDF-` header. It then starts reading
+   cross-reference data right after the first `endobj` in the file, an offset the file's
+   author chooses (it can sit inside a string), not at the last `startxref`. A signer can
+   set `/L` to the length the file will have after a later append and hide a forged xref
+   table there, so the classifier and pdf.js would see different content. Two rules close
+   this for every file, linearized or not:
+   - the file must start with `%PDF-`. Bytes before the header change the length pdf.js
+     measures, and a first object more than 1024 bytes before the header is read by pdf.js
+     but skipped by pdf-lib;
+   - every object with a `/Linearized` key must have a direct numeric `/L` of at most E.
+     Appended data makes the final file longer than E, so pdf.js never accepts the
+     linearization and follows the `/Prev` chain from the last `startxref`, the chain the
+     classifier checks. An `/L` larger than E (for example the final length after the
+     append) is unclassified.
+
+   Two rules then pin the state at E to what pdf.js reads:
    - every object pdf-lib holds at E must be the definition the active chain's entry names
      (a type-1 entry at exactly that offset, a type-2 entry in that object stream), so an
      orphan duplicate signed outside the chain never becomes the baseline;
@@ -628,6 +644,12 @@ content change must warn and pdf.js must draw the changed text. A shadow object 
 a linearized file stays unclassified, and so does a forward `/Prev` when the first object
 is not a linearization dictionary, `/H` does not name a hint stream, the main section links
 back, or an object sits between the linearization dictionary and the first-page section.
+Two `/L` exploits (`linearizedLengthExploit`) carry a forged xref table after a literal
+`endobj` and set `/L` before signing to the length after a "DSS" append whose certificate
+stream data hides a new page content object: once in the signed linearization dictionary,
+once in a first object more than 1024 bytes before the `%PDF-` header. The signed file is
+green and pdf.js draws the signed text; after the append both must warn while pdf.js draws
+`EXPLOIT CHANGED CONTENT AFTER SIGNING` (5c4636f classified the first as green).
 
 The fixtures are generated in the vitest setup instead of being committed as binary files:
 the public repository stays free of binaries that cannot be diff-reviewed, keys are
@@ -717,7 +739,9 @@ a signed structural stream number to be freed, ignoring an appended xref stream 
 a dangling reference, counting signed structural streams as filled later, rejecting a tail
 entry that re-lists a signed structural stream at its signed offset, not recognising a
 linearized first-page section, accepting any forward `/Prev`, and recognising linearization
-without a hint stream or with an object before the first-page section.
+without a hint stream or with an object before the first-page section, not checking a
+linearization `/L` against E, allowing bytes before the `%PDF-` header, and not calling the
+linearization guard at all.
 
 For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
 It checks the reviewed hook baseline and individually breaks result retention, queue

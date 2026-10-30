@@ -88,7 +88,15 @@ const mutations = [
     revisionTests, 'does not name a hint stream'],
   ['Object between the linearization dictionary and the first-page section allowed', revisions,
     'starts.some((s) => s !== first.start && s < section.offset)) return null;', 'false) return null;',
-    revisionTests, 'an object sits between']
+    revisionTests, 'an object sits between'],
+  ['Linearization /L not checked against the signed length', revisions,
+    'if (!(length instanceof PDFNumber) || !(length.asNumber() <= E)) {', 'if (false) {',
+    revisionTests, '/L set before signing'],
+  ['Bytes before the %PDF- header allowed', revisions,
+    "if (!log.headerAtStart) stop('the file does not start with the %PDF- header');", '',
+    revisionTests, 'hidden before the %PDF- header'],
+  ['Linearization guard not called', revisions, 'assertLinearizationIgnored(log, E, pdfLib);', '',
+    revisionTests, 'pdf.js reads a forged xref table']
 ];
 
 function run(file, name) {
