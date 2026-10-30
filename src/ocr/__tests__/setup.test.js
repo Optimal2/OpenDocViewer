@@ -111,7 +111,7 @@ describe('describeOcrSetup', () => {
 
 describe('createConfiguredOcrEngine', () => {
   it('hands the resolved languages and URLs to the engine, which starts the injected worker with them', async () => {
-    const worker = { recognize: vi.fn(), terminate: vi.fn(async () => {}) };
+    const worker = { recognize: vi.fn(), setParameters: vi.fn(async () => {}), terminate: vi.fn(async () => {}) };
     const createWorker = vi.fn(async () => worker);
     const opts = options();
     const { engine, setup } = createConfiguredOcrEngine(
