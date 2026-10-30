@@ -21,3 +21,7 @@ docs-agent/** text eol=lf
 # working-tree bytes match the platform (CRLF) while the blobs stay LF, which
 # also keeps the pre-commit whitespace check (git diff --check) green.
 *.ps1 text eol=crlf
+
+# Committed fixture bases (scripts/generate-linearized-fixture-bases.py) are
+# read byte for byte by the signature tests: never convert line endings.
+scripts/fixtures/*.pdf binary

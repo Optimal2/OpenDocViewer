@@ -217,7 +217,16 @@ order:
 2. **Cross-reference consistency (mandatory).** pdf-lib keeps the last physical definition
    of an object, while pdf.js follows the signed revision's active `/Prev` chain and keeps
    the nearest section's entry per object. Every parsed pre-E section must belong to that
-   chain; an unlinked decoy table or xref stream makes the result unclassified. Two rules
+   chain; an unlinked decoy table or xref stream makes the result unclassified. Every `/Prev`
+   in the chain must point backwards, with one exception: a linearized file (ISO 32000-1
+   Annex F) puts its first-page section first, and that section's `/Prev` points forward to
+   the main section. That link is accepted only in the exact shape: the file's first object
+   is a signed linearization dictionary (`/Linearized` > 0) whose `/H` names a signed hint
+   stream, the first-page section is the physically first section and follows that
+   dictionary with no other object in between, and the main section ends the chain (no
+   `/Prev` of its own). Any other forward `/Prev`, or a cycle, is unclassified. (After an
+   incremental update the file length no longer matches `/L`, so pdf.js ignores the
+   linearization and follows the same `/Prev` chain from the last `startxref`.) Two rules
    then pin the state at E to what pdf.js reads:
    - every object pdf-lib holds at E must be the definition the active chain's entry names
      (a type-1 entry at exactly that offset, a type-2 entry in that object stream), so an
@@ -231,9 +240,12 @@ order:
    that offset (or, for a type-2 entry, at an appended object stream that holds the object
    exactly once), or at the same offset as the entry reached through the active chain.
    Every appended definition must be listed, and the newest entry for an object must point
-   at its last definition. No appended object or object stream may reuse the number of an
-   object, object stream or xref stream in use at E (pdf.js resolves compressed objects
-   through the newest entry for the stream number). Otherwise the result is unclassified. A
+   at its last definition. An appended object stream or xref stream may not reuse the number
+   of an object, object stream or xref stream in use at E, nor the number of an appended
+   object, and an appended object may not reuse the number of a signed object stream or xref
+   stream (pdf.js resolves compressed objects through the newest entry for the stream
+   number). An appended ordinary object may redefine a signed ordinary object; step 3 then
+   compares the two definitions. Otherwise the result is unclassified. A
    deleted entry (`f` / type 0) for an object, object stream or xref stream in use at E is a
    content change; pdf-lib does not model deletions, so they are read from the recorded
    entries.
@@ -585,7 +597,8 @@ stream tail, DSS in an object stream, timestamp then DSS, a reverted change) mus
 `extended-with-validation-data`; the content-change fixtures (annotation, page content,
 page entry, form field value, `/OpenAction`, `/NeedAppearances`, visible timestamp widget,
 widget with `/AP`, object shared by DSS and content, dangling reference, dangling
-reference filled with a `/Type /ObjStm` stream, deleted live object) must be
+reference filled with a `/Type /ObjStm` stream or with the appended `/Type /XRef` stream,
+deleted live object) must be
 `content-changed-after-signing`; the structural fixtures (shadow object, broken `/Prev`,
 `/XRefStm`, patched xref offset, an object stream reusing a signed object number, objects
 without xref) must be `unclassified-change-after-signing`.
@@ -598,6 +611,23 @@ stream's own entry. DSS-only appends (plain, with a signed object stream, and af
 changes (plain and compressed) must be `content-changed-after-signing`; a signed
 structural entry one byte off its stream, and an appended object stream or DSS object that
 reuses the signed xref stream number 10, must be `unclassified-change-after-signing`.
+Freeing the signed xref or object stream number is `content-changed-after-signing`; a
+signed `/Info` that references the signed xref stream, and a tail xref that re-lists the
+signed object and xref streams at their exact signed offsets, stay green after a DSS
+append.
+
+`createLinearizedFixtures` (exposed as `createSecurityFixtures().linearized`) covers the
+forward `/Prev` of linearized files. `linearizedFile` writes the base fixture in the qpdf
+layout (signed by an incremental update, or with the signature inside the linearized file);
+`qpdfLinearized` signs and extends two small UNSIGNED one-page bases written by a real
+linearizer, qpdf 12.3.2 through pikepdf (`scripts/fixtures/linearized-qpdf-table.pdf` with
+xref tables, `scripts/fixtures/linearized-qpdf-objstm.pdf` with xref and object streams;
+regenerate with `python scripts/generate-linearized-fixture-bases.py`). For every shape a
+DSS-only append must be green and pdf.js must draw the same page text before and after; a
+content change must warn and pdf.js must draw the changed text. A shadow object appended to
+a linearized file stays unclassified, and so does a forward `/Prev` when the first object
+is not a linearization dictionary, `/H` does not name a hint stream, the main section links
+back, or an object sits between the linearization dictionary and the first-page section.
 
 The fixtures are generated in the vitest setup instead of being committed as binary files:
 the public repository stays free of binaries that cannot be diff-reviewed, keys are
@@ -665,7 +695,7 @@ non-null `integrityCode` for every non-intact signature. The
 Vitest security suites also cover nested ASN.1/PDF input, a 50 MiB extension, worker
 timeouts/errors, bounded worker recreation, bounded fallback and disposal. Parser tests
 also generate junk-prefixed signed/tampered PDFs and verify the unsigned fast path.
-No binary fixture is committed.
+The only committed binary fixtures are the two unsigned qpdf-linearized bases above.
 
 Run `npm test -- pdfSignature` for both positive and hostile inputs. In an isolated
 worktree, `node scripts/test-signature-security-mutations.mjs --baseline` temporarily
@@ -682,7 +712,12 @@ green `algorithm-unsupported`, and an oversized ECDSA INTEGER reaching the gener
 Appended-revision groups: removing the cross-reference consistency check, ignoring deleted
 entries, allowing a reused object stream number, letting validation data win over content,
 allowing a visible timestamp widget,
-accepting orphan objects, trusting an unhooked parser, and skipping the `/Prev` chain.
+accepting orphan objects, trusting an unhooked parser, skipping the `/Prev` chain, allowing
+a signed structural stream number to be freed, ignoring an appended xref stream that fills
+a dangling reference, counting signed structural streams as filled later, rejecting a tail
+entry that re-lists a signed structural stream at its signed offset, not recognising a
+linearized first-page section, accepting any forward `/Prev`, and recognising linearization
+without a hint stream or with an object before the first-page section.
 
 For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
 It checks the reviewed hook baseline and individually breaks result retention, queue

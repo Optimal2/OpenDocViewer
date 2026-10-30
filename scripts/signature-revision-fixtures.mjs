@@ -7,9 +7,13 @@
 // xref stream (`xrefStream`), a trailer chained with /Prev, and startxref.
 // Negative knobs: `free` (f / type-0 entries), `prevOverride`, `xrefPoint`
 // (point an entry at an earlier duplicate definition), `offsetShift` (patch an
-// xref offset), `trailerExtras` (e.g. /XRefStm) and `objStm` (pack objects in
-// an object stream, xref stream only).
+// xref offset), `trailerExtras` (e.g. /XRefStm), `objStm` (pack objects in
+// an object stream, xref stream only), `xrefNum` (number of the appended xref
+// stream), `root` and `size` (the trailer /Root and /Size, for bases not
+// numbered like BASE).
+import { readFileSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
+import { PDFDocument, PDFName, PDFRef } from 'pdf-lib';
 import {
   baseSignedPdf, buildSignedData, buildTstToken, signFile, sigDictBody, latin1, latin1Text, concatBytes, findStartxrefOffset
 } from './generate-signature-fixtures.mjs';
@@ -50,7 +54,8 @@ export function dssObjects({ certs = '[21 0 R]' } = {}) {
  */
 export function appendRevision(base, defs, {
   xrefStream = false, compress = false, objStm = [], free = [], prevOverride = null,
-  xrefPoint = {}, preXrefPoint = {}, offsetShift = {}, trailerExtras = '', info = '/Info 9 0 R', objStmNum = null
+  xrefPoint = {}, preXrefPoint = {}, offsetShift = {}, trailerExtras = '', info = '/Info 9 0 R', objStmNum = null,
+  xrefNum: xrefNumOverride = null, root = '1 0 R', size = null
 } = {}) {
   const prev = prevOverride ?? findStartxrefOffset(base);
   let text = '\n';
@@ -96,10 +101,10 @@ export function appendRevision(base, defs, {
       const e = entries.get(num);
       text += `${num} 1\n${String(e.a).padStart(10, '0')} ${String(e.b).padStart(5, '0')} ${e.type === 0 ? 'f' : 'n'} \n`;
     }
-    text += `trailer\n<< /Size ${maxNum + 1} /Root 1 0 R ${info}${extras} /Prev ${prev} >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+    text += `trailer\n<< /Size ${size ?? maxNum + 1} /Root ${root} ${info}${extras} /Prev ${prev} >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
     return { bytes: concatBytes(base, latin1(text)), offsets };
   }
-  const xrefNum = streamNum;
+  const xrefNum = xrefNumOverride ?? streamNum;
   const xrefOffset = at();
   entries.set(xrefNum, { type: 1, a: xrefOffset, b: 0 });
   shiftOffsets();
@@ -119,7 +124,7 @@ export function appendRevision(base, defs, {
     filter = '/Filter /FlateDecode /DecodeParms << /Predictor 12 /Columns 7 >> ';
   } else data = Buffer.from(rows.flat());
   const binary = String.fromCharCode(...data);
-  text += `${xrefNum} 0 obj\n<< /Type /XRef /Size ${xrefNum + 1} /W [1 4 2] /Index [${index}] /Root 1 0 R ${info}${extras} /Prev ${prev} ${filter}/Length ${data.length} >>\nstream\n${binary}\nendstream\nendobj\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  text += `${xrefNum} 0 obj\n<< /Type /XRef /Size ${nums.at(-1) + 1} /W [1 4 2] /Index [${index}] /Root ${root} ${info}${extras} /Prev ${prev} ${filter}/Length ${data.length} >>\nstream\n${binary}\nendstream\nendobj\nstartxref\n${xrefOffset}\n%%EOF\n`;
   return { bytes: concatBytes(base, latin1(text)), offsets };
 }
 
@@ -190,12 +195,12 @@ export async function createSignedXrefStreamFixtures(pki) {
   const original = 'BT /F1 20 Tf 60 780 Td (ODV SIGNATURE FIXTURE SAMPLE TEXT 0123456789) Tj ET';
   const changed = 'BT /F1 20 Tf 60 780 Td (CHANGED AFTER SIGNING) Tj ET';
   // The signed xref stream is object 10, or 11 behind object stream 10 when `objStm` is set.
-  async function signed({ wrongKey = null, objStm = [], compress = false, offsetShift = {} } = {}) {
+  async function signed({ wrongKey = null, objStm = [], compress = false, offsetShift = {}, extra = [] } = {}) {
     const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
       sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
     const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
     const pre = appendRevision(rev.bytes, [
-      { num: 4, body: BASE.font }, { num: 6, body: stream(original) }
+      { num: 4, body: BASE.font }, { num: 6, body: stream(original) }, ...extra
     ], { xrefStream: true, objStm, compress, offsetShift });
     return signFile(pre.bytes, rev.offsets.get(8), (signedOverBytes) =>
       buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes, wrongKey }));
@@ -206,6 +211,8 @@ export async function createSignedXrefStreamFixtures(pki) {
   if (textAt < 0) throw new Error('fixture bug: missing signed text');
   digestMismatch[textAt] = 0x73;
   const compressed = await signed({ compress: true });
+  const withObjectStream = await signed({ objStm: [4] });
+  const lastObjectAt = (bytes, num) => latin1Text(bytes).lastIndexOf(`\n${num} 0 obj\n`) + 1;
   return {
     intact,
     dssOnly: appendDssRevision(intact),
@@ -221,6 +228,19 @@ export async function createSignedXrefStreamFixtures(pki) {
     objectReusesSignedXrefNumber: appendRevision(intact, [
       ...dssObjects({ certs: '[21 0 R 10 0 R]' }), { num: 10, body: stream('ODV-FIXTURE-NOT-A-CERTIFICATE') }
     ]).bytes,
+    // The unsigned tail frees the number of the signed xref stream 10 / object stream 10.
+    freeSignedXrefStream: appendRevision(intact, dssObjects(), { free: [10] }).bytes,
+    freeSignedObjectStream: appendRevision(withObjectStream, dssObjects(), { free: [10] }).bytes,
+    // A signed object (/Info) references the signed xref stream 10: that is not a
+    // reference filled in after signing, so a DSS-only append stays green.
+    dssOnlySignedStructuralReference: appendDssRevision(await signed({
+      extra: [{ num: 9, body: BASE.info.replace(' >>', ' /ODVFixtureRef 10 0 R >>') }]
+    })),
+    // A full xref rewrite re-lists the signed object stream 10 and xref stream 11
+    // at exactly their signed offsets: the entries resolve to the signed streams.
+    dssOnlyRelistsSignedStructural: appendDssRevision(withObjectStream, {
+      preXrefPoint: { 10: lastObjectAt(withObjectStream, 10), 11: lastObjectAt(withObjectStream, 11) }
+    }),
     contentChanged: appendRevision(intact, [{ num: 6, body: stream(changed) }, ...dssObjects()]).bytes,
     shadowObject: appendRevision(intact, [
       { num: 6, body: stream(changed) }, { num: 6, body: stream(original) }, ...dssObjects()
@@ -316,6 +336,9 @@ export async function createRevisionFixtures(normal, pki) {
     f.danglingReferenceFilledByObjectStream = appendRevision(dangling, [
       { num: 13, body: stream(content, '/Type /ObjStm /N 0 /First 0 ') }, ...dss
     ]).bytes;
+    // The same, filled by the appended /Type /XRef stream itself: pdf.js
+    // resolves the signed reference to the xref stream and draws its data.
+    f.danglingReferenceFilledByXrefStream = appendRevision(dangling, dss, { ...xs, xrefNum: 13 }).bytes;
   }
   // Deleted live object (f entry / type-0 entry) next to an otherwise harmless DSS update.
   f.freeLiveObject = appendRevision(signed, dss, { free: [6] }).bytes;
@@ -366,4 +389,151 @@ export async function createRevisionFixtures(normal, pki) {
     f.tailWithoutXref = latin1(text.slice(0, text.lastIndexOf('\nxref\n') + 1));
   }
   return f;
+}
+
+// --- linearized files (ISO 32000-1 Annex F) ------------------------------------------
+const LINEARIZATION = 10;
+const HINT = 11;
+const GAP = 12;
+const FIRST_PAGE = new Set([1, 3, 4, 6, LINEARIZATION, HINT, GAP]);
+const pad10 = (n) => String(n).padStart(10, '0');
+
+/**
+ * Write `objects` (Map num -> body) in the qpdf layout of a linearized file:
+ * the linearization dictionary first, then the first-page xref table whose
+ * trailer /Prev points FORWARD to the main table at the end of the file, the
+ * hint stream and first-page objects, the other objects and the main table.
+ * Numbers are zero-padded, so a second pass fills in the final offsets.
+ * Knobs break exactly one part of the shape: `linearized: false` (no
+ * /Linearized key), `hint: false` (/H names a dictionary, not a stream),
+ * `mainPrev` (the main trailer links back to the first-page table) and
+ * `gapObject` (an object between the linearization dictionary and the table).
+ */
+function linearizedFile(objects, { linearized = true, hint = true, mainPrev = false, gapObject = false } = {}) {
+  const render = (v) => {
+    let text = '%PDF-1.7\n%\xE2\xE3\xCF\xD3\n';
+    const offsets = new Map();
+    const add = (num, body) => { offsets.set(num, text.length); text += `${num} 0 obj\n${body}\nendobj\n`; };
+    const table = (nums) => nums.map((n) => `${n} 1\n${pad10(v.offsets.get(n) ?? 0)} 00000 n \n`).join('');
+    const marker = linearized ? '/Linearized 1' : '/ODVFixture 1';
+    add(LINEARIZATION, `<< ${marker} /L ${pad10(v.length)} /H [${pad10(v.hint)} 0000000016] /O 3 /E ${pad10(v.end)} /N 1 /T ${pad10(v.main)} >>`);
+    if (gapObject) add(GAP, '<< /ODVFixtureGap true >>');
+    const nums = [...offsets.keys(), HINT, ...objects.keys()].sort((a, b) => a - b);
+    const firstXref = text.length;
+    text += `xref\n${table(nums.filter((n) => FIRST_PAGE.has(n)))}`;
+    text += `trailer\n<< /Size ${GAP + 1} /Root 1 0 R /Info 9 0 R /Prev ${pad10(v.main)} >>\nstartxref\n0\n%%EOF\n`;
+    add(HINT, stream('\0'.repeat(16), '/S 36 '));
+    for (const [num, body] of objects) if (FIRST_PAGE.has(num)) add(num, body);
+    const end = text.length;
+    for (const [num, body] of objects) if (!FIRST_PAGE.has(num)) add(num, body);
+    const main = text.length;
+    text += `xref\n0 1\n0000000000 65535 f \n${table(nums.filter((n) => !FIRST_PAGE.has(n)))}`;
+    text += `trailer\n<< /Size ${GAP + 1}${mainPrev ? ` /Prev ${firstXref}` : ''} >>\nstartxref\n${firstXref}\n%%EOF\n`;
+    return { text, offsets, values: { length: text.length, hint: offsets.get(hint ? HINT : 1), end, main, offsets } };
+  };
+  const first = render({ length: 0, hint: 0, end: 0, main: 0, offsets: new Map() });
+  const { text, offsets, values } = render(first.values);
+  if (JSON.stringify([...values.offsets]) !== JSON.stringify([...first.values.offsets]) || values.length !== first.values.length) {
+    throw new Error('fixture bug: linearized layout is not stable');
+  }
+  return { bytes: latin1(text), offsets };
+}
+
+/**
+ * The base fixture written as a linearized file. `incremental` (the common
+ * real-world shape) signs it with an incremental update; otherwise the
+ * signature dictionary is inside the linearized file itself.
+ */
+async function signLinearized(pki, { incremental = true, ...shape } = {}) {
+  const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
+    sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
+  const objects = new Map([...builder.objects].map(([num, o]) => [num, o.body]));
+  const cms = (signedOverBytes) => buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes });
+  if (!incremental) {
+    const { bytes, offsets } = linearizedFile(objects, shape);
+    return signFile(bytes, offsets.get(8), cms);
+  }
+  const signing = [1, 3, 5, 7, 8].map((num) => ({ num, body: objects.get(num) }));
+  objects.set(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  objects.set(3, BASE.page().replace(' /Annots [7 0 R]', ''));
+  for (const num of [5, 7, 8]) objects.delete(num);
+  const { bytes, offsets } = appendRevision(linearizedFile(objects, shape).bytes, signing, { size: GAP + 1 });
+  return signFile(bytes, offsets[4], cms);
+}
+
+/**
+ * Sign a committed qpdf-linearized base (scripts/fixtures, written by
+ * scripts/generate-linearized-fixture-bases.py) with an incremental update and
+ * return the signed file plus a DSS-only and a content-changing append.
+ */
+async function qpdfLinearized(pki, file) {
+  const base = new Uint8Array(readFileSync(new URL(`./fixtures/${file}`, import.meta.url)));
+  const doc = await PDFDocument.load(base, { updateMetadata: false });
+  const root = doc.context.trailerInfo.Root.objectNumber;
+  const page = doc.getPage(0);
+  const contents = page.node.get(PDFName.of('Contents')).objectNumber;
+  const [widget, sig, dss, cert, ocsp] = [0, 1, 2, 3, 4].map((i) => doc.context.largestObjectNumber + 1 + i);
+  const extend = (num, extra) => doc.context.lookup(PDFRef.of(num)).toString().replace(/>>\s*$/, ` ${extra} >>`);
+  const catalog = extend(root, `/AcroForm << /Fields [${widget} 0 R] /SigFlags 3 >>`);
+  const options = { root: `${root} 0 R`, info: '', size: ocsp + 1 };
+  const signing = appendRevision(base, [
+    { num: root, body: catalog },
+    { num: page.ref.objectNumber, body: extend(page.ref.objectNumber, `/Annots [${widget} 0 R]`) },
+    { num: widget, body: `<< /Type /Annot /Subtype /Widget /FT /Sig /T (Signature1) /V ${sig} 0 R /P ${page.ref.objectNumber} 0 R /Rect [0 0 0 0] /F 132 >>` },
+    { num: sig, body: sigDictBody({ subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' }) }
+  ], options);
+  const signed = await signFile(signing.bytes, signing.offsets[3], (signedOverBytes) =>
+    buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes }));
+  const dssDefs = [
+    { num: root, body: catalog.replace(/ >>$/, ` /DSS ${dss} 0 R >>`) },
+    { num: dss, body: `<< /Type /DSS /Certs [${cert} 0 R] /OCSPs [${ocsp} 0 R] >>` },
+    { num: cert, body: stream(FAKE_CERT) },
+    { num: ocsp, body: stream(FAKE_OCSP) }
+  ];
+  return {
+    signed,
+    dss: appendRevision(signed, dssDefs, options).bytes,
+    contentChanged: appendRevision(signed, [
+      { num: contents, body: stream('BT /F1 20 Tf 60 780 Td (CHANGED AFTER SIGNING) Tj ET') }, ...dssDefs
+    ], options).bytes
+  };
+}
+
+/**
+ * Linearized signed files. In a linearized file the first-page xref section
+ * comes first and its trailer /Prev points FORWARD to the main section; a
+ * DSS-only append must stay green and a content change must warn. Every other
+ * forward /Prev shape must fail closed. `qpdf*` are produced by a real
+ * linearizer (qpdf 12.3.2 via pikepdf); the rest are written by linearizedFile().
+ */
+export async function createLinearizedFixtures(pki) {
+  const changed = { num: 6, body: stream('BT /F1 20 Tf 60 780 Td (CHANGED AFTER SIGNING) Tj ET') };
+  const incremental = await signLinearized(pki);
+  const inside = await signLinearized(pki, { incremental: false });
+  const qpdfTable = await qpdfLinearized(pki, 'linearized-qpdf-table.pdf');
+  const qpdfObjStm = await qpdfLinearized(pki, 'linearized-qpdf-objstm.pdf');
+  return {
+    signed: { incremental, inside, qpdfTable: qpdfTable.signed, qpdfObjStm: qpdfObjStm.signed },
+    dss: {
+      incremental: appendDssRevision(incremental),
+      inside: appendDssRevision(inside),
+      qpdfTable: qpdfTable.dss,
+      qpdfObjStm: qpdfObjStm.dss
+    },
+    contentChanged: {
+      incremental: appendRevision(incremental, [changed, ...dssObjects()]).bytes,
+      inside: appendRevision(inside, [changed, ...dssObjects()]).bytes,
+      qpdfTable: qpdfTable.contentChanged,
+      qpdfObjStm: qpdfObjStm.contentChanged
+    },
+    // The accepted forward link must not reopen the shadow-object path.
+    shadowObject: appendRevision(incremental, [
+      changed, { num: 6, body: stream('BT /F1 20 Tf 60 780 Td (ODV SIGNATURE FIXTURE SAMPLE TEXT 0123456789) Tj ET') }, ...dssObjects()
+    ], { xrefPoint: { 6: 0 } }).bytes,
+    // DSS-only appends to signed files with a forward /Prev that is NOT the linearized shape.
+    notLinearized: appendDssRevision(await signLinearized(pki, { linearized: false })),
+    noHintStream: appendDssRevision(await signLinearized(pki, { hint: false })),
+    mainSectionLinksBack: appendDssRevision(await signLinearized(pki, { mainPrev: true })),
+    objectBeforeFirstPageXref: appendDssRevision(await signLinearized(pki, { gapObject: true }))
+  };
 }

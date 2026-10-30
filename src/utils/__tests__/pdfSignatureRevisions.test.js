@@ -85,6 +85,7 @@ describe('appended revisions that change content -> warning', () => {
     ['a second unsigned revision adds an annotation after a DSS revision', 'laterRevisionAddsAnnotation'],
     ['fills in a reference that dangled at signing time', 'danglingReferenceFilled'],
     ['fills in a dangling reference with an appended /Type /ObjStm stream', 'danglingReferenceFilledByObjectStream'],
+    ['fills in a dangling reference with the appended /Type /XRef stream', 'danglingReferenceFilledByXrefStream'],
     ['deletes a live object with an f entry', 'freeLiveObject'],
     ['deletes a live object with a type-0 xref stream entry', 'freeLiveObjectXrefStream']
   ])('%s', async (_label, name) => {
@@ -144,7 +145,9 @@ describe('status model with an xref stream on the signed revision', () => {
   it.each([
     ['DSS-only append', 'dssOnly'],
     ['DSS-only append with a signed object stream', 'dssObjectStream'],
-    ['DSS-only append to a Flate + PNG predictor signed xref stream', 'dssCompressed']
+    ['DSS-only append to a Flate + PNG predictor signed xref stream', 'dssCompressed'],
+    ['DSS-only append when a signed object references the signed xref stream', 'dssOnlySignedStructuralReference'],
+    ['DSS-only append whose xref re-lists the signed object and xref streams at their signed offsets', 'dssOnlyRelistsSignedStructural']
   ])('%s -> ok with information', async (_label, name) => {
     const sig = await approval(f.signedXrefStream[name]);
     expectStatus(sig, 'intact', 'extended-with-validation-data', 'ok');
@@ -157,6 +160,15 @@ describe('status model with an xref stream on the signed revision', () => {
   ])('%s -> warning', async (_label, name) => {
     expectStatus(await approval(f.signedXrefStream[name]),
       'modified-after-signing', 'content-changed-after-signing', 'warning');
+  });
+
+  it.each([
+    ['frees the signed xref stream number', 'freeSignedXrefStream'],
+    ['frees the signed object stream number', 'freeSignedObjectStream']
+  ])('an appended revision that %s -> content change', async (_label, name) => {
+    const sig = await approval(f.signedXrefStream[name]);
+    expectStatus(sig, 'modified-after-signing', 'content-changed-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(/object 10 was deleted/);
   });
 
   // Structural streams have no parser record; only the exact num:offset the
@@ -190,6 +202,62 @@ describe('status model with an xref stream on the signed revision', () => {
     ['invalid CMS signature', 'invalidSignature', 'signature-invalid', 'signature-invalid']
   ])('%s -> error', async (_label, name, integrity, code) => {
     expectStatus(await approval(f.signedXrefStream[name]), integrity, code, 'error');
+  });
+});
+
+describe('linearized signed files (first-page xref /Prev points forward)', () => {
+  let pdfjs;
+  beforeAll(async () => { pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs'); });
+  /** What pdf.js draws: the text of page 1 as pdf.js resolves the final file. */
+  async function pdfjsText(bytes) {
+    const task = pdfjs.getDocument({ data: bytes.slice(), isEvalSupported: false });
+    try {
+      const page = await (await task.promise).getPage(1);
+      return (await page.getTextContent()).items.map((item) => item.str).join('');
+    } finally { await task.destroy(); }
+  }
+  const shapes = [
+    ['synthetic, signed by an incremental update', 'incremental'],
+    ['synthetic, signature inside the linearized file', 'inside'],
+    ['qpdf, xref tables', 'qpdfTable'],
+    ['qpdf, xref streams and object streams', 'qpdfObjStm']
+  ];
+
+  it.each(shapes)('%s: intact signed file -> ok', async (_label, name) => {
+    expectStatus(await approval(f.linearized.signed[name]), 'intact', null, 'ok');
+  });
+
+  it.each(shapes)('%s: DSS-only append -> ok with information, pdf.js draws the same page', async (_label, name) => {
+    const sig = await approval(f.linearized.dss[name]);
+    expectStatus(sig, 'intact', 'extended-with-validation-data', 'ok');
+    expect(sig.integrityReason).toMatch(/validation data\/metadata only/);
+    const before = await pdfjsText(f.linearized.signed[name]);
+    expect(before).toContain('ODV SIGNATURE FIXTURE SAMPLE TEXT');
+    expect(await pdfjsText(f.linearized.dss[name])).toBe(before);
+  });
+
+  it.each(shapes)('%s: content change -> warning, pdf.js draws the changed page', async (_label, name) => {
+    expectStatus(await approval(f.linearized.contentChanged[name]),
+      'modified-after-signing', 'content-changed-after-signing', 'warning');
+    expect(await pdfjsText(f.linearized.contentChanged[name])).toContain('CHANGED AFTER SIGNING');
+  });
+
+  it('a shadow object appended to a linearized file stays unclassified', async () => {
+    const sig = await approval(f.linearized.shadowObject);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(/not listed|does not point/);
+    expect(await pdfjsText(f.linearized.shadowObject)).toContain('CHANGED AFTER SIGNING');
+  });
+
+  it.each([
+    ['the first object is not a linearization dictionary', 'notLinearized'],
+    ['/H does not name a hint stream', 'noHintStream'],
+    ['the main section links back with its own /Prev', 'mainSectionLinksBack'],
+    ['an object sits between the linearization dictionary and the first-page section', 'objectBeforeFirstPageXref']
+  ])('a forward /Prev where %s -> unclassified', async (_label, name) => {
+    const sig = await approval(f.linearized[name]);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(/Prev chain is broken/);
   });
 });
 

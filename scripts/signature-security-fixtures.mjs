@@ -7,7 +7,7 @@ import {
   PdfBuilder, signFile, sigDictBody, latin1, latin1Text, concatBytes,
   digestBytes, patchContents, patchByteRange, findStartxrefOffset
 } from './generate-signature-fixtures.mjs';
-import { createRevisionFixtures, createSignedXrefStreamFixtures } from './signature-revision-fixtures.mjs';
+import { createLinearizedFixtures, createRevisionFixtures, createSignedXrefStreamFixtures } from './signature-revision-fixtures.mjs';
 
 // DER encodings (tag, length, value) of the OIDs the status-model fixtures rewrite.
 export const OID_DER = Object.freeze({
@@ -335,6 +335,7 @@ export async function createSecurityFixtures() {
   });
 
   return { normal, revisions: await createRevisionFixtures(normal, pki), signedXrefStream: await createSignedXrefStreamFixtures(pki),
+    linearized: await createLinearizedFixtures(pki),
     noDigest, direct, wrongIssuer, unknownSerial, serialCollision, fakeLater, maliciousLater, wide, decoy,
     unknownDigest, sha224Digest, unknownSignatureAlgorithm, unknownCurve, badEcKey, timestampUnknownImprint,
     oversizedCms, encrypted, structureFilterChain, structureFilterUnknown, tooManySignatures, pkcs1MismatchedOids, pkcs1GenericRsa,

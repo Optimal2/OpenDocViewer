@@ -261,7 +261,8 @@ function classify(log, E, pdfLib) {
     if (trailer.has(name('Encrypt'))) stop('an appended trailer adds /Encrypt');
   });
   if (!(signedSection.trailer instanceof PDFDict)) stop('the signed revision has no trailer');
-  const preSections = activeXrefChain(physicalPreSections, signedSection, pdfLib);
+  const linearizedFirstPage = linearizedFirstPageSection(log, physicalPreSections, E, pdfLib);
+  const preSections = activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage, pdfLib);
   const rootNum = refNum(signedSection.trailer.get(name('Root')));
   if (rootNum === null) stop('the signed revision trailer has no /Root reference');
   for (const section of tail) {
@@ -491,8 +492,11 @@ function revisionMaps(log, E) {
  * pdf.js follows only this chain and keeps the nearest entry per object. Any
  * physically parsed pre-E section outside it is rejected: otherwise an
  * unlinked decoy could choose the definition used by the comparison below.
+ * Every /Prev must point backwards, except the one forward link of a
+ * linearized file: from its first-page section to a main section that ends
+ * the chain (no /Prev of its own, so no cycle).
  */
-function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
+function activeXrefChain(physicalPreSections, signedSection, linearizedFirstPage, pdfLib) {
   const { PDFDict, PDFName, PDFNumber } = pdfLib;
   const byOffset = new Map();
   for (const section of physicalPreSections) {
@@ -513,12 +517,40 @@ function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
       stop('the signed revision has an invalid /Prev entry');
     }
     const previous = byOffset.get(prev.asNumber());
-    if (!previous || previous.offset >= section.offset) stop('the signed revision /Prev chain is broken');
+    const linearizedLink = !!previous && section === linearizedFirstPage && previous.offset > section.offset &&
+      previous.trailer instanceof PDFDict && !previous.trailer.has(PDFName.of('Prev'));
+    if (!previous || (previous.offset >= section.offset && !linearizedLink)) stop('the signed revision /Prev chain is broken');
     section = previous;
   }
   const outside = physicalPreSections.find((candidate) => !activeSet.has(candidate));
   if (outside) stop(`cross-reference section at offset ${outside.offset} before signing is outside the active /Prev chain`);
   return active;
+}
+
+/**
+ * The first-page cross-reference section of a signed linearized file
+ * (ISO 32000-1 Annex F), or null. Recognised only in the exact shape: the
+ * file's first object is a signed linearization dictionary (/Linearized > 0)
+ * whose /H names a signed hint stream, and the physically first section
+ * follows it with no other object in between. Its trailer /Prev may then
+ * point forward to the main section (see activeXrefChain).
+ */
+function linearizedFirstPageSection(log, physicalPreSections, E, pdfLib) {
+  const { PDFArray, PDFDict, PDFName, PDFNumber, PDFRawStream } = pdfLib;
+  const first = log.records[0];
+  const starts = [...log.records, ...log.structural].map((r) => r.start);
+  if (!first || first.container || first.start >= E || starts.some((s) => s < first.start)) return null;
+  const lin = first.object;
+  const linearized = lin instanceof PDFDict ? lin.get(PDFName.of('Linearized')) : undefined;
+  if (!(linearized instanceof PDFNumber) || !(linearized.asNumber() > 0)) return null;
+  const h = lin.get(PDFName.of('H'));
+  const hint = h instanceof PDFArray && (h.size() === 2 || h.size() === 4) ? h.get(0) : undefined;
+  if (!(hint instanceof PDFNumber) || !log.records.some((r) => !r.container && r.start < E &&
+    r.start === hint.asNumber() && r.object instanceof PDFRawStream)) return null;
+  const section = physicalPreSections.reduce((a, s) => (!a || s.offset < a.offset ? s : a), null);
+  if (!section || section.offset <= first.start ||
+    starts.some((s) => s !== first.start && s < section.offset)) return null;
+  return section;
 }
 
 /**
