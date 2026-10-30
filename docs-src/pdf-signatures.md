@@ -217,16 +217,26 @@ order:
 2. **Cross-reference consistency (mandatory).** pdf-lib keeps the last physical definition
    of an object, while pdf.js follows the signed revision's active `/Prev` chain and keeps
    the nearest section's entry per object. Every parsed pre-E section must belong to that
-   chain; an unlinked decoy table or xref stream makes the result unclassified. Every
-   appended in-use entry must point at an appended definition of that object at exactly
+   chain; an unlinked decoy table or xref stream makes the result unclassified. Two rules
+   then pin the state at E to what pdf.js reads:
+   - every object pdf-lib holds at E must be the definition the active chain's entry names
+     (a type-1 entry at exactly that offset, a type-2 entry in that object stream), so an
+     orphan duplicate signed outside the chain never becomes the baseline;
+   - every in-use entry of the active chain must have a definition pdf-lib used. Object and
+     xref streams have no parser record of their own, so the only exemption is the logged
+     structural stream at exactly the entry's object number AND offset; one byte off, or a
+     number without a definition, is unclassified.
+
+   Every appended in-use entry must point at an appended definition of that object at exactly
    that offset (or, for a type-2 entry, at an appended object stream that holds the object
    exactly once), or at the same offset as the entry reached through the active chain.
    Every appended definition must be listed, and the newest entry for an object must point
-   at its last definition, and an appended object stream may not reuse the number of an
-   object or object stream in use at E (pdf.js resolves compressed objects through the
-   newest entry for the stream number). Otherwise the result is unclassified. A deleted
-   entry (`f` / type 0) for an object in use at E is a content change; pdf-lib does not model
-   deletions, so they are read from the recorded entries.
+   at its last definition. No appended object or object stream may reuse the number of an
+   object, object stream or xref stream in use at E (pdf.js resolves compressed objects
+   through the newest entry for the stream number). Otherwise the result is unclassified. A
+   deleted entry (`f` / type 0) for an object, object stream or xref stream in use at E is a
+   content change; pdf-lib does not model deletions, so they are read from the recorded
+   entries.
 3. **Changed set.** An object is unchanged when its final definition is byte-identical to the
    definition at E (dictionary text, plus the raw bytes for streams). Generations are
    ignored. Object and xref streams are structural and never compared themselves.
@@ -247,14 +257,20 @@ order:
    content change. Reachable only from `/DSS`, `/Metadata`, `/Extensions` or the trailer
    `/Info` is validation data or metadata. Reachable from nothing (an orphan) is
    unclassified. A new object that a reference already pointed at in the signed revision
-   (a dangling reference filled in later) is a content change.
+   (a dangling reference filled in later) is a content change. This includes an appended
+   object or xref stream with that number: pdf-lib does not record structural streams as
+   objects, but pdf.js resolves the signed reference to the stream and draws its data.
 7. **Result.** Any content change gives `content-changed-after-signing`, otherwise any
    unclassified point gives `unclassified-change-after-signing`, otherwise
    `intact` / `extended-with-validation-data` ("the file was extended after signing with
    validation data/metadata only").
 
 The classifier is conservative by construction: whatever it cannot classify with certainty
-is a warning, never green. Its parser hooks are installed on the pdf-lib parser instance
+is a warning, never green. Known false warnings, kept on purpose: a validly signed hybrid
+file (a signed trailer with `/XRefStm`) stays a warning after a DSS append, because the
+hybrid section is not part of the modelled `/Prev` chain; and an appended revision that
+frees or reuses the number of a signed xref stream is a warning even though no writer
+needs to. Its parser hooks are installed on the pdf-lib parser instance
 only when every expected method exists (the same guard as the indirect-object header
 probe); a different pdf-lib build, an unattributed object, an unexpected parser shape or
 any exception inside the classifier yields `unclassified-change-after-signing`. An invalid
@@ -568,11 +584,20 @@ with `ok` (DSS, `/Info`, XMP `/Metadata`, byte-identical rewrite, each also with
 stream tail, DSS in an object stream, timestamp then DSS, a reverted change) must be
 `extended-with-validation-data`; the content-change fixtures (annotation, page content,
 page entry, form field value, `/OpenAction`, `/NeedAppearances`, visible timestamp widget,
-widget with `/AP`, object shared by DSS and content, dangling reference, deleted live
-object) must be `content-changed-after-signing`; the structural fixtures (shadow object,
-broken `/Prev`, `/XRefStm`, patched xref offset, an object stream reusing a signed object
-number, objects without xref) must be
-`unclassified-change-after-signing`.
+widget with `/AP`, object shared by DSS and content, dangling reference, dangling
+reference filled with a `/Type /ObjStm` stream, deleted live object) must be
+`content-changed-after-signing`; the structural fixtures (shadow object, broken `/Prev`,
+`/XRefStm`, patched xref offset, an object stream reusing a signed object number, objects
+without xref) must be `unclassified-change-after-signing`.
+
+`createSignedXrefStreamFixtures` (exposed as `createSecurityFixtures().signedXrefStream`)
+signs a revision that itself ends in an xref stream (object 10, or object stream 10 plus
+xref stream 11). Its `offsetShift` patches a signed entry, including the object or xref
+stream's own entry. DSS-only appends (plain, with a signed object stream, and after a Flate
++ PNG predictor signed xref stream) must be `extended-with-validation-data`; content
+changes (plain and compressed) must be `content-changed-after-signing`; a signed
+structural entry one byte off its stream, and an appended object stream or DSS object that
+reuses the signed xref stream number 10, must be `unclassified-change-after-signing`.
 
 The fixtures are generated in the vitest setup instead of being committed as binary files:
 the public repository stays free of binaries that cannot be diff-reviewed, keys are

@@ -84,6 +84,7 @@ describe('appended revisions that change content -> warning', () => {
     ['changes an object shared by /DSS and the page content', 'dssSharedWithContent'],
     ['a second unsigned revision adds an annotation after a DSS revision', 'laterRevisionAddsAnnotation'],
     ['fills in a reference that dangled at signing time', 'danglingReferenceFilled'],
+    ['fills in a dangling reference with an appended /Type /ObjStm stream', 'danglingReferenceFilledByObjectStream'],
     ['deletes a live object with an f entry', 'freeLiveObject'],
     ['deletes a live object with a type-0 xref stream entry', 'freeLiveObjectXrefStream']
   ])('%s', async (_label, name) => {
@@ -142,16 +143,40 @@ describe('status model with an xref stream on the signed revision', () => {
 
   it.each([
     ['DSS-only append', 'dssOnly'],
-    ['DSS-only append with a signed object stream', 'dssObjectStream']
+    ['DSS-only append with a signed object stream', 'dssObjectStream'],
+    ['DSS-only append to a Flate + PNG predictor signed xref stream', 'dssCompressed']
   ])('%s -> ok with information', async (_label, name) => {
     const sig = await approval(f.signedXrefStream[name]);
     expectStatus(sig, 'intact', 'extended-with-validation-data', 'ok');
     expect(sig.integrityReason).toMatch(/validation data\/metadata only/);
   });
 
-  it('content change -> warning', async () => {
-    expectStatus(await approval(f.signedXrefStream.contentChanged),
+  it.each([
+    ['content change', 'contentChanged'],
+    ['content change after a Flate + PNG predictor signed xref stream', 'contentChangedCompressed']
+  ])('%s -> warning', async (_label, name) => {
+    expectStatus(await approval(f.signedXrefStream[name]),
       'modified-after-signing', 'content-changed-after-signing', 'warning');
+  });
+
+  // Structural streams have no parser record; only the exact num:offset the
+  // signed entry names is exempt, so one byte off must fail closed.
+  it.each([
+    ['the signed object stream entry is one byte off its definition', 'objectStreamOffsetOffByOne'],
+    ['the signed xref stream entry is one byte off its definition', 'xrefStreamOffsetOffByOne']
+  ])('%s -> unclassified', async (_label, name) => {
+    const sig = await approval(f.signedXrefStream[name]);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(/signed cross-reference entry for object 10 has no definition/);
+  });
+
+  it.each([
+    ['an appended object stream reuses the signed xref stream number', 'objectStreamReusesSignedXrefNumber', /reuses an object number/],
+    ['an appended DSS object reuses the signed xref stream number', 'objectReusesSignedXrefNumber', /redefines a signed object or xref stream/]
+  ])('%s -> unclassified', async (_label, name, reason) => {
+    const sig = await approval(f.signedXrefStream[name]);
+    expectStatus(sig, 'modified-after-signing', 'unclassified-change-after-signing', 'warning');
+    expect(sig.integrityReason).toMatch(reason);
   });
 
   it('shadow object and re-pointing append keep the structural warning', async () => {

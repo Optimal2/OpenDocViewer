@@ -292,10 +292,16 @@ function classify(log, E, pdfLib) {
   const isNamed = (dict, key, value) => dict instanceof PDFDict && dict.get(name(key)) === name(value);
 
   // A new object that a reference signed at E already pointed at (a dangling
-  // reference filled in later) changes what that signed object shows.
+  // reference filled in later) changes what that signed object shows. pdf-lib
+  // never assigns an object or xref stream, so an appended structural stream is
+  // not in the delta, but pdf.js still resolves the signed reference to it.
   const preReferenced = collectShallowRefs([...pre.values()].map((r) => r.object), pdfLib);
-  for (const n of delta) {
-    if (!pre.has(n) && preReferenced.has(n)) {
+  const filledLater = [
+    ...delta.filter((n) => !pre.has(n)),
+    ...log.structural.filter((c) => c.start >= E).map((c) => c.num)
+  ];
+  for (const n of filledLater) {
+    if (preReferenced.has(n)) {
       throw new Verdict(contentChanged(`object ${n} was referenced at signing time and was defined only afterwards`));
     }
   }
@@ -524,7 +530,8 @@ function activeXrefChain(physicalPreSections, signedSection, pdfLib) {
 function assertXrefConsistent(log, E, tail, preSections, pre, tailRecords) {
   const tailStructural = log.structural.filter((c) => c.start >= E);
   const preStructural = log.structural.filter((c) => c.start < E);
-  const preStreamNums = new Set(preStructural.filter((c) => c.type === 'ObjStm').map((c) => c.num));
+  // Signed object AND xref stream numbers: neither may be reused after signing.
+  const preStreamNums = new Set(preStructural.map((c) => c.num));
   const preStructuralOffsets = new Set(preStructural.map((c) => `${c.num}:${c.start}`));
   const preEntry = new Map();
   for (const section of preSections) {
@@ -557,7 +564,7 @@ function assertXrefConsistent(log, E, tail, preSections, pre, tailRecords) {
     if (inUseAtE(c.num) || tailRecords.has(c.num)) stop(`appended stream ${c.num} reuses an object number in use`);
   }
   for (const n of tailRecords.keys()) {
-    if (preStreamNums.has(n)) stop(`object ${n} after signing redefines a signed object stream`);
+    if (preStreamNums.has(n)) stop(`object ${n} after signing redefines a signed object or xref stream`);
   }
 
   const referenced = new Set();

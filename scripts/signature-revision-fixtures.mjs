@@ -66,7 +66,10 @@ export function appendRevision(base, defs, {
   direct.forEach((d, i) => entries.set(d.num, { type: 1, a: offsets[i], b: d.gen ?? 0 }));
   for (const [num, index] of Object.entries(xrefPoint)) entries.set(Number(num), { type: 1, a: offsets[index], b: 0 });
   for (const [num, offset] of Object.entries(preXrefPoint)) entries.set(Number(num), { type: 1, a: offset, b: 0 });
-  for (const [num, delta] of Object.entries(offsetShift)) entries.get(Number(num)).a += delta;
+  // Applied last, so it can also patch the object stream or the xref stream entry.
+  const shiftOffsets = () => {
+    for (const [num, delta] of Object.entries(offsetShift)) entries.get(Number(num)).a += delta;
+  };
   const maxNum = Math.max(9, ...defs.map((d) => d.num));
   let streamNum = maxNum + 1;
   if (inStream.length) {
@@ -86,6 +89,7 @@ export function appendRevision(base, defs, {
   for (const num of free) entries.set(num, { type: 0, a: 0, b: 1 });
   const extras = trailerExtras ? ` ${trailerExtras.trim()}` : '';
   if (!xrefStream) {
+    shiftOffsets();
     const xrefOffset = at();
     text += 'xref\n0 1\n0000000000 65535 f \n';
     for (const num of [...entries.keys()].sort((a, b) => a - b)) {
@@ -98,6 +102,7 @@ export function appendRevision(base, defs, {
   const xrefNum = streamNum;
   const xrefOffset = at();
   entries.set(xrefNum, { type: 1, a: xrefOffset, b: 0 });
+  shiftOffsets();
   const nums = [...entries.keys()].sort((a, b) => a - b);
   const rows = nums.map((num) => {
     const e = entries.get(num);
@@ -184,13 +189,14 @@ async function signWithUnlinkedDecoy(pki, kind, content) {
 export async function createSignedXrefStreamFixtures(pki) {
   const original = 'BT /F1 20 Tf 60 780 Td (ODV SIGNATURE FIXTURE SAMPLE TEXT 0123456789) Tj ET';
   const changed = 'BT /F1 20 Tf 60 780 Td (CHANGED AFTER SIGNING) Tj ET';
-  async function signed({ wrongKey = null, objStm = [] } = {}) {
+  // The signed xref stream is object 10, or 11 behind object stream 10 when `objStm` is set.
+  async function signed({ wrongKey = null, objStm = [], compress = false, offsetShift = {} } = {}) {
     const builder = baseSignedPdf({ fieldName: 'Signature1', visible: true,
       sigOptions: { subFilter: 'adbe.pkcs7.detached', nameLiteral: 'ODV Fixture Signer' } });
     const rev = builder.serialize({ trailerExtras: '/Info 9 0 R' });
     const pre = appendRevision(rev.bytes, [
       { num: 4, body: BASE.font }, { num: 6, body: stream(original) }
-    ], { xrefStream: true, objStm });
+    ], { xrefStream: true, objStm, compress, offsetShift });
     return signFile(pre.bytes, rev.offsets.get(8), (signedOverBytes) =>
       buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes, wrongKey }));
   }
@@ -199,10 +205,22 @@ export async function createSignedXrefStreamFixtures(pki) {
   const textAt = latin1Text(digestMismatch).indexOf('SAMPLE TEXT');
   if (textAt < 0) throw new Error('fixture bug: missing signed text');
   digestMismatch[textAt] = 0x73;
+  const compressed = await signed({ compress: true });
   return {
     intact,
     dssOnly: appendDssRevision(intact),
     dssObjectStream: appendDssRevision(await signed({ objStm: [4] })),
+    dssCompressed: appendDssRevision(compressed),
+    contentChangedCompressed: appendRevision(compressed, [{ num: 6, body: stream(changed) }, ...dssObjects()]).bytes,
+    // The signed entry for a structural stream is one byte off its definition:
+    // pdf.js would not find the stream there, so the exemption must not apply.
+    objectStreamOffsetOffByOne: appendDssRevision(await signed({ objStm: [4], offsetShift: { 10: 1 } })),
+    xrefStreamOffsetOffByOne: appendDssRevision(await signed({ offsetShift: { 10: 1 } })),
+    // The unsigned tail reuses the number of the signed xref stream 10.
+    objectStreamReusesSignedXrefNumber: appendDssRevision(intact, { xrefStream: true, objStm: [20, 21], objStmNum: 10 }),
+    objectReusesSignedXrefNumber: appendRevision(intact, [
+      ...dssObjects({ certs: '[21 0 R 10 0 R]' }), { num: 10, body: stream('ODV-FIXTURE-NOT-A-CERTIFICATE') }
+    ]).bytes,
     contentChanged: appendRevision(intact, [{ num: 6, body: stream(changed) }, ...dssObjects()]).bytes,
     shadowObject: appendRevision(intact, [
       { num: 6, body: stream(changed) }, { num: 6, body: stream(original) }, ...dssObjects()
@@ -293,6 +311,11 @@ export async function createRevisionFixtures(normal, pki) {
     builder.set(3, BASE.page('[7 0 R]', '[6 0 R 13 0 R]'));
     const dangling = await signBuilder(pki, builder);
     f.danglingReferenceFilled = appendRevision(dangling, [{ num: 13, body: stream(content) }, ...dss]).bytes;
+    // The same, filled with an empty /Type /ObjStm: pdf-lib never assigns a
+    // structural stream, but pdf.js still draws its data as page content.
+    f.danglingReferenceFilledByObjectStream = appendRevision(dangling, [
+      { num: 13, body: stream(content, '/Type /ObjStm /N 0 /First 0 ') }, ...dss
+    ]).bytes;
   }
   // Deleted live object (f entry / type-0 entry) next to an otherwise harmless DSS update.
   f.freeLiveObject = appendRevision(signed, dss, { free: [6] }).bytes;
