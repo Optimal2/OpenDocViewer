@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 18. Line count: 8031. JSDoc symbol count: 108.
+File count: 19. Line count: 8200. JSDoc symbol count: 110.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -53,7 +53,7 @@ OpenDocViewer — Active page renderer.
 
 Exports: `DocumentRender`
 
-Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/ImageRenderer.jsx`, `src/components/CanvasRenderer.jsx`, `src/components/LoadingMessage.jsx`, `src/utils/zoomUtils.js`, `src/utils/documentLoadingConfig.js`, `src/utils/renderSurfaceBounds.js`, `src/utils/imageAdjustments.js`, `src/utils/printCore.js`, `src/utils/compareTransform.js`
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/ImageRenderer.jsx`, `src/components/CanvasRenderer.jsx`, `src/components/LoadingMessage.jsx`, `src/components/OcrTextLayer.jsx`, `src/utils/ocrPageKey.js`, `src/utils/zoomUtils.js`, `src/utils/documentLoadingConfig.js`, `src/utils/renderSurfaceBounds.js`, `src/utils/imageAdjustments.js`, `src/utils/printCore.js`
 
 Symbols:
 
@@ -62,13 +62,13 @@ Symbols:
 - `normalizeSize` (function) - No description.
 - `hasUsableSize` (function) - No description.
 - `isBlobAssetUrl` (function) - No description.
+- `OCR_STATUS_FALLBACK` (constant) - English fallbacks of the OCR status texts \(public/locales/ /common.json, ocr.status \).
 - `DisplayedAsset` (typedef) - No description.
 - `DocumentRender` (constant) - No description.
 - `<anonymous>~lastNaturalSizeRef` (constant) - Natural size of the last finalized asset, per page index, for boost zoom compensation.
 - `<anonymous>~resetAssetRetry` (constant) - Reset the per\-page blob\-URL retry tracker after a successful load or when the target page changes.
 - `<anonymous>~clearLoadingOverlayTimer` (constant) - No description.
 - `<anonymous>~claimAssetRetry` (constant) - No description.
-- `<anonymous>~resolveCustomFitOptions` (constant) - No description.
 
 ## src/components/DocumentSelectionPanel.jsx
 
@@ -140,6 +140,18 @@ Symbols:
 - `LoadingSpinner.propTypes.size` (member) - Optional width/height; if omitted, CSS controls dimensions.
 - `LoadingSpinner.propTypes.label` (member) - Accessible label announced by assistive technologies.
 - `LoadingSpinner.propTypes.className` (member) - Extra classes to append to the root element.
+
+## src/components/OcrTextLayer.jsx
+
+Selectable, invisible text over a recognised page image.
+
+Exports: `OcrTextLayer`
+
+Local imports: `src/utils/ocrTextLayout.js`
+
+Symbols:
+
+- `OcrTextLayer` (function) - No description.
 
 ## src/components/PrintSelectionWorkspace.jsx
 

@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { isPdfSignatureInspectionEnabled, getPdfSignatureInspectionStart } from '../utils/runtimeConfig.js';
+import { isPdfSignatureInspectionEnabled, getPdfSignatureInspectionStart, isOcrEnabled } from '../utils/runtimeConfig.js';
 import logger from '../logging/systemLogger.js';
 import ViewerContext from './viewerContext.js';
 import {
@@ -706,7 +706,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pinnedAssetsRef.current.clear();
     ephemeralPrintUrlsRef.current.clear();
     printLeasedUrlsRef.current.clear();
-    setPrintActivity(printPreparationsRef.current > 0);
+    if (isOcrEnabled()) setPrintActivity(printPreparationsRef.current > 0);
   }, []);
 
   /**
@@ -906,8 +906,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     });
   }, [updateAllPages]);
 
-  /** Recompute the OCR pause signal from outstanding leases and print PDF assemblies. */
+  /**
+   * Recompute the OCR pause signal from outstanding leases and print PDF assemblies. Only OCR
+   * reads it, so while the switch is off no state is written and print flows render as before.
+   */
   const syncPrintActivity = useCallback(() => {
+    if (!isOcrEnabled()) return;
     setPrintActivity(printPreparationsRef.current > 0 || printLeasedUrlsRef.current.size > 0);
   }, []);
 
@@ -2724,8 +2728,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     readSourceArrayBuffer,
     ensurePageAsset,
   });
-  /** @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first. */
+  /**
+   * @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first.
+   *   A no-op while OCR is off, so page changes write no provider state on the default path.
+   */
   const setOcrFocusPageIndexes = useCallback((indexes) => {
+    if (!isOcrEnabled()) return;
     const next = (Array.isArray(indexes) ? indexes : [])
       .map((value) => Number(value))
       .filter((value) => Number.isInteger(value) && value >= 0);

@@ -312,10 +312,14 @@ Which pages are recognised, and when:
 - Raster pages (TIFF, JPEG, PNG and the other image formats the viewer shows) are always
   recognised. A PDF page is first checked for its own text layer through pdf.js, from the bytes
   the viewer already holds; a page with a usable layer is skipped and keeps the viewer's text. The
-  layer counts as unusable when it has fewer than 20 visible characters, or when more than a fifth
-  of them are private-use or replacement characters, or when fewer than half are letters or digits
-  (a scanned page wrapped in a PDF, or a font without a usable ToUnicode map). Any other format is
-  skipped.
+  layer counts as unusable when it has fewer than 50 visible characters (a page number, or a short
+  stamp on an otherwise scanned page), or when more than a fifth of them are private-use or
+  replacement characters, or when fewer than half are letters or digits (a scanned page wrapped in
+  a PDF, or a font without a usable ToUnicode map). The check counts characters only; a scanned
+  page that carries more than 50 characters of real text in its layer is taken as a text page.
+  The probe opens the PDF a second time in pdf.js from a copy of the bytes the viewer holds (the
+  renderer keeps its own instance), at most two documents at a time, and closes them when the
+  document leaves the viewer or the engine goes idle. Any other format is skipped.
 - Only the displayed page (both pages in the compare view) and a fixed number of neighbours are
   queued, never the whole document: after each displayed page the next two pages, then the page
   before it, so at most four pages per displayed page however long the document is. A page joins
@@ -328,8 +332,12 @@ Which pages are recognised, and when:
   hard memory pressure; the page in flight finishes, nothing new starts until the pause ends.
 - Outcomes (text, word boxes, a skip or a failure) are cached per page for the session, at most
   200 pages, least recently used first. A page that failed is not retried in the same session.
-  After a minute without work the worker is terminated to free its WebAssembly memory; the next
-  page starts it again, which costs the model load once more.
+  Each step is bounded (30 s for the text-layer probe and the page image, 180 s for recognition),
+  so a step that never answers fails that page instead of blocking the queue; a recognition that
+  times out also drops the worker, and the next page starts a fresh one. After a minute without
+  work the worker is terminated to free its WebAssembly memory; the next page starts it again,
+  which costs the model load once more. An engine that cannot start at all (see CSP below) stops
+  the queue for the session and releases the worker and the probed documents the same way.
 
 The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are

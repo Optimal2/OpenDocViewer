@@ -92,15 +92,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 162,
-    "sourceLineCount": 63359,
-    "docletCount": 1768,
-    "documentedFileCount": 161,
+    "fileCount": 164,
+    "sourceLineCount": 63688,
+    "docletCount": 1779,
+    "documentedFileCount": 163,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 5243
+    "estimatedSourceTokens": 5317
   },
   "recommendations": [
     "1 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -109,7 +109,7 @@
   "packageUsage": [
     {
       "packageName": "react",
-      "importCount": 69,
+      "importCount": 70,
       "dynamicImportCount": 0,
       "files": [
         "src/ErrorBoundary.jsx",
@@ -160,6 +160,7 @@
         "src/components/ImageRenderer.jsx",
         "src/components/LoadingMessage.jsx",
         "src/components/LoadingSpinner.jsx",
+        "src/components/OcrTextLayer.jsx",
         "src/components/PrintSelectionWorkspace.jsx",
         "src/components/Resizer.jsx",
         "src/components/SignatureDetailsDialog.jsx",
@@ -181,6 +182,56 @@
         "src/hooks/usePageTimer.js",
         "src/hooks/usePdfSignatureReports.js",
         "src/index.jsx"
+      ]
+    },
+    {
+      "packageName": "prop-types",
+      "importCount": 43,
+      "dynamicImportCount": 0,
+      "files": [
+        "src/PerformanceMonitor.jsx",
+        "src/app/OpenDocViewer.jsx",
+        "src/components/CanvasRenderer.jsx",
+        "src/components/DocumentConsumerWrapper.jsx",
+        "src/components/DocumentLoader/LoadPressureDialog.jsx",
+        "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
+        "src/components/DocumentMetadataOverlayDialog.jsx",
+        "src/components/DocumentSelectionPanel.jsx",
+        "src/components/DocumentThumbnailList.jsx",
+        "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
+        "src/components/DocumentToolbar/DocumentToolbar.jsx",
+        "src/components/DocumentToolbar/HelpMenuButton.jsx",
+        "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
+        "src/components/DocumentToolbar/LanguageMenuButton.jsx",
+        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+        "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+        "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
+        "src/components/DocumentToolbar/PrintRangeDialog.jsx",
+        "src/components/DocumentToolbar/SplitToolbarButton.jsx",
+        "src/components/DocumentToolbar/ThemeMenuButton.jsx",
+        "src/components/DocumentToolbar/ThemeToggleButton.jsx",
+        "src/components/DocumentToolbar/ZoomButtons.jsx",
+        "src/components/DocumentViewer/CompareCurtainButton.jsx",
+        "src/components/DocumentViewer/CompareCurtainView.jsx",
+        "src/components/DocumentViewer/CompareOverlayView.jsx",
+        "src/components/DocumentViewer/CompareTransformControls.jsx",
+        "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+        "src/components/DocumentViewer/DocumentViewerRender.jsx",
+        "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
+        "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
+        "src/components/ImageRenderer.jsx",
+        "src/components/LoadingMessage.jsx",
+        "src/components/LoadingSpinner.jsx",
+        "src/components/OcrTextLayer.jsx",
+        "src/components/PrintSelectionWorkspace.jsx",
+        "src/components/Resizer.jsx",
+        "src/components/SignatureDetailsDialog.jsx",
+        "src/components/SignatureOverviewButton.jsx",
+        "src/components/SignatureOverviewDialog.jsx",
+        "src/components/SignatureStatusBadge.jsx",
+        "src/components/SignatureTime.jsx",
+        "src/components/ViewerProblemNotice.jsx",
+        "src/components/common/StatusLed.jsx"
       ]
     },
     {
@@ -231,55 +282,6 @@
         "src/components/SignatureStatusBadge.jsx",
         "src/components/ViewerProblemNotice.jsx",
         "src/i18n.js"
-      ]
-    },
-    {
-      "packageName": "prop-types",
-      "importCount": 42,
-      "dynamicImportCount": 0,
-      "files": [
-        "src/PerformanceMonitor.jsx",
-        "src/app/OpenDocViewer.jsx",
-        "src/components/CanvasRenderer.jsx",
-        "src/components/DocumentConsumerWrapper.jsx",
-        "src/components/DocumentLoader/LoadPressureDialog.jsx",
-        "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
-        "src/components/DocumentMetadataOverlayDialog.jsx",
-        "src/components/DocumentSelectionPanel.jsx",
-        "src/components/DocumentThumbnailList.jsx",
-        "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-        "src/components/DocumentToolbar/DocumentToolbar.jsx",
-        "src/components/DocumentToolbar/HelpMenuButton.jsx",
-        "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
-        "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-        "src/components/DocumentToolbar/PageNavigationButtons.jsx",
-        "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
-        "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-        "src/components/DocumentToolbar/SplitToolbarButton.jsx",
-        "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-        "src/components/DocumentToolbar/ThemeToggleButton.jsx",
-        "src/components/DocumentToolbar/ZoomButtons.jsx",
-        "src/components/DocumentViewer/CompareCurtainButton.jsx",
-        "src/components/DocumentViewer/CompareCurtainView.jsx",
-        "src/components/DocumentViewer/CompareOverlayView.jsx",
-        "src/components/DocumentViewer/CompareTransformControls.jsx",
-        "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-        "src/components/DocumentViewer/DocumentViewerRender.jsx",
-        "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
-        "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-        "src/components/ImageRenderer.jsx",
-        "src/components/LoadingMessage.jsx",
-        "src/components/LoadingSpinner.jsx",
-        "src/components/PrintSelectionWorkspace.jsx",
-        "src/components/Resizer.jsx",
-        "src/components/SignatureDetailsDialog.jsx",
-        "src/components/SignatureOverviewButton.jsx",
-        "src/components/SignatureOverviewDialog.jsx",
-        "src/components/SignatureStatusBadge.jsx",
-        "src/components/SignatureTime.jsx",
-        "src/components/ViewerProblemNotice.jsx",
-        "src/components/common/StatusLed.jsx"
       ]
     },
     {
@@ -676,7 +678,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2872,
+            "lines": 2880,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -783,7 +785,7 @@
           {
             "path": "src/hooks/useOcrTextLayers.js",
             "score": 25,
-            "lines": 157,
+            "lines": 164,
             "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
@@ -962,10 +964,19 @@
     },
     {
       "name": "src/components",
-      "fileCount": 18,
-      "lineCount": 8031,
-      "docletCount": 108,
+      "fileCount": 19,
+      "lineCount": 8200,
+      "docletCount": 110,
       "importantFiles": [
+        {
+          "path": "src/components/DocumentRender.jsx",
+          "score": 63,
+          "lines": 1236,
+          "incomingLocalImports": 3,
+          "doclets": 27,
+          "summary": "OpenDocViewer — Active page renderer.",
+          "summaryConfidence": "high"
+        },
         {
           "path": "src/components/DocumentThumbnailList.jsx",
           "score": 63,
@@ -973,15 +984,6 @@
           "incomingLocalImports": 2,
           "doclets": 28,
           "summary": "OpenDocViewer — Deterministic thumbnail strip.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentRender.jsx",
-          "score": 62,
-          "lines": 1180,
-          "incomingLocalImports": 3,
-          "doclets": 26,
-          "summary": "OpenDocViewer — Active page renderer.",
           "summaryConfidence": "high"
         },
         {
@@ -1300,7 +1302,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3513,
+      "lineCount": 3521,
       "docletCount": 97,
       "importantFiles": [
         {
@@ -1315,7 +1317,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2872,
+          "lines": 2880,
           "incomingLocalImports": 1,
           "doclets": 68,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1361,7 +1363,7 @@
     {
       "name": "src/hooks",
       "fileCount": 7,
-      "lineCount": 970,
+      "lineCount": 977,
       "docletCount": 29,
       "importantFiles": [
         {
@@ -1403,7 +1405,7 @@
         {
           "path": "src/hooks/useOcrTextLayers.js",
           "score": 25,
-          "lines": 157,
+          "lines": 164,
           "incomingLocalImports": 1,
           "doclets": 2,
           "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -1572,8 +1574,8 @@
     {
       "name": "src/ocr",
       "fileCount": 10,
-      "lineCount": 1121,
-      "docletCount": 52,
+      "lineCount": 1173,
+      "docletCount": 56,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
@@ -1587,9 +1589,9 @@
         {
           "path": "src/ocr/classify.js",
           "score": 65,
-          "lines": 95,
+          "lines": 100,
           "incomingLocalImports": 2,
-          "doclets": 14,
+          "doclets": 15,
           "summary": "Decides, per page, whether OCR is worth running.",
           "summaryConfidence": "high"
         },
@@ -1600,6 +1602,15 @@
           "incomingLocalImports": 1,
           "doclets": 13,
           "summary": "Thin wrapper around a tesseract.js worker.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/ocr/queue.js",
+          "score": 41,
+          "lines": 282,
+          "incomingLocalImports": 0,
+          "doclets": 8,
+          "summary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
           "summaryConfidence": "high"
         },
         {
@@ -1618,15 +1629,6 @@
           "incomingLocalImports": 1,
           "doclets": 4,
           "summary": "Resolves where the OCR worker, engine core and language models are loaded from.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/ocr/queue.js",
-          "score": 26,
-          "lines": 235,
-          "incomingLocalImports": 0,
-          "doclets": 5,
-          "summary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
           "summaryConfidence": "high"
         },
         {
@@ -1702,9 +1704,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 53,
-      "lineCount": 21165,
-      "docletCount": 858,
+      "fileCount": 54,
+      "lineCount": 21258,
+      "docletCount": 863,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -8531,9 +8533,9 @@
     },
     {
       "path": "src/components/DocumentRender.jsx",
-      "lines": 1180,
+      "lines": 1236,
       "extension": ".jsx",
-      "jsdocBlockCount": 36,
+      "jsdocBlockCount": 37,
       "sourceSummary": "OpenDocViewer — Active page renderer.",
       "imports": [
         {
@@ -8601,6 +8603,22 @@
           "kind": "static"
         },
         {
+          "source": "./OcrTextLayer.jsx",
+          "specifiers": [
+            "OcrTextLayer"
+          ],
+          "line": 30,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/ocrPageKey.js",
+          "specifiers": [
+            "ocrPageKeyOf"
+          ],
+          "line": 31,
+          "kind": "static"
+        },
+        {
           "source": "../utils/zoomUtils.js",
           "specifiers": [
             "calculateFitToScreenZoom",
@@ -8608,7 +8626,7 @@
             "handleZoomIn",
             "handleZoomOut"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -8616,7 +8634,7 @@
           "specifiers": [
             "getDocumentLoadingConfig"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -8624,7 +8642,7 @@
           "specifiers": [
             "clampRenderSurfaceSize"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -8632,7 +8650,7 @@
           "specifiers": [
             "buildImageFilter"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -8640,7 +8658,7 @@
           "specifiers": [
             "composePagePrintCanvas"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -8648,7 +8666,7 @@
           "specifiers": [
             "isIdentityCompareTransform"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static"
         }
       ],
@@ -8656,64 +8674,64 @@
         {
           "name": "DocumentRender",
           "kind": "default",
-          "line": 1179
+          "line": 1235
         }
       ],
       "declarations": [
         {
           "name": "NOOP",
           "kind": "component",
-          "line": 51
+          "line": 53
         },
         {
           "name": "getCurrentPage",
           "kind": "function",
-          "line": 58
+          "line": 60
         },
         {
           "name": "normalizeSize",
           "kind": "function",
-          "line": 67
+          "line": 69
         },
         {
           "name": "hasUsableSize",
           "kind": "function",
-          "line": 78
+          "line": 80
         },
         {
           "name": "isBlobAssetUrl",
           "kind": "function",
-          "line": 86
+          "line": 88
         },
         {
           "name": "DocumentRender",
           "kind": "component",
-          "line": 117
+          "line": 128
         },
         {
           "name": "normalizeRequired",
           "kind": "function",
-          "line": 256
+          "line": 269
         },
         {
           "name": "normalizeOptional",
           "kind": "function",
-          "line": 261
+          "line": 274
         },
         {
           "name": "resolveOptionalFactor",
           "kind": "function",
-          "line": 287
+          "line": 300
         },
         {
           "name": "syntheticSurface",
           "kind": "object",
-          "line": 501
+          "line": 514
         },
         {
           "name": "beginTransition",
           "kind": "function",
-          "line": 557
+          "line": 570
         }
       ],
       "parseError": null,
@@ -8729,7 +8747,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 51,
+          "line": 53,
           "description": "Shared default for the optional callbacks.",
           "params": [],
           "returns": [
@@ -8747,7 +8765,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 58,
+          "line": 60,
           "description": "",
           "params": [
             {
@@ -8778,7 +8796,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 67,
+          "line": 69,
           "description": "",
           "params": [
             {
@@ -8803,7 +8821,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 78,
+          "line": 80,
           "description": "",
           "params": [
             {
@@ -8828,7 +8846,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 86,
+          "line": 88,
           "description": "",
           "params": [
             {
@@ -8847,13 +8865,26 @@
           "examples": 0
         },
         {
+          "id": "OCR_STATUS_FALLBACK",
+          "name": "OCR_STATUS_FALLBACK",
+          "longname": "OCR_STATUS_FALLBACK",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/DocumentRender.jsx",
+          "line": 93,
+          "description": "English fallbacks of the OCR status texts (public/locales/ /common.json, ocr.status ).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "DisplayedAsset",
           "name": "DisplayedAsset",
           "longname": "DisplayedAsset",
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 90,
+          "line": 101,
           "description": "",
           "params": [],
           "returns": [],
@@ -8866,7 +8897,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentRender.jsx",
-          "line": 117,
+          "line": 128,
           "description": "",
           "params": [
             {
@@ -8981,7 +9012,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 164,
+          "line": 177,
           "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
           "params": [],
           "returns": [],
@@ -8994,7 +9025,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 219,
+          "line": 232,
           "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
           "params": [],
           "returns": [
@@ -9012,7 +9043,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 226,
+          "line": 239,
           "description": "",
           "params": [],
           "returns": [
@@ -9030,7 +9061,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 238,
+          "line": 251,
           "description": "",
           "params": [
             {
@@ -9061,7 +9092,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 278,
+          "line": 291,
           "description": "",
           "params": [
             {
@@ -9086,7 +9117,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 407,
+          "line": 420,
           "description": "",
           "params": [
             {
@@ -9111,7 +9142,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 449,
+          "line": 462,
           "description": "Returns the surface whose intrinsic size should drive fit calculations.",
           "params": [],
           "returns": [
@@ -9129,7 +9160,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 462,
+          "line": 475,
           "description": "",
           "params": [],
           "returns": [
@@ -9147,7 +9178,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 471,
+          "line": 484,
           "description": "",
           "params": [],
           "returns": [
@@ -9165,7 +9196,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 481,
+          "line": 494,
           "description": "",
           "params": [
             {
@@ -9190,7 +9221,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 494,
+          "line": 507,
           "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
           "params": [
             {
@@ -9215,7 +9246,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 517,
+          "line": 530,
           "description": "",
           "params": [],
           "returns": [
@@ -9233,7 +9264,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 540,
+          "line": 553,
           "description": "",
           "params": [
             {
@@ -9258,7 +9289,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 739,
+          "line": 752,
           "description": "",
           "params": [
             {
@@ -9289,7 +9320,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 819,
+          "line": 832,
           "description": "",
           "params": [
             {
@@ -9314,7 +9345,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 876,
+          "line": 889,
           "description": "",
           "params": [
             {
@@ -9345,7 +9376,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 902,
+          "line": 915,
           "description": "",
           "params": [
             {
@@ -9382,7 +9413,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 943,
+          "line": 956,
           "description": "",
           "params": [
             {
@@ -9413,7 +9444,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentRender.jsx",
-          "line": 971,
+          "line": 984,
           "description": "",
           "params": [],
           "returns": [
@@ -9473,6 +9504,24 @@
           "resolved": "src/components/LoadingMessage.jsx"
         },
         {
+          "source": "./OcrTextLayer.jsx",
+          "specifiers": [
+            "OcrTextLayer"
+          ],
+          "line": 30,
+          "kind": "static",
+          "resolved": "src/components/OcrTextLayer.jsx"
+        },
+        {
+          "source": "../utils/ocrPageKey.js",
+          "specifiers": [
+            "ocrPageKeyOf"
+          ],
+          "line": 31,
+          "kind": "static",
+          "resolved": "src/utils/ocrPageKey.js"
+        },
+        {
           "source": "../utils/zoomUtils.js",
           "specifiers": [
             "calculateFitToScreenZoom",
@@ -9480,7 +9529,7 @@
             "handleZoomIn",
             "handleZoomOut"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static",
           "resolved": "src/utils/zoomUtils.js"
         },
@@ -9489,7 +9538,7 @@
           "specifiers": [
             "getDocumentLoadingConfig"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
@@ -9498,7 +9547,7 @@
           "specifiers": [
             "clampRenderSurfaceSize"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static",
           "resolved": "src/utils/renderSurfaceBounds.js"
         },
@@ -9507,7 +9556,7 @@
           "specifiers": [
             "buildImageFilter"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static",
           "resolved": "src/utils/imageAdjustments.js"
         },
@@ -9516,7 +9565,7 @@
           "specifiers": [
             "composePagePrintCanvas"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static",
           "resolved": "src/utils/printCore.js"
         },
@@ -9525,7 +9574,7 @@
           "specifiers": [
             "isIdentityCompareTransform"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static",
           "resolved": "src/utils/compareTransform.js"
         }
@@ -9557,7 +9606,7 @@
         }
       ],
       "incomingLocalImports": 3,
-      "importanceScore": 62,
+      "importanceScore": 63,
       "summary": "OpenDocViewer — Active page renderer.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -26030,6 +26079,174 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/components/OcrTextLayer.jsx",
+      "lines": 113,
+      "extension": ".jsx",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "Selectable, invisible text over a recognised page image.",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useMemo"
+          ],
+          "line": 13,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 14,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/ocrTextLayout.js",
+          "specifiers": [
+            "layoutOcrWords"
+          ],
+          "line": 15,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "OcrTextLayer",
+          "kind": "default",
+          "line": 112
+        }
+      ],
+      "declarations": [
+        {
+          "name": "OcrTextLayer",
+          "kind": "component",
+          "line": 28
+        },
+        {
+          "name": "layerStyle",
+          "kind": "object",
+          "line": 47
+        },
+        {
+          "name": "frameStyle",
+          "kind": "object",
+          "line": 57
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OcrTextLayer",
+          "name": "OcrTextLayer",
+          "longname": "OcrTextLayer",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/OcrTextLayer.jsx",
+          "line": 28,
+          "description": "",
+          "params": [
+            {
+              "name": "props",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.outcome",
+              "type": "Object",
+              "optional": false,
+              "description": "A done OCR outcome: words , imageWidth , imageHeight ."
+            },
+            {
+              "name": "props.renderWidth",
+              "type": "number",
+              "optional": false,
+              "description": "Stage width before zoom (the rotated page's layout size)."
+            },
+            {
+              "name": "props.renderHeight",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.zoom",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.rotation",
+              "type": "number",
+              "optional": true,
+              "description": "0, 90, 180 or 270 (default 0)."
+            },
+            {
+              "name": "props.label",
+              "type": "string",
+              "optional": false,
+              "description": "Accessible name of the layer."
+            },
+            {
+              "name": "props.pageNumber",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components",
+      "localImports": [
+        {
+          "source": "../utils/ocrTextLayout.js",
+          "specifiers": [
+            "layoutOcrWords"
+          ],
+          "line": 15,
+          "kind": "static",
+          "resolved": "src/utils/ocrTextLayout.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useMemo"
+          ],
+          "line": 13,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 14,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 1,
+      "importanceScore": 16,
+      "summary": "Selectable, invisible text over a recognised page image.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/components/PrintSelectionWorkspace.jsx",
       "lines": 2504,
       "extension": ".jsx",
@@ -29320,7 +29537,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2872,
+      "lines": 2880,
       "extension": ".jsx",
       "jsdocBlockCount": 74,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -29341,7 +29558,8 @@
           "source": "../utils/runtimeConfig.js",
           "specifiers": [
             "isPdfSignatureInspectionEnabled",
-            "getPdfSignatureInspectionStart"
+            "getPdfSignatureInspectionStart",
+            "isOcrEnabled"
           ],
           "line": 13,
           "kind": "static"
@@ -29620,47 +29838,47 @@
         {
           "name": "nextPage",
           "kind": "object",
-          "line": 1004
+          "line": 1008
         },
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1755
+          "line": 1759
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2170
+          "line": 2174
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2184
+          "line": 2188
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2198
+          "line": 2202
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2231
+          "line": 2235
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2401
+          "line": 2405
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2500
+          "line": 2504
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2502
+          "line": 2506
         }
       ],
       "parseError": null,
@@ -30363,7 +30581,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 910,
+          "line": 913,
           "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
           "params": [],
           "returns": [],
@@ -30376,7 +30594,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 918,
+          "line": 922,
           "description": "",
           "params": [
             {
@@ -30401,7 +30619,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 927,
+          "line": 931,
           "description": "",
           "params": [
             {
@@ -30426,7 +30644,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 938,
+          "line": 942,
           "description": "",
           "params": [
             {
@@ -30451,7 +30669,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 962,
+          "line": 966,
           "description": "Release print leases previously acquired through getPrintablePageUrls .",
           "params": [
             {
@@ -30476,7 +30694,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 987,
+          "line": 991,
           "description": "",
           "params": [
             {
@@ -30507,7 +30725,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1037,
+          "line": 1041,
           "description": "",
           "params": [
             {
@@ -30532,7 +30750,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1052,
+          "line": 1056,
           "description": "",
           "params": [
             {
@@ -30569,7 +30787,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1079,
+          "line": 1083,
           "description": "",
           "params": [],
           "returns": [
@@ -30587,7 +30805,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1088,
+          "line": 1092,
           "description": "",
           "params": [
             {
@@ -30612,7 +30830,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1151,
+          "line": 1155,
           "description": "",
           "params": [
             {
@@ -30637,7 +30855,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1303,
+          "line": 1307,
           "description": "",
           "params": [
             {
@@ -30662,7 +30880,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1322,
+          "line": 1326,
           "description": "",
           "params": [
             {
@@ -30687,7 +30905,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1346,
+          "line": 1350,
           "description": "",
           "params": [
             {
@@ -30712,7 +30930,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1355,
+          "line": 1359,
           "description": "",
           "params": [
             {
@@ -30737,7 +30955,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1363,
+          "line": 1367,
           "description": "",
           "params": [],
           "returns": [
@@ -30755,7 +30973,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1375,
+          "line": 1379,
           "description": "",
           "params": [
             {
@@ -30780,7 +30998,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1422,
+          "line": 1426,
           "description": "",
           "params": [
             {
@@ -30817,7 +31035,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1491,
+          "line": 1495,
           "description": "",
           "params": [
             {
@@ -30842,7 +31060,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1500,
+          "line": 1504,
           "description": "",
           "params": [
             {
@@ -30873,7 +31091,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1513,
+          "line": 1517,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -30910,7 +31128,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1565,
+          "line": 1569,
           "description": "",
           "params": [
             {
@@ -30941,7 +31159,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1576,
+          "line": 1580,
           "description": "",
           "params": [
             {
@@ -30972,7 +31190,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1587,
+          "line": 1591,
           "description": "",
           "params": [
             {
@@ -30997,7 +31215,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1611,
+          "line": 1615,
           "description": "",
           "params": [
             {
@@ -31022,7 +31240,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1658,
+          "line": 1662,
           "description": "",
           "params": [
             {
@@ -31047,7 +31265,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1671,
+          "line": 1675,
           "description": "",
           "params": [
             {
@@ -31084,7 +31302,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1743,
+          "line": 1747,
           "description": "",
           "params": [
             {
@@ -31121,7 +31339,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1835,
+          "line": 1839,
           "description": "",
           "params": [
             {
@@ -31158,7 +31376,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2028,
+          "line": 2032,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -31183,7 +31401,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2110,
+          "line": 2114,
           "description": "",
           "params": [
             {
@@ -31214,7 +31432,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2132,
+          "line": 2136,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -31239,7 +31457,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2291,
+          "line": 2295,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -31257,7 +31475,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2382,
+          "line": 2386,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -31288,7 +31506,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2425,
+          "line": 2429,
           "description": "",
           "params": [
             {
@@ -31313,14 +31531,14 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2728,
+          "line": 2735,
           "description": "",
           "params": [
             {
               "name": "indexes",
               "type": "Array.<number>",
               "optional": false,
-              "description": "Indexes into allPages of the displayed page(s), primary first."
+              "description": "Indexes into allPages of the displayed page(s), primary first. A no-op while OCR is off, so page changes write no provider state on the def..."
             }
           ],
           "returns": [],
@@ -31333,7 +31551,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2745,
+          "line": 2753,
           "description": "",
           "params": [
             {
@@ -31353,7 +31571,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2754,
+          "line": 2762,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -31379,7 +31597,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2759,
+          "line": 2767,
           "description": "",
           "params": [
             {
@@ -31399,7 +31617,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2764,
+          "line": 2772,
           "description": "",
           "params": [
             {
@@ -31419,7 +31637,8 @@
           "source": "../utils/runtimeConfig.js",
           "specifiers": [
             "isPdfSignatureInspectionEnabled",
-            "getPdfSignatureInspectionStart"
+            "getPdfSignatureInspectionStart",
+            "isOcrEnabled"
           ],
           "line": 13,
           "kind": "static",
@@ -32554,7 +32773,7 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 157,
+      "lines": 164,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -37914,9 +38133,9 @@
     },
     {
       "path": "src/ocr/classify.js",
-      "lines": 95,
+      "lines": 100,
       "extension": ".js",
-      "jsdocBlockCount": 14,
+      "jsdocBlockCount": 15,
       "sourceSummary": "Decides, per page, whether OCR is worth running.",
       "imports": [],
       "exports": [
@@ -37933,39 +38152,39 @@
         {
           "name": "PDF_TEXT_LAYER_THRESHOLDS",
           "kind": "variable",
-          "line": 33
+          "line": 34
         },
         {
           "name": "classifyPageSource",
           "kind": "function",
-          "line": 46
+          "line": 51
         },
         {
           "name": "assessPdfTextLayer",
           "kind": "function",
-          "line": 76
+          "line": 81
         }
       ],
       "declarations": [
         {
           "name": "classifyPageSource",
           "kind": "function",
-          "line": 46
+          "line": 51
         },
         {
           "name": "assessPdfTextLayer",
           "kind": "function",
-          "line": 76
+          "line": 81
         },
         {
           "name": "limits",
           "kind": "object",
-          "line": 77
+          "line": 82
         },
         {
           "name": "counts",
           "kind": "object",
-          "line": 89
+          "line": 94
         }
       ],
       "parseError": null,
@@ -38066,13 +38285,26 @@
           "examples": 0
         },
         {
+          "id": "RASTER_EXTENSIONS",
+          "name": "RASTER_EXTENSIONS",
+          "longname": "RASTER_EXTENSIONS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/classify.js",
+          "line": 31,
+          "description": "The image formats the viewer rasterises (utils/documentLoadingConfig.js isRasterImageExtension).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "PDF_TEXT_LAYER_THRESHOLDS",
           "name": "PDF_TEXT_LAYER_THRESHOLDS",
           "longname": "PDF_TEXT_LAYER_THRESHOLDS",
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 33,
+          "line": 34,
           "description": "Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.",
           "params": [],
           "returns": [],
@@ -38085,8 +38317,8 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 35,
-          "description": "Fewer visible characters than this counts as an empty layer (page numbers, a stray header).",
+          "line": 40,
+          "description": "Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -38098,7 +38330,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 37,
+          "line": 42,
           "description": "Below this share of letters and digits among visible characters the layer is garbled.",
           "params": [],
           "returns": [],
@@ -38111,7 +38343,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 39,
+          "line": 44,
           "description": "Above this share of private-use or replacement characters the layer is garbled.",
           "params": [],
           "returns": [],
@@ -38124,7 +38356,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 46,
+          "line": 51,
           "description": "",
           "params": [
             {
@@ -38149,7 +38381,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 60,
+          "line": 65,
           "description": "",
           "params": [],
           "returns": [],
@@ -38162,7 +38394,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/classify.js",
-          "line": 76,
+          "line": 81,
           "description": "Judge the text pdf.js extracted from one page.",
           "params": [
             {
@@ -39077,9 +39309,9 @@
     },
     {
       "path": "src/ocr/queue.js",
-      "lines": 235,
+      "lines": 282,
       "extension": ".js",
-      "jsdocBlockCount": 10,
+      "jsdocBlockCount": 13,
       "sourceSummary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
       "imports": [
         {
@@ -39095,61 +39327,71 @@
       ],
       "exports": [
         {
+          "name": "OCR_STEP_TIMEOUTS_MS",
+          "kind": "variable",
+          "line": 25
+        },
+        {
           "name": "OCR_PAGE_STATUS",
           "kind": "variable",
-          "line": 19
+          "line": 53
         },
         {
           "name": "createOcrQueue",
           "kind": "function",
-          "line": 70
+          "line": 105
         }
       ],
       "declarations": [
         {
+          "name": "withTimeout",
+          "kind": "function",
+          "line": 40
+        },
+        {
           "name": "createOcrQueue",
           "kind": "function",
-          "line": 70
+          "line": 105
         },
         {
           "name": "isRetained",
           "kind": "function",
-          "line": 94
+          "line": 130
         },
         {
           "name": "getSnapshot",
           "kind": "function",
-          "line": 96
+          "line": 132
         },
         {
           "name": "pages",
           "kind": "object",
-          "line": 97
+          "line": 133
         },
         {
           "name": "notify",
           "kind": "function",
-          "line": 103
+          "line": 139
         },
         {
           "name": "setTransient",
           "kind": "function",
-          "line": 112
+          "line": 148
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 117
+          "line": 153
         },
         {
           "name": "run",
           "kind": "function",
-          "line": 131
+          "line": 172
         },
         {
           "name": "job",
           "kind": "object",
-          "line": 132
+          "line": 173
         }
       ],
       "parseError": null,
@@ -39159,13 +39401,76 @@
       },
       "doclets": [
         {
+          "id": "OCR_STEP_TIMEOUTS_MS",
+          "name": "OCR_STEP_TIMEOUTS_MS",
+          "longname": "OCR_STEP_TIMEOUTS_MS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/queue.js",
+          "line": 25,
+          "description": "Upper bounds per step, so a promise that never settles (a pdf.js document that hangs, a page image that never arrives, a worker that stops answering) fails the page instead of blo...",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "TIMEOUT_STEP",
+          "name": "TIMEOUT_STEP",
+          "longname": "TIMEOUT_STEP",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/queue.js",
+          "line": 32,
+          "description": "Marker on the error of a step that exceeded its bound.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "withTimeout",
+          "name": "withTimeout",
+          "longname": "withTimeout",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/queue.js",
+          "line": 40,
+          "description": "",
+          "params": [
+            {
+              "name": "promise",
+              "type": "Promise.<*>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "ms",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "step",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<*>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "OcrQueueCandidate",
           "name": "OcrQueueCandidate",
           "longname": "OcrQueueCandidate",
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/queue.js",
-          "line": 28,
+          "line": 62,
           "description": "",
           "params": [],
           "returns": [],
@@ -39178,7 +39483,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/queue.js",
-          "line": 37,
+          "line": 71,
           "description": "",
           "params": [],
           "returns": [],
@@ -39191,7 +39496,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/queue.js",
-          "line": 44,
+          "line": 78,
           "description": "",
           "params": [],
           "returns": [],
@@ -39204,7 +39509,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/queue.js",
-          "line": 70,
+          "line": 105,
           "description": "",
           "params": [
             {
@@ -39266,6 +39571,12 @@
               "type": "function",
               "optional": false,
               "description": "Called when nothing is left to do."
+            },
+            {
+              "name": "options.timeouts",
+              "type": "Object",
+              "optional": true,
+              "description": "Per-step bounds in ms ( probe , image , recognize ); default OCR_STEP_TIMEOUTS_MS."
             }
           ],
           "returns": [
@@ -39283,7 +39594,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/ocr/queue.js",
-          "line": 86,
+          "line": 122,
           "description": "null until retainSources is called: every source is retained.",
           "params": [],
           "returns": [],
@@ -39306,7 +39617,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 0,
-      "importanceScore": 26,
+      "importanceScore": 41,
       "summary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -47070,9 +47381,186 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 27,
+      "incomingLocalImports": 2,
+      "importanceScore": 35,
       "summary": "Key of one document page in the OCR result map (`ocrPages` on the viewer context).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/ocrTextLayout.js",
+      "lines": 93,
+      "extension": ".js",
+      "jsdocBlockCount": 7,
+      "sourceSummary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "OCR_LAYER_FONT_FAMILY",
+          "kind": "variable",
+          "line": 8
+        },
+        {
+          "name": "measureWordWidth",
+          "kind": "function",
+          "line": 23
+        },
+        {
+          "name": "layoutOcrWords",
+          "kind": "function",
+          "line": 67
+        }
+      ],
+      "declarations": [
+        {
+          "name": "measureWordWidth",
+          "kind": "function",
+          "line": 23
+        },
+        {
+          "name": "layoutOcrWords",
+          "kind": "function",
+          "line": 67
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OCR_LAYER_FONT_FAMILY",
+          "name": "OCR_LAYER_FONT_FAMILY",
+          "longname": "OCR_LAYER_FONT_FAMILY",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrTextLayout.js",
+          "line": 8,
+          "description": "Font used for the invisible words; width is fitted per word so the family only affects fallback estimates.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "FALLBACK_ADVANCE",
+          "name": "FALLBACK_ADVANCE",
+          "longname": "FALLBACK_ADVANCE",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrTextLayout.js",
+          "line": 10,
+          "description": "Average advance per character relative to the font size, used when text cannot be measured.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "measureWordWidth",
+          "name": "measureWordWidth",
+          "longname": "measureWordWidth",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrTextLayout.js",
+          "line": 23,
+          "description": "Width of text at fontSize px, measured with a canvas context when one exists (jsdom and print have none, then an estimate keeps the layout consistent).",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "fontSize",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "OcrWordPlacement",
+          "name": "OcrWordPlacement",
+          "longname": "OcrWordPlacement",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/ocrTextLayout.js",
+          "line": 44,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "layoutOcrWords",
+          "name": "layoutOcrWords",
+          "longname": "layoutOcrWords",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrTextLayout.js",
+          "line": 67,
+          "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
+          "params": [
+            {
+              "name": "words",
+              "type": "Array.<Object>",
+              "optional": false,
+              "description": "{ text, bbox: { x0, y0, x1, y1 } } in image pixels."
+            },
+            {
+              "name": "imageWidth",
+              "type": "number",
+              "optional": false,
+              "description": "Pixel width of the recognised image."
+            },
+            {
+              "name": "imageHeight",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "frameWidth",
+              "type": "number",
+              "optional": false,
+              "description": "Width the image occupies on the stage (before zoom)."
+            },
+            {
+              "name": "frameHeight",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "measure",
+              "type": "function",
+              "optional": false,
+              "description": "Default measureWordWidth."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<OcrWordPlacement>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 38,
+      "summary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -76603,7 +77091,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 494,
+      "line": 507,
       "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
       "params": [
         {
@@ -76628,7 +77116,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 517,
+      "line": 530,
       "description": "",
       "params": [],
       "returns": [
@@ -76646,7 +77134,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 238,
+      "line": 251,
       "description": "",
       "params": [
         {
@@ -76677,7 +77165,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 226,
+      "line": 239,
       "description": "",
       "params": [],
       "returns": [
@@ -76695,7 +77183,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 90,
+      "line": 101,
       "description": "",
       "params": [],
       "returns": [],
@@ -76708,7 +77196,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 117,
+      "line": 128,
       "description": "",
       "params": [
         {
@@ -76823,7 +77311,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 407,
+      "line": 420,
       "description": "",
       "params": [
         {
@@ -76848,7 +77336,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 739,
+      "line": 752,
       "description": "",
       "params": [
         {
@@ -76879,7 +77367,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 481,
+      "line": 494,
       "description": "",
       "params": [
         {
@@ -76904,7 +77392,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 462,
+      "line": 475,
       "description": "",
       "params": [],
       "returns": [
@@ -76922,7 +77410,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 471,
+      "line": 484,
       "description": "",
       "params": [],
       "returns": [
@@ -76940,7 +77428,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 449,
+      "line": 462,
       "description": "Returns the surface whose intrinsic size should drive fit calculations.",
       "params": [],
       "returns": [
@@ -76958,7 +77446,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 58,
+      "line": 60,
       "description": "",
       "params": [
         {
@@ -76989,7 +77477,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 943,
+      "line": 956,
       "description": "",
       "params": [
         {
@@ -77020,7 +77508,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 876,
+      "line": 889,
       "description": "",
       "params": [
         {
@@ -77051,7 +77539,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 540,
+      "line": 553,
       "description": "",
       "params": [
         {
@@ -77076,7 +77564,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 971,
+      "line": 984,
       "description": "",
       "params": [],
       "returns": [
@@ -77094,7 +77582,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 819,
+      "line": 832,
       "description": "",
       "params": [
         {
@@ -77119,7 +77607,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 78,
+      "line": 80,
       "description": "",
       "params": [
         {
@@ -77144,7 +77632,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 86,
+      "line": 88,
       "description": "",
       "params": [
         {
@@ -77169,7 +77657,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 164,
+      "line": 177,
       "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
       "params": [],
       "returns": [],
@@ -77182,7 +77670,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 51,
+      "line": 53,
       "description": "Shared default for the optional callbacks.",
       "params": [],
       "returns": [
@@ -77200,7 +77688,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentRender.jsx",
-      "line": 67,
+      "line": 69,
       "description": "",
       "params": [
         {
@@ -77219,13 +77707,26 @@
       "examples": 0
     },
     {
+      "id": "OCR_STATUS_FALLBACK",
+      "name": "OCR_STATUS_FALLBACK",
+      "longname": "OCR_STATUS_FALLBACK",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/DocumentRender.jsx",
+      "line": 93,
+      "description": "English fallbacks of the OCR status texts (public/locales/ /common.json, ocr.status ).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~recoverPageAsset",
       "name": "recoverPageAsset",
       "longname": "<anonymous>~recoverPageAsset",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 902,
+      "line": 915,
       "description": "",
       "params": [
         {
@@ -77262,7 +77763,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 219,
+      "line": 232,
       "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
       "params": [],
       "returns": [
@@ -77280,7 +77781,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentRender.jsx",
-      "line": 278,
+      "line": 291,
       "description": "",
       "params": [
         {
@@ -86513,6 +87014,73 @@
       "examples": 0
     },
     {
+      "id": "OcrTextLayer",
+      "name": "OcrTextLayer",
+      "longname": "OcrTextLayer",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/OcrTextLayer.jsx",
+      "line": 28,
+      "description": "",
+      "params": [
+        {
+          "name": "props",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.outcome",
+          "type": "Object",
+          "optional": false,
+          "description": "A done OCR outcome: words , imageWidth , imageHeight ."
+        },
+        {
+          "name": "props.renderWidth",
+          "type": "number",
+          "optional": false,
+          "description": "Stage width before zoom (the rotated page's layout size)."
+        },
+        {
+          "name": "props.renderHeight",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.zoom",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.rotation",
+          "type": "number",
+          "optional": true,
+          "description": "0, 90, 180 or 270 (default 0)."
+        },
+        {
+          "name": "props.label",
+          "type": "string",
+          "optional": false,
+          "description": "Accessible name of the layer."
+        },
+        {
+          "name": "props.pageNumber",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "getBestIncreasingDocumentEntryIndexes",
       "name": "getBestIncreasingDocumentEntryIndexes",
       "longname": "getBestIncreasingDocumentEntryIndexes",
@@ -88005,7 +88573,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1037,
+      "line": 1041,
       "description": "",
       "params": [
         {
@@ -88030,7 +88598,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1363,
+      "line": 1367,
       "description": "",
       "params": [],
       "returns": [
@@ -88048,7 +88616,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1052,
+      "line": 1056,
       "description": "",
       "params": [
         {
@@ -88085,7 +88653,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1513,
+      "line": 1517,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -88122,7 +88690,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1079,
+      "line": 1083,
       "description": "",
       "params": [],
       "returns": [
@@ -88183,7 +88751,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2759,
+      "line": 2767,
       "description": "",
       "params": [
         {
@@ -88203,7 +88771,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2745,
+      "line": 2753,
       "description": "",
       "params": [
         {
@@ -88223,7 +88791,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1151,
+      "line": 1155,
       "description": "",
       "params": [
         {
@@ -88274,7 +88842,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1611,
+      "line": 1615,
       "description": "",
       "params": [
         {
@@ -88299,7 +88867,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2028,
+      "line": 2032,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -88324,7 +88892,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1835,
+      "line": 1839,
       "description": "",
       "params": [
         {
@@ -88374,7 +88942,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2764,
+      "line": 2772,
       "description": "",
       "params": [
         {
@@ -88425,7 +88993,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2425,
+      "line": 2429,
       "description": "",
       "params": [
         {
@@ -88450,7 +89018,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1491,
+      "line": 1495,
       "description": "",
       "params": [
         {
@@ -88475,7 +89043,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1587,
+      "line": 1591,
       "description": "",
       "params": [
         {
@@ -88500,7 +89068,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1088,
+      "line": 1092,
       "description": "",
       "params": [
         {
@@ -88612,7 +89180,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 938,
+      "line": 942,
       "description": "",
       "params": [
         {
@@ -88712,7 +89280,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 918,
+      "line": 922,
       "description": "",
       "params": [
         {
@@ -88762,7 +89330,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 927,
+      "line": 931,
       "description": "",
       "params": [
         {
@@ -88923,7 +89491,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1375,
+      "line": 1379,
       "description": "",
       "params": [
         {
@@ -89023,7 +89591,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 987,
+      "line": 991,
       "description": "",
       "params": [
         {
@@ -89054,7 +89622,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1422,
+      "line": 1426,
       "description": "",
       "params": [
         {
@@ -89091,7 +89659,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1565,
+      "line": 1569,
       "description": "",
       "params": [
         {
@@ -89122,7 +89690,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2291,
+      "line": 2295,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -89140,7 +89708,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1346,
+      "line": 1350,
       "description": "",
       "params": [
         {
@@ -89165,7 +89733,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1355,
+      "line": 1359,
       "description": "",
       "params": [
         {
@@ -89190,7 +89758,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2110,
+      "line": 2114,
       "description": "",
       "params": [
         {
@@ -89221,7 +89789,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1303,
+      "line": 1307,
       "description": "",
       "params": [
         {
@@ -89246,7 +89814,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 962,
+      "line": 966,
       "description": "Release print leases previously acquired through getPrintablePageUrls .",
       "params": [
         {
@@ -89271,7 +89839,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1743,
+      "line": 1747,
       "description": "",
       "params": [
         {
@@ -89357,7 +89925,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1671,
+      "line": 1675,
       "description": "",
       "params": [
         {
@@ -89412,7 +89980,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2382,
+      "line": 2386,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -89443,7 +90011,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2754,
+      "line": 2762,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -89469,14 +90037,14 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2728,
+      "line": 2735,
       "description": "",
       "params": [
         {
           "name": "indexes",
           "type": "Array.<number>",
           "optional": false,
-          "description": "Indexes into allPages of the displayed page(s), primary first."
+          "description": "Indexes into allPages of the displayed page(s), primary first. A no-op while OCR is off, so page changes write no provider state on the def..."
         }
       ],
       "returns": [],
@@ -89489,7 +90057,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1658,
+      "line": 1662,
       "description": "",
       "params": [
         {
@@ -89514,7 +90082,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1322,
+      "line": 1326,
       "description": "",
       "params": [
         {
@@ -89552,7 +90120,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 910,
+      "line": 913,
       "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
       "params": [],
       "returns": [],
@@ -89596,7 +90164,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1500,
+      "line": 1504,
       "description": "",
       "params": [
         {
@@ -89627,7 +90195,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2132,
+      "line": 2136,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -89652,7 +90220,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1576,
+      "line": 1580,
       "description": "",
       "params": [
         {
@@ -93461,7 +94029,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 76,
+      "line": 81,
       "description": "Judge the text pdf.js extracted from one page.",
       "params": [
         {
@@ -93492,7 +94060,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 46,
+      "line": 51,
       "description": "",
       "params": [
         {
@@ -93530,7 +94098,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 39,
+      "line": 44,
       "description": "Above this share of private-use or replacement characters the layer is garbled.",
       "params": [],
       "returns": [],
@@ -93543,8 +94111,8 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 35,
-      "description": "Fewer visible characters than this counts as an empty layer (page numbers, a stray header).",
+      "line": 40,
+      "description": "Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -93556,7 +94124,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 37,
+      "line": 42,
       "description": "Below this share of letters and digits among visible characters the layer is garbled.",
       "params": [],
       "returns": [],
@@ -93582,7 +94150,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 33,
+      "line": 34,
       "description": "Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.",
       "params": [],
       "returns": [],
@@ -93595,7 +94163,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/classify.js",
-      "line": 60,
+      "line": 65,
       "description": "",
       "params": [],
       "returns": [],
@@ -93610,6 +94178,19 @@
       "file": "src/ocr/classify.js",
       "line": 16,
       "description": "PDF: read the text layer first, recognise only when it is not usable.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RASTER_EXTENSIONS",
+      "name": "RASTER_EXTENSIONS",
+      "longname": "RASTER_EXTENSIONS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/classify.js",
+      "line": 31,
+      "description": "The image formats the viewer rasterises (utils/documentLoadingConfig.js isRasterImageExtension).",
       "params": [],
       "returns": [],
       "examples": 0
@@ -94053,7 +94634,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/queue.js",
-      "line": 70,
+      "line": 105,
       "description": "",
       "params": [
         {
@@ -94115,6 +94696,12 @@
           "type": "function",
           "optional": false,
           "description": "Called when nothing is left to do."
+        },
+        {
+          "name": "options.timeouts",
+          "type": "Object",
+          "optional": true,
+          "description": "Per-step bounds in ms ( probe , image , recognize ); default OCR_STEP_TIMEOUTS_MS."
         }
       ],
       "returns": [
@@ -94126,13 +94713,26 @@
       "examples": 0
     },
     {
+      "id": "OCR_STEP_TIMEOUTS_MS",
+      "name": "OCR_STEP_TIMEOUTS_MS",
+      "longname": "OCR_STEP_TIMEOUTS_MS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/queue.js",
+      "line": 25,
+      "description": "Upper bounds per step, so a promise that never settles (a pdf.js document that hangs, a page image that never arrives, a worker that stops answering) fails the page instead of blo...",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "OcrQueue",
       "name": "OcrQueue",
       "longname": "OcrQueue",
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/queue.js",
-      "line": 44,
+      "line": 78,
       "description": "",
       "params": [],
       "returns": [],
@@ -94145,7 +94745,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/queue.js",
-      "line": 28,
+      "line": 62,
       "description": "",
       "params": [],
       "returns": [],
@@ -94158,7 +94758,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/queue.js",
-      "line": 37,
+      "line": 71,
       "description": "",
       "params": [],
       "returns": [],
@@ -94171,10 +94771,60 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/ocr/queue.js",
-      "line": 86,
+      "line": 122,
       "description": "null until retainSources is called: every source is retained.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "TIMEOUT_STEP",
+      "name": "TIMEOUT_STEP",
+      "longname": "TIMEOUT_STEP",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/queue.js",
+      "line": 32,
+      "description": "Marker on the error of a step that exceeded its bound.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "withTimeout",
+      "name": "withTimeout",
+      "longname": "withTimeout",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/queue.js",
+      "line": 40,
+      "description": "",
+      "params": [
+        {
+          "name": "promise",
+          "type": "Promise.<*>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "ms",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "step",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<*>",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -99450,6 +100100,131 @@
       "file": "src/utils/ocrPageKey.js",
       "line": 11,
       "description": "Key of one document page in the OCR result map ( ocrPages on the viewer context).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "FALLBACK_ADVANCE",
+      "name": "FALLBACK_ADVANCE",
+      "longname": "FALLBACK_ADVANCE",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrTextLayout.js",
+      "line": 10,
+      "description": "Average advance per character relative to the font size, used when text cannot be measured.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "layoutOcrWords",
+      "name": "layoutOcrWords",
+      "longname": "layoutOcrWords",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrTextLayout.js",
+      "line": 67,
+      "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.",
+      "params": [
+        {
+          "name": "words",
+          "type": "Array.<Object>",
+          "optional": false,
+          "description": "{ text, bbox: { x0, y0, x1, y1 } } in image pixels."
+        },
+        {
+          "name": "imageWidth",
+          "type": "number",
+          "optional": false,
+          "description": "Pixel width of the recognised image."
+        },
+        {
+          "name": "imageHeight",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "frameWidth",
+          "type": "number",
+          "optional": false,
+          "description": "Width the image occupies on the stage (before zoom)."
+        },
+        {
+          "name": "frameHeight",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "measure",
+          "type": "function",
+          "optional": false,
+          "description": "Default measureWordWidth."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<OcrWordPlacement>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "measureWordWidth",
+      "name": "measureWordWidth",
+      "longname": "measureWordWidth",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrTextLayout.js",
+      "line": 23,
+      "description": "Width of text at fontSize px, measured with a canvas context when one exists (jsdom and print have none, then an estimate keeps the layout consistent).",
+      "params": [
+        {
+          "name": "text",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "fontSize",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "OCR_LAYER_FONT_FAMILY",
+      "name": "OCR_LAYER_FONT_FAMILY",
+      "longname": "OCR_LAYER_FONT_FAMILY",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrTextLayout.js",
+      "line": 8,
+      "description": "Font used for the invisible words; width is fitted per word so the family only affects fallback estimates.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OcrWordPlacement",
+      "name": "OcrWordPlacement",
+      "longname": "OcrWordPlacement",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/ocrTextLayout.js",
+      "line": 44,
+      "description": "",
       "params": [],
       "returns": [],
       "examples": 0

@@ -16,6 +16,40 @@
  */
 import { OCR_PAGE_DECISION, OCR_SKIP_REASON, classifyPageSource } from './classify.js';
 
+/**
+ * Upper bounds per step, so a promise that never settles (a pdf.js document that hangs, a page
+ * image that never arrives, a worker that stops answering) fails the page instead of blocking
+ * the queue for the rest of the session. Recognition of a large page at 300 dpi takes seconds;
+ * the bound is far above that.
+ */
+export const OCR_STEP_TIMEOUTS_MS = Object.freeze({
+  probe: 30000,
+  image: 30000,
+  recognize: 180000,
+});
+
+/** Marker on the error of a step that exceeded its bound. */
+const TIMEOUT_STEP = Symbol('ocr-step-timeout');
+
+/**
+ * @param {Promise<*>} promise
+ * @param {number} ms
+ * @param {string} step
+ * @returns {Promise<*>}
+ */
+function withTimeout(promise, ms, step) {
+  if (!(ms > 0)) return promise;
+  let timer;
+  const bound = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(`OCR ${step} exceeded ${ms} ms`);
+      error[TIMEOUT_STEP] = step;
+      reject(error);
+    }, ms);
+  });
+  return Promise.race([promise, bound]).finally(() => clearTimeout(timer));
+}
+
 export const OCR_PAGE_STATUS = Object.freeze({
   QUEUED: 'queued',
   PROBING: 'probing',
@@ -65,6 +99,7 @@ export const OCR_PAGE_STATUS = Object.freeze({
  * @param {function(OcrQueueSnapshot): void=} options.onChange  Called after every state change.
  * @param {function(): void=} options.onBusy  Called when a page starts.
  * @param {function(): void=} options.onIdle  Called when nothing is left to do.
+ * @param {Object=} options.timeouts  Per-step bounds in ms (`probe`, `image`, `recognize`); default OCR_STEP_TIMEOUTS_MS.
  * @returns {OcrQueue}
  */
 export function createOcrQueue({
@@ -77,6 +112,7 @@ export function createOcrQueue({
   onChange,
   onBusy,
   onIdle,
+  timeouts = OCR_STEP_TIMEOUTS_MS,
 }) {
   /** @type {Array<OcrQueueCandidate>} */
   let plan = [];
@@ -115,7 +151,12 @@ export function createOcrQueue({
   }
 
   function pump() {
-    if (disposed || paused || inFlight || engineFailure) return;
+    if (disposed || paused || inFlight) return;
+    if (engineFailure) {
+      // Nothing more will run this session; let the owner release the prober and the worker.
+      onIdle?.();
+      return;
+    }
     const candidate = plan.find((entry) => {
       if (cache.has(entry.key)) return false;
       const status = transient.get(entry.key)?.status;
@@ -140,15 +181,17 @@ export function createOcrQueue({
       } else {
         if (decision === OCR_PAGE_DECISION.PROBE_TEXT) {
           setTransient(job.key, job.sourceKey, OCR_PAGE_STATUS.PROBING);
-          const assessment = await probeTextLayer(candidate.sourceKey, candidate.pageIndex);
+          const assessment = await withTimeout(
+            probeTextLayer(candidate.sourceKey, candidate.pageIndex), timeouts.probe, 'text-layer probe'
+          );
           if (assessment?.usable) {
             outcome = { status: OCR_PAGE_STATUS.SKIPPED, reason: OCR_SKIP_REASON.TEXT_LAYER, assessment };
           }
         }
         if (!outcome && !job.abandoned) {
           setTransient(job.key, job.sourceKey, OCR_PAGE_STATUS.RECOGNIZING);
-          const image = await getPageImage(candidate);
-          const result = await engine.recognize(image.blob);
+          const image = await withTimeout(getPageImage(candidate), timeouts.image, 'page image');
+          const result = await withTimeout(engine.recognize(image.blob), timeouts.recognize, 'recognition');
           outcome = {
             status: OCR_PAGE_STATUS.DONE,
             text: result.text,
@@ -164,12 +207,16 @@ export function createOcrQueue({
       if (failure) {
         // The engine cannot start in this session (CSP, missing files, timeout); engine.js has
         // logged the cause. Stop the queue instead of failing page after page.
-        engineFailure = String(failure);
+        engineFailure = String(failure?.kind || failure);
         outcome = { status: OCR_PAGE_STATUS.FAILED, reason: `engine:${engineFailure}` };
       } else if (!job.abandoned) {
         const message = String(error?.message || error);
         log.warn?.('OCR of a page failed', { sourceKey: job.sourceKey, pageIndex: candidate.pageIndex, error: message });
         outcome = { status: OCR_PAGE_STATUS.FAILED, reason: message };
+        if (error?.[TIMEOUT_STEP] === 'recognition') {
+          // The worker stopped answering: drop it so the next page starts a fresh one.
+          void engine.terminate();
+        }
       }
     }
     inFlight = null;

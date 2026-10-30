@@ -78,14 +78,21 @@ export default function useOcrTextLayers({
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Page image could not be read (${response.status})`);
       const blob = await response.blob();
-      const page = allPagesRef.current?.[candidate.viewerIndex];
-      let width = Math.max(0, Number(page?.realWidth) || 0);
-      let height = Math.max(0, Number(page?.realHeight) || 0);
-      if ((!width || !height) && typeof createImageBitmap === 'function') {
+      // The image size comes from the fetched bytes themselves: the page entry's
+      // realWidth/realHeight also track thumbnail commits and resolution boosts, so they may
+      // describe other pixels than this blob. The page entry is only the fallback where
+      // createImageBitmap does not exist.
+      let width;
+      let height;
+      if (typeof createImageBitmap === 'function') {
         const bitmap = await createImageBitmap(blob);
         width = bitmap.width;
         height = bitmap.height;
         bitmap.close?.();
+      } else {
+        const page = allPagesRef.current?.[candidate.viewerIndex];
+        width = Math.max(0, Number(page?.realWidth) || 0);
+        height = Math.max(0, Number(page?.realHeight) || 0);
       }
       return { blob, width, height };
     };

@@ -144,6 +144,21 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(4);
   });
 
+  it('measures the fetched image itself when the browser can decode it, not the page entry', async () => {
+    const closed = [];
+    vi.stubGlobal('createImageBitmap', vi.fn(async (blob) => ({ width: 2480, height: 3508, close: () => closed.push(blob.type) })));
+    const engine = makeEngine();
+    const ocrModule = makeModule(engine, makeProber());
+    // The page entry carries thumbnail-sized dimensions (a thumbnail commit overwrote them).
+    const props = baseProps({ ocrModule, allPages: [page('doc', 0, { realWidth: 220, realHeight: 311 })], focusPageIndexes: [0] });
+    await render(props);
+    await flush();
+    engine.pending[0].resolve(result('mätt'));
+    await flush();
+    expect(latest.ocrPages[makeOcrPageKey('doc', 0)]).toMatchObject({ status: 'done', imageWidth: 2480, imageHeight: 3508 });
+    expect(closed).toEqual(['image/png']);
+  });
+
   it('waits for a page to be rendered before queuing it', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());

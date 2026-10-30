@@ -27,12 +27,17 @@ export const OCR_SKIP_REASON = Object.freeze({
   FAILED_PAGE: 'failed-page',
 });
 
-const RASTER_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'jfif', 'tif', 'tiff', 'bmp', 'gif', 'webp']);
+/** The image formats the viewer rasterises (utils/documentLoadingConfig.js isRasterImageExtension). */
+const RASTER_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'jfif', 'tif', 'tiff', 'bmp', 'gif', 'webp', 'avif']);
 
 /** Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers. */
 export const PDF_TEXT_LAYER_THRESHOLDS = Object.freeze({
-  /** Fewer visible characters than this counts as an empty layer (page numbers, a stray header). */
-  minCharacters: 20,
+  /**
+   * Fewer visible characters than this counts as an empty layer: page numbers, a stray header,
+   * or a short stamp on an otherwise scanned page. A page of running text has hundreds, so the
+   * cost of the bound is at most one unneeded recognition of a very short real page.
+   */
+  minCharacters: 50,
   /** Below this share of letters and digits among visible characters the layer is garbled. */
   minLetterShare: 0.5,
   /** Above this share of private-use or replacement characters the layer is garbled. */

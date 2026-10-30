@@ -20,7 +20,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-const flush = async (rounds = 6) => {
+const flush = async (rounds = 25) => {
   for (let index = 0; index < rounds; index += 1) await Promise.resolve();
 };
 
@@ -29,7 +29,8 @@ function makeEngine() {
   let failure = null;
   return {
     pending,
-    setFailure(code) { failure = code; },
+    // Same shape as createOcrEngine's getFailure: `{ kind, error }`.
+    setFailure(kind) { failure = { kind, error: new Error(`OCR engine could not start (${kind})`) }; },
     recognize: vi.fn(() => {
       const job = deferred();
       pending.push(job);
@@ -256,6 +257,47 @@ describe('createOcrQueue', () => {
     queue.setWindow([b]);
     await flush();
     expect(engine.recognize).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports idle after the engine failed, so the owner can release the prober and the worker', async () => {
+    const { queue, engine, events } = makeQueue();
+    queue.setWindow([candidate('doc', 0), candidate('doc', 1)]);
+    await flush();
+    engine.setFailure('assets');
+    engine.pending[0].reject(new Error('OCR engine could not start (assets)'));
+    await flush();
+    expect(queue.getSnapshot().engineFailure).toBe('assets');
+    expect(events[events.length - 1]).toBe('idle');
+  });
+
+  it('fails a page whose step never answers instead of blocking the queue, and drops a worker that stops answering', async () => {
+    vi.useFakeTimers();
+    try {
+      const probeTextLayer = vi.fn(() => new Promise(() => {}));
+      const { queue, engine, cache } = makeQueue({ probeTextLayer, timeouts: { probe: 50, image: 50, recognize: 100 } });
+      const [stuckProbe, scan, next] = [candidate('pdf', 0, { fileExtension: 'pdf' }), candidate('doc', 0), candidate('doc', 1)];
+      queue.setWindow([stuckProbe, scan, next]);
+      await flush();
+      expect(engine.recognize).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(50);
+      await flush();
+      expect(cache.get(stuckProbe.key)).toEqual({ status: OCR_PAGE_STATUS.FAILED, reason: 'OCR text-layer probe exceeded 50 ms' });
+      expect(engine.terminate).not.toHaveBeenCalled();
+      expect(engine.recognize).toHaveBeenCalledTimes(1);
+
+      // Recognition that never answers: the page fails and the worker is terminated.
+      await vi.advanceTimersByTimeAsync(100);
+      await flush();
+      expect(cache.get(scan.key)).toEqual({ status: OCR_PAGE_STATUS.FAILED, reason: 'OCR recognition exceeded 100 ms' });
+      expect(engine.terminate).toHaveBeenCalledTimes(1);
+      expect(engine.recognize).toHaveBeenCalledTimes(2);
+      engine.pending[1].resolve(result('next'));
+      await flush();
+      expect(cache.get(next.key).status).toBe(OCR_PAGE_STATUS.DONE);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('releases the engine only when idle', async () => {

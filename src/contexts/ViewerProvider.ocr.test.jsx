@@ -101,11 +101,20 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-// The dynamic import of the (mocked) OCR module resolves on a macrotask, so settle on one.
+// A short settle for negative checks (nothing must happen); the dynamic import of the mocked
+// OCR module resolves on a macrotask, so positive checks wait for their condition instead.
 const flush = () => act(async () => {
   await new Promise((resolve) => setTimeout(resolve, 20));
   for (let index = 0; index < 10; index += 1) await Promise.resolve();
 });
+
+async function waitFor(condition, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition()) {
+    if (Date.now() > deadline) throw new Error('Condition not met in time');
+    await flush();
+  }
+}
 
 /**
  * Render the provider with one rendered PNG page. `focus` mirrors the viewer, which hands the
@@ -159,7 +168,7 @@ it.each([
 it('imports the module once and recognises the focus page from its rendered image when enabled is the literal true', async () => {
   vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true } });
   const api = await renderProviderWithOnePage({ focus: [0] });
-  await flush();
+  await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'done');
   expect(ocrModule.evaluations).toBe(1);
   expect(ocrModule.engines).toHaveLength(1);
   expect(fetchedUrls).toEqual([PAGE_URL]);
@@ -174,42 +183,40 @@ it('imports the module once and recognises the focus page from its rendered imag
 it('does nothing until the viewer names a focus page', async () => {
   vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true } });
   const api = await renderProviderWithOnePage();
-  await flush();
   // vi.resetModules() does not re-evaluate a mocked module, so the import is observed here
   // through the loader instead of the evaluation counter.
-  expect(isOcrModuleRequested()).toBe(true);
+  await waitFor(() => isOcrModuleRequested() && ocrModule.engines.length === 1);
+  await flush();
   expect(fetchedUrls).toEqual([]);
   expect(api().ocrPages).toEqual({});
   await act(async () => { api().setOcrFocusPageIndexes([0]); });
-  await flush();
+  await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'done');
   expect(fetchedUrls).toEqual([PAGE_URL]);
-  expect(api().ocrPages[PAGE_KEY].status).toBe('done');
 });
 
 it('pauses recognition while a print flow holds page URLs and resumes when they are released', async () => {
   vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true } });
   const api = await renderProviderWithOnePage();
-  await flush();
+  await waitFor(() => isOcrModuleRequested() && ocrModule.engines.length === 1);
   let leased;
   await act(async () => { leased = await api().getPrintablePageUrls([0]); });
   expect(leased).toEqual([PAGE_URL]);
   await act(async () => { api().setOcrFocusPageIndexes([0]); });
+  await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'queued');
   await flush();
   expect(fetchedUrls).toEqual([]);
   expect(api().ocrPages[PAGE_KEY]).toEqual({ status: 'queued' });
 
   await act(async () => { api().releasePrintablePageUrls(leased); });
-  await flush();
+  await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'done');
   expect(fetchedUrls).toEqual([PAGE_URL]);
-  expect(api().ocrPages[PAGE_KEY].status).toBe('done');
 });
 
 it('forgets the outcomes when the document session is disposed', async () => {
   vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true } });
   const api = await renderProviderWithOnePage({ focus: [0] });
-  await flush();
-  expect(api().ocrPages[PAGE_KEY].status).toBe('done');
+  await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'done');
   await act(async () => { await api().disposeDocumentSession({ clearPages: true }); });
-  await flush();
+  await waitFor(() => Object.keys(api().ocrPages).length === 0);
   expect(api().ocrPages).toEqual({});
 });

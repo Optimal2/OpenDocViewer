@@ -34,7 +34,7 @@ function makeFakePdf(pagesText) {
 
 describe('createPdfTextProber', () => {
   it('reads the page text through pdf.js from the viewer bytes and assesses it', async () => {
-    const pdf = makeFakePdf([['Första sidan med riktig text som duger.'], ['7']]);
+    const pdf = makeFakePdf([['Första sidan med riktig text som duger.', 'Den har tillräckligt många tecken för att räknas.'], ['7']]);
     const readSourceArrayBuffer = vi.fn(async () => new ArrayBuffer(16));
     const getDocument = vi.fn(() => pdf.task);
     const prober = createPdfTextProber({ readSourceArrayBuffer, getDocument });

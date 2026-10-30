@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 10. Line count: 1121. JSDoc symbol count: 52.
+File count: 10. Line count: 1173. JSDoc symbol count: 56.
 
 ## src/ocr/assetUrls.js
 
@@ -30,11 +30,11 @@ Symbols:
 - `TEXT_LAYER` (member) - The PDF page has a usable text layer; the viewer's own text wins.
 - `UNSUPPORTED` (member) - A format the viewer does not rasterise into a page image.
 - `FAILED_PAGE` (member) - The page failed to load; there is no image to recognise.
+- `RASTER_EXTENSIONS` (constant) - The image formats the viewer rasterises \(utils/documentLoadingConfig.js isRasterImageExtension\).
 - `PDF_TEXT_LAYER_THRESHOLDS` (constant) - Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.
-- `minCharacters` (member) - Fewer visible characters than this counts as an empty layer \(page numbers, a stray header\).
+- `minCharacters` (member) - Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page.
 - `minLetterShare` (member) - Below this share of letters and digits among visible characters the layer is garbled.
 - `maxPrivateUseShare` (member) - Above this share of private\-use or replacement characters the layer is garbled.
-- `classifyPageSource` (function) - No description.
 
 ## src/ocr/engine.js
 
@@ -95,12 +95,15 @@ Symbols:
 
 The OCR page queue: one page at a time, bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
 
-Exports: `OCR_PAGE_STATUS`, `createOcrQueue`
+Exports: `OCR_STEP_TIMEOUTS_MS`, `OCR_PAGE_STATUS`, `createOcrQueue`
 
 Local imports: `src/ocr/classify.js`
 
 Symbols:
 
+- `OCR_STEP_TIMEOUTS_MS` (constant) - Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo...
+- `TIMEOUT_STEP` (constant) - Marker on the error of a step that exceeded its bound.
+- `withTimeout` (function) - No description.
 - `OcrQueueCandidate` (typedef) - No description.
 - `OcrQueueSnapshot` (typedef) - No description.
 - `OcrQueue` (typedef) - No description.

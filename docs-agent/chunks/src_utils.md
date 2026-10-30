@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 53. Line count: 21165. JSDoc symbol count: 858.
+File count: 54. Line count: 21258. JSDoc symbol count: 863.
 
 ## src/utils/compareCurtain.js
 
@@ -277,6 +277,20 @@ Symbols:
 - `SEPARATOR` (constant) - Key of one document page in the OCR result map \( ocrPages on the viewer context\).
 - `makeOcrPageKey` (function) - No description.
 - `ocrPageKeyOf` (function) - No description.
+
+## src/utils/ocrTextLayout.js
+
+Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): where each recognised word goes inside the page frame and how wide its invisible text must be scaled to cover its box.
+
+Exports: `OCR_LAYER_FONT_FAMILY`, `measureWordWidth`, `layoutOcrWords`
+
+Symbols:
+
+- `OCR_LAYER_FONT_FAMILY` (constant) - Font used for the invisible words; width is fitted per word so the family only affects fallback estimates.
+- `FALLBACK_ADVANCE` (constant) - Average advance per character relative to the font size, used when text cannot be measured.
+- `measureWordWidth` (function) - Width of text at fontSize px, measured with a canvas context when one exists \(jsdom and print have none, then an estimate keeps the layout consistent\).
+- `OcrWordPlacement` (typedef) - No description.
+- `layoutOcrWords` (function) - Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px.
 
 ## src/utils/ompThemePreference.js
 
