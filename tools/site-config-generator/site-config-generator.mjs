@@ -100,11 +100,14 @@
  *     is reported next to the original error, never instead of it.
  *   - generate, generate-all and new-profile refuse, also with --force, an output that is or leads
  *     (through a link) to the shipped sample public/odv.site.config.sample.js or the loader
- *     public/odv.config.js; generate also refuses its own --sample and --loader files. An existing
- *     destination is compared by file identity (statSync dev and inode), so another spelling of
- *     the same file (a mapped or substituted drive, a \\?\ prefix, a hard link) is refused too; a
- *     destination that does not exist yet, or a file system that reports no inode number, is
- *     compared by its normalised path. The output's file name must be a plain file name (the
+ *     public/odv.config.js; generate also refuses its own --sample and --loader files. Every
+ *     destination is compared by normalised path. An existing destination is also compared by file
+ *     identity (statSync dev and inode) when both sides yield an available, exact and comparable
+ *     identity, so another spelling of the same file (a mapped or substituted drive, a \\?\ prefix,
+ *     a hard link) is refused too. If either side has no such identity (a missing destination, a
+ *     stat error, missing dev/inode, inode 0 or an inexact or non-numeric component), only the path
+ *     comparison applies, and another spelling that does not match by name is not refused. The
+ *     output's file name must be a plain file name (the
  *     --name rule): a Windows device name, a trailing dot or space, or a colon (an NTFS
  *     alternate data stream) is refused before any file is created.
  *   - After generating, the text is executed in `node:vm` with a stub `window`, and every active
@@ -1502,9 +1505,10 @@ function resolveDestination(out, files) {
 
 /**
  * The identity of an existing file, "dev:ino" from statSync, or undefined when there is none to
- * compare: the file does not exist or cannot be read, or the file system reports no inode number
- * (ino 0 or missing). Read as bigint where the seam supports it, because NTFS file ids exceed
- * Number's safe-integer range.
+ * compare exactly: the file does not exist or cannot be read, the file system reports no inode
+ * number (ino 0 or missing), or dev/ino is not a bigint or safe integer. Read as bigint where the
+ * seam supports it, because NTFS file ids exceed Number's safe-integer range. Canonical decimal
+ * strings make a safe number compare equal to the same bigint.
  * @param {string} file
  * @param {FileOps} files
  */
@@ -1517,8 +1521,10 @@ function fileIdentity(file, files) {
   }
   const dev = stats?.dev;
   const ino = stats?.ino;
-  if (dev === undefined || dev === null || ino === undefined || ino === null || String(ino) === '0') return undefined;
-  return `${dev}:${ino}`;
+  const devText = typeof dev === 'bigint' || Number.isSafeInteger(dev) ? String(dev) : undefined;
+  const inoText = typeof ino === 'bigint' || Number.isSafeInteger(ino) ? String(ino) : undefined;
+  if (devText === undefined || inoText === undefined || inoText === '0') return undefined;
+  return `${devText}:${inoText}`;
 }
 
 /**

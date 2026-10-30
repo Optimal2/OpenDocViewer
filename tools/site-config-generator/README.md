@@ -483,14 +483,15 @@ ERROR: The profile does not match the sample:
   (`public/odv.site.config.sample.js`) or the loader (`public/odv.config.js`), or leads there
   through a symbolic link; `generate` also refuses its own `--sample` and `--loader` files.
   `generate-all` stops at that version, and nothing more is written after it. How "is" is decided:
-  - When the output already exists, it is compared by **file identity** (the device and file id
-    that `stat` reports), so another spelling of the same file is refused too: a mapped or
-    `subst` drive, a `\\?\` prefix, or a hard link.
+  - When both the output and the protected file yield an available, exact and comparable **file
+    identity** (the device and file id that `stat` reports), another spelling of the same file is
+    refused too: a mapped or `subst` drive, a `\\?\` prefix, or a hard link.
   - Every output is also compared by its normalised path (case-insensitive on Windows), both as
-    named and as resolved through a link. That is what refuses an output that does not exist yet,
-    and the only comparison on a file system that reports no file id.
-  - Not covered: a different spelling of the sample or loader on a file system that reports no
-    file id (`ino` 0), where only the path comparison is left.
+    named and as resolved through a link. Only that comparison applies when the output does not
+    exist, `stat` fails, the device or file id is missing, the file id is 0, or either identity
+    component is not exactly comparable (for example an unsafe numeric value).
+  - Not covered: a different spelling of the sample or loader when either side lacks an available,
+    exact and comparable identity and the normalised paths do not match.
 
   ```text
   ERROR: --out must not be the sample file itself.

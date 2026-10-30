@@ -212,6 +212,94 @@ test('identity is only compared when both dev and ino are known and equal', () =
   assert.equal(fs.readFileSync(otherDevice, 'utf8'), PROFILE_TEMPLATE);
 });
 
+/** Real stats with synthetic identities for selected paths, including seams that ignore bigint. */
+function statWithIdentities(identities) {
+  return (f, o) => {
+    const identity = identities[path.resolve(f)];
+    return identity ? { ...fs.statSync(f, o), ...identity } : fs.statSync(f, o);
+  };
+}
+
+test('unsafe numeric identities are not compared and cannot refuse an unrelated destination', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'unrelated.json');
+  fs.writeFileSync(out, 'old\n', 'utf8');
+  const destinationIno = Number(9007199254740992n);
+  const sampleIno = Number(9007199254740993n);
+  assert.equal(destinationIno, sampleIno, 'the distinct bigint ids collapse to one unsafe Number');
+  const writes = [];
+  const statSync = statWithIdentities({
+    [path.resolve(out)]: { dev: 1, ino: destinationIno },
+    [path.resolve(DEFAULT_SAMPLE)]: { dev: 1, ino: sampleIno },
+  });
+  const result = run(['new-profile', '--out', out, '--force'], {
+    writeFile: guardedWriter(writes),
+    fileOps: guardedOps([], { statSync }),
+  });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(writes.length, 1);
+  assert.equal(fs.readFileSync(out, 'utf8'), PROFILE_TEMPLATE);
+});
+
+test('mixed-precision unsafe identities fall back to the path comparison', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'mixed-precision.json');
+  fs.writeFileSync(out, 'old\n', 'utf8');
+  const sampleIno = 9007199254740993n;
+  const destinationIno = Number(sampleIno);
+  assert.notEqual(String(destinationIno), String(sampleIno), 'precision is lost before comparison');
+  const writes = [];
+  const statSync = statWithIdentities({
+    [path.resolve(out)]: { dev: 1, ino: destinationIno },
+    [path.resolve(DEFAULT_SAMPLE)]: { dev: 1n, ino: sampleIno },
+  });
+  const result = run(['new-profile', '--out', out, '--force'], {
+    writeFile: guardedWriter(writes),
+    fileOps: guardedOps([], { statSync }),
+  });
+  assert.equal(result.code, 0, result.stderr);
+  assert.equal(writes.length, 1);
+  assert.equal(fs.readFileSync(out, 'utf8'), PROFILE_TEMPLATE);
+});
+
+test('a safe number identity matches the equal bigint identity', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'safe-identity.json');
+  fs.writeFileSync(out, HAND_WRITTEN, 'utf8');
+  const writes = [];
+  const statSync = statWithIdentities({
+    [path.resolve(out)]: { dev: 1, ino: 7 },
+    [path.resolve(DEFAULT_SAMPLE)]: { dev: 1n, ino: 7n },
+  });
+  const result = run(['new-profile', '--out', out, '--force'], {
+    writeFile: guardedWriter(writes),
+    fileOps: guardedOps([], { statSync }),
+  });
+  assert.equal(result.code, 1);
+  assert.equal(result.stderr, `ERROR: --out must not be the sample file itself (it is the same file as "${path.resolve(DEFAULT_SAMPLE)}").`);
+  assert.deepEqual(writes, []);
+  assert.equal(fs.readFileSync(out, 'utf8'), HAND_WRITTEN);
+});
+
+test('device zero still participates in an exact identity comparison', () => {
+  const dir = tempDir();
+  const out = path.join(dir, 'device-zero.json');
+  fs.writeFileSync(out, HAND_WRITTEN, 'utf8');
+  const writes = [];
+  const statSync = statWithIdentities({
+    [path.resolve(out)]: { dev: 0, ino: 7 },
+    [path.resolve(DEFAULT_SAMPLE)]: { dev: 0n, ino: 7n },
+  });
+  const result = run(['new-profile', '--out', out, '--force'], {
+    writeFile: guardedWriter(writes),
+    fileOps: guardedOps([], { statSync }),
+  });
+  assert.equal(result.code, 1);
+  assert.equal(result.stderr, `ERROR: --out must not be the sample file itself (it is the same file as "${path.resolve(DEFAULT_SAMPLE)}").`);
+  assert.deepEqual(writes, []);
+  assert.equal(fs.readFileSync(out, 'utf8'), HAND_WRITTEN);
+});
+
 test('a destination that does not exist yet is still refused by name (the path fallback)', () => {
   // A custom --sample that does not exist has no identity: only the path comparison can refuse it.
   const dir = tempDir();
