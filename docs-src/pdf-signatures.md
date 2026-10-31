@@ -457,6 +457,31 @@ Each page carries 45 text lines, vector graphics and one shared 256x256 RGB imag
 change the classifier already detects never reaches the comparison, which is why the whole
 inspection of the changed files is fast.
 
+**Cold pdf.js import in Vitest (test environment only).** The first differential in a test
+file otherwise pays the module import inside the comparison's startup budget. On the 24-core
+hub with Node 22.23.3, Vitest 5.0.5 and 20-page fixtures, three fresh processes per standalone
+measurement gave the medians below. Load means 23 CPU busy-loop processes. The per-test rows
+are the first comparison reported by Vitest; two no-load after runs are shown as a range because
+whole-test durations also include fixture and comparison work.
+
+| Measurement (ms) | Before, no load | After, no load | Before, load | After, load |
+| --- | ---: | ---: | ---: | ---: |
+| Standalone cold import | 474.7 | 364.9 | 4,838.4 | 1,071.7 |
+| Standalone immediately repeated import | 0.073 | 0.062 | 0.078 | 0.070 |
+| First `pdfSignatureRevisions.test.js` comparison | 1,536 | 327-1,885 (2 runs) | 1,209 | 657 |
+| First `pdfSignatureRenderCheckGuardsDisabled.test.js` comparison | 912 | 450-705 (2 runs) | 2,297 | 870 |
+
+`tests/setup/pdfjs-warm.js` is in `test.setupFiles`, so Vitest pays the cold import before the
+test file's timed comparisons. A probe and the permanent guard in
+`tests/setup/pdfjs-warm.test.js` verify that setup and the test file receive the identical
+module namespace; the guard uses marker presence and object identity, never a timing threshold.
+The standalone after measurements are controls, not an expected speed-up: that script starts
+fresh Node processes without Vitest setup, confirming that the production import and comparison
+path is unchanged. `src/utils/pdfSignatureRenderCheck.js`, its budgets and its fail-closed
+behavior were not modified. Thus a red signature suite should not automatically be read as a
+signature-code regression: check whether setup ran and whether the failure is a worker/import
+failure rather than a different verdict for a fixture.
+
 **Per page form.** Scanned pages cost far more than text pages. Synthetic A4 300 dpi pages
 (`scripts/signature-page-form-fixtures.mjs`: one distinct 2480x3508 image per page), DSS-only
 append (the path that must compare every page), Node 22.23.3, linear fit over 1, 2, 4 and 8
