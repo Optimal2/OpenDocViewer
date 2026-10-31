@@ -470,15 +470,22 @@ Only the three suites that execute the real comparator opt in with `beforeAll(wa
 `src/utils/__tests__/pdfSignatureRevisions.test.js` (accepted appended revisions), and
 `src/utils/__tests__/pdfSignatureRenderCheckGuardsDisabled.test.js` (the mocked classifier
 accepts appended revisions so the differential alone decides). The exported helper in
-`tests/setup/pdfjs-warm.js` loads the same module namespace before their timed comparisons.
+`tests/setup/pdfjs-warm.js` loads the same module namespace before their timed comparisons and
+records completion in module-local state. Each suite has a separate following `beforeAll` that
+requires that completed state, so deleting, commenting out, moving into a skipped block, or not
+awaiting the warm-up fails in that suite's own worker before its comparisons. This runtime
+binding replaces the earlier source-text regular expression, which accepted commented-out and
+fire-and-forget calls while rejecting equivalent callback forms.
+
 The explicit `.mjs` matches the comparator's specifier, but it is **not** a module boundary:
 under Vite, `pdfjs-dist/legacy/build/pdf` and `pdfjs-dist/legacy/build/pdf.mjs` resolve to the
-same file and namespace. Do not add the warm-up to a suite that mocks either specifier; keep
-it in a separate, unmocked differential suite. `tests/setup/pdfjs-warm.test.js` calls the
-helper and requires its returned namespace to be identical (`===`) to its own import of the
-comparator's exact specifier. It also binds the opt-in structurally in all three files,
-accepting direct and callback-wrapper `beforeAll` forms, and rejects a return to global
-`setupFiles`. None of these checks uses a timing threshold.
+same file and namespace. The production signature worker injects its own `loadPdfjs` and uses
+the extensionless form; that is the same module under Vite, not a separate warm-up target. Do
+not add the warm-up to a suite that mocks either specifier; keep it in a separate, unmocked
+differential suite. `tests/setup/pdfjs-warm.test.js` calls the helper and requires its returned
+namespace to be identical (`===`) to an import whose specifier is derived from the comparator's
+default loader. It also rejects `vi.mock`/`vi.doMock` of either specifier in the three files and
+rejects a return to global `setupFiles`. None of these checks uses a timing threshold.
 
 Do **not** move this import back to `test.setupFiles`. That runs it in every test file's worker
 during startup, not just in the differential suites. Four full local-CI runs of that form on

@@ -5,7 +5,7 @@
 // and the committed regression files in scripts/fixtures/.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';
+import { pdfjsWarmed, warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';
 import { collectPdfSignatures } from '../pdfSignatures.js';
 import { getSignatureSeverity } from '../pdfSignatureStatus.js';
 import { createRenderComparator, renderCheckVerdict } from '../pdfSignatureRenderCheck.js';
@@ -16,6 +16,9 @@ import { createFixturePki } from '../../../scripts/generate-signature-fixtures.m
 import { attackFiles, honestFiles, invisibleChangeFiles } from './pdfSignatureRenderCheck.cases.js';
 
 beforeAll(warmPdfjs);
+beforeAll(() => {
+  expect(pdfjsWarmed(), 'pdf.js warm-up must complete before this suite compares revisions').toBe(true);
+});
 
 const fixture = (name) => new Uint8Array(readFileSync(new URL(`../../../scripts/fixtures/${name}`, import.meta.url)));
 const signedEnd = (bytes) => { const br = byteRange(bytes); return br[2] + br[3]; };

@@ -8,7 +8,16 @@
 // an isolation boundary. Never warm either specifier from a suite that mocks it.
 // A global setupFiles import instead made every test file pay this cost during
 // worker startup and repeatedly exceeded Vitest's 60 s worker-response limit.
+let warmed = false;
+
 /** Load and cache the exact pdf.js module namespace used by the differential. */
 export async function warmPdfjs() {
-  return import('pdfjs-dist/legacy/build/pdf.mjs');
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  warmed = true;
+  return pdfjs;
+}
+
+/** Whether this test file's pdf.js warm-up has actually completed. */
+export function pdfjsWarmed() {
+  return warmed;
 }

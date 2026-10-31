@@ -5,7 +5,7 @@
 // while every honest validation-data append stays green.
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';
+import { pdfjsWarmed, warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';
 import { collectPdfSignatures } from '../pdfSignatures.js';
 import { getSignatureSeverity } from '../pdfSignatureStatus.js';
 import { createSecurityFixtures } from '../../../scripts/signature-security-fixtures.mjs';
@@ -14,6 +14,9 @@ import { createFixturePki } from '../../../scripts/generate-signature-fixtures.m
 import { attackFiles, contentChangeFiles, honestFiles, invisibleChangeFiles } from './pdfSignatureRenderCheck.cases.js';
 
 beforeAll(warmPdfjs);
+beforeAll(() => {
+  expect(pdfjsWarmed(), 'pdf.js warm-up must complete before this suite compares revisions').toBe(true);
+});
 
 vi.mock('../pdfSignatureRevisions.js', async (importOriginal) => ({
   ...(await importOriginal()),

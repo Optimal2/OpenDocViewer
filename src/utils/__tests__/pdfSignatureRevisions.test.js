@@ -3,7 +3,7 @@
 // Synthetic fixtures only: scripts/signature-revision-fixtures.mjs.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';
+import { pdfjsWarmed, warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';
 import * as pdfLib from 'pdf-lib';
 import { collectPdfSignatures } from '../pdfSignatures.js';
 import { getSignatureSeverity } from '../pdfSignatureStatus.js';
@@ -13,6 +13,9 @@ import {
 import { createSecurityFixtures, byteRange } from '../../../scripts/signature-security-fixtures.mjs';
 
 beforeAll(warmPdfjs);
+beforeAll(() => {
+  expect(pdfjsWarmed(), 'pdf.js warm-up must complete before this suite compares revisions').toBe(true);
+});
 
 let f;
 let r;
