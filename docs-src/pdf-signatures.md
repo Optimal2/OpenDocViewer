@@ -460,8 +460,10 @@ inspection of the changed files is fast.
 **Cold pdf.js import in Vitest (test environment only).** The first differential in a test
 file otherwise pays the module import inside the comparison's startup budget. On the 24-core
 hub with Node 22.23.3 and Vitest 5.0.5, a fresh import measured 318 ms without load and
-1,074 ms under CPU load, with a 6,153 ms observed spike; an immediately repeated import took
-about 0.06-0.08 ms. The warm-up is therefore still needed, but it must be targeted.
+1,074 ms under CPU load; an immediately repeated import took about 0.06-0.08 ms. These are
+the medians in the three-process measurements recorded in the header of
+`scripts/measure-signature-import-cost.mjs`. The warm-up is therefore still needed, but it must
+be targeted.
 
 Only the three suites that execute the real comparator opt in with `beforeAll(warmPdfjs)`:
 `src/utils/__tests__/pdfSignatureRenderCheck.test.js` (direct comparator calls),
@@ -469,8 +471,14 @@ Only the three suites that execute the real comparator opt in with `beforeAll(wa
 `src/utils/__tests__/pdfSignatureRenderCheckGuardsDisabled.test.js` (the mocked classifier
 accepts appended revisions so the differential alone decides). The exported helper in
 `tests/setup/pdfjs-warm.js` loads the same module namespace before their timed comparisons.
-`tests/setup/pdfjs-warm.test.js` statically binds that opt-in in all three files and rejects a
-return to global `setupFiles`; it uses source structure, never a timing threshold.
+The explicit `.mjs` matches the comparator's specifier, but it is **not** a module boundary:
+under Vite, `pdfjs-dist/legacy/build/pdf` and `pdfjs-dist/legacy/build/pdf.mjs` resolve to the
+same file and namespace. Do not add the warm-up to a suite that mocks either specifier; keep
+it in a separate, unmocked differential suite. `tests/setup/pdfjs-warm.test.js` calls the
+helper and requires its returned namespace to be identical (`===`) to its own import of the
+comparator's exact specifier. It also binds the opt-in structurally in all three files,
+accepting direct and callback-wrapper `beforeAll` forms, and rejects a return to global
+`setupFiles`. None of these checks uses a timing threshold.
 
 Do **not** move this import back to `test.setupFiles`. That runs it in every test file's worker
 during startup, not just in the differential suites. Four full local-CI runs of that form on
