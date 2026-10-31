@@ -142,7 +142,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
 | <code>src/utils/pdfSignatureDocuments.js</code> | 257 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 211 | 2 | 5 | high | PDF signature inspection - the single entry point for application code. |
-| <code>src/utils/pdfSignatureRenderCheck.js</code> | 538 | 2 | 22 | high | pdf.js differential confirmation for appended revisions. |
+| <code>src/utils/pdfSignatureRenderCheck.js</code> | 545 | 2 | 22 | high | pdf.js differential confirmation for appended revisions. |
 | <code>src/utils/pdfSignatureRevisions.js</code> | 1015 | 1 | 23 | high | Appended-revision classifier for PDF signatures. |
 | <code>src/utils/pdfSignatures.js</code> | 1560 | 3 | 26 | high | PDF signature collection - level 1 integrity inspection. |
 | <code>src/utils/pdfSignatureStatus.js</code> | 300 | 6 | 21 | high | Signature UI status helpers for browser integrity. |

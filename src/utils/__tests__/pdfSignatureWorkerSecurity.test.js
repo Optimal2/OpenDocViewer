@@ -142,6 +142,40 @@ it('heartbeats from the pdf.js comparison extend the timeout, bounded by its tot
   expect(worker.terminate).toHaveBeenCalledOnce();
   expect(vi.getTimerCount()).toBe(0);
 });
+it('a heartbeat extends only its own request, and one for an unknown id extends nothing', async () => {
+  const { getDocumentSignatures } = await api();
+  const { RENDER_CHECK_MAX_TOTAL_MS } = await import('../pdfSignatureRenderCheck.js');
+  const settledAt = {};
+  const started = Date.now();
+  const progressing = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 10000 });
+  const stalled = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 20000 });
+  progressing.then(() => { settledAt.progressing ??= Date.now() - started; });
+  stalled.then(() => { settledAt.stalled ??= Date.now() - started; });
+  await vi.advanceTimersByTimeAsync(0);
+  const worker = state.workers[0];
+  const [a, b] = worker.postMessage.mock.calls.map(([message]) => message.requestId);
+  expect(a).not.toBe(b);
+  // A's heartbeats keep A alive past its own timeoutMs, while B (and an unknown id) stay silent ...
+  for (let t = 0; t < 18000; t += 9000) {
+    worker.onmessage({ data: { type: 'pdfSignaturesProgress', requestId: a } });
+    worker.onmessage({ data: { type: 'pdfSignaturesProgress', requestId: Math.max(a, b) + 1 } });
+    await vi.advanceTimersByTimeAsync(9000);
+  }
+  expect(settledAt).toEqual({});
+  // ... and B times out at its own timeoutMs although A is still progressing.
+  for (let i = 0; i < 20 && settledAt.stalled === undefined; i++) {
+    worker.onmessage({ data: { type: 'pdfSignaturesProgress', requestId: a } });
+    await vi.advanceTimersByTimeAsync(100);
+  }
+  expect(settledAt.stalled).toBeGreaterThanOrEqual(20000);
+  expect(settledAt.stalled).toBeLessThanOrEqual(20100);
+  expect(settledAt.stalled).toBeLessThan(20000 + RENDER_CHECK_MAX_TOTAL_MS);
+  expect((await stalled).signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'timeout' });
+  // A timeout ends the shared worker, so A settles (not checked) with it.
+  expect((await progressing).signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'timeout' });
+  expect(worker.terminate).toHaveBeenCalledOnce();
+  expect(vi.getTimerCount()).toBe(0);
+});
 it('without a heartbeat the worker still times out after timeoutMs', async () => {
   const { getDocumentSignatures } = await api();
   const promise = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 10000 });

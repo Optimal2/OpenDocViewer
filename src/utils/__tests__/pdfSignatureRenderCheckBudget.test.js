@@ -42,8 +42,9 @@ class Objs {
  * @param {number} [spec.images] images per page
  * @param {Function} [spec.pixels] (revision, pageIndex, imageIndex) => Uint8Array of an image
  * @param {number} [spec.stallPage] 1-based page whose operator list never arrives
+ * @param {Function} [spec.afterImage] (revision, pageIndex, imageIndex, data) => void, run once an image has resolved
  */
-function fakePdfjs({ pages, pageMs = 0, imageMs = 10, images = 1, pixels = () => new Uint8Array(16), stallPage = null }) {
+function fakePdfjs({ pages, pageMs = 0, imageMs = 10, images = 1, pixels = () => new Uint8Array(16), stallPage = null, afterImage = () => {} }) {
   const later = (ms, value) => new Promise((resolve) => setTimeout(() => resolve(value), ms));
   const optional = Object.assign(new Map(), { name: null, creator: null, getOrder: () => null });
   const getDocument = ({ data }) => {
@@ -67,7 +68,11 @@ function fakePdfjs({ pages, pageMs = 0, imageMs = 10, images = 1, pixels = () =>
           getOperatorList: () => {
             if (number === stallPage) return new Promise(() => {});
             return later(pageMs).then(() => {
-              ids.forEach((id, k) => setTimeout(() => objs.resolve(id, { width: 4, height: 4, kind: 3, data: pixels(revision, number - 1, k) }), imageMs));
+              ids.forEach((id, k) => setTimeout(() => {
+                const data = pixels(revision, number - 1, k);
+                objs.resolve(id, { width: 4, height: 4, kind: 3, data });
+                afterImage(revision, number - 1, k, data);
+              }, imageMs));
               return { fnArray: ids.map(() => PAINT_IMAGE), argsArray: ids.map((id) => [id, 4, 4]) };
             });
           },
@@ -226,5 +231,33 @@ describe('a resource is awaited only on the container that receives it', () => {
     p.objs.resolve('img_p0_1', 'ready');
     expect(await resolveResource(p, 'img_p0_1')).toBe('ready');
     expect(p.objs.registered).toEqual([]);
+  });
+});
+
+describe('a large blob is re-validated before it is hashed', () => {
+  it('a large blob detached or resized before it is hashed fails closed (viewer-error), never "same"', async () => {
+    const size = 70000; // above the in-place hashing threshold
+    // Each page's first image really differs between the revisions; its second is identical.
+    const pixels = (revision, page, k) => new Uint8Array(new ArrayBuffer(size, { maxByteLength: size })).fill(revision === 'final' && k === 0 ? 9 : 1);
+    // The first image is already encoded (its H record holds a live reference) while the
+    // comparison waits for the second; it is then detached or shrunk before ops.digest().
+    const between = (change) => {
+      const first = new Map();
+      return (revision, page, k, data) => {
+        if (k === 0) first.set(`${revision}/${page}`, data);
+        else change(first.get(`${revision}/${page}`));
+      };
+    };
+    const detach = between((data) => { structuredClone(data.buffer, { transfer: [data.buffer] }); });
+    const shrink = between((data) => { data.buffer.resize(size - 1); });
+    for (const afterImage of [detach, shrink]) {
+      // Without the re-validation both revisions would hash the first image as empty input: "same".
+      const { result } = await compareWith({ pages: 2, images: 2, pixels, afterImage });
+      expect(result.outcome).not.toBe('same');
+      expect(result).toMatchObject({ outcome: 'unavailable', code: 'viewer-error', detail: 'pdf.js data changed length or was detached before it was hashed' });
+      expect(renderCheckVerdict(result)).toMatchObject({ integrity: 'indeterminate', code: 'viewer-error' });
+    }
+    // The same resizable buffers left alone still compare on their content.
+    expect((await compareWith({ pages: 2, images: 2, pixels })).result).toEqual({ outcome: 'different', detail: 'page 1 operator list' });
   });
 });

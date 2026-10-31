@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 167,
-    "sourceLineCount": 65062,
+    "sourceLineCount": 65069,
     "docletCount": 1835,
     "documentedFileCount": 166,
     "lowConfidenceSummaryCount": 0,
@@ -1707,7 +1707,7 @@
     {
       "name": "src/utils",
       "fileCount": 55,
-      "lineCount": 22113,
+      "lineCount": 22120,
       "docletCount": 893,
       "importantFiles": [
         {
@@ -54627,7 +54627,7 @@
     },
     {
       "path": "src/utils/pdfSignatureRenderCheck.js",
-      "lines": 538,
+      "lines": 545,
       "extension": ".js",
       "jsdocBlockCount": 23,
       "sourceSummary": "pdf.js differential confirmation for appended revisions.",
@@ -54820,12 +54820,12 @@
         {
           "name": "sha256",
           "kind": "function",
-          "line": 531
+          "line": 538
         },
         {
           "name": "hex",
           "kind": "function",
-          "line": 537
+          "line": 544
         }
       ],
       "parseError": null,

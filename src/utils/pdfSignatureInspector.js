@@ -69,9 +69,9 @@ function ensureWorker() {
     workerHandle = handle;
     worker.onmessage = (event) => {
       const data = event?.data;
-      // A heartbeat proves the worker is alive and progressing: every waiting request keeps waiting.
+      // A heartbeat proves its own request is progressing: only that request keeps waiting.
       if (data?.type === 'pdfSignaturesProgress') {
-        for (const entry of handle.pending.values()) entry.alive();
+        handle.pending.get(data.requestId)?.alive();
         return;
       }
       if (!data || data.type !== 'pdfSignaturesResult') return;

@@ -395,6 +395,7 @@ with a "could not be checked" explanation, never green and never an error. The s
 | Cause | Code |
 | --- | --- |
 | pdf.js cannot be imported, cannot load a revision, throws, or returns data that cannot be encoded | `viewer-error` |
+| A large blob changed length or its buffer was detached between being encoded and being hashed | `viewer-error` |
 | Opening both revisions takes longer than the startup allowance (5 s) | `timeout` |
 | One page (or the document-level sections) takes longer than the watchdog (15 s) | `timeout` |
 | The whole comparison takes longer than its work-scaled budget, or this file's 300 s cap is used up | `timeout` |
@@ -431,7 +432,10 @@ container that receives it. It used to register a callback on both; the callback
 blobs (64 KiB or more, i.e. decoded pixels and font programs) are no longer copied into the
 encoding buffer: they stand in it as a fixed-size record (tag, exact length, the blob's own
 SHA-256) at their label position, so the encoding stays self-delimiting and bytes cannot be
-moved between resources without a SHA-256 collision.
+moved between resources without a SHA-256 collision. The record keeps a live reference to the
+blob and is hashed last, so it is re-validated first: a blob whose length no longer equals the
+recorded length, or whose buffer was detached, fails closed (`viewer-error`) instead of hashing
+to the SHA-256 of empty input, which would make two different revisions look alike.
 
 The comparison runs only for signed files with an appended revision the classifier accepts
 (rare), inside the signature worker, off the main thread. The worker loads pdf.js on first
@@ -586,7 +590,8 @@ multiple structural stream filters or a filter pdf-lib cannot decode are reporte
 `not-checked-in-viewer` / `structure-unsupported`. Page and image streams are not decoded
 by signature inspection. Worker execution has a default 30-second deadline without
 progress: the pdf.js differential confirmation posts a `pdfSignaturesProgress` heartbeat
-after every compared page, and each heartbeat re-arms that deadline, never beyond 30 s plus
+after every compared page, and each heartbeat re-arms the deadline of its own request only
+(matched by `requestId`; a heartbeat for an unknown id is ignored), never beyond 30 s plus
 the comparison's 300 s total cap (`RENDER_CHECK_MAX_TOTAL_MS`). Exceeding a
 budget returns `not-checked-in-viewer` / `inspection-limit` (or `timeout`), never an
 unsigned verdict. Because pdf-lib wraps errors thrown while parsing an indirect object, the
@@ -904,9 +909,11 @@ that differs only after its operator list resolved is `different` on that page; 
 page is `timeout` after the 15 s watchdog, not after the 80 s budget; pages that each stay
 under the watchdog but together exceed the scaled budget are `timeout`; the 300 s cap is
 shared by all comparisons of one file; bytes shifted between two large images on one page
-differ. It also pins that a page-local id waits only on `page.objs` and a `g_*` id only on
-`commonObjs`. `pdfSignatureWorkerSecurity.test.js` checks that heartbeats extend the worker
-deadline only up to 30 s plus the 300 s cap.
+differ; a large image detached or shrunk after it was encoded but before it was hashed is
+`unavailable` / `viewer-error`, not `same`. It also pins that a page-local id waits only on
+`page.objs` and a `g_*` id only on `commonObjs`. `pdfSignatureWorkerSecurity.test.js` checks
+that heartbeats extend the worker deadline only up to 30 s plus the 300 s cap, and only for
+the request that sent them.
 
 Committed regression files in `scripts/fixtures/` (synthetic, signed with a throwaway fixture
 PKI, no personal data), copied from the round-7 review of e2935c0:

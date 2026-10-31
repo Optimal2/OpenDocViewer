@@ -454,7 +454,7 @@ class Encoder {
       this.tag(0x48);
       this.reserve(8 + 32);
       this.view.setFloat64(this.at, bytes.byteLength);
-      this.hashed.push({ at: this.at + 8, bytes });
+      this.hashed.push({ at: this.at + 8, bytes, length: bytes.byteLength });
       this.at += 8 + 32;
       return;
     }
@@ -522,7 +522,14 @@ class Encoder {
   }
   /** SHA-256 of the encoding, with every large blob's own SHA-256 in its record. */
   async digest() {
-    for (const { at, bytes } of this.hashed) this.buf.set(await sha256(bytes), at);
+    for (const { at, bytes, length } of this.hashed) {
+      // The record holds a live reference: a blob that changed length or was detached
+      // since raw() would hash as different (or as empty) input, so fail closed.
+      if (bytes.byteLength !== length || bytes.buffer.detached === true) {
+        throw new RenderCheckError('viewer-error', 'pdf.js data changed length or was detached before it was hashed');
+      }
+      this.buf.set(await sha256(bytes), at);
+    }
     this.hashed = [];
     return hex(await sha256(this.buf.subarray(0, this.at)));
   }
