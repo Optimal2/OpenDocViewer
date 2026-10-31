@@ -227,8 +227,6 @@ export default defineConfig(({ mode }) => {
       // `dist/**` is build output and must never be scanned for tests. `tests/ui/**` holds the
       // Playwright browser specs (`npm run test:ui`), which vitest cannot run.
       exclude: [...configDefaults.exclude, '_tools/**', 'dist/**', 'tests/ui/**'],
-      // Pay pdf.js's cold module-import cost before each test file's timed signature checks.
-      setupFiles: ['./tests/setup/pdfjs-warm.js'],
       // The signature-inspection suites run real CMS/X.509 verification on signed fixtures and
       // take 30–60 s on a machine under I/O load (pre-push gate measured 2026-10-05); the
       // default 5 s/30 s timeouts then report a timeout, not a defect.

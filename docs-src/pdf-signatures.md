@@ -459,28 +459,36 @@ inspection of the changed files is fast.
 
 **Cold pdf.js import in Vitest (test environment only).** The first differential in a test
 file otherwise pays the module import inside the comparison's startup budget. On the 24-core
-hub with Node 22.23.3, Vitest 5.0.5 and 20-page fixtures, three fresh processes per standalone
-measurement gave the medians below. Load means 23 CPU busy-loop processes. The per-test rows
-are the first comparison reported by Vitest; two no-load after runs are shown as a range because
-whole-test durations also include fixture and comparison work.
+hub with Node 22.23.3 and Vitest 5.0.5, a fresh import measured 318 ms without load and
+1,074 ms under CPU load, with a 6,153 ms observed spike; an immediately repeated import took
+about 0.06-0.08 ms. The warm-up is therefore still needed, but it must be targeted.
 
-| Measurement (ms) | Before, no load | After, no load | Before, load | After, load |
-| --- | ---: | ---: | ---: | ---: |
-| Standalone cold import | 474.7 | 364.9 | 4,838.4 | 1,071.7 |
-| Standalone immediately repeated import | 0.073 | 0.062 | 0.078 | 0.070 |
-| First `pdfSignatureRevisions.test.js` comparison | 1,536 | 327-1,885 (2 runs) | 1,209 | 657 |
-| First `pdfSignatureRenderCheckGuardsDisabled.test.js` comparison | 912 | 450-705 (2 runs) | 2,297 | 870 |
+Only the three suites that execute the real comparator opt in with `beforeAll(warmPdfjs)`:
+`src/utils/__tests__/pdfSignatureRenderCheck.test.js` (direct comparator calls),
+`src/utils/__tests__/pdfSignatureRevisions.test.js` (accepted appended revisions), and
+`src/utils/__tests__/pdfSignatureRenderCheckGuardsDisabled.test.js` (the mocked classifier
+accepts appended revisions so the differential alone decides). The exported helper in
+`tests/setup/pdfjs-warm.js` loads the same module namespace before their timed comparisons.
+`tests/setup/pdfjs-warm.test.js` statically binds that opt-in in all three files and rejects a
+return to global `setupFiles`; it uses source structure, never a timing threshold.
 
-`tests/setup/pdfjs-warm.js` is in `test.setupFiles`, so Vitest pays the cold import before the
-test file's timed comparisons. A probe and the permanent guard in
-`tests/setup/pdfjs-warm.test.js` verify that setup and the test file receive the identical
-module namespace; the guard uses marker presence and object identity, never a timing threshold.
-The standalone after measurements are controls, not an expected speed-up: that script starts
-fresh Node processes without Vitest setup, confirming that the production import and comparison
-path is unchanged. `src/utils/pdfSignatureRenderCheck.js`, its budgets and its fail-closed
-behavior were not modified. Thus a red signature suite should not automatically be read as a
-signature-code regression: check whether setup ran and whether the failure is a worker/import
-failure rather than a different verdict for a fixture.
+Do **not** move this import back to `test.setupFiles`. That runs it in every test file's worker
+during startup, not just in the differential suites. Four full local-CI runs of that form on
+commit `82c6d1d` gave exit 1 / 1 / 1 / 0, only 101 / 86 / 102 / 109 of 109 test files executed,
+and 8 / 23 / 7 / 0 separate `Errors`. Every error was `Timeout waiting for worker to respond`,
+not a failed assertion; the green-looking `Tests` line did not include those errors. With about
+23 concurrent forks, adding the cold import to every worker repeatedly exceeded Vitest's 60 s
+worker-response limit. `vite.config.js` therefore has no `setupFiles` entry and leaves
+`maxWorkers` unset.
+
+Three full targeted runs on 2026-10-31 all executed 109/109 files, passed 3,350 tests with one
+skipped, had zero `Errors`, and exited 0. Their Vitest durations were 107.98, 98.08 and 98.44 s
+(phase-1 baseline: 79.0 s); the first comparisons were 797 / 526 / 670 ms in
+`pdfSignatureRevisions.test.js` and 451 / 435 / 369 ms in
+`pdfSignatureRenderCheckGuardsDisabled.test.js`. For comparison, the pre-warm values were
+1,213 / 1,150 ms and the global-setup values under load were 657 / 870 ms.
+`src/utils/pdfSignatureRenderCheck.js`, its production budgets and its fail-closed behavior were
+not modified.
 
 **Per page form.** Scanned pages cost far more than text pages. Synthetic A4 300 dpi pages
 (`scripts/signature-page-form-fixtures.mjs`: one distinct 2480x3508 image per page), DSS-only
