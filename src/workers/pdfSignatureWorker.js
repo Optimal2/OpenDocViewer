@@ -8,6 +8,8 @@
  *   in : { type: 'collectPdfSignatures', requestId: number, bytes: Uint8Array }
  *   out: { type: 'pdfSignaturesResult', requestId: number, ok: true, report }
  *        or { type: 'pdfSignaturesResult', requestId: number, ok: false, error }
+ *        and, while the pdf.js comparison runs, one
+ *        { type: 'pdfSignaturesProgress', requestId: number } per compared page
  *
  * Application code should not talk to this worker directly; use
  * `getDocumentSignatures` from `utils/pdfSignatureInspector.js`.
@@ -48,7 +50,10 @@ const renderCheck = {
 
 async function handleRequest(requestId, bytes) {
   try {
-    const report = await collectPdfSignatures(bytes, { renderCheck });
+    // Heartbeat after every page the pdf.js comparison finishes: the inspector
+    // keeps waiting for a comparison that still makes progress.
+    const onProgress = () => workerScope.postMessage({ type: 'pdfSignaturesProgress', requestId });
+    const report = await collectPdfSignatures(bytes, { renderCheck: { ...renderCheck, onProgress } });
     workerScope.postMessage({ type: 'pdfSignaturesResult', requestId, ok: true, report });
   } catch (err) {
     workerScope.postMessage({

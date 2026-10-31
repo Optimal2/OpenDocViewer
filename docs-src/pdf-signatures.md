@@ -386,11 +386,52 @@ a visible one is still compared through `getAnnotations()`. DSS/VRI, `/Metadata`
 Results: `same` keeps the classifier's green verdict (the detail line adds "pdf.js shows the
 same document as the signed revision"); `different` is `modified-after-signing` /
 `content-changed-after-signing`. **Fail closed:** when pdf.js cannot load either revision,
-throws, exceeds the time budget (20 s per comparison) or the page budget (1,000 pages), or
-returns data the comparison cannot encode, the signature is `indeterminate` with the neutral
-code `viewer-error`, `timeout` or `inspection-limit`: amber with a "could not be checked"
-explanation, never green and never an error. The site switch `uncheckedSeverity` does not
-affect it.
+throws, exceeds the time budget or the per-page watchdog (below), exceeds the page budget
+(1,000 pages), or returns data the comparison cannot encode, the signature is
+`indeterminate` with the neutral code `viewer-error`, `timeout` or `inspection-limit`: amber
+with a "could not be checked" explanation, never green and never an error. The site switch
+`uncheckedSeverity` does not affect it.
+
+| Cause | Code |
+| --- | --- |
+| pdf.js cannot be imported, cannot load a revision, throws, or returns data that cannot be encoded | `viewer-error` |
+| Opening both revisions takes longer than the startup allowance (5 s) | `timeout` |
+| One page (or the document-level sections) takes longer than the watchdog (15 s) | `timeout` |
+| The whole comparison takes longer than its work-scaled budget, or this file's 300 s cap is used up | `timeout` |
+| More than 1,000 pages | `inspection-limit` |
+
+**Time budget.** The budget scales with the work the document requires
+(`renderCheckBudgetMs` in `src/utils/pdfSignatureRenderCheck.js`): until both revisions are
+open only the startup allowance applies; once the page count n is known the deadline is
+`min(5 s + n x 2.5 s, 300 s)` from the start of the comparison, and every step (the
+document-level sections, then each page) is additionally bounded by a 15 s watchdog. The
+numbers come from the page-form measurements below:
+
+- **startup 5 s:** pdf.js import plus opening both revisions measured 0.36-1.5 s cold
+  (fixed term up to 267 ms warm); 5 s leaves more than 3x for a slower machine;
+- **per page 2.5 s:** more than 3x the slowest measured form (JPEG scan with text
+  strokes, 800 ms/page in the step-1 fit, 732 ms/page after this change), because real scans
+  carry more detail than the fixtures and slower hardware exists;
+- **total cap 300 s,** shared by all comparisons of one file: 200 pages of the slowest
+  measured form need about 160 s, so an ordinary large scanned journal with a DSS/LTV
+  append completes with almost 2x to spare. Beyond 118 pages the cap, not the per-page
+  allowance, binds;
+- **per-page watchdog 15 s:** about 19x the slowest measured page and 1/20 of the cap, so
+  a stalled page fails closed in seconds instead of consuming the whole budget.
+
+The signature worker's 30 s main-thread deadline is re-armed by a heartbeat after every
+compared page (see "Where it runs"), so a long comparison that still makes progress is not
+cut short by the worker deadline, while a worker that stops progressing still ends after
+30 s.
+
+**Memory.** `page.objs` holds a page's images and `page.commonObjs` the document-wide `g_*`
+objects (fonts, globally cached images). The comparison waits for each object only on the
+container that receives it. It used to register a callback on both; the callback left on
+`commonObjs` kept every decoded page image alive until the document was destroyed. Large
+blobs (64 KiB or more, i.e. decoded pixels and font programs) are no longer copied into the
+encoding buffer: they stand in it as a fixed-size record (tag, exact length, the blob's own
+SHA-256) at their label position, so the encoding stays self-delimiting and bytes cannot be
+moved between resources without a SHA-256 collision.
 
 The comparison runs only for signed files with an appended revision the classifier accepts
 (rare), inside the signature worker, off the main thread. The worker loads pdf.js on first
@@ -411,6 +452,61 @@ first comparison also pays for loading pdf.js):
 Each page carries 45 text lines, vector graphics and one shared 256x256 RGB image. A content
 change the classifier already detects never reaches the comparison, which is why the whole
 inspection of the changed files is fast.
+
+**Per page form.** Scanned pages cost far more than text pages. Synthetic A4 300 dpi pages
+(`scripts/signature-page-form-fixtures.mjs`: one distinct 2480x3508 image per page), DSS-only
+append (the path that must compare every page), Node 22.23.3, linear fit over 1, 2, 4 and 8
+pages. "Amber at" is the page count at which the fitted comparison time exceeds the
+work-scaled budget; for text and Flate pages the 1,000-page limit (`inspection-limit`)
+comes first, and for this Flate fixture (0.65 MB per page) so does the inspector's 64 MiB
+file limit at about 100 pages.
+
+| Form | Before (constant 20 s): ms/page + fixed ms | Amber before | After: ms/page + fixed ms | pdf.js's own share after | Amber now (step-1 fit / after fit) |
+| --- | --- | --- | --- | --- | --- |
+| text (45 lines, shared 256x256 image) | 25.5 + 159 | ~778 pages | 20.8 + 62 | 41% | never (1,000-page limit) |
+| flate-rgb, 8.7 MP | 225.5 + 94 | ~88 pages | 147.4 + 29 | 70% | never (1,000-page and 64 MiB limits) |
+| jpeg, 8.7 MP | 684.6 + 267 | ~29 pages | 601.2 + 67 | 98% | ~438 / ~499 pages |
+| smask (RGB + gray mask) | 516.8 + 35 | ~39 pages | 490.4 - 116 | 76% | ~581 / ~613 pages |
+| jpeg-text (gradient + text strokes) | 799.6 + 105 | ~25 pages | 731.6 + 22 | ~100% | ~376 / ~411 pages |
+
+Large documents, one run each, before and after this change on the same machine:
+
+| Fixture | Before: outcome, compare time, peak RSS, verdict | After: outcome, compare time, peak RSS, verdict |
+| --- | --- | --- |
+| jpeg, 60 pages, DSS-only append | unavailable (time budget of 20000 ms exceeded), 20.3 s, 804 MiB, `indeterminate` / `timeout` | same, 36.4 s, 806 MiB, `intact` / `extended-with-validation-data` |
+| jpeg, 60 pages, image changed on page 57 | unavailable (timeout), 20.6 s; classifier `modified-after-signing` | different (page 57 operator list), 34.0 s; `modified-after-signing` / `content-changed-after-signing` |
+| flate-rgb, 60 pages, DSS-only append | same, 12.5 s, 4,656 MiB, `intact` | same, 9.8 s, 1,701 MiB, `intact` / `extended-with-validation-data` |
+| flate-rgb, 96 pages (59 MiB), DSS-only append | same, 19.6 s (0.4 s under the ceiling), 7,281 MiB | same, 14.9 s, 2,530 MiB, `intact` / `extended-with-validation-data` |
+| flate-rgb, 96 pages, image changed on page 93 | different (page 93 operator list), 17.4 s | different (page 93 operator list), 14.8 s; `modified-after-signing` / `content-changed-after-signing` |
+
+Memory, `--only=compare`, flate-rgb, one process per point: 407 MiB at 2 pages and 1,428 MiB
+at 16 pages before (73 MiB per page), 379 MiB and 662 MiB after (20 MiB per page). The
+remaining growth is pdf.js's own: the pdf.js-only baseline grows 23 MiB per page in the same
+run (292 / 617 MiB), and neither a forced GC nor `PDFDocumentProxy.cleanup()` after every
+page lowers it. JPEG pages stay flat (about 800 MiB at 60 pages).
+
+**Why the comparison stays on decoded pixels.** pdf.js decodes an image while it builds the
+operator list (`getOperatorList()` starts the decode), whether or not anyone reads the
+pixels, so for JPEG pages 91-98% of the comparison time is pdf.js's own work. Comparing the
+image's raw stream data and decode parameters instead would only save the check's own
+overhead (for JPEG it would have moved the old ceiling from about 29 to about 32 pages)
+while giving up the premise that the comparison covers what pdf.js shows. It was rejected;
+the work-scaled budget addresses the cost instead. pdf.js also resolves `getOperatorList()`
+before the page's images have arrived in `page.objs` and keeps decoding after a document is
+destroyed, so a measurement or a test that does not wait for the decoded objects reports far
+too little work.
+
+Reproduce (Node 22; the page-form mode is opt-in and does not change the default lines):
+
+```powershell
+node scripts/measure-signature-render-check.mjs
+node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=text,flate-rgb,jpeg,smask,jpeg-text --pages=1,2,4,8
+node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=jpeg,flate-rgb --pages=60,96
+node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=flate-rgb --pages=16 --only=compare
+```
+
+The fit line per form prints the page count at which the work-scaled budget is exceeded and,
+for comparison, where the former constant 20 s budget was reached.
 
 Limits. The comparison proves what pdf.js shows, nothing more:
 
@@ -488,7 +584,10 @@ Inspection budgets are 64 MiB input (checked before worker cloning or reading a 
 Structural streams (ObjStm/XRef) have an 8 MiB decoded limit each and 32 MiB total;
 multiple structural stream filters or a filter pdf-lib cannot decode are reported as
 `not-checked-in-viewer` / `structure-unsupported`. Page and image streams are not decoded
-by signature inspection. Worker execution has a default 30-second deadline. Exceeding a
+by signature inspection. Worker execution has a default 30-second deadline without
+progress: the pdf.js differential confirmation posts a `pdfSignaturesProgress` heartbeat
+after every compared page, and each heartbeat re-arms that deadline, never beyond 30 s plus
+the comparison's 300 s total cap (`RENDER_CHECK_MAX_TOTAL_MS`). Exceeding a
 budget returns `not-checked-in-viewer` / `inspection-limit` (or `timeout`), never an
 unsigned verdict. Because pdf-lib wraps errors thrown while parsing an indirect object, the
 first structural limit is remembered and rethrown as such. The CMS ASN.1 depth/node limit is
@@ -798,6 +897,16 @@ change in the multi-page document. Every honest DSS-only append (all chain forms
 multi-page, and the two round-7 false-warning files) must compare `same` and stay green;
 the fail-closed paths (pdf.js does not load, cannot load a revision, throws, time budget, page
 budget) must be `indeterminate` with the matching code.
+`src/utils/__tests__/pdfSignatureRenderCheckBudget.test.js` binds the work-scaled budget with
+a fake pdf.js under fake timers that, like pdf.js, delivers each page's image after the
+operator list: 30 pages of 1 s each (past the former constant 20 s) compare `same`; an image
+that differs only after its operator list resolved is `different` on that page; a stalled
+page is `timeout` after the 15 s watchdog, not after the 80 s budget; pages that each stay
+under the watchdog but together exceed the scaled budget are `timeout`; the 300 s cap is
+shared by all comparisons of one file; bytes shifted between two large images on one page
+differ. It also pins that a page-local id waits only on `page.objs` and a `g_*` id only on
+`commonObjs`. `pdfSignatureWorkerSecurity.test.js` checks that heartbeats extend the worker
+deadline only up to 30 s plus the 300 s cap.
 
 Committed regression files in `scripts/fixtures/` (synthetic, signed with a throwaway fixture
 PKI, no personal data), copied from the round-7 review of e2935c0:

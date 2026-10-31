@@ -24,15 +24,77 @@
  * @module utils/pdfSignatureRenderCheck
  */
 
-/** Wall-clock budget for one comparison (both revisions), in ms. */
-export const RENDER_CHECK_BUDGET_MS = 20000;
+/*
+ * Time budget, scaled with the work the document requires (measured per page
+ * form with `scripts/measure-signature-render-check.mjs --forms=...`; table in
+ * docs-src/pdf-signatures.md). The slowest measured page form, an A4 300 dpi
+ * JPEG scan with text strokes, takes about 800 ms per page for both revisions
+ * together; text pages about 26 ms.
+ *
+ * - Startup: pdf.js import plus opening both revisions measured 0.36-1.5 s
+ *   cold; 5 s leaves more than 3x for a slow machine. It is the whole budget
+ *   until the page count is known.
+ * - Per page: 2.5 s, more than 3x the slowest measured form, because real
+ *   scans carry more detail than the fixtures and slower hardware exists.
+ * - Total cap: 300 s for all comparisons of one file. 200 pages of the
+ *   slowest measured form need about 160 s, so they complete with almost 2x to
+ *   spare; beyond 118 pages the cap, not the per-page allowance, binds.
+ * - Per-page watchdog: 15 s for one page (or the document-level sections),
+ *   about 19x the slowest measured page and 1/20 of the cap, so a stalled page
+ *   fails closed in seconds instead of consuming the whole document's budget.
+ */
+/** Allowance for loading pdf.js and opening both revisions, in ms. */
+export const RENDER_CHECK_STARTUP_MS = 5000;
+/** Allowance per page (both revisions), in ms. */
+export const RENDER_CHECK_PER_PAGE_MS = 2500;
+/** Absolute cap for all comparisons of one comparator (one file), in ms. */
+export const RENDER_CHECK_MAX_TOTAL_MS = 300000;
+/** Longest one page, or the document-level sections, may take, in ms. */
+export const RENDER_CHECK_PAGE_WATCHDOG_MS = 15000;
 /** Page budget: larger documents are not compared (fail closed). */
 export const RENDER_CHECK_MAX_PAGES = 1000;
+
+/**
+ * @typedef {Object} RenderCheckLimits
+ * @property {number} startupMs
+ * @property {number} perPageMs
+ * @property {number} maxTotalMs
+ * @property {number} pageWatchdogMs
+ */
+
+/**
+ * The time limits, with optional overrides (positive numbers only).
+ * @param {Object} [overrides] Any of the RenderCheckLimits properties.
+ * @returns {RenderCheckLimits}
+ */
+export function renderCheckLimits(overrides = {}) {
+  const pick = (value, fallback) => (Number.isFinite(value) && value > 0 ? value : fallback);
+  return {
+    startupMs: pick(overrides?.startupMs, RENDER_CHECK_STARTUP_MS),
+    perPageMs: pick(overrides?.perPageMs, RENDER_CHECK_PER_PAGE_MS),
+    maxTotalMs: pick(overrides?.maxTotalMs, RENDER_CHECK_MAX_TOTAL_MS),
+    pageWatchdogMs: pick(overrides?.pageWatchdogMs, RENDER_CHECK_PAGE_WATCHDOG_MS)
+  };
+}
+
+/**
+ * Wall-clock budget for comparing a document of `pageCount` pages:
+ * startup + pageCount x per page, never more than the total cap.
+ * @param {number} pageCount
+ * @param {RenderCheckLimits} [limits]
+ * @returns {number} ms
+ */
+export function renderCheckBudgetMs(pageCount, limits = renderCheckLimits()) {
+  const pages = Number.isFinite(pageCount) && pageCount > 0 ? pageCount : 0;
+  return Math.min(limits.maxTotalMs, limits.startupMs + pages * limits.perPageMs);
+}
 
 const ANNOTATION_WIDGET = 20;
 const ANNOT_FLAG_HIDDEN = 2;
 const ANNOT_FLAG_NOVIEW = 32;
 const MAX_DEPTH = 64;
+// Blobs from this size on are hashed in place instead of copied (Encoder.raw).
+const HASHED_BYTES = 1 << 16;
 // Per-document pdf.js object ids: fonts g_d0_f1, images/masks/patterns
 // img_p0_1 or g_d0_img_p0_1 (globally cached).
 const RESOURCE_ID = /^(?:g_d\d+_f\d+|(?:g_d\d+_)?(?:img|mask|pattern)_p\d+_\d+)$/;
@@ -87,16 +149,18 @@ export function renderCheckVerdict(check) {
  * @param {Object} [options]
  * @param {Function} [options.loadPdfjs] Resolves to the pdf.js module (the viewer's build).
  * @param {Object} [options.documentOptions] Extra getDocument options (the viewer's options).
- * @param {number} [options.budgetMs] Wall-clock budget per comparison.
+ * @param {Object} [options.budget] Overrides of the time limits (RenderCheckLimits; tests).
  * @param {number} [options.maxPages] Page budget.
+ * @param {Function} [options.onProgress] Called after every compared page (the worker's heartbeat).
  * @returns {RenderComparator}
  */
 export function createRenderComparator(bytes, options = {}) {
   const loadPdfjs = options.loadPdfjs ?? (() => import('pdfjs-dist/legacy/build/pdf.mjs'));
-  const budgetMs = Number.isFinite(options.budgetMs) && options.budgetMs > 0 ? options.budgetMs : RENDER_CHECK_BUDGET_MS;
+  const limits = renderCheckLimits(options.budget);
   const maxPages = Number.isFinite(options.maxPages) && options.maxPages > 0 ? options.maxPages : RENDER_CHECK_MAX_PAGES;
   const tasks = new Set();
   let full = null;
+  let spentMs = 0; // the total cap holds for all comparisons of this file together
 
   async function open(data) {
     const pdfjs = await loadPdfjs();
@@ -115,7 +179,7 @@ export function createRenderComparator(bytes, options = {}) {
     return fingerprinted(doc, () => { tasks.delete(task); return task.destroy(); });
   }
 
-  async function compareAll(signedEnd, deadline) {
+  async function compareAll(signedEnd, clock) {
     if (!Number.isSafeInteger(signedEnd) || signedEnd <= 0 || signedEnd >= bytes.length) {
       throw new RenderCheckError('viewer-error', 'the signed range does not end inside the file');
     }
@@ -129,14 +193,16 @@ export function createRenderComparator(bytes, options = {}) {
       if (finalDoc.numPages > maxPages) {
         throw new RenderCheckError('inspection-limit', `more than ${maxPages} pages`);
       }
-      const [a, b] = await Promise.all([signedDoc.documentDigests(), finalDoc.documentDigests()]);
+      clock.pages(finalDoc.numPages);
+      const [a, b] = await clock.step('the document-level sections',
+        Promise.all([signedDoc.documentDigests(), finalDoc.documentDigests()]));
       const docDiff = firstDifference(a, b);
       if (docDiff) return { outcome: 'different', detail: `document ${docDiff}` };
       for (let i = 0; i < finalDoc.numPages; i++) {
-        if (Date.now() > deadline) throw new RenderCheckError('timeout', `time budget of ${budgetMs} ms exceeded`);
-        const [pa, pb] = await Promise.all([signedDoc.pageDigests(i), finalDoc.pageDigests(i)]);
+        const [pa, pb] = await clock.step(`page ${i + 1}`, Promise.all([signedDoc.pageDigests(i), finalDoc.pageDigests(i)]));
         const pageDiff = firstDifference(pa, pb);
         if (pageDiff) return { outcome: 'different', detail: `page ${i + 1} ${pageDiff}` };
+        try { options.onProgress?.(); } catch { /* a heartbeat never decides the result */ }
       }
       return { outcome: 'same', detail: `${finalDoc.numPages} page(s) identical in pdf.js` };
     } finally {
@@ -146,21 +212,55 @@ export function createRenderComparator(bytes, options = {}) {
 
   return {
     async compare(signedEnd) {
-      const deadline = Date.now() + budgetMs;
+      const started = Date.now();
+      const remaining = limits.maxTotalMs - spentMs;
+      // Until the page count is known, only the startup allowance applies.
+      let deadline = started + Math.min(limits.startupMs, remaining);
+      let budgetText = `time budget of ${deadline - started} ms for opening both revisions exceeded`;
       let timer;
-      const timeout = new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new RenderCheckError('timeout', `time budget of ${budgetMs} ms exceeded`)), budgetMs);
-      });
-      const work = compareAll(signedEnd, deadline);
-      work.catch(() => {}); // still settles after a timeout; the race already decided
+      let expire;
+      const expired = new Promise((_, reject) => { expire = reject; });
+      expired.catch(() => {});
+      const arm = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => expire(new RenderCheckError('timeout', budgetText)), Math.max(0, deadline - Date.now()));
+      };
+      const clock = {
+        pages(count) {
+          const budget = Math.min(renderCheckBudgetMs(count, limits), remaining);
+          deadline = started + budget;
+          budgetText = `time budget of ${budget} ms for ${count} page(s) exceeded`;
+          arm();
+        },
+        // One step (a page, or the document-level sections) gets at most the watchdog.
+        async step(what, promise) {
+          promise.catch(() => {});
+          const left = deadline - Date.now();
+          let watchdog;
+          const stalled = new Promise((_, reject) => {
+            watchdog = setTimeout(() => reject(new RenderCheckError('timeout', left > limits.pageWatchdogMs
+              ? `${what} took longer than ${limits.pageWatchdogMs} ms` : budgetText)), Math.max(0, Math.min(left, limits.pageWatchdogMs)));
+          });
+          try {
+            return await Promise.race([promise, stalled]);
+          } finally {
+            clearTimeout(watchdog);
+          }
+        }
+      };
       try {
-        return await Promise.race([work, timeout]);
+        if (remaining <= 0) throw new RenderCheckError('timeout', `time budget of ${limits.maxTotalMs} ms for this file used up`);
+        arm();
+        const work = compareAll(signedEnd, clock);
+        work.catch(() => {}); // still settles after a timeout; the race already decided
+        return await Promise.race([work, expired]);
       } catch (err) {
         const code = err instanceof RenderCheckError ? err.code : 'viewer-error';
         if (code === 'timeout') await this.destroy();
         return { outcome: 'unavailable', code, detail: String(err?.message ?? err) };
       } finally {
         clearTimeout(timer);
+        spentMs += Date.now() - started;
       }
     },
     async destroy() {
@@ -213,7 +313,7 @@ async function documentDigests(doc) {
     'optional content': { name: optional.name, creator: optional.creator, order: optional.getOrder(), groups }
   };
   const digests = {};
-  for (const [key, value] of Object.entries(sections)) digests[key] = await digest(encode(value));
+  for (const [key, value] of Object.entries(sections)) digests[key] = await digest(value);
   return digests;
 }
 
@@ -233,11 +333,11 @@ async function pageDigests(doc, index) {
       ops.value(resourceValue(await resolveResource(page, labels.ids[i])));
     }
     return {
-      geometry: await digest(encode({ view: page.view, rotate: page.rotate, userUnit: page.userUnit })),
-      'operator list': await digest(ops.bytes()),
-      annotations: await digest(encode(annotations.filter((a) => !isInvisibleSignatureWidget(a)))),
-      'text content': await digest(textEncoder.bytes()),
-      'page actions': await digest(encode(await page.getJSActions()))
+      geometry: await digest({ view: page.view, rotate: page.rotate, userUnit: page.userUnit }),
+      'operator list': await ops.digest(),
+      annotations: await digest(annotations.filter((a) => !isInvisibleSignatureWidget(a))),
+      'text content': await textEncoder.digest(),
+      'page actions': await digest(await page.getJSActions())
     };
   } finally {
     page.cleanup();
@@ -265,15 +365,19 @@ function withoutSignatureFields(fields) {
   return out;
 }
 
-function resolveResource(page, id) {
-  for (const objs of [page.commonObjs, page.objs]) {
-    if (objs?.has(id)) return Promise.resolve(objs.get(id));
-  }
-  // Not resolved yet: whichever container receives it first (the caller's budget bounds the wait).
-  return new Promise((resolve) => {
-    page.commonObjs?.get(id, resolve);
-    page.objs?.get(id, resolve);
-  });
+/**
+ * The resolved object for an id, from the one container pdf.js sends it to:
+ * `g_*` ids (fonts, globally cached images) are document-wide `commonObjs`,
+ * every other id is the page's `objs`. A callback is registered only there: a
+ * callback left on the other container would keep the decoded pixels alive
+ * until the document is destroyed (measured ~54 instead of ~10 MiB per A4 scan
+ * page). An id that never arrives is bounded by the page watchdog.
+ */
+export function resolveResource(page, id) {
+  const objs = id.startsWith('g_') ? page.commonObjs : page.objs;
+  if (!objs) return Promise.reject(new RenderCheckError('viewer-error', `no pdf.js object container for ${id}`));
+  if (objs.has(id)) return Promise.resolve(objs.get(id));
+  return new Promise((resolve) => objs.get(id, resolve));
 }
 
 /** Plain data for a resolved pdf.js object; fonts expose their state through getters. */
@@ -304,20 +408,25 @@ class Labels {
   }
 }
 
-function encode(value) {
+function digest(value) {
   const encoder = new Encoder(null);
   encoder.value(value);
-  return encoder.bytes();
+  return encoder.digest();
 }
 
 /**
  * Deterministic, type-tagged binary encoding of structured-clone data, written
  * into one growing buffer. Object keys are sorted; anything that is not plain
- * data cannot be compared and fails closed.
+ * data cannot be compared and fails closed. Every record carries its type and
+ * length, so the encoding is self-delimiting; a blob of HASHED_BYTES or more
+ * (decoded image pixels) is not copied but stands as a fixed-size record of
+ * its length and its own SHA-256. Two different values can therefore only
+ * share a digest through a SHA-256 collision.
  */
 class Encoder {
   constructor(labels) {
     this.labels = labels;
+    this.hashed = [];
     this.buf = new Uint8Array(1 << 16);
     this.view = new DataView(this.buf.buffer);
     this.at = 0;
@@ -339,6 +448,16 @@ class Encoder {
     if (length !== null) { this.view.setUint32(this.at, length >>> 0); this.at += 4; }
   }
   raw(bytes) {
+    if (bytes.byteLength >= HASHED_BYTES) {
+      // H, the exact length, then the blob's own SHA-256 (filled in by digest()):
+      // a fixed-size record in place, so no bytes can move between resources.
+      this.tag(0x48);
+      this.reserve(8 + 32);
+      this.view.setFloat64(this.at, bytes.byteLength);
+      this.hashed.push({ at: this.at + 8, bytes });
+      this.at += 8 + 32;
+      return;
+    }
     this.tag(0x23, bytes.byteLength); // #
     this.reserve(bytes.byteLength);
     this.buf.set(bytes, this.at);
@@ -401,14 +520,18 @@ class Encoder {
     }
     throw new RenderCheckError('viewer-error', `pdf.js returned data that cannot be compared (${typeof v})`);
   }
-  bytes() {
-    return this.buf.subarray(0, this.at);
+  /** SHA-256 of the encoding, with every large blob's own SHA-256 in its record. */
+  async digest() {
+    for (const { at, bytes } of this.hashed) this.buf.set(await sha256(bytes), at);
+    this.hashed = [];
+    return hex(await sha256(this.buf.subarray(0, this.at)));
   }
 }
 
-async function digest(bytes) {
+async function sha256(bytes) {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) throw new RenderCheckError('viewer-error', 'WebCrypto is unavailable');
-  const hash = new Uint8Array(await subtle.digest('SHA-256', bytes));
-  return Array.from(hash, (b) => b.toString(16).padStart(2, '0')).join('');
+  return new Uint8Array(await subtle.digest('SHA-256', bytes));
 }
+
+const hex = (hash) => Array.from(hash, (b) => b.toString(16).padStart(2, '0')).join('');

@@ -1465,8 +1465,9 @@ async function parseWithSourceSpans(bytes, pdfLib) {
  * @param {Object} [options]
  * @param {Object} [options.renderCheck] Options for the pdf.js differential
  * confirmation of appended revisions (`loadPdfjs`, `documentOptions`,
- * `budgetMs`; see utils/pdfSignatureRenderCheck.js). The signature worker
- * passes the viewer's pdf.js build and document options.
+ * `budget`, `maxPages`, `onProgress`; see utils/pdfSignatureRenderCheck.js).
+ * The signature worker passes the viewer's pdf.js build, document options and
+ * a per-page heartbeat.
  * @returns {Promise<PdfSignatureReport>}
  */
 export async function collectPdfSignatures(pdfBytes, options = {}) {

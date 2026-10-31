@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 55. Line count: 21973. JSDoc symbol count: 885.
+File count: 55. Line count: 22113. JSDoc symbol count: 893.
 
 ## src/utils/compareCurtain.js
 
@@ -527,7 +527,7 @@ PDF signature inspection \- the single entry point for application code.
 
 Exports: `getDocumentSignatures`, `disposePdfSignatureWorker`, `getDocumentSignatures`
 
-Local imports: `../workers/pdfSignatureWorker.js?worker`, `src/utils/pdfSignatures.js`
+Local imports: `../workers/pdfSignatureWorker.js?worker`, `src/utils/pdfSignatures.js`, `src/utils/pdfSignatureRenderCheck.js`
 
 Symbols:
 
@@ -541,22 +541,22 @@ Symbols:
 
 pdf.js differential confirmation for appended revisions.
 
-Exports: `RENDER_CHECK_BUDGET_MS`, `RENDER_CHECK_MAX_PAGES`, `renderCheckVerdict`, `createRenderComparator`
+Exports: `RENDER_CHECK_STARTUP_MS`, `RENDER_CHECK_PER_PAGE_MS`, `RENDER_CHECK_MAX_TOTAL_MS`, `RENDER_CHECK_PAGE_WATCHDOG_MS`, `RENDER_CHECK_MAX_PAGES`, `renderCheckLimits`, `renderCheckBudgetMs`, `renderCheckVerdict`, `createRenderComparator`, `resolveResource`
 
 Symbols:
 
 - `module:utils/pdfSignatureRenderCheck` (module) - pdf.js differential confirmation for appended revisions.
-- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS` (constant) - Wall\-clock budget for one comparison \(both revisions\), in ms.
+- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_STARTUP_MS` (constant) - Allowance for loading pdf.js and opening both revisions, in ms.
+- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PER_PAGE_MS` (constant) - Allowance per page \(both revisions\), in ms.
+- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_TOTAL_MS` (constant) - Absolute cap for all comparisons of one comparator \(one file\), in ms.
+- `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PAGE_WATCHDOG_MS` (constant) - Longest one page, or the document\-level sections, may take, in ms.
 - `module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_PAGES` (constant) - Page budget: larger documents are not compared \(fail closed\).
+- `module:utils/pdfSignatureRenderCheck~RenderCheckLimits` (typedef) - No description.
+- `module:utils/pdfSignatureRenderCheck.renderCheckLimits` (function) - The time limits, with optional overrides \(positive numbers only\).
+- `module:utils/pdfSignatureRenderCheck.renderCheckBudgetMs` (function) - Wall\-clock budget for comparing a document of pageCount pages: startup \+ pageCount x per page, never more than the total cap.
 - `module:utils/pdfSignatureRenderCheck~RenderCheckError` (class) - Raised for anything that prevents a complete comparison.
 - `module:utils/pdfSignatureRenderCheck~RenderCheckResult` (typedef) - No description.
 - `module:utils/pdfSignatureRenderCheck.renderCheckVerdict` (function) - Map a comparison result to a signature verdict.
-- `module:utils/pdfSignatureRenderCheck~RenderComparator` (typedef) - No description.
-- `module:utils/pdfSignatureRenderCheck.createRenderComparator` (function) - Create a comparator for one file.
-- `module:utils/pdfSignatureRenderCheck~fingerprinted` (function) - Wrap a loaded pdf.js document with cached, id\-independent digests.
-- `module:utils/pdfSignatureRenderCheck~isInvisibleSignatureWidget` (function) - A widget a document\-timestamp append may add: a signature field that shows nothing.
-- `module:utils/pdfSignatureRenderCheck~withoutSignatureFields` (function) - Signature\-typed form fields are dropped; what they show is in the page annotations.
-- `module:utils/pdfSignatureRenderCheck~resourceValue` (function) - Plain data for a resolved pdf.js object; fonts expose their state through getters.
 
 ## src/utils/pdfSignatureRevisions.js
 

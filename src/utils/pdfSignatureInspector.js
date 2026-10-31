@@ -21,6 +21,7 @@
 
 import PdfSignatureWorkerConstructor from '../workers/pdfSignatureWorker.js?worker';
 import { collectPdfSignatures, notCheckedSignatureReport } from './pdfSignatures.js';
+import { RENDER_CHECK_MAX_TOTAL_MS } from './pdfSignatureRenderCheck.js';
 
 const MAX_WORKER_RECREATIONS = 3;
 
@@ -68,6 +69,11 @@ function ensureWorker() {
     workerHandle = handle;
     worker.onmessage = (event) => {
       const data = event?.data;
+      // A heartbeat proves the worker is alive and progressing: every waiting request keeps waiting.
+      if (data?.type === 'pdfSignaturesProgress') {
+        for (const entry of handle.pending.values()) entry.alive();
+        return;
+      }
       if (!data || data.type !== 'pdfSignaturesResult') return;
       const entry = handle.pending.get(data.requestId);
       if (!entry) return;
@@ -95,11 +101,20 @@ function runInWorker(handle, bytes, timeoutMs, transfer) {
     requestId += 1;
     const id = requestId;
     let settled = false;
-    const timer = setTimeout(() => {
-      if (settled) return;
-      markBroken(handle, `signature worker timeout after ${timeoutMs} ms`, 'timeout');
-    }, timeoutMs);
+    let timer;
+    // timeoutMs without a heartbeat ends the worker; heartbeats from the pdf.js
+    // comparison extend the wait, never past timeoutMs plus that comparison's total cap.
+    const latest = Date.now() + timeoutMs + RENDER_CHECK_MAX_TOTAL_MS;
+    const arm = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (settled) return;
+        markBroken(handle, `signature worker timeout after ${timeoutMs} ms without progress`, 'timeout');
+      }, Math.max(0, Math.min(timeoutMs, latest - Date.now())));
+    };
+    arm();
     handle.pending.set(id, {
+      alive: () => { if (!settled) arm(); },
       resolve: (value) => {
         if (settled) return;
         settled = true;
@@ -141,7 +156,8 @@ async function toBytes(source) {
  * @param {Uint8Array|ArrayBuffer|Blob} source Complete PDF document bytes
  * (or a Blob of them, e.g. the loader's document blob).
  * @param {Object} [options] Worker options.
- * @param {number} [options.timeoutMs] Worker timeout in ms (default 30000).
+ * @param {number} [options.timeoutMs] Worker timeout in ms without progress (default 30000);
+ * the pdf.js comparison's per-page heartbeats extend it by at most RENDER_CHECK_MAX_TOTAL_MS.
  * @param {boolean} [options.transfer=false] Transfer ownership of the input buffer to the worker.
  * Only use for disposable copies: all views of the buffer become detached.
  * @returns {Promise} Resolves - never rejects - with a PdfSignatureReport

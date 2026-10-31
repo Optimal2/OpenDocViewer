@@ -126,7 +126,7 @@ describe('fail closed: no complete pdf.js comparison -> not green, neutral infor
 
   it('the time budget is exceeded -> timeout', async () => {
     const loadPdfjs = () => new Promise(() => {});
-    expectNotChecked(await approval(f.revisions.okDss, { renderCheck: { loadPdfjs, budgetMs: 50 } }), 'timeout');
+    expectNotChecked(await approval(f.revisions.okDss, { renderCheck: { loadPdfjs, budget: { startupMs: 50 } } }), 'timeout');
   });
 
   it('the page budget is exceeded -> inspection-limit', async () => {

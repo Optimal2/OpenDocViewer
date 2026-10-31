@@ -1273,25 +1273,33 @@
 | <code>module:utils/pdfSignatureDocuments~SignatureFileEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:20</code> |  |
 | <code>module:utils/pdfSignatureDocuments.summarizeSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:203</code> | Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\). |
 | <code>module:utils/pdfSignatureDocuments</code> | module | <code>src/utils/pdfSignatureDocuments.js:2</code> | Per-document aggregation of PDF signature reports. |
-| <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:188</code> | Terminate the signature worker \(e.g. |
-| <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:150</code> | Inspect the signatures of one document. |
-| <code>module:utils/pdfSignatureInspector~InspectionError</code> | class | <code>src/utils/pdfSignatureInspector.js:28</code> | Rejection reason that carries the integrity code for the placeholder report. |
+| <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:204</code> | Terminate the signature worker \(e.g. |
+| <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:166</code> | Inspect the signatures of one document. |
+| <code>module:utils/pdfSignatureInspector~InspectionError</code> | class | <code>src/utils/pdfSignatureInspector.js:29</code> | Rejection reason that carries the integrity code for the placeholder report. |
 | <code>module:utils/pdfSignatureInspector</code> | module | <code>src/utils/pdfSignatureInspector.js:1</code> | PDF signature inspection - the single entry point for application code. |
-| <code>module:utils/pdfSignatureInspector~workerHandle</code> | member | <code>src/utils/pdfSignatureInspector.js:43</code> | Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks. |
-| <code>module:utils/pdfSignatureRenderCheck.createRenderComparator</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:94</code> | Create a comparator for one file. |
-| <code>module:utils/pdfSignatureRenderCheck~Encoder</code> | class | <code>src/utils/pdfSignatureRenderCheck.js:318</code> | Deterministic, type-tagged binary encoding of structured-clone data, written into one growing buffer. |
-| <code>module:utils/pdfSignatureRenderCheck~fingerprinted</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:181</code> | Wrap a loaded pdf.js document with cached, id-independent digests. |
-| <code>module:utils/pdfSignatureRenderCheck~isInvisibleSignatureWidget</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:248</code> | A widget a document-timestamp append may add: a signature field that shows nothing. |
-| <code>module:utils/pdfSignatureRenderCheck~Labels</code> | class | <code>src/utils/pdfSignatureRenderCheck.js:293</code> | Ids are numbered in order of first use per page. |
-| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:28</code> | Wall-clock budget for one comparison \(both revisions\), in ms. |
-| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_PAGES</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:30</code> | Page budget: larger documents are not compared \(fail closed\). |
-| <code>module:utils/pdfSignatureRenderCheck~RenderCheckError</code> | class | <code>src/utils/pdfSignatureRenderCheck.js:44</code> | Raised for anything that prevents a complete comparison. |
-| <code>module:utils/pdfSignatureRenderCheck~RenderCheckResult</code> | typedef | <code>src/utils/pdfSignatureRenderCheck.js:52</code> |  |
-| <code>module:utils/pdfSignatureRenderCheck.renderCheckVerdict</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:65</code> | Map a comparison result to a signature verdict. |
-| <code>module:utils/pdfSignatureRenderCheck~RenderComparator</code> | typedef | <code>src/utils/pdfSignatureRenderCheck.js:76</code> |  |
-| <code>module:utils/pdfSignatureRenderCheck~resourceValue</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:280</code> | Plain data for a resolved pdf.js object; fonts expose their state through getters. |
+| <code>module:utils/pdfSignatureInspector~workerHandle</code> | member | <code>src/utils/pdfSignatureInspector.js:44</code> | Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks. |
+| <code>module:utils/pdfSignatureRenderCheck.createRenderComparator</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:157</code> | Create a comparator for one file. |
+| <code>module:utils/pdfSignatureRenderCheck~Encoder#digest</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:524</code> | SHA-256 of the encoding, with every large blob&#39;s own SHA-256 in its record. |
+| <code>module:utils/pdfSignatureRenderCheck~Encoder</code> | class | <code>src/utils/pdfSignatureRenderCheck.js:426</code> | Deterministic, type-tagged binary encoding of structured-clone data, written into one growing buffer. |
+| <code>module:utils/pdfSignatureRenderCheck~fingerprinted</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:281</code> | Wrap a loaded pdf.js document with cached, id-independent digests. |
+| <code>module:utils/pdfSignatureRenderCheck~isInvisibleSignatureWidget</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:348</code> | A widget a document-timestamp append may add: a signature field that shows nothing. |
+| <code>module:utils/pdfSignatureRenderCheck~Labels</code> | class | <code>src/utils/pdfSignatureRenderCheck.js:397</code> | Ids are numbered in order of first use per page. |
+| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_PAGES</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:55</code> | Page budget: larger documents are not compared \(fail closed\). |
+| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_TOTAL_MS</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:51</code> | Absolute cap for all comparisons of one comparator \(one file\), in ms. |
+| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PAGE_WATCHDOG_MS</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:53</code> | Longest one page, or the document-level sections, may take, in ms. |
+| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PER_PAGE_MS</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:49</code> | Allowance per page \(both revisions\), in ms. |
+| <code>module:utils/pdfSignatureRenderCheck.RENDER_CHECK_STARTUP_MS</code> | constant | <code>src/utils/pdfSignatureRenderCheck.js:47</code> | Allowance for loading pdf.js and opening both revisions, in ms. |
+| <code>module:utils/pdfSignatureRenderCheck.renderCheckBudgetMs</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:87</code> | Wall-clock budget for comparing a document of pageCount pages: startup + pageCount x per page, never more than the total cap. |
+| <code>module:utils/pdfSignatureRenderCheck~RenderCheckError</code> | class | <code>src/utils/pdfSignatureRenderCheck.js:106</code> | Raised for anything that prevents a complete comparison. |
+| <code>module:utils/pdfSignatureRenderCheck.renderCheckLimits</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:70</code> | The time limits, with optional overrides \(positive numbers only\). |
+| <code>module:utils/pdfSignatureRenderCheck~RenderCheckLimits</code> | typedef | <code>src/utils/pdfSignatureRenderCheck.js:57</code> |  |
+| <code>module:utils/pdfSignatureRenderCheck~RenderCheckResult</code> | typedef | <code>src/utils/pdfSignatureRenderCheck.js:114</code> |  |
+| <code>module:utils/pdfSignatureRenderCheck.renderCheckVerdict</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:127</code> | Map a comparison result to a signature verdict. |
+| <code>module:utils/pdfSignatureRenderCheck~RenderComparator</code> | typedef | <code>src/utils/pdfSignatureRenderCheck.js:138</code> |  |
+| <code>module:utils/pdfSignatureRenderCheck.resolveResource</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:376</code> | The resolved object for an id, from the one container pdf.js sends it to: g_* ids \(fonts, globally cached images\) are document-wide commonObjs , every other id is the page&#39;s objs . |
+| <code>module:utils/pdfSignatureRenderCheck~resourceValue</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:384</code> | Plain data for a resolved pdf.js object; fonts expose their state through getters. |
 | <code>module:utils/pdfSignatureRenderCheck</code> | module | <code>src/utils/pdfSignatureRenderCheck.js:1</code> | pdf.js differential confirmation for appended revisions. |
-| <code>module:utils/pdfSignatureRenderCheck~withoutSignatureFields</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:258</code> | Signature-typed form fields are dropped; what they show is in the page annotations. |
+| <code>module:utils/pdfSignatureRenderCheck~withoutSignatureFields</code> | function | <code>src/utils/pdfSignatureRenderCheck.js:358</code> | Signature-typed form fields are dropped; what they show is in the page annotations. |
 | <code>module:utils/pdfSignatureRevisions~activeXrefChain</code> | function | <code>src/utils/pdfSignatureRevisions.js:556</code> | Return the signed revision&#39;s active cross-reference sections, newest first. |
 | <code>module:utils/pdfSignatureRevisions.allDicts</code> | function | <code>src/utils/pdfSignatureRevisions.js:216</code> | The single enumeration point for revision rules. |
 | <code>module:utils/pdfSignatureRevisions~assertLinearizationIgnored</code> | function | <code>src/utils/pdfSignatureRevisions.js:600</code> | pdf.js reads a file as linearized when its first object is a dictionary with /Linearized &amp;gt; 0 and an /L equal to the length it measures from the %PDF- header \(Linearization.crea... |
@@ -1315,7 +1323,7 @@
 | <code>module:utils/pdfSignatureRevisions~SECURITY_KEYS</code> | constant | <code>src/utils/pdfSignatureRevisions.js:51</code> | Keys whose spelling must agree between pdf-lib and pdf.js \(see hasEscapedSecurityKey\). |
 | <code>module:utils/pdfSignatureRevisions</code> | module | <code>src/utils/pdfSignatureRevisions.js:1</code> | Appended-revision classifier for PDF signatures. |
 | <code>module:utils/pdfSignatureRevisions~Verdict</code> | class | <code>src/utils/pdfSignatureRevisions.js:249</code> |  |
-| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1472</code> | Collect signature information from PDF bytes. |
+| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1473</code> | Collect signature information from PDF bytes. |
 | <code>module:utils/pdfSignatures~curvePointSize</code> | function | <code>src/utils/pdfSignatures.js:681</code> | Point size of the certificate&#39;s named curve, or null when the SPKI does not name one of the WebCrypto curves. |
 | <code>module:utils/pdfSignatures~DECODABLE_STREAM_FILTERS</code> | constant | <code>src/utils/pdfSignatures.js:139</code> | Structural stream filters pdf-lib&#39;s decodePDFRawStream can decode. |
 | <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:335</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
@@ -1826,6 +1834,6 @@
 | <code>ZoomCalcOptions</code> | typedef | <code>src/utils/zoomUtils.js:23</code> | Optional calculation overrides. |
 | <code>createFallbackMainThreadError</code> | function | <code>src/workers/imageWorker.js:44</code> | Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread. |
 | <code>PdfCacheEntry</code> | typedef | <code>src/workers/pdfPageWorker.js:21</code> |  |
-| <code>module:workers/pdfSignatureWorker~loadPdfjs</code> | function | <code>src/workers/pdfSignatureWorker.js:32</code> | The viewer&#39;s pdf.js build, loaded only when an appended revision needs the differential confirmation. |
+| <code>module:workers/pdfSignatureWorker~loadPdfjs</code> | function | <code>src/workers/pdfSignatureWorker.js:34</code> | The viewer&#39;s pdf.js build, loaded only when an appended revision needs the differential confirmation. |
 | <code>module:workers/pdfSignatureWorker</code> | module | <code>src/workers/pdfSignatureWorker.js:1</code> | Web worker entry for PDF signature inspection. |
 | <code>workerScope</code> | constant | <code>src/workers/pdfWorker.js:9</code> | OpenDocViewer - generated PDF worker. |

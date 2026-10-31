@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 167,
-    "sourceLineCount": 64917,
-    "docletCount": 1827,
+    "sourceLineCount": 65062,
+    "docletCount": 1835,
     "documentedFileCount": 166,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -595,8 +595,8 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "score": 90,
-      "lines": 1559,
+      "score": 91,
+      "lines": 1560,
       "incomingLocalImports": 3,
       "doclets": 26,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -858,7 +858,7 @@
           {
             "path": "src/workers/pdfSignatureWorker.js",
             "score": 6,
-            "lines": 68,
+            "lines": 73,
             "summary": "Web worker entry for PDF signature inspection."
           }
         ]
@@ -1707,8 +1707,8 @@
     {
       "name": "src/utils",
       "fileCount": 55,
-      "lineCount": 21973,
-      "docletCount": 885,
+      "lineCount": 22113,
+      "docletCount": 893,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1787,7 +1787,7 @@
     {
       "name": "src/workers",
       "fileCount": 4,
-      "lineCount": 1637,
+      "lineCount": 1642,
       "docletCount": 5,
       "importantFiles": [
         {
@@ -1820,7 +1820,7 @@
         {
           "path": "src/workers/pdfSignatureWorker.js",
           "score": 6,
-          "lines": 68,
+          "lines": 73,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "Web worker entry for PDF signature inspection.",
@@ -54378,7 +54378,7 @@
     },
     {
       "path": "src/utils/pdfSignatureInspector.js",
-      "lines": 195,
+      "lines": 211,
       "extension": ".js",
       "jsdocBlockCount": 6,
       "sourceSummary": "PDF signature inspection - the single entry point for application code.",
@@ -54399,70 +54399,83 @@
           ],
           "line": 23,
           "kind": "static"
+        },
+        {
+          "source": "./pdfSignatureRenderCheck.js",
+          "specifiers": [
+            "RENDER_CHECK_MAX_TOTAL_MS"
+          ],
+          "line": 24,
+          "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "getDocumentSignatures",
           "kind": "function",
-          "line": 150
+          "line": 166
         },
         {
           "name": "disposePdfSignatureWorker",
           "kind": "function",
-          "line": 188
+          "line": 204
         },
         {
           "name": "getDocumentSignatures",
           "kind": "default",
-          "line": 194
+          "line": 210
         }
       ],
       "declarations": [
         {
           "name": "InspectionError",
           "kind": "class",
-          "line": 28
+          "line": 29
         },
         {
           "name": "canUseWorker",
           "kind": "function",
-          "line": 47
+          "line": 48
         },
         {
           "name": "markBroken",
           "kind": "function",
-          "line": 51
+          "line": 52
         },
         {
           "name": "ensureWorker",
           "kind": "function",
-          "line": 59
+          "line": 60
         },
         {
           "name": "handle",
           "kind": "object",
-          "line": 67
+          "line": 68
         },
         {
           "name": "runInWorker",
           "kind": "function",
-          "line": 93
+          "line": 99
+        },
+        {
+          "name": "arm",
+          "kind": "function",
+          "line": 108
         },
         {
           "name": "toBytes",
           "kind": "function",
-          "line": 126
+          "line": 141
         },
         {
           "name": "getDocumentSignatures",
           "kind": "function",
-          "line": 150
+          "line": 166
         },
         {
           "name": "disposePdfSignatureWorker",
           "kind": "function",
-          "line": 188
+          "line": 204
         }
       ],
       "parseError": null,
@@ -54491,7 +54504,7 @@
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 28,
+          "line": 29,
           "description": "Rejection reason that carries the integrity code for the placeholder report.",
           "params": [
             {
@@ -54511,7 +54524,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 43,
+          "line": 44,
           "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
           "params": [],
           "returns": [],
@@ -54524,7 +54537,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 150,
+          "line": 166,
           "description": "Inspect the signatures of one document.",
           "params": [
             {
@@ -54543,7 +54556,7 @@
               "name": "options.timeoutMs",
               "type": "number",
               "optional": true,
-              "description": "Worker timeout in ms (default 30000)."
+              "description": "Worker timeout in ms without progress (default 30000); the pdf.js comparison's per-page heartbeats extend it by at most RENDER_CHECK_MAX_TO..."
             },
             {
               "name": "options.transfer",
@@ -54567,7 +54580,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 188,
+          "line": 204,
           "description": "Terminate the signature worker (e.g.",
           "params": [],
           "returns": [],
@@ -54594,6 +54607,15 @@
           "line": 23,
           "kind": "static",
           "resolved": "src/utils/pdfSignatures.js"
+        },
+        {
+          "source": "./pdfSignatureRenderCheck.js",
+          "specifiers": [
+            "RENDER_CHECK_MAX_TOTAL_MS"
+          ],
+          "line": 24,
+          "kind": "static",
+          "resolved": "src/utils/pdfSignatureRenderCheck.js"
         }
       ],
       "packageImports": [],
@@ -54605,145 +54627,205 @@
     },
     {
       "path": "src/utils/pdfSignatureRenderCheck.js",
-      "lines": 415,
+      "lines": 538,
       "extension": ".js",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 23,
       "sourceSummary": "pdf.js differential confirmation for appended revisions.",
       "imports": [
         {
           "source": "pdfjs-dist/legacy/build/pdf.mjs",
           "specifiers": [],
-          "line": 95,
+          "line": 158,
           "kind": "dynamic"
         }
       ],
       "exports": [
         {
-          "name": "RENDER_CHECK_BUDGET_MS",
+          "name": "RENDER_CHECK_STARTUP_MS",
           "kind": "variable",
-          "line": 28
+          "line": 47
+        },
+        {
+          "name": "RENDER_CHECK_PER_PAGE_MS",
+          "kind": "variable",
+          "line": 49
+        },
+        {
+          "name": "RENDER_CHECK_MAX_TOTAL_MS",
+          "kind": "variable",
+          "line": 51
+        },
+        {
+          "name": "RENDER_CHECK_PAGE_WATCHDOG_MS",
+          "kind": "variable",
+          "line": 53
         },
         {
           "name": "RENDER_CHECK_MAX_PAGES",
           "kind": "variable",
-          "line": 30
+          "line": 55
+        },
+        {
+          "name": "renderCheckLimits",
+          "kind": "function",
+          "line": 70
+        },
+        {
+          "name": "renderCheckBudgetMs",
+          "kind": "function",
+          "line": 87
         },
         {
           "name": "renderCheckVerdict",
           "kind": "function",
-          "line": 65
+          "line": 127
         },
         {
           "name": "createRenderComparator",
           "kind": "function",
-          "line": 94
-        }
-      ],
-      "declarations": [
-        {
-          "name": "RenderCheckError",
-          "kind": "class",
-          "line": 44
-        },
-        {
-          "name": "renderCheckVerdict",
-          "kind": "function",
-          "line": 65
-        },
-        {
-          "name": "createRenderComparator",
-          "kind": "function",
-          "line": 94
-        },
-        {
-          "name": "open",
-          "kind": "function",
-          "line": 101
-        },
-        {
-          "name": "compareAll",
-          "kind": "function",
-          "line": 118
-        },
-        {
-          "name": "firstDifference",
-          "kind": "function",
-          "line": 175
-        },
-        {
-          "name": "fingerprinted",
-          "kind": "function",
-          "line": 181
-        },
-        {
-          "name": "documentDigests",
-          "kind": "function",
-          "line": 198
-        },
-        {
-          "name": "sections",
-          "kind": "object",
-          "line": 205
-        },
-        {
-          "name": "digests",
-          "kind": "object",
-          "line": 215
-        },
-        {
-          "name": "pageDigests",
-          "kind": "function",
-          "line": 220
-        },
-        {
-          "name": "isInvisibleSignatureWidget",
-          "kind": "function",
-          "line": 248
-        },
-        {
-          "name": "withoutSignatureFields",
-          "kind": "function",
-          "line": 258
-        },
-        {
-          "name": "out",
-          "kind": "object",
-          "line": 260
+          "line": 157
         },
         {
           "name": "resolveResource",
           "kind": "function",
-          "line": 268
+          "line": 376
+        }
+      ],
+      "declarations": [
+        {
+          "name": "renderCheckLimits",
+          "kind": "function",
+          "line": 70
+        },
+        {
+          "name": "pick",
+          "kind": "function",
+          "line": 71
+        },
+        {
+          "name": "renderCheckBudgetMs",
+          "kind": "function",
+          "line": 87
+        },
+        {
+          "name": "RenderCheckError",
+          "kind": "class",
+          "line": 106
+        },
+        {
+          "name": "renderCheckVerdict",
+          "kind": "function",
+          "line": 127
+        },
+        {
+          "name": "createRenderComparator",
+          "kind": "function",
+          "line": 157
+        },
+        {
+          "name": "open",
+          "kind": "function",
+          "line": 165
+        },
+        {
+          "name": "compareAll",
+          "kind": "function",
+          "line": 182
+        },
+        {
+          "name": "arm",
+          "kind": "function",
+          "line": 224
+        },
+        {
+          "name": "clock",
+          "kind": "object",
+          "line": 228
+        },
+        {
+          "name": "firstDifference",
+          "kind": "function",
+          "line": 275
+        },
+        {
+          "name": "fingerprinted",
+          "kind": "function",
+          "line": 281
+        },
+        {
+          "name": "documentDigests",
+          "kind": "function",
+          "line": 298
+        },
+        {
+          "name": "sections",
+          "kind": "object",
+          "line": 305
+        },
+        {
+          "name": "digests",
+          "kind": "object",
+          "line": 315
+        },
+        {
+          "name": "pageDigests",
+          "kind": "function",
+          "line": 320
+        },
+        {
+          "name": "isInvisibleSignatureWidget",
+          "kind": "function",
+          "line": 348
+        },
+        {
+          "name": "withoutSignatureFields",
+          "kind": "function",
+          "line": 358
+        },
+        {
+          "name": "out",
+          "kind": "object",
+          "line": 360
+        },
+        {
+          "name": "resolveResource",
+          "kind": "function",
+          "line": 376
         },
         {
           "name": "resourceValue",
           "kind": "function",
-          "line": 280
+          "line": 384
         },
         {
           "name": "font",
           "kind": "object",
-          "line": 282
+          "line": 386
         },
         {
           "name": "Labels",
           "kind": "class",
-          "line": 293
-        },
-        {
-          "name": "encode",
-          "kind": "function",
-          "line": 307
-        },
-        {
-          "name": "Encoder",
-          "kind": "class",
-          "line": 318
+          "line": 397
         },
         {
           "name": "digest",
           "kind": "function",
-          "line": 409
+          "line": 411
+        },
+        {
+          "name": "Encoder",
+          "kind": "class",
+          "line": 426
+        },
+        {
+          "name": "sha256",
+          "kind": "function",
+          "line": 531
+        },
+        {
+          "name": "hex",
+          "kind": "function",
+          "line": 537
         }
       ],
       "parseError": null,
@@ -54766,14 +54848,53 @@
           "examples": 0
         },
         {
-          "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS",
-          "name": "RENDER_CHECK_BUDGET_MS",
-          "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS",
+          "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_STARTUP_MS",
+          "name": "RENDER_CHECK_STARTUP_MS",
+          "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_STARTUP_MS",
           "kind": "constant",
           "scope": "static",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 28,
-          "description": "Wall-clock budget for one comparison (both revisions), in ms.",
+          "line": 47,
+          "description": "Allowance for loading pdf.js and opening both revisions, in ms.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PER_PAGE_MS",
+          "name": "RENDER_CHECK_PER_PAGE_MS",
+          "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PER_PAGE_MS",
+          "kind": "constant",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 49,
+          "description": "Allowance per page (both revisions), in ms.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_TOTAL_MS",
+          "name": "RENDER_CHECK_MAX_TOTAL_MS",
+          "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_TOTAL_MS",
+          "kind": "constant",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 51,
+          "description": "Absolute cap for all comparisons of one comparator (one file), in ms.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PAGE_WATCHDOG_MS",
+          "name": "RENDER_CHECK_PAGE_WATCHDOG_MS",
+          "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PAGE_WATCHDOG_MS",
+          "kind": "constant",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 53,
+          "description": "Longest one page, or the document-level sections, may take, in ms.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -54785,10 +54906,79 @@
           "kind": "constant",
           "scope": "static",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 30,
+          "line": 55,
           "description": "Page budget: larger documents are not compared (fail closed).",
           "params": [],
           "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck~RenderCheckLimits",
+          "name": "RenderCheckLimits",
+          "longname": "module:utils/pdfSignatureRenderCheck~RenderCheckLimits",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 57,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck.renderCheckLimits",
+          "name": "renderCheckLimits",
+          "longname": "module:utils/pdfSignatureRenderCheck.renderCheckLimits",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 70,
+          "description": "The time limits, with optional overrides (positive numbers only).",
+          "params": [
+            {
+              "name": "overrides",
+              "type": "Object",
+              "optional": true,
+              "description": "Any of the RenderCheckLimits properties."
+            }
+          ],
+          "returns": [
+            {
+              "type": "RenderCheckLimits",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck.renderCheckBudgetMs",
+          "name": "renderCheckBudgetMs",
+          "longname": "module:utils/pdfSignatureRenderCheck.renderCheckBudgetMs",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 87,
+          "description": "Wall-clock budget for comparing a document of pageCount pages: startup + pageCount x per page, never more than the total cap.",
+          "params": [
+            {
+              "name": "pageCount",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "limits",
+              "type": "RenderCheckLimits",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": "ms"
+            }
+          ],
           "examples": 0
         },
         {
@@ -54798,7 +54988,7 @@
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 44,
+          "line": 106,
           "description": "Raised for anything that prevents a complete comparison.",
           "params": [
             {
@@ -54818,7 +55008,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 52,
+          "line": 114,
           "description": "",
           "params": [],
           "returns": [],
@@ -54831,7 +55021,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 65,
+          "line": 127,
           "description": "Map a comparison result to a signature verdict.",
           "params": [
             {
@@ -54856,7 +55046,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 76,
+          "line": 138,
           "description": "",
           "params": [],
           "returns": [],
@@ -54869,7 +55059,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 94,
+          "line": 157,
           "description": "Create a comparator for one file.",
           "params": [
             {
@@ -54897,16 +55087,22 @@
               "description": "Extra getDocument options (the viewer's options)."
             },
             {
-              "name": "options.budgetMs",
-              "type": "number",
+              "name": "options.budget",
+              "type": "Object",
               "optional": true,
-              "description": "Wall-clock budget per comparison."
+              "description": "Overrides of the time limits (RenderCheckLimits; tests)."
             },
             {
               "name": "options.maxPages",
               "type": "number",
               "optional": true,
               "description": "Page budget."
+            },
+            {
+              "name": "options.onProgress",
+              "type": "function",
+              "optional": true,
+              "description": "Called after every compared page (the worker's heartbeat)."
             }
           ],
           "returns": [
@@ -54924,7 +55120,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 181,
+          "line": 281,
           "description": "Wrap a loaded pdf.js document with cached, id-independent digests.",
           "params": [],
           "returns": [],
@@ -54937,7 +55133,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 248,
+          "line": 348,
           "description": "A widget a document-timestamp append may add: a signature field that shows nothing.",
           "params": [],
           "returns": [],
@@ -54950,8 +55146,21 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 258,
+          "line": 358,
           "description": "Signature-typed form fields are dropped; what they show is in the page annotations.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck.resolveResource",
+          "name": "resolveResource",
+          "longname": "module:utils/pdfSignatureRenderCheck.resolveResource",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 376,
+          "description": "The resolved object for an id, from the one container pdf.js sends it to: g_* ids (fonts, globally cached images) are document-wide commonObjs , every other id is the page's objs .",
           "params": [],
           "returns": [],
           "examples": 0
@@ -54963,7 +55172,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 280,
+          "line": 384,
           "description": "Plain data for a resolved pdf.js object; fonts expose their state through getters.",
           "params": [],
           "returns": [],
@@ -54976,7 +55185,7 @@
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 293,
+          "line": 397,
           "description": "Ids are numbered in order of first use per page.",
           "params": [],
           "returns": [],
@@ -54989,8 +55198,21 @@
           "kind": "class",
           "scope": "inner",
           "file": "src/utils/pdfSignatureRenderCheck.js",
-          "line": 318,
+          "line": 426,
           "description": "Deterministic, type-tagged binary encoding of structured-clone data, written into one growing buffer.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureRenderCheck~Encoder#digest",
+          "name": "digest",
+          "longname": "module:utils/pdfSignatureRenderCheck~Encoder#digest",
+          "kind": "function",
+          "scope": "instance",
+          "file": "src/utils/pdfSignatureRenderCheck.js",
+          "line": 524,
+          "description": "SHA-256 of the encoding, with every large blob's own SHA-256 in its record.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -55002,12 +55224,12 @@
         {
           "source": "pdfjs-dist/legacy/build/pdf.mjs",
           "specifiers": [],
-          "line": 95,
+          "line": 158,
           "kind": "dynamic"
         }
       ],
-      "incomingLocalImports": 1,
-      "importanceScore": 55,
+      "incomingLocalImports": 2,
+      "importanceScore": 74,
       "summary": "pdf.js differential confirmation for appended revisions.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -55710,7 +55932,7 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1559,
+      "lines": 1560,
       "extension": ".js",
       "jsdocBlockCount": 33,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -55749,7 +55971,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1487,
+          "line": 1488,
           "kind": "dynamic"
         }
       ],
@@ -55782,7 +56004,7 @@
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1472
+          "line": 1473
         }
       ],
       "declarations": [
@@ -56174,17 +56396,17 @@
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1472
+          "line": 1473
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1473
+          "line": 1474
         },
         {
           "name": "renderCheck",
           "kind": "function",
-          "line": 1543
+          "line": 1544
         }
       ],
       "parseError": null,
@@ -56702,7 +56924,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1472,
+          "line": 1473,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -56721,7 +56943,7 @@
               "name": "options.renderCheck",
               "type": "Object",
               "optional": true,
-              "description": "Options for the pdf.js differential confirmation of appended revisions ( loadPdfjs , documentOptions , budgetMs ; see utils/pdfSignatureRen..."
+              "description": "Options for the pdf.js differential confirmation of appended revisions ( loadPdfjs , documentOptions , budget , maxPages , onProgress ; see..."
             }
           ],
           "returns": [
@@ -56773,12 +56995,12 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1487,
+          "line": 1488,
           "kind": "dynamic"
         }
       ],
       "incomingLocalImports": 3,
-      "importanceScore": 90,
+      "importanceScore": 91,
       "summary": "PDF signature collection - level 1 integrity inspection.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -74690,7 +74912,7 @@
     },
     {
       "path": "src/workers/pdfSignatureWorker.js",
-      "lines": 68,
+      "lines": 73,
       "extension": ".js",
       "jsdocBlockCount": 3,
       "sourceSummary": "Web worker entry for PDF signature inspection.",
@@ -74700,7 +74922,7 @@
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 18,
+          "line": 20,
           "kind": "static"
         },
         {
@@ -74708,7 +74930,7 @@
           "specifiers": [
             "collectPdfSignatures"
           ],
-          "line": 19,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -74716,13 +74938,13 @@
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [],
-          "line": 33,
+          "line": 35,
           "kind": "dynamic"
         }
       ],
@@ -74731,17 +74953,22 @@
         {
           "name": "loadPdfjs",
           "kind": "function",
-          "line": 32
+          "line": 34
         },
         {
           "name": "renderCheck",
           "kind": "object",
-          "line": 44
+          "line": 46
         },
         {
           "name": "handleRequest",
           "kind": "function",
-          "line": 49
+          "line": 51
+        },
+        {
+          "name": "onProgress",
+          "kind": "function",
+          "line": 55
         }
       ],
       "parseError": null,
@@ -74772,7 +74999,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/workers/pdfSignatureWorker.js",
-          "line": 32,
+          "line": 34,
           "description": "The viewer's pdf.js build, loaded only when an appended revision needs the differential confirmation.",
           "params": [],
           "returns": [],
@@ -74786,7 +75013,7 @@
           "specifiers": [
             "collectPdfSignatures"
           ],
-          "line": 19,
+          "line": 21,
           "kind": "static",
           "resolved": "src/utils/pdfSignatures.js"
         },
@@ -74795,7 +75022,7 @@
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static",
           "resolved": "src/utils/pdfjsDocumentOptions.js"
         }
@@ -74806,13 +75033,13 @@
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 18,
+          "line": 20,
           "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [],
-          "line": 33,
+          "line": 35,
           "kind": "dynamic"
         }
       ],
@@ -106493,7 +106720,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 188,
+      "line": 204,
       "description": "Terminate the signature worker (e.g.",
       "params": [],
       "returns": [],
@@ -106506,7 +106733,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 150,
+      "line": 166,
       "description": "Inspect the signatures of one document.",
       "params": [
         {
@@ -106525,7 +106752,7 @@
           "name": "options.timeoutMs",
           "type": "number",
           "optional": true,
-          "description": "Worker timeout in ms (default 30000)."
+          "description": "Worker timeout in ms without progress (default 30000); the pdf.js comparison's per-page heartbeats extend it by at most RENDER_CHECK_MAX_TO..."
         },
         {
           "name": "options.transfer",
@@ -106549,7 +106776,7 @@
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 28,
+      "line": 29,
       "description": "Rejection reason that carries the integrity code for the placeholder report.",
       "params": [
         {
@@ -106582,7 +106809,7 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 43,
+      "line": 44,
       "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
       "params": [],
       "returns": [],
@@ -106595,7 +106822,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 94,
+      "line": 157,
       "description": "Create a comparator for one file.",
       "params": [
         {
@@ -106623,16 +106850,22 @@
           "description": "Extra getDocument options (the viewer's options)."
         },
         {
-          "name": "options.budgetMs",
-          "type": "number",
+          "name": "options.budget",
+          "type": "Object",
           "optional": true,
-          "description": "Wall-clock budget per comparison."
+          "description": "Overrides of the time limits (RenderCheckLimits; tests)."
         },
         {
           "name": "options.maxPages",
           "type": "number",
           "optional": true,
           "description": "Page budget."
+        },
+        {
+          "name": "options.onProgress",
+          "type": "function",
+          "optional": true,
+          "description": "Called after every compared page (the worker's heartbeat)."
         }
       ],
       "returns": [
@@ -106644,13 +106877,26 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureRenderCheck~Encoder#digest",
+      "name": "digest",
+      "longname": "module:utils/pdfSignatureRenderCheck~Encoder#digest",
+      "kind": "function",
+      "scope": "instance",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 524,
+      "description": "SHA-256 of the encoding, with every large blob's own SHA-256 in its record.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureRenderCheck~Encoder",
       "name": "Encoder",
       "longname": "module:utils/pdfSignatureRenderCheck~Encoder",
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 318,
+      "line": 426,
       "description": "Deterministic, type-tagged binary encoding of structured-clone data, written into one growing buffer.",
       "params": [],
       "returns": [],
@@ -106663,7 +106909,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 181,
+      "line": 281,
       "description": "Wrap a loaded pdf.js document with cached, id-independent digests.",
       "params": [],
       "returns": [],
@@ -106676,7 +106922,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 248,
+      "line": 348,
       "description": "A widget a document-timestamp append may add: a signature field that shows nothing.",
       "params": [],
       "returns": [],
@@ -106689,21 +106935,8 @@
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 293,
+      "line": 397,
       "description": "Ids are numbered in order of first use per page.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS",
-      "name": "RENDER_CHECK_BUDGET_MS",
-      "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_BUDGET_MS",
-      "kind": "constant",
-      "scope": "static",
-      "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 28,
-      "description": "Wall-clock budget for one comparison (both revisions), in ms.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -106715,10 +106948,93 @@
       "kind": "constant",
       "scope": "static",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 30,
+      "line": 55,
       "description": "Page budget: larger documents are not compared (fail closed).",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_TOTAL_MS",
+      "name": "RENDER_CHECK_MAX_TOTAL_MS",
+      "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_MAX_TOTAL_MS",
+      "kind": "constant",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 51,
+      "description": "Absolute cap for all comparisons of one comparator (one file), in ms.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PAGE_WATCHDOG_MS",
+      "name": "RENDER_CHECK_PAGE_WATCHDOG_MS",
+      "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PAGE_WATCHDOG_MS",
+      "kind": "constant",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 53,
+      "description": "Longest one page, or the document-level sections, may take, in ms.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PER_PAGE_MS",
+      "name": "RENDER_CHECK_PER_PAGE_MS",
+      "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_PER_PAGE_MS",
+      "kind": "constant",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 49,
+      "description": "Allowance per page (both revisions), in ms.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_STARTUP_MS",
+      "name": "RENDER_CHECK_STARTUP_MS",
+      "longname": "module:utils/pdfSignatureRenderCheck.RENDER_CHECK_STARTUP_MS",
+      "kind": "constant",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 47,
+      "description": "Allowance for loading pdf.js and opening both revisions, in ms.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck.renderCheckBudgetMs",
+      "name": "renderCheckBudgetMs",
+      "longname": "module:utils/pdfSignatureRenderCheck.renderCheckBudgetMs",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 87,
+      "description": "Wall-clock budget for comparing a document of pageCount pages: startup + pageCount x per page, never more than the total cap.",
+      "params": [
+        {
+          "name": "pageCount",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "limits",
+          "type": "RenderCheckLimits",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": "ms"
+        }
+      ],
       "examples": 0
     },
     {
@@ -106728,7 +107044,7 @@
       "kind": "class",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 44,
+      "line": 106,
       "description": "Raised for anything that prevents a complete comparison.",
       "params": [
         {
@@ -106742,13 +107058,51 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureRenderCheck.renderCheckLimits",
+      "name": "renderCheckLimits",
+      "longname": "module:utils/pdfSignatureRenderCheck.renderCheckLimits",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 70,
+      "description": "The time limits, with optional overrides (positive numbers only).",
+      "params": [
+        {
+          "name": "overrides",
+          "type": "Object",
+          "optional": true,
+          "description": "Any of the RenderCheckLimits properties."
+        }
+      ],
+      "returns": [
+        {
+          "type": "RenderCheckLimits",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck~RenderCheckLimits",
+      "name": "RenderCheckLimits",
+      "longname": "module:utils/pdfSignatureRenderCheck~RenderCheckLimits",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 57,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureRenderCheck~RenderCheckResult",
       "name": "RenderCheckResult",
       "longname": "module:utils/pdfSignatureRenderCheck~RenderCheckResult",
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 52,
+      "line": 114,
       "description": "",
       "params": [],
       "returns": [],
@@ -106761,7 +107115,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 65,
+      "line": 127,
       "description": "Map a comparison result to a signature verdict.",
       "params": [
         {
@@ -106786,8 +107140,21 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 76,
+      "line": 138,
       "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureRenderCheck.resolveResource",
+      "name": "resolveResource",
+      "longname": "module:utils/pdfSignatureRenderCheck.resolveResource",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureRenderCheck.js",
+      "line": 376,
+      "description": "The resolved object for an id, from the one container pdf.js sends it to: g_* ids (fonts, globally cached images) are document-wide commonObjs , every other id is the page's objs .",
       "params": [],
       "returns": [],
       "examples": 0
@@ -106799,7 +107166,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 280,
+      "line": 384,
       "description": "Plain data for a resolved pdf.js object; fonts expose their state through getters.",
       "params": [],
       "returns": [],
@@ -106825,7 +107192,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureRenderCheck.js",
-      "line": 258,
+      "line": 358,
       "description": "Signature-typed form fields are dropped; what they show is in the page annotations.",
       "params": [],
       "returns": [],
@@ -107242,7 +107609,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1472,
+      "line": 1473,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {
@@ -107261,7 +107628,7 @@
           "name": "options.renderCheck",
           "type": "Object",
           "optional": true,
-          "description": "Options for the pdf.js differential confirmation of appended revisions ( loadPdfjs , documentOptions , budgetMs ; see utils/pdfSignatureRen..."
+          "description": "Options for the pdf.js differential confirmation of appended revisions ( loadPdfjs , documentOptions , budget , maxPages , onProgress ; see..."
         }
       ],
       "returns": [
@@ -120699,7 +121066,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/workers/pdfSignatureWorker.js",
-      "line": 32,
+      "line": 34,
       "description": "The viewer's pdf.js build, loaded only when an appended revision needs the differential confirmation.",
       "params": [],
       "returns": [],

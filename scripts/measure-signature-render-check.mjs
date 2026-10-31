@@ -23,8 +23,9 @@
 // destroyed, so a baseline that does not wait for the objects both under-
 // reports pdf.js and slows down the next measurement.) Each line also carries
 // the peak RSS sampled during the comparison and the baseline. A linear fit per
-// form gives the page count at which the comparator reaches
-// RENDER_CHECK_BUDGET_MS. Positional page counts are ignored in this mode.
+// form gives the page count at which the comparator reaches its work-scaled
+// budget (renderCheckBudgetMs; capped by RENDER_CHECK_MAX_PAGES), next to the
+// former constant 20 000 ms. Positional page counts are ignored in this mode.
 // RSS is a process high-water mark, so a side that runs after the other
 // inherits its peak; for clean memory figures run one side per process with
 // `--only=compare` or `--only=pdfjs` (DSS-only append, no fit).
@@ -33,7 +34,7 @@ import { getHeapStatistics } from 'node:v8';
 import { createSecurityFixtures, byteRange } from './signature-security-fixtures.mjs';
 import { createMultiPageFixtures } from './signature-revision-fixtures.mjs';
 import { createFixturePki } from './generate-signature-fixtures.mjs';
-import { createRenderComparator, RENDER_CHECK_BUDGET_MS } from '../src/utils/pdfSignatureRenderCheck.js';
+import { createRenderComparator, renderCheckBudgetMs, RENDER_CHECK_MAX_PAGES } from '../src/utils/pdfSignatureRenderCheck.js';
 import { collectPdfSignatures } from '../src/utils/pdfSignatures.js';
 import { createPageFormFixtures, PAGE_FORMS } from './signature-page-form-fixtures.mjs';
 
@@ -225,6 +226,12 @@ async function measurePageForms() {
     const last = rows[rows.length - 1];
     const pct = (part) => `${((100 * part) / c.slope).toFixed(0)}%`;
     console.log(`${form} | fit over ${xs.join(',')} pages | compare ${c.slope.toFixed(1)} ms/page + ${ms(c.intercept)} ms (r2 ${c.r2.toFixed(3)}) | pdf.js-only ${p.slope.toFixed(1)} ms/page + ${ms(p.intercept)} ms (r2 ${p.r2.toFixed(3)}, ${pct(p.slope)}) | check overhead ${(c.slope - p.slope).toFixed(1)} ms/page (${pct(c.slope - p.slope)})`);
-    console.log(`${form} | ${RENDER_CHECK_BUDGET_MS} ms reached at ~${ms((RENDER_CHECK_BUDGET_MS - c.intercept) / c.slope)} pages (slope, warm pdf.js), ~${ms((RENDER_CHECK_BUDGET_MS - c.intercept - importMs) / c.slope)} pages (slope, cold: + import), ~${ms(RENDER_CHECK_BUDGET_MS / (last.compare / last.pages))} pages (mean ${ms(last.compare / last.pages)} ms/page at ${last.pages} pages)`);
+    // First page count whose fitted time exceeds the work-scaled budget (the fit is linear, the budget piecewise linear).
+    const amberAt = (extraMs) => {
+      for (let n = 1; n <= RENDER_CHECK_MAX_PAGES; n++) if (c.intercept + extraMs + c.slope * n > renderCheckBudgetMs(n)) return `at ~${n} pages`;
+      return `never (the ${RENDER_CHECK_MAX_PAGES}-page limit binds first)`;
+    };
+    const OLD_BUDGET_MS = 20000;
+    console.log(`${form} | work-scaled budget exceeded ${amberAt(0)} (slope, warm pdf.js), ${amberAt(importMs)} (slope, cold: + import) | former constant ${OLD_BUDGET_MS} ms reached at ~${ms((OLD_BUDGET_MS - c.intercept) / c.slope)} pages (mean ${ms(last.compare / last.pages)} ms/page at ${last.pages} pages)`);
   }
 }

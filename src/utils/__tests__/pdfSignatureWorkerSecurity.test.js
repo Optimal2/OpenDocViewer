@@ -117,6 +117,41 @@ it('F6 timeout terminates the worker, settles all requests, and never parses inl
   expect(state.workers[0].terminate).toHaveBeenCalledOnce();
   expect(collectPdfSignatures).not.toHaveBeenCalled();
 });
+it('heartbeats from the pdf.js comparison extend the timeout, bounded by its total cap', async () => {
+  const { getDocumentSignatures } = await api();
+  const { RENDER_CHECK_MAX_TOTAL_MS } = await import('../pdfSignatureRenderCheck.js');
+  let settled = null;
+  const promise = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 10000 });
+  promise.then((report) => { settled = report; });
+  await vi.advanceTimersByTimeAsync(0);
+  const worker = state.workers[0];
+  const { requestId } = worker.postMessage.mock.calls[0][0];
+  // A progressing comparison keeps the request alive far past timeoutMs ...
+  for (let t = 0; t < RENDER_CHECK_MAX_TOTAL_MS; t += 9000) {
+    worker.onmessage({ data: { type: 'pdfSignaturesProgress', requestId } });
+    await vi.advanceTimersByTimeAsync(9000);
+    if (t + 9000 < RENDER_CHECK_MAX_TOTAL_MS) expect(settled).toBeNull();
+  }
+  // ... but never past timeoutMs plus the comparison's total cap, heartbeats or not.
+  for (let i = 0; i < 6 && settled === null; i++) {
+    worker.onmessage({ data: { type: 'pdfSignaturesProgress', requestId } });
+    await vi.advanceTimersByTimeAsync(1000);
+  }
+  expect(settled).not.toBeNull();
+  expect((await promise).signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'timeout' });
+  expect(worker.terminate).toHaveBeenCalledOnce();
+  expect(vi.getTimerCount()).toBe(0);
+});
+it('without a heartbeat the worker still times out after timeoutMs', async () => {
+  const { getDocumentSignatures } = await api();
+  const promise = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 10000 });
+  await vi.advanceTimersByTimeAsync(0);
+  const worker = state.workers[0];
+  const { requestId } = worker.postMessage.mock.calls[0][0];
+  worker.onmessage({ data: { type: 'pdfSignaturesProgress', requestId } });
+  await vi.advanceTimersByTimeAsync(10001);
+  expect((await promise).signatures[0]).toMatchObject({ integrity: 'not-checked-in-viewer', integrityCode: 'timeout' });
+});
 it('F6 worker construction failure never falls through to inline parsing', async () => {
   state.failConstruction = true;
   const { getDocumentSignatures, collectPdfSignatures } = await api();
