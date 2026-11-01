@@ -99,3 +99,10 @@ playwright-report/
 
 # Local scratch dir for one-off reproduction / break-it scripts
 scratch/
+
+# Lockstep workflow test scratch (scripts/lockstep-workflow.test.mjs creates
+# disposable repos under _tools/lockstep-fixture-*/ and removes them on every
+# exit path; ignore leftovers so stale scratch never shows up as untracked
+# repository state). Kept tight on purpose: _tools/ itself also hosts release
+# tooling checkouts (see .github/workflows/release.yml) and must stay tracked.
+_tools/lockstep-fixture-*/

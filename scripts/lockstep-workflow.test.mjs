@@ -5,6 +5,41 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+// Best-effort removal of one scratch directory created by mkdtempSync below.
+// Idempotent (an already-removed directory is not an error) and confined to the
+// directory this test created: anything outside scratchRoot, or without the
+// lockstep-fixture- prefix, is left alone. Cleanup must never fail the test.
+function removeScratchDir(scratchRoot, scratch) {
+  try {
+    if (path.dirname(path.resolve(scratch)) !== path.resolve(scratchRoot)) return;
+    if (!path.basename(scratch).startsWith('lockstep-fixture-')) return;
+    fs.rmSync(scratch, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+  } catch {
+    // Best effort only.
+  }
+}
+
+// Covers process-level termination where a try/finally cannot run (SIGINT,
+// SIGTERM, process exit). Returns an uninstall function for the settled path,
+// where the try/finally in runMatrix already removes the directory.
+function installScratchCleanup(scratchRoot, scratch) {
+  const cleanup = () => removeScratchDir(scratchRoot, scratch);
+  const listeners = [];
+  for (const signal of ['SIGINT', 'SIGTERM']) {
+    const handler = () => {
+      cleanup();
+      process.exit(signal === 'SIGINT' ? 130 : 143);
+    };
+    process.once(signal, handler);
+    listeners.push([signal, handler]);
+  }
+  process.once('exit', cleanup);
+  return () => {
+    for (const [signal, handler] of listeners) process.removeListener(signal, handler);
+    process.removeListener('exit', cleanup);
+  };
+}
+
 function runMatrix() {
   const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const baseline = process.argv.includes('--baseline');
@@ -45,6 +80,7 @@ function runMatrix() {
   const scratchRoot = path.join(repo, '_tools');
   fs.mkdirSync(scratchRoot, { recursive: true });
   const scratch = fs.mkdtempSync(path.join(scratchRoot, 'lockstep-fixture-'));
+  const uninstallScratchCleanup = installScratchCleanup(scratchRoot, scratch);
   const fixture = path.join(scratch, 'repo');
   const transcript = [
     `Source pin: ${git(repo, ['rev-parse', 'HEAD']).trim()}`,
@@ -183,11 +219,15 @@ function runMatrix() {
       }
     }
   } finally {
-    if (evidence) {
-      fs.mkdirSync(path.dirname(evidence), { recursive: true });
-      fs.writeFileSync(evidence, `${transcript.join('\n')}\n`.replaceAll('\r\n', '\n'));
+    try {
+      if (evidence) {
+        fs.mkdirSync(path.dirname(evidence), { recursive: true });
+        fs.writeFileSync(evidence, `${transcript.join('\n')}\n`.replaceAll('\r\n', '\n'));
+      }
+    } finally {
+      uninstallScratchCleanup();
+      removeScratchDir(scratchRoot, scratch);
     }
-    fs.rmSync(scratch, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
   }
   assert.deepEqual(failures, [], failures.join('\n'));
   console.log('PASS: extracted lockstep workflow matrix');
