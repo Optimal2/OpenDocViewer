@@ -418,6 +418,22 @@ profile stated inline; re-run the command to reproduce):
   Machine for both runs (printed by the script itself): 24 cores, 63.9 GiB RAM,
   Node v22.23.3, measured 46% CPU busy over the no-load run and 100% over the
   loaded run (2026-11-01; medians of 3 fresh processes each).
+  The first check of a fresh browser session — the signature worker's own
+  pdf.js registration included — was measured end to end with
+  `ODV_MEASURE_FIRST_CHECK=1 npx playwright test
+  tests/ui/signature-first-check.spec.mjs` (one fresh Chromium context per
+  run, 1-page DSS-only fixture whose appended revision the classifier
+  accepts, production `getDocumentSignatures`; run of 2026-11-01, 24 cores,
+  63.9 GiB RAM, Chromium 156.0.8078.4, fixture generated under Node
+  v22.23.3). First-check times, 10 runs each: without load 1898, 894, 926,
+  987, 895, 878, 888, 885, 906, 936 ms (median 900, max 1898; measured 40%
+  CPU busy over the runs); under full CPU load (23 busy-loop processes)
+  1275, 1682, 2210, 1570, 1622, 1935, 1763, 2077, 1780, 1821 ms (median
+  1771, max 2210; measured 100% busy). A second check on the same page took
+  49-73 ms without load and 72-151 ms loaded, so almost all of the first
+  check is the cold worker registration and document opening the startup
+  allowance gates. 5 s leaves more than 2x over the worst measured first
+  check (2.26x over 2.21 s), so the allowance is kept.
 - **per page 2.5 s:** 3.2x the slowest fitted form (JPEG scan with text strokes,
   786 ms/page in the linear fit over 1, 2, 4 and 8 pages printed by the page-form
   run quoted in the per-page-form table below), because real scans
@@ -428,7 +444,7 @@ profile stated inline; re-run the command to reproduce):
   journal with a DSS/LTV append completes with almost 2x to spare. Beyond 118 pages
   the cap, not the per-page allowance, binds (computed from the budget formula
   5 s + n x 2.5 s = 300 s at n = 118, not measured);
-- **per-page watchdog 15 s:** about 19x the slowest fitted page rate (15 s / 0.786 s,
+- **per-page watchdog 15 s:** about 19.1x the slowest fitted page rate (15 s / 0.786 s,
   computed, not measured) and 1/20 of the cap, so a stalled page fails closed in
   seconds instead of consuming the whole budget.
 

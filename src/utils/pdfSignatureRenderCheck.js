@@ -27,21 +27,30 @@
 /*
  * Time budget, scaled with the work the document requires (measured per page
  * form with `scripts/measure-signature-render-check.mjs --forms=...`; table in
- * docs-src/pdf-signatures.md). The slowest measured page form, an A4 300 dpi
- * JPEG scan with text strokes, takes about 800 ms per page for both revisions
- * together; text pages about 26 ms.
+ * docs-src/pdf-signatures.md). The slowest fitted page form, an A4 300 dpi
+ * JPEG scan with text strokes, takes about 786 ms per page for both revisions
+ * together; text pages about 29 ms.
  *
- * - Startup: pdf.js import plus opening both revisions measured 0.36-1.5 s
- *   cold; 5 s leaves more than 3x for a slow machine. It is the whole budget
- *   until the page count is known.
- * - Per page: 2.5 s, more than 3x the slowest measured form, because real
- *   scans carry more detail than the fixtures and slower hardware exists.
+ * - Startup: pdf.js import plus opening both revisions (the `startupColdMs`
+ *   median emitted by `node scripts/measure-signature-import-cost.mjs
+ *   --repeat=3 --pages=20`) measured 0.51 s without load and 0.72 s under
+ *   full CPU load; the whole first browser check of a fresh session, worker
+ *   pdf.js registration included (measured with `ODV_MEASURE_FIRST_CHECK=1
+ *   npx playwright test tests/ui/signature-first-check.spec.mjs`, 10 fresh
+ *   sessions per condition), took at most 1.90 s without load and 2.21 s
+ *   under full CPU load. 5 s leaves more than 2x over that worst measured
+ *   first check (2.26x over 2.21 s). It is the whole budget until the page
+ *   count is known.
+ * - Per page: 2.5 s, 3.2x the slowest fitted form (785.6 ms/page), because
+ *   real scans carry more detail than the fixtures and slower hardware exists.
  * - Total cap: 300 s for all comparisons of one file. 200 pages of the
- *   slowest measured form need about 160 s, so they complete with almost 2x to
- *   spare; beyond 118 pages the cap, not the per-page allowance, binds.
+ *   slowest fitted form need about 157 s (extrapolated, not measured), so
+ *   they complete with almost 2x to spare; beyond 118 pages the cap, not the
+ *   per-page allowance, binds.
  * - Per-page watchdog: 15 s for one page (or the document-level sections),
- *   about 19x the slowest measured page and 1/20 of the cap, so a stalled page
- *   fails closed in seconds instead of consuming the whole document's budget.
+ *   about 19.1x the slowest fitted page rate and 1/20 of the cap, so a
+ *   stalled page fails closed in seconds instead of consuming the whole
+ *   document's budget.
  */
 /** Allowance for loading pdf.js and opening both revisions, in ms. */
 export const RENDER_CHECK_STARTUP_MS = 5000;
