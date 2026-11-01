@@ -406,19 +406,31 @@ with a "could not be checked" explanation, never green and never an error. The s
 open only the startup allowance applies; once the page count n is known the deadline is
 `min(5 s + n x 2.5 s, 300 s)` from the start of the comparison, and every step (the
 document-level sections, then each page) is additionally bounded by a 15 s watchdog. The
-numbers come from the page-form measurements below:
+numbers come from the runs quoted with each number (exact command and machine
+profile stated inline; re-run the command to reproduce):
 
-- **startup 5 s:** pdf.js import plus opening both revisions measured 0.36-1.5 s cold
-  (fixed term up to 267 ms warm); 5 s leaves more than 3x for a slower machine;
-- **per page 2.5 s:** more than 3x the slowest measured form (JPEG scan with text
-  strokes, 800 ms/page in the step-1 fit, 732 ms/page after this change), because real scans
+- **startup 5 s:** pdf.js import plus opening both revisions (the `startupColdMs`
+  median emitted by `node scripts/measure-signature-import-cost.mjs --repeat=3
+  --pages=20`) measured 0.51 s without load and 0.72 s under full CPU load
+  (the same command with `--load=23`); opening both revisions with the module
+  already warm (`startupWarmMs`) measured 0.12 s and 0.17 s in the same runs.
+  5 s leaves about 7x headroom over the loaded measurement for a slower machine.
+  Machine for both runs (printed by the script itself): 24 cores, 63.9 GiB RAM,
+  Node v22.23.3, measured 46% CPU busy over the no-load run and 100% over the
+  loaded run (2026-11-01; medians of 3 fresh processes each).
+- **per page 2.5 s:** 3.2x the slowest fitted form (JPEG scan with text strokes,
+  786 ms/page in the linear fit over 1, 2, 4 and 8 pages printed by the page-form
+  run quoted in the per-page-form table below), because real scans
   carry more detail than the fixtures and slower hardware exists;
-- **total cap 300 s,** shared by all comparisons of one file: 200 pages of the slowest
-  measured form need about 160 s, so an ordinary large scanned journal with a DSS/LTV
-  append completes with almost 2x to spare. Beyond 118 pages the cap, not the per-page
-  allowance, binds;
-- **per-page watchdog 15 s:** about 19x the slowest measured page and 1/20 of the cap, so
-  a stalled page fails closed in seconds instead of consuming the whole budget.
+- **total cap 300 s,** shared by all comparisons of one file: 200 pages at the slowest
+  fitted rate need about 160 s (200 x 0.786 s, extrapolated from the fit, not measured -
+  the largest measured document below has 96 pages), so an ordinary large scanned
+  journal with a DSS/LTV append completes with almost 2x to spare. Beyond 118 pages
+  the cap, not the per-page allowance, binds (computed from the budget formula
+  5 s + n x 2.5 s = 300 s at n = 118, not measured);
+- **per-page watchdog 15 s:** about 19x the slowest fitted page rate (15 s / 0.786 s,
+  computed, not measured) and 1/20 of the cap, so a stalled page fails closed in
+  seconds instead of consuming the whole budget.
 
 The signature worker's 30 s main-thread deadline is re-armed by a heartbeat after every
 compared page (see "Where it runs"), so a long comparison that still makes progress is not
@@ -443,27 +455,29 @@ use with a dynamic import and sets its worker source exactly like the page worke
 then starts a nested worker or uses its in-thread loopback. The full file is loaded once per
 inspection and its fingerprints are reused for every signature. Measured with
 `node scripts/measure-signature-render-check.mjs` (Node 22, the same code the worker runs; the
-first comparison also pays for loading pdf.js):
+first comparison also pays for loading pdf.js); run of 2026-11-01 on 24 cores,
+63.9 GiB RAM (20.0 GiB free), Node v22.23.3, measured 47% CPU busy:
 
 | File | Pages | Size | Outcome | Comparison | Whole inspection |
 | --- | --- | --- | --- | --- | --- |
-| Largest appended-revision fixture (`okDocTimestampThenDss`, two signatures) | 1 | 35 KB | same | 439 ms (first, includes pdf.js load) | 96 ms |
-| Synthetic signed report, DSS-only append | 20 | 273 KB | same | 496 ms | 447 ms |
-| The same, content change on page 17 | 20 | 278 KB | different | 395 ms | 15 ms (classifier) |
-| Synthetic signed report, DSS-only append | 50 | 380 KB | same | 1,073 ms | 1,184 ms |
-| The same, content change on page 47 | 50 | 384 KB | different | 1,060 ms | 21 ms (classifier) |
+| Largest appended-revision fixture (`okDocTimestampThenDss`, two signatures) | 1 | 36 KB | same | 639 ms (first, includes pdf.js load) | 225 ms |
+| Synthetic signed report, DSS-only append | 20 | 273 KB | same | 649 ms | 631 ms |
+| The same, content change on page 17 | 20 | 278 KB | different | 482 ms | 20 ms (classifier) |
+| Synthetic signed report, DSS-only append | 50 | 380 KB | same | 1,359 ms | 1,384 ms |
+| The same, content change on page 47 | 50 | 384 KB | different | 1,359 ms | 32 ms (classifier) |
 
 Each page carries 45 text lines, vector graphics and one shared 256x256 RGB image. A content
 change the classifier already detects never reaches the comparison, which is why the whole
 inspection of the changed files is fast.
 
 **Cold pdf.js import in Vitest (test environment only).** The first differential in a test
-file otherwise pays the module import inside the comparison's startup budget. On the 24-core
-hub with Node 22.23.3 and Vitest 5.0.5, a fresh import measured 318 ms without load and
-1,074 ms under CPU load; an immediately repeated import took about 0.06-0.08 ms. These are
-the medians in the three-process measurements recorded in the header of
-`scripts/measure-signature-import-cost.mjs`. The warm-up is therefore still needed, but it must
-be targeted.
+file otherwise pays the module import inside the comparison's startup budget. Measured with
+`node scripts/measure-signature-import-cost.mjs --repeat=3 --pages=20` (medians of 3 fresh
+processes, 2026-11-01, 24 cores, 63.9 GiB RAM, Node v22.23.3): a cold import took 390 ms
+without load (46% CPU busy) and 545 ms under full CPU load (the same command with
+`--load=23`, 100% busy); an immediately repeated import in the same process took 0.06 ms
+in both runs. The script prints these `coldImportMs`/`warmImportMs` medians itself. The
+warm-up is therefore still needed, but it must be targeted.
 
 Only the three suites that execute the real comparator opt in with `beforeAll(warmPdfjs)`:
 `src/utils/__tests__/pdfSignatureRenderCheck.test.js` (direct comparator calls),
@@ -507,41 +521,48 @@ not modified.
 
 **Per page form.** Scanned pages cost far more than text pages. Synthetic A4 300 dpi pages
 (`scripts/signature-page-form-fixtures.mjs`: one distinct 2480x3508 image per page), DSS-only
-append (the path that must compare every page), Node 22.23.3, linear fit over 1, 2, 4 and 8
-pages. "Amber at" is the page count at which the fitted comparison time exceeds the
-work-scaled budget; for text and Flate pages the 1,000-page limit (`inspection-limit`)
-comes first, and for this Flate fixture (0.65 MB per page) so does the inspector's 64 MiB
-file limit at about 100 pages.
+append (the path that must compare every page), linear fit over 1, 2, 4 and 8 pages (run of
+2026-11-01 (Reproduce below), 24 cores, 63.9 GiB RAM, Node v22.23.3, repeat 1, measured
+45% CPU busy). "Amber" is the page count at which the fitted comparison time exceeds the
+work-scaled budget (warm fit, then the same fit plus the one-off cold import); for text
+and Flate pages the 1,000-page limit (`inspection-limit`) comes first, and for this Flate
+fixture (about 0.63 MB per page) so does the inspector's 64 MiB file limit at about 100 pages
+(64 / 0.63, computed).
 
-| Form | Before (constant 20 s): ms/page + fixed ms | Amber before | After: ms/page + fixed ms | pdf.js's own share after | Amber now (step-1 fit / after fit) |
-| --- | --- | --- | --- | --- | --- |
-| text (45 lines, shared 256x256 image) | 25.5 + 159 | ~778 pages | 20.8 + 62 | 41% | never (1,000-page limit) |
-| flate-rgb, 8.7 MP | 225.5 + 94 | ~88 pages | 147.4 + 29 | 70% | never (1,000-page and 64 MiB limits) |
-| jpeg, 8.7 MP | 684.6 + 267 | ~29 pages | 601.2 + 67 | 98% | ~438 / ~499 pages |
-| smask (RGB + gray mask) | 516.8 + 35 | ~39 pages | 490.4 - 116 | 76% | ~581 / ~613 pages |
-| jpeg-text (gradient + text strokes) | 799.6 + 105 | ~25 pages | 731.6 + 22 | ~100% | ~376 / ~411 pages |
+| Form | ms/page + fixed ms (fit over 1,2,4,8) | pdf.js's own share | Amber (warm fit / cold incl. import) |
+| --- | --- | --- | --- |
+| text (45 lines, shared 256x256 image) | 29.0 + 56 | 34% | never (1,000-page limit) |
+| flate-rgb, 8.7 MP | 221.0 + (-23) | 89% | never (1,000-page and 64 MiB limits) |
+| jpeg, 8.7 MP | 627.8 + 202 | 103% | ~478 / ~475 pages |
+| smask (RGB + gray mask) | 476.0 + 11 | 87% | ~631 / ~627 pages |
+| jpeg-text (gradient + text strokes) | 785.6 + 224 | 91% | ~382 / ~380 pages |
 
-Large documents, one run each, before and after this change on the same machine:
+Large documents, one run each, current code (`--forms=jpeg,flate-rgb --pages=60,96`;
+run of 2026-11-01, 24 cores, 63.9 GiB RAM, Node v22.23.3, measured 45% CPU busy):
 
-| Fixture | Before: outcome, compare time, peak RSS, verdict | After: outcome, compare time, peak RSS, verdict |
-| --- | --- | --- |
-| jpeg, 60 pages, DSS-only append | unavailable (time budget of 20000 ms exceeded), 20.3 s, 804 MiB, `indeterminate` / `timeout` | same, 36.4 s, 806 MiB, `intact` / `extended-with-validation-data` |
-| jpeg, 60 pages, image changed on page 57 | unavailable (timeout), 20.6 s; classifier `modified-after-signing` | different (page 57 operator list), 34.0 s; `modified-after-signing` / `content-changed-after-signing` |
-| flate-rgb, 60 pages, DSS-only append | same, 12.5 s, 4,656 MiB, `intact` | same, 9.8 s, 1,701 MiB, `intact` / `extended-with-validation-data` |
-| flate-rgb, 96 pages (59 MiB), DSS-only append | same, 19.6 s (0.4 s under the ceiling), 7,281 MiB | same, 14.9 s, 2,530 MiB, `intact` / `extended-with-validation-data` |
-| flate-rgb, 96 pages, image changed on page 93 | different (page 93 operator list), 17.4 s | different (page 93 operator list), 14.8 s; `modified-after-signing` / `content-changed-after-signing` |
+| Fixture | Outcome, compare time, peak RSS, verdict |
+| --- | --- |
+| jpeg, 60 pages, DSS-only append | same, 43.4 s, 855 MiB, `intact` / `extended-with-validation-data` |
+| jpeg, 60 pages, image changed on page 57 | different (page 57 operator list), 40.7 s; `modified-after-signing` / `content-changed-after-signing` |
+| flate-rgb, 60 pages, DSS-only append | same, 11.3 s, 1,637 MiB, `intact` / `extended-with-validation-data` |
+| flate-rgb, 96 pages (59 MiB), DSS-only append | same, 17.1 s, 2,480 MiB, `intact` / `extended-with-validation-data` |
+| flate-rgb, 96 pages, image changed on page 93 | different (page 93 operator list), 18.2 s; `modified-after-signing` / `content-changed-after-signing` |
 
-Memory, `--only=compare`, flate-rgb, one process per point: 407 MiB at 2 pages and 1,428 MiB
-at 16 pages before (73 MiB per page), 379 MiB and 662 MiB after (20 MiB per page). The
-remaining growth is pdf.js's own: the pdf.js-only baseline grows 23 MiB per page in the same
-run (292 / 617 MiB), and neither a forced GC nor `PDFDocumentProxy.cleanup()` after every
-page lowers it. JPEG pages stay flat (about 800 MiB at 60 pages).
+Memory, `--only=compare`, flate-rgb, one process per point (`--forms=flate-rgb
+--pages=2,16 --only=compare`, runs of 2026-11-01, 24 cores, 63.9 GiB RAM,
+Node v22.23.3): 333 MiB at 2 pages and 672 MiB
+at 16 pages (24 MiB per page). The
+remaining growth is pdf.js's own: the pdf.js-only baseline (`--only=pdfjs` in the same runs)
+grows 20 MiB per page (332 / 617 MiB), and neither a forced GC nor `PDFDocumentProxy.cleanup()`
+after every page lowers it. JPEG pages stay almost flat (855 MiB at 60 pages, 1,121 MiB at 96 pages).
 
 **Why the comparison stays on decoded pixels.** pdf.js decodes an image while it builds the
 operator list (`getOperatorList()` starts the decode), whether or not anyone reads the
-pixels, so for JPEG pages 91-98% of the comparison time is pdf.js's own work. Comparing the
-image's raw stream data and decode parameters instead would only save the check's own
-overhead (for JPEG it would have moved the old ceiling from about 29 to about 32 pages)
+pixels, so for the slowest pages about nine-tenths of the comparison time is pdf.js's own
+work (91% in the fit above). Comparing the
+image's raw stream data and decode parameters instead would only save the check's
+own overhead (about 67 ms/page on the slowest form: without it the amber point would
+move from about 382 to about 417 pages, computed from the fit above)
 while giving up the premise that the comparison covers what pdf.js shows. It was rejected;
 the work-scaled budget addresses the cost instead. pdf.js also resolves `getOperatorList()`
 before the page's images have arrived in `page.objs` and keeps decoding after a document is
@@ -554,11 +575,13 @@ Reproduce (Node 22; the page-form mode is opt-in and does not change the default
 node scripts/measure-signature-render-check.mjs
 node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=text,flate-rgb,jpeg,smask,jpeg-text --pages=1,2,4,8
 node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=jpeg,flate-rgb --pages=60,96
-node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=flate-rgb --pages=16 --only=compare
+node --expose-gc --max-old-space-size=8192 scripts/measure-signature-render-check.mjs --forms=flate-rgb --pages=2,16 --only=compare
+node scripts/measure-signature-import-cost.mjs --repeat=3 --pages=20 [--load=23]
 ```
 
-The fit line per form prints the page count at which the work-scaled budget is exceeded and,
-for comparison, where the former constant 20 s budget was reached.
+The fit line per form prints the page count at which the work-scaled budget is exceeded
+(warm pdf.js, and cold including the one-off import) and, for comparison, where the
+former constant 20 s budget was reached.
 
 Limits. The comparison proves what pdf.js shows, nothing more:
 

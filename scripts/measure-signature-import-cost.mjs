@@ -1,6 +1,10 @@
 // Separate the cold pdf.js module import from document opening and the actual
 // pdf.js differential comparison (src/utils/pdfSignatureRenderCheck.js).
 // Usage: node scripts/measure-signature-import-cost.mjs [--repeat=3] [--pages=20] [--load=N]
+// Every run prints a machine profile (Node, cores, RAM, measured CPU busy
+// fraction) and medians for cold/warm import, opening both revisions, the
+// combined startup sums (startupColdMs/startupWarmMs) and the warm compare.
+// Reference numbers live in docs-src/pdf-signatures.md; re-run to reproduce.
 //
 // Every repeat is a fresh Node process. It prints JSON for (a) the first,
 // cold import and a second, warm import of the same module, (b) getDocument +
@@ -12,14 +16,16 @@
 // the default Vitest fork count on the hub. The parent prints every sample and
 // then median, minimum, maximum and max-min spread in milliseconds.
 //
-// Measured on the hub with Node 22.23.3, 20 pages and three fresh processes
-// per row (median [min-max], ms; 2026-10-31):
-//   no load:  cold import 317.7 [310.9-1456.1], warm import 0.061 [0.058-0.064],
-//             open both 119.9 [112.6-175.1], warm compare 696.1 [669.3-816.5]
-//   23 load:  cold import 1073.8 [1041.5-1432.4], warm import 0.075 [0.073-0.078],
-//             open both 295.2 [268.7-357.3], warm compare 2485.7 [2400.6-2506.3]
+// Sample run on 24 cores, 63.9 GiB RAM, Node 22.23.3, 20 pages, three fresh
+// processes per row (median [min-max], ms; 2026-11-01; re-run to reproduce):
+//   no load:  cold import 390.3 [380.2-422.7], warm import 0.060 [0.058-0.061],
+//             open both 123.4 [119.1-128.1], startup cold 513.8 [508.3-541.8],
+//             warm startup 123.5 [119.1-128.1], warm compare 754.5 [655.4-762.9]
+//   23 load:  cold import 545.2 [480.0-676.4], warm import 0.066 [0.061-0.067],
+//             open both 174.2 [159.7-222.7], startup cold 719.4 [639.7-899.1],
+//             warm startup 174.3 [159.7-222.8], warm compare 1111.3 [995.8-2133.1]
 import { spawn } from 'node:child_process';
-import { availableParallelism } from 'node:os';
+import { availableParallelism, cpus, freemem, totalmem } from 'node:os';
 import { byteRange } from './signature-security-fixtures.mjs';
 import { createMultiPageFixtures } from './signature-revision-fixtures.mjs';
 import { createFixturePki } from './generate-signature-fixtures.mjs';
@@ -32,6 +38,26 @@ const integerFlag = (name, fallback, minimum) => {
   return value;
 };
 const repeat = integerFlag('repeat', 3, 1);
+// Machine profile: --load=N only simulates CPU contention with busy loops, so
+// every run also records the real machine state: logical core count,
+// total/available RAM, and the measured CPU busy fraction across all cores
+// over the repeat loop (os.cpus() snapshots, Windows-compatible).
+const machineProfile = () => ({
+  node: process.version,
+  cores: availableParallelism(),
+  memTotalBytes: totalmem(),
+  memFreeBytes: freemem()
+});
+const cpuTimes = () => cpus().reduce((acc, cpu) => {
+  const t = cpu.times;
+  acc.idle += t.idle;
+  acc.total += t.idle + t.user + t.nice + t.sys + t.irq;
+  return acc;
+}, { idle: 0, total: 0 });
+const cpuBusyFraction = (before, after) => (after.total > before.total
+  ? 1 - (after.idle - before.idle) / (after.total - before.total)
+  : NaN);
+const gib = (bytes) => (bytes / 2 ** 30).toFixed(1);
 const pages = integerFlag('pages', 20, 1);
 const load = integerFlag('load', 0, 0);
 
@@ -41,14 +67,19 @@ if (process.argv.includes('--child')) {
 } else {
   const burners = Array.from({ length: load }, () => spawn(process.execPath, ['--eval', 'while (true) {}'], { stdio: 'ignore' }));
   try {
-    console.log(`node ${process.version} | repeat ${repeat} | pages ${pages} | load ${load} busy processes | availableParallelism ${availableParallelism()}`);
+    const profileStart = machineProfile();
+    const cpuStart = cpuTimes();
+    console.log(`machine | node ${profileStart.node} | cores ${profileStart.cores} | mem ${gib(profileStart.memTotalBytes)} GiB total, ${gib(profileStart.memFreeBytes)} GiB free | repeat ${repeat} | pages ${pages} | requested load ${load} busy processes`);
     const samples = [];
     for (let index = 0; index < repeat; index++) {
       const sample = await runFreshChild(pages);
       samples.push(sample);
       console.log(`sample ${index + 1} | ${JSON.stringify(sample)}`);
     }
-    const metrics = ['coldImportMs', 'warmImportMs', 'documentOpenMs', 'openFullMs', 'openSignedMs', 'compareMs', 'comparePerPageMs'];
+    const profileEnd = machineProfile();
+    const busy = cpuBusyFraction(cpuStart, cpuTimes());
+    console.log(`machine | ${gib(profileEnd.memFreeBytes)} GiB free at end | measured cpu busy ${(100 * busy).toFixed(1)}% of all cores over the run (requested load ${load})`);
+    const metrics = ['coldImportMs', 'warmImportMs', 'documentOpenMs', 'openFullMs', 'openSignedMs', 'startupColdMs', 'startupWarmMs', 'compareMs', 'comparePerPageMs'];
     for (const metric of metrics) {
       const values = samples.map((sample) => sample[metric]);
       const sorted = [...values].sort((a, b) => a - b);
@@ -57,7 +88,7 @@ if (process.argv.includes('--child')) {
       const summary = { median, min: sorted[0], max: sorted.at(-1), spread: sorted.at(-1) - sorted[0] };
       console.log(`${metric} | ${Object.entries(summary).map(([key, value]) => `${key} ${value.toFixed(3)} ms`).join(' | ')}`);
     }
-    console.log(`summary | ${JSON.stringify({ node: process.version, repeat, pages, load, samples })}`);
+    console.log(`summary | ${JSON.stringify({ machine: { ...profileStart, memFreeEndBytes: profileEnd.memFreeBytes, cpuBusyFraction: busy, requestedLoad: load }, repeat, pages, samples })}`);
   } finally {
     for (const burner of burners) burner.kill();
   }
@@ -121,6 +152,8 @@ async function measureInFreshProcess(pageCount) {
     coldImportMs,
     warmImportMs,
     documentOpenMs,
+    startupColdMs: coldImportMs + documentOpenMs,
+    startupWarmMs: warmImportMs + documentOpenMs,
     openFullMs: full.elapsedMs,
     openSignedMs: signed.elapsedMs,
     compareMs,

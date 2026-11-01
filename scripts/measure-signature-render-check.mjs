@@ -30,6 +30,7 @@
 // inherits its peak; for clean memory figures run one side per process with
 // `--only=compare` or `--only=pdfjs` (DSS-only append, no fit).
 import { readFileSync } from 'node:fs';
+import { availableParallelism, cpus, freemem, totalmem } from 'node:os';
 import { getHeapStatistics } from 'node:v8';
 import { createSecurityFixtures, byteRange } from './signature-security-fixtures.mjs';
 import { createMultiPageFixtures } from './signature-revision-fixtures.mjs';
@@ -38,9 +39,35 @@ import { createRenderComparator, renderCheckBudgetMs, RENDER_CHECK_MAX_PAGES } f
 import { collectPdfSignatures } from '../src/utils/pdfSignatures.js';
 import { createPageFormFixtures, PAGE_FORMS } from './signature-page-form-fixtures.mjs';
 
+// Machine profile: the timings below depend on the real machine state, so
+// every run records it (logical core count, total/available RAM, Node
+// version, and the measured CPU busy fraction across all cores over the run,
+// from os.cpus() snapshots, Windows-compatible). The page-form mode adds its
+// own profile lines around the whole run.
+const machineProfile = () => ({
+  node: process.version,
+  cores: availableParallelism(),
+  memTotalBytes: totalmem(),
+  memFreeBytes: freemem()
+});
+const cpuTimes = () => cpus().reduce((acc, cpu) => {
+  const t = cpu.times;
+  acc.idle += t.idle;
+  acc.total += t.idle + t.user + t.nice + t.sys + t.irq;
+  return acc;
+}, { idle: 0, total: 0 });
+const cpuBusyFraction = (before, after) => (after.total > before.total
+  ? 1 - (after.idle - before.idle) / (after.total - before.total)
+  : NaN);
+const gib = (bytes) => (bytes / 2 ** 30).toFixed(1);
 const flag = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 if (flag('forms')) {
+  const formsMachineStart = machineProfile();
+  const formsCpuStart = cpuTimes();
+  console.log(`machine | node ${formsMachineStart.node} | cores ${formsMachineStart.cores} | mem ${gib(formsMachineStart.memTotalBytes)} GiB total, ${gib(formsMachineStart.memFreeBytes)} GiB free | argv ${process.argv.slice(2).join(' ')}`);
   await measurePageForms();
+  const formsMachineEnd = machineProfile();
+  console.log(`machine | ${gib(formsMachineEnd.memFreeBytes)} GiB free at end | measured cpu busy ${(100 * cpuBusyFraction(formsCpuStart, cpuTimes())).toFixed(1)}% of all cores over the run`);
   process.exit(0);
 }
 
@@ -67,6 +94,9 @@ for (const pages of pageCounts.length ? pageCounts : [20, 50]) {
   measured.push([`${pages}-page signed, content change on page ${pages - 3}`, multi.contentChanged]);
 }
 
+const defaultMachineStart = machineProfile();
+const defaultCpuStart = cpuTimes();
+console.log(`machine | node ${defaultMachineStart.node} | cores ${defaultMachineStart.cores} | mem ${gib(defaultMachineStart.memTotalBytes)} GiB total, ${gib(defaultMachineStart.memFreeBytes)} GiB free | ${measured.length} files`);
 for (const [label, bytes] of measured) {
   const br = byteRange(bytes);
   let t = performance.now();
@@ -81,6 +111,10 @@ for (const [label, bytes] of measured) {
   console.log(`${label} | ${bytes.length} B | ${check.outcome} (${check.detail}) | compare ${compareMs.toFixed(0)} ms | inspection ${inspectMs.toFixed(0)} ms | ${verdict}`);
 }
 
+{
+const defaultMachineEnd = machineProfile();
+console.log(`machine | ${gib(defaultMachineEnd.memFreeBytes)} GiB free at end | measured cpu busy ${(100 * cpuBusyFraction(defaultCpuStart, cpuTimes())).toFixed(1)}% of all cores over the run`);
+}
 /** Opt-in page-form measurement; see the header comment. */
 async function measurePageForms() {
   const forms = flag('forms').split(',').filter(Boolean);
@@ -110,7 +144,8 @@ async function measurePageForms() {
   const t = performance.now();
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const importMs = performance.now() - t;
-  console.log(`pdf.js import ${ms(importMs)} ms (once per process, not in the fits) | node ${process.version} | heap limit ${(getHeapStatistics().heap_size_limit / 2 ** 20).toFixed(0)} MiB | gc ${globalThis.gc ? 'between runs' : 'not exposed'} | repeat ${repeat} (median)`);
+  const formMachine = machineProfile();
+  console.log(`pdf.js import ${ms(importMs)} ms (once per process, not in the fits) | node ${formMachine.node} | cores ${formMachine.cores} | mem ${gib(formMachine.memTotalBytes)} GiB total, ${gib(formMachine.memFreeBytes)} GiB free | heap limit ${(getHeapStatistics().heap_size_limit / 2 ** 20).toFixed(0)} MiB | gc ${globalThis.gc ? 'between runs' : 'not exposed'} | repeat ${repeat} (median)`);
   // The check's own per-byte work on decoded pixels: one buffer copy and one SHA-256.
   for (const [name, size] of [['RGB', 2480 * 3508 * 3], ['RGBA', 2480 * 3508 * 4]]) {
     const pixels = new Uint8Array(size).fill(7);
