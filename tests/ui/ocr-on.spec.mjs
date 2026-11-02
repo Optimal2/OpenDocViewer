@@ -127,16 +127,18 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await page.mouse.move(last.x + last.width - 2, last.y + last.height / 2, { steps: 12 });
   await page.mouse.up();
   const dragged = (await page.evaluate(() => window.getSelection().toString())).replace(/\s+/g, ' ').trim();
+  expect(dragged.startsWith('OpenDocViewer OCR')).toBe(true);
+  expect(dragged.endsWith('2026')).toBe(true);
   expect(dragged).toContain('OCR Hej världen');
-  expect(dragged.split(' ').length).toBeGreaterThanOrEqual(4);
   // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping. It
   // matches a word; the words are positioned separately, so a phrase does not match.
-  const found = await page.evaluate(() => {
+  const find = (text) => page.evaluate((needle) => {
     window.getSelection().removeAllRanges();
-    return window.find('världen', false, false, true, false, false, false);
-  });
-  expect(found).toBe(true);
+    return window.find(needle, false, false, true, false, false, false);
+  }, text);
+  expect(await find('världen')).toBe(true);
   expect(await page.evaluate(() => window.getSelection().toString())).toBe('världen');
+  expect(await find('Hej världen')).toBe(false);
 
   // Print hides the layer and the status; the screen shows them.
   await page.emulateMedia({ media: 'print' });
