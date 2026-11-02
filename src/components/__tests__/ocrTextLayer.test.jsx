@@ -73,8 +73,23 @@ describe('layoutOcrLines', () => {
     const { lines } = layoutOcrLines(words, 1000, 1000, 1000, 1000, () => 10);
     expect(lines.map((line) => line.top)).toEqual([100, 90]);
     // The distance from line 1 to line 2 is negative, so line 1 keeps its own height; the last
-    // line's box is its own height.
+    // line's box is its own height. Line 2's box lands at 150 by stacking, and its words are
+    // shifted from there onto their own boxes.
     expect(lines.map((line) => line.lineHeight)).toEqual([50, 50]);
+    expect(lines.map((line) => line.stackedTop)).toEqual([100, 150]);
+    expect(lines[1].words.map((word) => word.shiftY)).toEqual([350, -60]);
+  });
+
+  it('shifts the words of overlapping lines from the box they land in onto their own places', () => {
+    const words = [
+      { text: 'a', bbox: { x0: 0, y0: 100, x1: 50, y1: 160 } },
+      { text: 'b', bbox: { x0: 0, y0: 140, x1: 50, y1: 200 } },
+      { text: 'c', bbox: { x0: 0, y0: 180, x1: 50, y1: 240 } },
+    ];
+    const { lines } = layoutOcrLines(words, 1000, 1000, 1000, 1000, () => 10);
+    expect(lines.map((line) => line.lineHeight)).toEqual([60, 60, 60]);
+    expect(lines.map((line) => line.stackedTop)).toEqual([100, 160, 220]);
+    expect(lines.map((line) => line.words[0].shiftY)).toEqual([0, -20, -40]);
   });
 
   it('never tightens letter-spacing below -0.4 em for a box narrower than its text', () => {
@@ -250,6 +265,14 @@ describe('OcrTextLayer', () => {
     window.getSelection().addRange(range);
     await act(async () => { document.dispatchEvent(new Event('selectionchange')); });
     expect(words.map((word) => word.classList.contains(OCR_WORD_SELECTED_CLASS))).toEqual([false, true, true, false]);
+    // A selection that ends exactly where a word starts does not cover that word.
+    const edge = document.createRange();
+    edge.setStart(words[1].firstChild, 0);
+    edge.setEnd(words[2].firstChild, 0);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(edge);
+    await act(async () => { document.dispatchEvent(new Event('selectionchange')); });
+    expect(words.map((word) => word.classList.contains(OCR_WORD_SELECTED_CLASS))).toEqual([false, true, false, false]);
     window.getSelection().removeAllRanges();
     await act(async () => { document.dispatchEvent(new Event('selectionchange')); });
     expect(words.map((word) => word.classList.contains(OCR_WORD_SELECTED_CLASS))).toEqual([false, false, false, false]);

@@ -27353,7 +27353,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 184,
+    "line": 198,
     "description": "Whether a selection lies within OCR text layers only (one or several pages), so that its text can be read line by line and a copy of it replaced.",
     "params": [
       {
@@ -27378,7 +27378,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 130,
+    "line": 135,
     "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.",
     "params": [
       {
@@ -27503,7 +27503,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 109,
+    "line": 113,
     "description": "",
     "params": [],
     "returns": [],
@@ -27516,7 +27516,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 98,
+    "line": 99,
     "description": "",
     "params": [],
     "returns": [],
@@ -27529,7 +27529,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 208,
+    "line": 222,
     "description": "The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces (the DOM joins them with no-break spaces) and the lines by newlines...",
     "params": [
       {

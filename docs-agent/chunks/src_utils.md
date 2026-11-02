@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 55. Line count: 22248. JSDoc symbol count: 900.
+File count: 55. Line count: 22262. JSDoc symbol count: 900.
 
 ## src/utils/compareCurtain.js
 

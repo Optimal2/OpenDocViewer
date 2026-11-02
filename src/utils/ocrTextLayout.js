@@ -92,7 +92,8 @@ export function measureWordWidth(text, fontSize) {
  *   as the box (negative for a box narrower than the text, down to MIN_LETTER_SPACING_EM).
  * @property {number} shiftX  Relative offset from the word's natural position in the line flow
  *   to `left`.
- * @property {number} shiftY  Relative offset from the line's top to `top`.
+ * @property {number} shiftY  Relative offset from the top of the line box the word is laid out
+ *   in (the line's `stackedTop`) to `top`.
  */
 
 /**
@@ -103,6 +104,9 @@ export function measureWordWidth(text, fontSize) {
  * @property {number} lineHeight  Height of the line's line box: the distance to the next line's
  *   top (at least the line's own height), or the line's height for the last line. The lines
  *   stack from the flow's top, so this is what places the next line.
+ * @property {number} stackedTop  Where the line box lands by stacking: `top`, unless an earlier
+ *   line box had to be taller than the distance to its successor (lines that overlap or are out
+ *   of reading order); the words are shifted from here onto their boxes.
  * @property {Array<OcrWordPlacement>} words
  */
 
@@ -116,8 +120,9 @@ export function measureWordWidth(text, fontSize) {
  * Place the words of an outcome inside an unrotated frame of `frameWidth` × `frameHeight` CSS px,
  * grouped into lines. Words without text or with an empty box are left out. A word whose box
  * starts below the vertical middle of the previous word's box begins a new line. A line that
- * starts above the previous one (words out of reading order) still gets a line box at least as
- * tall as itself, so the lines after it sit lower than their boxes.
+ * starts above the previous one (words out of reading order), or closer to it than its height,
+ * still gets a line box at least as tall as itself, so the line boxes after it land lower than
+ * their lines; the words are shifted from the box they land in onto their own places.
  *
  * @param {Array<Object>} words  `{ text, bbox: { x0, y0, x1, y1 } }` in image pixels.
  * @param {number} imageWidth  Pixel width of the recognised image.
@@ -164,12 +169,21 @@ export function layoutOcrLines(words, imageWidth, imageHeight, frameWidth, frame
       const shiftX = word.left - naturalLeft;
       // The word advances by its measured width plus the spacing after every character.
       naturalLeft += textWidth + letterSpacing * characters;
-      return { ...word, fontSize, letterSpacing, shiftX, shiftY: word.top - top };
+      return { ...word, fontSize, letterSpacing, shiftX, shiftY: 0 };
     });
-    return { top, height, fontSize: height, lineHeight: height, words: placedWords };
+    return { top, height, fontSize: height, lineHeight: height, stackedTop: top, words: placedWords };
   });
   for (let index = 0; index < lines.length - 1; index += 1) {
     lines[index].lineHeight = Math.max(lines[index].height, lines[index + 1].top - lines[index].top);
+  }
+  // Where each line box lands when the boxes stack from the first line's top; equal to the
+  // line's top unless an earlier line box had to be taller than the distance to its successor.
+  // Every word is shifted from there onto its own box.
+  let stackedTop = lines.length > 0 ? lines[0].top : 0;
+  for (const line of lines) {
+    line.stackedTop = stackedTop;
+    for (const word of line.words) word.shiftY = word.top - stackedTop;
+    stackedTop += line.lineHeight;
   }
   return { top: lines.length > 0 ? lines[0].top : 0, lines };
 }

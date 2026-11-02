@@ -58,16 +58,30 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
     [frameHeight, frameWidth, imageHeight, imageWidth, outcome?.words]
   );
 
-  // Mark the words the selection touches; the native highlight is transparent (styles/ocr.css).
+  // Mark the words the selection covers; the native highlight is transparent (styles/ocr.css).
   useEffect(() => {
     const flow = flowRef.current;
     if (!flow || typeof document === 'undefined') return undefined;
+    let anyMarked = false;
+    const probe = document.createRange();
     const update = () => {
       const selection = window.getSelection?.();
       const range = selection && selection.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : null;
       const touchesFlow = !!range && range.intersectsNode(flow);
+      if (!touchesFlow && !anyMarked) return;
+      anyMarked = false;
       for (const word of flow.querySelectorAll('.ocr-text-layer-word')) {
-        word.classList.toggle(OCR_WORD_SELECTED_CLASS, touchesFlow && range.intersectsNode(word));
+        let covered = false;
+        if (touchesFlow && range.intersectsNode(word)) {
+          // Only a word the selection reaches into, not one it merely touches at its edge
+          // (compared against the word's text, so a boundary just inside the element counts
+          // as its edge too).
+          probe.selectNodeContents(word.firstChild || word);
+          covered = range.compareBoundaryPoints(Range.END_TO_START, probe) < 0
+            && range.compareBoundaryPoints(Range.START_TO_END, probe) > 0;
+        }
+        word.classList.toggle(OCR_WORD_SELECTED_CLASS, covered);
+        if (covered) anyMarked = true;
       }
     };
     document.addEventListener('selectionchange', update);

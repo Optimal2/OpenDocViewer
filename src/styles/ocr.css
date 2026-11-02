@@ -44,7 +44,8 @@
 
 /* A recognised line: inline, never wrapped inside (its words are joined with no-break spaces).
    Its line-height (inline style) is the distance to the next recognised line, so the line boxes
-   stack onto the recognised lines without moving anything. */
+   stack onto the recognised lines; the line itself is never moved, the words inside it are
+   shifted from the line box onto their own boxes. */
 .ocr-text-layer-line {
   position: relative;
   display: inline;
