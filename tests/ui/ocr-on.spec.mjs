@@ -116,7 +116,21 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const selectedText = selected.replace(/\s+/g, ' ').trim();
   expect(selectedText.startsWith('OpenDocViewer OCR Hej världen 2026')).toBe(true);
   expect(selectedText).toContain('Konto Belopp');
-  // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping.
+  // A pointer drag (not a programmatic range) from the first word of the first line to the last
+  // word of the second line selects across the words: each word is its own selectable island
+  // inside `user-select: none` ancestors, and the drag must start on a word (a word is not a pan
+  // start) and extend over the gaps between them.
+  await page.evaluate(() => window.getSelection().removeAllRanges());
+  const last = await words.filter({ hasText: '2026' }).first().boundingBox();
+  await page.mouse.move(first.x + 2, first.y + first.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(last.x + last.width - 2, last.y + last.height / 2, { steps: 12 });
+  await page.mouse.up();
+  const dragged = (await page.evaluate(() => window.getSelection().toString())).replace(/\s+/g, ' ').trim();
+  expect(dragged).toContain('OCR Hej världen');
+  expect(dragged.split(' ').length).toBeGreaterThanOrEqual(4);
+  // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping. It
+  // matches a word; the words are positioned separately, so a phrase does not match.
   const found = await page.evaluate(() => {
     window.getSelection().removeAllRanges();
     return window.find('världen', false, false, true, false, false, false);

@@ -384,7 +384,9 @@ it did before.
 
 The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are
-not searchable until they come into view.
+not searchable until they come into view. Find matches one word at a time: every word is
+positioned separately, so the browser sees a line break between words and a phrase with a space
+in it does not match.
 
 ### Page layout analysis
 
@@ -434,13 +436,13 @@ the shipped policy.
 What the user sees with OCR on: the page image is unchanged. Over a recognised page lies an
 invisible text layer (one transparent word per recognised word, placed on the ink, with spaces
 between words and line breaks between lines), so dragging over the words selects text, Ctrl+C
-copies it as it reads on the page, and the browser's own find (Ctrl+F) matches it; dragging on a
-blank part of the page still pans. A small status in the corner of the page area says
-"Recognising text…", "Text recognised", "No text found", "The text could not be recognised" or
-"Text recognition is unavailable" (the engine could not start; see CSP below), announced to
-screen readers through a polite live region. A page skipped because it has its own text layer
-shows no status. Printing and PDF export never include the layer or the status. Texts are in
-`public/locales/<lng>/common.json` under `ocr`.
+copies it as it reads on the page, and the browser's own find (Ctrl+F) matches single words of
+it (not phrases, see above); dragging on a blank part of the page still pans. A small status in
+the corner of the page area says "Recognising text…", "Text recognised", "No text found", "The
+text could not be recognised" or "Text recognition is unavailable" (the engine could not start;
+see CSP below), announced to screen readers through a polite live region. A page skipped because
+it has its own text layer shows no status. Printing and PDF export never include the layer or
+the status. Texts are in `public/locales/<lng>/common.json` under `ocr`.
 
 ## Toolbar Button Size
 
