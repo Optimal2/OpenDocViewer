@@ -500,7 +500,8 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| <code>OcrTextLayer</code> | function | <code>src/components/OcrTextLayer.jsx:35</code> |  |
+| <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:28</code> | Class of a word that the current selection touches. |
+| <code>OcrTextLayer</code> | function | <code>src/components/OcrTextLayer.jsx:44</code> |  |
 | <code>getBestIncreasingDocumentEntryIndexes</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:528</code> | Find the document-run entries that best preserve natural page order. |
 | <code>&lt;anonymous&gt;~handleDone</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:1834</code> |  |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:1774</code> |  |
@@ -1104,15 +1105,18 @@
 | <code>makeOcrPageKey</code> | function | <code>src/utils/ocrPageKey.js:18</code> |  |
 | <code>ocrPageKeyOf</code> | function | <code>src/utils/ocrPageKey.js:29</code> |  |
 | <code>SEPARATOR</code> | constant | <code>src/utils/ocrPageKey.js:11</code> | Key of one document page in the OCR result map \( ocrPages on the viewer context\). |
-| <code>FALLBACK_ADVANCE</code> | constant | <code>src/utils/ocrTextLayout.js:21</code> | Average advance per character relative to the font size, used when text cannot be measured. |
-| <code>layoutOcrLines</code> | function | <code>src/utils/ocrTextLayout.js:100</code> | Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines. |
-| <code>measureWordWidth</code> | function | <code>src/utils/ocrTextLayout.js:41</code> | Width of text at fontSize px, measured with a canvas context when one exists \(jsdom and print have none, then an estimate keeps the layout consistent\). |
-| <code>MIN_LETTER_SPACING_EM</code> | constant | <code>src/utils/ocrTextLayout.js:28</code> | Tightest letter-spacing, relative to the font size. |
-| <code>OCR_LAYER_FONT_FAMILY</code> | constant | <code>src/utils/ocrTextLayout.js:19</code> | Font used for the invisible words; width is fitted per word so the family only affects fallback estimates. |
-| <code>OCR_WORD_JOINER</code> | constant | <code>src/utils/ocrTextLayout.js:23</code> | The character that joins the words of a line without offering a wrap opportunity. |
-| <code>OcrLinePlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:77</code> |  |
-| <code>ocrSelectionText</code> | function | <code>src/utils/ocrTextLayout.js:155</code> | The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no-break spaces\) and the lines by newlines... |
-| <code>OcrWordPlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:62</code> |  |
+| <code>countCharacters</code> | function | <code>src/utils/ocrTextLayout.js:46</code> | The number of typographic characters in text : letter-spacing is added after each grapheme cluster, not after each code point \(a letter and its combining accent are one\). |
+| <code>FALLBACK_ADVANCE</code> | constant | <code>src/utils/ocrTextLayout.js:25</code> | Average advance per character relative to the font size, used when text cannot be measured. |
+| <code>isOcrLayerSelection</code> | function | <code>src/utils/ocrTextLayout.js:184</code> | Whether a selection lies within OCR text layers only \(one or several pages\), so that its text can be read line by line and a copy of it replaced. |
+| <code>layoutOcrLines</code> | function | <code>src/utils/ocrTextLayout.js:130</code> | Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines. |
+| <code>measureWordWidth</code> | function | <code>src/utils/ocrTextLayout.js:62</code> | Width of text at fontSize px, measured with a canvas context when one exists \(jsdom and print have none, then an estimate keeps the layout consistent\). |
+| <code>MIN_LETTER_SPACING_EM</code> | constant | <code>src/utils/ocrTextLayout.js:32</code> | Tightest letter-spacing, relative to the font size. |
+| <code>OCR_LAYER_FONT_FAMILY</code> | constant | <code>src/utils/ocrTextLayout.js:23</code> | Font used for the invisible words; width is fitted per word so the family only affects fallback estimates. |
+| <code>OCR_WORD_JOINER</code> | constant | <code>src/utils/ocrTextLayout.js:27</code> | The character that joins the words of a line without offering a wrap opportunity. |
+| <code>OcrLayout</code> | typedef | <code>src/utils/ocrTextLayout.js:109</code> |  |
+| <code>OcrLinePlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:98</code> |  |
+| <code>ocrSelectionText</code> | function | <code>src/utils/ocrTextLayout.js:208</code> | The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no-break spaces\) and the lines by newlines... |
+| <code>OcrWordPlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:83</code> |  |
 | <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
 | <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |
 | <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:262</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |

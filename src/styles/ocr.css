@@ -18,11 +18,12 @@
 
 /* One text flow in reading order (utils/ocrTextLayout.js explains why): a 1 px wide block that
    wraps at the ordinary spaces between the line elements, so every recognised line is one line
-   box. Its own font is tiny and its line-height zero, so the wrapping spaces and the strut add
-   nothing to the line boxes. The flow and the lines are selectable like the words: the
-   selection's text (toString, and so the clipboard) leaves out text in `user-select: none`
-   elements, which would drop the joining and wrapping spaces. They still take no pointer
-   events (inherited), so only a word can start a selection. */
+   box. It starts at the first line's top (inline style); its own font is tiny and its
+   line-height zero, so the wrapping spaces and the strut add nothing to the line boxes. The
+   flow and the lines are selectable like the words: the selection's text (toString, and so the
+   clipboard) leaves out text in `user-select: none` elements, which would drop the joining and
+   wrapping spaces. They still take no pointer events (inherited), so only a word can start a
+   selection. */
 .ocr-text-layer-flow {
   position: absolute;
   top: 0;
@@ -41,9 +42,9 @@
   user-select: text;
 }
 
-/* A recognised line: inline, never wrapped inside (its words are joined with no-break spaces),
-   shifted from its natural line box onto the recognised line with relative positioning (inline
-   styles). The line boxes stack with the tallest word of each line as their height. */
+/* A recognised line: inline, never wrapped inside (its words are joined with no-break spaces).
+   Its line-height (inline style) is the distance to the next recognised line, so the line boxes
+   stack onto the recognised lines without moving anything. */
 .ocr-text-layer-line {
   position: relative;
   display: inline;
@@ -73,16 +74,19 @@
   user-select: text;
 }
 
-/* The joining no-break spaces and the wrapping spaces sit at their natural flow positions, not
-   between the shifted words: keep their highlight invisible, the words carry it. */
+/* The browser paints its selection over the whole line box, which here reaches down to the
+   next line, and the joining and wrapping spaces sit at their natural positions, not between
+   the shifted words: the native highlight is transparent everywhere, and the words the
+   selection touches are marked by the layer (components/OcrTextLayer.jsx) and painted over
+   their own boxes. */
 .ocr-text-layer-flow::selection,
-.ocr-text-layer-line::selection {
+.ocr-text-layer-line::selection,
+.ocr-text-layer-word::selection {
   color: transparent;
   background: transparent;
 }
 
-.ocr-text-layer-word::selection {
-  color: transparent;
+.ocr-text-layer-word--selected {
   background: rgba(11, 87, 208, 0.3);
 }
 
@@ -97,13 +101,13 @@
   }
 
   .ocr-text-layer-flow::selection,
-  .ocr-text-layer-line::selection {
+  .ocr-text-layer-line::selection,
+  .ocr-text-layer-word::selection {
     color: transparent;
     background: transparent;
   }
 
-  .ocr-text-layer-word::selection {
-    color: transparent;
+  .ocr-text-layer-word--selected {
     background: Highlight;
   }
 }

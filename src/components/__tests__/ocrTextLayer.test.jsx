@@ -2,15 +2,16 @@
 // File: src/components/__tests__/ocrTextLayer.test.jsx
 /**
  * The OCR text layer is one transparent text flow in reading order: a line element per
- * recognised line, inline words joined with no-break spaces, each shifted onto its image-pixel
- * box, scaled to the stage like the page image and rotated with it. It renders nothing without
- * a `done` outcome, and copy gives the text as it reads on the page.
+ * recognised line whose line box reaches to the next line, inline words joined with no-break
+ * spaces, each word shifted onto its image-pixel box, scaled to the stage like the page image
+ * and rotated with it. It renders nothing without a `done` outcome, marks the words a selection
+ * touches, and copy gives the text as it reads on the page.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import OcrTextLayer from '../OcrTextLayer.jsx';
-import { layoutOcrLines, measureWordWidth, ocrSelectionText, OCR_WORD_JOINER } from '../../utils/ocrTextLayout.js';
+import OcrTextLayer, { OCR_WORD_SELECTED_CLASS } from '../OcrTextLayer.jsx';
+import { countCharacters, isOcrLayerSelection, layoutOcrLines, measureWordWidth, ocrSelectionText, OCR_WORD_JOINER } from '../../utils/ocrTextLayout.js';
 
 const WORDS = [
   { text: 'Hej', confidence: 95, bbox: { x0: 100, y0: 200, x1: 400, y1: 300 } },
@@ -26,14 +27,16 @@ const TWO_LINES = [
   { text: 'Rad', bbox: { x0: 100, y0: 200, x1: 200, y1: 250 } },
   { text: 'två', bbox: { x0: 220, y0: 200, x1: 300, y1: 250 } },
 ];
+const TWO_LINES_OUTCOME = { ...OUTCOME, words: TWO_LINES, imageWidth: 1000, imageHeight: 1000 };
 
 describe('layoutOcrLines', () => {
   it('scales boxes from image pixels to the frame and fits each word to its box with letter-spacing', () => {
     const measure = (text, fontSize) => text.length * fontSize * 0.5;
-    const lines = layoutOcrLines(WORDS, 2000, 3000, 1000, 1500, measure);
+    const { top, lines } = layoutOcrLines(WORDS, 2000, 3000, 1000, 1500, measure);
+    expect(top).toBe(100);
     expect(lines).toHaveLength(1);
     const [line] = lines;
-    expect(line).toMatchObject({ top: 100, height: 50, fontSize: 50, shiftY: 100 });
+    expect(line).toMatchObject({ top: 100, height: 50, fontSize: 50, lineHeight: 50 });
     expect(line.words).toHaveLength(2);
     // "Hej" measures 75 px at 50 px; 25 px after each of its three characters makes it 150 px.
     expect(line.words[0]).toEqual({ text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, letterSpacing: 25, shiftX: 50, shiftY: 0 });
@@ -44,13 +47,14 @@ describe('layoutOcrLines', () => {
     expect(75 + line.words[0].letterSpacing * 3).toBe(150);
   });
 
-  it('groups words into lines and stacks the lines from the top of the frame', () => {
-    const lines = layoutOcrLines(TWO_LINES, 1000, 1000, 1000, 1000, () => 10);
+  it('groups words into lines and gives each line box the distance to the next line', () => {
+    const { top, lines } = layoutOcrLines(TWO_LINES, 1000, 1000, 1000, 1000, () => 10);
     expect(lines.map((line) => line.words.map((word) => word.text))).toEqual([['Rad', 'ett'], ['Rad', 'två']]);
-    // Line 1 sits at 100 and is 50 px tall (its tallest word); line 2 is naturally below it at 50
-    // in the flow and is shifted to 200.
-    expect(lines[0]).toMatchObject({ top: 100, height: 50, shiftY: 100 });
-    expect(lines[1]).toMatchObject({ top: 200, height: 50, shiftY: 150 });
+    // The flow starts at line 1 (100); line 1's box reaches to line 2 (100 px), so line 2 lands
+    // on its top (200) by stacking; the last line box is as tall as the line.
+    expect(top).toBe(100);
+    expect(lines[0]).toMatchObject({ top: 100, height: 50, lineHeight: 100 });
+    expect(lines[1]).toMatchObject({ top: 200, height: 50, lineHeight: 50 });
     // "ett" starts 5 px below the top of its line.
     expect(lines[0].words[1]).toMatchObject({ top: 105, height: 45, fontSize: 45, shiftY: 5 });
     // Natural flow: "Rad" (10 + 30 × 3 = 100), the joiner (10), then "ett" at 110; its box is at 220.
@@ -58,15 +62,38 @@ describe('layoutOcrLines', () => {
     expect(lines[0].words[1].shiftX).toBe(110);
   });
 
+  it('keeps a line box at least as tall as its line when the next line starts above it', () => {
+    // "över" joins the line of "under" (it does not start below it) and lifts that line's top
+    // above the first line's top.
+    const words = [
+      { text: 'först', bbox: { x0: 0, y0: 100, x1: 100, y1: 150 } },
+      { text: 'under', bbox: { x0: 0, y0: 500, x1: 100, y1: 550 } },
+      { text: 'över', bbox: { x0: 200, y0: 90, x1: 300, y1: 140 } },
+    ];
+    const { lines } = layoutOcrLines(words, 1000, 1000, 1000, 1000, () => 10);
+    expect(lines.map((line) => line.top)).toEqual([100, 90]);
+    // The distance from line 1 to line 2 is negative, so line 1 keeps its own height; the last
+    // line's box is its own height.
+    expect(lines.map((line) => line.lineHeight)).toEqual([50, 50]);
+  });
+
   it('never tightens letter-spacing below -0.4 em for a box narrower than its text', () => {
-    const lines = layoutOcrLines([{ text: 'abcdefghij', bbox: { x0: 0, y0: 0, x1: 100, y1: 50 } }], 100, 50, 100, 50, () => 1000);
+    const { lines } = layoutOcrLines([{ text: 'abcdefghij', bbox: { x0: 0, y0: 0, x1: 100, y1: 50 } }], 100, 50, 100, 50, () => 1000);
     expect(lines[0].words[0].letterSpacing).toBe(-20);
   });
 
+  it('counts typographic characters, not code points, for the letter-spacing', () => {
+    expect(countCharacters('Hej')).toBe(3);
+    expect(countCharacters('éx')).toBe(2);
+    expect(countCharacters('\u{1F600}x')).toBe(2);
+    const { lines } = layoutOcrLines([{ text: 'éx', bbox: { x0: 0, y0: 0, x1: 100, y1: 50 } }], 100, 50, 100, 50, () => 40);
+    expect(lines[0].words[0].letterSpacing).toBe(30);
+  });
+
   it('returns nothing for an empty image or frame', () => {
-    expect(layoutOcrLines(WORDS, 0, 3000, 1000, 1500)).toEqual([]);
-    expect(layoutOcrLines(WORDS, 2000, 3000, 0, 1500)).toEqual([]);
-    expect(layoutOcrLines(null, 2000, 3000, 1000, 1500)).toEqual([]);
+    expect(layoutOcrLines(WORDS, 0, 3000, 1000, 1500)).toEqual({ top: 0, lines: [] });
+    expect(layoutOcrLines(WORDS, 2000, 3000, 0, 1500)).toEqual({ top: 0, lines: [] });
+    expect(layoutOcrLines(null, 2000, 3000, 1000, 1500)).toEqual({ top: 0, lines: [] });
   });
 
   it('estimates the width without a canvas context (jsdom) and never returns zero', () => {
@@ -75,22 +102,27 @@ describe('layoutOcrLines', () => {
   });
 });
 
-describe('ocrSelectionText', () => {
+describe('ocrSelectionText and isOcrLayerSelection', () => {
   let host;
+  let outside;
 
   beforeEach(() => {
     host = document.createElement('div');
+    host.className = 'ocr-text-layer';
     host.innerHTML = '<div class="ocr-text-layer-flow">'
       + `<span class="ocr-text-layer-line"><span class="ocr-text-layer-word">Hej</span>${OCR_WORD_JOINER}<span class="ocr-text-layer-word">världen</span></span>`
       + ' '
       + `<span class="ocr-text-layer-line"><span class="ocr-text-layer-word">Rad</span>${OCR_WORD_JOINER}<span class="ocr-text-layer-word">två</span></span>`
       + '</div>';
-    document.body.appendChild(host);
+    outside = document.createElement('p');
+    outside.textContent = 'utanför';
+    document.body.append(host, outside);
   });
 
   afterEach(() => {
     window.getSelection().removeAllRanges();
     host.remove();
+    outside.remove();
   });
 
   function select(startNode, startOffset, endNode, endOffset) {
@@ -105,6 +137,7 @@ describe('ocrSelectionText', () => {
 
   it('reads lines as lines and words as words', () => {
     const selection = select(host, 0, host, 1);
+    expect(isOcrLayerSelection(selection)).toBe(true);
     expect(ocrSelectionText(selection)).toBe('Hej världen\nRad två');
   });
 
@@ -119,7 +152,15 @@ describe('ocrSelectionText', () => {
     expect(ocrSelectionText(select(word.firstChild, 1, word.firstChild, 3))).toBe('ej');
     window.getSelection().removeAllRanges();
     expect(ocrSelectionText(window.getSelection())).toBe('');
+    expect(isOcrLayerSelection(window.getSelection())).toBe(false);
     expect(ocrSelectionText(null)).toBe('');
+    expect(isOcrLayerSelection(null)).toBe(false);
+  });
+
+  it('does not treat a selection that reaches outside the layer as a layer selection', () => {
+    const word = host.querySelector('.ocr-text-layer-word');
+    expect(isOcrLayerSelection(select(word.firstChild, 0, outside.firstChild, 3))).toBe(false);
+    expect(isOcrLayerSelection(select(outside.firstChild, 0, word.firstChild, 2))).toBe(false);
   });
 });
 
@@ -134,6 +175,7 @@ describe('OcrTextLayer', () => {
   });
 
   afterEach(async () => {
+    window.getSelection().removeAllRanges();
     await act(async () => { root.unmount(); });
     container.remove();
   });
@@ -142,6 +184,13 @@ describe('OcrTextLayer', () => {
     await act(async () => {
       root.render(createElement(OcrTextLayer, { outcome: OUTCOME, renderWidth: 1000, renderHeight: 1500, zoom: 1, label: 'Tolkad text, sida 1', pageNumber: 1, ...props }));
     });
+  }
+
+  function selectAll(element) {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
   }
 
   it('renders one text flow with a line element and inline words shifted onto the scaled boxes, with the stage size and zoom of the image', async () => {
@@ -163,10 +212,11 @@ describe('OcrTextLayer', () => {
     expect(frame.style.transform).toBe('');
 
     const flow = frame.querySelector('.ocr-text-layer-flow');
+    expect(flow.style.top).toBe('100px');
     const lines = [...flow.querySelectorAll('.ocr-text-layer-line')];
     expect(lines).toHaveLength(1);
-    expect(lines[0].style.top).toBe('100px');
     expect(lines[0].style.fontSize).toBe('50px');
+    expect(lines[0].style.lineHeight).toBe('50px');
 
     const words = [...lines[0].querySelectorAll('.ocr-text-layer-word')];
     expect(words.map((span) => span.textContent)).toEqual(['Hej', 'världen']);
@@ -180,28 +230,61 @@ describe('OcrTextLayer', () => {
     expect(layer.textContent).toBe(`Hej${OCR_WORD_JOINER}världen`);
   });
 
-  it('separates lines with ordinary spaces so the flow wraps once per recognised line', async () => {
-    await render({ outcome: { ...OUTCOME, words: TWO_LINES, imageWidth: 1000, imageHeight: 1000 }, renderWidth: 1000, renderHeight: 1000 });
+  it('separates lines with ordinary spaces and gives each line box the distance to the next line', async () => {
+    await render({ outcome: TWO_LINES_OUTCOME, renderWidth: 1000, renderHeight: 1000 });
     const layer = container.querySelector('.ocr-text-layer');
     expect(layer.textContent).toBe(`Rad${OCR_WORD_JOINER}ett Rad${OCR_WORD_JOINER}två`);
+    expect(layer.querySelector('.ocr-text-layer-flow').style.top).toBe('100px');
     const lines = [...layer.querySelectorAll('.ocr-text-layer-line')];
-    expect(lines.map((line) => line.style.top)).toEqual(['100px', '150px']);
+    expect(lines.map((line) => line.style.lineHeight)).toEqual(['100px', '50px']);
+    expect(lines.map((line) => line.style.top)).toEqual(['', '']);
+  });
+
+  it('marks the words the selection touches, and only those', async () => {
+    await render({ outcome: TWO_LINES_OUTCOME, renderWidth: 1000, renderHeight: 1000 });
+    const words = [...container.querySelectorAll('.ocr-text-layer-word')];
+    const range = document.createRange();
+    range.setStart(words[1].firstChild, 1);
+    range.setEnd(words[2].firstChild, 2);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    await act(async () => { document.dispatchEvent(new Event('selectionchange')); });
+    expect(words.map((word) => word.classList.contains(OCR_WORD_SELECTED_CLASS))).toEqual([false, true, true, false]);
+    window.getSelection().removeAllRanges();
+    await act(async () => { document.dispatchEvent(new Event('selectionchange')); });
+    expect(words.map((word) => word.classList.contains(OCR_WORD_SELECTED_CLASS))).toEqual([false, false, false, false]);
   });
 
   it('copies the selected text as it reads on the page', async () => {
-    await render({ outcome: { ...OUTCOME, words: TWO_LINES, imageWidth: 1000, imageHeight: 1000 }, renderWidth: 1000, renderHeight: 1000 });
+    await render({ outcome: TWO_LINES_OUTCOME, renderWidth: 1000, renderHeight: 1000 });
     const layer = container.querySelector('.ocr-text-layer');
-    const range = document.createRange();
-    range.selectNodeContents(layer.querySelector('.ocr-text-layer-flow'));
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
+    selectAll(layer.querySelector('.ocr-text-layer-flow'));
     const setData = vi.fn();
     const event = new Event('copy', { bubbles: true, cancelable: true });
     Object.defineProperty(event, 'clipboardData', { value: { setData } });
     await act(async () => { layer.querySelector('.ocr-text-layer-word').dispatchEvent(event); });
     expect(setData).toHaveBeenCalledWith('text/plain', 'Rad ett\nRad två');
     expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('leaves a copy of a selection that reaches outside the layer to the browser', async () => {
+    await render({ outcome: TWO_LINES_OUTCOME, renderWidth: 1000, renderHeight: 1000 });
+    const outside = document.createElement('p');
+    outside.textContent = 'utanför';
+    document.body.appendChild(outside);
+    const word = container.querySelector('.ocr-text-layer-word');
+    const range = document.createRange();
+    range.setStart(word.firstChild, 0);
+    range.setEnd(outside.firstChild, 3);
     window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    const setData = vi.fn();
+    const event = new Event('copy', { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'clipboardData', { value: { setData } });
+    await act(async () => { word.dispatchEvent(event); });
+    expect(setData).not.toHaveBeenCalled();
+    expect(event.defaultPrevented).toBe(false);
+    outside.remove();
   });
 
   it('keeps a double-click on a word from reaching the viewport (fit-mode toggle), but lets other clicks through', async () => {
@@ -238,8 +321,8 @@ describe('OcrTextLayer', () => {
     expect(frame.style.left).toBe('250px');
     expect(frame.style.top).toBe('-250px');
     expect(frame.style.transform).toBe('rotate(90deg)');
-    // The flow is laid out in the unrotated frame; the line and its first word keep their place.
-    expect(container.querySelector('.ocr-text-layer-line').style.top).toBe('100px');
+    // The flow is laid out in the unrotated frame; it and its first word keep their place.
+    expect(container.querySelector('.ocr-text-layer-flow').style.top).toBe('100px');
     expect(container.querySelector('.ocr-text-layer-word').style.left).toBe('50px');
   });
 

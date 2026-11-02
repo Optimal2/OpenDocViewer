@@ -4,19 +4,28 @@
  *
  * One text flow in reading order: a line element per recognised line, inline word elements
  * joined with no-break spaces, lines separated by ordinary spaces in a 1 px wide block so that
- * each recognised line is one line box. Every line and word is shifted onto its recognised box
- * with relative positioning (utils/ocrTextLayout.js), scaled to the page stage exactly like the
- * image: the outer layer takes the stage size and the zoom transform of CanvasRenderer/
- * ImageRenderer, the inner frame is the unrotated image rotated about its centre like
- * drawImageOnCanvas. The text is transparent, so the page looks exactly as before while the
- * browser's selection, copy and find (Ctrl+F, words and phrases, also across a line break) work
- * on it. Copy writes the text as it reads on the page (spaces between words, newlines between
- * lines). Mounted only for a page with a `done` outcome, so the default code path (OCR off)
- * renders nothing here. Hidden in print (styles/ocr.css).
+ * each recognised line is one line box. The flow starts at the first line and the line boxes
+ * are as tall as the distance to the next line, so the lines stack onto their recognised
+ * places; each word is shifted onto its box with relative positioning (utils/ocrTextLayout.js).
+ * The layer is scaled to the page stage exactly like the image: the outer layer takes the stage
+ * size and the zoom transform of CanvasRenderer/ImageRenderer, the inner frame is the unrotated
+ * image rotated about its centre like drawImageOnCanvas. The text is transparent, so the page
+ * looks exactly as before while the browser's selection, copy and find (Ctrl+F, words and
+ * phrases, also across a line break) work on it.
+ *
+ * The browser paints its selection highlight over the whole line box, which here is the gap
+ * down to the next line, so the native highlight is transparent and the layer marks the
+ * selected words itself (a class set on `selectionchange`, painted over the word's box). Copy
+ * writes the text as it reads on the page (spaces between words, newlines between lines) when
+ * the selection lies within text layers. Mounted only for a page with a `done` outcome, so the
+ * default code path (OCR off) renders nothing here. Hidden in print (styles/ocr.css).
  */
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { layoutOcrLines, ocrSelectionText, OCR_WORD_JOINER } from '../utils/ocrTextLayout.js';
+import { isOcrLayerSelection, layoutOcrLines, ocrSelectionText, OCR_WORD_JOINER } from '../utils/ocrTextLayout.js';
+
+/** Class of a word that the current selection touches. */
+export const OCR_WORD_SELECTED_CLASS = 'ocr-text-layer-word--selected';
 
 /**
  * @param {Object} props
@@ -42,11 +51,29 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
   const frameHeight = swapAxes ? stageWidth : stageHeight;
   const imageWidth = Math.max(0, Number(outcome?.imageWidth) || 0);
   const imageHeight = Math.max(0, Number(outcome?.imageHeight) || 0);
+  const flowRef = useRef(null);
 
-  const lines = useMemo(
+  const layout = useMemo(
     () => layoutOcrLines(outcome?.words, imageWidth, imageHeight, frameWidth, frameHeight),
     [frameHeight, frameWidth, imageHeight, imageWidth, outcome?.words]
   );
+
+  // Mark the words the selection touches; the native highlight is transparent (styles/ocr.css).
+  useEffect(() => {
+    const flow = flowRef.current;
+    if (!flow || typeof document === 'undefined') return undefined;
+    const update = () => {
+      const selection = window.getSelection?.();
+      const range = selection && selection.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : null;
+      const touchesFlow = !!range && range.intersectsNode(flow);
+      for (const word of flow.querySelectorAll('.ocr-text-layer-word')) {
+        word.classList.toggle(OCR_WORD_SELECTED_CLASS, touchesFlow && range.intersectsNode(word));
+      }
+    };
+    document.addEventListener('selectionchange', update);
+    update();
+    return () => { document.removeEventListener('selectionchange', update); };
+  }, [layout]);
 
   if (!outcome || outcome.status !== 'done' || !stageWidth || !stageHeight || !imageWidth || !imageHeight) return null;
 
@@ -77,11 +104,13 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
   };
 
   // Copy gives the text as it reads on the page, not the no-break spaces and wrapping spaces
-  // the DOM needs for find.
+  // the DOM needs for find. A selection that reaches outside the text layers is left to the
+  // browser, so nothing outside them is lost.
   const copyAsPageText = (event) => {
     const selection = typeof window !== 'undefined' ? window.getSelection?.() : null;
+    if (!isOcrLayerSelection(selection) || !event.clipboardData) return;
     const text = ocrSelectionText(selection);
-    if (!text || !event.clipboardData) return;
+    if (!text) return;
     event.clipboardData.setData('text/plain', text);
     event.preventDefault();
   };
@@ -99,13 +128,13 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
       onCopy={copyAsPageText}
     >
       <div className="ocr-text-layer-frame" style={frameStyle}>
-        <div className="ocr-text-layer-flow">
-          {lines.map((line, lineIndex) => (
+        <div className="ocr-text-layer-flow" style={{ top: `${layout.top}px` }} ref={flowRef}>
+          {layout.lines.map((line, lineIndex) => (
             <Fragment key={`${lineIndex}:${line.top}`}>
               {lineIndex > 0 ? ' ' : null}
               <span
                 className="ocr-text-layer-line"
-                style={{ top: `${line.shiftY}px`, fontSize: `${line.fontSize}px` }}
+                style={{ fontSize: `${line.fontSize}px`, lineHeight: `${line.lineHeight}px` }}
               >
                 {line.words.map((word, wordIndex) => (
                   <Fragment key={`${wordIndex}:${word.left}`}>

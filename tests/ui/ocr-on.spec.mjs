@@ -117,9 +117,8 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(selectedText).toMatch(/^OpenDocViewer OCR Hej världen 2026/);
   expect(selectedText).toContain('Konto Belopp');
   // A pointer drag (not a programmatic range) from the first word of the first line to the last
-  // word of the second line selects across the words: each word is its own selectable island
-  // inside `user-select: none` ancestors, and the drag must start on a word (a word is not a pan
-  // start) and extend over the gaps between them.
+  // word of the second line selects across the words and lines: the drag must start on a word
+  // (a word is not a pan start) and extend through the one text flow the layer is.
   await page.evaluate(() => window.getSelection().removeAllRanges());
   const last = await words.filter({ hasText: '2026' }).first().boundingBox();
   await page.mouse.move(first.x + 2, first.y + first.height / 2);
@@ -130,6 +129,20 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(dragged.startsWith('OpenDocViewer OCR')).toBe(true);
   expect(dragged.endsWith('2026')).toBe(true);
   expect(dragged).toContain('OCR Hej världen');
+  // The layer paints the selection itself, over the selected words only: the native highlight
+  // would cover each line box down to the next line. The five dragged words are marked and
+  // painted, the table's words are not.
+  const painted = await words.evaluateAll((spans) => spans.map((span) => ({
+    text: span.textContent,
+    marked: span.classList.contains('ocr-text-layer-word--selected'),
+    background: getComputedStyle(span).backgroundColor,
+    native: getComputedStyle(span, '::selection').backgroundColor,
+  })));
+  expect(painted.filter((word) => word.marked).map((word) => word.text).join(' ')).toBe('OpenDocViewer OCR Hej världen 2026');
+  for (const word of painted) {
+    expect(word.native).toBe('rgba(0, 0, 0, 0)');
+    expect(word.background === 'rgba(0, 0, 0, 0)').toBe(!word.marked);
+  }
   // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping. A word,
   // a phrase on one line, and a phrase across the line break, all typed with ordinary spaces.
   const find = (text) => page.evaluate((needle) => {

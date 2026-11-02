@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 19. Line count: 8239. JSDoc symbol count: 110.
+File count: 19. Line count: 8268. JSDoc symbol count: 111.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -145,12 +145,13 @@ Symbols:
 
 Selectable, invisible text over a recognised page image.
 
-Exports: `OcrTextLayer`
+Exports: `OCR_WORD_SELECTED_CLASS`, `OcrTextLayer`
 
 Local imports: `src/utils/ocrTextLayout.js`
 
 Symbols:
 
+- `OCR_WORD_SELECTED_CLASS` (constant) - Class of a word that the current selection touches.
 - `OcrTextLayer` (function) - No description.
 
 ## src/components/PrintSelectionWorkspace.jsx

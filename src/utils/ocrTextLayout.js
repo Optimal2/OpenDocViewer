@@ -9,10 +9,14 @@
  * when its words are inline text of the same flow. The flow is a 1 px wide block that wraps at
  * ordinary spaces; the words of a line are joined with no-break spaces, so the only wrap
  * opportunities are the spaces between lines and every recognised line becomes one line box.
- * Each line and word is then shifted from its natural flow position onto the recognised box
- * with relative positioning (which keeps it inline), and a word's width is fitted with
- * letter-spacing (a transform would need a block). Find treats a no-break space as a space, so
- * "two words" typed with a space match within a line and across a line break alike.
+ * The flow starts at the first line's top and the lines stack naturally: each line box is as
+ * tall as the distance to the next recognised line (the line element's line-height), so no line
+ * is moved vertically. Moving a line with relative positioning would make the browser paint its
+ * selection from the line's natural place to its moved place; a text-free spacer between the
+ * lines would break find across them. Within a line each word is shifted onto its box with
+ * relative positioning (which keeps it inline), and its width is fitted with letter-spacing (a
+ * transform would need a block). Find treats a no-break space as a space, so "two words" typed
+ * with a space match within a line and across a line break alike.
  */
 
 /** Font used for the invisible words; width is fitted per word so the family only affects fallback estimates. */
@@ -26,6 +30,23 @@ export const OCR_WORD_JOINER = '\u00a0';
  * recognition error, or a very condensed font) would otherwise push glyph advances below zero.
  */
 const MIN_LETTER_SPACING_EM = -0.4;
+
+/** @type {(Intl.Segmenter|null)} */
+const graphemeSegmenter = typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function'
+  ? new Intl.Segmenter(undefined, { granularity: 'grapheme' })
+  : null;
+
+/**
+ * The number of typographic characters in `text`: letter-spacing is added after each grapheme
+ * cluster, not after each code point (a letter and its combining accent are one).
+ *
+ * @param {string} text
+ * @returns {number}
+ */
+export function countCharacters(text) {
+  if (graphemeSegmenter) return [...graphemeSegmenter.segment(text)].length;
+  return Array.from(text).length;
+}
 
 /** @type {(CanvasRenderingContext2D|null|undefined)} */
 let measureContext;
@@ -56,7 +77,7 @@ export function measureWordWidth(text, fontSize) {
       // Fall through to the estimate.
     }
   }
-  return Math.max(1, text.length * fontSize * FALLBACK_ADVANCE);
+  return Math.max(1, countCharacters(text) * fontSize * FALLBACK_ADVANCE);
 }
 
 /**
@@ -77,17 +98,26 @@ export function measureWordWidth(text, fontSize) {
 /**
  * @typedef {Object} OcrLinePlacement
  * @property {number} top  CSS px inside the unrotated frame (the highest word box of the line).
- * @property {number} height  The tallest word box of the line; the natural height of its line box.
+ * @property {number} height  The tallest word box of the line.
  * @property {number} fontSize  Equal to the height; sets the width of the joining no-break spaces.
- * @property {number} shiftY  Relative offset from the line's natural position in the flow
- *   (the lines stacked from the top of the frame) to `top`.
+ * @property {number} lineHeight  Height of the line's line box: the distance to the next line's
+ *   top (at least the line's own height), or the line's height for the last line. The lines
+ *   stack from the flow's top, so this is what places the next line.
  * @property {Array<OcrWordPlacement>} words
+ */
+
+/**
+ * @typedef {Object} OcrLayout
+ * @property {number} top  Where the flow starts: the first line's top (0 without lines).
+ * @property {Array<OcrLinePlacement>} lines
  */
 
 /**
  * Place the words of an outcome inside an unrotated frame of `frameWidth` × `frameHeight` CSS px,
  * grouped into lines. Words without text or with an empty box are left out. A word whose box
- * starts below the vertical middle of the previous word's box begins a new line.
+ * starts below the vertical middle of the previous word's box begins a new line. A line that
+ * starts above the previous one (words out of reading order) still gets a line box at least as
+ * tall as itself, so the lines after it sit lower than their boxes.
  *
  * @param {Array<Object>} words  `{ text, bbox: { x0, y0, x1, y1 } }` in image pixels.
  * @param {number} imageWidth  Pixel width of the recognised image.
@@ -95,12 +125,12 @@ export function measureWordWidth(text, fontSize) {
  * @param {number} frameWidth  Width the image occupies on the stage (before zoom).
  * @param {number} frameHeight
  * @param {function(string, number): number=} measure  Default measureWordWidth.
- * @returns {Array<OcrLinePlacement>}
+ * @returns {OcrLayout}
  */
 export function layoutOcrLines(words, imageWidth, imageHeight, frameWidth, frameHeight, measure = measureWordWidth) {
   const sx = imageWidth > 0 ? frameWidth / imageWidth : 0;
   const sy = imageHeight > 0 ? frameHeight / imageHeight : 0;
-  if (!(sx > 0) || !(sy > 0)) return [];
+  if (!(sx > 0) || !(sy > 0)) return { top: 0, lines: [] };
 
   /** @type {Array<Array<{ text: string, left: number, top: number, width: number, height: number }>>} */
   const groups = [];
@@ -118,29 +148,52 @@ export function layoutOcrLines(words, imageWidth, imageHeight, frameWidth, frame
     previous = placed;
   }
 
-  const lines = [];
-  let naturalTop = 0;
-  for (const group of groups) {
+  const lines = groups.map((group) => {
     const top = Math.min(...group.map((word) => word.top));
     const height = Math.max(...group.map((word) => word.height));
     const joinerWidth = measure(OCR_WORD_JOINER, height);
     let naturalLeft = 0;
     const placedWords = group.map((word, index) => {
       const fontSize = word.height;
-      const characters = Array.from(word.text).length;
+      const characters = countCharacters(word.text);
       const measured = measure(word.text, fontSize);
-      const spacing = (word.width - (measured > 0 ? measured : word.width)) / Math.max(1, characters);
+      const textWidth = measured > 0 ? measured : word.width;
+      const spacing = (word.width - textWidth) / Math.max(1, characters);
       const letterSpacing = Math.max(MIN_LETTER_SPACING_EM * fontSize, spacing);
       if (index > 0) naturalLeft += joinerWidth;
       const shiftX = word.left - naturalLeft;
       // The word advances by its measured width plus the spacing after every character.
-      naturalLeft += (measured > 0 ? measured : word.width) + letterSpacing * characters;
+      naturalLeft += textWidth + letterSpacing * characters;
       return { ...word, fontSize, letterSpacing, shiftX, shiftY: word.top - top };
     });
-    lines.push({ top, height, fontSize: height, shiftY: top - naturalTop, words: placedWords });
-    naturalTop += height;
+    return { top, height, fontSize: height, lineHeight: height, words: placedWords };
+  });
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    lines[index].lineHeight = Math.max(lines[index].height, lines[index + 1].top - lines[index].top);
   }
-  return lines;
+  return { top: lines.length > 0 ? lines[0].top : 0, lines };
+}
+
+/**
+ * Whether a selection lies within OCR text layers only (one or several pages), so that its text
+ * can be read line by line and a copy of it replaced.
+ *
+ * @param {(Selection|null|undefined)} selection
+ * @returns {boolean}
+ */
+export function isOcrLayerSelection(selection) {
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false;
+  let range;
+  try {
+    range = selection.getRangeAt(0);
+  } catch {
+    return false;
+  }
+  const inLayer = (node) => {
+    const element = node instanceof Element ? node : node?.parentElement;
+    return !!element?.closest?.('.ocr-text-layer');
+  };
+  return inLayer(range.startContainer) && inLayer(range.endContainer);
 }
 
 /**

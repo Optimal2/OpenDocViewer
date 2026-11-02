@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 55. Line count: 22195. JSDoc symbol count: 897.
+File count: 55. Line count: 22248. JSDoc symbol count: 900.
 
 ## src/utils/compareCurtain.js
 
@@ -282,7 +282,7 @@ Symbols:
 
 Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes.
 
-Exports: `OCR_LAYER_FONT_FAMILY`, `OCR_WORD_JOINER`, `measureWordWidth`, `layoutOcrLines`, `ocrSelectionText`
+Exports: `OCR_LAYER_FONT_FAMILY`, `OCR_WORD_JOINER`, `countCharacters`, `measureWordWidth`, `layoutOcrLines`, `isOcrLayerSelection`, `ocrSelectionText`
 
 Symbols:
 
@@ -290,10 +290,13 @@ Symbols:
 - `FALLBACK_ADVANCE` (constant) - Average advance per character relative to the font size, used when text cannot be measured.
 - `OCR_WORD_JOINER` (constant) - The character that joins the words of a line without offering a wrap opportunity.
 - `MIN_LETTER_SPACING_EM` (constant) - Tightest letter\-spacing, relative to the font size.
+- `countCharacters` (function) - The number of typographic characters in text : letter\-spacing is added after each grapheme cluster, not after each code point \(a letter and its combining accent are one\).
 - `measureWordWidth` (function) - Width of text at fontSize px, measured with a canvas context when one exists \(jsdom and print have none, then an estimate keeps the layout consistent\).
 - `OcrWordPlacement` (typedef) - No description.
 - `OcrLinePlacement` (typedef) - No description.
+- `OcrLayout` (typedef) - No description.
 - `layoutOcrLines` (function) - Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.
+- `isOcrLayerSelection` (function) - Whether a selection lies within OCR text layers only \(one or several pages\), so that its text can be read line by line and a copy of it replaced.
 - `ocrSelectionText` (function) - The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no\-break spaces\) and the lines by newlines...
 
 ## src/utils/ompThemePreference.js
