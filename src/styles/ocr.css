@@ -64,6 +64,8 @@
 .ocr-text-layer-gap {
   position: relative;
   display: inline;
+  line-height: 1;
+  vertical-align: top;
 }
 
 /* Transparent text shifted onto the recognised word box (inline styles); the height sets the

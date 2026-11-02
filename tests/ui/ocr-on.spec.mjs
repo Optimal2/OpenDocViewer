@@ -110,11 +110,13 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     const before = gap.previousElementSibling.getBoundingClientRect();
     const after = gap.nextElementSibling.getBoundingClientRect();
     const rect = gap.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, before: before.right, after: after.left };
+    return { left: rect.left, right: rect.right, top: rect.top, before: before.right, after: after.left, wordTop: Math.min(before.top, after.top) };
   });
   expect(gapPlacement.left).toBeGreaterThanOrEqual(gapPlacement.before - 1);
   expect(gapPlacement.right).toBeLessThanOrEqual(gapPlacement.after + 1);
   expect(gapPlacement.right - gapPlacement.left).toBeGreaterThan(0);
+  // And at the words' height, not lower in the line box (which reaches to the next line).
+  expect(Math.abs(gapPlacement.top - gapPlacement.wordTop)).toBeLessThanOrEqual(2);
 
   // Selection and copy see plain text in reading order; the browser's own find sees it too.
   const selected = await layer.evaluate((element) => {
