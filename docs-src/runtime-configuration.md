@@ -384,9 +384,11 @@ it did before.
 
 The text layer is ordinary DOM text, so the browser's own find (Ctrl+F) and copy work on it, but
 only for pages that are currently in the DOM. Lazily rendered pages that are not mounted yet are
-not searchable until they come into view. Find matches one word at a time: every word is
-positioned separately, so the browser sees a line break between words and a phrase with a space
-in it does not match.
+not searchable until they come into view. The layer is one text flow in reading order (the
+words of a line joined with no-break spaces, the lines wrapped once each), so find matches
+single words and phrases alike, typed with ordinary spaces, also when the phrase continues on the
+next line. Copy gives the text as it reads on the page: spaces between words, a newline between
+lines.
 
 ### Page layout analysis
 
@@ -434,10 +436,10 @@ pdf.js use the faster decoders for scanned PDFs; this is a separate observation 
 the shipped policy.
 
 What the user sees with OCR on: the page image is unchanged. Over a recognised page lies an
-invisible text layer (one transparent word per recognised word, placed on the ink, with spaces
-between words and line breaks between lines), so dragging over the words selects text, Ctrl+C
-copies it as it reads on the page, and the browser's own find (Ctrl+F) matches single words of
-it (not phrases, see above); dragging on a blank part of the page still pans. A small status in
+invisible text layer (one transparent word per recognised word, placed on the ink, in one text
+flow with the lines of the page), so dragging over the words selects text, Ctrl+C copies it as
+it reads on the page, and the browser's own find (Ctrl+F) matches words and phrases in it;
+dragging on a blank part of the page still pans. A small status in
 the corner of the page area says "Recognising text…", "Text recognised", "No text found", "The
 text could not be recognised" or "Text recognition is unavailable" (the engine could not start;
 see CSP below), announced to screen readers through a polite live region. A page skipped because

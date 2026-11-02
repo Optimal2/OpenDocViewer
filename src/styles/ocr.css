@@ -16,24 +16,69 @@
   position: absolute;
 }
 
-/* Transparent text positioned per word from the recognised boxes; the width is fitted with a
-   horizontal scale (inline), the height sets the font size. */
-.ocr-text-layer-word {
+/* One text flow in reading order (utils/ocrTextLayout.js explains why): a 1 px wide block that
+   wraps at the ordinary spaces between the line elements, so every recognised line is one line
+   box. Its own font is tiny and its line-height zero, so the wrapping spaces and the strut add
+   nothing to the line boxes. The flow and the lines are selectable like the words: the
+   selection's text (toString, and so the clipboard) leaves out text in `user-select: none`
+   elements, which would drop the joining and wrapping spaces. They still take no pointer
+   events (inherited), so only a word can start a selection. */
+.ocr-text-layer-flow {
   position: absolute;
-  display: block;
+  top: 0;
+  left: 0;
+  width: 1px;
   margin: 0;
   padding: 0;
   border: 0;
   overflow: visible;
-  color: transparent;
   font-family: sans-serif;
+  font-size: 1px;
+  line-height: 0;
+  white-space: normal;
+  color: transparent;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* A recognised line: inline, never wrapped inside (its words are joined with no-break spaces),
+   shifted from its natural line box onto the recognised line with relative positioning (inline
+   styles). The line boxes stack with the tallest word of each line as their height. */
+.ocr-text-layer-line {
+  position: relative;
+  display: inline;
   line-height: 1;
-  white-space: pre;
-  transform-origin: 0 0;
+  vertical-align: top;
+  white-space: nowrap;
+  color: transparent;
+  pointer-events: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Transparent text shifted onto the recognised word box (inline styles); the height sets the
+   font size and letter-spacing fits the width. */
+.ocr-text-layer-word {
+  position: relative;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: transparent;
+  line-height: 1;
+  vertical-align: top;
   pointer-events: auto;
   cursor: text;
   -webkit-user-select: text;
   user-select: text;
+}
+
+/* The joining no-break spaces and the wrapping spaces sit at their natural flow positions, not
+   between the shifted words: keep their highlight invisible, the words carry it. */
+.ocr-text-layer-flow::selection,
+.ocr-text-layer-line::selection {
+  color: transparent;
+  background: transparent;
 }
 
 .ocr-text-layer-word::selection {
@@ -44,9 +89,17 @@
 /* High-contrast (forced colours) would repaint the transparent text in the system text colour
    on top of the scan; keep it invisible there too, with the system highlight for selection. */
 @media (forced-colors: active) {
+  .ocr-text-layer-flow,
+  .ocr-text-layer-line,
   .ocr-text-layer-word {
     forced-color-adjust: none;
     color: transparent;
+  }
+
+  .ocr-text-layer-flow::selection,
+  .ocr-text-layer-line::selection {
+    color: transparent;
+    background: transparent;
   }
 
   .ocr-text-layer-word::selection {

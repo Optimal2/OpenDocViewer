@@ -2,17 +2,21 @@
 /**
  * Selectable, invisible text over a recognised page image.
  *
- * One absolutely positioned span per recognised word, placed from Tesseract's pixel boxes and
- * scaled to the page stage exactly like the image: the outer layer takes the stage size and the
- * zoom transform of CanvasRenderer/ImageRenderer, the inner frame is the unrotated image rotated
- * about its centre like drawImageOnCanvas. The text is transparent, so the page looks exactly as
- * before while the browser's selection, copy and find (Ctrl+F) work on it. Mounted only for a
- * page with a `done` outcome, so the default code path (OCR off) renders nothing here. Hidden in
- * print (styles/ocr.css). Geometry lives in utils/ocrTextLayout.js.
+ * One text flow in reading order: a line element per recognised line, inline word elements
+ * joined with no-break spaces, lines separated by ordinary spaces in a 1 px wide block so that
+ * each recognised line is one line box. Every line and word is shifted onto its recognised box
+ * with relative positioning (utils/ocrTextLayout.js), scaled to the page stage exactly like the
+ * image: the outer layer takes the stage size and the zoom transform of CanvasRenderer/
+ * ImageRenderer, the inner frame is the unrotated image rotated about its centre like
+ * drawImageOnCanvas. The text is transparent, so the page looks exactly as before while the
+ * browser's selection, copy and find (Ctrl+F, words and phrases, also across a line break) work
+ * on it. Copy writes the text as it reads on the page (spaces between words, newlines between
+ * lines). Mounted only for a page with a `done` outcome, so the default code path (OCR off)
+ * renders nothing here. Hidden in print (styles/ocr.css).
  */
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { layoutOcrWords } from '../utils/ocrTextLayout.js';
+import { layoutOcrLines, ocrSelectionText, OCR_WORD_JOINER } from '../utils/ocrTextLayout.js';
 
 /**
  * @param {Object} props
@@ -39,8 +43,8 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
   const imageWidth = Math.max(0, Number(outcome?.imageWidth) || 0);
   const imageHeight = Math.max(0, Number(outcome?.imageHeight) || 0);
 
-  const words = useMemo(
-    () => layoutOcrWords(outcome?.words, imageWidth, imageHeight, frameWidth, frameHeight),
+  const lines = useMemo(
+    () => layoutOcrLines(outcome?.words, imageWidth, imageHeight, frameWidth, frameHeight),
     [frameHeight, frameWidth, imageHeight, imageWidth, outcome?.words]
   );
 
@@ -72,6 +76,16 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
     if (event.target instanceof Element && event.target.closest('.ocr-text-layer-word')) event.stopPropagation();
   };
 
+  // Copy gives the text as it reads on the page, not the no-break spaces and wrapping spaces
+  // the DOM needs for find.
+  const copyAsPageText = (event) => {
+    const selection = typeof window !== 'undefined' ? window.getSelection?.() : null;
+    const text = ocrSelectionText(selection);
+    if (!text || !event.clipboardData) return;
+    event.clipboardData.setData('text/plain', text);
+    event.preventDefault();
+  };
+
   return (
     <div
       className="ocr-text-layer"
@@ -82,24 +96,37 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
       aria-label={label}
       style={layerStyle}
       onDoubleClick={stopDoubleClick}
+      onCopy={copyAsPageText}
     >
       <div className="ocr-text-layer-frame" style={frameStyle}>
-        {words.map((word, index) => (
-          <span
-            key={`${index}:${word.left}:${word.top}`}
-            className="ocr-text-layer-word"
-            style={{
-              left: `${word.left}px`,
-              top: `${word.top}px`,
-              width: `${word.textWidth}px`,
-              height: `${word.height}px`,
-              fontSize: `${word.fontSize}px`,
-              transform: `scaleX(${word.scaleX})`,
-            }}
-          >
-            {word.text}{word.separator}
-          </span>
-        ))}
+        <div className="ocr-text-layer-flow">
+          {lines.map((line, lineIndex) => (
+            <Fragment key={`${lineIndex}:${line.top}`}>
+              {lineIndex > 0 ? ' ' : null}
+              <span
+                className="ocr-text-layer-line"
+                style={{ top: `${line.shiftY}px`, fontSize: `${line.fontSize}px` }}
+              >
+                {line.words.map((word, wordIndex) => (
+                  <Fragment key={`${wordIndex}:${word.left}`}>
+                    {wordIndex > 0 ? OCR_WORD_JOINER : null}
+                    <span
+                      className="ocr-text-layer-word"
+                      style={{
+                        left: `${word.shiftX}px`,
+                        top: `${word.shiftY}px`,
+                        fontSize: `${word.fontSize}px`,
+                        letterSpacing: `${word.letterSpacing}px`,
+                      }}
+                    >
+                      {word.text}
+                    </span>
+                  </Fragment>
+                ))}
+              </span>
+            </Fragment>
+          ))}
+        </div>
       </div>
     </div>
   );

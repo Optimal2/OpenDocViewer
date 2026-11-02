@@ -114,7 +114,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     return selection.toString();
   });
   const selectedText = selected.replace(/\s+/g, ' ').trim();
-  expect(selectedText.startsWith('OpenDocViewer OCR Hej världen 2026')).toBe(true);
+  expect(selectedText).toMatch(/^OpenDocViewer OCR Hej världen 2026/);
   expect(selectedText).toContain('Konto Belopp');
   // A pointer drag (not a programmatic range) from the first word of the first line to the last
   // word of the second line selects across the words: each word is its own selectable island
@@ -130,15 +130,34 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(dragged.startsWith('OpenDocViewer OCR')).toBe(true);
   expect(dragged.endsWith('2026')).toBe(true);
   expect(dragged).toContain('OCR Hej världen');
-  // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping. It
-  // matches a word; the words are positioned separately, so a phrase does not match.
+  // The browser's own find, as Ctrl+F uses it: from the top of the document, wrapping. A word,
+  // a phrase on one line, and a phrase across the line break, all typed with ordinary spaces.
   const find = (text) => page.evaluate((needle) => {
     window.getSelection().removeAllRanges();
     return window.find(needle, false, false, true, false, false, false);
   }, text);
   expect(await find('världen')).toBe(true);
   expect(await page.evaluate(() => window.getSelection().toString())).toBe('världen');
-  expect(await find('Hej världen')).toBe(false);
+  expect(await find('Hej världen')).toBe(true);
+  expect(await find('OCR Hej')).toBe(true);
+  expect(await find('Hej världen 2026 Konto')).toBe(true);
+  expect(await find('världen Hej')).toBe(false);
+
+  // Copy gives the text as it reads on the page: spaces between words, newlines between lines.
+  const copied = await layer.evaluate((element) => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    const data = new DataTransfer();
+    const event = new ClipboardEvent('copy', { clipboardData: data, bubbles: true, cancelable: true });
+    element.querySelector('.ocr-text-layer-word').dispatchEvent(event);
+    return { prevented: event.defaultPrevented, text: data.getData('text/plain') };
+  });
+  expect(copied.prevented).toBe(true);
+  expect(copied.text.startsWith('OpenDocViewer OCR\nHej världen 2026\n')).toBe(true);
+  expect(copied.text).toContain('Konto Belopp\n');
+  expect(copied.text).not.toMatch(/\u00a0/);
 
   // Print hides the layer and the status; the screen shows them.
   await page.emulateMedia({ media: 'print' });
