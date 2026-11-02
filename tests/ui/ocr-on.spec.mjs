@@ -103,6 +103,18 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(first.x + first.width).toBeLessThan(image.x + image.width);
   expect(first.y).toBeLessThan(image.y + image.height / 3);
   expect(await words.first().evaluate((span) => getComputedStyle(span).color)).toBe('rgba(0, 0, 0, 0)');
+  // The no-break space between two words sits in the gap between their boxes (where find and
+  // selection paint it), not at its natural place in the flow.
+  const gapPlacement = await layer.evaluate((element) => {
+    const gap = element.querySelector('.ocr-text-layer-gap');
+    const before = gap.previousElementSibling.getBoundingClientRect();
+    const after = gap.nextElementSibling.getBoundingClientRect();
+    const rect = gap.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, before: before.right, after: after.left };
+  });
+  expect(gapPlacement.left).toBeGreaterThanOrEqual(gapPlacement.before - 1);
+  expect(gapPlacement.right).toBeLessThanOrEqual(gapPlacement.after + 1);
+  expect(gapPlacement.right - gapPlacement.left).toBeGreaterThan(0);
 
   // Selection and copy see plain text in reading order; the browser's own find sees it too.
   const selected = await layer.evaluate((element) => {

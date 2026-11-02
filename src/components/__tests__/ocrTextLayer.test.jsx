@@ -39,10 +39,11 @@ describe('layoutOcrLines', () => {
     expect(line).toMatchObject({ top: 100, height: 50, fontSize: 50, lineHeight: 50 });
     expect(line.words).toHaveLength(2);
     // "Hej" measures 75 px at 50 px; 25 px after each of its three characters makes it 150 px.
-    expect(line.words[0]).toEqual({ text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, letterSpacing: 25, shiftX: 50, shiftY: 0 });
-    // "världen" follows the first word (150 px) and a no-break space (25 px) in the flow, at 175;
-    // its box starts at 250.
-    expect(line.words[1]).toMatchObject({ text: 'världen', left: 250, width: 300, shiftX: 75, shiftY: 0 });
+    expect(line.words[0]).toEqual({ text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, letterSpacing: 25, shiftX: 50, shiftY: 0, gapShiftX: 0, gapLetterSpacing: 0 });
+    // The no-break space before "världen" follows the first word (150 px) in the flow and is
+    // shifted to the first box's right edge (200), 50 px wide like the gap: 25 px of its own and
+    // 25 px of spacing. "världen" then follows it at 200 in the flow; its box starts at 250.
+    expect(line.words[1]).toMatchObject({ text: 'världen', left: 250, width: 300, shiftX: 50, shiftY: 0, gapShiftX: 50, gapLetterSpacing: 25 });
     expect(line.words[1].letterSpacing).toBeCloseTo((300 - 7 * 25) / 7);
     expect(75 + line.words[0].letterSpacing * 3).toBe(150);
   });
@@ -57,9 +58,20 @@ describe('layoutOcrLines', () => {
     expect(lines[1]).toMatchObject({ top: 200, height: 50, lineHeight: 50 });
     // "ett" starts 5 px below the top of its line.
     expect(lines[0].words[1]).toMatchObject({ top: 105, height: 45, fontSize: 45, shiftY: 5 });
-    // Natural flow: "Rad" (10 + 30 × 3 = 100), the joiner (10), then "ett" at 110; its box is at 220.
+    // Natural flow: "Rad" (10 + 30 × 3 = 100), then the gap shifted to 200 and 20 px wide (10 of
+    // its own, 10 of spacing), then "ett" at 120; its box is at 220.
     expect(lines[0].words[0].shiftX).toBe(100);
-    expect(lines[0].words[1].shiftX).toBe(110);
+    expect(lines[0].words[1]).toMatchObject({ gapShiftX: 100, gapLetterSpacing: 10, shiftX: 100 });
+  });
+
+  it('gives the no-break space no width when the boxes touch or overlap', () => {
+    const words = [
+      { text: 'ab', bbox: { x0: 0, y0: 0, x1: 100, y1: 50 } },
+      { text: 'cd', bbox: { x0: 90, y0: 0, x1: 200, y1: 50 } },
+    ];
+    const { lines } = layoutOcrLines(words, 1000, 1000, 1000, 1000, () => 10);
+    // The gap advances by nothing (10 px of its own, -10 px of spacing) and sits at 100.
+    expect(lines[0].words[1]).toMatchObject({ gapShiftX: 0, gapLetterSpacing: -10, shiftX: -10 });
   });
 
   it('keeps a line box at least as tall as its line when the next line starts above it', () => {
@@ -242,7 +254,14 @@ describe('OcrTextLayer', () => {
     const letterSpacing = parseFloat(words[0].style.letterSpacing);
     expect(measureWordWidth('Hej', 50) + letterSpacing * 3).toBeCloseTo(150, 3);
     // The words of a line are joined with no-break spaces: one flow, one line, no wrap inside.
+    // The space is its own element, shifted into the gap between the boxes.
     expect(layer.textContent).toBe(`Hej${OCR_WORD_JOINER}världen`);
+    const gaps = [...lines[0].querySelectorAll('.ocr-text-layer-gap')];
+    expect(gaps).toHaveLength(1);
+    expect(gaps[0].textContent).toBe(OCR_WORD_JOINER);
+    // Shifted from its natural place after "Hej" (150) to the box's right edge (200).
+    expect(gaps[0].style.left).toBe('50px');
+    expect(gaps[0].nextElementSibling).toBe(words[1]);
   });
 
   it('separates lines with ordinary spaces and gives each line box the distance to the next line', async () => {

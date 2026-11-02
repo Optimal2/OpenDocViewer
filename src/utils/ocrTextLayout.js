@@ -94,6 +94,11 @@ export function measureWordWidth(text, fontSize) {
  *   to `left`.
  * @property {number} shiftY  Relative offset from the top of the line box the word is laid out
  *   in (the line's `stackedTop`) to `top`.
+ * @property {number} gapShiftX  Relative offset of the no-break space before the word (the gap)
+ *   from its natural position to the right edge of the previous word's box; 0 for the first
+ *   word of a line, which has no gap.
+ * @property {number} gapLetterSpacing  CSS px added to the no-break space before the word so
+ *   that it is as wide as the gap between the two boxes (no width when the boxes touch).
  */
 
 /**
@@ -165,11 +170,23 @@ export function layoutOcrLines(words, imageWidth, imageHeight, frameWidth, frame
       const textWidth = measured > 0 ? measured : word.width;
       const spacing = (word.width - textWidth) / Math.max(1, characters);
       const letterSpacing = Math.max(MIN_LETTER_SPACING_EM * fontSize, spacing);
-      if (index > 0) naturalLeft += joinerWidth;
+      let gapShiftX = 0;
+      let gapLetterSpacing = 0;
+      if (index > 0) {
+        // The joining no-break space is shifted into the gap between the two boxes and made as
+        // wide as the gap (none when the boxes touch or overlap), so that find and selection
+        // paint it where a space reads, not at its natural place in the flow.
+        const previousWord = group[index - 1];
+        const gapLeft = previousWord.left + previousWord.width;
+        const gapWidth = Math.max(0, word.left - gapLeft);
+        gapLetterSpacing = gapWidth - joinerWidth;
+        gapShiftX = gapLeft - naturalLeft;
+        naturalLeft += gapWidth;
+      }
       const shiftX = word.left - naturalLeft;
       // The word advances by its measured width plus the spacing after every character.
       naturalLeft += textWidth + letterSpacing * characters;
-      return { ...word, fontSize, letterSpacing, shiftX, shiftY: 0 };
+      return { ...word, fontSize, letterSpacing, shiftX, shiftY: 0, gapShiftX, gapLetterSpacing };
     });
     return { top, height, fontSize: height, lineHeight: height, stackedTop: top, words: placedWords };
   });

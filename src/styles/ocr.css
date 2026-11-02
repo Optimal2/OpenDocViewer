@@ -58,6 +58,14 @@
   user-select: text;
 }
 
+/* The no-break space between two words, shifted into the gap between their boxes and as wide
+   as the gap (inline styles), so that the browser's find highlight paints it where a space
+   reads and not at its natural place in the flow. */
+.ocr-text-layer-gap {
+  position: relative;
+  display: inline;
+}
+
 /* Transparent text shifted onto the recognised word box (inline styles); the height sets the
    font size and letter-spacing fits the width. */
 .ocr-text-layer-word {

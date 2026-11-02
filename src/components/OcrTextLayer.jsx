@@ -152,7 +152,14 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
               >
                 {line.words.map((word, wordIndex) => (
                   <Fragment key={`${wordIndex}:${word.left}`}>
-                    {wordIndex > 0 ? OCR_WORD_JOINER : null}
+                    {wordIndex > 0 ? (
+                      <span
+                        className="ocr-text-layer-gap"
+                        style={{ left: `${word.gapShiftX}px`, letterSpacing: `${word.gapLetterSpacing}px` }}
+                      >
+                        {OCR_WORD_JOINER}
+                      </span>
+                    ) : null}
                     <span
                       className="ocr-text-layer-word"
                       style={{

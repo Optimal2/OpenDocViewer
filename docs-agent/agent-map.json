@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 167,
-    "sourceLineCount": 65281,
+    "sourceLineCount": 65305,
     "docletCount": 1843,
     "documentedFileCount": 166,
     "lowConfidenceSummaryCount": 0,
@@ -967,7 +967,7 @@
     {
       "name": "src/components",
       "fileCount": 19,
-      "lineCount": 8282,
+      "lineCount": 8289,
       "docletCount": 111,
       "importantFiles": [
         {
@@ -1036,7 +1036,7 @@
         {
           "path": "src/components/OcrTextLayer.jsx",
           "score": 25,
-          "lines": 195,
+          "lines": 202,
           "incomingLocalImports": 1,
           "doclets": 2,
           "summary": "Selectable, invisible text over a recognised page image.",
@@ -1707,7 +1707,7 @@
     {
       "name": "src/utils",
       "fileCount": 55,
-      "lineCount": 22262,
+      "lineCount": 22279,
       "docletCount": 900,
       "importantFiles": [
         {
@@ -26082,7 +26082,7 @@
     },
     {
       "path": "src/components/OcrTextLayer.jsx",
-      "lines": 195,
+      "lines": 202,
       "extension": ".jsx",
       "jsdocBlockCount": 5,
       "sourceSummary": "Selectable, invisible text over a recognised page image.",
@@ -26128,7 +26128,7 @@
         {
           "name": "OcrTextLayer",
           "kind": "default",
-          "line": 194
+          "line": 201
         }
       ],
       "declarations": [
@@ -48354,7 +48354,7 @@
     },
     {
       "path": "src/utils/ocrTextLayout.js",
-      "lines": 238,
+      "lines": 255,
       "extension": ".js",
       "jsdocBlockCount": 16,
       "sourceSummary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes.",
@@ -48383,17 +48383,17 @@
         {
           "name": "layoutOcrLines",
           "kind": "function",
-          "line": 135
+          "line": 140
         },
         {
           "name": "isOcrLayerSelection",
           "kind": "function",
-          "line": 198
+          "line": 215
         },
         {
           "name": "ocrSelectionText",
           "kind": "function",
-          "line": 222
+          "line": 239
         }
       ],
       "declarations": [
@@ -48410,27 +48410,27 @@
         {
           "name": "layoutOcrLines",
           "kind": "function",
-          "line": 135
+          "line": 140
         },
         {
           "name": "placed",
           "kind": "object",
-          "line": 150
+          "line": 155
         },
         {
           "name": "isOcrLayerSelection",
           "kind": "function",
-          "line": 198
+          "line": 215
         },
         {
           "name": "inLayer",
           "kind": "function",
-          "line": 206
+          "line": 223
         },
         {
           "name": "ocrSelectionText",
           "kind": "function",
-          "line": 222
+          "line": 239
         }
       ],
       "parseError": null,
@@ -48567,7 +48567,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 99,
+          "line": 104,
           "description": "",
           "params": [],
           "returns": [],
@@ -48580,7 +48580,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 113,
+          "line": 118,
           "description": "",
           "params": [],
           "returns": [],
@@ -48593,7 +48593,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 135,
+          "line": 140,
           "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.",
           "params": [
             {
@@ -48648,7 +48648,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 198,
+          "line": 215,
           "description": "Whether a selection lies within OCR text layers only (one or several pages), so that its text can be read line by line and a copy of it replaced.",
           "params": [
             {
@@ -48673,7 +48673,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrTextLayout.js",
-          "line": 222,
+          "line": 239,
           "description": "The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces (the DOM joins them with no-break spaces) and the lines by newlines...",
           "params": [
             {
@@ -48696,7 +48696,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 63,
+      "importanceScore": 64,
       "summary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -102862,7 +102862,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 198,
+      "line": 215,
       "description": "Whether a selection lies within OCR text layers only (one or several pages), so that its text can be read line by line and a copy of it replaced.",
       "params": [
         {
@@ -102887,7 +102887,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 135,
+      "line": 140,
       "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.",
       "params": [
         {
@@ -103012,7 +103012,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 113,
+      "line": 118,
       "description": "",
       "params": [],
       "returns": [],
@@ -103025,7 +103025,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 99,
+      "line": 104,
       "description": "",
       "params": [],
       "returns": [],
@@ -103038,7 +103038,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrTextLayout.js",
-      "line": 222,
+      "line": 239,
       "description": "The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces (the DOM joins them with no-break spaces) and the lines by newlines...",
       "params": [
         {
