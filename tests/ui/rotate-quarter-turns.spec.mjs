@@ -42,7 +42,11 @@ test('four quarter turns with the toolbar button: the page stays painted at 90°
   const rotateLeft = page.getByRole('button', { name: /^(Rotate left|Rotera vänster) 90°$/ });
   const canvas = page.locator('.document-pane-frame.is-single-pane canvas[data-page-number]');
 
-  /** @param {number} degrees */
+  /**
+   * The bitmap size tells 90°/270° (axes swapped) from 0°/180° but not 180° from 0°; the 180°
+   * step, where the regression showed, is guarded by the painted pixels alone.
+   * @param {number} degrees
+   */
   const expectPainted = async (degrees) => {
     const swapped = degrees === 90 || degrees === 270;
     await expect.poll(() => readPageCanvas(page), { message: `canvas at ${degrees}°` }).toMatchObject({
