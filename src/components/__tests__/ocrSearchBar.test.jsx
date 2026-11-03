@@ -269,6 +269,24 @@ describe('OcrSearchBar', () => {
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
+  it('a mouse click on the page toggle leaves the focus in the input, so Enter still steps', () => {
+    const pages = { [KEY(0)]: done(['hej', 'hej']) };
+    render({ ocrPages: pages });
+    act(() => button().click());
+    type('hej');
+    expect(document.activeElement).toBe(input());
+    const scope = container.querySelector('.toolbar-ocr-search-scope');
+    const mouseDown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    act(() => { scope.dispatchEvent(mouseDown); });
+    expect(mouseDown.defaultPrevented).toBe(true);
+    act(() => scope.click());
+    expect(scope.getAttribute('aria-pressed')).toBe('true');
+    expect(document.activeElement).toBe(input());
+    key('Enter');
+    expect(status()).toBe('2 of 2');
+    expect(scope.getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('Escape closes the field from the step buttons too', () => {
     render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
     act(() => button().click());

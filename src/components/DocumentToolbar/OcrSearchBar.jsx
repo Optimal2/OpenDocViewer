@@ -299,6 +299,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
         <button
           type="button"
           className={`odv-btn toolbar-ocr-search-scope${pageOnly ? ' is-active' : ''}`}
+          // A mouse click leaves the focus in the input, so Enter still steps (a focused
+          // toggle would be toggled back by it); keyboard focus reaches the button as usual.
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => setPageOnly((value) => !value)}
           aria-pressed={pageOnly}
           aria-label={pageOnlyLabel}

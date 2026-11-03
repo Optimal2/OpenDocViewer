@@ -469,7 +469,8 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   one; Escape closes the field. A toggle in the field ("Search only on this page") limits the
   search to the displayed page: the position counts that page's matches, the steps stay on it,
   the matches follow the page as it changes, and no other page's layer marks anything; on a page
-  without searchable text the field shows the page's status instead of "No matches". The toggle
+  without searchable text the field shows the page's status instead of "No matches". Clicking
+  the toggle leaves the keyboard focus in the field, so Enter still walks the matches. The toggle
   is remembered while the viewer is open, not across reloads. The search follows the primary
   page (in compare mode the compared page's layer still marks its matches, but the position and
   the status are the primary page's; limited to a page, only that page's layer marks), and a

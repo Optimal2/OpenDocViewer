@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 174,
-    "sourceLineCount": 66364,
+    "sourceLineCount": 66367,
     "docletCount": 1883,
     "documentedFileCount": 173,
     "lowConfidenceSummaryCount": 0,
@@ -1149,7 +1149,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8513,
+      "lineCount": 8516,
       "docletCount": 146,
       "importantFiles": [
         {
@@ -1209,7 +1209,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 33,
-          "lines": 352,
+          "lines": 355,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
@@ -14408,7 +14408,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 352,
+      "lines": 355,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
