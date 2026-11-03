@@ -72,24 +72,72 @@ function isWarmupRef(node, bound) {
     && node.property.name === WARMUP_IMPORT_NAME;
 }
 
-// Whether a beforeAll registration runs before the suite: anything under a
-// skipped/todo block, inside a test, or inside another hook never executes
-// (or fails loudly instead of warming). Registrations at the top level or
-// inside an executing describe block run.
+function memberPropertyName(member) {
+  if (!member.computed && member.property.type === 'Identifier') return member.property.name;
+  if (member.computed && member.property.type === 'Literal'
+    && typeof member.property.value === 'string') return member.property.value;
+  return null;
+}
+
+function calleeRootName(callee) {
+  if (callee.type === 'Identifier') return callee.name;
+  if (callee.type === 'MemberExpression') return calleeRootName(callee.object);
+  if (callee.type === 'CallExpression') return calleeRootName(callee.callee);
+  return null;
+}
+
+// Check the whole callee chain: in describe.skipIf(true)(...) and
+// describe.skip.each(...)(...), the skip call or member belongs to the
+// callback's callee chain rather than to the callback's direct ancestors.
+function callCanExecute(call) {
+  const callee = call.callee;
+  const root = calleeRootName(callee);
+  if (root === 'it' || root === 'test' || /^x(describe|it|test)$/.test(root)) return false;
+  if (callee.type === 'MemberExpression') {
+    const property = memberPropertyName(callee);
+    if (property === 'skip' || property === 'todo') return false;
+    if (property === 'skipIf') {
+      const [condition] = call.arguments;
+      if (!condition || condition.type !== 'Literal' || condition.value !== false) return false;
+    }
+    for (let object = callee.object; object.type === 'MemberExpression'; object = object.object) {
+      const chainedProperty = memberPropertyName(object);
+      if (chainedProperty === 'skip' || chainedProperty === 'todo') return false;
+    }
+  }
+  if (callee.type === 'CallExpression') return callCanExecute(callee);
+  if (callee.type === 'MemberExpression' && callee.object.type === 'CallExpression') {
+    return callCanExecute(callee.object);
+  }
+  return true;
+}
+
+// Supported execution contract: top-level registrations and callbacks passed
+// directly to an executing describe count. Skipped/todo blocks, tests, hooks,
+// other nested functions and literal-false conditional branches do not. The
+// guard deliberately does not evaluate arbitrary JavaScript control flow.
 function executesRegistration(ancestors) {
-  for (const ancestor of ancestors) {
-    if (ancestor.type !== 'CallExpression') continue;
-    const callee = ancestor.callee;
-    if (callee.type === 'MemberExpression') {
-      const property = !callee.computed && callee.property.type === 'Identifier'
-        ? callee.property.name
-        : '';
-      if (property === 'skip' || property === 'todo') return false;
-      if (callee.object.type === 'Identifier'
-        && (callee.object.name === 'it' || callee.object.name === 'test')) return false;
-    } else if (callee.type === 'Identifier') {
-      if (/^x(describe|it|test)$/.test(callee.name)) return false;
-      if (callee.name === 'it' || callee.name === 'test') return false;
+  for (let index = 0; index < ancestors.length; index += 1) {
+    const ancestor = ancestors[index];
+    if (ancestor.type === 'ArrowFunctionExpression'
+      || ancestor.type === 'FunctionExpression'
+      || ancestor.type === 'FunctionDeclaration') {
+      const parent = index > 0 ? ancestors[index - 1] : null;
+      if (!parent || parent.type !== 'CallExpression'
+        || !parent.arguments.includes(ancestor)
+        || calleeRootName(parent.callee) !== 'describe') return false;
+    }
+    if (ancestor.type === 'CallExpression' && !callCanExecute(ancestor)) return false;
+    const next = ancestors[index + 1];
+    if (ancestor.type === 'IfStatement' && ancestor.test.type === 'Literal'
+      && typeof ancestor.test.value === 'boolean') {
+      if (next === ancestor.consequent && !ancestor.test.value) return false;
+      if (next === ancestor.alternate && ancestor.test.value) return false;
+    }
+    if (ancestor.type === 'ConditionalExpression' && ancestor.test.type === 'Literal'
+      && typeof ancestor.test.value === 'boolean') {
+      if (next === ancestor.consequent && !ancestor.test.value) return false;
+      if (next === ancestor.alternate && ancestor.test.value) return false;
     }
   }
   return true;
@@ -108,18 +156,22 @@ function bindsName(pattern, name) {
 }
 
 // Whether an expression is the warm-up promise itself: a call to the import
-// (optionally awaited or chained with .then), so the hook settles only after
-// the pdf.js import resolves. Anything else — a bare call whose result is
-// dropped, a variable holding the promise — leaves the suite racing the import.
-function resolvesToWarmupCall(node, bound) {
+// (optionally awaited or chained with .then), or a directly bound local name
+// for that same promise. A bare call whose result is dropped still races.
+function resolvesToWarmupCall(node, bound, promiseNames = new Set()) {
   if (!node || typeof node.type !== 'string') return false;
-  if (node.type === 'AwaitExpression') return resolvesToWarmupCall(node.argument, bound);
-  if (node.type === 'ChainExpression') return resolvesToWarmupCall(node.expression, bound);
+  if (node.type === 'Identifier') return promiseNames.has(node.name);
+  if (node.type === 'AwaitExpression') return resolvesToWarmupCall(node.argument, bound, promiseNames);
+  if (node.type === 'ChainExpression') return resolvesToWarmupCall(node.expression, bound, promiseNames);
   if (node.type !== 'CallExpression') return false;
   const callee = node.callee;
-  if (callee.type === 'ChainExpression') return resolvesToWarmupCall(callee.expression, bound);
+  if (callee.type === 'ChainExpression') {
+    return resolvesToWarmupCall(callee.expression, bound, promiseNames);
+  }
   if (isWarmupRef(callee, bound)) return true;
-  if (callee.type === 'MemberExpression') return resolvesToWarmupCall(callee.object, bound);
+  if (callee.type === 'MemberExpression') {
+    return resolvesToWarmupCall(callee.object, bound, promiseNames);
+  }
   return false;
 }
 
@@ -139,11 +191,27 @@ function callbackShadowsImport(fn, bound) {
   return [...bound.names].some(shadowed);
 }
 
+// Only a const declared directly in the hook callback and initialized by the
+// warm-up call is a supported promise binding. Other data flow is rejected.
+function callbackWarmupPromiseNames(fn, bound) {
+  const names = new Set();
+  for (const statement of fn.body.body) {
+    if (statement.type !== 'VariableDeclaration' || statement.kind !== 'const') continue;
+    for (const declarator of statement.declarations) {
+      if (declarator.id.type === 'Identifier'
+        && declarator.init
+        && resolvesToWarmupCall(declarator.init, bound)) names.add(declarator.id.name);
+    }
+  }
+  return names;
+}
+
 // Whether a beforeAll callback returns or awaits the warm-up call, without
 // crossing into nested functions (a call hidden in a nested callback floats).
 function callbackWarmsUp(fn, bound) {
   if (callbackShadowsImport(fn, bound)) return false;
   if (fn.body.type !== 'BlockStatement') return resolvesToWarmupCall(fn.body, bound);
+  const promiseNames = callbackWarmupPromiseNames(fn, bound);
   let warmed = false;
   const visit = (node) => {
     if (warmed || !node || typeof node.type !== 'string') return;
@@ -151,9 +219,9 @@ function callbackWarmsUp(fn, bound) {
       || node.type === 'FunctionExpression'
       || node.type === 'FunctionDeclaration') return;
     if (node.type === 'ReturnStatement') {
-      if (node.argument && resolvesToWarmupCall(node.argument, bound)) warmed = true;
+      if (node.argument && resolvesToWarmupCall(node.argument, bound, promiseNames)) warmed = true;
     } else if (node.type === 'AwaitExpression') {
-      if (resolvesToWarmupCall(node.argument, bound)) warmed = true;
+      if (resolvesToWarmupCall(node.argument, bound, promiseNames)) warmed = true;
     }
     for (const child of childNodes(node)) visit(child);
   };
@@ -263,17 +331,20 @@ export function readComparatorDefaultLoad(source) {
       || declarator.id.name !== LOAD_PDFJS
       || !declarator.init) continue;
     const init = declarator.init;
+    let specifier = null;
     if (init.type === 'LogicalExpression'
       && (init.operator === '??' || init.operator === '||')
       && isOptionsLoadPdfjs(init.left)) {
-      return loaderSpecifier(init.right);
+      specifier = loaderSpecifier(init.right);
+    } else if (init.type === 'ConditionalExpression' && isOptionsLoadPdfjs(init.test)) {
+      if (isOptionsLoadPdfjs(init.consequent)) specifier = loaderSpecifier(init.alternate);
+      if (isOptionsLoadPdfjs(init.alternate)) specifier = loaderSpecifier(init.consequent);
+    } else {
+      specifier = loaderSpecifier(init);
     }
-    if (init.type === 'ConditionalExpression' && isOptionsLoadPdfjs(init.test)) {
-      if (isOptionsLoadPdfjs(init.consequent)) return loaderSpecifier(init.alternate);
-      if (isOptionsLoadPdfjs(init.alternate)) return loaderSpecifier(init.consequent);
-      return null;
-    }
-    return loaderSpecifier(init);
+    // An unrelated or unreadable same-named declaration does not exclude a
+    // later comparator default in another scope.
+    if (specifier) return specifier;
   }
   return null;
 }

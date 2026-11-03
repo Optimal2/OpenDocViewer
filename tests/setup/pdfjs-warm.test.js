@@ -96,5 +96,43 @@ describe('targeted pdf.js test warm-up', () => {
       );
       expect(suiteOptsIntoWarmup(awaited)).toBe(true);
     });
+
+    it.each([
+      ['describe.skipIf(true)', "describe.skipIf(true)('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['it.skipIf(true)', "it.skipIf(true)('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['computed describe skip', "describe['skip']('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['computed test skip', "it['skip']('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['describe.skip.each', "describe.skip.each([[]])('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['beforeEach', 'beforeEach(() => { beforeAll(warmPdfjs); });'],
+      ['another beforeAll', 'beforeAll(() => { beforeAll(warmPdfjs); });'],
+      ['an uncalled nested function', 'function registerWarmup() { beforeAll(warmPdfjs); }'],
+      ['a literal-false branch', 'if (false) { beforeAll(warmPdfjs); }'],
+    ])('rejects a registration inside %s', (_name, registration) => {
+      // Deliberately small syntax contract: static skip/todo forms, nested
+      // functions/hooks and literal-false branches are recognized. This guard
+      // does not evaluate arbitrary JavaScript or infer dynamic control flow.
+      const source = `import { warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';\n${registration}`;
+      expect(suiteOptsIntoWarmup(source)).toBe(false);
+    });
+
+    it('accepts a directly bound warm-up promise that is returned or awaited', () => {
+      const prefix = "import { warmPdfjs } from '../../../tests/setup/pdfjs-warm.js';\n";
+      const returned = `${prefix}beforeAll(() => { const warmup = warmPdfjs(); return warmup; });`;
+      const awaited = `${prefix}beforeAll(async () => { const warmup = warmPdfjs(); await warmup; });`;
+      expect(suiteOptsIntoWarmup(returned)).toBe(true);
+      expect(suiteOptsIntoWarmup(awaited)).toBe(true);
+    });
+  });
+
+  describe('comparator default loader guard', () => {
+    it('continues past an unrelated loadPdfjs declaration', () => {
+      const source = `
+        const loadPdfjs = customLoader;
+        function createRenderComparator(options) {
+          const loadPdfjs = options.loadPdfjs ?? (() => import('expected-pdfjs'));
+        }
+      `;
+      expect(readComparatorDefaultLoad(source)).toBe('expected-pdfjs');
+    });
   });
 });
