@@ -17,10 +17,11 @@
  * down to the next line, so the native highlight is transparent and the layer marks the
  * selected words itself (a class set on `selectionchange`, painted over the word's box). Copy
  * writes the text as it reads on the page (spaces between words, newlines between lines) when
- * the selection lies within text layers. The toolbar's OCR search (`search`: the term and the
- * current match, published through ViewerContext) is marked here too: every match on the page
- * gets a class on its words, the current match another, and the current match is scrolled into
- * view. Mounted only for a page with a `done` outcome, so the default code path (OCR off)
+ * the selection lies within text layers. The toolbar's OCR search (`search`: the term, the
+ * current match and, limited to one page, that page, published through ViewerContext) is marked
+ * here too: every match on the page gets a class on its words, the current match another, and
+ * the current match is scrolled into view; a search limited to another page marks nothing.
+ * Mounted only for a page with a `done` outcome, so the default code path (OCR off)
  * renders nothing here. Hidden in print (styles/ocr.css).
  */
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
@@ -48,8 +49,9 @@ export const OCR_WORD_CURRENT_MATCH_CLASS = 'ocr-text-layer-word--match-current'
  * @param {string} props.label  Accessible name of the layer.
  * @param {number} props.pageNumber
  * @param {string=} props.pageKey  utils/ocrPageKey.js key of the page (matches `search.current.pageKey`).
- * @param {({ term:string, current:({ pageKey:string, ordinal:number }|null) }|null)=} props.search
- *   The toolbar's OCR search: the normalised term and the current match, or null when closed.
+ * @param {({ term:string, current:({ pageKey:string, ordinal:number }|null), onlyPageKey:(string|null) }|null)=} props.search
+ *   The toolbar's OCR search: the normalised term, the current match and the page the search
+ *   is limited to (null for every page), or null when closed.
  * @returns {(React.ReactElement|null)}
  */
 function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, label, pageNumber, pageKey = '', search = null }) {
@@ -71,7 +73,8 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
 
   // Marks of the toolbar's OCR search (utils/ocrSearch.js, the same function the toolbar counts
   // with): the words of every match on this page, the current match's words marked as such.
-  const searchTerm = search?.term || '';
+  // A search limited to one page (`onlyPageKey`) marks nothing on any other page.
+  const searchTerm = search?.term && (!search.onlyPageKey || search.onlyPageKey === pageKey) ? search.term : '';
   const currentOrdinal = search?.current && search.current.pageKey === pageKey ? Number(search.current.ordinal) : -1;
   const searchMarks = useMemo(() => {
     const marks = new Map();
@@ -238,6 +241,7 @@ OcrTextLayer.propTypes = {
   search: PropTypes.shape({
     term: PropTypes.string,
     current: PropTypes.shape({ pageKey: PropTypes.string, ordinal: PropTypes.number }),
+    onlyPageKey: PropTypes.string,
   }),
 };
 

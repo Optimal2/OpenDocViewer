@@ -336,12 +336,14 @@ function nowMs() {
 /**
  * @param {(Object|null)} a
  * @param {(Object|null)} b
- * @returns {boolean} Whether two OCR search states (term and current match) are the same.
+ * @returns {boolean} Whether two OCR search states (term, current match and the page the search
+ *   is limited to) are the same.
  */
 function isSameOcrSearch(a, b) {
   if (!a && !b) return true;
   if (!a || !b) return false;
   if (String(a.term || '') !== String(b.term || '')) return false;
+  if (String(a.onlyPageKey || '') !== String(b.onlyPageKey || '')) return false;
   const ca = a.current || null;
   const cb = b.current || null;
   if (!ca && !cb) return true;

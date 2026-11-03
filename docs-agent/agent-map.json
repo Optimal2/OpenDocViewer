@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 174,
-    "sourceLineCount": 66326,
+    "sourceLineCount": 66359,
     "docletCount": 1883,
     "documentedFileCount": 173,
     "lowConfidenceSummaryCount": 0,
@@ -685,7 +685,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2911,
+            "lines": 2913,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -972,7 +972,7 @@
     {
       "name": "src/components",
       "fileCount": 19,
-      "lineCount": 8319,
+      "lineCount": 8323,
       "docletCount": 112,
       "importantFiles": [
         {
@@ -1005,7 +1005,7 @@
         {
           "path": "src/components/OcrTextLayer.jsx",
           "score": 42,
-          "lines": 245,
+          "lines": 249,
           "incomingLocalImports": 1,
           "doclets": 4,
           "summary": "Selectable, invisible text over a recognised page image.",
@@ -1149,7 +1149,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8486,
+      "lineCount": 8513,
       "docletCount": 146,
       "importantFiles": [
         {
@@ -1209,7 +1209,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 33,
-          "lines": 325,
+          "lines": 352,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
@@ -1309,7 +1309,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3554,
+      "lineCount": 3556,
       "docletCount": 99,
       "importantFiles": [
         {
@@ -1324,7 +1324,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2911,
+          "lines": 2913,
           "incomingLocalImports": 1,
           "doclets": 70,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -14408,7 +14408,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 325,
+      "lines": 352,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
@@ -14426,7 +14426,7 @@
             "useRef",
             "useState"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -14434,7 +14434,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -14442,7 +14442,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 27,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -14450,7 +14450,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -14458,7 +14458,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -14466,7 +14466,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -14477,7 +14477,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -14486,7 +14486,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -14495,7 +14495,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static"
         }
       ],
@@ -14503,34 +14503,34 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 46
+          "line": 48
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 36
+          "line": 38
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 46
+          "line": 48
         },
         {
           "name": "place",
           "kind": "function",
-          "line": 139
+          "line": 151
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 207
+          "line": 219
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 215
+          "line": 227
         }
       ],
       "parseError": null,
@@ -14546,7 +14546,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 36,
+          "line": 38,
           "description": "",
           "params": [
             {
@@ -14566,7 +14566,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 46,
+          "line": 48,
           "description": "",
           "params": [
             {
@@ -14609,7 +14609,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 170,
+          "line": 182,
           "description": "",
           "params": [
             {
@@ -14629,7 +14629,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 191,
+          "line": 203,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14649,7 +14649,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 207,
+          "line": 219,
           "description": "",
           "params": [
             {
@@ -14669,7 +14669,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 215,
+          "line": 227,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14683,7 +14683,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14692,7 +14692,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14701,7 +14701,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14713,7 +14713,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14723,7 +14723,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         },
@@ -14733,7 +14733,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static",
           "resolved": "src/utils/ocrSearchPlacement.js"
         }
@@ -14752,7 +14752,7 @@
             "useRef",
             "useState"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -14760,7 +14760,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -14768,7 +14768,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 27,
+          "line": 29,
           "kind": "static"
         }
       ],
@@ -26682,7 +26682,7 @@
     },
     {
       "path": "src/components/OcrTextLayer.jsx",
-      "lines": 245,
+      "lines": 249,
       "extension": ".jsx",
       "jsdocBlockCount": 7,
       "sourceSummary": "Selectable, invisible text over a recognised page image.",
@@ -26696,7 +26696,7 @@
             "useMemo",
             "useRef"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -26704,7 +26704,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -26715,7 +26715,7 @@
             "ocrSelectionText",
             "OCR_WORD_JOINER"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -26723,7 +26723,7 @@
           "specifiers": [
             "findOcrMatchesInOutcome"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         }
       ],
@@ -26731,54 +26731,54 @@
         {
           "name": "OCR_WORD_SELECTED_CLASS",
           "kind": "variable",
-          "line": 32
+          "line": 33
         },
         {
           "name": "OCR_WORD_MATCH_CLASS",
           "kind": "variable",
-          "line": 34
+          "line": 35
         },
         {
           "name": "OCR_WORD_CURRENT_MATCH_CLASS",
           "kind": "variable",
-          "line": 36
+          "line": 37
         },
         {
           "name": "OcrTextLayer",
           "kind": "default",
-          "line": 244
+          "line": 248
         }
       ],
       "declarations": [
         {
           "name": "OcrTextLayer",
           "kind": "component",
-          "line": 55
+          "line": 57
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 104
+          "line": 107
         },
         {
           "name": "layerStyle",
           "kind": "object",
-          "line": 132
+          "line": 135
         },
         {
           "name": "frameStyle",
           "kind": "object",
-          "line": 142
+          "line": 145
         },
         {
           "name": "stopDoubleClick",
           "kind": "function",
-          "line": 153
+          "line": 156
         },
         {
           "name": "copyAsPageText",
           "kind": "function",
-          "line": 160
+          "line": 163
         }
       ],
       "parseError": null,
@@ -26794,7 +26794,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/OcrTextLayer.jsx",
-          "line": 32,
+          "line": 33,
           "description": "Class of a word that the current selection touches.",
           "params": [],
           "returns": [],
@@ -26807,7 +26807,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/OcrTextLayer.jsx",
-          "line": 34,
+          "line": 35,
           "description": "Class of a word inside a match of the toolbar's OCR search.",
           "params": [],
           "returns": [],
@@ -26820,7 +26820,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/OcrTextLayer.jsx",
-          "line": 36,
+          "line": 37,
           "description": "Class of a word inside the current match of the toolbar's OCR search.",
           "params": [],
           "returns": [],
@@ -26833,7 +26833,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/OcrTextLayer.jsx",
-          "line": 55,
+          "line": 57,
           "description": "",
           "params": [
             {
@@ -26894,7 +26894,7 @@
               "name": "props.search",
               "type": "Object|null",
               "optional": true,
-              "description": "The toolbar's OCR search: the normalised term and the current match, or null when closed."
+              "description": "The toolbar's OCR search: the normalised term, the current match and the page the search is limited to (null for every page), or null when..."
             }
           ],
           "returns": [
@@ -26916,7 +26916,7 @@
             "ocrSelectionText",
             "OCR_WORD_JOINER"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static",
           "resolved": "src/utils/ocrTextLayout.js"
         },
@@ -26925,7 +26925,7 @@
           "specifiers": [
             "findOcrMatchesInOutcome"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         }
@@ -26940,7 +26940,7 @@
             "useMemo",
             "useRef"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -26948,7 +26948,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27,
+          "line": 28,
           "kind": "static"
         }
       ],
@@ -30249,7 +30249,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2911,
+      "lines": 2913,
       "extension": ".jsx",
       "jsdocBlockCount": 77,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -30433,7 +30433,7 @@
         {
           "name": "ViewerProvider",
           "kind": "variable",
-          "line": 356
+          "line": 358
         }
       ],
       "declarations": [
@@ -30540,62 +30540,62 @@
         {
           "name": "isSameOcrSearch",
           "kind": "function",
-          "line": 341
+          "line": 342
         },
         {
           "name": "ViewerProvider",
           "kind": "component",
-          "line": 356
+          "line": 358
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 616
+          "line": 618
         },
         {
           "name": "nextPage",
           "kind": "object",
-          "line": 1027
+          "line": 1029
         },
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1778
+          "line": 1780
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2193
+          "line": 2195
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2207
+          "line": 2209
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2221
+          "line": 2223
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2254
+          "line": 2256
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2424
+          "line": 2426
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2523
+          "line": 2525
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2525
+          "line": 2527
         }
       ],
       "parseError": null,
@@ -31082,7 +31082,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 341,
+          "line": 342,
           "description": "",
           "params": [
             {
@@ -31101,7 +31101,7 @@
           "returns": [
             {
               "type": "boolean",
-              "description": "Whether two OCR search states (term and current match) are the same."
+              "description": "Whether two OCR search states (term, current match and the page the search is limited to) are the same."
             }
           ],
           "examples": 0
@@ -31113,7 +31113,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 356,
+          "line": 358,
           "description": "",
           "params": [
             {
@@ -31138,7 +31138,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 528,
+          "line": 530,
           "description": "",
           "params": [
             {
@@ -31163,7 +31163,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 552,
+          "line": 554,
           "description": "Record that a page now has a reusable full-size asset available.",
           "params": [
             {
@@ -31188,7 +31188,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 562,
+          "line": 564,
           "description": "Record that a page now has a reusable thumbnail asset available.",
           "params": [
             {
@@ -31213,7 +31213,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 575,
+          "line": 577,
           "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
           "params": [],
           "returns": [
@@ -31231,7 +31231,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 706,
+          "line": 708,
           "description": "",
           "params": [],
           "returns": [
@@ -31249,7 +31249,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 734,
+          "line": 736,
           "description": "",
           "params": [],
           "returns": [
@@ -31267,7 +31267,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 895,
+          "line": 897,
           "description": "",
           "params": [
             {
@@ -31298,7 +31298,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 912,
+          "line": 914,
           "description": "",
           "params": [
             {
@@ -31329,7 +31329,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 932,
+          "line": 934,
           "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
           "params": [],
           "returns": [],
@@ -31342,7 +31342,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 941,
+          "line": 943,
           "description": "",
           "params": [
             {
@@ -31367,7 +31367,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 950,
+          "line": 952,
           "description": "",
           "params": [
             {
@@ -31392,7 +31392,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 961,
+          "line": 963,
           "description": "",
           "params": [
             {
@@ -31417,7 +31417,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 985,
+          "line": 987,
           "description": "Release print leases previously acquired through getPrintablePageUrls .",
           "params": [
             {
@@ -31442,7 +31442,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1010,
+          "line": 1012,
           "description": "",
           "params": [
             {
@@ -31473,7 +31473,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1060,
+          "line": 1062,
           "description": "",
           "params": [
             {
@@ -31498,7 +31498,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1075,
+          "line": 1077,
           "description": "",
           "params": [
             {
@@ -31535,7 +31535,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1102,
+          "line": 1104,
           "description": "",
           "params": [],
           "returns": [
@@ -31553,7 +31553,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1111,
+          "line": 1113,
           "description": "",
           "params": [
             {
@@ -31578,7 +31578,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1174,
+          "line": 1176,
           "description": "",
           "params": [
             {
@@ -31603,7 +31603,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1326,
+          "line": 1328,
           "description": "",
           "params": [
             {
@@ -31628,7 +31628,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1345,
+          "line": 1347,
           "description": "",
           "params": [
             {
@@ -31653,7 +31653,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1369,
+          "line": 1371,
           "description": "",
           "params": [
             {
@@ -31678,7 +31678,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1378,
+          "line": 1380,
           "description": "",
           "params": [
             {
@@ -31703,7 +31703,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1386,
+          "line": 1388,
           "description": "",
           "params": [],
           "returns": [
@@ -31721,7 +31721,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1398,
+          "line": 1400,
           "description": "",
           "params": [
             {
@@ -31746,7 +31746,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1445,
+          "line": 1447,
           "description": "",
           "params": [
             {
@@ -31783,7 +31783,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1514,
+          "line": 1516,
           "description": "",
           "params": [
             {
@@ -31808,7 +31808,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1523,
+          "line": 1525,
           "description": "",
           "params": [
             {
@@ -31839,7 +31839,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1536,
+          "line": 1538,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -31876,7 +31876,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1588,
+          "line": 1590,
           "description": "",
           "params": [
             {
@@ -31907,7 +31907,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1599,
+          "line": 1601,
           "description": "",
           "params": [
             {
@@ -31938,7 +31938,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1610,
+          "line": 1612,
           "description": "",
           "params": [
             {
@@ -31963,7 +31963,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1634,
+          "line": 1636,
           "description": "",
           "params": [
             {
@@ -31988,7 +31988,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1681,
+          "line": 1683,
           "description": "",
           "params": [
             {
@@ -32013,7 +32013,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1694,
+          "line": 1696,
           "description": "",
           "params": [
             {
@@ -32050,7 +32050,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1766,
+          "line": 1768,
           "description": "",
           "params": [
             {
@@ -32087,7 +32087,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1858,
+          "line": 1860,
           "description": "",
           "params": [
             {
@@ -32124,7 +32124,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2051,
+          "line": 2053,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -32149,7 +32149,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2133,
+          "line": 2135,
           "description": "",
           "params": [
             {
@@ -32180,7 +32180,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2155,
+          "line": 2157,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -32205,7 +32205,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2314,
+          "line": 2316,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -32223,7 +32223,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2405,
+          "line": 2407,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -32254,7 +32254,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2448,
+          "line": 2450,
           "description": "",
           "params": [
             {
@@ -32279,7 +32279,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2754,
+          "line": 2756,
           "description": "",
           "params": [
             {
@@ -32299,7 +32299,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2767,
+          "line": 2769,
           "description": "",
           "params": [
             {
@@ -32319,7 +32319,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2780,
+          "line": 2782,
           "description": "",
           "params": [
             {
@@ -32339,7 +32339,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2789,
+          "line": 2791,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -32365,7 +32365,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2794,
+          "line": 2796,
           "description": "",
           "params": [
             {
@@ -32385,7 +32385,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2799,
+          "line": 2801,
           "description": "",
           "params": [
             {
@@ -84442,7 +84442,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 46,
+      "line": 48,
       "description": "",
       "params": [
         {
@@ -84485,7 +84485,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 170,
+      "line": 182,
       "description": "",
       "params": [
         {
@@ -84505,7 +84505,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 207,
+      "line": 219,
       "description": "",
       "params": [
         {
@@ -84525,7 +84525,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 215,
+      "line": 227,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -84538,7 +84538,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 36,
+      "line": 38,
       "description": "",
       "params": [
         {
@@ -84558,7 +84558,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 191,
+      "line": 203,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -91061,7 +91061,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/OcrTextLayer.jsx",
-      "line": 36,
+      "line": 37,
       "description": "Class of a word inside the current match of the toolbar's OCR search.",
       "params": [],
       "returns": [],
@@ -91074,7 +91074,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/OcrTextLayer.jsx",
-      "line": 34,
+      "line": 35,
       "description": "Class of a word inside a match of the toolbar's OCR search.",
       "params": [],
       "returns": [],
@@ -91087,7 +91087,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/OcrTextLayer.jsx",
-      "line": 32,
+      "line": 33,
       "description": "Class of a word that the current selection touches.",
       "params": [],
       "returns": [],
@@ -91100,7 +91100,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/OcrTextLayer.jsx",
-      "line": 55,
+      "line": 57,
       "description": "",
       "params": [
         {
@@ -91161,7 +91161,7 @@
           "name": "props.search",
           "type": "Object|null",
           "optional": true,
-          "description": "The toolbar's OCR search: the normalised term and the current match, or null when closed."
+          "description": "The toolbar's OCR search: the normalised term, the current match and the page the search is limited to (null for every page), or null when..."
         }
       ],
       "returns": [
@@ -92665,7 +92665,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1060,
+      "line": 1062,
       "description": "",
       "params": [
         {
@@ -92690,7 +92690,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1386,
+      "line": 1388,
       "description": "",
       "params": [],
       "returns": [
@@ -92708,7 +92708,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1075,
+      "line": 1077,
       "description": "",
       "params": [
         {
@@ -92745,7 +92745,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1536,
+      "line": 1538,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -92782,7 +92782,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1102,
+      "line": 1104,
       "description": "",
       "params": [],
       "returns": [
@@ -92800,7 +92800,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 575,
+      "line": 577,
       "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
       "params": [],
       "returns": [
@@ -92843,7 +92843,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2794,
+      "line": 2796,
       "description": "",
       "params": [
         {
@@ -92863,7 +92863,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2780,
+      "line": 2782,
       "description": "",
       "params": [
         {
@@ -92883,7 +92883,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1174,
+      "line": 1176,
       "description": "",
       "params": [
         {
@@ -92934,7 +92934,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1634,
+      "line": 1636,
       "description": "",
       "params": [
         {
@@ -92959,7 +92959,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2051,
+      "line": 2053,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -92984,7 +92984,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1858,
+      "line": 1860,
       "description": "",
       "params": [
         {
@@ -93034,7 +93034,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2799,
+      "line": 2801,
       "description": "",
       "params": [
         {
@@ -93085,7 +93085,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2448,
+      "line": 2450,
       "description": "",
       "params": [
         {
@@ -93110,7 +93110,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1514,
+      "line": 1516,
       "description": "",
       "params": [
         {
@@ -93135,7 +93135,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1610,
+      "line": 1612,
       "description": "",
       "params": [
         {
@@ -93160,7 +93160,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1111,
+      "line": 1113,
       "description": "",
       "params": [
         {
@@ -93185,7 +93185,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 895,
+      "line": 897,
       "description": "",
       "params": [
         {
@@ -93216,7 +93216,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 912,
+      "line": 914,
       "description": "",
       "params": [
         {
@@ -93272,7 +93272,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 961,
+      "line": 963,
       "description": "",
       "params": [
         {
@@ -93372,7 +93372,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 941,
+      "line": 943,
       "description": "",
       "params": [
         {
@@ -93422,7 +93422,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 341,
+      "line": 342,
       "description": "",
       "params": [
         {
@@ -93441,7 +93441,7 @@
       "returns": [
         {
           "type": "boolean",
-          "description": "Whether two OCR search states (term and current match) are the same."
+          "description": "Whether two OCR search states (term, current match and the page the search is limited to) are the same."
         }
       ],
       "examples": 0
@@ -93453,7 +93453,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 950,
+      "line": 952,
       "description": "",
       "params": [
         {
@@ -93614,7 +93614,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1398,
+      "line": 1400,
       "description": "",
       "params": [
         {
@@ -93664,7 +93664,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 552,
+      "line": 554,
       "description": "Record that a page now has a reusable full-size asset available.",
       "params": [
         {
@@ -93689,7 +93689,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 562,
+      "line": 564,
       "description": "Record that a page now has a reusable thumbnail asset available.",
       "params": [
         {
@@ -93714,7 +93714,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1010,
+      "line": 1012,
       "description": "",
       "params": [
         {
@@ -93745,7 +93745,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1445,
+      "line": 1447,
       "description": "",
       "params": [
         {
@@ -93782,7 +93782,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1588,
+      "line": 1590,
       "description": "",
       "params": [
         {
@@ -93813,7 +93813,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2314,
+      "line": 2316,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -93831,7 +93831,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1369,
+      "line": 1371,
       "description": "",
       "params": [
         {
@@ -93856,7 +93856,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1378,
+      "line": 1380,
       "description": "",
       "params": [
         {
@@ -93881,7 +93881,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2133,
+      "line": 2135,
       "description": "",
       "params": [
         {
@@ -93912,7 +93912,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1326,
+      "line": 1328,
       "description": "",
       "params": [
         {
@@ -93937,7 +93937,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 985,
+      "line": 987,
       "description": "Release print leases previously acquired through getPrintablePageUrls .",
       "params": [
         {
@@ -93962,7 +93962,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1766,
+      "line": 1768,
       "description": "",
       "params": [
         {
@@ -93999,7 +93999,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 734,
+      "line": 736,
       "description": "",
       "params": [],
       "returns": [
@@ -94048,7 +94048,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1694,
+      "line": 1696,
       "description": "",
       "params": [
         {
@@ -94085,7 +94085,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 706,
+      "line": 708,
       "description": "",
       "params": [],
       "returns": [
@@ -94103,7 +94103,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2405,
+      "line": 2407,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -94134,7 +94134,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2789,
+      "line": 2791,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -94160,7 +94160,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2754,
+      "line": 2756,
       "description": "",
       "params": [
         {
@@ -94180,7 +94180,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2767,
+      "line": 2769,
       "description": "",
       "params": [
         {
@@ -94200,7 +94200,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1681,
+      "line": 1683,
       "description": "",
       "params": [
         {
@@ -94225,7 +94225,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1345,
+      "line": 1347,
       "description": "",
       "params": [
         {
@@ -94263,7 +94263,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 932,
+      "line": 934,
       "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
       "params": [],
       "returns": [],
@@ -94307,7 +94307,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1523,
+      "line": 1525,
       "description": "",
       "params": [
         {
@@ -94338,7 +94338,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2155,
+      "line": 2157,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -94363,7 +94363,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1599,
+      "line": 1601,
       "description": "",
       "params": [
         {
@@ -94394,7 +94394,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 528,
+      "line": 530,
       "description": "",
       "params": [
         {
@@ -94419,7 +94419,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 356,
+      "line": 358,
       "description": "",
       "params": [
         {

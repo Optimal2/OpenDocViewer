@@ -217,7 +217,7 @@ import { createContext } from 'react';
  * @property {function(Array.<number>): void} setOcrFocusPageIndexes
  *   Indexes into allPages of the displayed page(s), primary first; the OCR queue covers them
  *   and a fixed number of neighbours. A no-op while OCR is off.
- * @property {(Object|null)} ocrSearch  The toolbar's OCR search: `{ term, current: ({ pageKey, ordinal }|null) }`, or null when closed.
+ * @property {(Object|null)} ocrSearch  The toolbar's OCR search: `{ term, current: ({ pageKey, ordinal }|null), onlyPageKey: (string|null) }` (the page the search is limited to, or null for every page), or null when closed.
  * @property {function((Object|null)): void} setOcrSearch
  * @property {function(number, number): void} scheduleSourceWarmup
  * @property {CompareTransformState} compareTransforms

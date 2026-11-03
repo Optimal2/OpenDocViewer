@@ -447,6 +447,15 @@ describe('OcrTextLayer search marks', () => {
     expect(marked(OCR_WORD_CURRENT_MATCH_CLASS)).toEqual([]);
   });
 
+  it('a search limited to one page marks that page only', () => {
+    render({ search: { term: 'rad', current: null, onlyPageKey: 'other' } });
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual([]);
+    expect(marked(OCR_WORD_CURRENT_MATCH_CLASS)).toEqual([]);
+    render({ search: { term: 'rad', current: { pageKey: 'p1', ordinal: 0 }, onlyPageKey: 'p1' } });
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual(['Rad']);
+    expect(marked(OCR_WORD_CURRENT_MATCH_CLASS)).toEqual(['Rad']);
+  });
+
   it('no term or a closed search marks nothing', () => {
     render({ search: { term: '', current: null } });
     expect(marked(OCR_WORD_MATCH_CLASS)).toEqual([]);

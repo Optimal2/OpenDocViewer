@@ -145,7 +145,7 @@ describe('OcrSearchBar', () => {
     act(() => button().click());
     type('hej');
     expect(status()).toBe('1 of 1 · 1 of 3 pages recognised');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
   it('the position is right in the same render as the matches, never "0 of N"', () => {
@@ -180,16 +180,16 @@ describe('OcrSearchBar', () => {
     const { setOcrSearch } = render({ ocrPages: pages, pageNumber: 2, setPageNumber });
     act(() => button().click());
     type('hej');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 }, onlyPageKey: null });
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(3);
     // The viewer could not show page 3; it is still page 2.
     render({ ocrPages: pages, pageNumber: 2, setPageNumber, setOcrSearch });
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
     key('Enter');
     // Not asked for page 3 again: moved on (wrapping round to the first match, on page 2).
     expect(setPageNumber).toHaveBeenCalledTimes(1);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 }, onlyPageKey: null });
   });
 
   it('landing on another shown page after asking for a hidden one costs no second request', () => {
@@ -203,10 +203,10 @@ describe('OcrSearchBar', () => {
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(2);
     render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 }, onlyPageKey: null });
     key('Enter');
     expect(setPageNumber).toHaveBeenCalledTimes(1);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
   it('a new term forgets the page asked for: the same match is asked for again, not stepped past', () => {
@@ -220,14 +220,53 @@ describe('OcrSearchBar', () => {
     type('hej');
     key('Enter');
     expect(setPageNumber).toHaveBeenCalledTimes(1);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
     type('he');
     key('Enter');
     expect(setPageNumber).toHaveBeenCalledTimes(2);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'he', current: { pageKey: KEY(2), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'he', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
     // Still on page 1 (hidden page): the next Enter moves on to the second match.
     key('Enter');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'he', current: { pageKey: KEY(2), ordinal: 1 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'he', current: { pageKey: KEY(2), ordinal: 1 }, onlyPageKey: null });
+  });
+
+  it('limited to the displayed page: its matches only, the steps stay on it, the page\'s status when it has no text', () => {
+    const pages = { [KEY(0)]: done(['Hej', 'hej']), [KEY(1)]: { status: 'recognizing' }, [KEY(2)]: done(['hej', 'hej', 'hej']) };
+    const { setOcrSearch, setPageNumber } = render({ ocrPages: pages });
+    act(() => button().click());
+    type('hej');
+    expect(status()).toBe('1 of 5 · 2 of 3 pages recognised');
+    const scope = () => container.querySelector('.toolbar-ocr-search-scope');
+    expect(scope().getAttribute('aria-pressed')).toBe('false');
+    expect(scope().title).toBe('Search only on this page');
+
+    act(() => scope().click());
+    expect(scope().getAttribute('aria-pressed')).toBe('true');
+    expect(scope().classList.contains('is-active')).toBe(true);
+    // Only page 1's matches, no coverage line, and the page is published with the term.
+    expect(status()).toBe('1 of 2');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: KEY(0) });
+    key('Enter');
+    expect(status()).toBe('2 of 2');
+    key('Enter');
+    expect(status()).toBe('1 of 2');
+    expect(setPageNumber).not.toHaveBeenCalled();
+
+    // The viewer moves to page 3 (the user): the matches are that page's now.
+    render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
+    expect(status()).toBe('1 of 3');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: KEY(2) });
+    // Page 2 is still being recognised: its status, not "No matches".
+    render({ ocrPages: pages, pageNumber: 2, setPageNumber, setOcrSearch });
+    expect(status()).toBe('Recognising text…');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: null, onlyPageKey: KEY(1) });
+    expect(container.querySelector('[aria-label="Next match"]').disabled).toBe(true);
+
+    // Off again: the whole document, from the displayed page on.
+    act(() => scope().click());
+    expect(scope().getAttribute('aria-pressed')).toBe('false');
+    expect(status()).toBe('3 of 5 · 2 of 3 pages recognised');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
   it('Escape closes the field from the step buttons too', () => {
@@ -252,7 +291,7 @@ describe('OcrSearchBar', () => {
 
     type('HEJ');
     expect(status()).toBe('1 of 2 · 2 of 3 pages recognised');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     expect(setPageNumber).not.toHaveBeenCalled();
   });
 
@@ -265,23 +304,23 @@ describe('OcrSearchBar', () => {
 
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(3);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
     // The viewer shows page 3 now.
     render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
     expect(status()).toBe('2 of 3 · 2 of 3 pages recognised');
 
     key('Enter');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 1 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 1 }, onlyPageKey: null });
     expect(status()).toBe('3 of 3 · 2 of 3 pages recognised');
 
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(1);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
 
     render({ ocrPages: pages, pageNumber: 1, setPageNumber, setOcrSearch });
     key('Enter', { shiftKey: true });
     expect(setPageNumber).toHaveBeenLastCalledWith(3);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 1 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 1 }, onlyPageKey: null });
   });
 
   it('a current match on another page is shown first by Enter, before the position moves', () => {
@@ -290,11 +329,11 @@ describe('OcrSearchBar', () => {
     act(() => button().click());
     type('hej');
     // No match on page 1: the first match (page 2) is current, but the page does not change.
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 }, onlyPageKey: null });
     expect(setPageNumber).not.toHaveBeenCalled();
     act(() => container.querySelector('[aria-label="Next match"]').click());
     expect(setPageNumber).toHaveBeenLastCalledWith(2);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 }, onlyPageKey: null });
   });
 
   it('reports no matches, keeps the current match when outcomes arrive, and closes with Escape', () => {
@@ -304,13 +343,13 @@ describe('OcrSearchBar', () => {
     type('xyz');
     expect(status()).toBe('No matches · 1 of 3 pages recognised');
     expect(container.querySelector('[aria-label="Next match"]').disabled).toBe(true);
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'xyz', current: null });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'xyz', current: null, onlyPageKey: null });
 
     type('hej');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     render({ ocrPages: { ...pages, [KEY(1)]: done(['hej']), [KEY(2)]: done(['hej']) }, setOcrSearch });
     expect(status()).toBe('1 of 3');
-    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 } });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
 
     key('Escape');
     expect(container.querySelector('.toolbar-ocr-search').classList.contains('is-open')).toBe(false);

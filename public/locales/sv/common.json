@@ -451,6 +451,7 @@
       "position": "{current} av {total}",
       "none": "Inga träffar",
       "coverage": "{done} av {pages} sidor tolkade",
+      "pageOnly": "Sök bara på den här sidan",
       "previous": "Föregående träff",
       "next": "Nästa träff",
       "close": "Stäng sökningen"

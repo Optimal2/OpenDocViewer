@@ -271,6 +271,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(searchStatus).toHaveText(new RegExp(`^2 (of|av) ${matchCount}`));
   await searchField.press('Shift+Enter');
   await expect(searchStatus).toHaveText(new RegExp(`^1 (of|av) ${matchCount}`));
+  // Limited to the displayed page (the only page here): the same matches, the toggle pressed,
+  // the marks still on the page; off again afterwards.
+  const scope = page.locator('.toolbar-ocr-search-scope');
+  await expect(scope).toHaveAttribute('aria-pressed', 'false');
+  await scope.click();
+  await expect(scope).toHaveAttribute('aria-pressed', 'true');
+  await expect(searchStatus).toHaveText(new RegExp(`^1 (of|av) ${matchCount}$`));
+  await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
+  await scope.click();
+  await expect(scope).toHaveAttribute('aria-pressed', 'false');
   await searchField.fill('finnsinte');
   await expect(searchStatus).toHaveText(/No matches|Inga träffar/);
   await searchField.press('Escape');

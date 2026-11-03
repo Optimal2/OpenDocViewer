@@ -13,14 +13,16 @@
  *
  * The search covers the recognised text of every page that has an outcome, in page order
  * (utils/ocrSearch.js: case-insensitive, a phrase also across a line break), and nothing else
- * on the page. Typing finds the matches and makes the first one on the displayed page current
- * without leaving the page; Enter and the arrows walk the matches, moving to a match's page
- * when it is another one. The current term and match are published to the viewer
- * (ViewerContext `ocrSearch`), where the text layer marks the matches on its page and scrolls
- * the current one into view. While not every page has an outcome yet, the status says how
- * many pages the search covers. Page numbers here are original session page numbers (they
- * index `allPages` and are what `setPageNumber` takes), not ordinals among the visible pages.
- * Mounted by DocumentToolbar only while `ocr.enabled` is the literal true.
+ * on the page; a toggle in the field limits it to the displayed page (the matches follow the
+ * page as it changes, and the steps never leave it). Typing finds the matches and makes the
+ * first one on the displayed page current without leaving the page; Enter and the arrows walk
+ * the matches, moving to a match's page when it is another one. The current term, match and
+ * (when limited) the page are published to the viewer (ViewerContext `ocrSearch`), where the
+ * text layer marks the matches on its page and scrolls the current one into view. While not
+ * every page has an outcome yet, the status says how many pages the search covers. Page
+ * numbers here are original session page numbers (they index `allPages` and are what
+ * `setPageNumber` takes), not ordinals among the visible pages. Mounted by DocumentToolbar
+ * only while `ocr.enabled` is the literal true.
  */
 import React, { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -48,6 +50,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const { ocrPages, ocrEngineFailure, setOcrSearch } = useContext(ViewerContext);
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState('');
+  // Limited to the displayed page: the page's own matches only, the steps never leave it.
+  const [pageOnly, setPageOnly] = useState(false);
   const [currentId, setCurrentId] = useState(/** @type {(string|null)} */ (null));
   const inputRef = useRef(/** @type {(HTMLInputElement|null)} */ (null));
   const buttonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
@@ -64,7 +68,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const pages = useMemo(() => (Array.isArray(allPages) ? allPages : []), [allPages]);
   const displayedIndex = Math.max(0, (Number(pageNumber) || 1) - 1);
   const displayedPage = pages[displayedIndex] || null;
-  const displayedEntry = displayedPage && ocrPages ? ocrPages[ocrPageKeyOf(displayedPage)] || null : null;
+  const displayedKey = displayedPage ? ocrPageKeyOf(displayedPage) : '';
+  const displayedEntry = displayedKey && ocrPages ? ocrPages[displayedKey] || null : null;
   const statusKey = ocrStatusKeyOf(displayedEntry, ocrEngineFailure);
   const statusText = statusKey
     ? t(`ocr.status.${statusKey}`, { defaultValue: OCR_STATUS_FALLBACK[statusKey] })
@@ -83,9 +88,14 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const ready = hasSearchableOcrText(displayedEntry)
     || searchablePages.some((page) => hasSearchableOcrText(page.outcome));
   const normalizedTerm = normalizeOcrSearchTerm(term);
+  // The pages the search runs over: all of them, or the displayed page alone.
+  const scopedPages = useMemo(
+    () => (pageOnly ? searchablePages.filter((page) => page.pageIndex === displayedIndex) : searchablePages),
+    [displayedIndex, pageOnly, searchablePages]
+  );
   const matches = useMemo(
-    () => (open && normalizedTerm ? searchOcrPages(searchablePages, normalizedTerm) : []),
-    [normalizedTerm, open, searchablePages]
+    () => (open && normalizedTerm ? searchOcrPages(scopedPages, normalizedTerm) : []),
+    [normalizedTerm, open, scopedPages]
   );
   // The current match: the one chosen (if it still exists among the matches), else the first
   // match on the displayed page, or after it, or the first of all. Derived here, so the
@@ -110,7 +120,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     if (shownMatchRef.current !== null && shownMatchRef.current !== nextId) shownMatchRef.current = null;
   }, [current, currentId, open]);
 
-  // Publish the term and the current match for the text layers (marks and scrolling).
+  // Publish the term, the current match and (limited to one page) the page for the text layers
+  // (marks and scrolling): another page's layer then marks nothing, as in compare mode.
   useEffect(() => {
     if (typeof setOcrSearch !== 'function') return undefined;
     if (!open || !normalizedTerm) {
@@ -120,9 +131,10 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     setOcrSearch({
       term: normalizedTerm,
       current: current ? { pageKey: current.pageKey, ordinal: current.ordinal } : null,
+      onlyPageKey: pageOnly ? displayedKey : null,
     });
     return undefined;
-  }, [current, normalizedTerm, open, setOcrSearch]);
+  }, [current, displayedKey, normalizedTerm, open, pageOnly, setOcrSearch]);
 
   useEffect(() => () => {
     if (typeof setOcrSearch === 'function') setOcrSearch(null);
@@ -180,7 +192,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
 
   useEffect(() => {
     shownMatchRef.current = null;
-  }, [normalizedTerm]);
+  }, [normalizedTerm, pageOnly]);
 
   /**
    * Enter / the arrows: a current match on another page is shown first (the position does not
@@ -221,12 +233,16 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
 
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const buttonTitle = ready || open ? `${openLabel} · ${statusText}` : statusText;
+  const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   let statusLine = '';
-  if (normalizedTerm) {
+  if (normalizedTerm && pageOnly && !hasSearchableOcrText(displayedEntry)) {
+    // Limited to a page without searchable text: its status says why there is nothing.
+    statusLine = statusText;
+  } else if (normalizedTerm) {
     statusLine = matches.length === 0
       ? t('ocr.search.none', { defaultValue: 'No matches' })
       : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: '{current} of {total}' });
-    if (recognisedPages < pages.length) {
+    if (!pageOnly && recognisedPages < pages.length) {
       statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done} of {pages} pages recognised' })}`;
     }
   }
@@ -280,6 +296,17 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
           tabIndex={open ? 0 : -1}
         />
         <span className="toolbar-ocr-search-status" aria-live="polite">{statusLine}</span>
+        <button
+          type="button"
+          className={`odv-btn toolbar-ocr-search-scope${pageOnly ? ' is-active' : ''}`}
+          onClick={() => setPageOnly((value) => !value)}
+          aria-pressed={pageOnly}
+          aria-label={pageOnlyLabel}
+          title={pageOnlyLabel}
+          tabIndex={open ? 0 : -1}
+        >
+          <span className="material-icons" aria-hidden="true">pageview</span>
+        </button>
         <button
           type="button"
           className="odv-btn toolbar-ocr-search-step"

@@ -451,6 +451,7 @@
       "position": "{current} of {total}",
       "none": "No matches",
       "coverage": "{done} of {pages} pages recognised",
+      "pageOnly": "Search only on this page",
       "previous": "Previous match",
       "next": "Next match",
       "close": "Close the search"
