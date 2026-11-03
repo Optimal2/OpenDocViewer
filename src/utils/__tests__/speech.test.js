@@ -125,12 +125,15 @@ describe('speakText', () => {
     expect(onEnd).toHaveBeenCalledTimes(1);
   });
 
-  it('reports an engine error once, and an interruption as cancelled', () => {
+  it('reports an engine error once, drops the rest of the queue, and an interruption as cancelled', () => {
     const synthesis = fakeSynthesis();
     const onEnd = vi.fn();
     speakText('Hej. Då.', { lang: 'sv-SE', onEnd, synthesis, Utterance: FakeUtterance });
     synthesis.spoken[0].onerror({ error: 'synthesis-failed' });
+    // The rest of the queue is dropped with the failed chunk (cancel: once at start, once now).
+    expect(synthesis.cancel).toHaveBeenCalledTimes(2);
     synthesis.spoken[1].onerror({ error: 'synthesis-failed' });
+    synthesis.spoken[1].onend();
     expect(onEnd).toHaveBeenCalledTimes(1);
     expect(onEnd).toHaveBeenCalledWith('error');
 

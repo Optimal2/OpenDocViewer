@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8406. JSDoc symbol count: 145.
+File count: 21. Line count: 8422. JSDoc symbol count: 146.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -57,8 +57,8 @@ File count: 21. Line count: 8406. JSDoc symbol count: 145.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
+- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden liv
 - `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
-- `src/components/DocumentToolbar/PrintPipelineDialogs.jsx` - The dialogs of the ONE print pipeline \(usePrintPipeline.js\): the print dialog and the generated\-PDF progress \(modal, or a dock while working in the background\).
 
 ## src/components/DocumentViewer
 
@@ -75,7 +75,7 @@ File count: 17. Line count: 7656. JSDoc symbol count: 154.
 
 ## src/contexts
 
-File count: 4. Line count: 3554. JSDoc symbol count: 98.
+File count: 4. Line count: 3554. JSDoc symbol count: 99.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -165,7 +165,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 59. Line count: 22703. JSDoc symbol count: 922.
+File count: 59. Line count: 22707. JSDoc symbol count: 922.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

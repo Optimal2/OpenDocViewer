@@ -141,6 +141,10 @@ export function speakText(text, { lang, onEnd, synthesis, Utterance, maxChunkLen
       if (cancelled) return;
       const code = String(event?.error || '');
       if (code === 'interrupted' || code === 'canceled') { finish('cancelled'); return; }
+      // The rest of the queue would still be spoken while the caller shows the reading as
+      // ended: drop it with the failed chunk.
+      cancelled = true;
+      try { synth.cancel(); } catch { /* already stopped */ }
       finish('error');
     };
     synth.speak(utterance);

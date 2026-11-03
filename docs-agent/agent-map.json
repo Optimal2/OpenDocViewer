@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 173,
-    "sourceLineCount": 66138,
-    "docletCount": 1874,
+    "sourceLineCount": 66158,
+    "docletCount": 1876,
     "documentedFileCount": 172,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -1149,8 +1149,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8406,
-      "docletCount": 145,
+      "lineCount": 8422,
+      "docletCount": 146,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1182,7 +1182,7 @@
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
           "score": 50,
-          "lines": 1563,
+          "lines": 1565,
           "incomingLocalImports": 1,
           "doclets": 18,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -1207,21 +1207,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+          "score": 33,
+          "lines": 261,
+          "incomingLocalImports": 1,
+          "doclets": 6,
+          "summary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
           "score": 32,
           "lines": 202,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Compact theme selector for the toolbar.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentToolbar/PrintPipelineDialogs.jsx",
-          "score": 31,
-          "lines": 220,
-          "incomingLocalImports": 2,
-          "doclets": 3,
-          "summary": "The dialogs of the ONE print pipeline (usePrintPipeline.js): the print dialog and the generated-PDF progress (modal, or a dock while working in the background).",
           "summaryConfidence": "high"
         }
       ]
@@ -1310,7 +1310,7 @@
       "name": "src/contexts",
       "fileCount": 4,
       "lineCount": 3554,
-      "docletCount": 98,
+      "docletCount": 99,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
@@ -1326,7 +1326,7 @@
           "score": 57,
           "lines": 2911,
           "incomingLocalImports": 1,
-          "doclets": 69,
+          "doclets": 70,
           "summary": "OpenDocViewer — Viewer state provider.",
           "summaryConfidence": "high"
         },
@@ -1712,7 +1712,7 @@
     {
       "name": "src/utils",
       "fileCount": 59,
-      "lineCount": 22703,
+      "lineCount": 22707,
       "docletCount": 922,
       "importantFiles": [
         {
@@ -11541,7 +11541,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 1563,
+      "lines": 1565,
       "extension": ".jsx",
       "jsdocBlockCount": 25,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11783,7 +11783,7 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 1562
+          "line": 1564
         }
       ],
       "declarations": [
@@ -14408,10 +14408,10 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 247,
+      "lines": 261,
       "extension": ".jsx",
-      "jsdocBlockCount": 9,
-      "sourceSummary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button and the status as its tooltip; the button is enabled on",
+      "jsdocBlockCount": 10,
+      "sourceSummary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
       "imports": [
         {
           "source": "react",
@@ -14425,7 +14425,7 @@
             "useRef",
             "useState"
           ],
-          "line": 19,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -14433,7 +14433,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -14441,7 +14441,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 21,
+          "line": 23,
           "kind": "static"
         },
         {
@@ -14449,7 +14449,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 22,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -14457,7 +14457,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 23,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -14465,7 +14465,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 24,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -14476,7 +14476,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -14485,7 +14485,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         }
       ],
@@ -14493,24 +14493,29 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 38
+          "line": 41
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 29
+          "line": 31
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 38
+          "line": 41
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 143
+          "line": 150
+        },
+        {
+          "name": "handlePanelKeyDown",
+          "kind": "function",
+          "line": 158
         }
       ],
       "parseError": null,
@@ -14526,7 +14531,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 29,
+          "line": 31,
           "description": "",
           "params": [
             {
@@ -14546,7 +14551,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 38,
+          "line": 41,
           "description": "",
           "params": [
             {
@@ -14559,13 +14564,13 @@
               "name": "props.pageNumber",
               "type": "number",
               "optional": false,
-              "description": "1-based number of the displayed page."
+              "description": "Original session page number (1-based) of the displayed page: DocumentToolbar's pageNumberDisplay ."
             },
             {
               "name": "props.setPageNumber",
               "type": "function",
               "optional": false,
-              "description": ""
+              "description": "Takes an original session page number."
             },
             {
               "name": "props.allPages",
@@ -14589,7 +14594,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 115,
+          "line": 122,
           "description": "",
           "params": [
             {
@@ -14609,7 +14614,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 127,
+          "line": 134,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move); on its page, the next or previous match becomes current, wrapping round.",
           "params": [
             {
@@ -14629,7 +14634,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 143,
+          "line": 150,
           "description": "",
           "params": [
             {
@@ -14641,6 +14646,19 @@
           ],
           "returns": [],
           "examples": 0
+        },
+        {
+          "id": "OcrSearchBar~handlePanelKeyDown",
+          "name": "handlePanelKeyDown",
+          "longname": "OcrSearchBar~handlePanelKeyDown",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+          "line": 158,
+          "description": "Escape closes the field from any of its controls.",
+          "params": [],
+          "returns": [],
+          "examples": 0
         }
       ],
       "moduleKey": "src/components/DocumentToolbar",
@@ -14650,7 +14668,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 22,
+          "line": 24,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14659,7 +14677,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 23,
+          "line": 25,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14668,7 +14686,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 24,
+          "line": 26,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14680,7 +14698,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14690,7 +14708,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         }
@@ -14708,7 +14726,7 @@
             "useRef",
             "useState"
           ],
-          "line": 19,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -14716,7 +14734,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -14724,13 +14742,13 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 21,
+          "line": 23,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 30,
-      "summary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button and the status as its tooltip; the button is enabled on",
+      "importanceScore": 33,
+      "summary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -30496,7 +30514,7 @@
         {
           "name": "isSameOcrSearch",
           "kind": "function",
-          "line": 345
+          "line": 341
         },
         {
           "name": "ViewerProvider",
@@ -31038,7 +31056,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 345,
+          "line": 341,
           "description": "",
           "params": [
             {
@@ -31058,6 +31076,31 @@
             {
               "type": "boolean",
               "description": "Whether two OCR search states (term and current match) are the same."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "ViewerProvider",
+          "name": "ViewerProvider",
+          "longname": "ViewerProvider",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/contexts/ViewerProvider.jsx",
+          "line": 356,
+          "description": "",
+          "params": [
+            {
+              "name": "props",
+              "type": "ViewerProviderProps",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement",
+              "description": ""
             }
           ],
           "examples": 0
@@ -73437,7 +73480,7 @@
     },
     {
       "path": "src/utils/speech.js",
-      "lines": 158,
+      "lines": 162,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "Reading text aloud with the browser's speech synthesis (Web Speech API, `window.speechSynthesis`).",
@@ -84131,7 +84174,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 38,
+      "line": 41,
       "description": "",
       "params": [
         {
@@ -84144,13 +84187,13 @@
           "name": "props.pageNumber",
           "type": "number",
           "optional": false,
-          "description": "1-based number of the displayed page."
+          "description": "Original session page number (1-based) of the displayed page: DocumentToolbar's pageNumberDisplay ."
         },
         {
           "name": "props.setPageNumber",
           "type": "function",
           "optional": false,
-          "description": ""
+          "description": "Takes an original session page number."
         },
         {
           "name": "props.allPages",
@@ -84174,7 +84217,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 115,
+      "line": 122,
       "description": "",
       "params": [
         {
@@ -84194,7 +84237,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 143,
+      "line": 150,
       "description": "",
       "params": [
         {
@@ -84208,13 +84251,26 @@
       "examples": 0
     },
     {
+      "id": "OcrSearchBar~handlePanelKeyDown",
+      "name": "handlePanelKeyDown",
+      "longname": "OcrSearchBar~handlePanelKeyDown",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+      "line": 158,
+      "description": "Escape closes the field from any of its controls.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "matchIdOf",
       "name": "matchIdOf",
       "longname": "matchIdOf",
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 29,
+      "line": 31,
       "description": "",
       "params": [
         {
@@ -84234,7 +84290,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 127,
+      "line": 134,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move); on its page, the next or previous match becomes current, wrapping round.",
       "params": [
         {
@@ -93098,7 +93154,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 345,
+      "line": 341,
       "description": "",
       "params": [
         {
@@ -94083,6 +94139,31 @@
       "returns": [
         {
           "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "ViewerProvider",
+      "name": "ViewerProvider",
+      "longname": "ViewerProvider",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/contexts/ViewerProvider.jsx",
+      "line": 356,
+      "description": "",
+      "params": [
+        {
+          "name": "props",
+          "type": "ViewerProviderProps",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement",
           "description": ""
         }
       ],

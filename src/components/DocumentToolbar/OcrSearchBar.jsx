@@ -1,10 +1,11 @@
 // File: src/components/DocumentToolbar/OcrSearchBar.jsx
 /**
  * Search in the recognised text, from the toolbar: a search button to the right of the
- * toolbar's end group that doubles as the page's OCR status (an LED on the button and the
- * status as its tooltip; the button is enabled once the displayed page's text is recognised),
- * and a field that grows out of it to the right (a short width transition, styles/ocr.css)
- * with the match position, previous/next and close.
+ * toolbar's end group that doubles as the page's OCR status (an LED on the button, the status
+ * as its tooltip and in a visually hidden live region; the button is enabled once the displayed
+ * page's text is recognised, or any page's when the displayed page has none), and a field that
+ * grows out of it to the right (a short width transition, styles/ocr.css) with the match
+ * position, previous/next and close.
  *
  * The search covers the recognised text of every page that has an outcome, in page order
  * (utils/ocrSearch.js: case-insensitive, a phrase also across a line break), and nothing else
@@ -13,8 +14,9 @@
  * when it is another one. The current term and match are published to the viewer
  * (ViewerContext `ocrSearch`), where the text layer marks the matches on its page and scrolls
  * the current one into view. While not every page has an outcome yet, the status says how
- * many pages the search covers. Mounted by DocumentToolbar only while `ocr.enabled` is the
- * literal true.
+ * many pages the search covers. Page numbers here are original session page numbers (they
+ * index `allPages` and are what `setPageNumber` takes), not ordinals among the visible pages.
+ * Mounted by DocumentToolbar only while `ocr.enabled` is the literal true.
  */
 import React, { useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -30,8 +32,9 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
 
 /**
  * @param {Object} props
- * @param {number} props.pageNumber  1-based number of the displayed page.
- * @param {function(number): void} props.setPageNumber
+ * @param {number} props.pageNumber  Original session page number (1-based) of the displayed
+ *   page: DocumentToolbar's `pageNumberDisplay`.
+ * @param {function(number): void} props.setPageNumber  Takes an original session page number.
  * @param {Array<Object>} props.allPages  The viewer's pages.
  * @returns {React.ReactElement}
  */
@@ -53,7 +56,6 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const statusText = statusKey
     ? t(`ocr.status.${statusKey}`, { defaultValue: OCR_STATUS_FALLBACK[statusKey] })
     : t('ocr.status.notStarted', { defaultValue: 'Text recognition has not started on this page' });
-  const ready = hasSearchableOcrText(displayedEntry);
 
   // Every page with its outcome, in page order; the search runs over the ones with text.
   const searchablePages = useMemo(() => pages.map((page, index) => {
@@ -64,30 +66,35 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     () => searchablePages.filter((page) => page.outcome?.status === 'done').length,
     [searchablePages]
   );
+  // The displayed page's text, or (a page without text, skipped or failed) any page's.
+  const ready = hasSearchableOcrText(displayedEntry)
+    || searchablePages.some((page) => hasSearchableOcrText(page.outcome));
   const normalizedTerm = normalizeOcrSearchTerm(term);
   const matches = useMemo(
     () => (open && normalizedTerm ? searchOcrPages(searchablePages, normalizedTerm) : []),
     [normalizedTerm, open, searchablePages]
   );
-  const currentPosition = useMemo(
-    () => (currentId === null ? -1 : matches.findIndex((match) => matchIdOf(match) === currentId)),
-    [currentId, matches]
-  );
+  // The current match: the one chosen (if it still exists among the matches), else the first
+  // match on the displayed page, or after it, or the first of all. Derived here, so the
+  // position is right in the same render as the matches (never "0 of N"); the choice is kept
+  // in state so that outcomes arriving later do not move it. The page is not changed here;
+  // Enter and the arrows do that.
+  const currentPosition = useMemo(() => {
+    if (matches.length === 0) return -1;
+    if (currentId !== null) {
+      const chosen = matches.findIndex((match) => matchIdOf(match) === currentId);
+      if (chosen >= 0) return chosen;
+    }
+    const onOrAfter = matches.findIndex((match) => match.pageIndex >= displayedIndex);
+    return onOrAfter >= 0 ? onOrAfter : 0;
+  }, [currentId, displayedIndex, matches]);
   const current = currentPosition >= 0 ? matches[currentPosition] : null;
 
-  // A new term, or outcomes that arrived: the current match stays if it still exists, else the
-  // first match on the displayed page (or after it, or the first of all) becomes current. The
-  // page is not changed here; Enter and the arrows do that.
   useEffect(() => {
     if (!open) return;
-    if (matches.length === 0) {
-      if (currentId !== null) setCurrentId(null);
-      return;
-    }
-    if (currentPosition >= 0) return;
-    const onOrAfter = matches.findIndex((match) => match.pageIndex >= displayedIndex);
-    setCurrentId(matchIdOf(matches[onOrAfter >= 0 ? onOrAfter : 0]));
-  }, [currentId, currentPosition, displayedIndex, matches, open]);
+    const nextId = current ? matchIdOf(current) : null;
+    if (nextId !== currentId) setCurrentId(nextId);
+  }, [current, currentId, open]);
 
   // Publish the term and the current match for the text layers (marks and scrolling).
   useEffect(() => {
@@ -144,7 +151,12 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     if (event.key === 'Enter') {
       event.preventDefault();
       step(event.shiftKey ? -1 : 1);
-    } else if (event.key === 'Escape') {
+    }
+  };
+
+  /** Escape closes the field from any of its controls. @param {React.KeyboardEvent} event */
+  const handlePanelKeyDown = (event) => {
+    if (event.key === 'Escape') {
       event.preventDefault();
       close();
     }
@@ -180,6 +192,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
         <span className="material-icons" aria-hidden="true">search</span>
         <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
       </button>
+      <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
       <div
         id={panelId}
         className="toolbar-ocr-search-panel"
@@ -187,6 +200,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
         aria-label={openLabel}
         aria-hidden={!open}
         data-odv-shortcuts="off"
+        onKeyDown={handlePanelKeyDown}
       >
         <input
           ref={inputRef}

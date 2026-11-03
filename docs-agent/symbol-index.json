@@ -7137,7 +7137,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 38,
+    "line": 41,
     "description": "",
     "params": [
       {
@@ -7150,13 +7150,13 @@
         "name": "props.pageNumber",
         "type": "number",
         "optional": false,
-        "description": "1-based number of the displayed page."
+        "description": "Original session page number (1-based) of the displayed page: DocumentToolbar's pageNumberDisplay ."
       },
       {
         "name": "props.setPageNumber",
         "type": "function",
         "optional": false,
-        "description": ""
+        "description": "Takes an original session page number."
       },
       {
         "name": "props.allPages",
@@ -7180,7 +7180,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 115,
+    "line": 122,
     "description": "",
     "params": [
       {
@@ -7200,7 +7200,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 143,
+    "line": 150,
     "description": "",
     "params": [
       {
@@ -7214,13 +7214,26 @@
     "examples": 0
   },
   {
+    "id": "OcrSearchBar~handlePanelKeyDown",
+    "name": "handlePanelKeyDown",
+    "longname": "OcrSearchBar~handlePanelKeyDown",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 158,
+    "description": "Escape closes the field from any of its controls.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "matchIdOf",
     "name": "matchIdOf",
     "longname": "matchIdOf",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 29,
+    "line": 31,
     "description": "",
     "params": [
       {
@@ -7240,7 +7253,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 127,
+    "line": 134,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move); on its page, the next or previous match becomes current, wrapping round.",
     "params": [
       {
@@ -16104,7 +16117,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 345,
+    "line": 341,
     "description": "",
     "params": [
       {
@@ -17089,6 +17102,31 @@
     "returns": [
       {
         "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "ViewerProvider",
+    "name": "ViewerProvider",
+    "longname": "ViewerProvider",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/contexts/ViewerProvider.jsx",
+    "line": 356,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "ViewerProviderProps",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
         "description": ""
       }
     ],

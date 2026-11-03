@@ -454,7 +454,10 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   how many pages the search covers ("2 of 300 pages recognised"); the matches are marked on the
   page over the words, the current match stronger and scrolled into view. Enter and the arrow
   buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
-  one; Escape closes the field. The browser's own find (Ctrl+F) keeps working on the layer.
+  one; Escape closes the field. The search follows the primary page (in compare mode the
+  compared page's layer still marks its matches, but the position and the status are the
+  primary page's), and a match on a page the print selection hides lands on the nearest shown
+  page. The browser's own find (Ctrl+F) keeps working on the layer.
 - A read-aloud button that appears only while recognised text is selected, if the browser has
   speech synthesis (Web Speech API). Clicking it reads the selection as it reads on the page,
   line by line, with an installed voice of the viewer's UI language (Swedish text needs a

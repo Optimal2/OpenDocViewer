@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8406. JSDoc symbol count: 145.
+File count: 21. Line count: 8422. JSDoc symbol count: 146.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -114,7 +114,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/OcrSearchBar.jsx
 
-Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button and the status as its tooltip; the button is enabled on
+Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden liv
 
 Exports: `OcrSearchBar`
 
@@ -127,6 +127,7 @@ Symbols:
 - `OcrSearchBar~goToMatch` (constant) - No description.
 - `OcrSearchBar~step` (constant) - Enter / the arrows: a current match on another page is shown first \(the position does not move\); on its page, the next or previous match becomes current, wrapping round.
 - `OcrSearchBar~handleInputKeyDown` (function) - No description.
+- `OcrSearchBar~handlePanelKeyDown` (function) - Escape closes the field from any of its controls.
 
 ## src/components/DocumentToolbar/PageNavigationButtons.jsx
 

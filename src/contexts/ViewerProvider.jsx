@@ -334,10 +334,6 @@ function nowMs() {
  */
 
 /**
- * @param {ViewerProviderProps} props
- * @returns {React.ReactElement}
- */
-/**
  * @param {(Object|null)} a
  * @param {(Object|null)} b
  * @returns {boolean} Whether two OCR search states (term and current match) are the same.
@@ -353,6 +349,10 @@ function isSameOcrSearch(a, b) {
   return String(ca.pageKey || '') === String(cb.pageKey || '') && Number(ca.ordinal) === Number(cb.ordinal);
 }
 
+/**
+ * @param {ViewerProviderProps} props
+ * @returns {React.ReactElement}
+ */
 export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = false }) => {
   const [allPages, setAllPages] = useState([]);
   const [signaturePrioritySourceKey, setSignaturePrioritySourceKey] = useState('');

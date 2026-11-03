@@ -87,6 +87,8 @@ describe('OcrSearchBar', () => {
     render({ ocrPages: { [KEY(0)]: { status: 'recognizing' } } });
     expect(button().getAttribute('data-ocr-state')).toBe('working');
     expect(button().disabled).toBe(true);
+    expect(container.querySelector('[data-odv-ocr="status-text"]').textContent).toBe('Recognising text…');
+    expect(container.querySelector('[data-odv-ocr="status-text"]').getAttribute('aria-live')).toBe('polite');
     expect(button().title).toBe('Recognising text…');
     expect(container.querySelector('.odv-status-led--pending')).not.toBeNull();
 
@@ -106,11 +108,41 @@ describe('OcrSearchBar', () => {
     expect(button().disabled).toBe(true);
   });
 
-  it('a text-layer PDF page says so and is not searchable', () => {
+  it('a text-layer PDF page says so; the search opens from it once another page has text', () => {
     render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' } } });
     expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
     expect(button().title).toBe('Not recognised: the page has its own text');
     expect(button().disabled).toBe(true);
+    render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' }, [KEY(2)]: done(['hej']) } });
+    expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
+    expect(button().disabled).toBe(false);
+  });
+
+  it('works in original session page numbers: a displayed page 3 indexes the third page', () => {
+    const pages = { [KEY(2)]: done(['hej']) };
+    const { setOcrSearch } = render({ ocrPages: pages, pageNumber: 3 });
+    expect(button().getAttribute('data-ocr-state')).toBe('done');
+    act(() => button().click());
+    type('hej');
+    expect(status()).toBe('1 of 1 · 1 of 3 pages recognised');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+  });
+
+  it('the position is right in the same render as the matches, never "0 of N"', () => {
+    render({ ocrPages: { [KEY(0)]: done(['Hej', 'hej']) } });
+    act(() => button().click());
+    type('hej');
+    expect(status()).toBe('1 of 2 · 1 of 3 pages recognised');
+    expect(status()).not.toMatch(/^0 /);
+  });
+
+  it('Escape closes the field from the step buttons too', () => {
+    render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+    act(() => button().click());
+    const next = container.querySelector('[aria-label="Next match"]');
+    act(() => next.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })));
+    expect(container.querySelector('.toolbar-ocr-search').classList.contains('is-open')).toBe(false);
+    expect(document.activeElement).toBe(button());
   });
 
   it('opens on click, focuses the field, finds matches and publishes the current one on the displayed page', () => {

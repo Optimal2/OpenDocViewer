@@ -1385,7 +1385,9 @@ const DocumentToolbar = ({
       {isOcrEnabled() ? (
         <div className="toolbar-ocr-actions">
           <ReadSelectionButton />
-          <OcrSearchBar pageNumber={pageNumber} setPageNumber={setPageNumber} allPages={allPages} />
+          {/* Original session page numbers: `pageNumberDisplay` indexes allPages and is what
+              setPageNumber takes; `pageNumber` is the ordinal among the visible pages. */}
+          <OcrSearchBar pageNumber={pageNumberDisplay} setPageNumber={setPageNumber} allPages={allPages} />
         </div>
       ) : null}
 
