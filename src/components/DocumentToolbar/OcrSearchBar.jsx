@@ -6,9 +6,10 @@
  * page's text is recognised, or any page's when the displayed page has none), and a field that
  * grows out of it to the right (a short width transition, styles/ocr.css) with the match
  * position, previous/next and close. The field takes only the room the toolbar's spacer leaves
- * (measured when it opens and when the window is resized, utils/ocrSearchPlacement.js); with
- * too little room it hangs under the toolbar at the button's right edge instead, so the toolbar
- * never overflows for it.
+ * (measured when it opens and whenever the window, the toolbar, its spacer or the OCR group
+ * changes size or the toolbar's contents change, utils/ocrSearchPlacement.js); with too little
+ * room it hangs under the toolbar at the button's right edge instead, so the toolbar never
+ * overflows for it.
  *
  * The search covers the recognised text of every page that has an outcome, in page order
  * (utils/ocrSearch.js: case-insensitive, a phrase also across a line break), and nothing else
@@ -56,8 +57,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const [placement, setPlacement] = useState({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
   // The match whose page was last asked for: a match on a page the print selection hides lands
   // on the nearest shown page, and the next step must then move on instead of asking again.
-  // Forgotten with a new term and when the displayed page changes (then the current match's
-  // page is shown first again).
+  // Forgotten with a new term and when another match becomes current; not on a page change,
+  // which the request itself causes (landing elsewhere must not cost a second request).
   const shownMatchRef = useRef(/** @type {(string|null)} */ (null));
 
   const pages = useMemo(() => (Array.isArray(allPages) ? allPages : []), [allPages]);
@@ -106,6 +107,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     if (!open) return;
     const nextId = current ? matchIdOf(current) : null;
     if (nextId !== currentId) setCurrentId(nextId);
+    if (shownMatchRef.current !== null && shownMatchRef.current !== nextId) shownMatchRef.current = null;
   }, [current, currentId, open]);
 
   // Publish the term and the current match for the text layers (marks and scrolling).
@@ -127,8 +129,10 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   }, [setOcrSearch]);
 
   // Where the field goes: measured as it opens (the field is still closed, so the spacer shows
-  // the room) and again while it is open whenever the window is resized or the toolbar or its
-  // spacer changes size (another toolbar density, a button appearing, the signature overview).
+  // the room) and again while it is open whenever the window is resized, the toolbar, its
+  // spacer or the OCR group changes size (another toolbar density, the read-aloud button
+  // appearing) or the toolbar's contents change (the signature overview button: with the
+  // toolbar already overflowing, the spacer stays at 0 and only the button's place moves).
   // The anchor is the button: the root also holds the open inline field.
   useLayoutEffect(() => {
     if (!open) return undefined;
@@ -136,17 +140,25 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     place();
     if (typeof window === 'undefined') return undefined;
     window.addEventListener('resize', place);
-    let observer = null;
+    let sizes = null;
+    let contents = null;
     const toolbar = rootRef.current?.closest?.('.toolbar');
     if (toolbar && typeof ResizeObserver === 'function') {
-      observer = new ResizeObserver(place);
-      observer.observe(toolbar);
+      sizes = new ResizeObserver(place);
+      sizes.observe(toolbar);
       const spacer = toolbar.querySelector('.toolbar-spacer');
-      if (spacer) observer.observe(spacer);
+      if (spacer) sizes.observe(spacer);
+      const group = rootRef.current?.parentElement;
+      if (group && group !== toolbar) sizes.observe(group);
+    }
+    if (toolbar && typeof MutationObserver === 'function') {
+      contents = new MutationObserver(place);
+      contents.observe(toolbar, { childList: true, subtree: true });
     }
     return () => {
       window.removeEventListener('resize', place);
-      observer?.disconnect();
+      sizes?.disconnect();
+      contents?.disconnect();
     };
   }, [open]);
 
@@ -168,7 +180,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
 
   useEffect(() => {
     shownMatchRef.current = null;
-  }, [normalizedTerm, pageNumber]);
+  }, [normalizedTerm]);
 
   /**
    * Enter / the arrows: a current match on another page is shown first (the position does not

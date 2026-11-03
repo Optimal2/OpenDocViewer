@@ -190,12 +190,44 @@ describe('OcrSearchBar', () => {
     // Not asked for page 3 again: moved on (wrapping round to the first match, on page 2).
     expect(setPageNumber).toHaveBeenCalledTimes(1);
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
-    // A new term forgets the page asked for: its first match on page 3 is asked for again.
+  });
+
+  it('landing on another shown page after asking for a hidden one costs no second request', () => {
+    // Pages 1 and 3 shown, page 2 hidden: a match on page 2 is asked for, the viewer lands on
+    // page 3 (the nearest shown), and the next Enter moves on instead of asking again.
+    const pages = { [KEY(0)]: done(['hej']), [KEY(1)]: done(['hej']), [KEY(2)]: done(['hej']) };
+    const setPageNumber = vi.fn();
+    const { setOcrSearch } = render({ ocrPages: pages, pageNumber: 1, setPageNumber });
+    act(() => button().click());
+    type('hej');
+    key('Enter');
+    expect(setPageNumber).toHaveBeenLastCalledWith(2);
+    render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    key('Enter');
+    expect(setPageNumber).toHaveBeenCalledTimes(1);
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+  });
+
+  it('a new term forgets the page asked for: the same match is asked for again, not stepped past', () => {
+    // Displayed page 1 has no text; page 3 (hidden) holds two matches. After asking for its page
+    // the viewer stays on page 1. A new term that keeps the same first match asks for the page
+    // again (current stays the first match) instead of moving on to the second.
+    const pages = { [KEY(2)]: done(['hej', 'hej']) };
+    const setPageNumber = vi.fn();
+    const { setOcrSearch } = render({ ocrPages: pages, pageNumber: 1, setPageNumber });
+    act(() => button().click());
+    type('hej');
+    key('Enter');
+    expect(setPageNumber).toHaveBeenCalledTimes(1);
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
     type('he');
     key('Enter');
-    key('Enter');
     expect(setPageNumber).toHaveBeenCalledTimes(2);
-    expect(setPageNumber).toHaveBeenLastCalledWith(3);
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'he', current: { pageKey: KEY(2), ordinal: 0 } });
+    // Still on page 1 (hidden page): the next Enter moves on to the second match.
+    key('Enter');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'he', current: { pageKey: KEY(2), ordinal: 1 } });
   });
 
   it('Escape closes the field from the step buttons too', () => {
@@ -325,6 +357,21 @@ describe('OcrSearchBar', () => {
     expect(panel().getAttribute('data-placement')).toBe('hanging');
     expect(panel().style.right).toBe('176px');
     delete document.documentElement.clientWidth;
+  });
+
+  it('re-places the field when the toolbar\'s contents change while it is open', async () => {
+    const panel = () => container.querySelector('.toolbar-ocr-search-panel');
+    fakeToolbar({ width: 1400, spacerWidth: 600 });
+    render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+    act(() => button().click());
+    expect(panel().getAttribute('data-placement')).toBe('inline');
+    // A button appears in the toolbar and the room is gone (the spacer now measures 100).
+    container.querySelector('.toolbar-spacer').getBoundingClientRect = () => ({ width: 100, height: 0, top: 0, left: 0, right: 100, bottom: 0 });
+    await act(async () => {
+      container.appendChild(document.createElement('button'));
+      await Promise.resolve();
+    });
+    expect(panel().getAttribute('data-placement')).toBe('hanging');
   });
 
   it('the field is out of the tab order while closed and marked off for the viewer shortcuts', () => {
