@@ -1,3 +1,6 @@
+# Pin default checkout bytes independently of core.autocrlf.
+* text=auto eol=lf
+
 # Owned seed SQL is embedded byte-for-byte (base64) in module definitions and
 # validated with a strict byte-for-byte + sha256 check by
 # scripts/omp/validate-component-versions.ps1. Pin LF so git checkouts are
@@ -25,3 +28,7 @@ docs-agent/** text eol=lf
 # Committed fixture bases (scripts/generate-linearized-fixture-bases.py) are
 # read byte for byte by the signature tests: never convert line endings.
 scripts/fixtures/*.pdf binary
+
+# Windows command launchers use native line endings.
+*.cmd text eol=crlf
+*.bat text eol=crlf
