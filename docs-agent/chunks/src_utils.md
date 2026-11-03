@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 59. Line count: 22707. JSDoc symbol count: 922.
+File count: 60. Line count: 22808. JSDoc symbol count: 929.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -307,6 +307,22 @@ Symbols:
 - `findOcrMatchesInOutcome` (function) - Matches of a term in one outcome \(the index is built on first use\).
 - `OcrDocumentMatch` (typedef) - No description.
 - `searchOcrPages` (function) - Matches of a term across the recognised pages of a document, in page order, each page's matches in reading order.
+
+## src/utils/ocrSearchPlacement.js
+
+Where the toolbar's OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when
+
+Exports: `OCR_SEARCH_PANEL_WIDTH`, `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH`, `OCR_SEARCH_PANEL_MARGIN`, `OCR_SEARCH_PANEL_HANG_GAP`, `resolveOcrSearchPlacement`, `measureOcrSearchPlacement`
+
+Symbols:
+
+- `OCR_SEARCH_PANEL_WIDTH` (constant) - Full width of the field \(CSS px\).
+- `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH` (constant) - Below this inline width the field hangs under the toolbar instead.
+- `OCR_SEARCH_PANEL_MARGIN` (constant) - Air kept between the field and the rest of the toolbar, or the viewport edge when hanging.
+- `OCR_SEARCH_PANEL_HANG_GAP` (constant) - Air between the toolbar's lower edge and a hanging field.
+- `OcrSearchPlacement` (typedef) - No description.
+- `resolveOcrSearchPlacement` (function) - No description.
+- `measureOcrSearchPlacement` (function) - Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.
 
 ## src/utils/ocrStatus.js
 

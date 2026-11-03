@@ -92,15 +92,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 173,
-    "sourceLineCount": 66158,
-    "docletCount": 1876,
-    "documentedFileCount": 172,
+    "fileCount": 174,
+    "sourceLineCount": 66290,
+    "docletCount": 1883,
+    "documentedFileCount": 173,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 5751
+    "estimatedSourceTokens": 5814
   },
   "recommendations": [
     "1 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -1149,7 +1149,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8422,
+      "lineCount": 8453,
       "docletCount": 146,
       "importantFiles": [
         {
@@ -1209,7 +1209,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 33,
-          "lines": 261,
+          "lines": 292,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
@@ -1711,9 +1711,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 59,
-      "lineCount": 22707,
-      "docletCount": 922,
+      "fileCount": 60,
+      "lineCount": 22808,
+      "docletCount": 929,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -14408,9 +14408,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 261,
+      "lines": 292,
       "extension": ".jsx",
-      "jsdocBlockCount": 10,
+      "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden liv",
       "imports": [
         {
@@ -14421,11 +14421,12 @@
             "useContext",
             "useEffect",
             "useId",
+            "useLayoutEffect",
             "useMemo",
             "useRef",
             "useState"
           ],
-          "line": 21,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -14433,7 +14434,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 22,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -14441,7 +14442,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 23,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -14449,7 +14450,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 24,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -14457,7 +14458,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 25,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -14465,7 +14466,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 26,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -14476,7 +14477,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 27,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -14485,7 +14486,16 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 28,
+          "line": 31,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/ocrSearchPlacement.js",
+          "specifiers": [
+            "measureOcrSearchPlacement",
+            "OCR_SEARCH_PANEL_WIDTH"
+          ],
+          "line": 32,
           "kind": "static"
         }
       ],
@@ -14493,29 +14503,34 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 41
+          "line": 45
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 31
+          "line": 35
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 41
+          "line": 45
+        },
+        {
+          "name": "place",
+          "kind": "function",
+          "line": 131
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 150
+          "line": 174
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 158
+          "line": 182
         }
       ],
       "parseError": null,
@@ -14531,7 +14546,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 31,
+          "line": 35,
           "description": "",
           "params": [
             {
@@ -14551,7 +14566,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 41,
+          "line": 45,
           "description": "",
           "params": [
             {
@@ -14594,7 +14609,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 122,
+          "line": 143,
           "description": "",
           "params": [
             {
@@ -14614,8 +14629,8 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 134,
-          "description": "Enter / the arrows: a current match on another page is shown first (the position does not move); on its page, the next or previous match becomes current, wrapping round.",
+          "line": 158,
+          "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
               "name": "direction",
@@ -14634,7 +14649,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 150,
+          "line": 174,
           "description": "",
           "params": [
             {
@@ -14654,7 +14669,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 158,
+          "line": 182,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14668,7 +14683,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 24,
+          "line": 27,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14677,7 +14692,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 25,
+          "line": 28,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14686,7 +14701,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 26,
+          "line": 29,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14698,7 +14713,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 27,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14708,9 +14723,19 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 28,
+          "line": 31,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
+        },
+        {
+          "source": "../../utils/ocrSearchPlacement.js",
+          "specifiers": [
+            "measureOcrSearchPlacement",
+            "OCR_SEARCH_PANEL_WIDTH"
+          ],
+          "line": 32,
+          "kind": "static",
+          "resolved": "src/utils/ocrSearchPlacement.js"
         }
       ],
       "packageImports": [
@@ -14722,11 +14747,12 @@
             "useContext",
             "useEffect",
             "useId",
+            "useLayoutEffect",
             "useMemo",
             "useRef",
             "useState"
           ],
-          "line": 21,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -14734,7 +14760,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 22,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -14742,7 +14768,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 23,
+          "line": 26,
           "kind": "static"
         }
       ],
@@ -49414,6 +49440,242 @@
       "incomingLocalImports": 2,
       "importanceScore": 66,
       "summary": "Search in recognised text: the toolbar's OCR search (components/DocumentToolbar/OcrSearchBar.jsx) and the text layer's match marks (components/OcrTextLayer.jsx) both go through these functions, on the same outcomes, so t",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/ocrSearchPlacement.js",
+      "lines": 101,
+      "extension": ".js",
+      "jsdocBlockCount": 8,
+      "sourceSummary": "Where the toolbar's OCR search field goes and how wide it is (components/DocumentToolbar/OcrSearchBar.jsx): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when",
+      "imports": [],
+      "exports": [
+        {
+          "name": "OCR_SEARCH_PANEL_WIDTH",
+          "kind": "variable",
+          "line": 12
+        },
+        {
+          "name": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+          "kind": "variable",
+          "line": 14
+        },
+        {
+          "name": "OCR_SEARCH_PANEL_MARGIN",
+          "kind": "variable",
+          "line": 16
+        },
+        {
+          "name": "OCR_SEARCH_PANEL_HANG_GAP",
+          "kind": "variable",
+          "line": 18
+        },
+        {
+          "name": "resolveOcrSearchPlacement",
+          "kind": "function",
+          "line": 48
+        },
+        {
+          "name": "measureOcrSearchPlacement",
+          "kind": "function",
+          "line": 80
+        }
+      ],
+      "declarations": [
+        {
+          "name": "resolveOcrSearchPlacement",
+          "kind": "function",
+          "line": 48
+        },
+        {
+          "name": "measureOcrSearchPlacement",
+          "kind": "function",
+          "line": 80
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OCR_SEARCH_PANEL_WIDTH",
+          "name": "OCR_SEARCH_PANEL_WIDTH",
+          "longname": "OCR_SEARCH_PANEL_WIDTH",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 12,
+          "description": "Full width of the field (CSS px).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+          "name": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+          "longname": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 14,
+          "description": "Below this inline width the field hangs under the toolbar instead.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_SEARCH_PANEL_MARGIN",
+          "name": "OCR_SEARCH_PANEL_MARGIN",
+          "longname": "OCR_SEARCH_PANEL_MARGIN",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 16,
+          "description": "Air kept between the field and the rest of the toolbar, or the viewport edge when hanging.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_SEARCH_PANEL_HANG_GAP",
+          "name": "OCR_SEARCH_PANEL_HANG_GAP",
+          "longname": "OCR_SEARCH_PANEL_HANG_GAP",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 18,
+          "description": "Air between the toolbar's lower edge and a hanging field.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OcrSearchPlacement",
+          "name": "OcrSearchPlacement",
+          "longname": "OcrSearchPlacement",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 20,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "resolveOcrSearchPlacement",
+          "name": "resolveOcrSearchPlacement",
+          "longname": "resolveOcrSearchPlacement",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 48,
+          "description": "",
+          "params": [
+            {
+              "name": "measures",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "measures.toolbarWidth",
+              "type": "number",
+              "optional": false,
+              "description": "The toolbar's client width; 0 or less means no layout (jsdom), which gives the inline default."
+            },
+            {
+              "name": "measures.toolbarScrollWidth",
+              "type": "number",
+              "optional": false,
+              "description": "The toolbar's scroll width (overflow shows here)."
+            },
+            {
+              "name": "measures.spacerWidth",
+              "type": "number",
+              "optional": false,
+              "description": "Width of the toolbar's spacer (the free room)."
+            },
+            {
+              "name": "measures.inlinePanelWidth",
+              "type": "number",
+              "optional": false,
+              "description": "What the field takes inline right now (0 when closed or hanging): it is room too, since the field is being re-placed."
+            },
+            {
+              "name": "measures.viewportWidth",
+              "type": "number",
+              "optional": false,
+              "description": "For the hanging field's cap and offset."
+            },
+            {
+              "name": "measures.anchorRight",
+              "type": "number",
+              "optional": true,
+              "description": "Right edge of the search (the hanging field's anchor) in viewport px; beyond the viewport, the field is pulled left by the difference."
+            },
+            {
+              "name": "measures.anchorBottom",
+              "type": "number",
+              "optional": true,
+              "description": "Lower edge of the search in viewport px."
+            },
+            {
+              "name": "measures.toolbarBottom",
+              "type": "number",
+              "optional": true,
+              "description": "Lower edge of the toolbar in viewport px; a hanging field starts below it."
+            }
+          ],
+          "returns": [
+            {
+              "type": "OcrSearchPlacement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "measureOcrSearchPlacement",
+          "name": "measureOcrSearchPlacement",
+          "longname": "measureOcrSearchPlacement",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 80,
+          "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
+          "params": [
+            {
+              "name": "root",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": "The .toolbar-ocr-search element."
+            },
+            {
+              "name": "panel",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": "Its field element."
+            }
+          ],
+          "returns": [
+            {
+              "type": "OcrSearchPlacement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 59,
+      "summary": "Where the toolbar's OCR search field goes and how wide it is (components/DocumentToolbar/OcrSearchBar.jsx): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -84174,7 +84436,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 41,
+      "line": 45,
       "description": "",
       "params": [
         {
@@ -84217,7 +84479,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 122,
+      "line": 143,
       "description": "",
       "params": [
         {
@@ -84237,7 +84499,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 150,
+      "line": 174,
       "description": "",
       "params": [
         {
@@ -84257,7 +84519,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 158,
+      "line": 182,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -84270,7 +84532,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 31,
+      "line": 35,
       "description": "",
       "params": [
         {
@@ -84290,8 +84552,8 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 134,
-      "description": "Enter / the arrows: a current match on another page is shown first (the position does not move); on its page, the next or previous match becomes current, wrapping round.",
+      "line": 158,
+      "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
           "name": "direction",
@@ -104820,6 +105082,175 @@
       "returns": [
         {
           "type": "Array.<OcrDocumentMatch>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "measureOcrSearchPlacement",
+      "name": "measureOcrSearchPlacement",
+      "longname": "measureOcrSearchPlacement",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 80,
+      "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
+      "params": [
+        {
+          "name": "root",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": "The .toolbar-ocr-search element."
+        },
+        {
+          "name": "panel",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": "Its field element."
+        }
+      ],
+      "returns": [
+        {
+          "type": "OcrSearchPlacement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "OCR_SEARCH_PANEL_HANG_GAP",
+      "name": "OCR_SEARCH_PANEL_HANG_GAP",
+      "longname": "OCR_SEARCH_PANEL_HANG_GAP",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 18,
+      "description": "Air between the toolbar's lower edge and a hanging field.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_SEARCH_PANEL_MARGIN",
+      "name": "OCR_SEARCH_PANEL_MARGIN",
+      "longname": "OCR_SEARCH_PANEL_MARGIN",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 16,
+      "description": "Air kept between the field and the rest of the toolbar, or the viewport edge when hanging.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+      "name": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+      "longname": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 14,
+      "description": "Below this inline width the field hangs under the toolbar instead.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_SEARCH_PANEL_WIDTH",
+      "name": "OCR_SEARCH_PANEL_WIDTH",
+      "longname": "OCR_SEARCH_PANEL_WIDTH",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 12,
+      "description": "Full width of the field (CSS px).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OcrSearchPlacement",
+      "name": "OcrSearchPlacement",
+      "longname": "OcrSearchPlacement",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 20,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "resolveOcrSearchPlacement",
+      "name": "resolveOcrSearchPlacement",
+      "longname": "resolveOcrSearchPlacement",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 48,
+      "description": "",
+      "params": [
+        {
+          "name": "measures",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "measures.toolbarWidth",
+          "type": "number",
+          "optional": false,
+          "description": "The toolbar's client width; 0 or less means no layout (jsdom), which gives the inline default."
+        },
+        {
+          "name": "measures.toolbarScrollWidth",
+          "type": "number",
+          "optional": false,
+          "description": "The toolbar's scroll width (overflow shows here)."
+        },
+        {
+          "name": "measures.spacerWidth",
+          "type": "number",
+          "optional": false,
+          "description": "Width of the toolbar's spacer (the free room)."
+        },
+        {
+          "name": "measures.inlinePanelWidth",
+          "type": "number",
+          "optional": false,
+          "description": "What the field takes inline right now (0 when closed or hanging): it is room too, since the field is being re-placed."
+        },
+        {
+          "name": "measures.viewportWidth",
+          "type": "number",
+          "optional": false,
+          "description": "For the hanging field's cap and offset."
+        },
+        {
+          "name": "measures.anchorRight",
+          "type": "number",
+          "optional": true,
+          "description": "Right edge of the search (the hanging field's anchor) in viewport px; beyond the viewport, the field is pulled left by the difference."
+        },
+        {
+          "name": "measures.anchorBottom",
+          "type": "number",
+          "optional": true,
+          "description": "Lower edge of the search in viewport px."
+        },
+        {
+          "name": "measures.toolbarBottom",
+          "type": "number",
+          "optional": true,
+          "description": "Lower edge of the toolbar in viewport px; a hanging field starts below it."
+        }
+      ],
+      "returns": [
+        {
+          "type": "OcrSearchPlacement",
           "description": ""
         }
       ],

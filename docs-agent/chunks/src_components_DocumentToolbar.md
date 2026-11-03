@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8422. JSDoc symbol count: 146.
+File count: 21. Line count: 8453. JSDoc symbol count: 146.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -118,14 +118,14 @@ Search in the recognised text, from the toolbar: a search button to the right of
 
 Exports: `OcrSearchBar`
 
-Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`
+Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`, `src/utils/ocrSearchPlacement.js`
 
 Symbols:
 
 - `matchIdOf` (function) - No description.
 - `module.exports` (function) - No description.
 - `OcrSearchBar~goToMatch` (constant) - No description.
-- `OcrSearchBar~step` (constant) - Enter / the arrows: a current match on another page is shown first \(the position does not move\); on its page, the next or previous match becomes current, wrapping round.
+- `OcrSearchBar~step` (constant) - Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on...
 - `OcrSearchBar~handleInputKeyDown` (function) - No description.
 - `OcrSearchBar~handlePanelKeyDown` (function) - Escape closes the field from any of its controls.
 

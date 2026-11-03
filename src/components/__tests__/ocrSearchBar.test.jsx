@@ -65,6 +65,27 @@ describe('OcrSearchBar', () => {
     });
     return { setPageNumber, setOcrSearch };
   };
+  /** A toolbar around the search with a measurable width and spacer (jsdom lays nothing out). */
+  const fakeToolbar = ({ width, scrollWidth = width, spacerWidth, anchorRight = 0 }) => {
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement('div');
+    container.className = 'toolbar';
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: width });
+    Object.defineProperty(container, 'scrollWidth', { configurable: true, value: scrollWidth });
+    const spacer = document.createElement('div');
+    spacer.className = 'toolbar-spacer';
+    spacer.getBoundingClientRect = () => ({ width: spacerWidth, height: 0, top: 0, left: 0, right: spacerWidth, bottom: 0 });
+    container.appendChild(spacer);
+    const mount = document.createElement('div');
+    container.appendChild(mount);
+    document.body.appendChild(container);
+    root = createRoot(mount);
+    if (anchorRight > 0) {
+      Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 });
+      mount.getBoundingClientRect = () => ({ width: 32, height: 32, top: 0, left: anchorRight - 32, right: anchorRight, bottom: 32 });
+    }
+  };
   const button = () => container.querySelector('[data-odv-ocr="status"]');
   const input = () => container.querySelector('.toolbar-ocr-search-input');
   const status = () => container.querySelector('.toolbar-ocr-search-status').textContent;
@@ -131,9 +152,39 @@ describe('OcrSearchBar', () => {
   it('the position is right in the same render as the matches, never "0 of N"', () => {
     render({ ocrPages: { [KEY(0)]: done(['Hej', 'hej']) } });
     act(() => button().click());
+    // Every text the status node commits while the term is typed; a position chosen in an
+    // effect after the render would commit "0 of 2" first.
+    const texts = [];
+    const observer = new MutationObserver((records) => {
+      for (const record of records) texts.push(record.target.textContent ?? '');
+    });
+    observer.observe(container.querySelector('.toolbar-ocr-search-status'), { childList: true, characterData: true, subtree: true });
     type('hej');
+    texts.push(...observer.takeRecords().map((record) => record.target.textContent ?? ''));
+    observer.disconnect();
     expect(status()).toBe('1 of 2 · 1 of 3 pages recognised');
-    expect(status()).not.toMatch(/^0 /);
+    expect(texts.length).toBeGreaterThan(0);
+    for (const text of texts) expect(text).not.toMatch(/^0 /);
+  });
+
+  it('a match on a page the print selection hides: the first Enter asks for its page, the next moves on', () => {
+    // setPageNumber lands on the nearest shown page: page 2 stays displayed (the viewer renders
+    // again with the same pageNumber), as the viewer does for a hidden page.
+    const pages = { [KEY(1)]: done(['hej']), [KEY(2)]: done(['hej']) };
+    const setPageNumber = vi.fn();
+    const { setOcrSearch } = render({ ocrPages: pages, pageNumber: 2, setPageNumber });
+    act(() => button().click());
+    type('hej');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    key('Enter');
+    expect(setPageNumber).toHaveBeenLastCalledWith(3);
+    // The viewer could not show page 3; it is still page 2.
+    render({ ocrPages: pages, pageNumber: 2, setPageNumber, setOcrSearch });
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 } });
+    key('Enter');
+    // Not asked for page 3 again: moved on (wrapping round to the first match, on page 2).
+    expect(setPageNumber).toHaveBeenCalledTimes(1);
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
   });
 
   it('Escape closes the field from the step buttons too', () => {
@@ -222,6 +273,46 @@ describe('OcrSearchBar', () => {
     expect(container.querySelector('.toolbar-ocr-search').classList.contains('is-open')).toBe(false);
     expect(setOcrSearch).toHaveBeenLastCalledWith(null);
     expect(document.activeElement).toBe(button());
+  });
+
+  it('takes the room the toolbar has: the full width, a narrower field, or hanging under the toolbar', () => {
+    const panel = () => container.querySelector('.toolbar-ocr-search-panel');
+    fakeToolbar({ width: 1400, spacerWidth: 600 });
+    render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+    expect(panel().style.width).toBe('0px');
+    act(() => button().click());
+    expect(panel().style.width).toBe('340px');
+    expect(panel().getAttribute('data-placement')).toBe('inline');
+
+    fakeToolbar({ width: 1400, spacerWidth: 250 });
+    render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+    act(() => button().click());
+    expect(panel().style.width).toBe('234px');
+    expect(panel().classList.contains('is-hanging')).toBe(false);
+
+    fakeToolbar({ width: 1400, spacerWidth: 100 });
+    render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+    act(() => button().click());
+    expect(panel().getAttribute('data-placement')).toBe('hanging');
+    expect(panel().classList.contains('is-hanging')).toBe(true);
+    expect(panel().style.width).toBe('340px');
+    act(() => { window.dispatchEvent(new Event('resize')); });
+    expect(panel().getAttribute('data-placement')).toBe('hanging');
+    expect(panel().style.right).toBe('');
+    act(() => container.querySelector('.toolbar-ocr-search-close').click());
+    expect(panel().style.width).toBe('0px');
+
+    // The toolbar overflows on its own and the search sits beyond the window: the hanging
+    // field is pulled left into it. (The root's rect is read through the mount's: jsdom gives
+    // the search's root no layout of its own, so the test lends it the mount's rect.)
+    fakeToolbar({ width: 1000, scrollWidth: 1168, spacerWidth: 0, anchorRight: 1168 });
+    render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+    const searchRoot = container.querySelector('.toolbar-ocr-search');
+    searchRoot.getBoundingClientRect = () => ({ width: 32, height: 32, top: 0, left: 1136, right: 1168, bottom: 32 });
+    act(() => button().click());
+    expect(panel().getAttribute('data-placement')).toBe('hanging');
+    expect(panel().style.right).toBe('176px');
+    delete document.documentElement.clientWidth;
   });
 
   it('the field is out of the tab order while closed and marked off for the viewer shortcuts', () => {

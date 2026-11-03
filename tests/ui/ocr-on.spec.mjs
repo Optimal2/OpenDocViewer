@@ -225,7 +225,35 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await status.click();
   const searchField = page.locator('.toolbar-ocr-search-input');
   await expect(searchField).toBeFocused();
-  await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBeGreaterThan(200);
+  await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBeGreaterThan(150);
+  // The field took only the room the toolbar had: nothing overflows and it ends inside the window.
+  const fit = await page.locator('.toolbar').evaluate((toolbar) => {
+    const panel = toolbar.querySelector('.toolbar-ocr-search-panel');
+    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: panel.getBoundingClientRect().right, placement: panel.dataset.placement, viewport: document.documentElement.clientWidth };
+  });
+  expect(fit.overflow).toBeLessThanOrEqual(0);
+  expect(fit.right).toBeLessThanOrEqual(fit.viewport);
+  // A narrow window: the field hangs under the toolbar at the button's right edge, still inside,
+  // and the toolbar overflows no more than it does with the field closed (at this width the
+  // toolbar's own groups already overflow; that is not the field's doing).
+  await page.setViewportSize({ width: 1000, height: 900 });
+  await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'hanging');
+  const measureToolbar = () => page.locator('.toolbar').evaluate((toolbar) => {
+    const panel = toolbar.querySelector('.toolbar-ocr-search-panel');
+    const rect = panel.getBoundingClientRect();
+    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: rect.right, top: rect.top, toolbarBottom: toolbar.getBoundingClientRect().bottom, viewport: document.documentElement.clientWidth };
+  });
+  const hanging = await measureToolbar();
+  expect(hanging.right).toBeLessThanOrEqual(hanging.viewport);
+  expect(hanging.top).toBeGreaterThanOrEqual(hanging.toolbarBottom);
+  await searchField.press('Escape');
+  await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
+  const closedNarrow = await measureToolbar();
+  expect(hanging.overflow).toBeLessThanOrEqual(closedNarrow.overflow);
+  await status.click();
+  await expect(searchField).toBeFocused();
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'inline');
   await searchField.fill('ocr hej');
   const searchStatus = page.locator('.toolbar-ocr-search-status');
   await expect(searchStatus).toHaveText(/^1 (of|av) 1/);

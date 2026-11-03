@@ -448,7 +448,8 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   recognised: the page has its own text", "The text could not be recognised" or "Text recognition
   is unavailable", the last when the engine could not start; see CSP below). The button is
   enabled once the displayed page's text is recognised. Clicking it grows a search field out of
-  the button to the right (a short ease). The search covers only the recognised text, of every
+  the button to the right (a short ease) into the room the toolbar has; when there is too little,
+  the field hangs under the toolbar at the button's right edge instead. The search covers only the recognised text, of every
   page that has an outcome, in page order; it is case-insensitive and finds a phrase also across
   a line break. Typing shows the position ("1 of 5") and, while not every page has an outcome,
   how many pages the search covers ("2 of 300 pages recognised"); the matches are marked on the

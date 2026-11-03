@@ -161,12 +161,14 @@
 }
 
 .toolbar-ocr-search {
+  position: relative;
   display: inline-flex;
   align-items: center;
 }
 
-/* The field: zero wide and hidden until opened, then grown to its width in a short ease; closed
-   again it shrinks back first and hides when the transition has ended. */
+/* The field: zero wide and hidden until opened, then grown to its width (an inline style the
+   component measures, utils/ocrSearchPlacement.js) in a short ease; closed again it shrinks back
+   first and hides when the transition has ended. */
 .toolbar-ocr-search-panel {
   display: inline-flex;
   align-items: center;
@@ -180,10 +182,33 @@
 }
 
 .toolbar-ocr-search.is-open .toolbar-ocr-search-panel {
-  width: min(340px, 40vw);
   margin-left: 4px;
   visibility: visible;
   transition: width 150ms ease, margin-left 150ms ease, visibility 0s;
+}
+
+/* Too little room in the toolbar: the field hangs under it, its right edge at the button's and
+   its top below the toolbar's lower edge (inline styles the component measures; pulled left when
+   the button itself lies beyond the window), on its own surface (the toolbar is positioned and
+   above the document). */
+.toolbar-ocr-search-panel.is-hanging,
+.toolbar-ocr-search.is-open .toolbar-ocr-search-panel.is-hanging {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 3;
+  margin-left: 0;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color, #bbb) 70%, transparent 30%);
+  border-radius: var(--border-radius, 4px);
+  background: var(--toolbar-background-color, #fff);
+  box-shadow: var(--box-shadow, 0 2px 8px rgba(0, 0, 0, 0.25));
+}
+
+/* Closed, the hanging field is as wide as nothing: no padding or border left to show. */
+.toolbar-ocr-search:not(.is-open) .toolbar-ocr-search-panel.is-hanging {
+  padding: 0;
+  border-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

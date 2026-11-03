@@ -5,7 +5,10 @@
  * as its tooltip and in a visually hidden live region; the button is enabled once the displayed
  * page's text is recognised, or any page's when the displayed page has none), and a field that
  * grows out of it to the right (a short width transition, styles/ocr.css) with the match
- * position, previous/next and close.
+ * position, previous/next and close. The field takes only the room the toolbar's spacer leaves
+ * (measured when it opens and when the window is resized, utils/ocrSearchPlacement.js); with
+ * too little room it hangs under the toolbar at the button's right edge instead, so the toolbar
+ * never overflows for it.
  *
  * The search covers the recognised text of every page that has an outcome, in page order
  * (utils/ocrSearch.js: case-insensitive, a phrase also across a line break), and nothing else
@@ -18,7 +21,7 @@
  * index `allPages` and are what `setPageNumber` takes), not ordinals among the visible pages.
  * Mounted by DocumentToolbar only while `ocr.enabled` is the literal true.
  */
-import React, { useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import ViewerContext from '../../contexts/viewerContext.js';
@@ -26,6 +29,7 @@ import StatusLed from '../common/StatusLed.jsx';
 import { ocrPageKeyOf } from '../../utils/ocrPageKey.js';
 import { hasSearchableOcrText, OCR_STATUS_FALLBACK, OCR_STATUS_LED, ocrStatusKeyOf } from '../../utils/ocrStatus.js';
 import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js';
+import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -46,7 +50,13 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const [currentId, setCurrentId] = useState(/** @type {(string|null)} */ (null));
   const inputRef = useRef(/** @type {(HTMLInputElement|null)} */ (null));
   const buttonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
+  const rootRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const panelRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const panelId = useId();
+  const [placement, setPlacement] = useState({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
+  // The match whose page was last asked for: a match on a page the print selection hides lands
+  // on the nearest shown page, and the next step must then move on instead of asking again.
+  const shownMatchRef = useRef(/** @type {(string|null)} */ (null));
 
   const pages = useMemo(() => (Array.isArray(allPages) ? allPages : []), [allPages]);
   const displayedIndex = Math.max(0, (Number(pageNumber) || 1) - 1);
@@ -114,6 +124,17 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     if (typeof setOcrSearch === 'function') setOcrSearch(null);
   }, [setOcrSearch]);
 
+  // Where the field goes: measured as it opens (the field is still closed, so the spacer shows
+  // the room) and again whenever the window is resized while it is open.
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+    const place = () => setPlacement(measureOcrSearchPlacement(rootRef.current, panelRef.current));
+    place();
+    if (typeof window === 'undefined') return undefined;
+    window.addEventListener('resize', place);
+    return () => { window.removeEventListener('resize', place); };
+  }, [open]);
+
   useEffect(() => {
     if (open) inputRef.current?.focus?.();
   }, [open]);
@@ -122,18 +143,21 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const goToMatch = useCallback((position) => {
     const match = matches[position];
     if (!match) return;
-    setCurrentId(matchIdOf(match));
+    const id = matchIdOf(match);
+    setCurrentId(id);
+    shownMatchRef.current = id;
     if (match.pageNumber !== Number(pageNumber) && typeof setPageNumber === 'function') setPageNumber(match.pageNumber);
   }, [matches, pageNumber, setPageNumber]);
 
   /**
    * Enter / the arrows: a current match on another page is shown first (the position does not
-   * move); on its page, the next or previous match becomes current, wrapping round.
+   * move), unless its page was already asked for (a hidden page lands on the nearest shown one);
+   * then, and on its page, the next or previous match becomes current, wrapping round.
    * @param {number} direction  1 forwards, -1 backwards.
    */
   const step = useCallback((direction) => {
     if (matches.length === 0) return;
-    if (current && current.pageNumber !== Number(pageNumber)) {
+    if (current && current.pageNumber !== Number(pageNumber) && shownMatchRef.current !== matchIdOf(current)) {
       goToMatch(currentPosition);
       return;
     }
@@ -175,7 +199,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   }
 
   return (
-    <div className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search">
+    <div ref={rootRef} className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search">
       <button
         ref={buttonRef}
         type="button"
@@ -194,8 +218,15 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
       </button>
       <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
       <div
+        ref={panelRef}
         id={panelId}
-        className="toolbar-ocr-search-panel"
+        className={`toolbar-ocr-search-panel${placement.mode === 'hanging' ? ' is-hanging' : ''}`}
+        data-placement={placement.mode}
+        style={{
+          width: open ? `${placement.width}px` : '0px',
+          right: placement.mode === 'hanging' && placement.offset > 0 ? `${placement.offset}px` : undefined,
+          top: placement.mode === 'hanging' ? `calc(100% + ${placement.top}px)` : undefined,
+        }}
         role="search"
         aria-label={openLabel}
         aria-hidden={!open}
