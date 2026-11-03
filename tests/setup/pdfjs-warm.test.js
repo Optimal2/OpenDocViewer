@@ -97,6 +97,16 @@ describe('targeted pdf.js test warm-up', () => {
       expect(suiteOptsIntoWarmup(awaited)).toBe(true);
     });
 
+    it.each(differentialSuites.flatMap((file) => [
+      [file, 'a literal-false branch', 'beforeAll(async () => { if (false) { await warmPdfjs(); } });'],
+      [file, 'the alternate of a literal-true branch', 'beforeAll(async () => { if (true) {} else { await warmPdfjs(); } });'],
+      [file, 'an unreachable statement after return', 'beforeAll(async () => { return; await warmPdfjs(); });'],
+    ]))('%s rejects warm-up in %s', (file, _name, replacement) => {
+      const source = readSuite(file).replace('beforeAll(warmPdfjs);', replacement);
+      expect(source).toContain(replacement);
+      expect(suiteOptsIntoWarmup(source)).toBe(false);
+    });
+
     it.each([
       ['describe.skipIf(true)', "describe.skipIf(true)('warm-up', () => { beforeAll(warmPdfjs); });"],
       ['it.skipIf(true)', "it.skipIf(true)('warm-up', () => { beforeAll(warmPdfjs); });"],

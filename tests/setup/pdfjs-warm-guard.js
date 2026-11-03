@@ -208,6 +208,8 @@ function callbackWarmupPromiseNames(fn, bound) {
 
 // Whether a beforeAll callback returns or awaits the warm-up call, without
 // crossing into nested functions (a call hidden in a nested callback floats).
+// Only the selected branch of a literal boolean is walked, and a direct return
+// ends its statement list. Other control flow is not evaluated.
 function callbackWarmsUp(fn, bound) {
   if (callbackShadowsImport(fn, bound)) return false;
   if (fn.body.type !== 'BlockStatement') return resolvesToWarmupCall(fn.body, bound);
@@ -218,6 +220,18 @@ function callbackWarmsUp(fn, bound) {
     if (node.type === 'ArrowFunctionExpression'
       || node.type === 'FunctionExpression'
       || node.type === 'FunctionDeclaration') return;
+    if (node.type === 'BlockStatement') {
+      for (const statement of node.body) {
+        visit(statement);
+        if (warmed || statement.type === 'ReturnStatement') return;
+      }
+      return;
+    }
+    if (node.type === 'IfStatement' && node.test.type === 'Literal'
+      && typeof node.test.value === 'boolean') {
+      visit(node.test.value ? node.consequent : node.alternate);
+      return;
+    }
     if (node.type === 'ReturnStatement') {
       if (node.argument && resolvesToWarmupCall(node.argument, bound, promiseNames)) warmed = true;
     } else if (node.type === 'AwaitExpression') {
