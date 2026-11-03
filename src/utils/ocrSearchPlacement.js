@@ -10,8 +10,12 @@
 
 /** Full width of the field (CSS px). */
 export const OCR_SEARCH_PANEL_WIDTH = 340;
-/** Below this inline width the field hangs under the toolbar instead. */
-export const OCR_SEARCH_PANEL_MIN_INLINE_WIDTH = 200;
+/**
+ * Below this inline width the field hangs under the toolbar instead: the field's contents (the
+ * input at its minimum, the status, the four buttons and their gaps) need about 210 px, and a
+ * hanging field spends 10 px more on padding and border.
+ */
+export const OCR_SEARCH_PANEL_MIN_INLINE_WIDTH = 220;
 /** Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging. */
 export const OCR_SEARCH_PANEL_MARGIN = 16;
 /** Air between the toolbar's lower edge and a hanging field. */

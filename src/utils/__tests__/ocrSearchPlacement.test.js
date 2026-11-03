@@ -36,8 +36,8 @@ describe('resolveOcrSearchPlacement', () => {
   it('counts an open inline field as room when re-placing, and an overflowing toolbar against it', () => {
     // Open at 340 with the spacer at 0: still room for 340 (the field itself).
     expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 0, inlinePanelWidth: 344 })).toEqual({ mode: 'inline', width: 328, offset: 0, top: 0 });
-    // The toolbar overflows by 112 px with the field open: that much less room.
-    expect(resolveOcrSearchPlacement({ ...base, toolbarScrollWidth: 1512, spacerWidth: 0, inlinePanelWidth: 344 })).toEqual({ mode: 'inline', width: 216, offset: 0, top: 0 });
+    // The toolbar overflows by 100 px with the field open: that much less room.
+    expect(resolveOcrSearchPlacement({ ...base, toolbarScrollWidth: 1500, spacerWidth: 0, inlinePanelWidth: 344 })).toEqual({ mode: 'inline', width: 228, offset: 0, top: 0 });
     expect(resolveOcrSearchPlacement({ ...base, toolbarScrollWidth: 1600, spacerWidth: 0, inlinePanelWidth: 344 })).toEqual({ mode: 'hanging', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 6 });
   });
 

@@ -220,7 +220,7 @@
 
 .toolbar-ocr-search-input {
   flex: 1 1 auto;
-  min-width: 60px;
+  min-width: 48px;
   height: calc(var(--odv-toolbar-button-size) - 4px);
   padding: 0 6px;
   border: 1px solid var(--thumbnail-border-color, #bbb);

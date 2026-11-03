@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 60. Line count: 22811. JSDoc symbol count: 929.
+File count: 60. Line count: 22815. JSDoc symbol count: 929.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -317,7 +317,7 @@ Exports: `OCR_SEARCH_PANEL_WIDTH`, `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH`, `OCR_SEA
 Symbols:
 
 - `OCR_SEARCH_PANEL_WIDTH` (constant) - Full width of the field \(CSS px\).
-- `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH` (constant) - Below this inline width the field hangs under the toolbar instead.
+- `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH` (constant) - Below this inline width the field hangs under the toolbar instead: the field's contents \(the input at its minimum, the status, the four buttons and their gaps\) need about 210 px,...
 - `OCR_SEARCH_PANEL_MARGIN` (constant) - Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.
 - `OCR_SEARCH_PANEL_HANG_GAP` (constant) - Air between the toolbar's lower edge and a hanging field.
 - `OcrSearchPlacement` (typedef) - No description.

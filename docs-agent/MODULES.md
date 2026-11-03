@@ -75,7 +75,7 @@ File count: 17. Line count: 7656. JSDoc symbol count: 154.
 
 ## src/contexts
 
-File count: 4. Line count: 3556. JSDoc symbol count: 99.
+File count: 4. Line count: 3557. JSDoc symbol count: 99.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -165,7 +165,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 60. Line count: 22811. JSDoc symbol count: 929.
+File count: 60. Line count: 22815. JSDoc symbol count: 929.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

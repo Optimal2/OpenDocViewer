@@ -361,8 +361,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // OCR focus: indexes into allPages of the displayed page(s), set by the viewer; the OCR queue
   // (hooks/useOcrTextLayers.js) covers them and a fixed number of neighbours. Unused while OCR is off.
   const [ocrFocusPageIndexes, setOcrFocusPageIndexesState] = useState(/** @type {Array<number>} */ ([]));
-  // The toolbar's OCR search: `{ term, current: ({ pageKey, ordinal }|null) }` while open with a
-  // term, else null; the text layers mark the matches from it. Unused while OCR is off.
+  // The toolbar's OCR search: `{ term, current: ({ pageKey, ordinal }|null), onlyPageKey }` (the
+  // page the search is limited to, or null) while open with a term, else null; the text layers
+  // mark the matches from it. Unused while OCR is off.
   const [ocrSearch, setOcrSearchState] = useState(/** @type {(Object|null)} */ (null));
   // True while a print flow holds page URLs or a print PDF is being assembled; OCR pauses meanwhile.
   const [printActivity, setPrintActivity] = useState(false);
@@ -2763,8 +2764,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     ));
   }, []);
   /**
-   * @param {(Object|null)} next `{ term, current: ({ pageKey, ordinal }|null) }`, or null when the
-   *   search is closed. A no-op while OCR is off; an unchanged value writes no state.
+   * @param {(Object|null)} next `{ term, current: ({ pageKey, ordinal }|null), onlyPageKey: (string|null) }`,
+   *   or null when the search is closed. A no-op while OCR is off; an unchanged value writes no state.
    */
   const setOcrSearch = useCallback((next) => {
     if (!isOcrEnabled()) return;

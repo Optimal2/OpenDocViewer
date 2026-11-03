@@ -237,9 +237,12 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     const rect = panel.getBoundingClientRect();
     return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: rect.right, top: rect.top, toolbarBottom: toolbar.getBoundingClientRect().bottom, viewport: document.documentElement.clientWidth };
   });
+  // The field may already hang (a 1400 px window leaves it less than its inline minimum), so
+  // wait for the re-placement the resize causes rather than for the placement attribute.
+  await expect.poll(async () => (await measureToolbar()).right).toBeLessThanOrEqual(1000);
   const hanging = await measureToolbar();
   expect(hanging.right).toBeLessThanOrEqual(hanging.viewport);
-  // Re-placed from inline to hanging: anchored at the button, pulled just inside the window
+  // Re-placed for the narrow window: anchored at the button, pulled just inside the window
   // (not by the open field's own width, which would leave it hundreds of px further left).
   expect(hanging.right).toBeGreaterThanOrEqual(hanging.viewport - 10);
   expect(hanging.top).toBeGreaterThanOrEqual(hanging.toolbarBottom);
@@ -249,7 +252,8 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(hanging.overflow).toBeLessThanOrEqual(closedNarrow.overflow);
   await status.click();
   await expect(searchField).toBeFocused();
-  await page.setViewportSize({ width: 1400, height: 900 });
+  // Wide enough for the field inline (at 1400 px the toolbar leaves it less than its minimum).
+  await page.setViewportSize({ width: 1500, height: 900 });
   await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'inline');
   await searchField.fill('ocr hej');
   const searchStatus = page.locator('.toolbar-ocr-search-status');
