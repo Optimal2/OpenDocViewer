@@ -221,10 +221,12 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(searchField).toBeFocused();
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBeGreaterThan(150);
   // The field took only the room the toolbar had: nothing overflows and it ends inside the window.
-  const fit = await page.locator('.toolbar').evaluate((toolbar) => {
+  const measureFit = () => page.locator('.toolbar').evaluate((toolbar) => {
     const panel = toolbar.querySelector('.toolbar-ocr-search-panel');
-    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: panel.getBoundingClientRect().right, placement: panel.dataset.placement, viewport: document.documentElement.clientWidth };
+    const close = panel.querySelector('.toolbar-ocr-search-close').getBoundingClientRect();
+    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: panel.getBoundingClientRect().right, closeRight: close.right, placement: panel.dataset.placement, viewport: document.documentElement.clientWidth };
   });
+  const fit = await measureFit();
   expect(fit.overflow).toBeLessThanOrEqual(0);
   expect(fit.right).toBeLessThanOrEqual(fit.viewport);
   // A narrow window: the field hangs under the toolbar at the button's right edge, still inside,
@@ -255,6 +257,12 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // Wide enough for the field inline (at 1400 px the toolbar leaves it less than its minimum).
   await page.setViewportSize({ width: 1500, height: 900 });
   await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'inline');
+  // Inline, the field fits the toolbar (no overflow) and its last button lies inside it: the
+  // field is never laid inline narrower than its contents.
+  await expect.poll(async () => (await measureFit()).overflow).toBeLessThanOrEqual(0);
+  const inlineFit = await measureFit();
+  expect(inlineFit.right).toBeLessThanOrEqual(inlineFit.viewport);
+  expect(inlineFit.closeRight).toBeLessThanOrEqual(inlineFit.right + 0.5);
   await searchField.fill('ocr hej');
   const searchStatus = page.locator('.toolbar-ocr-search-status');
   await expect(searchStatus).toHaveText(/^1 (of|av) 1/);
