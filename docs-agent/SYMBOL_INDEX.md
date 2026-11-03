@@ -29,7 +29,7 @@
 | <code>OpenDocViewer~resizeRaf</code> | constant | <code>src/app/OpenDocViewer.jsx:93</code> | rAF-throttled resize handler: Avoids re-render spam during window drags. |
 | <code>OpenDocViewer~showPerf</code> | constant | <code>src/app/OpenDocViewer.jsx:134</code> | Decide if the Performance HUD should render: Runtime flag \(config/env/meta\) OR explicit URL opt-in: ?perf=1 \(handy during support sessions\) |
 | <code>SourceItem</code> | typedef | <code>src/app/OpenDocViewer.jsx:25</code> | Item in the explicit source list mode. |
-| <code>CanvasRenderer</code> | constant | <code>src/components/CanvasRenderer.jsx:40</code> | CanvasRenderer component. |
+| <code>CanvasRenderer</code> | constant | <code>src/components/CanvasRenderer.jsx:47</code> | CanvasRenderer component. |
 | <code>module.exports</code> | function | <code>src/components/common/StatusLed.jsx:17</code> |  |
 | <code>DocumentConsumerWrapper</code> | function | <code>src/components/DocumentConsumerWrapper.jsx:66</code> | DocumentConsumerWrapper Wraps DocumentLoader + DocumentViewer and switches between full viewer and a thumbnail-only presentation on small/mobile layouts. |
 | <code>SourceItem</code> | typedef | <code>src/components/DocumentConsumerWrapper.jsx:37</code> | An item for explicit-list mode. |
@@ -940,6 +940,7 @@
 | <code>SetString</code> | typedef | <code>src/types/jsdoc-types.js:29</code> | Simple string setter. |
 | <code>SetStringNullable</code> | typedef | <code>src/types/jsdoc-types.js:15</code> | Setter for string-or-null values. |
 | <code>ZoomMode</code> | typedef | <code>src/types/jsdoc-types.js:80</code> | Sticky zoom modes used by the viewer. |
+| <code>applyCanvasBitmapSize</code> | function | <code>src/utils/canvasBitmapSize.js:16</code> | Resize the bitmap of a canvas only when the requested size differs from its current size. |
 | <code>module:compareCurtain.buildCurtainClipPath</code> | function | <code>src/utils/compareCurtain.js:88</code> | CSS clip of the top page \(page B\): everything on the A side of the border is cut away. |
 | <code>module:compareCurtain.buildCurtainHandleStyle</code> | function | <code>src/utils/compareCurtain.js:102</code> | Position of the grab bar on the border. |
 | <code>module:compareCurtain.clampCurtainPosition</code> | function | <code>src/utils/compareCurtain.js:61</code> | Clamp a border position to \[0, 100\] with two decimals; non-numbers fall back to 50. |

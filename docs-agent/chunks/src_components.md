@@ -1,12 +1,14 @@
 # OpenDocViewer / src/components
 
-File count: 19. Line count: 8289. JSDoc symbol count: 111.
+File count: 19. Line count: 8303. JSDoc symbol count: 111.
 
 ## src/components/CanvasRenderer.jsx
 
 OpenDocViewer — Absolute\-positioned Canvas Renderer Render a &lt;canvas&gt; element for a single page at a specified zoom factor.
 
 Exports: `CanvasRenderer`
+
+Local imports: `src/utils/canvasBitmapSize.js`
 
 Symbols:
 

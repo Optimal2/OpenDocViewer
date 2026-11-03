@@ -123,7 +123,9 @@ Rendering responsibilities are split further:
   neighbouring pages
 - `ImageRenderer.jsx` handles plain image rendering
 - `CanvasRenderer.jsx` handles canvas drawing and visual adjustments (rotation, brightness,
-  contrast are drawn into the canvas)
+  contrast are drawn into the canvas). It sizes the canvas bitmap imperatively and only when the
+  size really changes (`utils/canvasBitmapSize.js`): setting a canvas's width or height clears the
+  bitmap even to the same value, and the parent reports the size it drew only after drawing
 - `DocumentViewer/*` manages stateful viewer composition, keyboard navigation, zoom effects and
   compare-mode post-zoom
 - `DocumentToolbar/*` manages toolbar UI, the print dialog, help/manual/about dialogs, language and

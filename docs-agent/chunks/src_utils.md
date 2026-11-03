@@ -1,6 +1,16 @@
 # OpenDocViewer / src/utils
 
-File count: 55. Line count: 22279. JSDoc symbol count: 900.
+File count: 56. Line count: 22310. JSDoc symbol count: 901.
+
+## src/utils/canvasBitmapSize.js
+
+Resize the bitmap of a canvas only when the requested size differs from its current size.
+
+Exports: `applyCanvasBitmapSize`
+
+Symbols:
+
+- `applyCanvasBitmapSize` (function) - Resize the bitmap of a canvas only when the requested size differs from its current size.
 
 ## src/utils/compareCurtain.js
 

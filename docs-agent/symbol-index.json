@@ -464,7 +464,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/CanvasRenderer.jsx",
-    "line": 40,
+    "line": 47,
     "description": "CanvasRenderer component.",
     "params": [
       {
@@ -23475,6 +23475,43 @@
     "description": "Sticky zoom modes used by the viewer.",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "applyCanvasBitmapSize",
+    "name": "applyCanvasBitmapSize",
+    "longname": "applyCanvasBitmapSize",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/canvasBitmapSize.js",
+    "line": 16,
+    "description": "Resize the bitmap of a canvas only when the requested size differs from its current size.",
+    "params": [
+      {
+        "name": "canvas",
+        "type": "HTMLCanvasElement|null|undefined",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "true when the bitmap was resized (and therefore cleared)."
+      }
+    ],
     "examples": 0
   },
   {

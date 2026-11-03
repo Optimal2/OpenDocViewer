@@ -92,15 +92,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 167,
-    "sourceLineCount": 65305,
-    "docletCount": 1843,
-    "documentedFileCount": 166,
+    "fileCount": 168,
+    "sourceLineCount": 65350,
+    "docletCount": 1844,
+    "documentedFileCount": 167,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 5440
+    "estimatedSourceTokens": 5470
   },
   "recommendations": [
     "1 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -967,7 +967,7 @@
     {
       "name": "src/components",
       "fileCount": 19,
-      "lineCount": 8289,
+      "lineCount": 8303,
       "docletCount": 111,
       "importantFiles": [
         {
@@ -1706,9 +1706,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 55,
-      "lineCount": 22279,
-      "docletCount": 900,
+      "fileCount": 56,
+      "lineCount": 22310,
+      "docletCount": 901,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -3273,18 +3273,21 @@
     },
     {
       "path": "src/components/CanvasRenderer.jsx",
-      "lines": 84,
+      "lines": 98,
       "extension": ".jsx",
-      "jsdocBlockCount": 3,
+      "jsdocBlockCount": 4,
       "sourceSummary": "OpenDocViewer — Absolute-positioned Canvas Renderer Render a <canvas> element for a single page at a specified zoom factor.",
       "imports": [
         {
           "source": "react",
           "specifiers": [
             "React",
-            "useMemo"
+            "useImperativeHandle",
+            "useLayoutEffect",
+            "useMemo",
+            "useRef"
           ],
-          "line": 27,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3292,7 +3295,15 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 28,
+          "line": 34,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/canvasBitmapSize.js",
+          "specifiers": [
+            "applyCanvasBitmapSize"
+          ],
+          "line": 35,
           "kind": "static"
         }
       ],
@@ -3300,14 +3311,14 @@
         {
           "name": "CanvasRenderer",
           "kind": "default",
-          "line": 83
+          "line": 97
         }
       ],
       "declarations": [
         {
           "name": "CanvasRenderer",
           "kind": "component",
-          "line": 40
+          "line": 47
         }
       ],
       "parseError": null,
@@ -3323,7 +3334,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/CanvasRenderer.jsx",
-          "line": 40,
+          "line": 47,
           "description": "CanvasRenderer component.",
           "params": [
             {
@@ -3367,15 +3378,28 @@
         }
       ],
       "moduleKey": "src/components",
-      "localImports": [],
+      "localImports": [
+        {
+          "source": "../utils/canvasBitmapSize.js",
+          "specifiers": [
+            "applyCanvasBitmapSize"
+          ],
+          "line": 35,
+          "kind": "static",
+          "resolved": "src/utils/canvasBitmapSize.js"
+        }
+      ],
       "packageImports": [
         {
           "source": "react",
           "specifiers": [
             "React",
-            "useMemo"
+            "useImperativeHandle",
+            "useLayoutEffect",
+            "useMemo",
+            "useRef"
           ],
-          "line": 27,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3383,7 +3407,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 28,
+          "line": 34,
           "kind": "static"
         }
       ],
@@ -42726,6 +42750,80 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/utils/canvasBitmapSize.js",
+      "lines": 31,
+      "extension": ".js",
+      "jsdocBlockCount": 1,
+      "sourceSummary": "Resize the bitmap of a canvas only when the requested size differs from its current size.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "applyCanvasBitmapSize",
+          "kind": "function",
+          "line": 16
+        }
+      ],
+      "declarations": [
+        {
+          "name": "applyCanvasBitmapSize",
+          "kind": "function",
+          "line": 16
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "applyCanvasBitmapSize",
+          "name": "applyCanvasBitmapSize",
+          "longname": "applyCanvasBitmapSize",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/canvasBitmapSize.js",
+          "line": 16,
+          "description": "Resize the bitmap of a canvas only when the requested size differs from its current size.",
+          "params": [
+            {
+              "name": "canvas",
+              "type": "HTMLCanvasElement|null|undefined",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "width",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "height",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": "true when the bitmap was resized (and therefore cleared)."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 16,
+      "summary": "Resize the bitmap of a canvas only when the requested size differs from its current size.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/utils/compareCurtain.js",
       "lines": 187,
       "extension": ".js",
@@ -75973,7 +76071,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/CanvasRenderer.jsx",
-      "line": 40,
+      "line": 47,
       "description": "CanvasRenderer component.",
       "params": [
         {
@@ -98984,6 +99082,43 @@
       "description": "Sticky zoom modes used by the viewer.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "applyCanvasBitmapSize",
+      "name": "applyCanvasBitmapSize",
+      "longname": "applyCanvasBitmapSize",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/canvasBitmapSize.js",
+      "line": 16,
+      "description": "Resize the bitmap of a canvas only when the requested size differs from its current size.",
+      "params": [
+        {
+          "name": "canvas",
+          "type": "HTMLCanvasElement|null|undefined",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": "true when the bitmap was resized (and therefore cleared)."
+        }
+      ],
       "examples": 0
     },
     {
