@@ -3668,7 +3668,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 507,
+    "line": 498,
     "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
     "params": [
       {
@@ -3693,7 +3693,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 530,
+    "line": 521,
     "description": "",
     "params": [],
     "returns": [
@@ -3711,7 +3711,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 251,
+    "line": 242,
     "description": "",
     "params": [
       {
@@ -3742,7 +3742,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 239,
+    "line": 230,
     "description": "",
     "params": [],
     "returns": [
@@ -3760,7 +3760,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 101,
+    "line": 92,
     "description": "",
     "params": [],
     "returns": [],
@@ -3773,7 +3773,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 128,
+    "line": 119,
     "description": "",
     "params": [
       {
@@ -3888,7 +3888,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 420,
+    "line": 411,
     "description": "",
     "params": [
       {
@@ -3913,7 +3913,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 752,
+    "line": 743,
     "description": "",
     "params": [
       {
@@ -3944,7 +3944,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 494,
+    "line": 485,
     "description": "",
     "params": [
       {
@@ -3969,7 +3969,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 475,
+    "line": 466,
     "description": "",
     "params": [],
     "returns": [
@@ -3987,7 +3987,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 484,
+    "line": 475,
     "description": "",
     "params": [],
     "returns": [
@@ -4005,7 +4005,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 462,
+    "line": 453,
     "description": "Returns the surface whose intrinsic size should drive fit calculations.",
     "params": [],
     "returns": [
@@ -4054,7 +4054,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 956,
+    "line": 947,
     "description": "",
     "params": [
       {
@@ -4085,7 +4085,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 889,
+    "line": 880,
     "description": "",
     "params": [
       {
@@ -4116,7 +4116,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 553,
+    "line": 544,
     "description": "",
     "params": [
       {
@@ -4141,7 +4141,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 984,
+    "line": 975,
     "description": "",
     "params": [],
     "returns": [
@@ -4159,7 +4159,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 832,
+    "line": 823,
     "description": "",
     "params": [
       {
@@ -4234,7 +4234,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 177,
+    "line": 168,
     "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
     "params": [],
     "returns": [],
@@ -4284,26 +4284,13 @@
     "examples": 0
   },
   {
-    "id": "OCR_STATUS_FALLBACK",
-    "name": "OCR_STATUS_FALLBACK",
-    "longname": "OCR_STATUS_FALLBACK",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentRender.jsx",
-    "line": 93,
-    "description": "English fallbacks of the OCR status texts (public/locales/ /common.json, ocr.status ).",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "<anonymous>~recoverPageAsset",
     "name": "recoverPageAsset",
     "longname": "<anonymous>~recoverPageAsset",
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 915,
+    "line": 906,
     "description": "",
     "params": [
       {
@@ -4340,7 +4327,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 232,
+    "line": 223,
     "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
     "params": [],
     "returns": [
@@ -4358,7 +4345,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 291,
+    "line": 282,
     "description": "",
     "params": [
       {
@@ -5634,7 +5621,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 53,
+    "line": 56,
     "description": "Mutable ref-like object used by the toolbar.",
     "params": [],
     "returns": [],
@@ -5647,7 +5634,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 211,
+    "line": 214,
     "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
     "params": [
       {
@@ -5672,7 +5659,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 81,
+    "line": 84,
     "description": "Props for {@link DocumentToolbar}.",
     "params": [],
     "returns": [],
@@ -5685,7 +5672,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 622,
+    "line": 625,
     "description": "Handle brightness slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5710,7 +5697,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 636,
+    "line": 639,
     "description": "Handle contrast slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5735,7 +5722,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 658,
+    "line": 661,
     "description": "",
     "params": [
       {
@@ -5760,7 +5747,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 339,
+    "line": 342,
     "description": "",
     "params": [
       {
@@ -5780,7 +5767,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 331,
+    "line": 334,
     "description": "",
     "params": [
       {
@@ -5800,7 +5787,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 671,
+    "line": 674,
     "description": "",
     "params": [
       {
@@ -5825,7 +5812,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 650,
+    "line": 653,
     "description": "",
     "params": [
       {
@@ -5856,7 +5843,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 59,
+    "line": 62,
     "description": "Editable image state shown by the toolbar.",
     "params": [],
     "returns": [],
@@ -5869,7 +5856,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 198,
+    "line": 201,
     "description": "",
     "params": [
       {
@@ -5894,7 +5881,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 188,
+    "line": 191,
     "description": "",
     "params": [
       {
@@ -5919,7 +5906,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 161,
+    "line": 164,
     "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
     "params": [],
     "returns": [],
@@ -5932,7 +5919,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 67,
+    "line": 70,
     "description": "React-like numeric page setter used by the toolbar.",
     "params": [
       {
@@ -5957,7 +5944,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 159,
+    "line": 162,
     "description": "Range (±) around 100% where sliders snap back to the neutral value.",
     "params": [],
     "returns": [],
@@ -5970,7 +5957,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 680,
+    "line": 683,
     "description": "",
     "params": [
       {
@@ -5995,7 +5982,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 74,
+    "line": 77,
     "description": "Zoom display state used by the newer toolbar UX paths.",
     "params": [],
     "returns": [],
@@ -7144,6 +7131,129 @@
     "examples": 0
   },
   {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 38,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.pageNumber",
+        "type": "number",
+        "optional": false,
+        "description": "1-based number of the displayed page."
+      },
+      {
+        "name": "props.setPageNumber",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.allPages",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "The viewer's pages."
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OcrSearchBar~goToMatch",
+    "name": "goToMatch",
+    "longname": "OcrSearchBar~goToMatch",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 115,
+    "description": "",
+    "params": [
+      {
+        "name": "position",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrSearchBar~handleInputKeyDown",
+    "name": "handleInputKeyDown",
+    "longname": "OcrSearchBar~handleInputKeyDown",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 143,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "React.KeyboardEvent.<HTMLInputElement>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "matchIdOf",
+    "name": "matchIdOf",
+    "longname": "matchIdOf",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 29,
+    "description": "",
+    "params": [
+      {
+        "name": "match",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrSearchBar~step",
+    "name": "step",
+    "longname": "OcrSearchBar~step",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 127,
+    "description": "Enter / the arrows: a current match on another page is shown first (the position does not move); on its page, the next or previous match becomes current, wrapping round.",
+    "params": [
+      {
+        "name": "direction",
+        "type": "number",
+        "optional": false,
+        "description": "1 forwards, -1 backwards."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "clampPage",
     "name": "clampPage",
     "longname": "clampPage",
@@ -7692,6 +7802,42 @@
       {
         "type": "RegExp|null",
         "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+    "line": 26,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "React.ReactElement|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "selectedLayerText",
+    "name": "selectedLayerText",
+    "longname": "selectedLayerText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+    "line": 17,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "string",
+        "description": "The selected text as it reads on the page, or '' outside the text layers."
       }
     ],
     "examples": 0
@@ -13591,13 +13737,39 @@
     "examples": 0
   },
   {
+    "id": "OCR_WORD_CURRENT_MATCH_CLASS",
+    "name": "OCR_WORD_CURRENT_MATCH_CLASS",
+    "longname": "OCR_WORD_CURRENT_MATCH_CLASS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/OcrTextLayer.jsx",
+    "line": 36,
+    "description": "Class of a word inside the current match of the toolbar's OCR search.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OCR_WORD_MATCH_CLASS",
+    "name": "OCR_WORD_MATCH_CLASS",
+    "longname": "OCR_WORD_MATCH_CLASS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/OcrTextLayer.jsx",
+    "line": 34,
+    "description": "Class of a word inside a match of the toolbar's OCR search.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "OCR_WORD_SELECTED_CLASS",
     "name": "OCR_WORD_SELECTED_CLASS",
     "longname": "OCR_WORD_SELECTED_CLASS",
     "kind": "constant",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 28,
+    "line": 32,
     "description": "Class of a word that the current selection touches.",
     "params": [],
     "returns": [],
@@ -13610,7 +13782,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 44,
+    "line": 55,
     "description": "",
     "params": [
       {
@@ -13660,6 +13832,18 @@
         "type": "number",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "props.pageKey",
+        "type": "string",
+        "optional": true,
+        "description": "utils/ocrPageKey.js key of the page (matches search.current.pageKey )."
+      },
+      {
+        "name": "props.search",
+        "type": "Object|null",
+        "optional": true,
+        "description": "The toolbar's OCR search: the normalised term and the current match, or null when closed."
       }
     ],
     "returns": [
@@ -15007,7 +15191,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 241,
+    "line": 243,
     "description": "",
     "params": [],
     "returns": [],
@@ -15020,7 +15204,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 231,
+    "line": 233,
     "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
     "params": [],
     "returns": [],
@@ -15033,7 +15217,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 248,
+    "line": 250,
     "description": "",
     "params": [],
     "returns": [],
@@ -15163,7 +15347,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1041,
+    "line": 1060,
     "description": "",
     "params": [
       {
@@ -15188,7 +15372,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1367,
+    "line": 1386,
     "description": "",
     "params": [],
     "returns": [
@@ -15206,7 +15390,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1056,
+    "line": 1075,
     "description": "",
     "params": [
       {
@@ -15243,7 +15427,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1517,
+    "line": 1536,
     "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
     "params": [
       {
@@ -15280,7 +15464,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1083,
+    "line": 1102,
     "description": "",
     "params": [],
     "returns": [
@@ -15298,7 +15482,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 556,
+    "line": 575,
     "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
     "params": [],
     "returns": [
@@ -15341,7 +15525,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2767,
+    "line": 2794,
     "description": "",
     "params": [
       {
@@ -15361,7 +15545,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2753,
+    "line": 2780,
     "description": "",
     "params": [
       {
@@ -15381,7 +15565,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1155,
+    "line": 1174,
     "description": "",
     "params": [
       {
@@ -15432,7 +15616,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1615,
+    "line": 1634,
     "description": "",
     "params": [
       {
@@ -15457,7 +15641,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2032,
+    "line": 2051,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -15482,7 +15666,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1839,
+    "line": 1858,
     "description": "",
     "params": [
       {
@@ -15532,7 +15716,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2772,
+    "line": 2799,
     "description": "",
     "params": [
       {
@@ -15583,7 +15767,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2429,
+    "line": 2448,
     "description": "",
     "params": [
       {
@@ -15608,7 +15792,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1495,
+    "line": 1514,
     "description": "",
     "params": [
       {
@@ -15633,7 +15817,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1591,
+    "line": 1610,
     "description": "",
     "params": [
       {
@@ -15658,7 +15842,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1092,
+    "line": 1111,
     "description": "",
     "params": [
       {
@@ -15683,7 +15867,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 876,
+    "line": 895,
     "description": "",
     "params": [
       {
@@ -15714,7 +15898,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 893,
+    "line": 912,
     "description": "",
     "params": [
       {
@@ -15770,7 +15954,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 942,
+    "line": 961,
     "description": "",
     "params": [
       {
@@ -15870,7 +16054,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 922,
+    "line": 941,
     "description": "",
     "params": [
       {
@@ -15914,13 +16098,44 @@
     "examples": 0
   },
   {
+    "id": "isSameOcrSearch",
+    "name": "isSameOcrSearch",
+    "longname": "isSameOcrSearch",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/contexts/ViewerProvider.jsx",
+    "line": 345,
+    "description": "",
+    "params": [
+      {
+        "name": "a",
+        "type": "Object|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "b",
+        "type": "Object|null",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "Whether two OCR search states (term and current match) are the same."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "ViewerProvider~leasePrintablePageUrl",
     "name": "leasePrintablePageUrl",
     "longname": "ViewerProvider~leasePrintablePageUrl",
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 931,
+    "line": 950,
     "description": "",
     "params": [
       {
@@ -16081,7 +16296,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1379,
+    "line": 1398,
     "description": "",
     "params": [
       {
@@ -16131,7 +16346,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 533,
+    "line": 552,
     "description": "Record that a page now has a reusable full-size asset available.",
     "params": [
       {
@@ -16156,7 +16371,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 543,
+    "line": 562,
     "description": "Record that a page now has a reusable thumbnail asset available.",
     "params": [
       {
@@ -16181,7 +16396,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 991,
+    "line": 1010,
     "description": "",
     "params": [
       {
@@ -16212,7 +16427,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1426,
+    "line": 1445,
     "description": "",
     "params": [
       {
@@ -16249,7 +16464,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1569,
+    "line": 1588,
     "description": "",
     "params": [
       {
@@ -16280,7 +16495,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2295,
+    "line": 2314,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -16298,7 +16513,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1350,
+    "line": 1369,
     "description": "",
     "params": [
       {
@@ -16323,7 +16538,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1359,
+    "line": 1378,
     "description": "",
     "params": [
       {
@@ -16348,7 +16563,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2114,
+    "line": 2133,
     "description": "",
     "params": [
       {
@@ -16379,7 +16594,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1307,
+    "line": 1326,
     "description": "",
     "params": [
       {
@@ -16404,7 +16619,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 966,
+    "line": 985,
     "description": "Release print leases previously acquired through getPrintablePageUrls .",
     "params": [
       {
@@ -16429,7 +16644,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1747,
+    "line": 1766,
     "description": "",
     "params": [
       {
@@ -16466,7 +16681,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 715,
+    "line": 734,
     "description": "",
     "params": [],
     "returns": [
@@ -16515,7 +16730,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1675,
+    "line": 1694,
     "description": "",
     "params": [
       {
@@ -16552,7 +16767,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 687,
+    "line": 706,
     "description": "",
     "params": [],
     "returns": [
@@ -16570,7 +16785,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2386,
+    "line": 2405,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -16601,7 +16816,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2762,
+    "line": 2789,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -16627,7 +16842,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2735,
+    "line": 2754,
     "description": "",
     "params": [
       {
@@ -16641,13 +16856,33 @@
     "examples": 0
   },
   {
+    "id": "ViewerProvider~setOcrSearch",
+    "name": "setOcrSearch",
+    "longname": "ViewerProvider~setOcrSearch",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/contexts/ViewerProvider.jsx",
+    "line": 2767,
+    "description": "",
+    "params": [
+      {
+        "name": "next",
+        "type": "Object|null",
+        "optional": false,
+        "description": "{ term, current: ({ pageKey, ordinal }|null) } , or null when the search is closed. A no-op while OCR is off; an unchanged value writes no..."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ViewerProvider~shouldReuseFullAssetForThumbnail",
     "name": "shouldReuseFullAssetForThumbnail",
     "longname": "ViewerProvider~shouldReuseFullAssetForThumbnail",
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1662,
+    "line": 1681,
     "description": "",
     "params": [
       {
@@ -16672,7 +16907,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1326,
+    "line": 1345,
     "description": "",
     "params": [
       {
@@ -16710,7 +16945,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 913,
+    "line": 932,
     "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
     "params": [],
     "returns": [],
@@ -16754,7 +16989,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1504,
+    "line": 1523,
     "description": "",
     "params": [
       {
@@ -16785,7 +17020,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2136,
+    "line": 2155,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {
@@ -16810,7 +17045,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1580,
+    "line": 1599,
     "description": "",
     "params": [
       {
@@ -16841,7 +17076,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 509,
+    "line": 528,
     "description": "",
     "params": [
       {
@@ -16854,31 +17089,6 @@
     "returns": [
       {
         "type": "void",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "ViewerProvider",
-    "name": "ViewerProvider",
-    "longname": "ViewerProvider",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/contexts/ViewerProvider.jsx",
-    "line": 340,
-    "description": "",
-    "params": [
-      {
-        "name": "props",
-        "type": "ViewerProviderProps",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "React.ReactElement",
         "description": ""
       }
     ],
@@ -27346,6 +27556,283 @@
     "examples": 0
   },
   {
+    "id": "findOcrMatches",
+    "name": "findOcrMatches",
+    "longname": "findOcrMatches",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 73,
+    "description": "All matches of a term in an index, in reading order, without overlaps.",
+    "params": [
+      {
+        "name": "index",
+        "type": "OcrSearchIndex",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "term",
+        "type": "*",
+        "optional": false,
+        "description": "Raw term; normalised here."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<OcrSearchMatch>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "findOcrMatchesInOutcome",
+    "name": "findOcrMatchesInOutcome",
+    "longname": "findOcrMatchesInOutcome",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 102,
+    "description": "Matches of a term in one outcome (the index is built on first use).",
+    "params": [
+      {
+        "name": "outcome",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "term",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<OcrSearchMatch>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "indexes",
+    "name": "indexes",
+    "longname": "indexes",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 32,
+    "description": "Index per outcome; outcomes are immutable objects from the result cache.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "normalizeOcrSearchTerm",
+    "name": "normalizeOcrSearchTerm",
+    "longname": "normalizeOcrSearchTerm",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 39,
+    "description": "The form a term is matched in: whitespace collapsed to single spaces, trimmed, lower-cased.",
+    "params": [
+      {
+        "name": "term",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OcrDocumentMatch",
+    "name": "OcrDocumentMatch",
+    "longname": "OcrDocumentMatch",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 107,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrSearchIndex",
+    "name": "OcrSearchIndex",
+    "longname": "OcrSearchIndex",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 16,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ocrSearchIndexOf",
+    "name": "ocrSearchIndexOf",
+    "longname": "ocrSearchIndexOf",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 48,
+    "description": "Build (or reuse) the search index of a done outcome.",
+    "params": [
+      {
+        "name": "outcome",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrSearchIndex",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OcrSearchMatch",
+    "name": "OcrSearchMatch",
+    "longname": "OcrSearchMatch",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 23,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "searchOcrPages",
+    "name": "searchOcrPages",
+    "longname": "searchOcrPages",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearch.js",
+    "line": 125,
+    "description": "Matches of a term across the recognised pages of a document, in page order, each page's matches in reading order.",
+    "params": [
+      {
+        "name": "pages",
+        "type": "Array.<{pageKey:string, pageIndex:number, pageNumber:number, outcome: (Object|null)}>",
+        "optional": false,
+        "description": "The viewer's pages with their outcomes (pages without a done outcome contribute nothing)."
+      },
+      {
+        "name": "term",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<OcrDocumentMatch>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "hasSearchableOcrText",
+    "name": "hasSearchableOcrText",
+    "longname": "hasSearchableOcrText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrStatus.js",
+    "line": 64,
+    "description": "Whether a page's recognised text can be searched: the outcome is final and holds words.",
+    "params": [
+      {
+        "name": "entry",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_STATUS_FALLBACK",
+    "name": "OCR_STATUS_FALLBACK",
+    "longname": "OCR_STATUS_FALLBACK",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrStatus.js",
+    "line": 9,
+    "description": "Status keys and their English fallbacks.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OCR_STATUS_LED",
+    "name": "OCR_STATUS_LED",
+    "longname": "OCR_STATUS_LED",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrStatus.js",
+    "line": 23,
+    "description": "LED state (components/common/StatusLed.jsx) per status key; '' (no outcome yet) is off.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ocrStatusKeyOf",
+    "name": "ocrStatusKeyOf",
+    "longname": "ocrStatusKeyOf",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrStatus.js",
+    "line": 41,
+    "description": "Status key of a page's OCR outcome.",
+    "params": [
+      {
+        "name": "entry",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": "The page's outcome ( status done/skipped/failed, or a transient queued/probing/recognizing state), or null before the page joined the windo..."
+      },
+      {
+        "name": "engineFailure",
+        "type": "string|null|undefined",
+        "optional": false,
+        "description": "Set when the engine cannot serve this session."
+      }
+    ],
+    "returns": [
+      {
+        "type": "'working'|'done'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|''",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "countCharacters",
     "name": "countCharacters",
     "longname": "countCharacters",
@@ -27390,7 +27877,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 215,
+    "line": 240,
     "description": "Whether a selection lies within OCR text layers only (one or several pages), so that its text can be read line by line and a copy of it replaced.",
     "params": [
       {
@@ -27415,7 +27902,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 140,
+    "line": 171,
     "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.",
     "params": [
       {
@@ -27540,7 +28027,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 118,
+    "line": 119,
     "description": "",
     "params": [],
     "returns": [],
@@ -27553,10 +28040,35 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 104,
+    "line": 105,
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ocrReadingOrder",
+    "name": "ocrReadingOrder",
+    "longname": "ocrReadingOrder",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrTextLayout.js",
+    "line": 135,
+    "description": "The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word'...",
+    "params": [
+      {
+        "name": "words",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "{ text, bbox: { x0, y0, x1, y1 } } ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<Array<{index:number, text:string, x0:number, y0:number, x1:number, y1:number}>>",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -27566,7 +28078,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 239,
+    "line": 264,
     "description": "The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces (the DOM joins them with no-break spaces) and the lines by newlines...",
     "params": [
       {
@@ -44208,6 +44720,198 @@
     "returns": [
       {
         "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isSpeechSynthesisAvailable",
+    "name": "isSpeechSynthesisAvailable",
+    "longname": "isSpeechSynthesisAvailable",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 20,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "Whether this browser can speak."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "pickSpeechVoice",
+    "name": "pickSpeechVoice",
+    "longname": "pickSpeechVoice",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 78,
+    "description": "The installed voice to use for a locale: exact locale first, then the same base language (preferring a local voice over a remote one), else null (the browser then picks by lang ).",
+    "params": [
+      {
+        "name": "voices",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "SpeechSynthesisVoice-like: { lang, localService, default } ."
+      },
+      {
+        "name": "lang",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveSpeechLanguage",
+    "name": "resolveSpeechLanguage",
+    "longname": "resolveSpeechLanguage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 32,
+    "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
+    "params": [
+      {
+        "name": "uiLanguage",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "speakText",
+    "name": "speakText",
+    "longname": "speakText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 110,
+    "description": "Speak text aloud.",
+    "params": [
+      {
+        "name": "text",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.lang",
+        "type": "string",
+        "optional": false,
+        "description": "Locale of the text, e.g. 'sv-SE'."
+      },
+      {
+        "name": "options.onEnd",
+        "type": "function",
+        "optional": false,
+        "description": "Called once when the last chunk has been spoken, on cancel, or on the first error."
+      },
+      {
+        "name": "options.synthesis",
+        "type": "Object",
+        "optional": true,
+        "description": "window.speechSynthesis by default (tests inject a fake)."
+      },
+      {
+        "name": "options.Utterance",
+        "type": "function",
+        "optional": true,
+        "description": "window.SpeechSynthesisUtterance by default."
+      },
+      {
+        "name": "options.maxChunkLength",
+        "type": "number",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "SpeechController",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "SPEECH_MAX_CHUNK_LENGTH",
+    "name": "SPEECH_MAX_CHUNK_LENGTH",
+    "longname": "SPEECH_MAX_CHUNK_LENGTH",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 15,
+    "description": "Longest chunk handed to the synthesiser (characters).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "SpeechController",
+    "name": "SpeechController",
+    "longname": "SpeechController",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 91,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "splitSpeechChunks",
+    "name": "splitSpeechChunks",
+    "longname": "splitSpeechChunks",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 48,
+    "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
+    "params": [
+      {
+        "name": "text",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "maxLength",
+        "type": "number",
+        "optional": true,
+        "description": "Default SPEECH_MAX_CHUNK_LENGTH."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
         "description": ""
       }
     ],

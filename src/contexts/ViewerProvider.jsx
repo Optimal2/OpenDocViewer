@@ -337,12 +337,31 @@ function nowMs() {
  * @param {ViewerProviderProps} props
  * @returns {React.ReactElement}
  */
+/**
+ * @param {(Object|null)} a
+ * @param {(Object|null)} b
+ * @returns {boolean} Whether two OCR search states (term and current match) are the same.
+ */
+function isSameOcrSearch(a, b) {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  if (String(a.term || '') !== String(b.term || '')) return false;
+  const ca = a.current || null;
+  const cb = b.current || null;
+  if (!ca && !cb) return true;
+  if (!ca || !cb) return false;
+  return String(ca.pageKey || '') === String(cb.pageKey || '') && Number(ca.ordinal) === Number(cb.ordinal);
+}
+
 export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = false }) => {
   const [allPages, setAllPages] = useState([]);
   const [signaturePrioritySourceKey, setSignaturePrioritySourceKey] = useState('');
   // OCR focus: indexes into allPages of the displayed page(s), set by the viewer; the OCR queue
   // (hooks/useOcrTextLayers.js) covers them and a fixed number of neighbours. Unused while OCR is off.
   const [ocrFocusPageIndexes, setOcrFocusPageIndexesState] = useState(/** @type {Array<number>} */ ([]));
+  // The toolbar's OCR search: `{ term, current: ({ pageKey, ordinal }|null) }` while open with a
+  // term, else null; the text layers mark the matches from it. Unused while OCR is off.
+  const [ocrSearch, setOcrSearchState] = useState(/** @type {(Object|null)} */ (null));
   // True while a print flow holds page URLs or a print PDF is being assembled; OCR pauses meanwhile.
   const [printActivity, setPrintActivity] = useState(false);
   const [error, setError] = useState(/** @type {(string|null)} */ (null));
@@ -2741,6 +2760,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       current.length === next.length && current.every((value, index) => value === next[index]) ? current : next
     ));
   }, []);
+  /**
+   * @param {(Object|null)} next `{ term, current: ({ pageKey, ordinal }|null) }`, or null when the
+   *   search is closed. A no-op while OCR is off; an unchanged value writes no state.
+   */
+  const setOcrSearch = useCallback((next) => {
+    if (!isOcrEnabled()) return;
+    setOcrSearchState((current) => (isSameOcrSearch(current, next) ? current : (next || null)));
+  }, []);
 
   useEffect(() => () => {
     disposePdfSignatureWorker();
@@ -2817,6 +2844,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     ocrPages,
     ocrEngineFailure,
     setOcrFocusPageIndexes,
+    ocrSearch,
+    setOcrSearch,
     scheduleSourceWarmup,
     compareTransforms,
     getCompareTransform,
@@ -2862,6 +2891,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     ocrPages,
     ocrEngineFailure,
     setOcrFocusPageIndexes,
+    ocrSearch,
+    setOcrSearch,
     scheduleSourceWarmup,
     compareTransforms,
     getCompareTransform,

@@ -436,11 +436,28 @@
   "ocr": {
     "textLayerLabel": "Tolkad text, sida {page}",
     "status": {
+      "notStarted": "Texttolkningen har inte börjat på den här sidan",
       "working": "Text tolkas…",
       "done": "Text tolkad",
       "noText": "Ingen text hittades",
+      "skippedTextLayer": "Tolkas inte: sidan har egen text",
+      "skipped": "Tolkas inte: inget att tolka på sidan",
       "failed": "Texten kunde inte tolkas",
       "unavailable": "Texttolkning är inte tillgänglig"
+    },
+    "search": {
+      "open": "Sök i tolkad text",
+      "placeholder": "Sök",
+      "position": "{current} av {total}",
+      "none": "Inga träffar",
+      "coverage": "{done} av {pages} sidor tolkade",
+      "previous": "Föregående träff",
+      "next": "Nästa träff",
+      "close": "Stäng sökningen"
+    },
+    "read": {
+      "speak": "Läs upp markerad text",
+      "stop": "Sluta läsa upp"
     }
   },
   "viewer": {

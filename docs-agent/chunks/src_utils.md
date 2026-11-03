@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 56. Line count: 22310. JSDoc symbol count: 901.
+File count: 59. Line count: 22703. JSDoc symbol count: 922.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -288,11 +288,44 @@ Symbols:
 - `makeOcrPageKey` (function) - No description.
 - `ocrPageKeyOf` (function) - No description.
 
+## src/utils/ocrSearch.js
+
+Search in recognised text: the toolbar's OCR search \(components/DocumentToolbar/OcrSearchBar.jsx\) and the text layer's match marks \(components/OcrTextLayer.jsx\) both go through these functions, on the same outcomes, so t
+
+Exports: `normalizeOcrSearchTerm`, `ocrSearchIndexOf`, `findOcrMatches`, `findOcrMatchesInOutcome`, `searchOcrPages`
+
+Local imports: `src/utils/ocrTextLayout.js`
+
+Symbols:
+
+- `OcrSearchIndex` (typedef) - No description.
+- `OcrSearchMatch` (typedef) - No description.
+- `indexes` (constant) - Index per outcome; outcomes are immutable objects from the result cache.
+- `normalizeOcrSearchTerm` (function) - The form a term is matched in: whitespace collapsed to single spaces, trimmed, lower\-cased.
+- `ocrSearchIndexOf` (function) - Build \(or reuse\) the search index of a done outcome.
+- `findOcrMatches` (function) - All matches of a term in an index, in reading order, without overlaps.
+- `findOcrMatchesInOutcome` (function) - Matches of a term in one outcome \(the index is built on first use\).
+- `OcrDocumentMatch` (typedef) - No description.
+- `searchOcrPages` (function) - Matches of a term across the recognised pages of a document, in page order, each page's matches in reading order.
+
+## src/utils/ocrStatus.js
+
+The per\-page OCR status the toolbar's search button shows \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per outcome state, its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.status\`\) and the LED s
+
+Exports: `OCR_STATUS_FALLBACK`, `OCR_STATUS_LED`, `ocrStatusKeyOf`, `hasSearchableOcrText`
+
+Symbols:
+
+- `OCR_STATUS_FALLBACK` (constant) - Status keys and their English fallbacks.
+- `OCR_STATUS_LED` (constant) - LED state \(components/common/StatusLed.jsx\) per status key; '' \(no outcome yet\) is off.
+- `ocrStatusKeyOf` (function) - Status key of a page's OCR outcome.
+- `hasSearchableOcrText` (function) - Whether a page's recognised text can be searched: the outcome is final and holds words.
+
 ## src/utils/ocrTextLayout.js
 
 Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes.
 
-Exports: `OCR_LAYER_FONT_FAMILY`, `OCR_WORD_JOINER`, `countCharacters`, `measureWordWidth`, `layoutOcrLines`, `isOcrLayerSelection`, `ocrSelectionText`
+Exports: `OCR_LAYER_FONT_FAMILY`, `OCR_WORD_JOINER`, `countCharacters`, `measureWordWidth`, `ocrReadingOrder`, `layoutOcrLines`, `isOcrLayerSelection`, `ocrSelectionText`
 
 Symbols:
 
@@ -305,9 +338,9 @@ Symbols:
 - `OcrWordPlacement` (typedef) - No description.
 - `OcrLinePlacement` (typedef) - No description.
 - `OcrLayout` (typedef) - No description.
+- `ocrReadingOrder` (function) - The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word'...
 - `layoutOcrLines` (function) - Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.
 - `isOcrLayerSelection` (function) - Whether a selection lies within OCR text layers only \(one or several pages\), so that its text can be read line by line and a copy of it replaced.
-- `ocrSelectionText` (function) - The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no\-break spaces\) and the lines by newlines...
 
 ## src/utils/ompThemePreference.js
 
@@ -939,6 +972,22 @@ Symbols:
 - `SourceStoreStats` (typedef) - No description.
 - `SourceMeta` (typedef) - No description.
 - `PutSourceOptions` (typedef) - No description.
+
+## src/utils/speech.js
+
+Reading text aloud with the browser's speech synthesis \(Web Speech API, \`window.speechSynthesis\`\).
+
+Exports: `SPEECH_MAX_CHUNK_LENGTH`, `isSpeechSynthesisAvailable`, `resolveSpeechLanguage`, `splitSpeechChunks`, `pickSpeechVoice`, `speakText`
+
+Symbols:
+
+- `SPEECH_MAX_CHUNK_LENGTH` (constant) - Longest chunk handed to the synthesiser \(characters\).
+- `isSpeechSynthesisAvailable` (function) - No description.
+- `resolveSpeechLanguage` (function) - The speech locale for a viewer UI language \('sv' → 'sv\-SE'\); other codes pass through.
+- `splitSpeechChunks` (function) - Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.
+- `pickSpeechVoice` (function) - The installed voice to use for a locale: exact locale first, then the same base language \(preferring a local voice over a remote one\), else null \(the browser then picks by lang \).
+- `SpeechController` (typedef) - No description.
+- `speakText` (function) - Speak text aloud.
 
 ## src/utils/supportDiagnostics.js
 

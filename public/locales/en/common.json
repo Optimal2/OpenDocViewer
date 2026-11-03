@@ -436,11 +436,28 @@
   "ocr": {
     "textLayerLabel": "Recognised text, page {page}",
     "status": {
+      "notStarted": "Text recognition has not started on this page",
       "working": "Recognising text…",
       "done": "Text recognised",
       "noText": "No text found",
+      "skippedTextLayer": "Not recognised: the page has its own text",
+      "skipped": "Not recognised: nothing to recognise on this page",
       "failed": "The text could not be recognised",
       "unavailable": "Text recognition is unavailable"
+    },
+    "search": {
+      "open": "Search in the recognised text",
+      "placeholder": "Search",
+      "position": "{current} of {total}",
+      "none": "No matches",
+      "coverage": "{done} of {pages} pages recognised",
+      "previous": "Previous match",
+      "next": "Next match",
+      "close": "Close the search"
+    },
+    "read": {
+      "speak": "Read the selected text aloud",
+      "stop": "Stop reading aloud"
     }
   },
   "viewer": {

@@ -10,7 +10,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import OcrTextLayer, { OCR_WORD_SELECTED_CLASS } from '../OcrTextLayer.jsx';
+import OcrTextLayer, { OCR_WORD_CURRENT_MATCH_CLASS, OCR_WORD_MATCH_CLASS, OCR_WORD_SELECTED_CLASS } from '../OcrTextLayer.jsx';
 import { countCharacters, isOcrLayerSelection, layoutOcrLines, measureWordWidth, ocrSelectionText, OCR_WORD_JOINER } from '../../utils/ocrTextLayout.js';
 
 const WORDS = [
@@ -39,7 +39,7 @@ describe('layoutOcrLines', () => {
     expect(line).toMatchObject({ top: 100, height: 50, fontSize: 50, lineHeight: 50 });
     expect(line.words).toHaveLength(2);
     // "Hej" measures 75 px at 50 px; 25 px after each of its three characters makes it 150 px.
-    expect(line.words[0]).toEqual({ text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, letterSpacing: 25, shiftX: 50, shiftY: 0, gapShiftX: 0, gapLetterSpacing: 0 });
+    expect(line.words[0]).toEqual({ index: 0, text: 'Hej', left: 50, top: 100, width: 150, height: 50, fontSize: 50, letterSpacing: 25, shiftX: 50, shiftY: 0, gapShiftX: 0, gapLetterSpacing: 0 });
     // The no-break space before "världen" follows the first word (150 px) in the flow and is
     // shifted to the first box's right edge (200), 50 px wide like the gap: 25 px of its own and
     // 25 px of spacing. "världen" then follows it at 200 in the flow; its box starts at 250.
@@ -397,5 +397,60 @@ describe('OcrTextLayer', () => {
     expect(layer).not.toBeNull();
     expect(layer.querySelectorAll('.ocr-text-layer-word')).toHaveLength(0);
     expect(layer.querySelector('.ocr-text-layer-flow').textContent).toBe('');
+  });
+});
+
+describe('OcrTextLayer search marks', () => {
+  let container;
+  let root;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  const render = (props) => act(() => {
+    root.render(createElement(OcrTextLayer, {
+      outcome: TWO_LINES_OUTCOME, renderWidth: 1000, renderHeight: 1000, zoom: 1, label: 'Layer', pageNumber: 1, pageKey: 'p1', ...props,
+    }));
+  });
+  const words = () => Array.from(container.querySelectorAll('.ocr-text-layer-word'));
+  const marked = (className) => words().filter((word) => word.classList.contains(className)).map((word) => word.textContent);
+
+  it('renders each word with its index in the outcome', () => {
+    render({});
+    expect(words().map((word) => word.getAttribute('data-word-index'))).toEqual(['0', '1', '2', '3']);
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual([]);
+  });
+
+  it('marks the words of every match, the current match on this page as such, and scrolls it into view', () => {
+    const scrolled = [];
+    Element.prototype.scrollIntoView = function scrollIntoView(options) { scrolled.push([this.textContent, options]); };
+    render({ search: { term: 'rad', current: { pageKey: 'p1', ordinal: 1 } } });
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual(['Rad']);
+    expect(marked(OCR_WORD_CURRENT_MATCH_CLASS)).toEqual(['Rad']);
+    expect(words()[0].classList.contains(OCR_WORD_MATCH_CLASS)).toBe(true);
+    expect(words()[2].classList.contains(OCR_WORD_CURRENT_MATCH_CLASS)).toBe(true);
+    expect(scrolled).toEqual([['Rad', { block: 'center', inline: 'center' }]]);
+    delete Element.prototype.scrollIntoView;
+  });
+
+  it('a phrase across the line break marks the words it reaches into; another page\'s current match is only a match here', () => {
+    render({ search: { term: 'ett rad', current: { pageKey: 'other', ordinal: 0 } } });
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual(['ett', 'Rad']);
+    expect(marked(OCR_WORD_CURRENT_MATCH_CLASS)).toEqual([]);
+  });
+
+  it('no term or a closed search marks nothing', () => {
+    render({ search: { term: '', current: null } });
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual([]);
+    render({ search: null });
+    expect(marked(OCR_WORD_MATCH_CLASS)).toEqual([]);
   });
 });

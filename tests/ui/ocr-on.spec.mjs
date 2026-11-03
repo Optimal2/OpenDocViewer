@@ -4,7 +4,9 @@
  * the CSP token a site adds (`'wasm-unsafe-eval'`), a synthetic scanned page drawn in the browser
  * (no document from anywhere else), the self-hosted engine, worker and Swedish/English models
  * served by the dev server from the same origin, and finally a text layer over the page whose
- * words can be selected, copied and found. Also proves what stays the same: the page image, the
+ * words can be selected, copied and found, the toolbar's search button with the page's OCR
+ * status and its search field marking the matches on the page, and the read-aloud button that
+ * hands the selection to speech synthesis. Also proves what stays the same: the page image, the
  * print stylesheet hiding the layer, and no request leaving the origin.
  */
 import { test, expect } from '@playwright/test';
@@ -69,6 +71,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // A throwaway page draws the scan; the viewer then loads it like any PNG document.
   await page.goto('/');
   const scan = await drawSyntheticScan(page);
+  // A recording speech synthesiser, installed before the viewer loads: the read-aloud button
+  // must hand the selection to `speechSynthesis.speak` as utterances in the UI language.
+  await page.addInitScript(() => {
+    const spoken = [];
+    window.__odvSpoken = spoken;
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: { cancel() {}, getVoices: () => [], speak(utterance) { spoken.push({ text: utterance.text, lang: utterance.lang }); } },
+    });
+  });
   await loadSession(page, {
     siteConfig: { ocr: { enabled: true } },
     session: SESSION,
@@ -77,10 +89,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   });
 
   await expect(page.locator('.document-render-container img').first()).toBeVisible();
-  const status = page.locator('.ocr-status');
+  // The page's OCR status is the toolbar's search button: its LED and tooltip, and it is
+  // disabled until the page's text is recognised. Nothing is drawn over the page itself.
+  const status = page.locator('.toolbar [data-odv-ocr="status"]');
   await expect(status).toBeVisible();
+  await expect(status).toBeDisabled();
+  await expect(page.locator('.ocr-status')).toHaveCount(0);
   await expect(status).toHaveAttribute('data-ocr-state', 'done', { timeout: 120000 });
-  await expect(status).toHaveText(/Text tolkad|Text recognised/);
+  await expect(status).toHaveAttribute('title', /Text tolkad|Text recognised/);
+  await expect(status).toBeEnabled();
+  await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
 
   const layer = page.locator('.ocr-text-layer');
   await expect(layer).toHaveCount(1);
@@ -186,10 +204,59 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(copied.text).toContain('Konto Belopp\n');
   expect(copied.text).not.toMatch(/\u00a0/);
 
-  // Print hides the layer and the status; the screen shows them.
+  // The read-aloud button appears while recognised text is selected (the whole layer is) and
+  // speaks the selection line by line in the UI language; while speaking it is a stop button.
+  const read = page.locator('.toolbar [data-odv-ocr="read"]');
+  await expect(read).toBeVisible();
+  await read.click();
+  await expect(read).toHaveAttribute('data-speaking', 'true');
+  const spoken = await page.evaluate(() => window.__odvSpoken);
+  expect(spoken.length).toBeGreaterThanOrEqual(3);
+  expect(spoken[0]).toEqual({ text: 'OpenDocViewer OCR', lang: expect.stringMatching(/^(sv|en)-/) });
+  expect(spoken[1].text).toBe('Hej världen 2026');
+  await read.click();
+  await expect(read).not.toHaveAttribute('data-speaking', 'true');
+  await page.evaluate(() => window.getSelection().removeAllRanges());
+  await expect(read).toHaveCount(0);
+
+  // The toolbar's search in the recognised text: the field grows out of the status button, a
+  // phrase across the line break is found, the match's words are marked on the page (the
+  // current match stronger), Enter walks the matches and Escape closes the field.
+  await status.click();
+  const searchField = page.locator('.toolbar-ocr-search-input');
+  await expect(searchField).toBeFocused();
+  await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBeGreaterThan(200);
+  await searchField.fill('ocr hej');
+  const searchStatus = page.locator('.toolbar-ocr-search-status');
+  await expect(searchStatus).toHaveText(/^1 (of|av) 1/);
+  await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['OCR', 'Hej']);
+  await searchField.fill('hej');
+  await expect(searchStatus).toHaveText(/^1 (of|av) 1/);
+  await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['Hej']);
+  await searchField.fill('o');
+  const matchCount = Number((await searchStatus.textContent()).match(/(\d+) (of|av) (\d+)/)[3]);
+  expect(matchCount).toBeGreaterThanOrEqual(3);
+  // Several matches can fall in one word ("OpenDocViewer" holds two), so marked words are
+  // fewer than matches, never more.
+  const markedWords = await layer.locator('.ocr-text-layer-word--match, .ocr-text-layer-word--match-current').count();
+  expect(markedWords).toBeGreaterThanOrEqual(3);
+  expect(markedWords).toBeLessThanOrEqual(matchCount);
+  await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
+  await searchField.press('Enter');
+  await expect(searchStatus).toHaveText(new RegExp(`^2 (of|av) ${matchCount}`));
+  await searchField.press('Shift+Enter');
+  await expect(searchStatus).toHaveText(new RegExp(`^1 (of|av) ${matchCount}`));
+  await searchField.fill('finnsinte');
+  await expect(searchStatus).toHaveText(/No matches|Inga träffar/);
+  await searchField.press('Escape');
+  await expect(status).toBeFocused();
+  await expect(layer.locator('.ocr-text-layer-word--match, .ocr-text-layer-word--match-current')).toHaveCount(0);
+  await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
+
+  // Print hides the layer and the toolbar's OCR group; the screen shows them.
   await page.emulateMedia({ media: 'print' });
   expect(await layer.evaluate((element) => getComputedStyle(element).display)).toBe('none');
-  expect(await status.evaluate((element) => getComputedStyle(element).display)).toBe('none');
+  expect(await page.locator('.toolbar-ocr-actions').evaluate((element) => getComputedStyle(element).display)).toBe('none');
   await page.emulateMedia({ media: 'screen' });
   await expect(layer).toBeVisible();
 

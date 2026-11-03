@@ -1,5 +1,7 @@
 /* File: src/styles/ocr.css
-   OCR text layer and status (components/OcrTextLayer.jsx, components/DocumentRender.jsx).
+   OCR text layer with its search marks (components/OcrTextLayer.jsx) and the toolbar's OCR group:
+   the search whose button shows the page's status, and the read-aloud button
+   (components/DocumentToolbar/OcrSearchBar.jsx, ReadSelectionButton.jsx).
    Mounted only while `ocr.enabled` is the literal true and a page has an outcome; with the
    switch off none of these selectors match anything. */
 
@@ -97,10 +99,6 @@
   background: transparent;
 }
 
-.ocr-text-layer-word--selected {
-  background: rgba(11, 87, 208, 0.3);
-}
-
 /* High-contrast (forced colours) would repaint the transparent text in the system text colour
    on top of the scan; keep it invisible there too, with the system highlight for selection. */
 @media (forced-colors: active) {
@@ -123,33 +121,106 @@
   }
 }
 
-/* Discreet per-page status in the viewport corner ("Recognising text…", "Text recognised"). */
-.ocr-status {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 2;
-  max-width: calc(100% - 24px);
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: var(--odv-surface-elevated, rgba(255, 255, 255, 0.9));
+/* Marks of the toolbar's OCR search (components/OcrTextLayer.jsx): the words of every match in
+   a soft tint, the current match stronger; painted over the word boxes like the selection
+   marks. The selection mark wins where both apply. */
+.ocr-text-layer-word--match {
+  background: rgba(255, 196, 0, 0.35);
+}
+
+.ocr-text-layer-word--match-current {
+  background: rgba(255, 140, 0, 0.55);
+  outline: 2px solid rgba(255, 120, 0, 0.9);
+  outline-offset: 0;
+}
+
+.ocr-text-layer-word--selected {
+  background: rgba(11, 87, 208, 0.3);
+}
+
+@media (forced-colors: active) {
+  .ocr-text-layer-word--match {
+    background: Mark;
+  }
+
+  .ocr-text-layer-word--match-current {
+    background: Mark;
+    outline-color: MarkText;
+  }
+}
+
+/* The toolbar's OCR group, right of the end actions (theme, language, help): the read-aloud
+   button, shown only while recognised text is selected, and the search button, whose field grows
+   out of it to the right. */
+.toolbar-ocr-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--odv-toolbar-end-gap);
+  margin-left: var(--odv-toolbar-end-group-margin-left);
+  flex-shrink: 0;
+}
+
+.toolbar-ocr-search {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The field: zero wide and hidden until opened, then grown to its width in a short ease; closed
+   again it shrinks back first and hides when the transition has ended. */
+.toolbar-ocr-search-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: width 150ms ease, margin-left 150ms ease, visibility 0s linear 150ms;
+}
+
+.toolbar-ocr-search.is-open .toolbar-ocr-search-panel {
+  width: min(340px, 40vw);
+  margin-left: 4px;
+  visibility: visible;
+  transition: width 150ms ease, margin-left 150ms ease, visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-ocr-search-panel,
+  .toolbar-ocr-search.is-open .toolbar-ocr-search-panel {
+    transition: none;
+  }
+}
+
+.toolbar-ocr-search-input {
+  flex: 1 1 auto;
+  min-width: 60px;
+  height: calc(var(--odv-toolbar-button-size) - 4px);
+  padding: 0 6px;
+  border: 1px solid var(--thumbnail-border-color, #bbb);
+  border-radius: var(--border-radius, 4px);
+  background: var(--canvas-background-color, #fff);
+  color: var(--text-color, #222);
+  font-size: 0.85rem;
+}
+
+.toolbar-ocr-search-status {
+  flex: 0 1 auto;
+  max-width: 45%;
+  padding: 0 4px;
+  overflow: hidden;
   color: var(--text-muted-color, rgba(0, 0, 0, 0.68));
-  box-shadow: var(--box-shadow, 0 1px 3px rgba(0, 0, 0, 0.2));
-  font-size: 12px;
-  line-height: 1.4;
-  pointer-events: none;
-  user-select: none;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.ocr-status[data-ocr-state='failed'],
-.ocr-status[data-ocr-state='unavailable'] {
-  color: var(--odv-signature-warning-color, #b25d00);
-}
-
-/* Printing and PDF export use the page images only: the layer and the status never print. */
+/* Printing and PDF export use the page images only: the layer never prints. */
 @media print {
   .ocr-text-layer,
-  .ocr-status {
+  .toolbar-ocr-actions {
     display: none !important;
   }
 }

@@ -215,6 +215,8 @@ import { createContext } from 'react';
  * @property {(string|null)} ocrEngineFailure
  *   Why the OCR engine cannot start in this session (src/ocr/engine.js failure codes), else null.
  * @property {function(Array.<number>): void} setOcrFocusPageIndexes
+ * @property {(Object|null)} ocrSearch  The toolbar's OCR search: `{ term, current: ({ pageKey, ordinal }|null) }`, or null when closed.
+ * @property {function((Object|null)): void} setOcrSearch
  *   Indexes into allPages of the displayed page(s), primary first; the OCR queue covers them
  *   and a fixed number of neighbours. A no-op while OCR is off.
  * @property {function(number, number): void} scheduleSourceWarmup

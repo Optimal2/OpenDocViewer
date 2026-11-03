@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 19. Line count: 8060. JSDoc symbol count: 138.
+File count: 21. Line count: 8406. JSDoc symbol count: 145.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -22,7 +22,7 @@ Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, 
 
 Exports: `DocumentToolbar`
 
-Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/components/DocumentToolbar/PageNavigationButtons.jsx`, `src/components/DocumentToolbar/ZoomButtons.jsx`, `src/components/DocumentToolbar/SplitToolbarButton.jsx`, `src/components/DocumentToolbar/LanguageMenuButton.jsx`, `src/components/DocumentToolbar/ThemeMenuButton.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/DocumentToolbar/HelpMenuButton.jsx`, `src/components/DocumentToolbar/ManualOverlayDialog.jsx`, `src/components/DocumentToolbar/AboutOverlayDialog.jsx`
+Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/components/DocumentToolbar/PageNavigationButtons.jsx`, `src/components/DocumentToolbar/ZoomButtons.jsx`, `src/components/DocumentToolbar/SplitToolbarButton.jsx`, `src/components/DocumentToolbar/LanguageMenuButton.jsx`, `src/components/DocumentToolbar/ThemeMenuButton.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/DocumentToolbar/HelpMenuButton.jsx`, `src/components/DocumentToolbar/OcrSearchBar.jsx`, `src/components/DocumentToolbar/ReadSelectionButton.jsx`
 
 Symbols:
 
@@ -112,6 +112,22 @@ Symbols:
 - `createManualSearchFolder` (function) - Build a case\-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.
 - `foldManualSearchText` (function) - Case\-fold text one code point at a time and keep, for every folded code unit, the original code\-unit range of the character it came from.
 
+## src/components/DocumentToolbar/OcrSearchBar.jsx
+
+Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button and the status as its tooltip; the button is enabled on
+
+Exports: `OcrSearchBar`
+
+Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`
+
+Symbols:
+
+- `matchIdOf` (function) - No description.
+- `module.exports` (function) - No description.
+- `OcrSearchBar~goToMatch` (constant) - No description.
+- `OcrSearchBar~step` (constant) - Enter / the arrows: a current match on another page is shown first \(the position does not move\); on its page, the next or previous match becomes current, wrapping round.
+- `OcrSearchBar~handleInputKeyDown` (function) - No description.
+
 ## src/components/DocumentToolbar/PageNavigationButtons.jsx
 
 Page navigation controls with support for single\-step clicks and continuous stepping on press\-and\-hold.
@@ -179,6 +195,19 @@ Symbols:
 - `module:printRangeDialogHelpers.normalizePdfOrientationMode` (function) - No description.
 - `module:printRangeDialogHelpers.buildSelectedOptionDetails` (function) - Build token\-friendly details for the selected option without forcing templates to use list indexes.
 - `module:printRangeDialogHelpers.ensureODVPrintCSS` (function) - Ensure base print CSS is injected once per document.
+
+## src/components/DocumentToolbar/ReadSelectionButton.jsx
+
+Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers \(components/OcrTextLayer.jsx\) and the browser can speak \(utils/speech.js\).
+
+Exports: `ReadSelectionButton`
+
+Local imports: `src/utils/ocrTextLayout.js`, `src/utils/speech.js`
+
+Symbols:
+
+- `selectedLayerText` (function) - No description.
+- `module.exports` (function) - No description.
 
 ## src/components/DocumentToolbar/SplitToolbarButton.jsx
 

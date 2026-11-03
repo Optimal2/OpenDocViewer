@@ -37,8 +37,8 @@
 - `src/logging/systemLogger.js`: 41 incoming local imports
 - `src/utils/runtimeConfig.js`: 27 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
+- `src/contexts/viewerContext.js`: 13 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
-- `src/contexts/viewerContext.js`: 12 incoming local imports
 - `src/utils/imageAdjustments.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/viewerPreferences.js`: 7 incoming local imports
@@ -51,6 +51,6 @@
 - `src/utils/compareOverlay.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
 - `src/utils/printSanitize.js`: 4 incoming local imports
+- `src/components/common/StatusLed.jsx`: 3 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
 - `src/components/DocumentRender.jsx`: 3 incoming local imports
-- `src/components/DocumentViewer/CompareTransformControls.jsx`: 3 incoming local imports

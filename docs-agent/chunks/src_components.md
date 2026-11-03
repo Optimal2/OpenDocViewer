@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 19. Line count: 8303. JSDoc symbol count: 111.
+File count: 19. Line count: 8319. JSDoc symbol count: 112.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -64,13 +64,13 @@ Symbols:
 - `normalizeSize` (function) - No description.
 - `hasUsableSize` (function) - No description.
 - `isBlobAssetUrl` (function) - No description.
-- `OCR_STATUS_FALLBACK` (constant) - English fallbacks of the OCR status texts \(public/locales/ /common.json, ocr.status \).
 - `DisplayedAsset` (typedef) - No description.
 - `DocumentRender` (constant) - No description.
 - `<anonymous>~lastNaturalSizeRef` (constant) - Natural size of the last finalized asset, per page index, for boost zoom compensation.
 - `<anonymous>~resetAssetRetry` (constant) - Reset the per\-page blob\-URL retry tracker after a successful load or when the target page changes.
 - `<anonymous>~clearLoadingOverlayTimer` (constant) - No description.
 - `<anonymous>~claimAssetRetry` (constant) - No description.
+- `<anonymous>~resolveCustomFitOptions` (constant) - No description.
 
 ## src/components/DocumentSelectionPanel.jsx
 
@@ -147,13 +147,15 @@ Symbols:
 
 Selectable, invisible text over a recognised page image.
 
-Exports: `OCR_WORD_SELECTED_CLASS`, `OcrTextLayer`
+Exports: `OCR_WORD_SELECTED_CLASS`, `OCR_WORD_MATCH_CLASS`, `OCR_WORD_CURRENT_MATCH_CLASS`, `OcrTextLayer`
 
-Local imports: `src/utils/ocrTextLayout.js`
+Local imports: `src/utils/ocrTextLayout.js`, `src/utils/ocrSearch.js`
 
 Symbols:
 
 - `OCR_WORD_SELECTED_CLASS` (constant) - Class of a word that the current selection touches.
+- `OCR_WORD_MATCH_CLASS` (constant) - Class of a word inside a match of the toolbar's OCR search.
+- `OCR_WORD_CURRENT_MATCH_CLASS` (constant) - Class of a word inside the current match of the toolbar's OCR search.
 - `OcrTextLayer` (function) - No description.
 
 ## src/components/PrintSelectionWorkspace.jsx

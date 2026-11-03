@@ -439,12 +439,31 @@ What the user sees with OCR on: the page image is unchanged. Over a recognised p
 invisible text layer (one transparent word per recognised word, placed on the ink, in one text
 flow with the lines of the page), so dragging over the words selects text, Ctrl+C copies it as
 it reads on the page, and the browser's own find (Ctrl+F) matches words and phrases in it;
-dragging on a blank part of the page still pans. A small status in
-the corner of the page area says "Recognising text…", "Text recognised", "No text found", "The
-text could not be recognised" or "Text recognition is unavailable" (the engine could not start;
-see CSP below), announced to screen readers through a polite live region. A page skipped because
-it has its own text layer shows no status. Printing and PDF export never include the layer or
-the status. Texts are in `public/locales/<lng>/common.json` under `ocr`.
+dragging on a blank part of the page still pans.
+
+The toolbar gets an OCR group to the right of the theme, language and help buttons:
+
+- A search button that doubles as the page's OCR status: a small LED on the button and the
+  status as its tooltip ("Recognising text…", "Text recognised", "No text found", "Not
+  recognised: the page has its own text", "The text could not be recognised" or "Text recognition
+  is unavailable", the last when the engine could not start; see CSP below). The button is
+  enabled once the displayed page's text is recognised. Clicking it grows a search field out of
+  the button to the right (a short ease). The search covers only the recognised text, of every
+  page that has an outcome, in page order; it is case-insensitive and finds a phrase also across
+  a line break. Typing shows the position ("1 of 5") and, while not every page has an outcome,
+  how many pages the search covers ("2 of 300 pages recognised"); the matches are marked on the
+  page over the words, the current match stronger and scrolled into view. Enter and the arrow
+  buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
+  one; Escape closes the field. The browser's own find (Ctrl+F) keeps working on the layer.
+- A read-aloud button that appears only while recognised text is selected, if the browser has
+  speech synthesis (Web Speech API). Clicking it reads the selection as it reads on the page,
+  line by line, with an installed voice of the viewer's UI language (Swedish text needs a
+  Swedish voice installed in the operating system; otherwise the browser's default voice reads
+  it). While reading, the button is a stop button. The voices are the ones the browser offers; a
+  voice installed locally is preferred over an online one of the same language.
+
+Printing and PDF export never include the layer or the toolbar's OCR group. Texts are in
+`public/locales/<lng>/common.json` under `ocr`.
 
 ## Toolbar Button Size
 

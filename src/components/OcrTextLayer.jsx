@@ -17,15 +17,23 @@
  * down to the next line, so the native highlight is transparent and the layer marks the
  * selected words itself (a class set on `selectionchange`, painted over the word's box). Copy
  * writes the text as it reads on the page (spaces between words, newlines between lines) when
- * the selection lies within text layers. Mounted only for a page with a `done` outcome, so the
- * default code path (OCR off) renders nothing here. Hidden in print (styles/ocr.css).
+ * the selection lies within text layers. The toolbar's OCR search (`search`: the term and the
+ * current match, published through ViewerContext) is marked here too: every match on the page
+ * gets a class on its words, the current match another, and the current match is scrolled into
+ * view. Mounted only for a page with a `done` outcome, so the default code path (OCR off)
+ * renders nothing here. Hidden in print (styles/ocr.css).
  */
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { isOcrLayerSelection, layoutOcrLines, ocrSelectionText, OCR_WORD_JOINER } from '../utils/ocrTextLayout.js';
+import { findOcrMatchesInOutcome } from '../utils/ocrSearch.js';
 
 /** Class of a word that the current selection touches. */
 export const OCR_WORD_SELECTED_CLASS = 'ocr-text-layer-word--selected';
+/** Class of a word inside a match of the toolbar's OCR search. */
+export const OCR_WORD_MATCH_CLASS = 'ocr-text-layer-word--match';
+/** Class of a word inside the current match of the toolbar's OCR search. */
+export const OCR_WORD_CURRENT_MATCH_CLASS = 'ocr-text-layer-word--match-current';
 
 /**
  * @param {Object} props
@@ -39,9 +47,12 @@ export const OCR_WORD_SELECTED_CLASS = 'ocr-text-layer-word--selected';
  * @param {number=} props.rotation  0, 90, 180 or 270 (default 0).
  * @param {string} props.label  Accessible name of the layer.
  * @param {number} props.pageNumber
+ * @param {string=} props.pageKey  utils/ocrPageKey.js key of the page (matches `search.current.pageKey`).
+ * @param {({ term:string, current:({ pageKey:string, ordinal:number }|null) }|null)=} props.search
+ *   The toolbar's OCR search: the normalised term and the current match, or null when closed.
  * @returns {(React.ReactElement|null)}
  */
-function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, label, pageNumber }) {
+function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, label, pageNumber, pageKey = '', search = null }) {
   const scale = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
   const turn = ((Math.round(Number(rotation) || 0) % 360) + 360) % 360;
   const swapAxes = turn === 90 || turn === 270;
@@ -57,6 +68,32 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
     () => layoutOcrLines(outcome?.words, imageWidth, imageHeight, frameWidth, frameHeight),
     [frameHeight, frameWidth, imageHeight, imageWidth, outcome?.words]
   );
+
+  // Marks of the toolbar's OCR search (utils/ocrSearch.js, the same function the toolbar counts
+  // with): the words of every match on this page, the current match's words marked as such.
+  const searchTerm = search?.term || '';
+  const currentOrdinal = search?.current && search.current.pageKey === pageKey ? Number(search.current.ordinal) : -1;
+  const searchMarks = useMemo(() => {
+    const marks = new Map();
+    if (!searchTerm || !outcome) return marks;
+    findOcrMatchesInOutcome(outcome, searchTerm).forEach((match, ordinal) => {
+      const kind = ordinal === currentOrdinal ? OCR_WORD_CURRENT_MATCH_CLASS : OCR_WORD_MATCH_CLASS;
+      for (const index of match.wordIndexes) {
+        if (kind === OCR_WORD_CURRENT_MATCH_CLASS || !marks.has(index)) marks.set(index, kind);
+      }
+    });
+    return marks;
+  }, [currentOrdinal, outcome, searchTerm]);
+
+  // The current match is scrolled into the viewport (the pane scrolls; the viewer's layout is fixed).
+  useEffect(() => {
+    const flow = flowRef.current;
+    if (!flow || currentOrdinal < 0 || !searchTerm) return;
+    const word = flow.querySelector(`.${OCR_WORD_CURRENT_MATCH_CLASS}`);
+    if (word && typeof word.scrollIntoView === 'function') {
+      try { word.scrollIntoView({ block: 'center', inline: 'center' }); } catch { /* older engines */ }
+    }
+  }, [currentOrdinal, layout, searchTerm]);
 
   // Mark the words the selection covers; the native highlight is transparent (styles/ocr.css).
   useEffect(() => {
@@ -161,7 +198,8 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
                       </span>
                     ) : null}
                     <span
-                      className="ocr-text-layer-word"
+                      className={`ocr-text-layer-word${searchMarks.has(word.index) ? ` ${searchMarks.get(word.index)}` : ''}`}
+                      data-word-index={word.index}
                       style={{
                         left: `${word.shiftX}px`,
                         top: `${word.shiftY}px`,
@@ -196,6 +234,11 @@ OcrTextLayer.propTypes = {
   rotation: PropTypes.number,
   label: PropTypes.string.isRequired,
   pageNumber: PropTypes.number.isRequired,
+  pageKey: PropTypes.string,
+  search: PropTypes.shape({
+    term: PropTypes.string,
+    current: PropTypes.shape({ pageKey: PropTypes.string, ordinal: PropTypes.number }),
+  }),
 };
 
 export default OcrTextLayer;

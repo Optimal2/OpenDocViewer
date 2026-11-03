@@ -27,6 +27,8 @@ import ThemeMenuButton from './ThemeMenuButton.jsx';
 import PrintPipelineDialogs from './PrintPipelineDialogs.jsx';
 import { normalizeToolbarPageNumber } from './usePrintPipeline.js';
 import HelpMenuButton from './HelpMenuButton.jsx';
+import OcrSearchBar from './OcrSearchBar.jsx';
+import ReadSelectionButton from './ReadSelectionButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import {
@@ -35,6 +37,7 @@ import {
   isCompareCurtainEnabled,
   isCompareOverlayEnabled,
   isFineTuneEnabled,
+  isOcrEnabled,
 } from '../../utils/runtimeConfig.js';
 import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
 import { isIdentityCompareTransform, selectCompareTransform } from '../../utils/compareTransform.js';
@@ -1376,6 +1379,15 @@ const DocumentToolbar = ({
           statusLedTitle={runtimeStatusLedTitle}
         />
       </div>
+
+      {/* OCR (only while `ocr.enabled` is the literal true): read the selection aloud, and the
+          search in the recognised text whose button doubles as the page's OCR status. */}
+      {isOcrEnabled() ? (
+        <div className="toolbar-ocr-actions">
+          <ReadSelectionButton />
+          <OcrSearchBar pageNumber={pageNumber} setPageNumber={setPageNumber} allPages={allPages} />
+        </div>
+      ) : null}
 
       {/* Print dialog and PDF progress of the shared print pipeline (also hosted by the compare views) */}
       <PrintPipelineDialogs pipeline={printPipeline} />

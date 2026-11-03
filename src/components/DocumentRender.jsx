@@ -89,15 +89,6 @@ function isBlobAssetUrl(url) {
   return /^blob:/i.test(String(url || '').trim());
 }
 
-/** English fallbacks of the OCR status texts (public/locales/<lng>/common.json, `ocr.status`). */
-const OCR_STATUS_FALLBACK = Object.freeze({
-  working: 'Recognising text…',
-  done: 'Text recognised',
-  noText: 'No text found',
-  failed: 'The text could not be recognised',
-  unavailable: 'Text recognition is unavailable',
-});
-
 /**
  * @typedef {Object} DisplayedAsset
  * @property {string} url
@@ -156,7 +147,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     leasePrintablePageUrl,
     documentLoadingConfig,
     ocrPages,
-    ocrEngineFailure,
+    ocrSearch,
   } = useContext(ViewerContext);
 
   const fallbackLoadingConfig = useMemo(() => getDocumentLoadingConfig(), []);
@@ -1095,25 +1086,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const displayedUrl = displayedAsset.url;
 
   // OCR outcome of the displayed page (empty map while ocr.enabled is not the literal true, so
-  // nothing below mounts on the default code path). The status text follows the outcome; a
-  // page the engine could not serve shows why once, through ocrEngineFailure.
+  // nothing below mounts on the default code path). The page's status is shown by the toolbar's
+  // search button (DocumentToolbar/OcrSearchBar.jsx, utils/ocrStatus.js).
   const displayedPage = (Array.isArray(allPages) && allPages[displayedAsset.pageIndex]) || null;
-  const ocrEntry = displayedPage && ocrPages ? ocrPages[ocrPageKeyOf(displayedPage)] || null : null;
-  const ocrStatusKey = useMemo(() => {
-    if (ocrEngineFailure) return 'unavailable';
-    switch (ocrEntry?.status) {
-      case 'queued':
-      case 'probing':
-      case 'recognizing':
-        return 'working';
-      case 'done':
-        return Array.isArray(ocrEntry.words) && ocrEntry.words.length > 0 ? 'done' : 'noText';
-      case 'failed':
-        return 'failed';
-      default:
-        return '';
-    }
-  }, [ocrEngineFailure, ocrEntry]);
+  const displayedPageKey = displayedPage ? ocrPageKeyOf(displayedPage) : '';
+  const ocrEntry = displayedPageKey && ocrPages ? ocrPages[displayedPageKey] || null : null;
   const isRequestedAssetVisible = displayedAsset.pageIndex === currentIndex && !!displayedUrl && !!imageLoaded;
 
   useEffect(() => {
@@ -1200,16 +1177,12 @@ const DocumentRender = React.forwardRef(function DocumentRender(
             zoom={zoom}
             rotation={normalizedRotation}
             pageNumber={displayedAsset.pageNumber || pageNumber}
+            pageKey={displayedPageKey}
+            search={ocrSearch || null}
             label={t('ocr.textLayerLabel', { page: displayedAsset.pageNumber || pageNumber, defaultValue: 'Recognised text, page {page}' })}
           />
         )}
       </div>
-
-      {ocrStatusKey && !showErrorState && (
-        <div className="ocr-status" data-odv-ocr="status" data-ocr-state={ocrStatusKey} role="status" aria-live="polite">
-          {t(`ocr.status.${ocrStatusKey}`, { defaultValue: OCR_STATUS_FALLBACK[ocrStatusKey] })}
-        </div>
-      )}
 
       {showErrorState && (
         <div className="document-render-status-overlay error-state">

@@ -82,6 +82,7 @@ export function measureWordWidth(text, fontSize) {
 
 /**
  * @typedef {Object} OcrWordPlacement
+ * @property {number} index  The word's index in the outcome's `words` (rendered as data-word-index).
  * @property {string} text
  * @property {number} left  CSS px inside the unrotated frame.
  * @property {number} top
@@ -122,6 +123,36 @@ export function measureWordWidth(text, fontSize) {
  */
 
 /**
+ * The words of an outcome in reading order, grouped into lines by the rule the text layer lays
+ * them out with: a word whose box starts below the vertical middle of the previous word's box
+ * begins a new line. Words without text or with an empty box are left out. Each word keeps its
+ * index in the outcome's `words` (the text layer renders it as `data-word-index`, the search
+ * in utils/ocrSearch.js maps matches back through it). Image pixel units.
+ *
+ * @param {Array<Object>} words  `{ text, bbox: { x0, y0, x1, y1 } }`.
+ * @returns {Array<Array<{ index:number, text:string, x0:number, y0:number, x1:number, y1:number }>>}
+ */
+export function ocrReadingOrder(words) {
+  const lines = [];
+  let previous = null;
+  (Array.isArray(words) ? words : []).forEach((word, index) => {
+    const text = String(word?.text ?? '');
+    const box = word?.bbox;
+    if (!text || !box) return;
+    const x0 = Number(box.x0);
+    const y0 = Number(box.y0);
+    const x1 = Number(box.x1);
+    const y1 = Number(box.y1);
+    if (!(x1 - x0 > 0) || !(y1 - y0 > 0)) return;
+    const placed = { index, text, x0, y0, x1, y1 };
+    if (!previous || placed.y0 > previous.y0 + (previous.y1 - previous.y0) / 2) lines.push([]);
+    lines[lines.length - 1].push(placed);
+    previous = placed;
+  });
+  return lines;
+}
+
+/**
  * Place the words of an outcome inside an unrotated frame of `frameWidth` × `frameHeight` CSS px,
  * grouped into lines. Words without text or with an empty box are left out. A word whose box
  * starts below the vertical middle of the previous word's box begins a new line. A line that
@@ -142,21 +173,15 @@ export function layoutOcrLines(words, imageWidth, imageHeight, frameWidth, frame
   const sy = imageHeight > 0 ? frameHeight / imageHeight : 0;
   if (!(sx > 0) || !(sy > 0)) return { top: 0, lines: [] };
 
-  /** @type {Array<Array<{ text: string, left: number, top: number, width: number, height: number }>>} */
-  const groups = [];
-  let previous = null;
-  for (const word of Array.isArray(words) ? words : []) {
-    const text = String(word?.text ?? '');
-    const box = word?.bbox;
-    if (!text || !box) continue;
-    const width = (Number(box.x1) - Number(box.x0)) * sx;
-    const height = (Number(box.y1) - Number(box.y0)) * sy;
-    if (!(width > 0) || !(height > 0)) continue;
-    const placed = { text, left: Number(box.x0) * sx, top: Number(box.y0) * sy, width, height };
-    if (!previous || placed.top > previous.top + previous.height / 2) groups.push([]);
-    groups[groups.length - 1].push(placed);
-    previous = placed;
-  }
+  /** @type {Array<Array<{ index: number, text: string, left: number, top: number, width: number, height: number }>>} */
+  const groups = ocrReadingOrder(words).map((line) => line.map((word) => ({
+    index: word.index,
+    text: word.text,
+    left: word.x0 * sx,
+    top: word.y0 * sy,
+    width: (word.x1 - word.x0) * sx,
+    height: (word.y1 - word.y0) * sy,
+  })));
 
   const lines = groups.map((group) => {
     const top = Math.min(...group.map((word) => word.top));
