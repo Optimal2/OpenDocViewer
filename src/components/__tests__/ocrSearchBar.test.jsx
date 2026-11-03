@@ -83,7 +83,6 @@ describe('OcrSearchBar', () => {
     root = createRoot(mount);
     if (anchorRight > 0) {
       Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1000 });
-      mount.getBoundingClientRect = () => ({ width: 32, height: 32, top: 0, left: anchorRight - 32, right: anchorRight, bottom: 32 });
     }
   };
   const button = () => container.querySelector('[data-odv-ocr="status"]');
@@ -152,19 +151,25 @@ describe('OcrSearchBar', () => {
   it('the position is right in the same render as the matches, never "0 of N"', () => {
     render({ ocrPages: { [KEY(0)]: done(['Hej', 'hej']) } });
     act(() => button().click());
-    // Every text the status node commits while the term is typed; a position chosen in an
-    // effect after the render would commit "0 of 2" first.
-    const texts = [];
-    const observer = new MutationObserver((records) => {
-      for (const record of records) texts.push(record.target.textContent ?? '');
+    // Every text the status node held BEFORE each change while the term is typed (the old
+    // values and the removed nodes, not the node's text after the fact): a position chosen in
+    // an effect after the render commits "0 of 2" first and replaces it in a second commit.
+    const before = [];
+    const record = (records) => {
+      for (const entry of records) {
+        if (entry.type === 'characterData') before.push(entry.oldValue ?? '');
+        for (const node of entry.removedNodes) before.push(node.textContent ?? '');
+      }
+    };
+    const observer = new MutationObserver(record);
+    observer.observe(container.querySelector('.toolbar-ocr-search-status'), {
+      childList: true, characterData: true, characterDataOldValue: true, subtree: true,
     });
-    observer.observe(container.querySelector('.toolbar-ocr-search-status'), { childList: true, characterData: true, subtree: true });
     type('hej');
-    texts.push(...observer.takeRecords().map((record) => record.target.textContent ?? ''));
+    record(observer.takeRecords());
     observer.disconnect();
     expect(status()).toBe('1 of 2 · 1 of 3 pages recognised');
-    expect(texts.length).toBeGreaterThan(0);
-    for (const text of texts) expect(text).not.toMatch(/^0 /);
+    for (const text of before) expect(text).not.toMatch(/^0 /);
   });
 
   it('a match on a page the print selection hides: the first Enter asks for its page, the next moves on', () => {
@@ -185,6 +190,12 @@ describe('OcrSearchBar', () => {
     // Not asked for page 3 again: moved on (wrapping round to the first match, on page 2).
     expect(setPageNumber).toHaveBeenCalledTimes(1);
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(1), ordinal: 0 } });
+    // A new term forgets the page asked for: its first match on page 3 is asked for again.
+    type('he');
+    key('Enter');
+    key('Enter');
+    expect(setPageNumber).toHaveBeenCalledTimes(2);
+    expect(setPageNumber).toHaveBeenLastCalledWith(3);
   });
 
   it('Escape closes the field from the step buttons too', () => {
@@ -307,8 +318,9 @@ describe('OcrSearchBar', () => {
     // the search's root no layout of its own, so the test lends it the mount's rect.)
     fakeToolbar({ width: 1000, scrollWidth: 1168, spacerWidth: 0, anchorRight: 1168 });
     render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
-    const searchRoot = container.querySelector('.toolbar-ocr-search');
-    searchRoot.getBoundingClientRect = () => ({ width: 32, height: 32, top: 0, left: 1136, right: 1168, bottom: 32 });
+    // The button is the anchor (the root would also hold an open inline field).
+    button().getBoundingClientRect = () => ({ width: 32, height: 32, top: 0, left: 1136, right: 1168, bottom: 32 });
+    container.querySelector('.toolbar-ocr-search').getBoundingClientRect = () => ({ width: 376, height: 32, top: 0, left: 1136, right: 1512, bottom: 32 });
     act(() => button().click());
     expect(panel().getAttribute('data-placement')).toBe('hanging');
     expect(panel().style.right).toBe('176px');

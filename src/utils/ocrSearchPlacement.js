@@ -12,7 +12,7 @@
 export const OCR_SEARCH_PANEL_WIDTH = 340;
 /** Below this inline width the field hangs under the toolbar instead. */
 export const OCR_SEARCH_PANEL_MIN_INLINE_WIDTH = 200;
-/** Air kept between the field and the rest of the toolbar, or the viewport edge when hanging. */
+/** Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging. */
 export const OCR_SEARCH_PANEL_MARGIN = 16;
 /** Air between the toolbar's lower edge and a hanging field. */
 export const OCR_SEARCH_PANEL_HANG_GAP = 6;
@@ -22,7 +22,7 @@ export const OCR_SEARCH_PANEL_HANG_GAP = 6;
  * @property {('inline'|'hanging')} mode
  * @property {number} width  CSS px of the open field.
  * @property {number} offset  Hanging only: CSS px the field is pulled left of its anchor (the
- *   search's right edge) so that it ends inside the viewport when the anchor itself lies
+ *   button's right edge) so that it ends inside the viewport when the anchor itself lies
  *   outside (a toolbar that overflows on its own). 0 inline.
  * @property {number} top  Hanging only: CSS px between the search's lower edge and the field's
  *   top, so that the field starts below the toolbar's lower edge (the search sits inside the
@@ -38,9 +38,9 @@ export const OCR_SEARCH_PANEL_HANG_GAP = 6;
  * @param {number} measures.inlinePanelWidth  What the field takes inline right now (0 when closed
  *   or hanging): it is room too, since the field is being re-placed.
  * @param {number} measures.viewportWidth  For the hanging field's cap and offset.
- * @param {number=} measures.anchorRight  Right edge of the search (the hanging field's anchor) in
+ * @param {number=} measures.anchorRight  Right edge of the button (the hanging field's anchor) in
  *   viewport px; beyond the viewport, the field is pulled left by the difference.
- * @param {number=} measures.anchorBottom  Lower edge of the search in viewport px.
+ * @param {number=} measures.anchorBottom  Lower edge of the button in viewport px.
  * @param {number=} measures.toolbarBottom  Lower edge of the toolbar in viewport px; a hanging
  *   field starts below it.
  * @returns {OcrSearchPlacement}
@@ -75,9 +75,12 @@ export function resolveOcrSearchPlacement({
  *
  * @param {(HTMLElement|null)} root  The `.toolbar-ocr-search` element.
  * @param {(HTMLElement|null)} panel  Its field element.
+ * @param {(HTMLElement|null)=} anchor  The button the field hangs from; the root when omitted.
+ *   Measured on its own because the root also holds the open inline field: re-placed from
+ *   inline to hanging on a resize, the root's right edge would be the field's, not the button's.
  * @returns {OcrSearchPlacement}
  */
-export function measureOcrSearchPlacement(root, panel) {
+export function measureOcrSearchPlacement(root, panel, anchor = null) {
   const toolbar = root && typeof root.closest === 'function' ? root.closest('.toolbar') : null;
   const spacer = toolbar ? toolbar.querySelector('.toolbar-spacer') : null;
   if (!toolbar || !spacer || !panel) return resolveOcrSearchPlacement({ toolbarWidth: 0 });
@@ -86,7 +89,7 @@ export function measureOcrSearchPlacement(root, panel) {
   const inlinePanelWidth = inline
     ? panel.getBoundingClientRect().width + (Number.parseFloat(panelStyle?.marginLeft || '0') || 0)
     : 0;
-  const rootRect = root.getBoundingClientRect();
+  const rootRect = (anchor || root).getBoundingClientRect();
   return resolveOcrSearchPlacement({
     toolbarWidth: toolbar.clientWidth,
     toolbarScrollWidth: toolbar.scrollWidth,

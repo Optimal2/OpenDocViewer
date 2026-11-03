@@ -56,6 +56,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   const [placement, setPlacement] = useState({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
   // The match whose page was last asked for: a match on a page the print selection hides lands
   // on the nearest shown page, and the next step must then move on instead of asking again.
+  // Forgotten with a new term and when the displayed page changes (then the current match's
+  // page is shown first again).
   const shownMatchRef = useRef(/** @type {(string|null)} */ (null));
 
   const pages = useMemo(() => (Array.isArray(allPages) ? allPages : []), [allPages]);
@@ -125,14 +127,27 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
   }, [setOcrSearch]);
 
   // Where the field goes: measured as it opens (the field is still closed, so the spacer shows
-  // the room) and again whenever the window is resized while it is open.
+  // the room) and again while it is open whenever the window is resized or the toolbar or its
+  // spacer changes size (another toolbar density, a button appearing, the signature overview).
+  // The anchor is the button: the root also holds the open inline field.
   useLayoutEffect(() => {
     if (!open) return undefined;
-    const place = () => setPlacement(measureOcrSearchPlacement(rootRef.current, panelRef.current));
+    const place = () => setPlacement(measureOcrSearchPlacement(rootRef.current, panelRef.current, buttonRef.current));
     place();
     if (typeof window === 'undefined') return undefined;
     window.addEventListener('resize', place);
-    return () => { window.removeEventListener('resize', place); };
+    let observer = null;
+    const toolbar = rootRef.current?.closest?.('.toolbar');
+    if (toolbar && typeof ResizeObserver === 'function') {
+      observer = new ResizeObserver(place);
+      observer.observe(toolbar);
+      const spacer = toolbar.querySelector('.toolbar-spacer');
+      if (spacer) observer.observe(spacer);
+    }
+    return () => {
+      window.removeEventListener('resize', place);
+      observer?.disconnect();
+    };
   }, [open]);
 
   useEffect(() => {
@@ -145,9 +160,15 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     if (!match) return;
     const id = matchIdOf(match);
     setCurrentId(id);
-    shownMatchRef.current = id;
-    if (match.pageNumber !== Number(pageNumber) && typeof setPageNumber === 'function') setPageNumber(match.pageNumber);
+    if (match.pageNumber !== Number(pageNumber)) {
+      shownMatchRef.current = id;
+      if (typeof setPageNumber === 'function') setPageNumber(match.pageNumber);
+    }
   }, [matches, pageNumber, setPageNumber]);
+
+  useEffect(() => {
+    shownMatchRef.current = null;
+  }, [normalizedTerm, pageNumber]);
 
   /**
    * Enter / the arrows: a current match on another page is shown first (the position does not

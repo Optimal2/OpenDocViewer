@@ -245,6 +245,9 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   });
   const hanging = await measureToolbar();
   expect(hanging.right).toBeLessThanOrEqual(hanging.viewport);
+  // Re-placed from inline to hanging: anchored at the button, pulled just inside the window
+  // (not by the open field's own width, which would leave it hundreds of px further left).
+  expect(hanging.right).toBeGreaterThanOrEqual(hanging.viewport - 10);
   expect(hanging.top).toBeGreaterThanOrEqual(hanging.toolbarBottom);
   await searchField.press('Escape');
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);

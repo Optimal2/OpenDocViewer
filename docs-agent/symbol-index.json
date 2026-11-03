@@ -7180,7 +7180,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 143,
+    "line": 158,
     "description": "",
     "params": [
       {
@@ -7200,7 +7200,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 174,
+    "line": 195,
     "description": "",
     "params": [
       {
@@ -7220,7 +7220,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 182,
+    "line": 203,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -7253,7 +7253,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 158,
+    "line": 179,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -27795,7 +27795,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 80,
+    "line": 83,
     "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
     "params": [
       {
@@ -27809,6 +27809,12 @@
         "type": "HTMLElement|null",
         "optional": false,
         "description": "Its field element."
+      },
+      {
+        "name": "anchor",
+        "type": "HTMLElement|null",
+        "optional": true,
+        "description": "The button the field hangs from; the root when omitted. Measured on its own because the root also holds the open inline field: re-placed fr..."
       }
     ],
     "returns": [
@@ -27840,7 +27846,7 @@
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
     "line": 16,
-    "description": "Air kept between the field and the rest of the toolbar, or the viewport edge when hanging.",
+    "description": "Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -27934,13 +27940,13 @@
         "name": "measures.anchorRight",
         "type": "number",
         "optional": true,
-        "description": "Right edge of the search (the hanging field's anchor) in viewport px; beyond the viewport, the field is pulled left by the difference."
+        "description": "Right edge of the button (the hanging field's anchor) in viewport px; beyond the viewport, the field is pulled left by the difference."
       },
       {
         "name": "measures.anchorBottom",
         "type": "number",
         "optional": true,
-        "description": "Lower edge of the search in viewport px."
+        "description": "Lower edge of the button in viewport px."
       },
       {
         "name": "measures.toolbarBottom",
