@@ -1,7 +1,7 @@
 // File: tests/ui/ocr-on.spec.mjs
 /**
  * The OCR switch on, end to end in a real browser: a site config with `ocr.enabled: true` and
- * the CSP token a site adds (`'wasm-unsafe-eval'`), a synthetic scanned page drawn in the browser
+ * the unmodified shipped CSP, a synthetic scanned page drawn in the browser
  * (no document from anywhere else), the self-hosted engine, worker and Swedish/English models
  * served by the dev server from the same origin, and finally a text layer over the page whose
  * words can be selected, copied and found, the toolbar's search button with the page's OCR
@@ -55,11 +55,6 @@ async function drawSyntheticScan(page) {
   return Buffer.from(dataUrl.split(',')[1], 'base64');
 }
 
-/** The CSP a site deploys to turn OCR on: the shipped policy plus 'wasm-unsafe-eval'. */
-function addWasmToken(html) {
-  return html.replace("script-src 'self'", "script-src 'self' 'wasm-unsafe-eval'");
-}
-
 test('ocr on: the synthetic scan gets a selectable text layer from the self-hosted engine, same origin only', async ({ page, baseURL }) => {
   test.setTimeout(180000);
   const origin = new URL(baseURL).origin;
@@ -85,7 +80,6 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     siteConfig: { ocr: { enabled: true } },
     session: SESSION,
     extraFixtures: new Map([['synthetic-scan.png', { body: scan, contentType: 'image/png' }]]),
-    transformIndexHtml: addWasmToken,
   });
 
   await expect(page.locator('.document-render-container img').first()).toBeVisible();

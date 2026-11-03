@@ -261,6 +261,10 @@ errors. Unknown values fall back to `'ok'`. See "Status model" in `docs-src/pdf-
 
 ## OCR (in-browser, off by default)
 
+Enable OCR with `ocr: { enabled: true, languages: ['swe', 'eng'] }` in the site configuration.
+The shipped HTML meta and IIS policies already allow its WebAssembly engine; no application
+file needs editing. A custom server or gateway policy must permit it too (see "CSP for OCR").
+
 OpenDocViewer can recognize text on scanned pages (TIFF, JPG, PNG and PDF pages without a usable
 text layer) inside the browser and show it as a selectable text layer on the page. The feature is
 opt-in and off by default:
@@ -408,18 +412,25 @@ sees or start a new recognition. Such a page has to be rotated at the source.
 
 ### CSP for OCR
 
-The OCR engine is WebAssembly. The Content-Security-Policy that ships with OpenDocViewer
-(`index.html` and `public/web.config`) is unchanged by this feature and does not allow WebAssembly
-compilation, so a site that turns OCR on must add `'wasm-unsafe-eval'` to the `script-src`
-directive of its own policy:
+The OCR engine is WebAssembly. Both the shipped `index.html` meta policy and the
+`public/web.config` header (including its narrower deployment example) permit compilation with
+`'wasm-unsafe-eval'` in `script-src`. OCR remains off by default; a site enables it through
+`odv.site.config.js` alone. The token permits WebAssembly, not JavaScript `eval` or `new Function`.
+The existing script origins and inline-script hash are unchanged.
+
+If a site supplies a custom policy, include the token in its `script-src` directive:
 
 ```text
 script-src 'self' 'wasm-unsafe-eval' 'sha256-...'
 ```
 
-Add it in every place the site sets a policy for the viewer: the `Content-Security-Policy` header
-in the site's `web.config`, and, when the viewer is served through ODVGateway, the gateway's
-`contentSecurityPolicy` setting in its appsettings as well. Without the token the engine cannot
+Browsers enforce all policies together: a response header cannot relax a stricter HTML meta
+policy. The shipped policies therefore agree; do not edit `index.html` per installation.
+Keep the token in any custom IIS/proxy header and in an explicit ODVGateway
+`contentSecurityPolicy` override. ODVGateway's updated default (selected when this setting is
+`null`) already includes it. An older gateway must be upgraded or given an explicit policy
+with this token while retaining its other directives. A custom header without the token can
+still deliberately prohibit WebAssembly. Without the token the engine cannot
 start; OCR then turns itself off for the session and logs one console error naming the missing
 token (the viewer probes WebAssembly compilation before starting the worker, so the refusal is
 reported at once, not after a timeout). The same applies when the engine files cannot be loaded:
@@ -429,11 +440,11 @@ still load and render exactly as before. (Chromium reports the block as a
 it allows WebAssembly without allowing `eval`.)
 
 The same policy affects pdf.js: its optional JBIG2 and JPX (OpenJPEG) decoders are WebAssembly
-modules in `pdfjs/wasm/`, and under the shipped policy their instantiation is refused in the same
-way. pdf.js then falls back to its JavaScript decoders (`*_nowasm_fallback.js`, slower but
-correct) after one console warning per decoder. Adding `'wasm-unsafe-eval'` therefore also lets
-pdf.js use the faster decoders for scanned PDFs; this is a separate observation and no change to
-the shipped policy.
+modules in `pdfjs/wasm/`. The shipped policy also permits those faster decoders, independently
+of the OCR switch. If a custom policy prohibits WebAssembly, pdf.js falls back to its JavaScript
+decoders (`*_nowasm_fallback.js`, slower but correct) after one console warning per decoder.
+
+Reference: [CSP Level 3, script source expressions](https://www.w3.org/TR/CSP3/#framework-directive-source-list).
 
 What the user sees with OCR on: the page image is unchanged. Over a recognised page lies an
 invisible text layer (one transparent word per recognised word, placed on the ink, in one text

@@ -18,6 +18,17 @@ Earlier releases are retained for historical reference only and are **not suppor
 | 2.7.0   | :x: | Superseded by v2.7.1 advisory fixes and the CSP `connect-src` correction; upgrade required |
 | <= 2.6.6 | :x: | Superseded by v2.7.0 framing, log-token, dependency, and CI/OMP-build hardening; upgrade required |
 
+## Unreleased installation policy update (2026-11-03)
+
+The shipped HTML meta and IIS Content-Security-Policy now allow `'wasm-unsafe-eval'` in
+`script-src` so site configuration can enable the self-hosted OCR engine. The same permission
+allows pdf.js WebAssembly decoders. It does not enable JavaScript `eval` or `new Function`,
+add script origins, or remove the existing inline-script hash. OCR is still disabled by
+default. Custom server/gateway policies can continue to prohibit WebAssembly, but must allow
+it when OCR is enabled; all header and meta policies are enforced together. See
+[runtime configuration](docs-src/runtime-configuration.md#csp-for-ocr).
+This is an OMP artifact update, not a new official release.
+
 ## Recent release context
 
 The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.11.0 is supported.
