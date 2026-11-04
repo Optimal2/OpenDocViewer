@@ -313,8 +313,11 @@ ocr: {
   switching follow. Only languages in `ocr.languages` can be guessed: a German page in a viewer
   configured for Swedish and English gets no language (German fits its words better than
   Swedish, and it would be recognised poorly anyway); add `deu` and its model to guess German.
-  A page that is mostly in another language than its headings (a Swedish reference list of
-  English titles) is guessed by its majority. `true` by default; only the boolean literal
+  The guess knows function words for Swedish, English, German, Danish, Norwegian, Finnish,
+  French, Spanish and Dutch; a page in a language outside that set can still pass as the
+  candidate it resembles most, and a configured language outside it is never guessed. A page
+  that is mostly in another language than its headings (a Swedish reference list of English
+  titles) is guessed by its majority. `true` by default; only the boolean literal
   `false` turns the guess off, and the read-aloud language then follows the UI language unless
   the user picks one. The key means nothing while OCR is off.
 - `ocr.assetBaseUrl`: where the engine, worker and language files are served from. `null`

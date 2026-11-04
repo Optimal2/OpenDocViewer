@@ -103,7 +103,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/logging/userLogger.js</code> | 308 | 2 | 17 | high | UserLogController — client-side controller for **user** print logs \(backend-agnostic\). |
 | <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
 | <code>src/ocr/classify.js</code> | 106 | 2 | 15 | high | Decides, per page, whether OCR is worth running. |
-| <code>src/ocr/detectLanguage.js</code> | 129 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
+| <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
 | <code>src/ocr/engine.js</code> | 302 | 1 | 14 | high | Thin wrapper around a tesseract.js worker. |
 | <code>src/ocr/index.js</code> | 22 | 1 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
 | <code>src/ocr/languages.js</code> | 29 | 1 | 2 | high | Membership check for OCR language codes against the models tesseract.js knows. |

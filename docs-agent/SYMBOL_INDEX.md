@@ -850,14 +850,14 @@
 | <code>SKIP</code> | member | <code>src/ocr/classify.js:20</code> | Not a page OCR can work on. |
 | <code>TEXT_LAYER</code> | member | <code>src/ocr/classify.js:29</code> | The PDF page has a usable text layer that could not be placed as words \(none of its text is upright, or the page has no size\); the viewer&#39;s own text wins. |
 | <code>UNSUPPORTED</code> | member | <code>src/ocr/classify.js:31</code> | A format the viewer does not rasterise into a page image. |
-| <code>DETECTABLE_LANGUAGES</code> | constant | <code>src/ocr/detectLanguage.js:64</code> | The languages the guess knows function words for \(ISO 639-1\). |
-| <code>detectTextLanguage</code> | function | <code>src/ocr/detectLanguage.js:83</code> |  |
-| <code>DISTINCTIVE_LETTERS</code> | constant | <code>src/ocr/detectLanguage.js:50</code> | Letters that point at a language more than at its neighbours. |
-| <code>FUNCTION_WORDS</code> | constant | <code>src/ocr/detectLanguage.js:37</code> | Common function words per language \(ISO 639-1\), lower case. |
-| <code>LETTER_SCORE</code> | constant | <code>src/ocr/detectLanguage.js:28</code> | Score a distinctive letter adds, and the most such letters that count. |
-| <code>MIN_HITS</code> | constant | <code>src/ocr/detectLanguage.js:24</code> | Fewest function-word hits the winning language needs. |
-| <code>RUNNER_UP_RATIO</code> | constant | <code>src/ocr/detectLanguage.js:26</code> | The winner must have at least this many times the runner-up&#39;s score. |
-| <code>TextLanguageGuess</code> | typedef | <code>src/ocr/detectLanguage.js:68</code> |  |
+| <code>DETECTABLE_LANGUAGES</code> | constant | <code>src/ocr/detectLanguage.js:67</code> | The languages the guess knows function words for \(ISO 639-1\). |
+| <code>detectTextLanguage</code> | function | <code>src/ocr/detectLanguage.js:86</code> |  |
+| <code>DISTINCTIVE_LETTERS</code> | constant | <code>src/ocr/detectLanguage.js:53</code> | Letters that point at a language more than at its neighbours. |
+| <code>FUNCTION_WORDS</code> | constant | <code>src/ocr/detectLanguage.js:40</code> | Common function words per language \(ISO 639-1\), lower case. |
+| <code>LETTER_SCORE</code> | constant | <code>src/ocr/detectLanguage.js:31</code> | Score a distinctive letter adds, and the most such letters that count. |
+| <code>MIN_HITS</code> | constant | <code>src/ocr/detectLanguage.js:27</code> | Fewest function-word hits the winning language needs. |
+| <code>RUNNER_UP_RATIO</code> | constant | <code>src/ocr/detectLanguage.js:29</code> | The winner must have at least this many times the runner-up&#39;s score. |
+| <code>TextLanguageGuess</code> | typedef | <code>src/ocr/detectLanguage.js:71</code> |  |
 | <code>ASSETS</code> | member | <code>src/ocr/engine.js:41</code> | The worker script, engine core or a language model could not be loaded. |
 | <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:85</code> | Classify a start-up error by its message. |
 | <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:148</code> | Create an engine for the given languages and asset URLs. |

@@ -19,5 +19,7 @@ describe('toolbar popup menus', () => {
     expect(menu.style.getPropertyValue('overflow-y')).toBe('auto');
     expect(menu.style.getPropertyValue('max-height')).toMatch(/100vh/);
     expect(menu.style.getPropertyValue('overscroll-behavior')).toBe('contain');
+    // The bound covers padding and border, so the box itself never ends below the window.
+    expect(menu.style.getPropertyValue('box-sizing')).toBe('border-box');
   });
 });

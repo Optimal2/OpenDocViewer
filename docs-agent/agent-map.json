@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 180,
-    "sourceLineCount": 67432,
+    "sourceLineCount": 67435,
     "docletCount": 1928,
     "documentedFileCount": 179,
     "lowConfidenceSummaryCount": 0,
@@ -1599,7 +1599,7 @@
     {
       "name": "src/ocr",
       "fileCount": 14,
-      "lineCount": 2085,
+      "lineCount": 2088,
       "docletCount": 101,
       "importantFiles": [
         {
@@ -1659,7 +1659,7 @@
         {
           "path": "src/ocr/detectLanguage.js",
           "score": 45,
-          "lines": 129,
+          "lines": 132,
           "incomingLocalImports": 0,
           "doclets": 8,
           "summary": "Guess the language of a page's text among a few candidate languages, from its words alone.",
@@ -39834,7 +39834,7 @@
     },
     {
       "path": "src/ocr/detectLanguage.js",
-      "lines": 129,
+      "lines": 132,
       "extension": ".js",
       "jsdocBlockCount": 10,
       "sourceSummary": "Guess the language of a page's text among a few candidate languages, from its words alone.",
@@ -39843,49 +39843,49 @@
         {
           "name": "MIN_HITS",
           "kind": "variable",
-          "line": 24
+          "line": 27
         },
         {
           "name": "RUNNER_UP_RATIO",
           "kind": "variable",
-          "line": 26
+          "line": 29
         },
         {
           "name": "DETECTABLE_LANGUAGES",
           "kind": "variable",
-          "line": 64
+          "line": 67
         },
         {
           "name": "detectTextLanguage",
           "kind": "function",
-          "line": 83
+          "line": 86
         }
       ],
       "declarations": [
         {
           "name": "detectTextLanguage",
           "kind": "function",
-          "line": 83
+          "line": 86
         },
         {
           "name": "scores",
           "kind": "object",
-          "line": 86
+          "line": 89
         },
         {
           "name": "hits",
           "kind": "object",
-          "line": 87
+          "line": 90
         },
         {
           "name": "letterHits",
           "kind": "object",
-          "line": 88
+          "line": 91
         },
         {
           "name": "candidateScores",
           "kind": "object",
-          "line": 125
+          "line": 128
         }
       ],
       "parseError": null,
@@ -39901,7 +39901,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 24,
+          "line": 27,
           "description": "Fewest function-word hits the winning language needs.",
           "params": [],
           "returns": [],
@@ -39914,7 +39914,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 26,
+          "line": 29,
           "description": "The winner must have at least this many times the runner-up's score.",
           "params": [],
           "returns": [],
@@ -39927,7 +39927,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 28,
+          "line": 31,
           "description": "Score a distinctive letter adds, and the most such letters that count.",
           "params": [],
           "returns": [],
@@ -39940,7 +39940,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 37,
+          "line": 40,
           "description": "Common function words per language (ISO 639-1), lower case.",
           "params": [],
           "returns": [],
@@ -39953,7 +39953,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 50,
+          "line": 53,
           "description": "Letters that point at a language more than at its neighbours.",
           "params": [],
           "returns": [],
@@ -39966,7 +39966,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 64,
+          "line": 67,
           "description": "The languages the guess knows function words for (ISO 639-1).",
           "params": [],
           "returns": [],
@@ -39979,7 +39979,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 68,
+          "line": 71,
           "description": "",
           "params": [],
           "returns": [],
@@ -39992,7 +39992,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/detectLanguage.js",
-          "line": 83,
+          "line": 86,
           "description": "",
           "params": [
             {
@@ -100303,7 +100303,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 64,
+      "line": 67,
       "description": "The languages the guess knows function words for (ISO 639-1).",
       "params": [],
       "returns": [],
@@ -100316,7 +100316,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 83,
+      "line": 86,
       "description": "",
       "params": [
         {
@@ -100347,7 +100347,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 50,
+      "line": 53,
       "description": "Letters that point at a language more than at its neighbours.",
       "params": [],
       "returns": [],
@@ -100360,7 +100360,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 37,
+      "line": 40,
       "description": "Common function words per language (ISO 639-1), lower case.",
       "params": [],
       "returns": [],
@@ -100373,7 +100373,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 28,
+      "line": 31,
       "description": "Score a distinctive letter adds, and the most such letters that count.",
       "params": [],
       "returns": [],
@@ -100386,7 +100386,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 24,
+      "line": 27,
       "description": "Fewest function-word hits the winning language needs.",
       "params": [],
       "returns": [],
@@ -100399,7 +100399,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 26,
+      "line": 29,
       "description": "The winner must have at least this many times the runner-up's score.",
       "params": [],
       "returns": [],
@@ -100412,7 +100412,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/detectLanguage.js",
-      "line": 68,
+      "line": 71,
       "description": "",
       "params": [],
       "returns": [],

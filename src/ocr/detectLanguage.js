@@ -10,14 +10,17 @@
  * short words with the candidates ("den", "de", "en") and would otherwise pass as one of them.
  * The best candidate wins only when it has at least MIN_HITS function-word hits of its own
  * (the letters do not count towards that), clearly more than the next candidate
- * (RUNNER_UP_RATIO), and at least as much as every language that is not a candidate; otherwise
- * the guess is "unsure" (null) and the caller keeps its default. A page of running text has
+ * (RUNNER_UP_RATIO), and at least as much as every other language with a list; otherwise the
+ * guess is "unsure" (null) and the caller keeps its default. A page of running text has
  * hundreds of words, so Swedish and English are told apart reliably; a page of numbers, a short
- * stamp, or a page in a language the viewer does not know gives no answer rather than a wrong
- * one. Danish and Norwegian share nearly all their function words and stay unsure between each
- * other. One pass over the words, one Set lookup per list each: well under a millisecond for a
- * dense page. Part of the lazy OCR chunk; the candidates come from the viewer's OCR languages
- * (hooks/useOcrTextLayers.js), so only languages the viewer recognises can be guessed.
+ * stamp, or a page in one of the other listed languages gives no answer rather than a wrong
+ * one. The guard reaches only as far as the lists: a page in a language with no list here
+ * (Italian, say) can still pass as the candidate it resembles most, and a candidate language
+ * without a list can never be guessed. Danish and Norwegian share nearly all their function
+ * words and stay unsure between each other. One pass over the words, one Set lookup per list
+ * each: well under a millisecond for a dense page. Part of the lazy OCR chunk; the candidates
+ * come from the viewer's OCR languages (hooks/useOcrTextLayers.js), so only languages the
+ * viewer recognises can be guessed.
  */
 
 /** Fewest function-word hits the winning language needs. */
