@@ -67,13 +67,25 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await page.goto('/');
   const scan = await drawSyntheticScan(page);
   // A recording speech synthesiser, installed before the viewer loads: the read-aloud button
-  // must hand the selection to `speechSynthesis.speak` as utterances in the UI language.
+  // must hand the selection to `speechSynthesis.speak` as utterances in the reading language,
+  // with a voice that runs on the machine (it never speaks without one; an online voice is
+  // offered here and must not be chosen).
   await page.addInitScript(() => {
     const spoken = [];
     window.__odvSpoken = spoken;
+    const voices = [
+      { name: 'Local Swedish', lang: 'sv-SE', localService: true, default: false },
+      { name: 'Local English', lang: 'en-US', localService: true, default: true },
+      { name: 'Online English', lang: 'en-US', localService: false, default: false },
+    ];
     Object.defineProperty(window, 'speechSynthesis', {
       configurable: true,
-      value: { cancel() {}, getVoices: () => [], speak(utterance) { spoken.push({ text: utterance.text, lang: utterance.lang }); } },
+      value: { cancel() {}, getVoices: () => voices, speak(utterance) { spoken.push({ text: utterance.text, lang: utterance.lang, voice: utterance.voice?.name }); } },
+    });
+    // The browser's own utterance class accepts only its own voice objects; the fake takes ours.
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+      configurable: true,
+      value: class FakeUtterance { constructor(text) { this.text = text; this.lang = ''; this.voice = null; this.onend = null; this.onerror = null; } },
     });
   });
   await loadSession(page, {
@@ -206,8 +218,9 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(read).toHaveAttribute('data-speaking', 'true');
   const spoken = await page.evaluate(() => window.__odvSpoken);
   expect(spoken.length).toBeGreaterThanOrEqual(3);
-  expect(spoken[0]).toEqual({ text: 'OpenDocViewer OCR', lang: expect.stringMatching(/^(sv|en)-/) });
+  expect(spoken[0]).toEqual({ text: 'OpenDocViewer OCR', lang: expect.stringMatching(/^(sv|en)-/), voice: expect.stringMatching(/^Local /) });
   expect(spoken[1].text).toBe('Hej världen 2026');
+  expect(spoken.every((utterance) => utterance.voice.startsWith('Local '))).toBe(true);
   await read.click();
   await expect(read).not.toHaveAttribute('data-speaking', 'true');
   await page.evaluate(() => window.getSelection().removeAllRanges());
