@@ -24,7 +24,7 @@ test('successful measurement attachment', async ({}, info) => {
 
 afterAll(() => { if (scratch) rmSync(scratch, { recursive: true, force: true }); });
 
-function runWithConfig(source, name) {
+function runWithConfig(source, name, environment = {}) {
   const config = join(scratch, `${name}.config.mjs`);
   const url = pathToFileURL(resolve(root, source)).href;
   writeFileSync(config, `
@@ -39,8 +39,15 @@ export default { ...base, testDir: ${JSON.stringify(scratch)}, testMatch: 'passe
     ? { ...options, outputFile: relocate(options.outputFile) } : options]),
   webServer: undefined };
 `);
+  const childEnvironment = { ...process.env, ...environment };
+  // Reporter environment variables take precedence over config outputFile.
+  // These children must always keep their reports within the relocated tree.
+  for (const key of ['PLAYWRIGHT_JSON_OUTPUT_FILE', 'PLAYWRIGHT_JSON_OUTPUT_DIR', 'PLAYWRIGHT_JSON_OUTPUT_NAME']) {
+    delete childEnvironment[key];
+  }
   const result = spawnSync(process.execPath, [cli, 'test', '--config', config], {
     cwd: root, encoding: 'utf8', windowsHide: true, timeout: 45_000,
+    env: childEnvironment,
   });
   expect(result.error, result.stdout + result.stderr).toBeUndefined();
   expect(result.status, result.stdout + result.stderr).toBe(0);
@@ -62,4 +69,14 @@ it('retains measurement evidence when the normal UI runner cleans its output', (
   writeFileSync(marker, '{"sample":42}');
   runWithConfig('playwright.config.mjs', 'normal');
   expect(readFileSync(marker, 'utf8')).toBe('{"sample":42}');
+}, 60_000);
+
+it('keeps inherited reporter overrides from overwriting unrelated evidence', () => {
+  // This sentinel models an external evidence file, but stays inside our scratch.
+  const unrelatedEvidence = join(scratch, 'unrelated-evidence.json');
+  writeFileSync(unrelatedEvidence, 'preserve this evidence');
+  runWithConfig('tests/ui/signature-first-check.playwright.config.mjs', 'reporter-override', {
+    PLAYWRIGHT_JSON_OUTPUT_FILE: unrelatedEvidence,
+  });
+  expect(readFileSync(unrelatedEvidence, 'utf8')).toBe('preserve this evidence');
 }, 60_000);
