@@ -18,12 +18,15 @@ process.env.ODV_FIRST_CHECK_PRODUCTION = '1';
 export default defineConfig({
   testDir: TEST_DIR,
   testMatch: ['signature-first-check.spec.mjs', 'signature-first-check-harness.regression.mjs'],
-  outputDir: resolve(ROOT, 'test-results/signature-first-check'),
+  // Keep successful evidence outside the normal UI runner's cleaned output tree.
+  outputDir: resolve(ROOT, 'signature-measurement-results'),
+  preserveOutput: 'always',
   timeout: 90_000,
   expect: { timeout: 30_000 },
   fullyParallel: false,
   workers: 1,
-  reporter: [['list']],
+  // Body attachments are in-memory unless a reporter persists them.
+  reporter: [['list'], ['json', { outputFile: resolve(ROOT, 'signature-measurement-results/report.json') }]],
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
     viewport: { width: 1400, height: 900 },

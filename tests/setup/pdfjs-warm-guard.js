@@ -100,6 +100,10 @@ function callCanExecute(call) {
       const [condition] = call.arguments;
       if (!condition || condition.type !== 'Literal' || condition.value !== false) return false;
     }
+    if (property === 'runIf') {
+      const [condition] = call.arguments;
+      if (!condition || condition.type !== 'Literal' || condition.value !== true) return false;
+    }
     for (let object = callee.object; object.type === 'MemberExpression'; object = object.object) {
       const chainedProperty = memberPropertyName(object);
       if (chainedProperty === 'skip' || chainedProperty === 'todo') return false;

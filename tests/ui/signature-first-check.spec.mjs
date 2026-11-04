@@ -24,7 +24,10 @@
  *
  * ODV_FIRST_CHECK_PREVIEW_PORT selects an isolated preview port (default 5187).
  * Every sample is logged as raw JSON and attached with its measured CPU busy
- * fraction and memory snapshots. This harness supplies evidence for a later
+ * fraction and memory snapshots. The dedicated runner retains successful
+ * attachments in signature-measurement-results/, outside normal UI cleanup.
+ * Archive that directory before repeating the dedicated measurement, which
+ * replaces its own previous output. This harness supplies evidence for a later
  * budget review; it does not itself assert or update a performance budget.
  */
 import { expect } from '@playwright/test';

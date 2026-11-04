@@ -46,6 +46,16 @@ describe('targeted pdf.js test warm-up', () => {
   });
 
   describe('warm-up opt-in guard', () => {
+    it('accepts runIf(true) and skipIf(false) registrations', () => {
+      for (const registration of ['describe.runIf(true)', "describe['runIf'](true)", 'describe.skipIf(false)']) {
+        const source = readSuite(differentialSuites[0]).replace(
+          'beforeAll(warmPdfjs);',
+          `${registration}('warm-up', () => { beforeAll(warmPdfjs); });`
+        );
+        expect(suiteOptsIntoWarmup(source)).toBe(true);
+      }
+    });
+
     it.each(differentialSuites)('flags %s with the opt-in removed entirely', (file) => {
       const removed = readSuite(file)
         .replace(/import\s*\{[^}]*\}\s*from\s*'[^']*pdfjs-warm\.js';\r?\n/, '')
@@ -109,6 +119,9 @@ describe('targeted pdf.js test warm-up', () => {
 
     it.each([
       ['describe.skipIf(true)', "describe.skipIf(true)('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['describe.runIf(false)', "describe.runIf(false)('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['computed describe runIf(false)', "describe['runIf'](false)('warm-up', () => { beforeAll(warmPdfjs); });"],
+      ['dynamic describe runIf', "describe.runIf(enabled)('warm-up', () => { beforeAll(warmPdfjs); });"],
       ['it.skipIf(true)', "it.skipIf(true)('warm-up', () => { beforeAll(warmPdfjs); });"],
       ['computed describe skip', "describe['skip']('warm-up', () => { beforeAll(warmPdfjs); });"],
       ['computed test skip', "it['skip']('warm-up', () => { beforeAll(warmPdfjs); });"],
