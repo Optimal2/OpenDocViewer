@@ -260,6 +260,13 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // Inline, the field fits the toolbar (no overflow) and its last button lies inside it: the
   // field is never laid inline narrower than its contents.
   await expect.poll(async () => (await measureFit()).overflow).toBeLessThanOrEqual(0);
+  // The reopened field settles its width after the toolbar stops overflowing; wait for the close
+  // button to lie inside it before the one-shot checks below (CI run 41729421855 measured once,
+  // mid-layout: closeRight 1562 against right 1489, green on the rerun of the same commit).
+  await expect.poll(async () => {
+    const fit = await measureFit();
+    return fit.closeRight - fit.right;
+  }).toBeLessThanOrEqual(0.5);
   const inlineFit = await measureFit();
   expect(inlineFit.right).toBeLessThanOrEqual(inlineFit.viewport);
   expect(inlineFit.closeRight).toBeLessThanOrEqual(inlineFit.right + 0.5);
