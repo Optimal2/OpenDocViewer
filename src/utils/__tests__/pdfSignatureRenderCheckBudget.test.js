@@ -128,9 +128,9 @@ describe('the budget scales with the page count', () => {
   });
 
   it('the chosen numbers keep the measured headroom (docs-src/pdf-signatures.md)', () => {
-    const productionStartupMaxMs = 378; // loaded production-browser maximum, scripts/measurements/signature-first-check.json
-    expect(RENDER_CHECK_STARTUP_MS).toBe(2000);
-    expect(RENDER_CHECK_STARTUP_MS).toBeGreaterThanOrEqual(5 * productionStartupMaxMs);
+    const productionStartupMaxMs = 378; // loaded loopback production-browser maximum, scripts/measurements/signature-first-check.json
+    expect(RENDER_CHECK_STARTUP_MS).toBe(5000);
+    expect(RENDER_CHECK_STARTUP_MS - productionStartupMaxMs).toBe(4622);
     const slowestMsPerPage = 800; // jpeg-text, measured 799.6 ms/page + 105 ms
     expect(RENDER_CHECK_PER_PAGE_MS).toBeGreaterThanOrEqual(3 * slowestMsPerPage);
     // 200 pages of the slowest measured form complete inside the cap.
@@ -156,6 +156,31 @@ describe('the budget scales with the page count', () => {
     expect(onTiming).toHaveBeenCalledTimes(1);
     expect(onTiming).toHaveBeenCalledWith({ phase: 'startup', durationMs: 0 });
   });
+
+  it('a synthetic 2500 ms cold pdf.js delivery fits the retained startup allowance', async () => {
+    // This controlled loader delay stands in for first network delivery inside
+    // the comparator boundary. It is a transport-delay regression, not a WAN sample.
+    const module = await fakePdfjs({ pages: 1 })();
+    let firstLoad = true;
+    const loadPdfjs = async () => {
+      if (firstLoad) {
+        firstLoad = false;
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+      }
+      return module;
+    };
+    const onTiming = vi.fn();
+    const comparator = createRenderComparator(new Uint8Array(FILE_LENGTH), { loadPdfjs, onTiming });
+    try {
+      const { result, elapsedMs } = await settle(comparator.compare(SIGNED_END));
+      expect(result).toEqual({ outcome: 'same', detail: '1 page(s) identical in pdf.js' });
+      expect(elapsedMs).toBeGreaterThanOrEqual(2500);
+      expect(elapsedMs).toBeLessThan(5000);
+      expect(onTiming).toHaveBeenCalledWith({ phase: 'startup', durationMs: 2500 });
+    } finally {
+      await comparator.destroy();
+    }
+  });
 });
 
 describe('end to end with a slow fake pdf.js', () => {
@@ -177,17 +202,17 @@ describe('end to end with a slow fake pdf.js', () => {
   it('a stalled page fails closed after the per-page watchdog, not after the whole budget', async () => {
     const { result, elapsedMs } = await compareWith({ pages: 30, pageMs: 100, stallPage: 3 });
     expect(result).toMatchObject({ outcome: 'unavailable', code: 'timeout', detail: `page 3 took longer than ${RENDER_CHECK_PAGE_WATCHDOG_MS} ms` });
-    // Pages 1-2 plus the watchdog, far below this document's budget of 2 s + 30 x 2.5 s = 77 s.
+    // Pages 1-2 plus the watchdog, far below this document's budget of 5 s + 30 x 2.5 s = 80 s.
     expect(elapsedMs).toBeGreaterThanOrEqual(RENDER_CHECK_PAGE_WATCHDOG_MS);
     expect(elapsedMs).toBeLessThan(RENDER_CHECK_PAGE_WATCHDOG_MS + 5000);
-    expect(renderCheckBudgetMs(30)).toBe(77000);
+    expect(renderCheckBudgetMs(30)).toBe(80000);
     expect(renderCheckVerdict(result)).toMatchObject({ integrity: 'indeterminate', code: 'timeout' });
   });
 
   it('pages that each stay under the watchdog but together exceed the scaled budget time out', async () => {
-    // 4 pages x 4 s = 16 s > 2 s + 4 x 2.5 s = 12 s.
+    // 4 pages x 4 s = 16 s > 5 s + 4 x 2.5 s = 15 s.
     const { result } = await compareWith({ pages: 4, pageMs: 4000 });
-    expect(result).toMatchObject({ outcome: 'unavailable', code: 'timeout', detail: 'time budget of 12000 ms for 4 page(s) exceeded' });
+    expect(result).toMatchObject({ outcome: 'unavailable', code: 'timeout', detail: 'time budget of 15000 ms for 4 page(s) exceeded' });
   });
 
   it('the total cap holds for all comparisons of one file together', async () => {

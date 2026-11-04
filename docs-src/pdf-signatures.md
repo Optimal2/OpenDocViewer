@@ -396,7 +396,7 @@ with a "could not be checked" explanation, never green and never an error. The s
 | --- | --- |
 | pdf.js cannot be imported, cannot load a revision, throws, or returns data that cannot be encoded | `viewer-error` |
 | A large blob changed length or its buffer was detached between being encoded and being hashed | `viewer-error` |
-| Opening both revisions takes longer than the startup allowance (2 s) | `timeout` |
+| Opening both revisions takes longer than the startup allowance (5 s) | `timeout` |
 | One page (or the document-level sections) takes longer than the watchdog (15 s) | `timeout` |
 | The whole comparison takes longer than its work-scaled budget, or this file's 300 s cap is used up | `timeout` |
 | More than 1,000 pages | `inspection-limit` |
@@ -404,12 +404,12 @@ with a "could not be checked" explanation, never green and never an error. The s
 **Time budget.** The budget scales with the work the document requires
 (`renderCheckBudgetMs` in `src/utils/pdfSignatureRenderCheck.js`): until both revisions are
 open only the startup allowance applies; once the page count n is known the deadline is
-`min(2 s + n x 2.5 s, 300 s)` from the start of the comparison, and every step (the
+`min(5 s + n x 2.5 s, 300 s)` from the start of the comparison, and every step (the
 document-level sections, then each page) is additionally bounded by a 15 s watchdog. The
 numbers come from the runs quoted with each number (exact command and machine
 profile stated inline; re-run the command to reproduce):
 
-- **startup 2 s:** measured on 2026-11-04 with the committed production
+- **startup 5 s, retained:** measured on 2026-11-04 with the committed production
   build/preview harness, Node 22.23.3 and a free isolated port selected through
   `ODV_FIRST_CHECK_PREVIEW_PORT`:
   `npx cross-env ODV_MEASURE_FIRST_CHECK=1 playwright test --config
@@ -436,23 +436,31 @@ profile stated inline; re-run the command to reproduce):
   327.5/284/378 ms under load. Whole first-call median/min/max was
   488.65/407.9/539.4 ms and 774.85/609.3/835.9 ms respectively. Same-page warm
   comparator startup medians were 2 and 3 ms (maxima 3 and 6 ms); warm whole-call
-  medians were 55.45 and 106.85 ms (maxima 70.2 and 166.7 ms). The budget uses the
-  loaded startup maximum, not the whole-call wall time: 5 x 378 ms = 1890 ms,
-  rounded up to **2000 ms**. The explicit added margin is 1622 ms and the
-  allowance/observed ratio is 5.29x, allowing for slower hardware and cache
-  variation. Earlier Node-only medians (0.51/0.72 s) and the historical
-  development-server maxima (1.90/2.21 s) are not the margin basis.
+  medians were 55.45 and 106.85 ms (maxima 70.2 and 166.7 ms). The existing
+  **5000 ms** allowance is retained rather than deriving a new allowance from a
+  CPU multiplier. Its arithmetic margin over the observed loopback startup maximum
+  is 5000 - 378 = **4622 ms**, and the allowance/observed ratio is 5000/378 =
+  **13.23x**. These figures describe the observed margin, not WAN safety. A
+  provisional 2000 ms reduction (5 x 378 ms = 1890 ms, rounded up) is retained as
+  superseded decision history in the measurement JSON. Earlier Node-only medians
+  (0.51/0.72 s) and the historical development-server maxima (1.90/2.21 s) are
+  not the margin basis.
 
-  Every context is fresh, but all contexts in one run share the Chromium browser
-  process and process/OS caches. Thus "cold" means a fresh context, page, worker
-  and module instance, not a new browser process or cold OS disk cache. The first
-  sample is retained and no outliers are removed. An earlier uninstrumented
-  production series is also preserved (whole-call maxima 702.1/1425.6 ms); it is
-  corroborating whole-call evidence, not startup-only evidence. All 20 final and
-  20 baseline samples, commands, boundaries, load, cleanup and the margin
-  calculation are in `scripts/measurements/signature-first-check.json`, without
-  hostnames or private runtime paths. Archive `signature-measurement-results/`
-  before any rerun because the dedicated runner replaces its previous output.
+  The comparator boundary includes first network delivery of pdf.js and its worker,
+  but the harness used loopback only; WAN delivery was not measured. Every context
+  is fresh, but all contexts in one run share the Chromium browser process and
+  process/OS caches. Thus "cold" means a fresh context, page, worker and module
+  instance, not a new browser process, cold OS disk cache or cold remote-network
+  delivery. Retaining 5000 ms preserves the existing network headroom instead of
+  treating the loopback CPU margin as WAN evidence. The committed series itself ran
+  under the 5000 ms allowance. The first sample is retained and no outliers are
+  removed. An earlier uninstrumented production series is also preserved
+  (whole-call maxima 702.1/1425.6 ms); it is corroborating whole-call evidence,
+  not startup-only evidence. All 20 final and 20 baseline samples, commands,
+  boundaries, load, cleanup and both current and superseded budget decisions are in
+  `scripts/measurements/signature-first-check.json`, without hostnames or private
+  runtime paths. Archive `signature-measurement-results/` before any rerun because
+  the dedicated runner replaces its previous output.
 - **per page 2.5 s:** 3.2x the slowest fitted form (JPEG scan with text strokes,
   786 ms/page in the linear fit over 1, 2, 4 and 8 pages printed by the page-form
   run quoted in the per-page-form table below), because real scans
@@ -460,9 +468,9 @@ profile stated inline; re-run the command to reproduce):
 - **total cap 300 s,** shared by all comparisons of one file: 200 pages at the slowest
   fitted rate need about 157 s (200 x 0.786 s, extrapolated from the fit, not measured -
   the largest measured document below has 96 pages), so an ordinary large scanned
-  journal with a DSS/LTV append completes with almost 2x to spare. From 120 pages
+  journal with a DSS/LTV append completes with almost 2x to spare. From 119 pages
   the cap, not the per-page allowance, binds (computed from the budget formula
-  2 s + n x 2.5 s = 300 s at n = 119.2, not measured);
+  5 s + n x 2.5 s = 300 s at n = 118, not measured);
 - **per-page watchdog 15 s:** about 19.1x the slowest fitted page rate (15 s / 0.786 s,
   computed, not measured) and 1/20 of the cap, so a stalled page fails closed in
   seconds instead of consuming the whole budget.
@@ -1010,14 +1018,17 @@ the fail-closed paths (pdf.js does not load, cannot load a revision, throws, tim
 budget) must be `indeterminate` with the matching code.
 `src/utils/__tests__/pdfSignatureRenderCheckBudget.test.js` binds the work-scaled budget with
 a fake pdf.js under fake timers that, like pdf.js, delivers each page's image after the
-operator list: 30 pages of 1 s each (past the former constant 20 s) compare `same`; an image
-that differs only after its operator list resolved is `different` on that page; a stalled
-page is `timeout` after the 15 s watchdog, not after the 80 s budget; pages that each stay
-under the watchdog but together exceed the scaled budget are `timeout`; the 300 s cap is
-shared by all comparisons of one file; bytes shifted between two large images on one page
-differ; a large image detached or shrunk after it was encoded but before it was hashed is
-`unavailable` / `viewer-error`, not `same`. It also pins that a page-local id waits only on
-`page.objs` and a `g_*` id only on `commonObjs`. `pdfSignatureWorkerSecurity.test.js` checks
+operator list. A controlled 2500 ms cold-loader delay completes under the retained 5000 ms
+default (and fails under the superseded 2000 ms candidate); this is a synthetic
+transport-delay regression, not a measured WAN sample. Also, 30 pages of 1 s each (past the
+former constant 20 s) compare `same`; an image that differs only after its operator list
+resolved is `different` on that page; a stalled page is `timeout` after the 15 s watchdog,
+not after the 80 s budget; pages that each stay under the watchdog but together exceed the
+scaled budget are `timeout`; the 300 s cap is shared by all comparisons of one file; bytes
+shifted between two large images on one page differ; a large image detached or shrunk after
+it was encoded but before it was hashed is `unavailable` / `viewer-error`, not `same`. It
+also pins that a page-local id waits only on `page.objs` and a `g_*` id only on
+`commonObjs`. `pdfSignatureWorkerSecurity.test.js` checks
 that heartbeats extend the worker deadline only up to 30 s plus the 300 s cap, and only for
 the request that sent them.
 

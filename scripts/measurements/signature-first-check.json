@@ -819,16 +819,32 @@
     ]
   },
   "budgetDecision": {
-    "previousStartupMs": 5000,
+    "status": "current",
+    "decision": "Retain the existing startup allowance; no new multiplier is applied",
+    "selectedStartupMs": 5000,
     "basis": "finalInstrumentedSeries.loaded.summary.comparatorStartupMs.max",
-    "observedLoadedMaximumMs": 378,
-    "explicitMultiplier": 5,
-    "multipliedMs": 1890,
-    "selectedStartupMs": 2000,
-    "rounding": "1890 ms rounded up to 2000 ms",
-    "explicitMarginMs": 1622,
-    "selectedToObservedRatio": 5.291005291005291,
-    "wholeCallBoundaryWarning": "Whole-call maxima are retained as evidence but are not mislabeled as startup-only work or used as the startup margin basis"
+    "observedLoopbackStartupMaximumMs": 378,
+    "explicitMarginMs": 4622,
+    "marginBasis": "5000 ms selected allowance minus the 378 ms observed loopback startup maximum",
+    "selectedToObservedRatio": 13.227513227513228,
+    "startupBudgetDuringMeasurementMs": 5000,
+    "selectionRationale": "Existing network headroom is retained because WAN delivery was not measured; loopback CPU measurements do not justify reducing the allowance",
+    "networkAndCacheLimit": "The startup boundary includes first network delivery of pdf.js and its worker. Measurement used loopback only, and all contexts shared one Chromium process and its process/OS caches",
+    "wholeCallBoundaryWarning": "Whole-call maxima are retained as evidence but are not mislabeled as startup-only work or used as the startup margin basis",
+    "supersededProvisionalDecision": {
+      "status": "superseded",
+      "previousStartupMs": 5000,
+      "basis": "finalInstrumentedSeries.loaded.summary.comparatorStartupMs.max",
+      "observedLoadedMaximumMs": 378,
+      "explicitMultiplier": 5,
+      "multipliedMs": 1890,
+      "selectedStartupMs": 2000,
+      "rounding": "1890 ms rounded up to 2000 ms",
+      "explicitMarginMs": 1622,
+      "selectedToObservedRatio": 5.291005291005291,
+      "wholeCallBoundaryWarning": "Whole-call maxima are retained as evidence but are not mislabeled as startup-only work or used as the startup margin basis",
+      "supersededReason": "The loopback series did not measure WAN delivery, so the existing 5000 ms network headroom is retained"
+    }
   },
   "sanitization": "No hostname, user/profile path, worktree path, runtime path, reporter configuration or process ID is included",
   "rawSuccessfulReportsArchivedLocallyBeforeRerun": true

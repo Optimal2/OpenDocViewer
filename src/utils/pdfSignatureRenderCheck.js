@@ -31,19 +31,23 @@
  * JPEG scan with text strokes, takes about 786 ms per page for both revisions
  * together; text pages about 29 ms.
  *
- * - Startup: 2 s. Ten fresh production-browser contexts per condition on
- *   2026-11-04 measured the actual compare()-to-both-revisions-open boundary
- *   at 257 ms maximum without requested load and 378 ms with 23 owned CPU
- *   contenders (100% busy). Five times 378 ms is 1890 ms, rounded up to 2 s:
- *   1622 ms explicit margin, 5.29x the observed loaded maximum. Whole first
- *   calls (539.4/835.9 ms maxima) retain worker startup and signature parsing
- *   separately. Raw evidence: scripts/measurements/signature-first-check.json.
- *   The startup allowance is the whole budget until the page count is known.
+ * - Startup: the existing 5 s allowance is retained. Ten fresh production-browser
+ *   contexts per condition on 2026-11-04 measured the actual
+ *   compare()-to-both-revisions-open boundary over loopback at 257 ms maximum
+ *   without requested load and 378 ms with 23 owned CPU contenders (100% busy).
+ *   The boundary includes first network delivery of pdf.js and its worker, but
+ *   contexts shared one Chromium process and process/OS caches, and WAN delivery
+ *   was not measured. Keeping 5 s retains the existing network headroom instead
+ *   of deriving a new allowance from a CPU multiplier. The arithmetic margin over
+ *   378 ms is 4622 ms (5000/378 = 13.23x). Whole first calls (539.4/835.9 ms
+ *   maxima) include worker startup and signature parsing separately. Raw evidence:
+ *   scripts/measurements/signature-first-check.json. The startup allowance is the
+ *   whole budget until the page count is known.
  * - Per page: 2.5 s, 3.2x the slowest fitted form (785.6 ms/page), because
  *   real scans carry more detail than the fixtures and slower hardware exists.
  * - Total cap: 300 s for all comparisons of one file. 200 pages of the
  *   slowest fitted form need about 157 s (extrapolated, not measured), so
- *   they complete with almost 2x to spare; beyond 119 pages the cap, not the
+ *   they complete with almost 2x to spare; from 119 pages the cap, not the
  *   per-page allowance, binds.
  * - Per-page watchdog: 15 s for one page (or the document-level sections),
  *   about 19.1x the slowest fitted page rate and 1/20 of the cap, so a
@@ -51,7 +55,7 @@
  *   document's budget.
  */
 /** Allowance for loading pdf.js and opening both revisions, in ms. */
-export const RENDER_CHECK_STARTUP_MS = 2000;
+export const RENDER_CHECK_STARTUP_MS = 5000;
 /** Allowance per page (both revisions), in ms. */
 export const RENDER_CHECK_PER_PAGE_MS = 2500;
 /** Absolute cap for all comparisons of one comparator (one file), in ms. */
