@@ -396,7 +396,7 @@ with a "could not be checked" explanation, never green and never an error. The s
 | --- | --- |
 | pdf.js cannot be imported, cannot load a revision, throws, or returns data that cannot be encoded | `viewer-error` |
 | A large blob changed length or its buffer was detached between being encoded and being hashed | `viewer-error` |
-| Opening both revisions takes longer than the startup allowance (5 s) | `timeout` |
+| Opening both revisions takes longer than the startup allowance (2 s) | `timeout` |
 | One page (or the document-level sections) takes longer than the watchdog (15 s) | `timeout` |
 | The whole comparison takes longer than its work-scaled budget, or this file's 300 s cap is used up | `timeout` |
 | More than 1,000 pages | `inspection-limit` |
@@ -404,37 +404,55 @@ with a "could not be checked" explanation, never green and never an error. The s
 **Time budget.** The budget scales with the work the document requires
 (`renderCheckBudgetMs` in `src/utils/pdfSignatureRenderCheck.js`): until both revisions are
 open only the startup allowance applies; once the page count n is known the deadline is
-`min(5 s + n x 2.5 s, 300 s)` from the start of the comparison, and every step (the
+`min(2 s + n x 2.5 s, 300 s)` from the start of the comparison, and every step (the
 document-level sections, then each page) is additionally bounded by a 15 s watchdog. The
 numbers come from the runs quoted with each number (exact command and machine
 profile stated inline; re-run the command to reproduce):
 
-- **startup 5 s:** pdf.js import plus opening both revisions (the `startupColdMs`
-  median emitted by `node scripts/measure-signature-import-cost.mjs --repeat=3
-  --pages=20`) measured 0.51 s without load and 0.72 s under full CPU load
-  (the same command with `--load=23`); opening both revisions with the module
-  already warm (`startupWarmMs`) measured 0.12 s and 0.17 s in the same runs.
-  5 s leaves about 7x headroom over the loaded measurement for a slower machine.
-  Machine for both runs (printed by the script itself): 24 cores, 63.9 GiB RAM,
-  Node v22.23.3, measured 46% CPU busy over the no-load run and 100% over the
-  loaded run (2026-11-01; medians of 3 fresh processes each).
-  These Node measurements do not establish the first browser worker's margin.
-  A historical development-server run on 2026-11-01 reported maxima of 1898 ms
-  without requested load and 2210 ms under load, but independent reruns did not
-  reproduce the claimed 2.26x headroom. Development-server transformation and
-  browser-process warm-up make that claim unsuitable as a production budget
-  justification. The 5 s allowance remains unchanged pending production evidence.
-  Use the committed production build/preview harness with Node 22.23.3:
+- **startup 2 s:** measured on 2026-11-04 with the committed production
+  build/preview harness, Node 22.23.3 and a free isolated port selected through
+  `ODV_FIRST_CHECK_PREVIEW_PORT`:
   `npx cross-env ODV_MEASURE_FIRST_CHECK=1 playwright test --config
   tests/ui/signature-first-check.playwright.config.mjs --grep "cold:|loaded:"`.
-  It measures ten fresh contexts per condition, including worker registration
-  and the real comparator, with a warm reference in each page and measured
-  CPU/memory data. The Chromium process is shared across contexts; keep the
-  first sample and state that boundary when interpreting the maximum.
-  Archive `signature-measurement-results/` before repeating the dedicated run;
-  its JSON report persists the raw measurement body attachments and survives
-  a normal UI test run. A completed production 10+10 series and its stated
-  margin are still required before accepting the browser startup budget.
+  The machine had 24 logical cores and 63.9 GiB RAM; Chromium was 156.0.8078.4.
+  Ten fresh contexts ran without requested load (45.5% actual CPU busy over the
+  condition), and ten ran with 23 owned CPU contenders (100% actual busy). The
+  minimum free memory across the final series was 26,683,473,920 bytes; every
+  sample also records free memory and runner RSS. All 23 load processes exited.
+  Every cold and warm sample executed the real comparator and returned `intact` /
+  `extended-with-validation-data`.
+
+  Two clocks are deliberately separate. `coldMs` / `warmMs` cover the whole
+  awaited `getDocumentSignatures()` call: signature-worker bootstrap and static
+  module registration, signature parsing, and the real comparator. The actual
+  startup deadline begins later, in `createRenderComparator.compare()`;
+  `comparatorStartupMs` ends when both revisions are open, before the page count
+  and document/page digests, and includes the comparator's dynamic pdf.js import
+  and module registration. Worker bootstrap and parsing are therefore reported,
+  not silently excluded. Context/page creation, production page/module load,
+  fixture generation/fetch and teardown are outside both clocks.
+
+  Comparator startup median/min/max was 234/198/257 ms without requested load and
+  327.5/284/378 ms under load. Whole first-call median/min/max was
+  488.65/407.9/539.4 ms and 774.85/609.3/835.9 ms respectively. Same-page warm
+  comparator startup medians were 2 and 3 ms (maxima 3 and 6 ms); warm whole-call
+  medians were 55.45 and 106.85 ms (maxima 70.2 and 166.7 ms). The budget uses the
+  loaded startup maximum, not the whole-call wall time: 5 x 378 ms = 1890 ms,
+  rounded up to **2000 ms**. The explicit added margin is 1622 ms and the
+  allowance/observed ratio is 5.29x, allowing for slower hardware and cache
+  variation. Earlier Node-only medians (0.51/0.72 s) and the historical
+  development-server maxima (1.90/2.21 s) are not the margin basis.
+
+  Every context is fresh, but all contexts in one run share the Chromium browser
+  process and process/OS caches. Thus "cold" means a fresh context, page, worker
+  and module instance, not a new browser process or cold OS disk cache. The first
+  sample is retained and no outliers are removed. An earlier uninstrumented
+  production series is also preserved (whole-call maxima 702.1/1425.6 ms); it is
+  corroborating whole-call evidence, not startup-only evidence. All 20 final and
+  20 baseline samples, commands, boundaries, load, cleanup and the margin
+  calculation are in `scripts/measurements/signature-first-check.json`, without
+  hostnames or private runtime paths. Archive `signature-measurement-results/`
+  before any rerun because the dedicated runner replaces its previous output.
 - **per page 2.5 s:** 3.2x the slowest fitted form (JPEG scan with text strokes,
   786 ms/page in the linear fit over 1, 2, 4 and 8 pages printed by the page-form
   run quoted in the per-page-form table below), because real scans
@@ -442,9 +460,9 @@ profile stated inline; re-run the command to reproduce):
 - **total cap 300 s,** shared by all comparisons of one file: 200 pages at the slowest
   fitted rate need about 157 s (200 x 0.786 s, extrapolated from the fit, not measured -
   the largest measured document below has 96 pages), so an ordinary large scanned
-  journal with a DSS/LTV append completes with almost 2x to spare. Beyond 118 pages
+  journal with a DSS/LTV append completes with almost 2x to spare. From 120 pages
   the cap, not the per-page allowance, binds (computed from the budget formula
-  5 s + n x 2.5 s = 300 s at n = 118, not measured);
+  2 s + n x 2.5 s = 300 s at n = 119.2, not measured);
 - **per-page watchdog 15 s:** about 19.1x the slowest fitted page rate (15 s / 0.786 s,
   computed, not measured) and 1/20 of the cap, so a stalled page fails closed in
   seconds instead of consuming the whole budget.

@@ -1,0 +1,835 @@
+{
+  "schemaVersion": 1,
+  "subject": "OpenDocViewer first PDF signature inspection in a production Chromium build",
+  "revision": "a67ec0da46f3b363138548cfebd83b6519e87fb4",
+  "revisionMeaning": "origin/main base on which the measurement-only instrumentation and subsequent budget change were built",
+  "measuredAt": "2026-11-04T21:02:20.484Z",
+  "machine": {
+    "os": "Windows 10 x64 (Chromium user agent)",
+    "logicalCores": 24,
+    "memoryTotalBytes": 68611059712,
+    "node": "v22.23.3",
+    "chromium": "156.0.8078.4"
+  },
+  "method": {
+    "build": "Dedicated Vite production build and preview; the real getDocumentSignatures(), signature worker and pdf.js comparator",
+    "fixture": "One-page signed PDF with an accepted DSS-only appended revision",
+    "contexts": "Ten fresh Chromium contexts per condition; one fresh page and signature worker per context",
+    "cold": "No requested CPU load; actual machine CPU busy and memory are recorded for every sample",
+    "loaded": "Twenty-three owned CPU-contention processes; actual CPU busy reached 1.0 for every sample",
+    "warmReference": "A second inspection with copied bytes in the same page, with the same integrity and timing assertions",
+    "firstSample": "Retained; no outliers were removed",
+    "wholeFirstCall": "coldMs/warmMs include signature-worker bootstrap and static module registration, signature parsing and the comparator",
+    "comparatorStartup": "comparatorStartupMs starts at createRenderComparator.compare() and stops when both revisions are open; it includes dynamic pdf.js import/module registration",
+    "excluded": "Context/page creation, production page/module load, fixture generation/fetch and context teardown",
+    "cacheLimit": "Contexts share one Chromium browser process and its process/OS caches. Cold means a fresh context and worker, not a cold OS disk cache or a new browser process",
+    "assertions": "Every final cold and warm sample executed the real comparator and returned intact/extended-with-validation-data; exactly one finite startup event was required per inspection"
+  },
+  "commands": [
+    "Select a free isolated preview port with ODV_FIRST_CHECK_PREVIEW_PORT.",
+    "npx cross-env ODV_MEASURE_FIRST_CHECK=1 playwright test --config tests/ui/signature-first-check.playwright.config.mjs --grep \"cold:|loaded:\""
+  ],
+  "finalInstrumentedSeries": {
+    "measuredAt": "2026-11-04T21:02:20.484Z",
+    "startupBudgetDuringMeasurementMs": 5000,
+    "cold": {
+      "summary": {
+        "label": "cold",
+        "runs": 10,
+        "profile": {
+          "node": "v22.23.3",
+          "cores": 24,
+          "chromium": "156.0.8078.4",
+          "requestedLoadProcesses": 0
+        },
+        "timingBoundaries": {
+          "included": "await getDocumentSignatures(bytes), including signature-worker bootstrap/module registration, parsing and the real comparator",
+          "comparatorStartup": "createRenderComparator.compare() start until both revisions are open, including dynamic pdf.js import/module registration",
+          "excluded": "browser context/page creation, production page/module load, fixture generation/fetch and context teardown",
+          "warmReference": "second awaited getDocumentSignatures(bytes.slice()) in the same page, with both whole-call and comparator-startup timings"
+        },
+        "firstCheckMs": {
+          "median": 488.65000000037253,
+          "min": 407.9000000022352,
+          "max": 539.3999999985099
+        },
+        "warmCheckMs": {
+          "median": 55.44999999925494,
+          "min": 51.5,
+          "max": 70.19999999925494
+        },
+        "comparatorStartupMs": {
+          "median": 234,
+          "min": 198,
+          "max": 257
+        },
+        "warmComparatorStartupMs": {
+          "median": 2,
+          "min": 2,
+          "max": 3
+        },
+        "cpuBusyFraction": 0.4551520929023313,
+        "memoryFreeBytes": {
+          "min": 27105914880,
+          "max": 27268411392
+        },
+        "memoryTotalBytes": 68611059712
+      },
+      "samples": [
+        {
+          "run": 1,
+          "coldMs": 539.3999999985099,
+          "warmMs": 51.5,
+          "comparatorStartupMs": 206,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3073397705009796,
+          "memoryFreeBytes": 27268411392,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 154152960
+        },
+        {
+          "run": 2,
+          "coldMs": 407.9000000022352,
+          "warmMs": 52.599999997764826,
+          "comparatorStartupMs": 198,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3061603823685608,
+          "memoryFreeBytes": 27224076288,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 158724096
+        },
+        {
+          "run": 3,
+          "coldMs": 486.0999999977648,
+          "warmMs": 56.20000000298023,
+          "comparatorStartupMs": 239,
+          "warmComparatorStartupMs": 3,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.4326701694314895,
+          "memoryFreeBytes": 27204653056,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 163270656
+        },
+        {
+          "run": 4,
+          "coldMs": 491.5,
+          "warmMs": 62.100000001490116,
+          "comparatorStartupMs": 228,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.4666272189349112,
+          "memoryFreeBytes": 27171188736,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 164532224
+        },
+        {
+          "run": 5,
+          "coldMs": 482.69999999925494,
+          "warmMs": 55.399999998509884,
+          "comparatorStartupMs": 232,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.5371677860053958,
+          "memoryFreeBytes": 27136319488,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 167526400
+        },
+        {
+          "run": 6,
+          "coldMs": 477.6000000014901,
+          "warmMs": 53.099999997764826,
+          "comparatorStartupMs": 236,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.4682147165259348,
+          "memoryFreeBytes": 27135389696,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 169820160
+        },
+        {
+          "run": 7,
+          "coldMs": 495.0999999977648,
+          "warmMs": 70.19999999925494,
+          "comparatorStartupMs": 254,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.5673349190168762,
+          "memoryFreeBytes": 27105914880,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 172818432
+        },
+        {
+          "run": 8,
+          "coldMs": 532.5999999977648,
+          "warmMs": 56,
+          "comparatorStartupMs": 257,
+          "warmComparatorStartupMs": 3,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.5837574445046021,
+          "memoryFreeBytes": 27109998592,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 174530560
+        },
+        {
+          "run": 9,
+          "coldMs": 491.20000000298023,
+          "warmMs": 53.5,
+          "comparatorStartupMs": 241,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.5104331981425969,
+          "memoryFreeBytes": 27174625280,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 176394240
+        },
+        {
+          "run": 10,
+          "coldMs": 438.29999999701977,
+          "warmMs": 55.5,
+          "comparatorStartupMs": 212,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.4128145298606294,
+          "memoryFreeBytes": 27173101568,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 176447488
+        }
+      ]
+    },
+    "loaded": {
+      "summary": {
+        "label": "loaded",
+        "runs": 10,
+        "profile": {
+          "node": "v22.23.3",
+          "cores": 24,
+          "chromium": "156.0.8078.4",
+          "requestedLoadProcesses": 23
+        },
+        "timingBoundaries": {
+          "included": "await getDocumentSignatures(bytes), including signature-worker bootstrap/module registration, parsing and the real comparator",
+          "comparatorStartup": "createRenderComparator.compare() start until both revisions are open, including dynamic pdf.js import/module registration",
+          "excluded": "browser context/page creation, production page/module load, fixture generation/fetch and context teardown",
+          "warmReference": "second awaited getDocumentSignatures(bytes.slice()) in the same page, with both whole-call and comparator-startup timings"
+        },
+        "firstCheckMs": {
+          "median": 774.8499999996275,
+          "min": 609.2999999970198,
+          "max": 835.8999999985099
+        },
+        "warmCheckMs": {
+          "median": 106.84999999962747,
+          "min": 69.5,
+          "max": 166.69999999925494
+        },
+        "comparatorStartupMs": {
+          "median": 327.5,
+          "min": 284,
+          "max": 378
+        },
+        "warmComparatorStartupMs": {
+          "median": 3,
+          "min": 2,
+          "max": 6
+        },
+        "cpuBusyFraction": 1,
+        "memoryFreeBytes": {
+          "min": 26683473920,
+          "max": 26938499072
+        },
+        "memoryTotalBytes": 68611059712
+      },
+      "samples": [
+        {
+          "run": 1,
+          "coldMs": 817.0999999977648,
+          "warmMs": 104.5,
+          "comparatorStartupMs": 336,
+          "warmComparatorStartupMs": 6,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26888634368,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 177893376
+        },
+        {
+          "run": 2,
+          "coldMs": 609.2999999970198,
+          "warmMs": 104.20000000298023,
+          "comparatorStartupMs": 286,
+          "warmComparatorStartupMs": 3,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26938499072,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 179396608
+        },
+        {
+          "run": 3,
+          "coldMs": 716,
+          "warmMs": 151.69999999925494,
+          "comparatorStartupMs": 317,
+          "warmComparatorStartupMs": 4,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26842132480,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 177758208
+        },
+        {
+          "run": 4,
+          "coldMs": 780.1999999992549,
+          "warmMs": 110,
+          "comparatorStartupMs": 364,
+          "warmComparatorStartupMs": 3,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26855985152,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 177139712
+        },
+        {
+          "run": 5,
+          "coldMs": 817.1999999992549,
+          "warmMs": 166.69999999925494,
+          "comparatorStartupMs": 344,
+          "warmComparatorStartupMs": 3,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26777997312,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 178589696
+        },
+        {
+          "run": 6,
+          "coldMs": 676.3999999985099,
+          "warmMs": 69.5,
+          "comparatorStartupMs": 284,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26695491584,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 178167808
+        },
+        {
+          "run": 7,
+          "coldMs": 835.8999999985099,
+          "warmMs": 92.90000000223517,
+          "comparatorStartupMs": 378,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26686926848,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 180318208
+        },
+        {
+          "run": 8,
+          "coldMs": 769.5,
+          "warmMs": 69.60000000149012,
+          "comparatorStartupMs": 309,
+          "warmComparatorStartupMs": 3,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26692964352,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 180047872
+        },
+        {
+          "run": 9,
+          "coldMs": 793.6000000014901,
+          "warmMs": 109.19999999925494,
+          "comparatorStartupMs": 371,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26748129280,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 179908608
+        },
+        {
+          "run": 10,
+          "coldMs": 678.5,
+          "warmMs": 133.69999999925494,
+          "comparatorStartupMs": 319,
+          "warmComparatorStartupMs": 2,
+          "coldStartupEvents": 1,
+          "warmStartupEvents": 1,
+          "outcome": "intact/extended-with-validation-data",
+          "warmOutcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "warmComparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 26683473920,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 181272576
+        }
+      ]
+    },
+    "ownedProcessCleanup": [
+      {
+        "title": "loaded: fresh browser session per run under CPU contention",
+        "childCount": 23,
+        "allExited": true,
+        "signals": {
+          "SIGTERM": 23
+        }
+      }
+    ]
+  },
+  "unmodifiedBaselineSeries": {
+    "measuredAt": "2026-11-04T20:53:43.892Z",
+    "cold": {
+      "summary": {
+        "label": "cold",
+        "runs": 10,
+        "profile": {
+          "node": "v22.23.3",
+          "cores": 24,
+          "chromium": "156.0.8078.4",
+          "requestedLoadProcesses": 0
+        },
+        "timingBoundaries": {
+          "included": "await getDocumentSignatures(bytes), including the signature worker and real comparator",
+          "excluded": "browser context/page creation, production page/module load, fixture generation/fetch and context teardown",
+          "warmReference": "second awaited getDocumentSignatures(bytes.slice()) in the same page"
+        },
+        "firstCheckMs": {
+          "median": 437.3999999985099,
+          "min": 415.30000000074506,
+          "max": 702.0999999977648
+        },
+        "warmCheckMs": {
+          "median": 51.65000000037253,
+          "min": 49.19999999925494,
+          "max": 55
+        },
+        "cpuBusyFraction": 0.36982439181569193,
+        "memoryFreeBytes": {
+          "min": 24408776704,
+          "max": 24962179072
+        },
+        "memoryTotalBytes": 68611059712
+      },
+      "samples": [
+        {
+          "run": 1,
+          "coldMs": 702.0999999977648,
+          "warmMs": 50.400000002235174,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3217381360777587,
+          "memoryFreeBytes": 24440905728,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 154411008
+        },
+        {
+          "run": 2,
+          "coldMs": 417.0999999977648,
+          "warmMs": 52.600000001490116,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3542585680352901,
+          "memoryFreeBytes": 24414883840,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 157548544
+        },
+        {
+          "run": 3,
+          "coldMs": 490.69999999925494,
+          "warmMs": 55,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.4449468553643784,
+          "memoryFreeBytes": 24413216768,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 160079872
+        },
+        {
+          "run": 4,
+          "coldMs": 447.4000000022352,
+          "warmMs": 49.399999998509884,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.42464332036316477,
+          "memoryFreeBytes": 24408776704,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 162529280
+        },
+        {
+          "run": 5,
+          "coldMs": 465.79999999701977,
+          "warmMs": 54,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.4540388302972196,
+          "memoryFreeBytes": 24602091520,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 164671488
+        },
+        {
+          "run": 6,
+          "coldMs": 435.3999999985099,
+          "warmMs": 51.80000000074506,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3977925514748596,
+          "memoryFreeBytes": 24662888448,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 167043072
+        },
+        {
+          "run": 7,
+          "coldMs": 438.69999999925494,
+          "warmMs": 50.30000000074506,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.386800612068392,
+          "memoryFreeBytes": 24879706112,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 169484288
+        },
+        {
+          "run": 8,
+          "coldMs": 420.70000000298023,
+          "warmMs": 49.19999999925494,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3025641025641026,
+          "memoryFreeBytes": 24943321088,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 171098112
+        },
+        {
+          "run": 9,
+          "coldMs": 436.0999999977648,
+          "warmMs": 51.5,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3344186046511628,
+          "memoryFreeBytes": 24962179072,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 173228032
+        },
+        {
+          "run": 10,
+          "coldMs": 415.30000000074506,
+          "warmMs": 53.100000001490116,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 0,
+          "cpuBusyFraction": 0.3148135189979707,
+          "memoryFreeBytes": 24802021376,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 174735360
+        }
+      ]
+    },
+    "loaded": {
+      "summary": {
+        "label": "loaded",
+        "runs": 10,
+        "profile": {
+          "node": "v22.23.3",
+          "cores": 24,
+          "chromium": "156.0.8078.4",
+          "requestedLoadProcesses": 23
+        },
+        "timingBoundaries": {
+          "included": "await getDocumentSignatures(bytes), including the signature worker and real comparator",
+          "excluded": "browser context/page creation, production page/module load, fixture generation/fetch and context teardown",
+          "warmReference": "second awaited getDocumentSignatures(bytes.slice()) in the same page"
+        },
+        "firstCheckMs": {
+          "median": 841.8499999996275,
+          "min": 588.8000000007451,
+          "max": 1425.6000000014901
+        },
+        "warmCheckMs": {
+          "median": 114.69999999925494,
+          "min": 78.10000000149012,
+          "max": 296.80000000074506
+        },
+        "cpuBusyFraction": 1,
+        "memoryFreeBytes": {
+          "min": 24634159104,
+          "max": 24890908672
+        },
+        "memoryTotalBytes": 68611059712
+      },
+      "samples": [
+        {
+          "run": 1,
+          "coldMs": 588.8000000007451,
+          "warmMs": 84,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24634159104,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 173768704
+        },
+        {
+          "run": 2,
+          "coldMs": 777.3000000007451,
+          "warmMs": 127.30000000074506,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24650039296,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 176504832
+        },
+        {
+          "run": 3,
+          "coldMs": 1073.4000000022352,
+          "warmMs": 92.5,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24702324736,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 177721344
+        },
+        {
+          "run": 4,
+          "coldMs": 955.1999999992549,
+          "warmMs": 134.5,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24766054400,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 122560512
+        },
+        {
+          "run": 5,
+          "coldMs": 1425.6000000014901,
+          "warmMs": 133.80000000074506,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24890908672,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 121966592
+        },
+        {
+          "run": 6,
+          "coldMs": 839,
+          "warmMs": 162.5,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24784863232,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 124076032
+        },
+        {
+          "run": 7,
+          "coldMs": 1333.699999999255,
+          "warmMs": 296.80000000074506,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24775892992,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 128962560
+        },
+        {
+          "run": 8,
+          "coldMs": 729.3000000007451,
+          "warmMs": 84.59999999776483,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24821399552,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 130854912
+        },
+        {
+          "run": 9,
+          "coldMs": 844.6999999992549,
+          "warmMs": 102.09999999776483,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24873668608,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 133935104
+        },
+        {
+          "run": 10,
+          "coldMs": 695.5999999977648,
+          "warmMs": 78.10000000149012,
+          "outcome": "intact/extended-with-validation-data",
+          "comparatorRan": true,
+          "requestedLoadProcesses": 23,
+          "cpuBusyFraction": 1,
+          "memoryFreeBytes": 24844836864,
+          "memoryTotalBytes": 68611059712,
+          "runnerRssBytes": 136208384
+        }
+      ]
+    },
+    "ownedProcessCleanup": [
+      {
+        "title": "loaded: fresh browser session per run under CPU contention",
+        "childCount": 23,
+        "allExited": true,
+        "signals": {
+          "SIGTERM": 23
+        }
+      }
+    ]
+  },
+  "budgetDecision": {
+    "previousStartupMs": 5000,
+    "basis": "finalInstrumentedSeries.loaded.summary.comparatorStartupMs.max",
+    "observedLoadedMaximumMs": 378,
+    "explicitMultiplier": 5,
+    "multipliedMs": 1890,
+    "selectedStartupMs": 2000,
+    "rounding": "1890 ms rounded up to 2000 ms",
+    "explicitMarginMs": 1622,
+    "selectedToObservedRatio": 5.291005291005291,
+    "wholeCallBoundaryWarning": "Whole-call maxima are retained as evidence but are not mislabeled as startup-only work or used as the startup margin basis"
+  },
+  "sanitization": "No hostname, user/profile path, worktree path, runtime path, reporter configuration or process ID is included",
+  "rawSuccessfulReportsArchivedLocallyBeforeRerun": true
+}

@@ -14,6 +14,9 @@ const OUTPUT_DIR = fileURLToPath(new URL('../../dist/signature-first-check/', im
 export default defineConfig(async (env) => {
   const resolvedBase = typeof baseConfig === 'function' ? await baseConfig(env) : baseConfig;
   return mergeConfig(resolvedBase, {
+    define: {
+      'import.meta.env.ODV_FIRST_CHECK_TIMING': JSON.stringify('1'),
+    },
     root: MEASUREMENT_ROOT,
     publicDir: false,
     build: {

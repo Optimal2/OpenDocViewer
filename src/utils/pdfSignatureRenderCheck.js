@@ -31,21 +31,19 @@
  * JPEG scan with text strokes, takes about 786 ms per page for both revisions
  * together; text pages about 29 ms.
  *
- * - Startup: pdf.js import plus opening both revisions (the `startupColdMs`
- *   median emitted by `node scripts/measure-signature-import-cost.mjs
- *   --repeat=3 --pages=20`) measured 0.51 s without load and 0.72 s under
- *   full CPU load; the whole first browser check of a fresh session, worker
- *   pdf.js registration included (measured with `ODV_MEASURE_FIRST_CHECK=1
- *   npx playwright test tests/ui/signature-first-check.spec.mjs`, 10 fresh
- *   sessions per condition), took at most 1.90 s without load and 2.21 s
- *   under full CPU load. 5 s leaves more than 2x over that worst measured
- *   first check (2.26x over 2.21 s). It is the whole budget until the page
- *   count is known.
+ * - Startup: 2 s. Ten fresh production-browser contexts per condition on
+ *   2026-11-04 measured the actual compare()-to-both-revisions-open boundary
+ *   at 257 ms maximum without requested load and 378 ms with 23 owned CPU
+ *   contenders (100% busy). Five times 378 ms is 1890 ms, rounded up to 2 s:
+ *   1622 ms explicit margin, 5.29x the observed loaded maximum. Whole first
+ *   calls (539.4/835.9 ms maxima) retain worker startup and signature parsing
+ *   separately. Raw evidence: scripts/measurements/signature-first-check.json.
+ *   The startup allowance is the whole budget until the page count is known.
  * - Per page: 2.5 s, 3.2x the slowest fitted form (785.6 ms/page), because
  *   real scans carry more detail than the fixtures and slower hardware exists.
  * - Total cap: 300 s for all comparisons of one file. 200 pages of the
  *   slowest fitted form need about 157 s (extrapolated, not measured), so
- *   they complete with almost 2x to spare; beyond 118 pages the cap, not the
+ *   they complete with almost 2x to spare; beyond 119 pages the cap, not the
  *   per-page allowance, binds.
  * - Per-page watchdog: 15 s for one page (or the document-level sections),
  *   about 19.1x the slowest fitted page rate and 1/20 of the cap, so a
@@ -53,7 +51,7 @@
  *   document's budget.
  */
 /** Allowance for loading pdf.js and opening both revisions, in ms. */
-export const RENDER_CHECK_STARTUP_MS = 5000;
+export const RENDER_CHECK_STARTUP_MS = 2000;
 /** Allowance per page (both revisions), in ms. */
 export const RENDER_CHECK_PER_PAGE_MS = 2500;
 /** Absolute cap for all comparisons of one comparator (one file), in ms. */
@@ -161,6 +159,7 @@ export function renderCheckVerdict(check) {
  * @param {Object} [options.budget] Overrides of the time limits (RenderCheckLimits; tests).
  * @param {number} [options.maxPages] Page budget.
  * @param {Function} [options.onProgress] Called after every compared page (the worker's heartbeat).
+ * @param {Function} [options.onTiming] Receives `{ phase: 'startup', durationMs }` once both revisions are open.
  * @returns {RenderComparator}
  */
 export function createRenderComparator(bytes, options = {}) {
@@ -195,6 +194,7 @@ export function createRenderComparator(bytes, options = {}) {
     full ??= open(bytes.slice());
     const finalDoc = await full;
     const signedDoc = await open(bytes.slice(0, signedEnd));
+    clock.startup();
     try {
       if (signedDoc.numPages !== finalDoc.numPages) {
         return { outcome: 'different', detail: `page count ${signedDoc.numPages} -> ${finalDoc.numPages}` };
@@ -235,6 +235,10 @@ export function createRenderComparator(bytes, options = {}) {
         timer = setTimeout(() => expire(new RenderCheckError('timeout', budgetText)), Math.max(0, deadline - Date.now()));
       };
       const clock = {
+        startup() {
+          // Measurement never decides the integrity result.
+          try { options.onTiming?.({ phase: 'startup', durationMs: Date.now() - started }); } catch { /* observer only */ }
+        },
         pages(count) {
           const budget = Math.min(renderCheckBudgetMs(count, limits), remaining);
           deadline = started + budget;

@@ -17,6 +17,10 @@
  * comparator. warmMs starts immediately before the second call with a copied
  * byte array in that same page. Context creation, fixture generation/fetch,
  * production module import and context teardown are outside both timings.
+ * comparatorStartupMs instead starts inside createRenderComparator.compare()
+ * and stops when both revisions are open, exactly where the startup allowance
+ * ends. It includes the comparator's dynamic pdf.js import/module registration;
+ * signature-worker startup and signature parsing remain visible in coldMs.
  *
  * Opt-in measurement (CI-pinned Node 22.23.3), cross-platform:
  *
@@ -27,8 +31,8 @@
  * fraction and memory snapshots. The dedicated runner retains successful
  * attachments in signature-measurement-results/, outside normal UI cleanup.
  * Archive that directory before repeating the dedicated measurement, which
- * replaces its own previous output. This harness supplies evidence for a later
- * budget review; it does not itself assert or update a performance budget.
+ * replaces its own previous output. This harness supplies reproducible budget
+ * evidence; it does not itself assert a timing threshold or update the budget.
  */
 import { expect } from '@playwright/test';
 import { availableParallelism, cpus, freemem, totalmem } from 'node:os';
@@ -44,9 +48,10 @@ const FIXTURE_PATH = '/measure-fixtures/first-check.pdf';
 const MEASURE = process.env.ODV_MEASURE_FIRST_CHECK === '1';
 const PRODUCTION = process.env.ODV_FIRST_CHECK_PRODUCTION === '1';
 const TIMING_BOUNDARIES = Object.freeze({
-  included: 'await getDocumentSignatures(bytes), including the signature worker and real comparator',
+  included: 'await getDocumentSignatures(bytes), including signature-worker bootstrap/module registration, parsing and the real comparator',
+  comparatorStartup: 'createRenderComparator.compare() start until both revisions are open, including dynamic pdf.js import/module registration',
   excluded: 'browser context/page creation, production page/module load, fixture generation/fetch and context teardown',
-  warmReference: 'second awaited getDocumentSignatures(bytes.slice()) in the same page',
+  warmReference: 'second awaited getDocumentSignatures(bytes.slice()) in the same page, with both whole-call and comparator-startup timings',
 });
 
 test.describe('first signature check startup measurement', () => {
@@ -111,13 +116,25 @@ test.describe('first signature check startup measurement', () => {
         const warmStart = performance.now();
         const warm = await getDocumentSignatures(bytes.slice());
         const warmMs = performance.now() - warmStart;
+        const startupEvents = (report) => (report.renderCheckTimings || [])
+          .filter((timing) => timing.phase === 'startup');
+        const coldStartup = startupEvents(cold);
+        const warmStartup = startupEvents(warm);
         const approval = (cold.signatures || []).find((sig) => sig.kind === 'approval');
+        const warmApproval = (warm.signatures || []).find((sig) => sig.kind === 'approval');
+        const comparatorRan = (signature) => typeof signature?.integrityReason === 'string'
+          && signature.integrityReason.includes('pdf.js shows the same document as the signed revision');
         return {
           coldMs,
           warmMs,
+          comparatorStartupMs: coldStartup.length === 1 ? coldStartup[0].durationMs : null,
+          warmComparatorStartupMs: warmStartup.length === 1 ? warmStartup[0].durationMs : null,
+          coldStartupEvents: coldStartup.length,
+          warmStartupEvents: warmStartup.length,
           outcome: approval ? `${approval.integrity}/${approval.integrityCode}` : 'no-approval-signature',
-          comparatorRan: typeof approval?.integrityReason === 'string'
-            && approval.integrityReason.includes('pdf.js shows the same document as the signed revision'),
+          warmOutcome: warmApproval ? `${warmApproval.integrity}/${warmApproval.integrityCode}` : 'no-approval-signature',
+          comparatorRan: comparatorRan(approval),
+          warmComparatorRan: comparatorRan(warmApproval),
         };
       }, FIXTURE_PATH);
       return {
@@ -148,7 +165,15 @@ test.describe('first signature check startup measurement', () => {
       console.log(`${label} raw ${JSON.stringify({ run: index + 1, runs: RUNS_PER_CONDITION, ...result })}`);
       // Otherwise this is not a first CHECK timing but a failed/classifier-only inspection.
       expect(result.comparatorRan).toBe(true);
+      expect(result.warmComparatorRan).toBe(true);
       expect(result.outcome).toBe('intact/extended-with-validation-data');
+      expect(result.warmOutcome).toBe('intact/extended-with-validation-data');
+      expect(result.coldStartupEvents).toBe(1);
+      expect(result.warmStartupEvents).toBe(1);
+      expect(Number.isFinite(result.comparatorStartupMs)).toBe(true);
+      expect(Number.isFinite(result.warmComparatorStartupMs)).toBe(true);
+      expect(result.comparatorStartupMs).toBeGreaterThanOrEqual(0);
+      expect(result.warmComparatorStartupMs).toBeGreaterThanOrEqual(0);
     }
     const summary = {
       label,
@@ -157,6 +182,8 @@ test.describe('first signature check startup measurement', () => {
       timingBoundaries: TIMING_BOUNDARIES,
       firstCheckMs: stats(results.map((result) => result.coldMs)),
       warmCheckMs: stats(results.map((result) => result.warmMs)),
+      comparatorStartupMs: stats(results.map((result) => result.comparatorStartupMs)),
+      warmComparatorStartupMs: stats(results.map((result) => result.warmComparatorStartupMs)),
       cpuBusyFraction: cpuBusyFraction(cpuStart, cpuTimes()),
       memoryFreeBytes: {
         min: Math.min(...results.map((result) => result.memoryFreeBytes)),

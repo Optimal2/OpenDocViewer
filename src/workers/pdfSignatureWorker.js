@@ -53,7 +53,14 @@ async function handleRequest(requestId, bytes) {
     // Heartbeat after every page the pdf.js comparison finishes: the inspector
     // keeps waiting for a comparison that still makes progress.
     const onProgress = () => workerScope.postMessage({ type: 'pdfSignaturesProgress', requestId });
-    const report = await collectPdfSignatures(bytes, { renderCheck: { ...renderCheck, onProgress } });
+    // The dedicated production measurement build opts into this diagnostic field.
+    // Normal viewer reports and timing behavior remain unchanged.
+    const renderCheckTimings = [];
+    const onTiming = import.meta.env.ODV_FIRST_CHECK_TIMING === '1'
+      ? (timing) => { renderCheckTimings.push(timing); }
+      : undefined;
+    const report = await collectPdfSignatures(bytes, { renderCheck: { ...renderCheck, onProgress, onTiming } });
+    if (onTiming) report.renderCheckTimings = renderCheckTimings;
     workerScope.postMessage({ type: 'pdfSignaturesResult', requestId, ok: true, report });
   } catch (err) {
     workerScope.postMessage({
