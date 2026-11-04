@@ -462,7 +462,8 @@
       "speak": "Läs upp markerad text",
       "stop": "Sluta läsa upp",
       "language": "Uppläsningsspråk",
-      "followUi": "Som gränssnittets språk ({language})"
+      "followUi": "Som gränssnittets språk ({language})",
+      "noLocalVoice": "Ingen lokal röst installerad för {language}; molnröster används aldrig"
     }
   },
   "viewer": {

@@ -6,6 +6,7 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  isLocalSpeechVoice,
   isSpeechSynthesisAvailable,
   listSpeechLocales,
   pickSpeechVoice,
@@ -81,8 +82,15 @@ describe('pickSpeechVoice', () => {
     { name: 'English', lang: 'en-US', localService: true, default: true },
   ];
 
-  it('prefers the exact locale, local over remote', () => {
+  it('prefers the exact locale and never takes an online voice', () => {
     expect(pickSpeechVoice(voices, 'sv-SE').name).toBe('Local Swedish');
+    // Only an online voice for the locale: nothing, not the online one, not another language.
+    expect(pickSpeechVoice([{ name: 'Remote Swedish', lang: 'sv-SE', localService: false }, voices[3]], 'sv-SE')).toBeNull();
+    // A voice that does not say it is local counts as online.
+    expect(pickSpeechVoice([{ name: 'Unknown Swedish', lang: 'sv-SE' }], 'sv-SE')).toBeNull();
+    expect(isLocalSpeechVoice({ localService: true })).toBe(true);
+    expect(isLocalSpeechVoice({ localService: false })).toBe(false);
+    expect(isLocalSpeechVoice({})).toBe(false);
   });
 
   it('falls back to the same base language, then to nothing', () => {
@@ -116,7 +124,7 @@ describe('speakText', () => {
   });
 
   it('cancel stops the synthesiser and reports cancelled once, also when the engine then errors', () => {
-    const synthesis = fakeSynthesis();
+    const synthesis = fakeSynthesis([{ name: 'Local Swedish', lang: 'sv-SE', localService: true }]);
     const onEnd = vi.fn();
     const controller = speakText('Hej', { lang: 'sv-SE', onEnd, synthesis, Utterance: FakeUtterance });
     controller.cancel();
@@ -128,7 +136,8 @@ describe('speakText', () => {
   });
 
   it('reports an engine error once, drops the rest of the queue, and an interruption as cancelled', () => {
-    const synthesis = fakeSynthesis();
+    const local = [{ name: 'Local Swedish', lang: 'sv-SE', localService: true }];
+    const synthesis = fakeSynthesis(local);
     const onEnd = vi.fn();
     speakText('Hej. Då.', { lang: 'sv-SE', onEnd, synthesis, Utterance: FakeUtterance });
     synthesis.spoken[0].onerror({ error: 'synthesis-failed' });
@@ -139,15 +148,28 @@ describe('speakText', () => {
     expect(onEnd).toHaveBeenCalledTimes(1);
     expect(onEnd).toHaveBeenCalledWith('error');
 
-    const other = fakeSynthesis();
+    const other = fakeSynthesis(local);
     const onEnd2 = vi.fn();
     speakText('Hej', { lang: 'sv-SE', onEnd: onEnd2, synthesis: other, Utterance: FakeUtterance });
     other.spoken[0].onerror({ error: 'interrupted' });
     expect(onEnd2).toHaveBeenCalledWith('cancelled');
   });
 
+  it('speaks nothing without a local voice for the language: no utterance, no cancel, ends with no-voice', () => {
+    const synthesis = fakeSynthesis([
+      { name: 'Remote Swedish', lang: 'sv-SE', localService: false },
+      { name: 'Local English', lang: 'en-US', localService: true },
+    ]);
+    const onEnd = vi.fn();
+    const controller = speakText('Hej världen', { lang: 'sv-SE', onEnd, synthesis, Utterance: FakeUtterance });
+    expect(controller.chunkCount).toBe(0);
+    expect(synthesis.speak).not.toHaveBeenCalled();
+    expect(synthesis.cancel).not.toHaveBeenCalled();
+    expect(onEnd).toHaveBeenCalledWith('no-voice');
+  });
+
   it('speaks nothing for empty text or without a synthesiser, and still ends', () => {
-    const synthesis = fakeSynthesis();
+    const synthesis = fakeSynthesis([{ name: 'Local Swedish', lang: 'sv-SE', localService: true }]);
     const onEnd = vi.fn();
     expect(speakText('   \n ', { lang: 'sv-SE', onEnd, synthesis, Utterance: FakeUtterance }).chunkCount).toBe(0);
     expect(synthesis.speak).not.toHaveBeenCalled();
@@ -170,10 +192,13 @@ describe('isSpeechSynthesisAvailable', () => {
 });
 
 describe('listSpeechLocales', () => {
-  it('lists each locale of the installed voices once, in canonical form, sorted', () => {
+  it('lists each locale of the installed local voices once, in canonical form, sorted', () => {
+    const local = (name, lang) => ({ name, lang, localService: true });
     const voices = [
-      { name: 'A', lang: 'sv-SE' }, { name: 'B', lang: 'sv_se' }, { name: 'C', lang: 'en-GB' },
-      { name: 'D', lang: 'en-US' }, { name: 'E', lang: 'EN-us' }, { name: 'F', lang: '' }, null,
+      local('A', 'sv-SE'), local('B', 'sv_se'), local('C', 'en-GB'), local('D', 'en-US'), local('E', 'EN-us'),
+      local('F', ''), null,
+      // Online voices never make the list, even for a language no local voice has.
+      { name: 'G', lang: 'de-DE', localService: false }, { name: 'H', lang: 'fr-FR' },
     ];
     expect(listSpeechLocales(voices)).toEqual(['en-GB', 'en-US', 'sv-SE']);
     expect(listSpeechLocales(null)).toEqual([]);

@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 178,
-    "sourceLineCount": 67136,
-    "docletCount": 1916,
+    "sourceLineCount": 67170,
+    "docletCount": 1917,
     "documentedFileCount": 177,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -1158,7 +1158,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8663,
+      "lineCount": 8672,
       "docletCount": 148,
       "importantFiles": [
         {
@@ -1730,8 +1730,8 @@
     {
       "name": "src/utils",
       "fileCount": 61,
-      "lineCount": 22966,
-      "docletCount": 940,
+      "lineCount": 22991,
+      "docletCount": 941,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -15877,7 +15877,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "lines": 233,
+      "lines": 242,
       "extension": ".jsx",
       "jsdocBlockCount": 10,
       "sourceSummary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
@@ -15893,7 +15893,7 @@
             "useRef",
             "useState"
           ],
-          "line": 21,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -15901,7 +15901,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -15910,7 +15910,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 23,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -15918,11 +15918,12 @@
           "specifiers": [
             "isSpeechSynthesisAvailable",
             "listSpeechLocales",
+            "pickSpeechVoice",
             "resolveSpeechLanguage",
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 24,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -15931,7 +15932,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 25,
+          "line": 28,
           "kind": "static"
         }
       ],
@@ -15939,69 +15940,69 @@
         {
           "name": "ReadSelectionButton",
           "kind": "default",
-          "line": 40
+          "line": 43
         }
       ],
       "declarations": [
         {
           "name": "selectedLayerText",
           "kind": "function",
-          "line": 31
+          "line": 34
         },
         {
           "name": "ReadSelectionButton",
           "kind": "component",
-          "line": 40
+          "line": 43
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 59
+          "line": 62
         },
         {
           "name": "read",
           "kind": "function",
-          "line": 70
+          "line": 73
         },
         {
           "name": "clearCloseTimer",
           "kind": "function",
-          "line": 76
+          "line": 79
         },
         {
           "name": "openMenu",
           "kind": "function",
-          "line": 82
+          "line": 85
         },
         {
           "name": "closeMenuSoon",
           "kind": "function",
-          "line": 95
+          "line": 98
         },
         {
           "name": "onPointerDown",
           "kind": "function",
-          "line": 106
+          "line": 109
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 110
+          "line": 113
         },
         {
           "name": "stop",
           "kind": "function",
-          "line": 129
+          "line": 132
         },
         {
           "name": "speak",
           "kind": "function",
-          "line": 133
+          "line": 136
         },
         {
           "name": "chooseLanguage",
           "kind": "function",
-          "line": 150
+          "line": 153
         }
       ],
       "parseError": null,
@@ -16017,7 +16018,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 28,
+          "line": 31,
           "description": "How long the pointer may leave the button and its menu before the menu closes.",
           "params": [],
           "returns": [],
@@ -16030,7 +16031,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 31,
+          "line": 34,
           "description": "",
           "params": [],
           "returns": [
@@ -16048,7 +16049,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 40,
+          "line": 43,
           "description": "",
           "params": [],
           "returns": [
@@ -16066,7 +16067,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 150,
+          "line": 153,
           "description": "",
           "params": [
             {
@@ -16088,7 +16089,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 23,
+          "line": 26,
           "kind": "static",
           "resolved": "src/utils/ocrTextLayout.js"
         },
@@ -16097,11 +16098,12 @@
           "specifiers": [
             "isSpeechSynthesisAvailable",
             "listSpeechLocales",
+            "pickSpeechVoice",
             "resolveSpeechLanguage",
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 24,
+          "line": 27,
           "kind": "static",
           "resolved": "src/utils/speech.js"
         },
@@ -16111,7 +16113,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 25,
+          "line": 28,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         }
@@ -16128,7 +16130,7 @@
             "useRef",
             "useState"
           ],
-          "line": 21,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -16136,12 +16138,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22,
+          "line": 25,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 26,
+      "importanceScore": 27,
       "summary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -74808,108 +74810,118 @@
     },
     {
       "path": "src/utils/speech.js",
-      "lines": 211,
+      "lines": 236,
       "extension": ".js",
-      "jsdocBlockCount": 11,
+      "jsdocBlockCount": 12,
       "sourceSummary": "Reading text aloud with the browser's speech synthesis (Web Speech API, `window.speechSynthesis`).",
       "imports": [],
       "exports": [
         {
           "name": "SPEECH_MAX_CHUNK_LENGTH",
           "kind": "variable",
-          "line": 15
+          "line": 18
         },
         {
           "name": "isSpeechSynthesisAvailable",
           "kind": "function",
-          "line": 20
+          "line": 23
         },
         {
           "name": "resolveSpeechLanguage",
           "kind": "function",
-          "line": 32
+          "line": 35
         },
         {
           "name": "splitSpeechChunks",
           "kind": "function",
-          "line": 48
+          "line": 51
+        },
+        {
+          "name": "isLocalSpeechVoice",
+          "kind": "function",
+          "line": 92
         },
         {
           "name": "listSpeechLocales",
           "kind": "function",
-          "line": 89
+          "line": 103
         },
         {
           "name": "speechLocaleLabel",
           "kind": "function",
-          "line": 106
+          "line": 121
         },
         {
           "name": "pickSpeechVoice",
           "kind": "function",
-          "line": 127
+          "line": 143
         },
         {
           "name": "speakText",
           "kind": "function",
-          "line": 159
+          "line": 178
         }
       ],
       "declarations": [
         {
           "name": "isSpeechSynthesisAvailable",
           "kind": "function",
-          "line": 20
+          "line": 23
         },
         {
           "name": "resolveSpeechLanguage",
           "kind": "function",
-          "line": 32
+          "line": 35
         },
         {
           "name": "splitSpeechChunks",
           "kind": "function",
-          "line": 48
+          "line": 51
         },
         {
           "name": "canonicalLocale",
           "kind": "function",
-          "line": 75
+          "line": 78
+        },
+        {
+          "name": "isLocalSpeechVoice",
+          "kind": "function",
+          "line": 92
         },
         {
           "name": "listSpeechLocales",
           "kind": "function",
-          "line": 89
+          "line": 103
         },
         {
           "name": "speechLocaleLabel",
           "kind": "function",
-          "line": 106
+          "line": 121
         },
         {
           "name": "pickSpeechVoice",
           "kind": "function",
-          "line": 127
+          "line": 143
         },
         {
           "name": "normalize",
           "kind": "function",
-          "line": 132
+          "line": 148
         },
         {
           "name": "rank",
           "kind": "function",
-          "line": 133
+          "line": 149
         },
         {
           "name": "speakText",
           "kind": "function",
-          "line": 159
+          "line": 178
         },
         {
           "name": "finish",
           "kind": "function",
-          "line": 164
+          "line": 183
         }
       ],
       "parseError": null,
@@ -74925,7 +74937,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 15,
+          "line": 18,
           "description": "Longest chunk handed to the synthesiser (characters).",
           "params": [],
           "returns": [],
@@ -74938,7 +74950,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 20,
+          "line": 23,
           "description": "",
           "params": [],
           "returns": [
@@ -74956,7 +74968,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 32,
+          "line": 35,
           "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
           "params": [
             {
@@ -74981,7 +74993,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 48,
+          "line": 51,
           "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
           "params": [
             {
@@ -75012,7 +75024,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 75,
+          "line": 78,
           "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
           "params": [
             {
@@ -75031,20 +75043,45 @@
           "examples": 0
         },
         {
+          "id": "isLocalSpeechVoice",
+          "name": "isLocalSpeechVoice",
+          "longname": "isLocalSpeechVoice",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/speech.js",
+          "line": 92,
+          "description": "Whether a voice runs on the machine.",
+          "params": [
+            {
+              "name": "voice",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "listSpeechLocales",
           "name": "listSpeechLocales",
           "longname": "listSpeechLocales",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 89,
-          "description": "The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
+          "line": 103,
+          "description": "The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
           "params": [
             {
               "name": "voices",
               "type": "Array.<Object>",
               "optional": false,
-              "description": "SpeechSynthesisVoice-like: { lang } ."
+              "description": "SpeechSynthesisVoice-like: { lang, localService } ."
             }
           ],
           "returns": [
@@ -75062,7 +75099,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 106,
+          "line": 121,
           "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
           "params": [
             {
@@ -75093,8 +75130,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 127,
-          "description": "The installed voice to use for a locale: exact locale first, then the same base language (preferring a local voice over a remote one), else null (the browser then picks by lang ).",
+          "line": 143,
+          "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
           "params": [
             {
               "name": "voices",
@@ -75124,7 +75161,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 140,
+          "line": 156,
           "description": "",
           "params": [],
           "returns": [],
@@ -75137,8 +75174,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 159,
-          "description": "Speak text aloud.",
+          "line": 178,
+          "description": "Speak text aloud with a local voice.",
           "params": [
             {
               "name": "text",
@@ -75162,7 +75199,7 @@
               "name": "options.onEnd",
               "type": "function",
               "optional": false,
-              "description": "Called once when the last chunk has been spoken, on cancel, or on the first error."
+              "description": "Called once when the last chunk has been spoken, on cancel, on the first error, or at once when no local voice exists."
             },
             {
               "name": "options.synthesis",
@@ -86365,7 +86402,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 150,
+      "line": 153,
       "description": "",
       "params": [
         {
@@ -86385,7 +86422,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 40,
+      "line": 43,
       "description": "",
       "params": [],
       "returns": [
@@ -86403,7 +86440,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 28,
+      "line": 31,
       "description": "How long the pointer may leave the button and its menu before the menu closes.",
       "params": [],
       "returns": [],
@@ -86416,7 +86453,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 31,
+      "line": 34,
       "description": "",
       "params": [],
       "returns": [
@@ -124020,7 +124057,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 75,
+      "line": 78,
       "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
       "params": [
         {
@@ -124039,13 +124076,38 @@
       "examples": 0
     },
     {
+      "id": "isLocalSpeechVoice",
+      "name": "isLocalSpeechVoice",
+      "longname": "isLocalSpeechVoice",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/speech.js",
+      "line": 92,
+      "description": "Whether a voice runs on the machine.",
+      "params": [
+        {
+          "name": "voice",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "isSpeechSynthesisAvailable",
       "name": "isSpeechSynthesisAvailable",
       "longname": "isSpeechSynthesisAvailable",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 20,
+      "line": 23,
       "description": "",
       "params": [],
       "returns": [
@@ -124063,14 +124125,14 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 89,
-      "description": "The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
+      "line": 103,
+      "description": "The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
       "params": [
         {
           "name": "voices",
           "type": "Array.<Object>",
           "optional": false,
-          "description": "SpeechSynthesisVoice-like: { lang } ."
+          "description": "SpeechSynthesisVoice-like: { lang, localService } ."
         }
       ],
       "returns": [
@@ -124088,8 +124150,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 127,
-      "description": "The installed voice to use for a locale: exact locale first, then the same base language (preferring a local voice over a remote one), else null (the browser then picks by lang ).",
+      "line": 143,
+      "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
       "params": [
         {
           "name": "voices",
@@ -124119,7 +124181,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 32,
+      "line": 35,
       "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
       "params": [
         {
@@ -124144,8 +124206,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 159,
-      "description": "Speak text aloud.",
+      "line": 178,
+      "description": "Speak text aloud with a local voice.",
       "params": [
         {
           "name": "text",
@@ -124169,7 +124231,7 @@
           "name": "options.onEnd",
           "type": "function",
           "optional": false,
-          "description": "Called once when the last chunk has been spoken, on cancel, or on the first error."
+          "description": "Called once when the last chunk has been spoken, on cancel, on the first error, or at once when no local voice exists."
         },
         {
           "name": "options.synthesis",
@@ -124205,7 +124267,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 15,
+      "line": 18,
       "description": "Longest chunk handed to the synthesiser (characters).",
       "params": [],
       "returns": [],
@@ -124218,7 +124280,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 140,
+      "line": 156,
       "description": "",
       "params": [],
       "returns": [],
@@ -124231,7 +124293,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 106,
+      "line": 121,
       "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
       "params": [
         {
@@ -124262,7 +124324,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 48,
+      "line": 51,
       "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
       "params": [
         {

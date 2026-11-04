@@ -497,12 +497,14 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   find (Ctrl+F) keeps working on the layer.
 - A read-aloud button that appears only while recognised text is selected, if the browser has
   speech synthesis (Web Speech API). Clicking it reads the selection as it reads on the page,
-  line by line, with an installed voice of the viewer's UI language (Swedish text needs a
-  Swedish voice installed in the operating system; otherwise the browser's default voice reads
-  it). While reading, the button is a stop button. The voices are the ones the browser offers; a
-  voice installed locally is preferred over an online one of the same language. Resting the
+  line by line, with a voice installed in the operating system for the reading language (the
+  viewer's UI language unless the user picks another). Only voices that run on the machine are
+  used, never the browser's online voices: the text is document content and must not leave the
+  computer. Without a local voice for the language the button is shown disabled with that
+  reason, and nothing is spoken (an utterance without a voice would let the browser pick one,
+  possibly online). While reading, the button is a stop button. Resting the
   pointer on the button (or pressing an arrow key on it) opens a menu of the locales the
-  installed voices offer, with "Follow the interface language" first; a choice there sets the
+  installed local voices offer, with "Follow the interface language" first; a choice there sets the
   reading language without changing the UI language and is kept in the viewer preferences
   (`speechLanguage`, next to `language`) across reloads.
 

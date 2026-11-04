@@ -5,10 +5,13 @@
  * The text is spoken in short chunks (a line, a sentence, at most `maxChunkLength` characters at
  * a word boundary): Chromium stops speaking an utterance that runs longer than about fifteen
  * seconds, so one long utterance would fall silent mid-page, while short ones are read through.
- * The voice follows the requested language: an installed voice of that exact locale, else one
- * of the same base language, else the browser's choice for `utterance.lang`. Nothing is spoken
- * before the first user gesture (browser policy), which is why the viewer speaks only on a
- * button click. Nothing here is loaded or called while OCR is off.
+ * Only voices that run on the machine are ever used (`SpeechSynthesisVoice.localService`): the
+ * text is document content, and an online voice would send it to the browser vendor's service.
+ * The voice follows the requested language: a local voice of that exact locale, else a local
+ * one of the same base language; with no local voice for the language nothing is spoken at
+ * all, because an utterance without a voice lets the browser pick one, which may be online.
+ * Nothing is spoken before the first user gesture (browser policy), which is why the viewer
+ * speaks only on a button click. Nothing here is loaded or called while OCR is off.
  */
 
 /** Longest chunk handed to the synthesiser (characters). */
@@ -80,15 +83,27 @@ function canonicalLocale(lang) {
 }
 
 /**
- * The locales the installed voices offer, each once, in canonical form, sorted: what the
- * read-aloud language menu lists.
+ * Whether a voice runs on the machine. Only `localService === true` counts: a voice that does
+ * not say so is treated as online.
  *
- * @param {Array<Object>} voices  SpeechSynthesisVoice-like: `{ lang }`.
+ * @param {*} voice
+ * @returns {boolean}
+ */
+export function isLocalSpeechVoice(voice) {
+  return !!voice && voice.localService === true;
+}
+
+/**
+ * The locales the installed local voices offer, each once, in canonical form, sorted: what the
+ * read-aloud language menu lists. Online voices are left out.
+ *
+ * @param {Array<Object>} voices  SpeechSynthesisVoice-like: `{ lang, localService }`.
  * @returns {Array<string>}
  */
 export function listSpeechLocales(voices) {
   const locales = new Set();
   for (const voice of Array.isArray(voices) ? voices : []) {
+    if (!isLocalSpeechVoice(voice)) continue;
     const locale = canonicalLocale(voice?.lang);
     if (locale) locales.add(locale);
   }
@@ -117,20 +132,21 @@ export function speechLocaleLabel(locale, uiLanguage) {
 }
 
 /**
- * The installed voice to use for a locale: exact locale first, then the same base language
- * (preferring a local voice over a remote one), else null (the browser then picks by `lang`).
+ * The local voice to use for a locale: exact locale first, then the same base language (the
+ * browser's default voice first among equals), else null. An online voice is never returned,
+ * whatever the locale.
  *
  * @param {Array<Object>} voices  SpeechSynthesisVoice-like: `{ lang, localService, default }`.
  * @param {string} lang
  * @returns {(Object|null)}
  */
 export function pickSpeechVoice(voices, lang) {
-  const list = Array.isArray(voices) ? voices : [];
+  const list = (Array.isArray(voices) ? voices : []).filter(isLocalSpeechVoice);
   const wanted = String(lang || '').toLowerCase().replace('_', '-');
   const base = wanted.split('-')[0];
   if (!base) return null;
   const normalize = (voice) => String(voice?.lang || '').toLowerCase().replace('_', '-');
-  const rank = (voice) => (voice.localService ? 0 : 1) + (voice.default ? 0 : 0.5);
+  const rank = (voice) => (voice.default ? 0 : 1);
   const exact = list.filter((voice) => normalize(voice) === wanted).sort((a, b) => rank(a) - rank(b));
   if (exact.length > 0) return exact[0];
   const sameBase = list.filter((voice) => normalize(voice).split('-')[0] === base).sort((a, b) => rank(a) - rank(b));
@@ -140,17 +156,20 @@ export function pickSpeechVoice(voices, lang) {
 /**
  * @typedef {Object} SpeechController
  * @property {function(): void} cancel  Stops speaking; `onEnd` is called once with `cancelled`.
- * @property {number} chunkCount  How many utterances were queued.
+ * @property {number} chunkCount  How many utterances were queued (0 when nothing is spoken,
+ *   also when no local voice exists for the language).
  */
 
 /**
- * Speak text aloud. Anything the synthesiser was saying is cancelled first.
+ * Speak text aloud with a local voice. Anything the synthesiser was saying is cancelled first.
+ * Without a local voice for the language nothing is spoken and `onEnd` gets `no-voice`.
  *
  * @param {*} text
  * @param {Object} options
  * @param {string} options.lang  Locale of the text, e.g. 'sv-SE'.
- * @param {function(('finished'|'cancelled'|'error')): void=} options.onEnd  Called once when the
- *   last chunk has been spoken, on cancel, or on the first error.
+ * @param {function(('finished'|'cancelled'|'error'|'no-voice')): void=} options.onEnd  Called
+ *   once when the last chunk has been spoken, on cancel, on the first error, or at once when no
+ *   local voice exists.
  * @param {Object=} options.synthesis  `window.speechSynthesis` by default (tests inject a fake).
  * @param {Function=} options.Utterance  `window.SpeechSynthesisUtterance` by default.
  * @param {number=} options.maxChunkLength
@@ -171,15 +190,21 @@ export function speakText(text, { lang, onEnd, synthesis, Utterance, maxChunkLen
     return { cancel() {}, chunkCount: 0 };
   }
 
-  try { synth.cancel(); } catch { /* nothing was speaking */ }
   const voices = typeof synth.getVoices === 'function' ? synth.getVoices() : [];
   const voice = pickSpeechVoice(voices, lang);
+  if (!voice) {
+    // No local voice: an utterance without one would let the browser choose, possibly an
+    // online voice, so nothing is spoken.
+    finish('no-voice');
+    return { cancel() {}, chunkCount: 0 };
+  }
+  try { synth.cancel(); } catch { /* nothing was speaking */ }
   let remaining = chunks.length;
   let cancelled = false;
   for (const chunk of chunks) {
     const utterance = new UtteranceClass(chunk);
     utterance.lang = lang || '';
-    if (voice) utterance.voice = voice;
+    utterance.voice = voice;
     utterance.onend = () => {
       remaining -= 1;
       if (remaining <= 0 && !cancelled) finish('finished');

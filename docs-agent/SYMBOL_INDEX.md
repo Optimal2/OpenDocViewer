@@ -289,10 +289,10 @@
 | <code>module:printRangeDialogHelpers.resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:50</code> | Resolve the string that should be used on physical print/log output for an option. |
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
-| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:150</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:40</code> |  |
-| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:28</code> | How long the pointer may leave the button and its menu before the menu closes. |
-| <code>selectedLayerText</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:31</code> |  |
+| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:153</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:43</code> |  |
+| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:31</code> | How long the pointer may leave the button and its menu before the menu closes. |
+| <code>selectedLayerText</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:34</code> |  |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:97</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:89</code> |  |
@@ -1826,16 +1826,17 @@
 | <code>SourceTempStore#touchIndexedDbRecord</code> | function | <code>src/utils/sourceTempStore.js:858</code> |  |
 | <code>transactionDone</code> | function | <code>src/utils/sourceTempStore.js:134</code> |  |
 | <code>SourceTempStore#updateConfig</code> | function | <code>src/utils/sourceTempStore.js:374</code> | Update runtime thresholds for the active session. |
-| <code>canonicalLocale</code> | function | <code>src/utils/speech.js:75</code> | A voice&#39;s locale in canonical form \(&#39;sv_se&#39; → &#39;sv-SE&#39;\), or &#39;&#39; for none. |
-| <code>isSpeechSynthesisAvailable</code> | function | <code>src/utils/speech.js:20</code> |  |
-| <code>listSpeechLocales</code> | function | <code>src/utils/speech.js:89</code> | The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists. |
-| <code>pickSpeechVoice</code> | function | <code>src/utils/speech.js:127</code> | The installed voice to use for a locale: exact locale first, then the same base language \(preferring a local voice over a remote one\), else null \(the browser then picks by lang \). |
-| <code>resolveSpeechLanguage</code> | function | <code>src/utils/speech.js:32</code> | The speech locale for a viewer UI language \(&#39;sv&#39; → &#39;sv-SE&#39;\); other codes pass through. |
-| <code>speakText</code> | function | <code>src/utils/speech.js:159</code> | Speak text aloud. |
-| <code>SPEECH_MAX_CHUNK_LENGTH</code> | constant | <code>src/utils/speech.js:15</code> | Longest chunk handed to the synthesiser \(characters\). |
-| <code>SpeechController</code> | typedef | <code>src/utils/speech.js:140</code> |  |
-| <code>speechLocaleLabel</code> | function | <code>src/utils/speech.js:106</code> | The name of a locale in the UI language \(&#39;sv-SE&#39; in Swedish: &amp;quot;svenska \(Sverige\)&amp;quot;\), through Intl.DisplayNames where the browser has it, else the code itself. |
-| <code>splitSpeechChunks</code> | function | <code>src/utils/speech.js:48</code> | Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long. |
+| <code>canonicalLocale</code> | function | <code>src/utils/speech.js:78</code> | A voice&#39;s locale in canonical form \(&#39;sv_se&#39; → &#39;sv-SE&#39;\), or &#39;&#39; for none. |
+| <code>isLocalSpeechVoice</code> | function | <code>src/utils/speech.js:92</code> | Whether a voice runs on the machine. |
+| <code>isSpeechSynthesisAvailable</code> | function | <code>src/utils/speech.js:23</code> |  |
+| <code>listSpeechLocales</code> | function | <code>src/utils/speech.js:103</code> | The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists. |
+| <code>pickSpeechVoice</code> | function | <code>src/utils/speech.js:143</code> | The local voice to use for a locale: exact locale first, then the same base language \(the browser&#39;s default voice first among equals\), else null. |
+| <code>resolveSpeechLanguage</code> | function | <code>src/utils/speech.js:35</code> | The speech locale for a viewer UI language \(&#39;sv&#39; → &#39;sv-SE&#39;\); other codes pass through. |
+| <code>speakText</code> | function | <code>src/utils/speech.js:178</code> | Speak text aloud with a local voice. |
+| <code>SPEECH_MAX_CHUNK_LENGTH</code> | constant | <code>src/utils/speech.js:18</code> | Longest chunk handed to the synthesiser \(characters\). |
+| <code>SpeechController</code> | typedef | <code>src/utils/speech.js:156</code> |  |
+| <code>speechLocaleLabel</code> | function | <code>src/utils/speech.js:121</code> | The name of a locale in the UI language \(&#39;sv-SE&#39; in Swedish: &amp;quot;svenska \(Sverige\)&amp;quot;\), through Intl.DisplayNames where the browser has it, else the code itself. |
+| <code>splitSpeechChunks</code> | function | <code>src/utils/speech.js:51</code> | Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long. |
 | <code>collectConfigDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:137</code> |  |
 | <code>collectLocationDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:124</code> |  |
 | <code>collectNavigatorDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:107</code> |  |

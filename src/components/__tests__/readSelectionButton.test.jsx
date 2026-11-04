@@ -148,7 +148,8 @@ describe('ReadSelectionButton', () => {
     expect(menu()).not.toBeNull();
     expect(button().getAttribute('aria-expanded')).toBe('true');
     const items = () => [...menu().querySelectorAll('[role="menuitemradio"]')];
-    expect(items().map((item) => item.getAttribute('data-speech-locale'))).toEqual(['', 'en-GB', 'en-US', 'sv-SE']);
+    // Only local voices are listed: the online English GB voice is left out.
+    expect(items().map((item) => item.getAttribute('data-speech-locale'))).toEqual(['', 'en-US', 'sv-SE']);
     expect(items()[0].textContent).toMatch(/Follow the interface language \(Svenska/);
     expect(items()[0].getAttribute('aria-checked')).toBe('true');
     // The menu keeps the selection: its mousedown is cancelled like the button's.
@@ -156,7 +157,7 @@ describe('ReadSelectionButton', () => {
     act(() => { menu().dispatchEvent(mousedown); });
     expect(mousedown.defaultPrevented).toBe(true);
 
-    act(() => items()[2].click());
+    act(() => items()[1].click());
     expect(menu()).toBeNull();
     expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'en-US' });
     // Named in the UI language (Swedish): "Amerikansk engelska".
@@ -172,6 +173,31 @@ describe('ReadSelectionButton', () => {
     expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES') || '{}')).toEqual({});
     act(() => button().click());
     expect(synthesis.spoken[2].lang).toBe('sv-SE');
+  });
+
+  it('never speaks with an online voice: without a local voice for the language the button is disabled and says so', () => {
+    synthesis.getVoices = () => [
+      { name: 'Remote Swedish', lang: 'sv-SE', localService: false },
+      { name: 'English US', lang: 'en-US', localService: true },
+    ];
+    render();
+    select(layerWithText());
+    expect(button()).not.toBeNull();
+    expect(button().getAttribute('data-voice-missing')).toBe('true');
+    expect(button().getAttribute('aria-disabled')).toBe('true');
+    expect(button().getAttribute('aria-label')).toMatch(/No local voice installed for .*; online voices are never used/);
+    act(() => button().click());
+    expect(synthesis.speak).not.toHaveBeenCalled();
+    expect(button().getAttribute('data-speaking')).toBeNull();
+    // Choosing a language with a local voice makes it readable again.
+    const shell = container.querySelector('.toolbar-ocr-read-shell');
+    act(() => { shell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
+    const items = [...container.querySelectorAll('[data-odv-ocr="read-menu"] [role="menuitemradio"]')];
+    expect(items.map((item) => item.getAttribute('data-speech-locale'))).toEqual(['', 'en-US']);
+    act(() => items[1].click());
+    expect(button().getAttribute('data-voice-missing')).toBeNull();
+    act(() => button().click());
+    expect(synthesis.spoken[0].voice.name).toBe('English US');
   });
 
   it('opens the language menu from the keyboard, keeps the viewer shortcuts off there, and gives the focus back on Escape', () => {

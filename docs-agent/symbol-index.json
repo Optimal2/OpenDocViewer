@@ -7826,7 +7826,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 150,
+    "line": 153,
     "description": "",
     "params": [
       {
@@ -7846,7 +7846,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 40,
+    "line": 43,
     "description": "",
     "params": [],
     "returns": [
@@ -7864,7 +7864,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 28,
+    "line": 31,
     "description": "How long the pointer may leave the button and its menu before the menu closes.",
     "params": [],
     "returns": [],
@@ -7877,7 +7877,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 31,
+    "line": 34,
     "description": "",
     "params": [],
     "returns": [
@@ -45481,7 +45481,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 75,
+    "line": 78,
     "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
     "params": [
       {
@@ -45500,13 +45500,38 @@
     "examples": 0
   },
   {
+    "id": "isLocalSpeechVoice",
+    "name": "isLocalSpeechVoice",
+    "longname": "isLocalSpeechVoice",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/speech.js",
+    "line": 92,
+    "description": "Whether a voice runs on the machine.",
+    "params": [
+      {
+        "name": "voice",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "isSpeechSynthesisAvailable",
     "name": "isSpeechSynthesisAvailable",
     "longname": "isSpeechSynthesisAvailable",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 20,
+    "line": 23,
     "description": "",
     "params": [],
     "returns": [
@@ -45524,14 +45549,14 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 89,
-    "description": "The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
+    "line": 103,
+    "description": "The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
     "params": [
       {
         "name": "voices",
         "type": "Array.<Object>",
         "optional": false,
-        "description": "SpeechSynthesisVoice-like: { lang } ."
+        "description": "SpeechSynthesisVoice-like: { lang, localService } ."
       }
     ],
     "returns": [
@@ -45549,8 +45574,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 127,
-    "description": "The installed voice to use for a locale: exact locale first, then the same base language (preferring a local voice over a remote one), else null (the browser then picks by lang ).",
+    "line": 143,
+    "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
     "params": [
       {
         "name": "voices",
@@ -45580,7 +45605,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 32,
+    "line": 35,
     "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
     "params": [
       {
@@ -45605,8 +45630,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 159,
-    "description": "Speak text aloud.",
+    "line": 178,
+    "description": "Speak text aloud with a local voice.",
     "params": [
       {
         "name": "text",
@@ -45630,7 +45655,7 @@
         "name": "options.onEnd",
         "type": "function",
         "optional": false,
-        "description": "Called once when the last chunk has been spoken, on cancel, or on the first error."
+        "description": "Called once when the last chunk has been spoken, on cancel, on the first error, or at once when no local voice exists."
       },
       {
         "name": "options.synthesis",
@@ -45666,7 +45691,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 15,
+    "line": 18,
     "description": "Longest chunk handed to the synthesiser (characters).",
     "params": [],
     "returns": [],
@@ -45679,7 +45704,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 140,
+    "line": 156,
     "description": "",
     "params": [],
     "returns": [],
@@ -45692,7 +45717,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 106,
+    "line": 121,
     "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
     "params": [
       {
@@ -45723,7 +45748,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 48,
+    "line": 51,
     "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
     "params": [
       {

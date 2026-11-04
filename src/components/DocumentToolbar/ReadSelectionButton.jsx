@@ -7,10 +7,13 @@
  * reading ends or is stopped. The button keeps the selection when clicked (its mousedown is not
  * allowed to move the focus).
  *
- * The reading language follows the viewer's UI language unless the user picks another one: a
- * menu opens under the button while the pointer rests on it (and from the keyboard with the
- * arrow keys), listing the locales the installed voices offer, with "follow the interface
- * language" first. The choice is kept in the viewer preferences (utils/viewerPreferences.js), so
+ * Only voices that run on the machine are used (utils/speech.js): the text is document content
+ * and must not reach an online voice service. Without a local voice for the reading language
+ * the button is shown disabled and says so, and nothing is spoken. The reading language
+ * follows the viewer's UI language unless the user picks another one: a menu opens under the
+ * button while the pointer rests on it (and from the keyboard with the arrow keys), listing
+ * the locales the installed local voices offer, with "follow the interface language" first.
+ * The choice is kept in the viewer preferences (utils/viewerPreferences.js), so
  * it survives reloads without touching the UI language. The menu, like the button, never takes
  * the selection away; the viewer's own shortcuts are off while the focus is in the button or
  * the menu (`data-odv-shortcuts="off"`), so the arrow keys open the menu without turning the
@@ -21,7 +24,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isOcrLayerSelection, ocrSelectionText } from '../../utils/ocrTextLayout.js';
-import { isSpeechSynthesisAvailable, listSpeechLocales, resolveSpeechLanguage, speakText, speechLocaleLabel } from '../../utils/speech.js';
+import { isSpeechSynthesisAvailable, listSpeechLocales, pickSpeechVoice, resolveSpeechLanguage, speakText, speechLocaleLabel } from '../../utils/speech.js';
 import { getSpeechLanguagePreference, setSpeechLanguagePreference } from '../../utils/viewerPreferences.js';
 
 /** How long the pointer may leave the button and its menu before the menu closes. */
@@ -156,13 +159,17 @@ export default function ReadSelectionButton() {
   if (!shown) return null;
 
   const locales = listSpeechLocales(voices);
-  const label = speaking
-    ? t('ocr.read.stop', { defaultValue: 'Stop reading aloud' })
-    : t('ocr.read.speak', { defaultValue: 'Read the selected text aloud' });
+  // No local voice for the reading language: nothing is ever spoken with an online voice.
+  const voiceMissing = !speaking && !pickSpeechVoice(voices, lang);
   const languageTitle = t('ocr.read.language', { defaultValue: 'Reading language' });
   const uiLabel = speechLocaleLabel(uiLocale, i18n?.language);
   const followLabel = t('ocr.read.followUi', { language: uiLabel, defaultValue: `Follow the interface language (${uiLabel})` });
   const currentLabel = preferred ? speechLocaleLabel(preferred, i18n?.language) : followLabel;
+  const label = speaking
+    ? t('ocr.read.stop', { defaultValue: 'Stop reading aloud' })
+    : voiceMissing
+      ? t('ocr.read.noLocalVoice', { language: speechLocaleLabel(lang, i18n?.language), defaultValue: `No local voice installed for ${speechLocaleLabel(lang, i18n?.language)}; online voices are never used` })
+      : t('ocr.read.speak', { defaultValue: 'Read the selected text aloud' });
 
   return (
     <div
@@ -178,13 +185,15 @@ export default function ReadSelectionButton() {
         className={`odv-btn toolbar-ocr-read${speaking ? ' is-active' : ''}`}
         data-odv-ocr="read"
         data-speaking={speaking ? 'true' : undefined}
+        data-voice-missing={voiceMissing ? 'true' : undefined}
         aria-label={label}
         title={`${label} · ${languageTitle}: ${currentLabel}`}
         aria-pressed={speaking}
+        aria-disabled={voiceMissing || undefined}
         aria-expanded={menuOpen}
         aria-controls={menuOpen ? menuId : undefined}
         onMouseDown={(event) => event.preventDefault()}
-        onClick={speaking ? stop : speak}
+        onClick={speaking ? stop : (voiceMissing ? undefined : speak)}
         onKeyDown={(event) => {
           if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
