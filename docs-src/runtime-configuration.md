@@ -266,8 +266,9 @@ The shipped HTML meta and IIS policies already allow its WebAssembly engine; no 
 file needs editing. A custom server or gateway policy must permit it too (see "CSP for OCR").
 
 OpenDocViewer can recognize text on scanned pages (TIFF, JPG, PNG and PDF pages without a usable
-text layer) inside the browser and show it as a selectable text layer on the page. The feature is
-opt-in and off by default:
+text layer) inside the browser and show it as a selectable text layer on the page; a PDF page that
+already has a usable text layer gets the same layer from its own text, without recognition. The
+feature is opt-in and off by default:
 
 ```js
 ocr: {
@@ -322,7 +323,24 @@ Which pages are recognised, and when:
 
 - Raster pages (TIFF, JPEG, PNG and the other image formats the viewer shows) are always
   recognised. A PDF page is first checked for its own text layer through pdf.js, from the bytes
-  the viewer already holds; a page with a usable layer is skipped and keeps the viewer's text. The
+  the viewer already holds. A page with a usable layer is not recognised: its own text becomes the
+  page's text layer (the outcome's source is `pdf-text`), so it is selectable, searchable and
+  readable aloud the way a recognised page is, and the engine never runs for it. The word boxes
+  come from pdf.js's text positions: an item (often a whole line) is placed by its transform and
+  font height the way pdf.js's own text layer places it, and cut into words at its spaces with
+  the item's width shared out by a rough per-character advance, so on a long line in a
+  proportional font a box can drift by a few characters' worth. Where pdf.js cuts a line into
+  several items (often right before a punctuation mark), an item that starts where the previous
+  one ended on the same baseline, with no space at the seam, continues the previous word, so
+  "sida," is one word (two items that touch without a space are joined even when they are, say,
+  neighbouring table cells; pdf.js writes a space wherever a gap reads as one). A right-to-left
+  item keeps its logical order with mirrored boxes; several right-to-left items on one line, and
+  a left-to-right run inside one, stay in drawing order. The words are taken in the order the
+  PDF draws them (column by column where there are columns), and the layer groups them into
+  lines by their boxes, so a footer the PDF draws first is a line of its own. Text
+  whose baseline is not upright on the page (a stamp along the margin) or set in a vertical font
+  gets no box and is left out of the layer. A layer whose text cannot be placed at all keeps the
+  viewer's text and is reported as "Not recognised: the page has its own text". The
   layer counts as unusable when it has fewer than 50 visible characters (a page number, or a short
   stamp on an otherwise scanned page), or when more than a fifth of them are private-use or
   replacement characters, or when fewer than half are letters or digits (a scanned page wrapped in
@@ -446,24 +464,25 @@ decoders (`*_nowasm_fallback.js`, slower but correct) after one console warning 
 
 Reference: [CSP Level 3, script source expressions](https://www.w3.org/TR/CSP3/#framework-directive-source-list).
 
-What the user sees with OCR on: the page image is unchanged. Over a recognised page lies an
-invisible text layer (one transparent word per recognised word, placed on the ink, in one text
-flow with the lines of the page), so dragging over the words selects text, Ctrl+C copies it as
-it reads on the page, and the browser's own find (Ctrl+F) matches words and phrases in it;
-dragging on a blank part of the page still pans.
+What the user sees with OCR on: the page image is unchanged. Over a recognised page, and over a
+PDF page with its own text, lies an invisible text layer (one transparent word per word, placed
+on the ink, in one text flow with the lines of the page), so dragging over the words selects
+text, Ctrl+C copies it as it reads on the page, and the browser's own find (Ctrl+F) matches
+words and phrases in it; dragging on a blank part of the page still pans.
 
 The toolbar gets an OCR group to the right of the theme, language and help buttons:
 
 - A search button that doubles as the page's OCR status: a small LED on the button and the
-  status as its tooltip ("Recognising text…", "Text recognised", "No text found", "Not
-  recognised: the page has its own text", "The text could not be recognised" or "Text recognition
-  is unavailable", the last when the engine could not start; see CSP below). The button is
-  enabled once the displayed page's text is recognised. Clicking it grows a search field out of
+  status as its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
+  "No text found", "Not recognised: the page has its own text", "The text could not be
+  recognised" or "Text recognition is unavailable", the last when the engine could not start; see
+  CSP below). The button is enabled once the displayed page has a text layer (recognised, or the
+  PDF page's own). Clicking it grows a search field out of
   the button to the right (a short ease) into the room the toolbar has; when there is too little,
-  the field hangs under the toolbar at the button's right edge instead. The search covers only the recognised text, of every
+  the field hangs under the toolbar at the button's right edge instead. The search covers only the text layers (recognised text and PDF pages' own text), of every
   page that has an outcome, in page order; it is case-insensitive and finds a phrase also across
   a line break. Typing shows the position ("1 of 5") and, while not every page has an outcome,
-  how many pages the search covers ("2 of 300 pages recognised"); the matches are marked on the
+  how many pages the search covers ("2 of 300 pages ready"); the matches are marked on the
   page over the words, the current match stronger and scrolled into view. Enter and the arrow
   buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
   one; Escape closes the field. A toggle in the field ("Search only on this page") limits the

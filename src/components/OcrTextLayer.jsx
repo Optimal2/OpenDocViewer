@@ -21,8 +21,11 @@
  * current match and, limited to one page, that page, published through ViewerContext) is marked
  * here too: every match on the page gets a class on its words, the current match another, and
  * the current match is scrolled into view; a search limited to another page marks nothing.
- * Mounted only for a page with a `done` outcome, so the default code path (OCR off)
- * renders nothing here. Hidden in print (styles/ocr.css).
+ * The words may come from the engine or from a PDF page's own text layer (the outcome's
+ * `source`, exposed as `data-ocr-source`); the layer treats both alike, the boxes of the latter
+ * being in PDF points of the page's base viewport instead of pixels. Mounted only for a page
+ * with a `done` outcome, so the default code path (OCR off) renders nothing here. Hidden in
+ * print (styles/ocr.css).
  */
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
@@ -38,10 +41,10 @@ export const OCR_WORD_CURRENT_MATCH_CLASS = 'ocr-text-layer-word--match-current'
 
 /**
  * @param {Object} props
- * @param {Object} props.outcome  A `done` OCR outcome: `words`, `imageWidth`, `imageHeight`, and
- *   `rulingLinePixels` (exposed as `data-ruling-lines-removed` when the line removal painted
- *   anything, for diagnostics and the end-to-end test; the geometry is unaffected, the copy had
- *   the same size as the page image).
+ * @param {Object} props.outcome  A `done` OCR outcome: `words`, `imageWidth`, `imageHeight`,
+ *   `source` (`recognition` or `pdf-text`, src/ocr/queue.js) and `rulingLinePixels` (exposed as
+ *   `data-ruling-lines-removed` when the line removal painted anything, for diagnostics and the
+ *   end-to-end test; the geometry is unaffected, the copy had the same size as the page image).
  * @param {number} props.renderWidth  Stage width before zoom (the rotated page's layout size).
  * @param {number} props.renderHeight
  * @param {number} props.zoom
@@ -174,6 +177,7 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
       className="ocr-text-layer"
       data-odv-ocr="text-layer"
       data-page-number={pageNumber}
+      data-ocr-source={outcome.source === 'pdf-text' ? 'pdf-text' : 'recognition'}
       data-ruling-lines-removed={outcome.rulingLinePixels > 0 ? 'true' : undefined}
       role="group"
       aria-label={label}
@@ -226,6 +230,7 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
 OcrTextLayer.propTypes = {
   outcome: PropTypes.shape({
     status: PropTypes.string,
+    source: PropTypes.string,
     words: PropTypes.array,
     imageWidth: PropTypes.number,
     imageHeight: PropTypes.number,

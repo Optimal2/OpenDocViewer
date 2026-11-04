@@ -5,7 +5,10 @@
  *
  * The queue holds the candidates the viewer last handed it (`setWindow`) and works through them in
  * that order on one engine: classify (classify.js), probe a PDF's text layer when it has one,
- * fetch the rendered page image, recognise. Replacing the window drops the pages that have not
+ * fetch the rendered page image, recognise. A PDF page whose own text layer is usable is done
+ * without the engine: its outcome holds the layer's words (pdfTextProbe.js), marked with the
+ * source `pdf-text`, in the same shape as recognised words, so the page is searchable like a
+ * recognised one. Replacing the window drops the pages that have not
  * started; the page in flight finishes and its outcome is kept, because a tesseract.js worker
  * cannot be interrupted short of terminating it (which would also discard the loaded models).
  * When a document leaves the viewer (`retainSources`) its outcomes are dropped and an in-flight
@@ -57,6 +60,14 @@ export const OCR_PAGE_STATUS = Object.freeze({
   DONE: 'done',
   SKIPPED: 'skipped',
   FAILED: 'failed',
+});
+
+/** Where a `done` outcome's words come from (`source`). */
+export const OCR_OUTCOME_SOURCE = Object.freeze({
+  /** The engine recognised the page image. */
+  RECOGNITION: 'recognition',
+  /** The PDF page's own text layer, read through pdf.js; the engine never ran. */
+  PDF_TEXT: 'pdf-text',
 });
 
 /**
@@ -186,7 +197,32 @@ export function createOcrQueue({
             probeTextLayer(candidate.sourceKey, candidate.pageIndex), timeouts.probe, 'text-layer probe'
           );
           if (assessment?.usable) {
-            outcome = { status: OCR_PAGE_STATUS.SKIPPED, reason: OCR_SKIP_REASON.TEXT_LAYER, assessment };
+            const words = Array.isArray(assessment.words) ? assessment.words : [];
+            const pageWidth = Math.max(0, Number(assessment.pageWidth) || 0);
+            const pageHeight = Math.max(0, Number(assessment.pageHeight) || 0);
+            if (words.length > 0 && pageWidth > 0 && pageHeight > 0) {
+              // The page's own text, in the shape of a recognised page: the text layer, the
+              // search and read-aloud take it as they take recognised words.
+              outcome = {
+                status: OCR_PAGE_STATUS.DONE,
+                source: OCR_OUTCOME_SOURCE.PDF_TEXT,
+                text: String(assessment.text ?? ''),
+                confidence: 100,
+                words,
+                imageWidth: pageWidth,
+                imageHeight: pageHeight,
+                rulingLinePixels: 0,
+              };
+            } else {
+              // Usable text that cannot be placed (none of it upright, or no page size): the
+              // viewer's own text stays, and the engine is not run over a text page.
+              const { usable, verdict, characters, letters, privateUse } = assessment;
+              outcome = {
+                status: OCR_PAGE_STATUS.SKIPPED,
+                reason: OCR_SKIP_REASON.TEXT_LAYER,
+                assessment: { usable, verdict, characters, letters, privateUse },
+              };
+            }
           }
         }
         if (!outcome && !job.abandoned) {
@@ -195,6 +231,7 @@ export function createOcrQueue({
           const result = await withTimeout(engine.recognize(image.blob), timeouts.recognize, 'recognition');
           outcome = {
             status: OCR_PAGE_STATUS.DONE,
+            source: OCR_OUTCOME_SOURCE.RECOGNITION,
             text: result.text,
             confidence: result.confidence,
             words: result.words,

@@ -124,8 +124,9 @@ export function measureWordWidth(text, fontSize) {
 
 /**
  * The words of an outcome in reading order, grouped into lines by the rule the text layer lays
- * them out with: a word whose box starts below the vertical middle of the previous word's box
- * begins a new line. Words without text or with an empty box are left out. Each word keeps its
+ * them out with: a word whose box starts below the vertical middle of the previous word's box,
+ * or ends above it (the next column's first line, a footer a PDF draws before its body), begins
+ * a new line. Words without text or with an empty box are left out. Each word keeps its
  * index in the outcome's `words` (the text layer renders it as `data-word-index`, the search
  * in utils/ocrSearch.js maps matches back through it). Image pixel units.
  *
@@ -145,7 +146,8 @@ export function ocrReadingOrder(words) {
     const y1 = Number(box.y1);
     if (!(x1 - x0 > 0) || !(y1 - y0 > 0)) return;
     const placed = { index, text, x0, y0, x1, y1 };
-    if (!previous || placed.y0 > previous.y0 + (previous.y1 - previous.y0) / 2) lines.push([]);
+    const previousMiddle = previous ? previous.y0 + (previous.y1 - previous.y0) / 2 : 0;
+    if (!previous || placed.y0 > previousMiddle || placed.y1 < previousMiddle) lines.push([]);
     lines[lines.length - 1].push(placed);
     previous = placed;
   });
@@ -155,7 +157,8 @@ export function ocrReadingOrder(words) {
 /**
  * Place the words of an outcome inside an unrotated frame of `frameWidth` × `frameHeight` CSS px,
  * grouped into lines. Words without text or with an empty box are left out. A word whose box
- * starts below the vertical middle of the previous word's box begins a new line. A line that
+ * starts below the vertical middle of the previous word's box, or ends above it, begins a new
+ * line. A line that
  * starts above the previous one (words out of reading order), or closer to it than its height,
  * still gets a line box at least as tall as itself, so the line boxes after it land lower than
  * their lines; the words are shifted from the box they land in onto their own places.

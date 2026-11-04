@@ -435,10 +435,12 @@
   },
   "ocr": {
     "textLayerLabel": "Recognised text, page {page}",
+    "pdfTextLayerLabel": "The page's own text, page {page}",
     "status": {
       "notStarted": "Text recognition has not started on this page",
       "working": "Recognising text…",
       "done": "Text recognised",
+      "pdfText": "The page has its own text",
       "noText": "No text found",
       "skippedTextLayer": "Not recognised: the page has its own text",
       "skipped": "Not recognised: nothing to recognise on this page",
@@ -450,7 +452,7 @@
       "placeholder": "Search",
       "position": "{current} of {total}",
       "none": "No matches",
-      "coverage": "{done} of {pages} pages recognised",
+      "coverage": "{done} of {pages} pages ready",
       "pageOnly": "Search only on this page",
       "previous": "Previous match",
       "next": "Next match",

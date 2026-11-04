@@ -4,9 +4,11 @@
  *
  * Raster pages (TIFF, JPEG, PNG and the other image formats the viewer shows) are pixels only and
  * are always recognised. A PDF page may already carry a usable text layer, which the viewer can
- * read through pdf.js in milliseconds, so it is probed first (see pdfTextProbe.js) and recognised
- * only when that layer is empty or garbled (a scanned page wrapped in a PDF, or text drawn with a
- * font that has no usable ToUnicode map). Everything else is skipped. Part of the lazy OCR chunk.
+ * read through pdf.js in milliseconds, so it is probed first (see pdfTextProbe.js): a usable
+ * layer becomes the page's text layer as it is (queue.js, source `pdf-text`), and the page is
+ * recognised only when that layer is empty or garbled (a scanned page wrapped in a PDF, or text
+ * drawn with a font that has no usable ToUnicode map). Everything else is skipped. Part of the
+ * lazy OCR chunk.
  */
 
 export const OCR_PAGE_DECISION = Object.freeze({
@@ -19,7 +21,11 @@ export const OCR_PAGE_DECISION = Object.freeze({
 });
 
 export const OCR_SKIP_REASON = Object.freeze({
-  /** The PDF page has a usable text layer; the viewer's own text wins. */
+  /**
+   * The PDF page has a usable text layer that could not be placed as words (none of its text is
+   * upright, or the page has no size); the viewer's own text wins. A placeable layer is not a
+   * skip but a `done` outcome with the source `pdf-text` (queue.js).
+   */
   TEXT_LAYER: 'text-layer',
   /** A format the viewer does not rasterise into a page image. */
   UNSUPPORTED: 'unsupported',

@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 174
-- Source lines: 66367
-- JSDoc symbols: 1883
+- Files: 175
+- Source lines: 66675
+- JSDoc symbols: 1895
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -41,7 +41,7 @@
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx`: 1301 lines
 - `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1292 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
-- `src/components/DocumentRender.jsx`: 1209 lines
+- `src/components/DocumentRender.jsx`: 1211 lines
 - `src/utils/documentLoadingConfig.js`: 1099 lines
 - `src/utils/printCore.js`: 1058 lines
 

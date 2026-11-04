@@ -3,8 +3,9 @@
 /**
  * The PDF text prober opens a document from the viewer's own bytes once, reuses it for
  * neighbouring pages, bounds the number of open documents, closes documents that leave the
- * viewer, and turns a page's text items into a text-layer assessment. pdf.js is replaced by an
- * injected getDocument, so no PDF is parsed here.
+ * viewer, and turns a page's text items into a text-layer assessment, with the words of a usable
+ * layer placed in the page's base viewport. pdf.js is replaced by an injected getDocument, so no
+ * PDF is parsed here.
  */
 import { describe, expect, it, vi } from 'vitest';
 
@@ -13,23 +14,35 @@ vi.mock('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url', () => ({ default: 'pdf
 
 const { DEFAULT_OPEN_PDF_DOCUMENTS, createPdfTextProber } = await import('../pdfTextProbe.js');
 
+/** A portrait A4 base viewport (scale 1): PDF y up, viewport y down. */
+const BASE_VIEWPORT = { width: 595.28, height: 841.89, transform: [1, 0, 0, -1, 0, 841.89] };
+
+/**
+ * @param {Array<Array<(string|Object)>>} pagesText  Per page: strings (placed items with a
+ *   transform of a 12 pt baseline at x 60, one line each) or full pdf.js items.
+ */
 function makeFakePdf(pagesText) {
   const destroyed = { document: 0, task: 0 };
   const cleanups = [];
   const getTextContent = vi.fn();
+  const getViewport = vi.fn(() => BASE_VIEWPORT);
   const document = {
     getPage: vi.fn(async (number) => ({
       getTextContent: async (options) => {
         getTextContent(options);
-        const strings = pagesText[number - 1] || [];
-        return { items: strings.map((str) => ({ str, dir: 'ltr' })) };
+        const entries = pagesText[number - 1] || [];
+        const items = entries.map((entry, index) => (typeof entry === 'string'
+          ? { str: entry, dir: 'ltr', transform: [12, 0, 0, 12, 60, 780 - index * 20], width: entry.length * 6, height: 12, fontName: 'f1', hasEOL: true }
+          : entry));
+        return { items, styles: { f1: { ascent: 0.75, descent: -0.25, vertical: false } } };
       },
+      getViewport,
       cleanup: () => cleanups.push(number),
     })),
     destroy: async () => { destroyed.document += 1; },
   };
   const task = { promise: Promise.resolve(document), destroy: async () => { destroyed.task += 1; } };
-  return { task, document, destroyed, cleanups, getTextContent };
+  return { task, document, destroyed, cleanups, getTextContent, getViewport };
 }
 
 describe('createPdfTextProber', () => {
@@ -39,8 +52,24 @@ describe('createPdfTextProber', () => {
     const getDocument = vi.fn(() => pdf.task);
     const prober = createPdfTextProber({ readSourceArrayBuffer, getDocument });
 
-    await expect(prober.probe('doc', 0)).resolves.toMatchObject({ usable: true, verdict: 'usable' });
-    await expect(prober.probe('doc', 1)).resolves.toMatchObject({ usable: false, verdict: 'empty' });
+    const usable = await prober.probe('doc', 0);
+    expect(usable).toMatchObject({ usable: true, verdict: 'usable', text: 'Första sidan med riktig text som duger.\nDen har tillräckligt många tecken för att räknas.' });
+    // A usable layer comes with its words placed in the base viewport (PDF points, y down):
+    // the first line's baseline at 780 from the bottom lies 61.89 from the top, its top one
+    // ascent (0.75 × 12) higher; the page size is the viewport's.
+    expect(usable.pageWidth).toBeCloseTo(595.28);
+    expect(usable.pageHeight).toBeCloseTo(841.89);
+    expect(usable.words.map((word) => word.text)).toEqual(['Första', 'sidan', 'med', 'riktig', 'text', 'som', 'duger.', 'Den', 'har', 'tillräckligt', 'många', 'tecken', 'för', 'att', 'räknas.']);
+    expect(usable.words[0].bbox.x0).toBeCloseTo(60);
+    expect(usable.words[0].bbox.y0).toBeCloseTo(841.89 - 780 - 9);
+    expect(usable.words[0].bbox.y1).toBeCloseTo(841.89 - 780 + 3);
+    expect(usable.words[7].bbox.y0).toBeCloseTo(841.89 - 760 - 9);
+    expect(pdf.getViewport).toHaveBeenCalledWith({ scale: 1 });
+    // An unusable layer is only assessed: no words, no page size, no viewport asked for.
+    const empty = await prober.probe('doc', 1);
+    expect(empty).toEqual(expect.objectContaining({ usable: false, verdict: 'empty' }));
+    expect(empty).not.toHaveProperty('words');
+    expect(pdf.getViewport).toHaveBeenCalledTimes(1);
 
     expect(readSourceArrayBuffer).toHaveBeenCalledTimes(1);
     expect(getDocument).toHaveBeenCalledTimes(1);

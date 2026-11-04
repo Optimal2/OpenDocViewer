@@ -209,9 +209,10 @@ import { createContext } from 'react';
  * @property {ViewerRuntimeDiagnostics} runtimeDiagnostics
  * @property {ViewerPageLoadState} pageLoadState
  * @property {Object<string, Object>} ocrPages
- *   OCR outcome per page key (utils/ocrPageKey.js): `status` done (text, words with pixel
- *   boxes, imageWidth/imageHeight), skipped (reason), failed (reason), or a transient
- *   queued/probing/recognizing state. Empty while `ocr.enabled` is not the literal true.
+ *   OCR outcome per page key (utils/ocrPageKey.js): `status` done (text, words with boxes,
+ *   imageWidth/imageHeight, `source` recognition or pdf-text for a PDF page's own text layer),
+ *   skipped (reason), failed (reason), or a transient queued/probing/recognizing state. Empty
+ *   while `ocr.enabled` is not the literal true.
  * @property {(string|null)} ocrEngineFailure
  *   Why the OCR engine cannot start in this session (src/ocr/engine.js failure codes), else null.
  * @property {function(Array.<number>): void} setOcrFocusPageIndexes

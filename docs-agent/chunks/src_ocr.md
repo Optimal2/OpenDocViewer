@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 12. Line count: 1651. JSDoc symbol count: 81.
+File count: 13. Line count: 1941. JSDoc symbol count: 93.
 
 ## src/ocr/assetUrls.js
 
@@ -27,7 +27,7 @@ Symbols:
 - `RECOGNIZE` (member) - Pixels only: recognise.
 - `PROBE_TEXT` (member) - PDF: read the text layer first, recognise only when it is not usable.
 - `SKIP` (member) - Not a page OCR can work on.
-- `TEXT_LAYER` (member) - The PDF page has a usable text layer; the viewer's own text wins.
+- `TEXT_LAYER` (member) - The PDF page has a usable text layer that could not be placed as words \(none of its text is upright, or the page has no size\); the viewer's own text wins.
 - `UNSUPPORTED` (member) - A format the viewer does not rasterise into a page image.
 - `FAILED_PAGE` (member) - The page failed to load; there is no image to recognise.
 - `RASTER_EXTENSIONS` (constant) - The image formats the viewer rasterises \(utils/documentLoadingConfig.js isRasterImageExtension\).
@@ -63,7 +63,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
 ## src/ocr/languages.js
 
@@ -99,11 +99,11 @@ Symbols:
 
 ## src/ocr/pdfTextProbe.js
 
-Reads a PDF page's own text layer through pdf.js so classify.js can decide whether OCR is needed at all.
+Reads a PDF page's own text layer through pdf.js so classify.js can decide whether OCR is needed at all, and, when the layer is usable, hands it over as words with boxes \(pdfTextWords.js\) so the page gets the same text l
 
 Exports: `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`
 
-Local imports: `src/utils/pdfjsDocumentOptions.js`, `src/ocr/classify.js`
+Local imports: `src/utils/pdfjsDocumentOptions.js`, `src/ocr/classify.js`, `src/ocr/pdfTextWords.js`
 
 Symbols:
 
@@ -111,6 +111,24 @@ Symbols:
 - `defaultGetDocument` (function) - pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\).
 - `PdfTextProber` (typedef) - No description.
 - `createPdfTextProber` (function) - No description.
+
+## src/ocr/pdfTextWords.js
+
+Word boxes from a PDF page's own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read\-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/
+
+Exports: `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextAdvanceWeight`, `multiplyTransforms`, `pdfTextLayerWords`
+
+Symbols:
+
+- `PDF_TEXT_DEFAULT_ASCENT` (constant) - pdf.js's own fallbacks for a font without metrics \(TextLayer: ascent 0.8, descent \-0.2\).
+- `UPRIGHT_TOLERANCE` (constant) - Baselines turned by more than this \(radians\) from the viewport's x axis get no boxes.
+- `SEAM_GAP_EM` (constant) - An item continues the previous one's word when it starts within this share of the font height after the previous item's end \(pdf.js writes a space into the string, or a separate s...
+- `pdfTextAdvanceWeight` (function) - Rough advance of a character relative to a typical lowercase letter, used to share an item's width among its characters.
+- `multiplyTransforms` (function) - pdf.js Util.transform : the product of two affine matrices \[a, b, c, d, e, f\].
+- `placeItem` (function) - Where an upright item lies in the viewport, or null when it gets no box.
+- `pdfTextLayerWords` (function) - No description.
+- `pdfTextLayerWords~previous` (member) - The last placed item's end, for the seam test.
+- `pdfTextLayerWords~pending` (member) - The word under construction, which the next item may continue.
 
 ## src/ocr/prepareImage.js
 
@@ -135,7 +153,7 @@ Symbols:
 
 The OCR page queue: one page at a time, bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
 
-Exports: `OCR_STEP_TIMEOUTS_MS`, `OCR_PAGE_STATUS`, `createOcrQueue`
+Exports: `OCR_STEP_TIMEOUTS_MS`, `OCR_PAGE_STATUS`, `OCR_OUTCOME_SOURCE`, `createOcrQueue`
 
 Local imports: `src/ocr/classify.js`
 
@@ -144,6 +162,9 @@ Symbols:
 - `OCR_STEP_TIMEOUTS_MS` (constant) - Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo...
 - `TIMEOUT_STEP` (constant) - Marker on the error of a step that exceeded its bound.
 - `withTimeout` (function) - No description.
+- `OCR_OUTCOME_SOURCE` (constant) - Where a done outcome's words come from \( source \).
+- `RECOGNITION` (member) - The engine recognised the page image.
+- `PDF_TEXT` (member) - The PDF page's own text layer, read through pdf.js; the engine never ran.
 - `OcrQueueCandidate` (typedef) - No description.
 - `OcrQueueSnapshot` (typedef) - No description.
 - `OcrQueue` (typedef) - No description.

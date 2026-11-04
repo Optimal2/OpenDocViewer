@@ -8,7 +8,7 @@
  * prober and image loading are fakes, so nothing is recognised here.
  */
 import { describe, expect, it, vi } from 'vitest';
-import { OCR_PAGE_STATUS, createOcrQueue } from '../queue.js';
+import { OCR_OUTCOME_SOURCE, OCR_PAGE_STATUS, createOcrQueue } from '../queue.js';
 import { createOcrResultCache } from '../resultCache.js';
 import { OCR_SKIP_REASON } from '../classify.js';
 import { makeOcrPageKey } from '../../utils/ocrPageKey.js';
@@ -83,7 +83,7 @@ describe('createOcrQueue', () => {
 
     engine.pending[0].resolve(result('första'));
     await flush();
-    expect(cache.get(a.key)).toEqual({ status: OCR_PAGE_STATUS.DONE, text: 'första', confidence: 90, words: expect.any(Array), imageWidth: 1240, imageHeight: 1754, rulingLinePixels: 0 });
+    expect(cache.get(a.key)).toEqual({ status: OCR_PAGE_STATUS.DONE, source: OCR_OUTCOME_SOURCE.RECOGNITION, text: 'första', confidence: 90, words: expect.any(Array), imageWidth: 1240, imageHeight: 1754, rulingLinePixels: 0 });
     expect(engine.recognize).toHaveBeenCalledTimes(2);
 
     engine.pending[1].resolve(result('andra'));
@@ -93,9 +93,12 @@ describe('createOcrQueue', () => {
     expect(events).toEqual(['busy', 'busy', 'idle']);
   });
 
-  it('skips a PDF page with a usable text layer and recognises one without', async () => {
+  it('takes a PDF page with a usable text layer as done from its own words, without the engine, and recognises one without', async () => {
+    const layerWords = [{ text: 'Egen', confidence: 100, bbox: { x0: 60, y0: 50, x1: 90, y1: 64 } }];
     const probeTextLayer = vi.fn(async (sourceKey, pageIndex) => (
-      pageIndex === 0 ? { usable: true, verdict: 'usable', characters: 400 } : { usable: false, verdict: 'empty', characters: 3 }
+      pageIndex === 0
+        ? { usable: true, verdict: 'usable', characters: 400, letters: 380, privateUse: 0, words: layerWords, text: 'Egen text', pageWidth: 595.28, pageHeight: 841.89 }
+        : { usable: false, verdict: 'empty', characters: 3, letters: 3, privateUse: 0 }
     ));
     const { queue, engine, cache, snapshots } = makeQueue({ probeTextLayer });
     const [text, scan] = [candidate('file.pdf', 0, { fileExtension: 'pdf' }), candidate('file.pdf', 1, { fileExtension: 'pdf' })];
@@ -103,12 +106,46 @@ describe('createOcrQueue', () => {
     await flush();
 
     expect(probeTextLayer).toHaveBeenCalledWith('file.pdf', 0);
-    expect(cache.get(text.key)).toEqual({ status: OCR_PAGE_STATUS.SKIPPED, reason: OCR_SKIP_REASON.TEXT_LAYER, assessment: { usable: true, verdict: 'usable', characters: 400 } });
+    // The page's own text in the shape of a recognised page: searchable, with the base
+    // viewport as the frame the boxes are in.
+    expect(cache.get(text.key)).toEqual({
+      status: OCR_PAGE_STATUS.DONE,
+      source: OCR_OUTCOME_SOURCE.PDF_TEXT,
+      text: 'Egen text',
+      confidence: 100,
+      words: layerWords,
+      imageWidth: 595.28,
+      imageHeight: 841.89,
+      rulingLinePixels: 0,
+    });
     expect(snapshots.some((snapshot) => snapshot.pages[text.key]?.status === OCR_PAGE_STATUS.PROBING)).toBe(true);
+    expect(snapshots.some((snapshot) => snapshot.pages[text.key]?.status === OCR_PAGE_STATUS.RECOGNIZING)).toBe(false);
+    // The engine ran once: for the scanned page only.
     expect(engine.recognize).toHaveBeenCalledTimes(1);
+    expect(engine.recognize).toHaveBeenCalledWith(`blob:${scan.key}`);
     engine.pending[0].resolve(result('skannad'));
     await flush();
-    expect(cache.get(scan.key).status).toBe(OCR_PAGE_STATUS.DONE);
+    expect(cache.get(scan.key)).toMatchObject({ status: OCR_PAGE_STATUS.DONE, source: OCR_OUTCOME_SOURCE.RECOGNITION });
+  });
+
+  it('keeps a usable text layer without placeable words, or without a page size, as a skip, without the engine', async () => {
+    const layerWords = [{ text: 'Egen', confidence: 100, bbox: { x0: 60, y0: 50, x1: 90, y1: 64 } }];
+    const probeTextLayer = vi.fn(async (sourceKey, pageIndex) => (pageIndex === 0
+      ? { usable: true, verdict: 'usable', characters: 400, letters: 380, privateUse: 0, words: [], text: 'Lodrät text', pageWidth: 595.28, pageHeight: 841.89 }
+      : { usable: true, verdict: 'usable', characters: 400, letters: 380, privateUse: 0, words: layerWords, text: 'Egen', pageWidth: 0, pageHeight: 841.89 }
+    ));
+    const { queue, engine, cache } = makeQueue({ probeTextLayer });
+    const [sideways, sizeless] = [candidate('file.pdf', 0, { fileExtension: 'pdf' }), candidate('file.pdf', 1, { fileExtension: 'pdf' })];
+    queue.setWindow([sideways, sizeless]);
+    await flush();
+    const skip = {
+      status: OCR_PAGE_STATUS.SKIPPED,
+      reason: OCR_SKIP_REASON.TEXT_LAYER,
+      assessment: { usable: true, verdict: 'usable', characters: 400, letters: 380, privateUse: 0 },
+    };
+    expect(cache.get(sideways.key)).toEqual(skip);
+    expect(cache.get(sizeless.key)).toEqual(skip);
+    expect(engine.recognize).not.toHaveBeenCalled();
   });
 
   it('skips unsupported and failed pages without probing or loading an image', async () => {

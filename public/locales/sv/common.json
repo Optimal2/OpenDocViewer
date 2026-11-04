@@ -435,10 +435,12 @@
   },
   "ocr": {
     "textLayerLabel": "Tolkad text, sida {page}",
+    "pdfTextLayerLabel": "Sidans egen text, sida {page}",
     "status": {
       "notStarted": "Texttolkningen har inte börjat på den här sidan",
       "working": "Text tolkas…",
       "done": "Text tolkad",
+      "pdfText": "Sidan har egen text",
       "noText": "Ingen text hittades",
       "skippedTextLayer": "Tolkas inte: sidan har egen text",
       "skipped": "Tolkas inte: inget att tolka på sidan",
@@ -450,7 +452,7 @@
       "placeholder": "Sök",
       "position": "{current} av {total}",
       "none": "Inga träffar",
-      "coverage": "{done} av {pages} sidor tolkade",
+      "coverage": "{done} av {pages} sidor klara",
       "pageOnly": "Sök bara på den här sidan",
       "previous": "Föregående träff",
       "next": "Nästa träff",

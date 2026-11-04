@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import OcrTextLayer, { OCR_WORD_CURRENT_MATCH_CLASS, OCR_WORD_MATCH_CLASS, OCR_WORD_SELECTED_CLASS } from '../OcrTextLayer.jsx';
-import { countCharacters, isOcrLayerSelection, layoutOcrLines, measureWordWidth, ocrSelectionText, OCR_WORD_JOINER } from '../../utils/ocrTextLayout.js';
+import { countCharacters, isOcrLayerSelection, layoutOcrLines, measureWordWidth, ocrReadingOrder, ocrSelectionText, OCR_WORD_JOINER } from '../../utils/ocrTextLayout.js';
 
 const WORDS = [
   { text: 'Hej', confidence: 95, bbox: { x0: 100, y0: 200, x1: 400, y1: 300 } },
@@ -64,6 +64,21 @@ describe('layoutOcrLines', () => {
     expect(lines[0].words[1]).toMatchObject({ gapShiftX: 100, gapLetterSpacing: 10, shiftX: 100 });
   });
 
+  it('starts a new line where the next word lies above the current line, not only below it', () => {
+    // A PDF's own text drawn footer first, or the next column's first line after the last line
+    // of the previous one: the word above is a line of its own, not part of the lower line.
+    const words = [
+      { text: 'Sidfot', bbox: { x0: 100, y0: 900, x1: 200, y1: 920 } },
+      { text: 'Rubrik', bbox: { x0: 100, y0: 100, x1: 200, y1: 150 } },
+      { text: 'ett', bbox: { x0: 220, y0: 105, x1: 300, y1: 150 } },
+      { text: 'Kolumn', bbox: { x0: 100, y0: 200, x1: 200, y1: 250 } },
+      { text: 'två', bbox: { x0: 500, y0: 100, x1: 600, y1: 150 } },
+    ];
+    expect(ocrReadingOrder(words).map((line) => line.map((word) => word.text))).toEqual([['Sidfot'], ['Rubrik', 'ett'], ['Kolumn'], ['två']]);
+    const { lines } = layoutOcrLines(words, 1000, 1000, 1000, 1000, () => 10);
+    expect(lines.map((line) => line.top)).toEqual([900, 100, 200, 100]);
+  });
+
   it('gives the no-break space no width when the boxes touch or overlap', () => {
     const words = [
       { text: 'ab', bbox: { x0: 0, y0: 0, x1: 100, y1: 50 } },
@@ -75,21 +90,21 @@ describe('layoutOcrLines', () => {
   });
 
   it('keeps a line box at least as tall as its line when the next line starts above it', () => {
-    // "över" joins the line of "under" (it does not start below it) and lifts that line's top
-    // above the first line's top.
+    // "över" lies above "under", so it is a line of its own (words out of reading order), and
+    // that line starts above the line before it.
     const words = [
       { text: 'först', bbox: { x0: 0, y0: 100, x1: 100, y1: 150 } },
       { text: 'under', bbox: { x0: 0, y0: 500, x1: 100, y1: 550 } },
       { text: 'över', bbox: { x0: 200, y0: 90, x1: 300, y1: 140 } },
     ];
     const { lines } = layoutOcrLines(words, 1000, 1000, 1000, 1000, () => 10);
-    expect(lines.map((line) => line.top)).toEqual([100, 90]);
-    // The distance from line 1 to line 2 is negative, so line 1 keeps its own height; the last
-    // line's box is its own height. Line 2's box lands at 150 by stacking, and its words are
-    // shifted from there onto their own boxes.
-    expect(lines.map((line) => line.lineHeight)).toEqual([50, 50]);
-    expect(lines.map((line) => line.stackedTop)).toEqual([100, 150]);
-    expect(lines[1].words.map((word) => word.shiftY)).toEqual([350, -60]);
+    expect(lines.map((line) => line.top)).toEqual([100, 500, 90]);
+    // Line 1 reaches down to line 2; the distance from line 2 to line 3 is negative, so line 2
+    // keeps its own height; the last line's box is its own height. Line 3's box lands at 550 by
+    // stacking, and its word is shifted from there onto its own box.
+    expect(lines.map((line) => line.lineHeight)).toEqual([400, 50, 50]);
+    expect(lines.map((line) => line.stackedTop)).toEqual([100, 500, 550]);
+    expect(lines[2].words.map((word) => word.shiftY)).toEqual([-460]);
   });
 
   it('shifts the words of overlapping lines from the box they land in onto their own places', () => {
@@ -389,6 +404,20 @@ describe('OcrTextLayer', () => {
     expect(container.querySelector('.ocr-text-layer').hasAttribute('data-ruling-lines-removed')).toBe(false);
     await render({ outcome: OUTCOME });
     expect(container.querySelector('.ocr-text-layer').hasAttribute('data-ruling-lines-removed')).toBe(false);
+  });
+
+  it('names the source of the words: the engine, or a PDF page\'s own text laid out the same way', async () => {
+    await render({ outcome: OUTCOME });
+    expect(container.querySelector('.ocr-text-layer').getAttribute('data-ocr-source')).toBe('recognition');
+    // A PDF page's own text: the boxes are in PDF points of the base viewport instead of
+    // pixels, scaled onto the stage by the same proportion.
+    const pdfText = { ...OUTCOME, source: 'pdf-text', words: [{ text: 'Egen', confidence: 100, bbox: { x0: 59.528, y0: 60, x1: 119.056, y1: 90 } }], imageWidth: 595.28, imageHeight: 841.89 };
+    await render({ outcome: pdfText, renderWidth: 1000, renderHeight: 1414.3 });
+    const layer = container.querySelector('.ocr-text-layer');
+    expect(layer.getAttribute('data-ocr-source')).toBe('pdf-text');
+    expect(layer.getAttribute('data-odv-ocr')).toBe('text-layer');
+    expect(layer.querySelector('.ocr-text-layer-word').textContent).toBe('Egen');
+    expect(layer.querySelector('.ocr-text-layer-word').style.left).toBe('100px');
   });
 
   it('renders an empty layer for a page recognised without words', async () => {

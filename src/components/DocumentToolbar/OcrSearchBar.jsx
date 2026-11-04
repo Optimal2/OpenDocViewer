@@ -80,6 +80,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     const pageKey = ocrPageKeyOf(page);
     return { pageKey, pageIndex: index, pageNumber: index + 1, outcome: (ocrPages && ocrPages[pageKey]) || null };
   }), [ocrPages, pages]);
+  // Pages the search covers: recognised, or a PDF page's own text (both `done`).
   const recognisedPages = useMemo(
     () => searchablePages.filter((page) => page.outcome?.status === 'done').length,
     [searchablePages]
@@ -243,7 +244,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
       ? t('ocr.search.none', { defaultValue: 'No matches' })
       : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: '{current} of {total}' });
     if (!pageOnly && recognisedPages < pages.length) {
-      statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done} of {pages} pages recognised' })}`;
+      statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done} of {pages} pages ready' })}`;
     }
   }
 

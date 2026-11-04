@@ -7180,7 +7180,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 182,
+    "line": 183,
     "description": "",
     "params": [
       {
@@ -7200,7 +7200,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 219,
+    "line": 220,
     "description": "",
     "params": [
       {
@@ -7220,7 +7220,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 227,
+    "line": 228,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -7253,7 +7253,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 203,
+    "line": 204,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -13756,7 +13756,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 37,
+    "line": 40,
     "description": "Class of a word inside the current match of the toolbar's OCR search.",
     "params": [],
     "returns": [],
@@ -13769,7 +13769,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 35,
+    "line": 38,
     "description": "Class of a word inside a match of the toolbar's OCR search.",
     "params": [],
     "returns": [],
@@ -13782,7 +13782,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 33,
+    "line": 36,
     "description": "Class of a word that the current selection touches.",
     "params": [],
     "returns": [],
@@ -13795,7 +13795,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 57,
+    "line": 60,
     "description": "",
     "params": [
       {
@@ -13808,7 +13808,7 @@
         "name": "props.outcome",
         "type": "Object",
         "optional": false,
-        "description": "A done OCR outcome: words , imageWidth , imageHeight , and rulingLinePixels (exposed as data-ruling-lines-removed when the line removal pai..."
+        "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js) and rulingLinePixels (exposed a..."
       },
       {
         "name": "props.renderWidth",
@@ -15204,7 +15204,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 243,
+    "line": 244,
     "description": "",
     "params": [],
     "returns": [],
@@ -15217,7 +15217,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 233,
+    "line": 234,
     "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
     "params": [],
     "returns": [],
@@ -15230,7 +15230,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 250,
+    "line": 251,
     "description": "",
     "params": [],
     "returns": [],
@@ -20867,7 +20867,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 81,
+    "line": 87,
     "description": "Judge the text pdf.js extracted from one page.",
     "params": [
       {
@@ -20898,7 +20898,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 51,
+    "line": 57,
     "description": "",
     "params": [
       {
@@ -20923,7 +20923,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 27,
+    "line": 33,
     "description": "The page failed to load; there is no image to recognise.",
     "params": [],
     "returns": [],
@@ -20936,7 +20936,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 44,
+    "line": 50,
     "description": "Above this share of private-use or replacement characters the layer is garbled.",
     "params": [],
     "returns": [],
@@ -20949,7 +20949,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 40,
+    "line": 46,
     "description": "Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page.",
     "params": [],
     "returns": [],
@@ -20962,7 +20962,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 42,
+    "line": 48,
     "description": "Below this share of letters and digits among visible characters the layer is garbled.",
     "params": [],
     "returns": [],
@@ -20975,7 +20975,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 12,
+    "line": 14,
     "description": "Decides, per page, whether OCR is worth running.",
     "params": [],
     "returns": [],
@@ -20988,7 +20988,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 34,
+    "line": 40,
     "description": "Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.",
     "params": [],
     "returns": [],
@@ -21001,7 +21001,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 65,
+    "line": 71,
     "description": "",
     "params": [],
     "returns": [],
@@ -21014,7 +21014,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 16,
+    "line": 18,
     "description": "PDF: read the text layer first, recognise only when it is not usable.",
     "params": [],
     "returns": [],
@@ -21027,7 +21027,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 31,
+    "line": 37,
     "description": "The image formats the viewer rasterises (utils/documentLoadingConfig.js isRasterImageExtension).",
     "params": [],
     "returns": [],
@@ -21040,7 +21040,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 14,
+    "line": 16,
     "description": "Pixels only: recognise.",
     "params": [],
     "returns": [],
@@ -21053,7 +21053,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 18,
+    "line": 20,
     "description": "Not a page OCR can work on.",
     "params": [],
     "returns": [],
@@ -21066,8 +21066,8 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 23,
-    "description": "The PDF page has a usable text layer; the viewer's own text wins.",
+    "line": 29,
+    "description": "The PDF page has a usable text layer that could not be placed as words (none of its text is upright, or the page has no size); the viewer's own text wins.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -21079,7 +21079,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 25,
+    "line": 31,
     "description": "A format the viewer does not rasterise into a page image.",
     "params": [],
     "returns": [],
@@ -21791,7 +21791,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/pdfTextProbe.js",
-    "line": 54,
+    "line": 59,
     "description": "",
     "params": [
       {
@@ -21834,7 +21834,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/pdfTextProbe.js",
-    "line": 18,
+    "line": 20,
     "description": "Open pdf.js documents kept for neighbouring pages before the least recently used is closed.",
     "params": [],
     "returns": [],
@@ -21847,7 +21847,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/pdfTextProbe.js",
-    "line": 26,
+    "line": 28,
     "description": "pdf.js loading task for a copy of the bytes (pdf.js takes ownership of the buffer it is given).",
     "params": [
       {
@@ -21872,8 +21872,215 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/pdfTextProbe.js",
-    "line": 37,
+    "line": 39,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "multiplyTransforms",
+    "name": "multiplyTransforms",
+    "longname": "multiplyTransforms",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 81,
+    "description": "pdf.js Util.transform : the product of two affine matrices [a, b, c, d, e, f].",
+    "params": [
+      {
+        "name": "m1",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "m2",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<number>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "PDF_TEXT_DEFAULT_ASCENT",
+    "name": "PDF_TEXT_DEFAULT_ASCENT",
+    "longname": "PDF_TEXT_DEFAULT_ASCENT",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 40,
+    "description": "pdf.js's own fallbacks for a font without metrics (TextLayer: ascent 0.8, descent -0.2).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "pdfTextAdvanceWeight",
+    "name": "pdfTextAdvanceWeight",
+    "longname": "pdfTextAdvanceWeight",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 66,
+    "description": "Rough advance of a character relative to a typical lowercase letter, used to share an item's width among its characters.",
+    "params": [
+      {
+        "name": "character",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "pdfTextLayerWords",
+    "name": "pdfTextLayerWords",
+    "longname": "pdfTextLayerWords",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 124,
+    "description": "",
+    "params": [
+      {
+        "name": "params",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "params.items",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "pdf.js text items ( str , dir , transform , width , fontName , hasEOL )."
+      },
+      {
+        "name": "params.styles",
+        "type": "Object",
+        "optional": true,
+        "description": "pdf.js text styles by font name ( ascent , descent , vertical )."
+      },
+      {
+        "name": "params.viewportTransform",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": "The viewport's matrix ( viewport.transform )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "The words with boxes in viewport units, in the order the PDF draws them, and the page text (a newline where pdf.js marks the end of a line,..."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "pdfTextLayerWords~pending",
+    "name": "pending",
+    "longname": "pdfTextLayerWords~pending",
+    "kind": "member",
+    "scope": "inner",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 135,
+    "description": "The word under construction, which the next item may continue.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "placeItem",
+    "name": "placeItem",
+    "longname": "placeItem",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 103,
+    "description": "Where an upright item lies in the viewport, or null when it gets no box.",
+    "params": [
+      {
+        "name": "item",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Object|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "viewport",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "scale",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "pdfTextLayerWords~previous",
+    "name": "previous",
+    "longname": "pdfTextLayerWords~previous",
+    "kind": "member",
+    "scope": "inner",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 133,
+    "description": "The last placed item's end, for the seam test.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "SEAM_GAP_EM",
+    "name": "SEAM_GAP_EM",
+    "longname": "SEAM_GAP_EM",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 51,
+    "description": "An item continues the previous one's word when it starts within this share of the font height after the previous item's end (pdf.js writes a space into the string, or a separate s...",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "UPRIGHT_TOLERANCE",
+    "name": "UPRIGHT_TOLERANCE",
+    "longname": "UPRIGHT_TOLERANCE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/pdfTextWords.js",
+    "line": 44,
+    "description": "Baselines turned by more than this (radians) from the viewport's x axis get no boxes.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -22086,7 +22293,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 106,
+    "line": 117,
     "description": "",
     "params": [
       {
@@ -22165,13 +22372,26 @@
     "examples": 0
   },
   {
+    "id": "OCR_OUTCOME_SOURCE",
+    "name": "OCR_OUTCOME_SOURCE",
+    "longname": "OCR_OUTCOME_SOURCE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 66,
+    "description": "Where a done outcome's words come from ( source ).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "OCR_STEP_TIMEOUTS_MS",
     "name": "OCR_STEP_TIMEOUTS_MS",
     "longname": "OCR_STEP_TIMEOUTS_MS",
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 25,
+    "line": 28,
     "description": "Upper bounds per step, so a promise that never settles (a pdf.js document that hangs, a page image that never arrives, a worker that stops answering) fails the page instead of blo...",
     "params": [],
     "returns": [],
@@ -22184,7 +22404,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 78,
+    "line": 89,
     "description": "",
     "params": [],
     "returns": [],
@@ -22197,7 +22417,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 62,
+    "line": 73,
     "description": "",
     "params": [],
     "returns": [],
@@ -22210,8 +22430,34 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 71,
+    "line": 82,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "PDF_TEXT",
+    "name": "PDF_TEXT",
+    "longname": "PDF_TEXT",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 70,
+    "description": "The PDF page's own text layer, read through pdf.js; the engine never ran.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "RECOGNITION",
+    "name": "RECOGNITION",
+    "longname": "RECOGNITION",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/queue.js",
+    "line": 68,
+    "description": "The engine recognised the page image.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -22223,7 +22469,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 123,
+    "line": 134,
     "description": "null until retainSources is called: every source is retained.",
     "params": [],
     "returns": [],
@@ -22236,7 +22482,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 32,
+    "line": 35,
     "description": "Marker on the error of a step that exceeded its bound.",
     "params": [],
     "returns": [],
@@ -22249,7 +22495,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 40,
+    "line": 43,
     "description": "",
     "params": [
       {
@@ -27970,7 +28216,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 64,
+    "line": 70,
     "description": "Whether a page's recognised text can be searched: the outcome is final and holds words.",
     "params": [
       {
@@ -28008,7 +28254,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 23,
+    "line": 24,
     "description": "LED state (components/common/StatusLed.jsx) per status key; '' (no outcome yet) is off.",
     "params": [],
     "returns": [],
@@ -28021,7 +28267,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 41,
+    "line": 46,
     "description": "Status key of a page's OCR outcome.",
     "params": [
       {
@@ -28034,12 +28280,12 @@
         "name": "engineFailure",
         "type": "string|null|undefined",
         "optional": false,
-        "description": "Set when the engine cannot serve this session."
+        "description": "Set when the engine cannot serve this session; a page that is already done keeps its own status (its text is there, and a PDF page's own te..."
       }
     ],
     "returns": [
       {
-        "type": "'working'|'done'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|''",
+        "type": "'working'|'done'|'pdfText'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|''",
         "description": ""
       }
     ],
@@ -28090,7 +28336,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 240,
+    "line": 243,
     "description": "Whether a selection lies within OCR text layers only (one or several pages), so that its text can be read line by line and a copy of it replaced.",
     "params": [
       {
@@ -28115,7 +28361,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 171,
+    "line": 174,
     "description": "Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.",
     "params": [
       {
@@ -28266,7 +28512,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 135,
+    "line": 136,
     "description": "The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word'...",
     "params": [
       {
@@ -28291,7 +28537,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrTextLayout.js",
-    "line": 264,
+    "line": 267,
     "description": "The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces (the DOM joins them with no-break spaces) and the lines by newlines...",
     "params": [
       {

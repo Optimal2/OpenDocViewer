@@ -1179,7 +1179,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
             pageNumber={displayedAsset.pageNumber || pageNumber}
             pageKey={displayedPageKey}
             search={ocrSearch || null}
-            label={t('ocr.textLayerLabel', { page: displayedAsset.pageNumber || pageNumber, defaultValue: 'Recognised text, page {page}' })}
+            label={ocrEntry.source === 'pdf-text'
+              ? t('ocr.pdfTextLayerLabel', { page: displayedAsset.pageNumber || pageNumber, defaultValue: "The page's own text, page {page}" })
+              : t('ocr.textLayerLabel', { page: displayedAsset.pageNumber || pageNumber, defaultValue: 'Recognised text, page {page}' })}
           />
         )}
       </div>

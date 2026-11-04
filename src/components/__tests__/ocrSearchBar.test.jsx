@@ -118,17 +118,36 @@ describe('OcrSearchBar', () => {
     expect(button().title).toBe('Search in the recognised text · Text recognised');
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
 
-    // The engine failed later in the session: the status says so, but text already recognised
-    // on this page can still be searched.
+    // The engine failed later in the session: a page already done keeps its own status and
+    // can still be searched; a page without a final outcome says the engine is unavailable.
     render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ocrEngineFailure: 'csp' });
-    expect(button().getAttribute('data-ocr-state')).toBe('unavailable');
+    expect(button().getAttribute('data-ocr-state')).toBe('done');
     expect(button().disabled).toBe(false);
+    expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
+    render({ ocrPages: { [KEY(0)]: { status: 'queued' } }, ocrEngineFailure: 'csp' });
+    expect(button().getAttribute('data-ocr-state')).toBe('unavailable');
     expect(container.querySelector('.odv-status-led--error')).not.toBeNull();
     render({ ocrPages: {}, ocrEngineFailure: 'csp' });
+    expect(button().getAttribute('data-ocr-state')).toBe('unavailable');
     expect(button().disabled).toBe(true);
   });
 
-  it('a text-layer PDF page says so; the search opens from it once another page has text', () => {
+  it('a PDF page with its own text says so and is searched like a recognised page', () => {
+    const pdfText = { ...done(['diarienummer', '2026-4471']), source: 'pdf-text', imageWidth: 595.28, imageHeight: 841.89 };
+    const { setOcrSearch } = render({ ocrPages: { [KEY(0)]: pdfText, [KEY(1)]: done(['diarienummer']) } });
+    expect(button().getAttribute('data-ocr-state')).toBe('pdfText');
+    expect(button().title).toBe('Search in the recognised text · The page has its own text');
+    expect(button().disabled).toBe(false);
+    expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
+    act(() => button().click());
+    type('diarienummer 2026');
+    expect(status()).toBe('1 of 1 · 2 of 3 pages ready');
+    expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'diarienummer 2026', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
+    type('diarienummer');
+    expect(status()).toBe('1 of 2 · 2 of 3 pages ready');
+  });
+
+  it('a text-layer PDF page whose text could not be placed says so; the search opens from it once another page has text', () => {
     render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' } } });
     expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
     expect(button().title).toBe('Not recognised: the page has its own text');
@@ -144,7 +163,7 @@ describe('OcrSearchBar', () => {
     expect(button().getAttribute('data-ocr-state')).toBe('done');
     act(() => button().click());
     type('hej');
-    expect(status()).toBe('1 of 1 · 1 of 3 pages recognised');
+    expect(status()).toBe('1 of 1 · 1 of 3 pages ready');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
@@ -168,7 +187,7 @@ describe('OcrSearchBar', () => {
     type('hej');
     record(observer.takeRecords());
     observer.disconnect();
-    expect(status()).toBe('1 of 2 · 1 of 3 pages recognised');
+    expect(status()).toBe('1 of 2 · 1 of 3 pages ready');
     for (const text of before) expect(text).not.toMatch(/^0 /);
   });
 
@@ -235,7 +254,7 @@ describe('OcrSearchBar', () => {
     const { setOcrSearch, setPageNumber } = render({ ocrPages: pages });
     act(() => button().click());
     type('hej');
-    expect(status()).toBe('1 of 5 · 2 of 3 pages recognised');
+    expect(status()).toBe('1 of 5 · 2 of 3 pages ready');
     const scope = () => container.querySelector('.toolbar-ocr-search-scope');
     expect(scope().getAttribute('aria-pressed')).toBe('false');
     expect(scope().title).toBe('Search only on this page');
@@ -265,7 +284,7 @@ describe('OcrSearchBar', () => {
     // Off again: the whole document, from the displayed page on.
     act(() => scope().click());
     expect(scope().getAttribute('aria-pressed')).toBe('false');
-    expect(status()).toBe('3 of 5 · 2 of 3 pages recognised');
+    expect(status()).toBe('3 of 5 · 2 of 3 pages ready');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
@@ -308,7 +327,7 @@ describe('OcrSearchBar', () => {
     expect(document.activeElement).toBe(input());
 
     type('HEJ');
-    expect(status()).toBe('1 of 2 · 2 of 3 pages recognised');
+    expect(status()).toBe('1 of 2 · 2 of 3 pages ready');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     expect(setPageNumber).not.toHaveBeenCalled();
   });
@@ -318,18 +337,18 @@ describe('OcrSearchBar', () => {
     const { setOcrSearch, setPageNumber } = render({ ocrPages: pages });
     act(() => button().click());
     type('hej');
-    expect(status()).toBe('1 of 3 · 2 of 3 pages recognised');
+    expect(status()).toBe('1 of 3 · 2 of 3 pages ready');
 
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(3);
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
     // The viewer shows page 3 now.
     render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
-    expect(status()).toBe('2 of 3 · 2 of 3 pages recognised');
+    expect(status()).toBe('2 of 3 · 2 of 3 pages ready');
 
     key('Enter');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 1 }, onlyPageKey: null });
-    expect(status()).toBe('3 of 3 · 2 of 3 pages recognised');
+    expect(status()).toBe('3 of 3 · 2 of 3 pages ready');
 
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(1);
@@ -359,7 +378,7 @@ describe('OcrSearchBar', () => {
     const { setOcrSearch } = render({ ocrPages: pages });
     act(() => button().click());
     type('xyz');
-    expect(status()).toBe('No matches · 1 of 3 pages recognised');
+    expect(status()).toBe('No matches · 1 of 3 pages ready');
     expect(container.querySelector('[aria-label="Next match"]').disabled).toBe(true);
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'xyz', current: null, onlyPageKey: null });
 

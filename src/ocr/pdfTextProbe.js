@@ -1,7 +1,8 @@
 // File: src/ocr/pdfTextProbe.js
 /**
  * Reads a PDF page's own text layer through pdf.js so classify.js can decide whether OCR is
- * needed at all.
+ * needed at all, and, when the layer is usable, hands it over as words with boxes
+ * (pdfTextWords.js) so the page gets the same text layer and search as a recognised page.
  *
  * The prober opens a document from the bytes the viewer already holds (`readSourceArrayBuffer`,
  * the file is never fetched again), keeps a few documents open so neighbouring pages reuse the
@@ -13,6 +14,7 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { withPdfJsDocumentOptions } from '../utils/pdfjsDocumentOptions.js';
 import { assessPdfTextLayer } from './classify.js';
+import { pdfTextLayerWords } from './pdfTextWords.js';
 
 /** Open pdf.js documents kept for neighbouring pages before the least recently used is closed. */
 export const DEFAULT_OPEN_PDF_DOCUMENTS = 2;
@@ -37,7 +39,10 @@ function defaultGetDocument(bytes) {
 /**
  * @typedef {Object} PdfTextProber
  * @property {function(string, number): Promise<Object>} probe
- *   `probe(sourceKey, pageIndex)` resolves to a PdfTextLayerAssessment (classify.js).
+ *   `probe(sourceKey, pageIndex)` resolves to a PdfTextLayerAssessment (classify.js); a usable
+ *   one also carries `words` (boxes in the page's base viewport, pdfTextWords.js), `text`, and
+ *   the base viewport's `pageWidth` and `pageHeight` (PDF points, the page's own rotation
+ *   applied, the frame the renderer scales).
  * @property {function(Set<string>): Promise<void>} retainSources  Close documents not in the set.
  * @property {function(): Promise<void>} releaseAll  Close every open document (idle shutdown).
  * @property {function(): number} openCount
@@ -111,8 +116,20 @@ export function createPdfTextProber({
       const page = await document.getPage(Math.max(0, Math.floor(Number(pageIndex)) || 0) + 1);
       try {
         const content = await page.getTextContent({ includeMarkedContent: false });
-        const strings = (Array.isArray(content?.items) ? content.items : []).map((item) => item?.str ?? '');
-        return assessPdfTextLayer(strings);
+        const items = Array.isArray(content?.items) ? content.items : [];
+        const assessment = assessPdfTextLayer(items.map((item) => item?.str ?? ''));
+        if (!assessment.usable) return assessment;
+        // The base viewport: scale 1 with the page's own rotation, the same frame the renderer
+        // scales to pixels, so the boxes map onto the page image by proportion.
+        const viewport = page.getViewport({ scale: 1 });
+        const { words, text } = pdfTextLayerWords({ items, styles: content?.styles, viewportTransform: viewport?.transform });
+        return {
+          ...assessment,
+          words,
+          text,
+          pageWidth: Math.max(0, Number(viewport?.width) || 0),
+          pageHeight: Math.max(0, Number(viewport?.height) || 0),
+        };
       } finally {
         try {
           page.cleanup?.();

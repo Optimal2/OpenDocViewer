@@ -269,11 +269,11 @@
 | <code>setCurrentMark</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:390</code> |  |
 | <code>ManualOverlayDialog~setManualFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:673</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the dialog or the page behind... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:48</code> |  |
-| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:182</code> |  |
-| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:219</code> |  |
-| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:227</code> | Escape closes the field from any of its controls. |
+| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:183</code> |  |
+| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:220</code> |  |
+| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:228</code> | Escape closes the field from any of its controls. |
 | <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:38</code> |  |
-| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:203</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
+| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:204</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/PrintPipelineDialogs.jsx:51</code> |  |
@@ -507,10 +507,10 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:37</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
-| <code>OCR_WORD_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:35</code> | Class of a word inside a match of the toolbar&#39;s OCR search. |
-| <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:33</code> | Class of a word that the current selection touches. |
-| <code>OcrTextLayer</code> | function | <code>src/components/OcrTextLayer.jsx:57</code> |  |
+| <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:40</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
+| <code>OCR_WORD_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:38</code> | Class of a word inside a match of the toolbar&#39;s OCR search. |
+| <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:36</code> | Class of a word that the current selection touches. |
+| <code>OcrTextLayer</code> | function | <code>src/components/OcrTextLayer.jsx:60</code> |  |
 | <code>getBestIncreasingDocumentEntryIndexes</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:528</code> | Find the document-run entries that best preserve natural page order. |
 | <code>&lt;anonymous&gt;~handleDone</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:1834</code> |  |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:1774</code> |  |
@@ -565,9 +565,9 @@
 | <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
 | <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:115</code> | ThemeProvider component to manage and provide theme-related state and functions. |
 | <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:191</code> | Toggle between the two highest-contrast explicit themes. |
-| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:243</code> |  |
-| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:233</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:250</code> |  |
+| <code>CompareOverlayState</code> | typedef | <code>src/contexts/viewerContext.js:244</code> |  |
+| <code>CompareTransform</code> | typedef | <code>src/contexts/viewerContext.js:234</code> | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>CompareTransformState</code> | typedef | <code>src/contexts/viewerContext.js:251</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -823,21 +823,21 @@
 | <code>OcrAssetUrls</code> | typedef | <code>src/ocr/assetUrls.js:25</code> |  |
 | <code>readOcrAssetManifest</code> | function | <code>src/ocr/assetUrls.js:39</code> | The manifest the build generated, or null when it is unusable. |
 | <code>resolveOcrAssetUrls</code> | function | <code>src/ocr/assetUrls.js:60</code> | Turn the dist-relative manifest paths into absolute URLs. |
-| <code>assessPdfTextLayer</code> | function | <code>src/ocr/classify.js:81</code> | Judge the text pdf.js extracted from one page. |
-| <code>classifyPageSource</code> | function | <code>src/ocr/classify.js:51</code> |  |
-| <code>FAILED_PAGE</code> | member | <code>src/ocr/classify.js:27</code> | The page failed to load; there is no image to recognise. |
-| <code>maxPrivateUseShare</code> | member | <code>src/ocr/classify.js:44</code> | Above this share of private-use or replacement characters the layer is garbled. |
-| <code>minCharacters</code> | member | <code>src/ocr/classify.js:40</code> | Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page. |
-| <code>minLetterShare</code> | member | <code>src/ocr/classify.js:42</code> | Below this share of letters and digits among visible characters the layer is garbled. |
-| <code>OCR_PAGE_DECISION</code> | constant | <code>src/ocr/classify.js:12</code> | Decides, per page, whether OCR is worth running. |
-| <code>PDF_TEXT_LAYER_THRESHOLDS</code> | constant | <code>src/ocr/classify.js:34</code> | Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers. |
-| <code>PdfTextLayerAssessment</code> | typedef | <code>src/ocr/classify.js:65</code> |  |
-| <code>PROBE_TEXT</code> | member | <code>src/ocr/classify.js:16</code> | PDF: read the text layer first, recognise only when it is not usable. |
-| <code>RASTER_EXTENSIONS</code> | constant | <code>src/ocr/classify.js:31</code> | The image formats the viewer rasterises \(utils/documentLoadingConfig.js isRasterImageExtension\). |
-| <code>RECOGNIZE</code> | member | <code>src/ocr/classify.js:14</code> | Pixels only: recognise. |
-| <code>SKIP</code> | member | <code>src/ocr/classify.js:18</code> | Not a page OCR can work on. |
-| <code>TEXT_LAYER</code> | member | <code>src/ocr/classify.js:23</code> | The PDF page has a usable text layer; the viewer&#39;s own text wins. |
-| <code>UNSUPPORTED</code> | member | <code>src/ocr/classify.js:25</code> | A format the viewer does not rasterise into a page image. |
+| <code>assessPdfTextLayer</code> | function | <code>src/ocr/classify.js:87</code> | Judge the text pdf.js extracted from one page. |
+| <code>classifyPageSource</code> | function | <code>src/ocr/classify.js:57</code> |  |
+| <code>FAILED_PAGE</code> | member | <code>src/ocr/classify.js:33</code> | The page failed to load; there is no image to recognise. |
+| <code>maxPrivateUseShare</code> | member | <code>src/ocr/classify.js:50</code> | Above this share of private-use or replacement characters the layer is garbled. |
+| <code>minCharacters</code> | member | <code>src/ocr/classify.js:46</code> | Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page. |
+| <code>minLetterShare</code> | member | <code>src/ocr/classify.js:48</code> | Below this share of letters and digits among visible characters the layer is garbled. |
+| <code>OCR_PAGE_DECISION</code> | constant | <code>src/ocr/classify.js:14</code> | Decides, per page, whether OCR is worth running. |
+| <code>PDF_TEXT_LAYER_THRESHOLDS</code> | constant | <code>src/ocr/classify.js:40</code> | Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers. |
+| <code>PdfTextLayerAssessment</code> | typedef | <code>src/ocr/classify.js:71</code> |  |
+| <code>PROBE_TEXT</code> | member | <code>src/ocr/classify.js:18</code> | PDF: read the text layer first, recognise only when it is not usable. |
+| <code>RASTER_EXTENSIONS</code> | constant | <code>src/ocr/classify.js:37</code> | The image formats the viewer rasterises \(utils/documentLoadingConfig.js isRasterImageExtension\). |
+| <code>RECOGNIZE</code> | member | <code>src/ocr/classify.js:16</code> | Pixels only: recognise. |
+| <code>SKIP</code> | member | <code>src/ocr/classify.js:20</code> | Not a page OCR can work on. |
+| <code>TEXT_LAYER</code> | member | <code>src/ocr/classify.js:29</code> | The PDF page has a usable text layer that could not be placed as words \(none of its text is upright, or the page has no size\); the viewer&#39;s own text wins. |
+| <code>UNSUPPORTED</code> | member | <code>src/ocr/classify.js:31</code> | A format the viewer does not rasterise into a page image. |
 | <code>ASSETS</code> | member | <code>src/ocr/engine.js:41</code> | The worker script, engine core or a language model could not be loaded. |
 | <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:85</code> | Classify a start-up error by its message. |
 | <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:148</code> | Create an engine for the given languages and asset URLs. |
@@ -870,10 +870,19 @@
 | <code>thinnestHorizontal</code> | function | <code>src/ocr/lineRemoval.js:83</code> | Thinnest thickness of a horizontal run \(dark rows through it\) sampled along its length. |
 | <code>thinnestVertical</code> | function | <code>src/ocr/lineRemoval.js:106</code> | Thinnest thickness of a vertical run \(dark columns through it\) sampled along its length. |
 | <code>yieldToEventLoop</code> | constant | <code>src/ocr/lineRemoval.js:272</code> | The default yield between bands \(see createEventLoopYield\). |
-| <code>createPdfTextProber</code> | function | <code>src/ocr/pdfTextProbe.js:54</code> |  |
-| <code>DEFAULT_OPEN_PDF_DOCUMENTS</code> | constant | <code>src/ocr/pdfTextProbe.js:18</code> | Open pdf.js documents kept for neighbouring pages before the least recently used is closed. |
-| <code>defaultGetDocument</code> | function | <code>src/ocr/pdfTextProbe.js:26</code> | pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\). |
-| <code>PdfTextProber</code> | typedef | <code>src/ocr/pdfTextProbe.js:37</code> |  |
+| <code>createPdfTextProber</code> | function | <code>src/ocr/pdfTextProbe.js:59</code> |  |
+| <code>DEFAULT_OPEN_PDF_DOCUMENTS</code> | constant | <code>src/ocr/pdfTextProbe.js:20</code> | Open pdf.js documents kept for neighbouring pages before the least recently used is closed. |
+| <code>defaultGetDocument</code> | function | <code>src/ocr/pdfTextProbe.js:28</code> | pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\). |
+| <code>PdfTextProber</code> | typedef | <code>src/ocr/pdfTextProbe.js:39</code> |  |
+| <code>multiplyTransforms</code> | function | <code>src/ocr/pdfTextWords.js:81</code> | pdf.js Util.transform : the product of two affine matrices \[a, b, c, d, e, f\]. |
+| <code>PDF_TEXT_DEFAULT_ASCENT</code> | constant | <code>src/ocr/pdfTextWords.js:40</code> | pdf.js&#39;s own fallbacks for a font without metrics \(TextLayer: ascent 0.8, descent -0.2\). |
+| <code>pdfTextAdvanceWeight</code> | function | <code>src/ocr/pdfTextWords.js:66</code> | Rough advance of a character relative to a typical lowercase letter, used to share an item&#39;s width among its characters. |
+| <code>pdfTextLayerWords</code> | function | <code>src/ocr/pdfTextWords.js:124</code> |  |
+| <code>pdfTextLayerWords~pending</code> | member | <code>src/ocr/pdfTextWords.js:135</code> | The word under construction, which the next item may continue. |
+| <code>placeItem</code> | function | <code>src/ocr/pdfTextWords.js:103</code> | Where an upright item lies in the viewport, or null when it gets no box. |
+| <code>pdfTextLayerWords~previous</code> | member | <code>src/ocr/pdfTextWords.js:133</code> | The last placed item&#39;s end, for the seam test. |
+| <code>SEAM_GAP_EM</code> | constant | <code>src/ocr/pdfTextWords.js:51</code> | An item continues the previous one&#39;s word when it starts within this share of the font height after the previous item&#39;s end \(pdf.js writes a space into the string, or a separate s... |
+| <code>UPRIGHT_TOLERANCE</code> | constant | <code>src/ocr/pdfTextWords.js:44</code> | Baselines turned by more than this \(radians\) from the viewport&#39;s x axis get no boxes. |
 | <code>CLEANED_IMAGE_TYPE</code> | constant | <code>src/ocr/prepareImage.js:35</code> | The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts. |
 | <code>defaultCreateCanvas</code> | function | <code>src/ocr/prepareImage.js:50</code> |  |
 | <code>defaultDecode</code> | function | <code>src/ocr/prepareImage.js:40</code> |  |
@@ -882,14 +891,17 @@
 | <code>PreparedOcrImage</code> | typedef | <code>src/ocr/prepareImage.js:86</code> |  |
 | <code>prepareOcrImage</code> | function | <code>src/ocr/prepareImage.js:106</code> |  |
 | <code>releaseCanvas</code> | function | <code>src/ocr/prepareImage.js:62</code> | Free the canvas backing store. |
-| <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:106</code> |  |
-| <code>OCR_STEP_TIMEOUTS_MS</code> | constant | <code>src/ocr/queue.js:25</code> | Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo... |
-| <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:78</code> |  |
-| <code>OcrQueueCandidate</code> | typedef | <code>src/ocr/queue.js:62</code> |  |
-| <code>OcrQueueSnapshot</code> | typedef | <code>src/ocr/queue.js:71</code> |  |
-| <code>createOcrQueue~retained</code> | member | <code>src/ocr/queue.js:123</code> | null until retainSources is called: every source is retained. |
-| <code>TIMEOUT_STEP</code> | constant | <code>src/ocr/queue.js:32</code> | Marker on the error of a step that exceeded its bound. |
-| <code>withTimeout</code> | function | <code>src/ocr/queue.js:40</code> |  |
+| <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:117</code> |  |
+| <code>OCR_OUTCOME_SOURCE</code> | constant | <code>src/ocr/queue.js:66</code> | Where a done outcome&#39;s words come from \( source \). |
+| <code>OCR_STEP_TIMEOUTS_MS</code> | constant | <code>src/ocr/queue.js:28</code> | Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo... |
+| <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:89</code> |  |
+| <code>OcrQueueCandidate</code> | typedef | <code>src/ocr/queue.js:73</code> |  |
+| <code>OcrQueueSnapshot</code> | typedef | <code>src/ocr/queue.js:82</code> |  |
+| <code>PDF_TEXT</code> | member | <code>src/ocr/queue.js:70</code> | The PDF page&#39;s own text layer, read through pdf.js; the engine never ran. |
+| <code>RECOGNITION</code> | member | <code>src/ocr/queue.js:68</code> | The engine recognised the page image. |
+| <code>createOcrQueue~retained</code> | member | <code>src/ocr/queue.js:134</code> | null until retainSources is called: every source is retained. |
+| <code>TIMEOUT_STEP</code> | constant | <code>src/ocr/queue.js:35</code> | Marker on the error of a step that exceeded its bound. |
+| <code>withTimeout</code> | function | <code>src/ocr/queue.js:43</code> |  |
 | <code>createOcrResultCache</code> | function | <code>src/ocr/resultCache.js:32</code> |  |
 | <code>DEFAULT_OCR_CACHE_LIMIT</code> | constant | <code>src/ocr/resultCache.js:12</code> | Pages kept per session before the least recently used outcome is dropped. |
 | <code>OcrResultCache</code> | typedef | <code>src/ocr/resultCache.js:14</code> |  |
@@ -1133,22 +1145,22 @@
 | <code>OCR_SEARCH_PANEL_WIDTH</code> | constant | <code>src/utils/ocrSearchPlacement.js:12</code> | Full width of the field \(CSS px\). |
 | <code>OcrSearchPlacement</code> | typedef | <code>src/utils/ocrSearchPlacement.js:24</code> |  |
 | <code>resolveOcrSearchPlacement</code> | function | <code>src/utils/ocrSearchPlacement.js:52</code> |  |
-| <code>hasSearchableOcrText</code> | function | <code>src/utils/ocrStatus.js:64</code> | Whether a page&#39;s recognised text can be searched: the outcome is final and holds words. |
+| <code>hasSearchableOcrText</code> | function | <code>src/utils/ocrStatus.js:70</code> | Whether a page&#39;s recognised text can be searched: the outcome is final and holds words. |
 | <code>OCR_STATUS_FALLBACK</code> | constant | <code>src/utils/ocrStatus.js:9</code> | Status keys and their English fallbacks. |
-| <code>OCR_STATUS_LED</code> | constant | <code>src/utils/ocrStatus.js:23</code> | LED state \(components/common/StatusLed.jsx\) per status key; &#39;&#39; \(no outcome yet\) is off. |
-| <code>ocrStatusKeyOf</code> | function | <code>src/utils/ocrStatus.js:41</code> | Status key of a page&#39;s OCR outcome. |
+| <code>OCR_STATUS_LED</code> | constant | <code>src/utils/ocrStatus.js:24</code> | LED state \(components/common/StatusLed.jsx\) per status key; &#39;&#39; \(no outcome yet\) is off. |
+| <code>ocrStatusKeyOf</code> | function | <code>src/utils/ocrStatus.js:46</code> | Status key of a page&#39;s OCR outcome. |
 | <code>countCharacters</code> | function | <code>src/utils/ocrTextLayout.js:46</code> | The number of typographic characters in text : letter-spacing is added after each grapheme cluster, not after each code point \(a letter and its combining accent are one\). |
 | <code>FALLBACK_ADVANCE</code> | constant | <code>src/utils/ocrTextLayout.js:25</code> | Average advance per character relative to the font size, used when text cannot be measured. |
-| <code>isOcrLayerSelection</code> | function | <code>src/utils/ocrTextLayout.js:240</code> | Whether a selection lies within OCR text layers only \(one or several pages\), so that its text can be read line by line and a copy of it replaced. |
-| <code>layoutOcrLines</code> | function | <code>src/utils/ocrTextLayout.js:171</code> | Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines. |
+| <code>isOcrLayerSelection</code> | function | <code>src/utils/ocrTextLayout.js:243</code> | Whether a selection lies within OCR text layers only \(one or several pages\), so that its text can be read line by line and a copy of it replaced. |
+| <code>layoutOcrLines</code> | function | <code>src/utils/ocrTextLayout.js:174</code> | Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines. |
 | <code>measureWordWidth</code> | function | <code>src/utils/ocrTextLayout.js:62</code> | Width of text at fontSize px, measured with a canvas context when one exists \(jsdom and print have none, then an estimate keeps the layout consistent\). |
 | <code>MIN_LETTER_SPACING_EM</code> | constant | <code>src/utils/ocrTextLayout.js:32</code> | Tightest letter-spacing, relative to the font size. |
 | <code>OCR_LAYER_FONT_FAMILY</code> | constant | <code>src/utils/ocrTextLayout.js:23</code> | Font used for the invisible words; width is fitted per word so the family only affects fallback estimates. |
 | <code>OCR_WORD_JOINER</code> | constant | <code>src/utils/ocrTextLayout.js:27</code> | The character that joins the words of a line without offering a wrap opportunity. |
 | <code>OcrLayout</code> | typedef | <code>src/utils/ocrTextLayout.js:119</code> |  |
 | <code>OcrLinePlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:105</code> |  |
-| <code>ocrReadingOrder</code> | function | <code>src/utils/ocrTextLayout.js:135</code> | The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word&#39;... |
-| <code>ocrSelectionText</code> | function | <code>src/utils/ocrTextLayout.js:264</code> | The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no-break spaces\) and the lines by newlines... |
+| <code>ocrReadingOrder</code> | function | <code>src/utils/ocrTextLayout.js:136</code> | The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word&#39;... |
+| <code>ocrSelectionText</code> | function | <code>src/utils/ocrTextLayout.js:267</code> | The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no-break spaces\) and the lines by newlines... |
 | <code>OcrWordPlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:83</code> |  |
 | <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
 | <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |

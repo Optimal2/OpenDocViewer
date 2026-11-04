@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 19. Line count: 8323. JSDoc symbol count: 112.
+File count: 19. Line count: 8330. JSDoc symbol count: 112.
 
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8516. JSDoc symbol count: 146.
+File count: 21. Line count: 8517. JSDoc symbol count: 146.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -75,7 +75,7 @@ File count: 17. Line count: 7656. JSDoc symbol count: 154.
 
 ## src/contexts
 
-File count: 4. Line count: 3557. JSDoc symbol count: 99.
+File count: 4. Line count: 3558. JSDoc symbol count: 99.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -134,16 +134,16 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 
 ## src/ocr
 
-File count: 12. Line count: 1651. JSDoc symbol count: 81.
+File count: 13. Line count: 1941. JSDoc symbol count: 93.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
 - `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
 - `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
+- `src/ocr/pdfTextWords.js` - Word boxes from a PDF page's own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read\-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/
 - `src/ocr/queue.js` - The OCR page queue: one page at a time, bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
 - `src/ocr/prepareImage.js` - Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
 - `src/ocr/window.js` - Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours.
-- `src/ocr/assetUrls.js` - Resolves where the OCR worker, engine core and language models are loaded from.
 
 ## src/PerformanceMonitor.jsx
 
@@ -165,7 +165,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 60. Line count: 22815. JSDoc symbol count: 929.
+File count: 60. Line count: 22824. JSDoc symbol count: 929.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

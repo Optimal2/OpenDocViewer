@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 60. Line count: 22815. JSDoc symbol count: 929.
+File count: 60. Line count: 22824. JSDoc symbol count: 929.
 
 ## src/utils/canvasBitmapSize.js
 

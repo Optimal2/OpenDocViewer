@@ -9,6 +9,7 @@
 export const OCR_STATUS_FALLBACK = Object.freeze({
   working: 'Recognising text…',
   done: 'Text recognised',
+  pdfText: 'The page has its own text',
   noText: 'No text found',
   skippedTextLayer: 'Not recognised: the page has its own text',
   skipped: 'Not recognised: nothing to recognise on this page',
@@ -23,6 +24,7 @@ export const OCR_STATUS_FALLBACK = Object.freeze({
 export const OCR_STATUS_LED = Object.freeze({
   working: 'pending',
   done: 'ready',
+  pdfText: 'ready',
   noText: 'off',
   skippedTextLayer: 'off',
   skipped: 'off',
@@ -34,19 +36,23 @@ export const OCR_STATUS_LED = Object.freeze({
  * Status key of a page's OCR outcome.
  *
  * @param {(Object|null|undefined)} entry  The page's outcome (`status` done/skipped/failed, or a
- *   transient queued/probing/recognizing state), or null before the page joined the window.
- * @param {(string|null|undefined)} engineFailure  Set when the engine cannot serve this session.
- * @returns {('working'|'done'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|'')}
+ *   transient queued/probing/recognizing state), or null before the page joined the window. A
+ *   done outcome whose `source` is `pdf-text` holds the PDF page's own text (src/ocr/queue.js).
+ * @param {(string|null|undefined)} engineFailure  Set when the engine cannot serve this session;
+ *   a page that is already `done` keeps its own status (its text is there, and a PDF page's own
+ *   text never needed the engine), every other page reports the failure.
+ * @returns {('working'|'done'|'pdfText'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|'')}
  */
 export function ocrStatusKeyOf(entry, engineFailure) {
-  if (engineFailure) return 'unavailable';
+  if (engineFailure && entry?.status !== 'done') return 'unavailable';
   switch (entry?.status) {
     case 'queued':
     case 'probing':
     case 'recognizing':
       return 'working';
     case 'done':
-      return Array.isArray(entry.words) && entry.words.length > 0 ? 'done' : 'noText';
+      if (!Array.isArray(entry.words) || entry.words.length === 0) return 'noText';
+      return entry.source === 'pdf-text' ? 'pdfText' : 'done';
     case 'skipped':
       return entry.reason === 'text-layer' ? 'skippedTextLayer' : 'skipped';
     case 'failed':
