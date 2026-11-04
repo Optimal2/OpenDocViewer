@@ -435,6 +435,11 @@
   right: 0;
   z-index: 1600;
   min-width: 170px;
+  /* A menu with more entries than the window has room for (an installation with many
+     languages) scrolls inside its own frame instead of running off the bottom. */
+  max-height: calc(100vh - var(--odv-toolbar-button-size, 32px) - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 1px;
