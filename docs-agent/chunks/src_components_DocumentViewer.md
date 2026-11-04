@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 17. Line count: 7656. JSDoc symbol count: 154.
+File count: 17. Line count: 7659. JSDoc symbol count: 154.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -109,7 +109,7 @@ OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane
 
 Exports: `DocumentViewerRender`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/runtimeConfig.js`, `src/utils/documentMetadata.js`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/runtimeConfig.js`, `src/utils/documentMetadata.js`, `src/components/KeyTips.jsx`
 
 Symbols:
 

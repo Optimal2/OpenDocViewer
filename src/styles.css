@@ -16,5 +16,8 @@
 /* OCR text layer and status (only present while ocr.enabled is true) */
 @import './styles/ocr.css';
 
+/* Key tips: the toolbar buttons' names while `?` is held */
+@import './styles/keytips.css';
+
 /* Print-only rules */
 @import './styles/print.css';

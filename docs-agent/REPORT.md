@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 175
-- Source lines: 66675
-- JSDoc symbols: 1895
+- Files: 178
+- Source lines: 66913
+- JSDoc symbols: 1909
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -39,7 +39,7 @@
 - `src/utils/pdfSignatures.js`: 1560 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx`: 1301 lines
-- `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1292 lines
+- `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1295 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
 - `src/components/DocumentRender.jsx`: 1211 lines
 - `src/utils/documentLoadingConfig.js`: 1099 lines

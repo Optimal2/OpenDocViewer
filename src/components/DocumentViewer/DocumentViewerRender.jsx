@@ -36,6 +36,7 @@ import { IDENTITY_COMPARE_TRANSFORM, buildCompareTransformCss } from '../../util
 import { needsCanvas } from '../../utils/imageAdjustments.js';
 import { isFineTuneEnabled } from '../../utils/runtimeConfig.js';
 import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
+import KeyTips from '../KeyTips.jsx';
 
 /**
  * @typedef {'primary'|'compare'} ViewerPaneKey
@@ -997,6 +998,8 @@ const DocumentViewerRender = ({
 
   return (
     <>
+      {/* Key tips: hold `?` for the toolbar buttons' names (nothing runs until the key is pressed). */}
+      <KeyTips />
       <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
         {/* LEFT / PRIMARY PANE */}
         <div

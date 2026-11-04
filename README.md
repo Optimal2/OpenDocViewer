@@ -40,6 +40,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 - A viewer for PDF (via `pdfjs-dist` pinned to 6.4.299), TIFF (via `utif2` 4.1), and raster images (JPG/PNG).
 - Embeddable: a host application (or an optional backend such as ODVGateway) can hand over documents as a **Portable Document Bundle v1** JSON payload through several documented startup modes.
 - Localized in English and Swedish (`public/locales/`, ICU messages via `i18next-icu`).
+- Learnable from the keyboard: hold `?` and every toolbar button shows its name under it (`src/components/KeyTips.jsx`); release the key and the labels go.
 - Shipped with an optional pair of Node/Express log servers for operational tracing and print auditing.
 - Packaged as an OpenModulePlatform (OMP) web-app component for platform-managed deployments.
 

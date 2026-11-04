@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 60. Line count: 22824. JSDoc symbol count: 929.
+File count: 61. Line count: 22889. JSDoc symbol count: 935.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -163,6 +163,21 @@ Symbols:
 - `module:imageAdjustments.pickStoredImageAdjustments` (function) - The stored image adjustment of one page, normalized: brightness, contrast, grayscale and invert.
 - `module:imageAdjustments.needsCanvas` (function) - Whether the page must be drawn on the canvas instead of the plain &lt;img&gt; .
 - `module:imageAdjustments.buildImageFilter` (function) - The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert.
+
+## src/utils/keyTipLayout.js
+
+Where the key tips go \(components/KeyTips.jsx\): one label under each toolbar button, centred on the button, packed into rows so that the labels of neighbouring buttons do not cover each other.
+
+Exports: `KEY_TIP_GAP`, `KEY_TIP_MAX_ROWS`, `packKeyTips`
+
+Symbols:
+
+- `KEY_TIP_GAP` (constant) - Gap between two labels in a row and between the rows \(CSS px\).
+- `KEY_TIP_MAX_ROWS` (constant) - Rows the labels may spread over before they are allowed to overlap.
+- `KeyTipInput` (typedef) - No description.
+- `KeyTipPlacement` (typedef) - No description.
+- `packKeyTips` (function) - No description.
+- `packKeyTips~rowEnds` (constant) - Right edge of the last label in each row.
 
 ## src/utils/localizedValue.js
 

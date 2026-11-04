@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 7. Line count: 971. JSDoc symbol count: 29.
+File count: 8. Line count: 1038. JSDoc symbol count: 32.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -13,6 +13,20 @@ Local imports: `src/logging/systemLogger.js`
 Symbols:
 
 - `module.exports` (function) - No description.
+
+## src/hooks/useKeyTipsHeld.js
+
+Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs.
+
+Exports: `KEY_TIPS_KEY`, `useKeyTipsHeld`, `useKeyTipsHeld`
+
+Local imports: `src/components/DocumentViewer/hooks/useViewerEffects.js`
+
+Symbols:
+
+- `KEY_TIPS_KEY` (constant) - The key that shows the tips while held.
+- `useKeyTipsHeld` (function) - No description.
+- `<anonymous>~heldCode` (member) - The physical key that was pressed, so its release ends the hold whatever key it reports then.
 
 ## src/hooks/useNavigationModifierState.js
 

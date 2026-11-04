@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 19. Line count: 8330. JSDoc symbol count: 112.
+File count: 20. Line count: 8433. JSDoc symbol count: 117.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -116,6 +116,22 @@ Symbols:
 
 - `ImgEventHandler` (typedef) - Image load/error handler.
 - `ImageRenderer` (constant) - ImageRenderer component.
+
+## src/components/KeyTips.jsx
+
+Key tips: hold \`?\` and every toolbar button shows its name in a small label under it, so the icons can be learnt without hovering them one by one; release the key and the labels go.
+
+Exports: `KeyTips`
+
+Local imports: `src/hooks/useKeyTipsHeld.js`, `src/utils/keyTipLayout.js`
+
+Symbols:
+
+- `BUTTON_SELECTOR` (constant) - Buttons the tips name: every button in a toolbar.
+- `buttonName` (function) - The accessible name of a button, as the tip shows it.
+- `measureKeyTips` (function) - Measure the visible toolbar buttons and lay their tips out.
+- `KeyTipLayer` (function) - The overlay with one label per toolbar button; mounted only while the key is held.
+- `module.exports` (function) - No description.
 
 ## src/components/LoadingMessage.jsx
 

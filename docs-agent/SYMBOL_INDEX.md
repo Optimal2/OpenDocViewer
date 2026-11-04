@@ -373,24 +373,24 @@
 | <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:352</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
 | <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:385</code> |  |
 | <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:299</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
-| <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:215</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
-| <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:60</code> |  |
-| <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:132</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:831</code> |  |
-| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:857</code> |  |
-| <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:492</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:825</code> |  |
-| <code>DocumentViewerRender~handleTransformWheel</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:347</code> | Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch. |
-| <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:152</code> |  |
-| <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:144</code> |  |
-| <code>isPaneInteractiveTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:81</code> |  |
-| <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:94</code> |  |
-| <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:105</code> |  |
-| <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:163</code> |  |
-| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:935</code> |  |
-| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:958</code> |  |
-| <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:44</code> |  |
-| <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:40</code> |  |
+| <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:216</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
+| <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:61</code> |  |
+| <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:133</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:832</code> |  |
+| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:858</code> |  |
+| <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:493</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:826</code> |  |
+| <code>DocumentViewerRender~handleTransformWheel</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:348</code> | Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch. |
+| <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:153</code> |  |
+| <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:145</code> |  |
+| <code>isPaneInteractiveTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:82</code> |  |
+| <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:95</code> |  |
+| <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:106</code> |  |
+| <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:164</code> |  |
+| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:936</code> |  |
+| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:959</code> |  |
+| <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:45</code> |  |
+| <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:41</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
 | <code>DocumentViewerToolbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:123</code> | Renders the toolbar for the document viewer by delegating to . |
 | <code>DocumentViewerToolbarProps</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:36</code> | Props consumed by DocumentViewerToolbar. |
@@ -501,6 +501,11 @@
 | <code>ZoomState</code> | typedef | <code>src/components/DocumentViewer/useDocumentViewer.js:488</code> | Zoom state \(mode + current numeric scale\). |
 | <code>ImageRenderer</code> | constant | <code>src/components/ImageRenderer.jsx:51</code> | ImageRenderer component. |
 | <code>ImgEventHandler</code> | typedef | <code>src/components/ImageRenderer.jsx:28</code> | Image load/error handler. |
+| <code>BUTTON_SELECTOR</code> | constant | <code>src/components/KeyTips.jsx:25</code> | Buttons the tips name: every button in a toolbar. |
+| <code>buttonName</code> | function | <code>src/components/KeyTips.jsx:32</code> | The accessible name of a button, as the tip shows it. |
+| <code>module.exports</code> | function | <code>src/components/KeyTips.jsx:99</code> |  |
+| <code>KeyTipLayer</code> | function | <code>src/components/KeyTips.jsx:70</code> | The overlay with one label per toolbar button; mounted only while the key is held. |
+| <code>measureKeyTips</code> | function | <code>src/components/KeyTips.jsx:41</code> | Measure the visible toolbar buttons and lay their tips out. |
 | <code>LoadingMessage</code> | function | <code>src/components/LoadingMessage.jsx:43</code> | LoadingMessage component. |
 | <code>LoadingSpinner.propTypes.className</code> | member | <code>src/components/LoadingSpinner.jsx:87</code> | Extra classes to append to the root element. |
 | <code>LoadingSpinner.propTypes.label</code> | member | <code>src/components/LoadingSpinner.jsx:85</code> | Accessible label announced by assistive technologies. |
@@ -660,6 +665,9 @@
 | <code>toBool</code> | function | <code>src/ErrorBoundary.jsx:59</code> | Coerce unknown values to boolean using common string/number forms. |
 | <code>tr</code> | function | <code>src/ErrorBoundary.jsx:45</code> | Tiny helper to translate with safe fallback \(NS: &#39;common&#39;\). |
 | <code>module.exports</code> | function | <code>src/hooks/useAcceleratingHoldRepeat.js:57</code> |  |
+| <code>&lt;anonymous&gt;~heldCode</code> | member | <code>src/hooks/useKeyTipsHeld.js:28</code> | The physical key that was pressed, so its release ends the hold whatever key it reports then. |
+| <code>KEY_TIPS_KEY</code> | constant | <code>src/hooks/useKeyTipsHeld.js:18</code> | The key that shows the tips while held. |
+| <code>useKeyTipsHeld</code> | function | <code>src/hooks/useKeyTipsHeld.js:23</code> |  |
 | <code>&lt;anonymous&gt;~applyState</code> | function | <code>src/hooks/useNavigationModifierState.js:59</code> |  |
 | <code>&lt;anonymous&gt;~clearState</code> | function | <code>src/hooks/useNavigationModifierState.js:71</code> |  |
 | <code>&lt;anonymous&gt;~handleVisibilityChange</code> | function | <code>src/hooks/useNavigationModifierState.js:88</code> |  |
@@ -1081,6 +1089,12 @@
 | <code>module:imageAdjustments.normalizeGrayscale</code> | function | <code>src/utils/imageAdjustments.js:36</code> | Grayscale amount in percent, clamped to 0..100. |
 | <code>module:imageAdjustments.normalizeInvert</code> | function | <code>src/utils/imageAdjustments.js:47</code> | Invert as a real boolean. |
 | <code>module:imageAdjustments.pickStoredImageAdjustments</code> | function | <code>src/utils/imageAdjustments.js:73</code> | The stored image adjustment of one page, normalized: brightness, contrast, grayscale and invert. |
+| <code>KEY_TIP_GAP</code> | constant | <code>src/utils/keyTipLayout.js:12</code> | Gap between two labels in a row and between the rows \(CSS px\). |
+| <code>KEY_TIP_MAX_ROWS</code> | constant | <code>src/utils/keyTipLayout.js:14</code> | Rows the labels may spread over before they are allowed to overlap. |
+| <code>KeyTipInput</code> | typedef | <code>src/utils/keyTipLayout.js:16</code> |  |
+| <code>KeyTipPlacement</code> | typedef | <code>src/utils/keyTipLayout.js:24</code> |  |
+| <code>packKeyTips</code> | function | <code>src/utils/keyTipLayout.js:40</code> |  |
+| <code>packKeyTips~rowEnds</code> | constant | <code>src/utils/keyTipLayout.js:47</code> | Right edge of the last label in each row. |
 | <code>I18nLike</code> | typedef | <code>src/utils/localizedValue.js:17</code> | Minimal shape of an i18n instance used by this module. |
 | <code>I18nOptionsLike</code> | typedef | <code>src/utils/localizedValue.js:11</code> | A subset of the i18next options object we care about. |
 | <code>LocalizedString</code> | typedef | <code>src/utils/localizedValue.js:2</code> | Localized string resolver for admin-supplied config values. |

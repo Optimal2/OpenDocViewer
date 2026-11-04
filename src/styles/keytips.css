@@ -1,0 +1,36 @@
+/* Key tips (components/KeyTips.jsx): labels under the toolbar buttons while `?` is held. The
+   overlay covers the viewport, lets every pointer event through and is never printed. */
+.odv-keytips {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  pointer-events: none;
+}
+
+.odv-keytip {
+  position: absolute;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 80%, transparent 20%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--canvas-background-color) 94%, var(--toolbar-background-color) 6%);
+  color: var(--text-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  font-size: 0.72rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* The measuring copy: laid out like a tip, but off screen. */
+.odv-keytip--probe {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  visibility: hidden;
+}
+
+@media print {
+  .odv-keytips {
+    display: none;
+  }
+}

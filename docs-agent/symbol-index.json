@@ -10180,7 +10180,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 215,
+    "line": 216,
     "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
     "params": [
       {
@@ -10421,7 +10421,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 60,
+    "line": 61,
     "description": "",
     "params": [
       {
@@ -10452,7 +10452,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 132,
+    "line": 133,
     "description": "",
     "params": [
       {
@@ -10483,7 +10483,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 831,
+    "line": 832,
     "description": "",
     "params": [
       {
@@ -10503,7 +10503,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 857,
+    "line": 858,
     "description": "",
     "params": [
       {
@@ -10540,7 +10540,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 492,
+    "line": 493,
     "description": "",
     "params": [
       {
@@ -10571,7 +10571,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 825,
+    "line": 826,
     "description": "",
     "params": [
       {
@@ -10591,7 +10591,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 347,
+    "line": 348,
     "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
     "params": [
       {
@@ -10622,7 +10622,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 152,
+    "line": 153,
     "description": "",
     "params": [
       {
@@ -10647,7 +10647,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 144,
+    "line": 145,
     "description": "",
     "params": [
       {
@@ -10672,7 +10672,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 81,
+    "line": 82,
     "description": "",
     "params": [
       {
@@ -10697,7 +10697,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 94,
+    "line": 95,
     "description": "",
     "params": [
       {
@@ -10722,7 +10722,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 105,
+    "line": 106,
     "description": "",
     "params": [
       {
@@ -10753,7 +10753,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 163,
+    "line": 164,
     "description": "",
     "params": [
       {
@@ -10778,7 +10778,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 935,
+    "line": 936,
     "description": "",
     "params": [
       {
@@ -10803,7 +10803,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 958,
+    "line": 959,
     "description": "",
     "params": [
       {
@@ -10828,7 +10828,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 44,
+    "line": 45,
     "description": "",
     "params": [],
     "returns": [],
@@ -10841,7 +10841,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 40,
+    "line": 41,
     "description": "",
     "params": [],
     "returns": [],
@@ -13589,6 +13589,105 @@
       {
         "type": "void",
         "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "BUTTON_SELECTOR",
+    "name": "BUTTON_SELECTOR",
+    "longname": "BUTTON_SELECTOR",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/KeyTips.jsx",
+    "line": 25,
+    "description": "Buttons the tips name: every button in a toolbar.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "buttonName",
+    "name": "buttonName",
+    "longname": "buttonName",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/KeyTips.jsx",
+    "line": 32,
+    "description": "The accessible name of a button, as the tip shows it.",
+    "params": [
+      {
+        "name": "button",
+        "type": "Element",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/KeyTips.jsx",
+    "line": 99,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "React.ReactElement|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "KeyTipLayer",
+    "name": "KeyTipLayer",
+    "longname": "KeyTipLayer",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/KeyTips.jsx",
+    "line": 70,
+    "description": "The overlay with one label per toolbar button; mounted only while the key is held.",
+    "params": [],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "measureKeyTips",
+    "name": "measureKeyTips",
+    "longname": "measureKeyTips",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/KeyTips.jsx",
+    "line": 41,
+    "description": "Measure the visible toolbar buttons and lay their tips out.",
+    "params": [
+      {
+        "name": "probe",
+        "type": "HTMLElement",
+        "optional": false,
+        "description": "An offscreen label used to measure the label widths."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<Object>",
+        "description": "KeyTipPlacement entries of utils/keyTipLayout.js."
       }
     ],
     "examples": 0
@@ -17464,6 +17563,50 @@
     "returns": [
       {
         "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "<anonymous>~heldCode",
+    "name": "heldCode",
+    "longname": "<anonymous>~heldCode",
+    "kind": "member",
+    "scope": "inner",
+    "file": "src/hooks/useKeyTipsHeld.js",
+    "line": 28,
+    "description": "The physical key that was pressed, so its release ends the hold whatever key it reports then.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "KEY_TIPS_KEY",
+    "name": "KEY_TIPS_KEY",
+    "longname": "KEY_TIPS_KEY",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useKeyTipsHeld.js",
+    "line": 18,
+    "description": "The key that shows the tips while held.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "useKeyTipsHeld",
+    "name": "useKeyTipsHeld",
+    "longname": "useKeyTipsHeld",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/hooks/useKeyTipsHeld.js",
+    "line": 23,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "boolean",
         "description": ""
       }
     ],
@@ -26744,6 +26887,120 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "KEY_TIP_GAP",
+    "name": "KEY_TIP_GAP",
+    "longname": "KEY_TIP_GAP",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/keyTipLayout.js",
+    "line": 12,
+    "description": "Gap between two labels in a row and between the rows (CSS px).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "KEY_TIP_MAX_ROWS",
+    "name": "KEY_TIP_MAX_ROWS",
+    "longname": "KEY_TIP_MAX_ROWS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/keyTipLayout.js",
+    "line": 14,
+    "description": "Rows the labels may spread over before they are allowed to overlap.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "KeyTipInput",
+    "name": "KeyTipInput",
+    "longname": "KeyTipInput",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/keyTipLayout.js",
+    "line": 16,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "KeyTipPlacement",
+    "name": "KeyTipPlacement",
+    "longname": "KeyTipPlacement",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/keyTipLayout.js",
+    "line": 24,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "packKeyTips",
+    "name": "packKeyTips",
+    "longname": "packKeyTips",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/keyTipLayout.js",
+    "line": 40,
+    "description": "",
+    "params": [
+      {
+        "name": "tips",
+        "type": "Array.<KeyTipInput>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "viewportWidth",
+        "type": "number",
+        "optional": false,
+        "description": "Labels are kept inside [0, viewportWidth]."
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.gap",
+        "type": "number",
+        "optional": true,
+        "description": "Default KEY_TIP_GAP."
+      },
+      {
+        "name": "options.maxRows",
+        "type": "number",
+        "optional": true,
+        "description": "Default KEY_TIP_MAX_ROWS."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<KeyTipPlacement>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "packKeyTips~rowEnds",
+    "name": "rowEnds",
+    "longname": "packKeyTips~rowEnds",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/utils/keyTipLayout.js",
+    "line": 47,
+    "description": "Right edge of the last label in each row.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
