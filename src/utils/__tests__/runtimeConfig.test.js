@@ -26,6 +26,7 @@ import {
   OCR_ASSET_BASE_URL_REJECTIONS,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
+  isSpeechLanguageAutoDetectEnabled,
   describeOcrLanguages,
   getOcrLanguages,
   describeOcrAssetBaseUrl,
@@ -325,6 +326,19 @@ describe('runtimeConfig', () => {
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 'false' } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 0 } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: null } })).toBe(true);
+    });
+  });
+
+  describe('isSpeechLanguageAutoDetectEnabled', () => {
+    it('is on when the section or key is missing and turns off only for the boolean literal false', () => {
+      expect(isSpeechLanguageAutoDetectEnabled({})).toBe(true);
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: {} })).toBe(true);
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: {} } })).toBe(true);
+      expect(isSpeechLanguageAutoDetectEnabled(null)).toBe(true);
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: true } } })).toBe(true);
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: false } } })).toBe(false);
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: 'false' } } })).toBe(true);
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: 0 } } })).toBe(true);
     });
   });
 

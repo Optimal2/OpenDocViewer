@@ -416,6 +416,12 @@ describe('OcrTextLayer', () => {
     const layer = container.querySelector('.ocr-text-layer');
     expect(layer.getAttribute('data-ocr-source')).toBe('pdf-text');
     expect(layer.getAttribute('data-odv-ocr')).toBe('text-layer');
+    // No language guessed: no lang attribute; a guessed one is the text flow's lang (not the
+    // labelled layer's, whose name stays in the UI language).
+    expect(layer.querySelector('.ocr-text-layer-flow').hasAttribute('lang')).toBe(false);
+    await render({ outcome: { ...pdfText, language: 'sv' }, renderWidth: 1000, renderHeight: 1414.3 });
+    expect(container.querySelector('.ocr-text-layer-flow').getAttribute('lang')).toBe('sv');
+    expect(container.querySelector('.ocr-text-layer').hasAttribute('lang')).toBe(false);
     expect(layer.querySelector('.ocr-text-layer-word').textContent).toBe('Egen');
     expect(layer.querySelector('.ocr-text-layer-word').style.left).toBe('100px');
   });

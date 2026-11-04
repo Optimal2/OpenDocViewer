@@ -9,32 +9,71 @@
  *
  * Only voices that run on the machine are used (utils/speech.js): the text is document content
  * and must not reach an online voice service. Without a local voice for the reading language
- * the button is shown disabled and says so, and nothing is spoken. The reading language
- * follows the viewer's UI language unless the user picks another one: a menu opens under the
- * button while the pointer rests on it (and from the keyboard with the arrow keys), listing
- * the locales the installed local voices offer, with "follow the interface language" first.
- * The choice is kept in the viewer preferences (utils/viewerPreferences.js), so
- * it survives reloads without touching the UI language. The menu, like the button, never takes
- * the selection away; the viewer's own shortcuts are off while the focus is in the button or
- * the menu (`data-odv-shortcuts="off"`), so the arrow keys open the menu without turning the
- * page, and a choice or Escape made from the keyboard puts the focus back on the button.
- * Mounted by DocumentToolbar only while `ocr.enabled` is the literal true, so the default code
- * path neither listens to the selection nor touches speech.
+ * the button is shown disabled and says so, and nothing is spoken.
+ *
+ * The reading language is, by default, the language guessed for the selected page's text
+ * (`ocr.speech.autoDetectLanguage`, the text layer's `lang`), or the viewer's UI language when
+ * the guess is unsure or the guess is turned off. A menu opens under the button while the
+ * pointer rests on it (and from the keyboard with the arrow keys): "Automatic" first, then one
+ * entry per OCR language (`ocr.languages`), greyed when no local voice is installed for it,
+ * and "Follow the interface language" last. The choice is kept in the viewer preferences
+ * (utils/viewerPreferences.js): absent for automatic, `ui` for the interface language, or an
+ * ISO 639-1 language. The menu, like the button, never takes the selection away; the viewer's
+ * own shortcuts are off while the focus is in the button or the menu (`data-odv-shortcuts="off"`),
+ * so the arrow keys open the menu without turning the page, and a choice or Escape made from
+ * the keyboard puts the focus back on the button. Mounted by DocumentToolbar only while
+ * `ocr.enabled` is the literal true, so the default code path neither listens to the selection
+ * nor touches speech.
  */
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isOcrLayerSelection, ocrSelectionText } from '../../utils/ocrTextLayout.js';
-import { isSpeechSynthesisAvailable, listSpeechLocales, pickSpeechVoice, resolveSpeechLanguage, speakText, speechLocaleLabel } from '../../utils/speech.js';
+import { getOcrLanguages, isSpeechLanguageAutoDetectEnabled } from '../../utils/runtimeConfig.js';
+import { speechLanguagesForOcr } from '../../utils/ocrLanguageCodes.js';
+import { isSpeechSynthesisAvailable, pickSpeechVoice, resolveSpeechLanguage, speakText, speechLocaleLabel } from '../../utils/speech.js';
 import { getSpeechLanguagePreference, setSpeechLanguagePreference } from '../../utils/viewerPreferences.js';
 
 /** How long the pointer may leave the button and its menu before the menu closes. */
 const READ_MENU_CLOSE_DELAY_MS = 250;
+/** Preference value for "follow the interface language" (absent: automatic). */
+const FOLLOW_UI = 'ui';
 
-/** @returns {string} The selected text as it reads on the page, or '' outside the text layers. */
-function selectedLayerText() {
+/**
+ * The selection inside the text layers: its text as it reads on the page, and the language the
+ * text flow of its start was given (the page's guessed language), or null outside the layers.
+ * @returns {({ text:string, language:(string|null) }|null)}
+ */
+function layerSelection() {
   const selection = typeof window !== 'undefined' ? window.getSelection?.() : null;
-  if (!selection || selection.isCollapsed || !isOcrLayerSelection(selection)) return '';
-  return ocrSelectionText(selection).trim();
+  if (!selection || selection.isCollapsed || !isOcrLayerSelection(selection)) return null;
+  const text = ocrSelectionText(selection).trim();
+  if (!text) return null;
+  let language = null;
+  try {
+    const node = selection.getRangeAt(0).startContainer;
+    const element = node instanceof Element ? node : node?.parentElement;
+    // The start lies in the flow's text, or (a selection of the whole layer) on the layer.
+    const flow = element?.closest?.('.ocr-text-layer-flow') || element?.closest?.('.ocr-text-layer')?.querySelector('.ocr-text-layer-flow');
+    language = flow?.getAttribute('lang') || null;
+  } catch {
+    // No range: no language.
+  }
+  return { text, language };
+}
+
+/**
+ * A stored reading-language choice in today's form: `ui`, or one of the OCR languages, else
+ * null (automatic). An older choice stored as a locale ('en-US') counts as its language.
+ * @param {(string|null)} stored
+ * @param {Array<string>} languages  The OCR languages (ISO 639-1).
+ * @returns {(string|null)}
+ */
+function normalizeStoredLanguage(stored, languages) {
+  const value = String(stored || '').trim().toLowerCase();
+  if (!value) return null;
+  if (value === FOLLOW_UI) return FOLLOW_UI;
+  const base = value.split(/[-_]/)[0];
+  return languages.includes(base) ? base : null;
 }
 
 /**
@@ -43,23 +82,29 @@ function selectedLayerText() {
 export default function ReadSelectionButton() {
   const { t, i18n } = useTranslation('common');
   const available = useMemo(() => isSpeechSynthesisAvailable(), []);
-  const [hasSelection, setHasSelection] = useState(false);
+  const autoDetect = useMemo(() => isSpeechLanguageAutoDetectEnabled(), []);
+  const ocrLanguages = useMemo(() => speechLanguagesForOcr(getOcrLanguages()), []);
+  const [selection, setSelection] = useState(/** @type {({ text:string, language:(string|null) }|null)} */ (null));
   const [speaking, setSpeaking] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [voices, setVoices] = useState(/** @type {Array<Object>} */ ([]));
-  const [preferred, setPreferred] = useState(() => getSpeechLanguagePreference());
+  const [preferred, setPreferred] = useState(() => normalizeStoredLanguage(getSpeechLanguagePreference(), ocrLanguages));
   const controllerRef = useRef(/** @type {(Object|null)} */ (null));
   const shellRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const buttonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const closeTimerRef = useRef(/** @type {*} */ (null));
   const menuId = useId();
   const uiLocale = resolveSpeechLanguage(i18n?.language);
-  const lang = preferred || uiLocale;
-  const shown = available && (hasSelection || speaking);
+  const detected = autoDetect ? selection?.language || null : null;
+  // The reading language: the user's choice, else the page's guessed language, else the UI's.
+  const lang = preferred && preferred !== FOLLOW_UI
+    ? resolveSpeechLanguage(preferred)
+    : (preferred !== FOLLOW_UI && detected ? resolveSpeechLanguage(detected) : uiLocale);
+  const shown = available && (!!selection || speaking);
 
   useEffect(() => {
     if (!available || typeof document === 'undefined') return undefined;
-    const update = () => setHasSelection(selectedLayerText().length > 0);
+    const update = () => setSelection(layerSelection());
     document.addEventListener('selectionchange', update);
     update();
     return () => { document.removeEventListener('selectionchange', update); };
@@ -134,7 +179,7 @@ export default function ReadSelectionButton() {
   };
 
   const speak = () => {
-    const text = selectedLayerText();
+    const text = layerSelection()?.text || '';
     if (!text) return;
     controllerRef.current?.cancel();
     const controller = speakText(text, {
@@ -149,26 +194,43 @@ export default function ReadSelectionButton() {
     setSpeaking(true);
   };
 
-  /** @param {string} locale  '' follows the UI language. */
-  const chooseLanguage = (locale) => {
-    setSpeechLanguagePreference(locale);
-    setPreferred(locale || null);
+  /** @param {string} value  '' for automatic, FOLLOW_UI, or an ISO 639-1 language. */
+  const chooseLanguage = (value) => {
+    setSpeechLanguagePreference(value);
+    setPreferred(value || null);
     closeMenu();
   };
 
   if (!shown) return null;
 
-  const locales = listSpeechLocales(voices);
+  const name = (code) => speechLocaleLabel(code, i18n?.language);
   // No local voice for the reading language: nothing is ever spoken with an online voice.
   const voiceMissing = !speaking && !pickSpeechVoice(voices, lang);
   const languageTitle = t('ocr.read.language', { defaultValue: 'Reading language' });
-  const uiLabel = speechLocaleLabel(uiLocale, i18n?.language);
-  const followLabel = t('ocr.read.followUi', { language: uiLabel, defaultValue: `Follow the interface language (${uiLabel})` });
-  const currentLabel = preferred ? speechLocaleLabel(preferred, i18n?.language) : followLabel;
+  const followLabel = t('ocr.read.followUi', { language: name(uiLocale), defaultValue: `Follow the interface language (${name(uiLocale)})` });
+  const autoLabel = detected
+    ? t('ocr.read.auto', { language: name(detected), defaultValue: `Automatic (${name(detected)})` })
+    : t('ocr.read.autoUnknown', { language: name(uiLocale), defaultValue: `Automatic (language not identified, reads in ${name(uiLocale)})` });
+  /** @type {Array<{ value:string, label:string, disabled:boolean }>} */
+  const entries = [
+    ...(autoDetect ? [{ value: '', label: autoLabel, disabled: false }] : []),
+    ...ocrLanguages.map((code) => {
+      const hasVoice = !!pickSpeechVoice(voices, resolveSpeechLanguage(code));
+      return {
+        value: code,
+        label: hasVoice ? name(code) : t('ocr.read.languageNoVoice', { language: name(code), defaultValue: `${name(code)} (no local voice installed)` }),
+        disabled: !hasVoice,
+      };
+    }),
+    { value: FOLLOW_UI, label: followLabel, disabled: false },
+  ];
+  // With the guess off, an absent preference is the interface language.
+  const selectedValue = preferred ?? (autoDetect ? '' : FOLLOW_UI);
+  const currentLabel = entries.find((entry) => entry.value === selectedValue)?.label || followLabel;
   const label = speaking
     ? t('ocr.read.stop', { defaultValue: 'Stop reading aloud' })
     : voiceMissing
-      ? t('ocr.read.noLocalVoice', { language: speechLocaleLabel(lang, i18n?.language), defaultValue: `No local voice installed for ${speechLocaleLabel(lang, i18n?.language)}; online voices are never used` })
+      ? t('ocr.read.noLocalVoice', { language: name(lang), defaultValue: `No local voice installed for ${name(lang)}; online voices are never used` })
       : t('ocr.read.speak', { defaultValue: 'Read the selected text aloud' });
 
   return (
@@ -186,6 +248,7 @@ export default function ReadSelectionButton() {
         data-odv-ocr="read"
         data-speaking={speaking ? 'true' : undefined}
         data-voice-missing={voiceMissing ? 'true' : undefined}
+        data-reading-language={lang}
         aria-label={label}
         title={`${label} · ${languageTitle}: ${currentLabel}`}
         aria-pressed={speaking}
@@ -214,18 +277,19 @@ export default function ReadSelectionButton() {
           onMouseDown={(event) => event.preventDefault()}
         >
           <div className="toolbar-ocr-read-menu-title" aria-hidden="true">{languageTitle}</div>
-          {[{ code: '', label: followLabel }, ...locales.map((code) => ({ code, label: speechLocaleLabel(code, i18n?.language) }))].map((entry) => {
-            const selected = (preferred || '') === entry.code;
+          {entries.map((entry) => {
+            const selected = entry.value === selectedValue;
             return (
               <button
-                key={entry.code || 'ui'}
+                key={entry.value || 'auto'}
                 type="button"
                 className={`toolbar-popup-menu-item${selected ? ' is-selected' : ''}`}
                 role="menuitemradio"
                 aria-checked={selected}
-                data-speech-locale={entry.code}
-                title={entry.code || undefined}
-                onClick={() => chooseLanguage(entry.code)}
+                aria-disabled={entry.disabled || undefined}
+                disabled={entry.disabled}
+                data-speech-language={entry.value}
+                onClick={() => chooseLanguage(entry.value)}
               >
                 <span className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`} aria-hidden="true">
                   {selected ? 'check' : ''}

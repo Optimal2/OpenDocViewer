@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8672. JSDoc symbol count: 148.
+File count: 21. Line count: 8736. JSDoc symbol count: 150.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -203,12 +203,14 @@ Read the selected recognised text aloud: a toolbar button that appears only whil
 
 Exports: `ReadSelectionButton`
 
-Local imports: `src/utils/ocrTextLayout.js`, `src/utils/speech.js`, `src/utils/viewerPreferences.js`
+Local imports: `src/utils/ocrTextLayout.js`, `src/utils/runtimeConfig.js`, `src/utils/ocrLanguageCodes.js`, `src/utils/speech.js`, `src/utils/viewerPreferences.js`
 
 Symbols:
 
 - `READ_MENU_CLOSE_DELAY_MS` (constant) - How long the pointer may leave the button and its menu before the menu closes.
-- `selectedLayerText` (function) - No description.
+- `FOLLOW_UI` (constant) - Preference value for &quot;follow the interface language&quot; \(absent: automatic\).
+- `layerSelection` (function) - The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page's guessed language\), or null outside the la...
+- `normalizeStoredLanguage` (function) - A stored reading\-language choice in today's form: ui , or one of the OCR languages, else null \(automatic\).
 - `module.exports` (function) - No description.
 - `ReadSelectionButton~chooseLanguage` (function) - No description.
 

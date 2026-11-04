@@ -462,6 +462,9 @@
       "speak": "Läs upp markerad text",
       "stop": "Sluta läsa upp",
       "language": "Uppläsningsspråk",
+      "auto": "Automatiskt ({language})",
+      "autoUnknown": "Automatiskt (språket kunde inte identifieras, läser på {language})",
+      "languageNoVoice": "{language} (ingen lokal röst installerad)",
       "followUi": "Som gränssnittets språk ({language})",
       "noLocalVoice": "Ingen lokal röst installerad för {language}; molnröster används aldrig"
     }

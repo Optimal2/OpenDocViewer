@@ -275,6 +275,9 @@ ocr: {
   enabled: false,              // only the literal true turns OCR on
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
+  speech: {
+    autoDetectLanguage: true   // guess each page's language for read-aloud and the layer's lang
+  },
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
 }
 ```
@@ -300,6 +303,20 @@ ocr: {
   a folder that has its model (`<lang>.traineddata.gz`). Every listed model runs on every text
   line and the best match wins, so each extra language adds some recognition time per page. As
   with every array in the site file, an override replaces the default completely.
+- `ocr.speech.autoDetectLanguage`: whether the language of each page's text is guessed among the
+  OCR languages, once per page when its text is ready (`src/ocr/detectLanguage.js`: the page's
+  words are counted against a few dozen function words per language, with a little weight for
+  letters such as å, ä, ö or æ, ø; the winner needs at least four function-word hits, clearly
+  more than the runner-up, and at least as much as every language the viewer is not configured
+  for, otherwise the page gets no language). The guess sets the read-aloud button's "Automatic"
+  language and the text flow's `lang` attribute, which screen readers with automatic voice
+  switching follow. Only languages in `ocr.languages` can be guessed: a German page in a viewer
+  configured for Swedish and English gets no language (German fits its words better than
+  Swedish, and it would be recognised poorly anyway); add `deu` and its model to guess German.
+  A page that is mostly in another language than its headings (a Swedish reference list of
+  English titles) is guessed by its majority. `true` by default; only the boolean literal
+  `false` turns the guess off, and the read-aloud language then follows the UI language unless
+  the user picks one. The key means nothing while OCR is off.
 - `ocr.assetBaseUrl`: where the engine, worker and language files are served from. `null`
   (default) uses the viewer's own `ocr/` folder next to the application. A site can point this at
   a copy of that folder on its own host (same layout, see `docs-src/deploy-ops.md`) to keep the
@@ -503,10 +520,12 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   computer. Without a local voice for the language the button is shown disabled with that
   reason, and nothing is spoken (an utterance without a voice would let the browser pick one,
   possibly online). While reading, the button is a stop button. Resting the
-  pointer on the button (or pressing an arrow key on it) opens a menu of the locales the
-  installed local voices offer, with "Follow the interface language" first; a choice there sets the
-  reading language without changing the UI language and is kept in the viewer preferences
-  (`speechLanguage`, next to `language`) across reloads.
+  pointer on the button (or pressing an arrow key on it) opens a menu: "Automatic" first (with
+  the language guessed for the selected page's text, see `ocr.speech.autoDetectLanguage`; when
+  the guess is unsure it reads in the UI language), then one entry per OCR language
+  (`ocr.languages`), greyed when no local voice is installed for it, and "Follow the interface
+  language" last. A choice there sets the reading language without changing the UI language
+  and is kept in the viewer preferences (`speechLanguage`, next to `language`) across reloads.
 
 Printing and PDF export never include the layer or the toolbar's OCR group. Texts are in
 `public/locales/<lng>/common.json` under `ocr`.

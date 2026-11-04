@@ -92,15 +92,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 178,
-    "sourceLineCount": 67170,
-    "docletCount": 1917,
-    "documentedFileCount": 177,
+    "fileCount": 180,
+    "sourceLineCount": 67432,
+    "docletCount": 1928,
+    "documentedFileCount": 179,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 6051
+    "estimatedSourceTokens": 6126
   },
   "recommendations": [
     "1 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -505,16 +505,16 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 121,
-      "lines": 895,
-      "incomingLocalImports": 27,
-      "doclets": 65,
+      "lines": 907,
+      "incomingLocalImports": 29,
+      "doclets": 66,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
     {
       "path": "src/ocr/index.js",
       "score": 118,
-      "lines": 21,
+      "lines": 22,
       "incomingLocalImports": 1,
       "doclets": 0,
       "summary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -523,7 +523,7 @@
     {
       "path": "src/utils/viewerPreferences.js",
       "score": 118,
-      "lines": 558,
+      "lines": 562,
       "incomingLocalImports": 8,
       "doclets": 39,
       "summary": "Lightweight persisted viewer preferences.",
@@ -801,7 +801,7 @@
           {
             "path": "src/hooks/useOcrTextLayers.js",
             "score": 25,
-            "lines": 158,
+            "lines": 170,
             "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
@@ -981,7 +981,7 @@
     {
       "name": "src/components",
       "fileCount": 20,
-      "lineCount": 8433,
+      "lineCount": 8443,
       "docletCount": 117,
       "importantFiles": [
         {
@@ -1014,7 +1014,7 @@
         {
           "path": "src/components/OcrTextLayer.jsx",
           "score": 42,
-          "lines": 254,
+          "lines": 264,
           "incomingLocalImports": 1,
           "doclets": 4,
           "summary": "Selectable, invisible text over a recognised page image.",
@@ -1158,8 +1158,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8672,
-      "docletCount": 148,
+      "lineCount": 8736,
+      "docletCount": 150,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1225,12 +1225,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "score": 32,
-          "lines": 202,
+          "path": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+          "score": 33,
+          "lines": 306,
           "incomingLocalImports": 1,
           "doclets": 6,
-          "summary": "Compact theme selector for the toolbar.",
+          "summary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
           "summaryConfidence": "high"
         }
       ]
@@ -1379,7 +1379,7 @@
     {
       "name": "src/hooks",
       "fileCount": 8,
-      "lineCount": 1038,
+      "lineCount": 1050,
       "docletCount": 32,
       "importantFiles": [
         {
@@ -1430,7 +1430,7 @@
         {
           "path": "src/hooks/useOcrTextLayers.js",
           "score": 25,
-          "lines": 158,
+          "lines": 170,
           "incomingLocalImports": 1,
           "doclets": 2,
           "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -1598,14 +1598,14 @@
     },
     {
       "name": "src/ocr",
-      "fileCount": 13,
-      "lineCount": 1941,
-      "docletCount": 93,
+      "fileCount": 14,
+      "lineCount": 2085,
+      "docletCount": 101,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
           "score": 118,
-          "lines": 21,
+          "lines": 22,
           "incomingLocalImports": 1,
           "doclets": 0,
           "summary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -1650,10 +1650,19 @@
         {
           "path": "src/ocr/queue.js",
           "score": 46,
-          "lines": 322,
+          "lines": 336,
           "incomingLocalImports": 0,
           "doclets": 11,
           "summary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/ocr/detectLanguage.js",
+          "score": 45,
+          "lines": 129,
+          "incomingLocalImports": 0,
+          "doclets": 8,
+          "summary": "Guess the language of a page's text among a few candidate languages, from its words alone.",
           "summaryConfidence": "high"
         },
         {
@@ -1663,15 +1672,6 @@
           "incomingLocalImports": 0,
           "doclets": 8,
           "summary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy (lineRemova",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/ocr/window.js",
-          "score": 32,
-          "lines": 62,
-          "incomingLocalImports": 0,
-          "doclets": 4,
-          "summary": "Which pages are queued for OCR: the visible page(s) and a fixed number of neighbours.",
           "summaryConfidence": "high"
         }
       ]
@@ -1729,9 +1729,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 61,
-      "lineCount": 22991,
-      "docletCount": 941,
+      "fileCount": 62,
+      "lineCount": 23023,
+      "docletCount": 942,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1745,16 +1745,16 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 121,
-          "lines": 895,
-          "incomingLocalImports": 27,
-          "doclets": 65,
+          "lines": 907,
+          "incomingLocalImports": 29,
+          "doclets": 66,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
         {
           "path": "src/utils/viewerPreferences.js",
           "score": 118,
-          "lines": 558,
+          "lines": 562,
           "incomingLocalImports": 8,
           "doclets": 39,
           "summary": "Lightweight persisted viewer preferences.",
@@ -15877,9 +15877,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "lines": 242,
+      "lines": 306,
       "extension": ".jsx",
-      "jsdocBlockCount": 10,
+      "jsdocBlockCount": 14,
       "sourceSummary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
       "imports": [
         {
@@ -15893,7 +15893,7 @@
             "useRef",
             "useState"
           ],
-          "line": 24,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -15901,7 +15901,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 25,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -15910,20 +15910,36 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 26,
+          "line": 30,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getOcrLanguages",
+            "isSpeechLanguageAutoDetectEnabled"
+          ],
+          "line": 31,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/ocrLanguageCodes.js",
+          "specifiers": [
+            "speechLanguagesForOcr"
+          ],
+          "line": 32,
           "kind": "static"
         },
         {
           "source": "../../utils/speech.js",
           "specifiers": [
             "isSpeechSynthesisAvailable",
-            "listSpeechLocales",
             "pickSpeechVoice",
             "resolveSpeechLanguage",
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 27,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -15932,7 +15948,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 28,
+          "line": 34,
           "kind": "static"
         }
       ],
@@ -15940,69 +15956,79 @@
         {
           "name": "ReadSelectionButton",
           "kind": "default",
-          "line": 43
+          "line": 82
         }
       ],
       "declarations": [
         {
-          "name": "selectedLayerText",
+          "name": "layerSelection",
           "kind": "function",
-          "line": 34
+          "line": 46
+        },
+        {
+          "name": "normalizeStoredLanguage",
+          "kind": "function",
+          "line": 71
         },
         {
           "name": "ReadSelectionButton",
           "kind": "component",
-          "line": 43
+          "line": 82
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 62
+          "line": 107
         },
         {
           "name": "read",
           "kind": "function",
-          "line": 73
+          "line": 118
         },
         {
           "name": "clearCloseTimer",
           "kind": "function",
-          "line": 79
+          "line": 124
         },
         {
           "name": "openMenu",
           "kind": "function",
-          "line": 85
+          "line": 130
         },
         {
           "name": "closeMenuSoon",
           "kind": "function",
-          "line": 98
+          "line": 143
         },
         {
           "name": "onPointerDown",
           "kind": "function",
-          "line": 109
+          "line": 154
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 113
+          "line": 158
         },
         {
           "name": "stop",
           "kind": "function",
-          "line": 132
+          "line": 177
         },
         {
           "name": "speak",
           "kind": "function",
-          "line": 136
+          "line": 181
         },
         {
           "name": "chooseLanguage",
           "kind": "function",
-          "line": 153
+          "line": 198
+        },
+        {
+          "name": "name",
+          "kind": "function",
+          "line": 206
         }
       ],
       "parseError": null,
@@ -16018,26 +16044,70 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 31,
+          "line": 37,
           "description": "How long the pointer may leave the button and its menu before the menu closes.",
           "params": [],
           "returns": [],
           "examples": 0
         },
         {
-          "id": "selectedLayerText",
-          "name": "selectedLayerText",
-          "longname": "selectedLayerText",
+          "id": "FOLLOW_UI",
+          "name": "FOLLOW_UI",
+          "longname": "FOLLOW_UI",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+          "line": 39,
+          "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "layerSelection",
+          "name": "layerSelection",
+          "longname": "layerSelection",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 34,
-          "description": "",
+          "line": 46,
+          "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
           "params": [],
           "returns": [
             {
-              "type": "string",
-              "description": "The selected text as it reads on the page, or '' outside the text layers."
+              "type": "Object|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "normalizeStoredLanguage",
+          "name": "normalizeStoredLanguage",
+          "longname": "normalizeStoredLanguage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+          "line": 71,
+          "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
+          "params": [
+            {
+              "name": "stored",
+              "type": "string|null",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "languages",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": "The OCR languages (ISO 639-1)."
+            }
+          ],
+          "returns": [
+            {
+              "type": "string|null",
+              "description": ""
             }
           ],
           "examples": 0
@@ -16049,7 +16119,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 43,
+          "line": 82,
           "description": "",
           "params": [],
           "returns": [
@@ -16067,14 +16137,14 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 153,
+          "line": 198,
           "description": "",
           "params": [
             {
-              "name": "locale",
+              "name": "value",
               "type": "string",
               "optional": false,
-              "description": "'' follows the UI language."
+              "description": "'' for automatic, FOLLOW_UI, or an ISO 639-1 language."
             }
           ],
           "returns": [],
@@ -16089,21 +16159,39 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 26,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/ocrTextLayout.js"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getOcrLanguages",
+            "isSpeechLanguageAutoDetectEnabled"
+          ],
+          "line": 31,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "../../utils/ocrLanguageCodes.js",
+          "specifiers": [
+            "speechLanguagesForOcr"
+          ],
+          "line": 32,
+          "kind": "static",
+          "resolved": "src/utils/ocrLanguageCodes.js"
         },
         {
           "source": "../../utils/speech.js",
           "specifiers": [
             "isSpeechSynthesisAvailable",
-            "listSpeechLocales",
             "pickSpeechVoice",
             "resolveSpeechLanguage",
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 27,
+          "line": 33,
           "kind": "static",
           "resolved": "src/utils/speech.js"
         },
@@ -16113,7 +16201,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 28,
+          "line": 34,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         }
@@ -16130,7 +16218,7 @@
             "useRef",
             "useState"
           ],
-          "line": 24,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -16138,12 +16226,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 25,
+          "line": 29,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 27,
+      "importanceScore": 33,
       "summary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -27043,7 +27131,7 @@
     },
     {
       "path": "src/components/OcrTextLayer.jsx",
-      "lines": 254,
+      "lines": 264,
       "extension": ".jsx",
       "jsdocBlockCount": 7,
       "sourceSummary": "Selectable, invisible text over a recognised page image.",
@@ -27107,39 +27195,39 @@
         {
           "name": "OcrTextLayer",
           "kind": "default",
-          "line": 253
+          "line": 263
         }
       ],
       "declarations": [
         {
           "name": "OcrTextLayer",
           "kind": "component",
-          "line": 60
+          "line": 61
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 110
+          "line": 111
         },
         {
           "name": "layerStyle",
           "kind": "object",
-          "line": 138
+          "line": 139
         },
         {
           "name": "frameStyle",
           "kind": "object",
-          "line": 148
+          "line": 149
         },
         {
           "name": "stopDoubleClick",
           "kind": "function",
-          "line": 159
+          "line": 160
         },
         {
           "name": "copyAsPageText",
           "kind": "function",
-          "line": 166
+          "line": 167
         }
       ],
       "parseError": null,
@@ -27194,7 +27282,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/OcrTextLayer.jsx",
-          "line": 60,
+          "line": 61,
           "description": "",
           "params": [
             {
@@ -27207,7 +27295,7 @@
               "name": "props.outcome",
               "type": "Object",
               "optional": false,
-              "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js) and rulingLinePixels (exposed a..."
+              "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js), language (the guessed ISO 639-..."
             },
             {
               "name": "props.renderWidth",
@@ -34053,7 +34141,7 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 158,
+      "lines": 170,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -34066,7 +34154,7 @@
             "useRef",
             "useState"
           ],
-          "line": 17,
+          "line": 20,
           "kind": "static"
         },
         {
@@ -34074,7 +34162,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 18,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -34082,7 +34170,24 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 19,
+          "line": 22,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "getOcrLanguages",
+            "isSpeechLanguageAutoDetectEnabled"
+          ],
+          "line": 23,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/ocrLanguageCodes.js",
+          "specifiers": [
+            "speechLanguagesForOcr"
+          ],
+          "line": 24,
           "kind": "static"
         }
       ],
@@ -34090,24 +34195,24 @@
         {
           "name": "OCR_IDLE_SHUTDOWN_MS",
           "kind": "variable",
-          "line": 22
+          "line": 27
         },
         {
           "name": "useOcrTextLayers",
           "kind": "default",
-          "line": 41
+          "line": 46
         }
       ],
       "declarations": [
         {
           "name": "useOcrTextLayers",
           "kind": "function",
-          "line": 41
+          "line": 46
         },
         {
           "name": "getPageImage",
           "kind": "function",
-          "line": 77
+          "line": 82
         }
       ],
       "parseError": null,
@@ -34125,7 +34230,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 22,
+          "line": 27,
           "description": "Idle time after which the OCR worker is terminated to free its memory.",
           "params": [],
           "returns": [],
@@ -34138,7 +34243,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 41,
+          "line": 46,
           "description": "",
           "params": [
             {
@@ -34212,7 +34317,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 18,
+          "line": 21,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -34221,9 +34326,28 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 19,
+          "line": 22,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
+        },
+        {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "getOcrLanguages",
+            "isSpeechLanguageAutoDetectEnabled"
+          ],
+          "line": 23,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "../utils/ocrLanguageCodes.js",
+          "specifiers": [
+            "speechLanguagesForOcr"
+          ],
+          "line": 24,
+          "kind": "static",
+          "resolved": "src/utils/ocrLanguageCodes.js"
         }
       ],
       "packageImports": [
@@ -34235,7 +34359,7 @@
             "useRef",
             "useState"
           ],
-          "line": 17,
+          "line": 20,
           "kind": "static"
         }
       ],
@@ -39709,6 +39833,200 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/ocr/detectLanguage.js",
+      "lines": 129,
+      "extension": ".js",
+      "jsdocBlockCount": 10,
+      "sourceSummary": "Guess the language of a page's text among a few candidate languages, from its words alone.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "MIN_HITS",
+          "kind": "variable",
+          "line": 24
+        },
+        {
+          "name": "RUNNER_UP_RATIO",
+          "kind": "variable",
+          "line": 26
+        },
+        {
+          "name": "DETECTABLE_LANGUAGES",
+          "kind": "variable",
+          "line": 64
+        },
+        {
+          "name": "detectTextLanguage",
+          "kind": "function",
+          "line": 83
+        }
+      ],
+      "declarations": [
+        {
+          "name": "detectTextLanguage",
+          "kind": "function",
+          "line": 83
+        },
+        {
+          "name": "scores",
+          "kind": "object",
+          "line": 86
+        },
+        {
+          "name": "hits",
+          "kind": "object",
+          "line": 87
+        },
+        {
+          "name": "letterHits",
+          "kind": "object",
+          "line": 88
+        },
+        {
+          "name": "candidateScores",
+          "kind": "object",
+          "line": 125
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "MIN_HITS",
+          "name": "MIN_HITS",
+          "longname": "MIN_HITS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 24,
+          "description": "Fewest function-word hits the winning language needs.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "RUNNER_UP_RATIO",
+          "name": "RUNNER_UP_RATIO",
+          "longname": "RUNNER_UP_RATIO",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 26,
+          "description": "The winner must have at least this many times the runner-up's score.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "LETTER_SCORE",
+          "name": "LETTER_SCORE",
+          "longname": "LETTER_SCORE",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 28,
+          "description": "Score a distinctive letter adds, and the most such letters that count.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "FUNCTION_WORDS",
+          "name": "FUNCTION_WORDS",
+          "longname": "FUNCTION_WORDS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 37,
+          "description": "Common function words per language (ISO 639-1), lower case.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "DISTINCTIVE_LETTERS",
+          "name": "DISTINCTIVE_LETTERS",
+          "longname": "DISTINCTIVE_LETTERS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 50,
+          "description": "Letters that point at a language more than at its neighbours.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "DETECTABLE_LANGUAGES",
+          "name": "DETECTABLE_LANGUAGES",
+          "longname": "DETECTABLE_LANGUAGES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 64,
+          "description": "The languages the guess knows function words for (ISO 639-1).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "TextLanguageGuess",
+          "name": "TextLanguageGuess",
+          "longname": "TextLanguageGuess",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 68,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "detectTextLanguage",
+          "name": "detectTextLanguage",
+          "longname": "detectTextLanguage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/detectLanguage.js",
+          "line": 83,
+          "description": "",
+          "params": [
+            {
+              "name": "words",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": "The page's words in any order."
+            },
+            {
+              "name": "candidates",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": "ISO 639-1 codes to choose among; codes without function words are ignored. One candidate alone still needs MIN_HITS to be chosen, and still..."
+            }
+          ],
+          "returns": [
+            {
+              "type": "TextLanguageGuess",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/ocr",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 0,
+      "importanceScore": 45,
+      "summary": "Guess the language of a page's text among a few candidate languages, from its words alone.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/ocr/engine.js",
       "lines": 302,
       "extension": ".js",
@@ -40109,7 +40427,7 @@
     },
     {
       "path": "src/ocr/index.js",
-      "lines": 21,
+      "lines": 22,
       "extension": ".js",
       "jsdocBlockCount": 1,
       "sourceSummary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -40290,46 +40608,70 @@
           "line": 18
         },
         {
+          "name": "DETECTABLE_LANGUAGES",
+          "kind": "named",
+          "source": "./detectLanguage.js",
+          "line": 19
+        },
+        {
+          "name": "MIN_HITS",
+          "kind": "named",
+          "source": "./detectLanguage.js",
+          "line": 19
+        },
+        {
+          "name": "RUNNER_UP_RATIO",
+          "kind": "named",
+          "source": "./detectLanguage.js",
+          "line": 19
+        },
+        {
+          "name": "detectTextLanguage",
+          "kind": "named",
+          "source": "./detectLanguage.js",
+          "line": 19
+        },
+        {
           "name": "RULING_LINE_DILATE_PX",
           "kind": "named",
           "source": "./lineRemoval.js",
-          "line": 19
+          "line": 20
         },
         {
           "name": "createEventLoopYield",
           "kind": "named",
           "source": "./lineRemoval.js",
-          "line": 19
+          "line": 20
         },
         {
           "name": "removeRulingLines",
           "kind": "named",
           "source": "./lineRemoval.js",
-          "line": 19
+          "line": 20
         },
         {
           "name": "removeRulingLinesAsync",
           "kind": "named",
           "source": "./lineRemoval.js",
-          "line": 19
+          "line": 20
         },
         {
           "name": "rulingLineMinRunPx",
           "kind": "named",
           "source": "./lineRemoval.js",
-          "line": 19
+          "line": 20
         },
         {
           "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
           "kind": "named",
           "source": "./prepareImage.js",
-          "line": 20
+          "line": 21
         },
         {
           "name": "prepareOcrImage",
           "kind": "named",
           "source": "./prepareImage.js",
-          "line": 20
+          "line": 21
         }
       ],
       "declarations": [],
@@ -41852,7 +42194,7 @@
     },
     {
       "path": "src/ocr/queue.js",
-      "lines": 322,
+      "lines": 336,
       "extension": ".js",
       "jsdocBlockCount": 16,
       "sourceSummary": "The OCR page queue: one page at a time, bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
@@ -41887,7 +42229,7 @@
         {
           "name": "createOcrQueue",
           "kind": "function",
-          "line": 117
+          "line": 120
         }
       ],
       "declarations": [
@@ -41899,47 +42241,47 @@
         {
           "name": "createOcrQueue",
           "kind": "function",
-          "line": 117
+          "line": 120
         },
         {
           "name": "isRetained",
           "kind": "function",
-          "line": 142
+          "line": 146
         },
         {
           "name": "getSnapshot",
           "kind": "function",
-          "line": 144
+          "line": 148
         },
         {
           "name": "pages",
           "kind": "object",
-          "line": 145
+          "line": 149
         },
         {
           "name": "notify",
           "kind": "function",
-          "line": 151
+          "line": 155
         },
         {
           "name": "setTransient",
           "kind": "function",
-          "line": 160
+          "line": 164
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 165
+          "line": 169
         },
         {
           "name": "run",
           "kind": "function",
-          "line": 184
+          "line": 188
         },
         {
           "name": "job",
           "kind": "object",
-          "line": 185
+          "line": 189
         }
       ],
       "parseError": null,
@@ -42096,7 +42438,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/queue.js",
-          "line": 117,
+          "line": 120,
           "description": "",
           "params": [
             {
@@ -42134,6 +42476,12 @@
               "type": "function",
               "optional": false,
               "description": "Default classifyPageSource."
+            },
+            {
+              "name": "options.detectLanguage",
+              "type": "function",
+              "optional": false,
+              "description": "Given a done outcome, the ISO 639-1 language of its text or null when unsure (detectLanguage.js); the outcome then carries it as language ...."
             },
             {
               "name": "options.log",
@@ -42181,7 +42529,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/ocr/queue.js",
-          "line": 134,
+          "line": 138,
           "description": "null until retainSources is called: every source is retained.",
           "params": [],
           "returns": [],
@@ -49950,6 +50298,73 @@
       "incomingLocalImports": 3,
       "importanceScore": 72,
       "summary": "Centralized helpers for object/blob URL lifecycle management.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/ocrLanguageCodes.js",
+      "lines": 31,
+      "extension": ".js",
+      "jsdocBlockCount": 3,
+      "sourceSummary": "Tesseract language codes (`ocr.languages`) and the ISO 639-1 language each one reads: what the read-aloud menu offers and the language guess chooses among.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "OCR_TO_SPEECH_LANGUAGE",
+          "kind": "variable",
+          "line": 10
+        },
+        {
+          "name": "speechLanguagesForOcr",
+          "kind": "function",
+          "line": 23
+        }
+      ],
+      "declarations": [
+        {
+          "name": "speechLanguagesForOcr",
+          "kind": "function",
+          "line": 23
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "speechLanguagesForOcr",
+          "name": "speechLanguagesForOcr",
+          "longname": "speechLanguagesForOcr",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrLanguageCodes.js",
+          "line": 23,
+          "description": "The ISO 639-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out.",
+          "params": [
+            {
+              "name": "ocrCodes",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<string>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 2,
+      "importanceScore": 29,
+      "summary": "Tesseract language codes (`ocr.languages`) and the ISO 639-1 language each one reads: what the read-aloud menu offers and the language guess chooses among.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -71848,9 +72263,9 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 895,
+      "lines": 907,
       "extension": ".js",
-      "jsdocBlockCount": 70,
+      "jsdocBlockCount": 71,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
@@ -71945,99 +72360,104 @@
           "line": 332
         },
         {
+          "name": "isSpeechLanguageAutoDetectEnabled",
+          "kind": "function",
+          "line": 344
+        },
+        {
           "name": "describeOcrLanguages",
           "kind": "function",
-          "line": 355
+          "line": 367
         },
         {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 398
+          "line": 410
         },
         {
           "name": "OCR_ASSET_BASE_URL_REJECTIONS",
           "kind": "variable",
-          "line": 403
+          "line": 415
         },
         {
           "name": "describeOcrAssetBaseUrl",
           "kind": "function",
-          "line": 429
+          "line": 441
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 454
+          "line": 466
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 466
+          "line": 478
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 635
+          "line": 647
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 652
+          "line": 664
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 663
+          "line": 675
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 681
+          "line": 693
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 707
+          "line": 719
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 720
+          "line": 732
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 734
+          "line": 746
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 758
+          "line": 770
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 783
+          "line": 795
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 807
+          "line": 819
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 825
+          "line": 837
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 866
+          "line": 878
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 883
+          "line": 895
         }
       ],
       "declarations": [
@@ -72122,139 +72542,144 @@
           "line": 332
         },
         {
+          "name": "isSpeechLanguageAutoDetectEnabled",
+          "kind": "function",
+          "line": 344
+        },
+        {
           "name": "describeOcrLanguages",
           "kind": "function",
-          "line": 355
+          "line": 367
         },
         {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 398
+          "line": 410
         },
         {
           "name": "describeOcrAssetBaseUrl",
           "kind": "function",
-          "line": 429
+          "line": 441
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 454
+          "line": 466
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 466
+          "line": 478
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 484
+          "line": 496
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 506
+          "line": 518
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 531
+          "line": 543
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 552
+          "line": 564
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 569
+          "line": 581
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 581
+          "line": 593
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 595
+          "line": 607
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 606
+          "line": 618
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 620
+          "line": 632
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 635
+          "line": 647
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 652
+          "line": 664
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 663
+          "line": 675
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 681
+          "line": 693
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 707
+          "line": 719
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 720
+          "line": 732
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 734
+          "line": 746
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 758
+          "line": 770
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 783
+          "line": 795
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 807
+          "line": 819
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 825
+          "line": 837
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 866
+          "line": 878
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 883
+          "line": 895
         }
       ],
       "parseError": null,
@@ -72897,13 +73322,38 @@
           "examples": 0
         },
         {
+          "id": "isSpeechLanguageAutoDetectEnabled",
+          "name": "isSpeechLanguageAutoDetectEnabled",
+          "longname": "isSpeechLanguageAutoDetectEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 344,
+          "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "RuntimeConfig",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "describeOcrLanguages",
           "name": "describeOcrLanguages",
           "longname": "describeOcrLanguages",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 355,
+          "line": 367,
           "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
           "params": [
             {
@@ -72928,7 +73378,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 398,
+          "line": 410,
           "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
           "params": [
             {
@@ -72953,7 +73403,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 403,
+          "line": 415,
           "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
           "params": [],
           "returns": [],
@@ -72966,7 +73416,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 405,
+          "line": 417,
           "description": "The value carries ?",
           "params": [],
           "returns": [],
@@ -72979,7 +73429,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 407,
+          "line": 419,
           "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
           "params": [],
           "returns": [],
@@ -72992,7 +73442,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 409,
+          "line": 421,
           "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
           "params": [],
           "returns": [],
@@ -73005,7 +73455,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 429,
+          "line": 441,
           "description": "Describe how ocr.assetBaseUrl resolves.",
           "params": [
             {
@@ -73030,7 +73480,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 454,
+          "line": 466,
           "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
           "params": [
             {
@@ -73055,7 +73505,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 466,
+          "line": 478,
           "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
           "params": [
             {
@@ -73080,7 +73530,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 484,
+          "line": 496,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -73111,7 +73561,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 506,
+          "line": 518,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -73154,7 +73604,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 531,
+          "line": 543,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -73197,7 +73647,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 552,
+          "line": 564,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -73240,7 +73690,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 569,
+          "line": 581,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -73271,7 +73721,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 581,
+          "line": 593,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -73296,7 +73746,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 595,
+          "line": 607,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -73321,7 +73771,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 606,
+          "line": 618,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -73346,7 +73796,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 620,
+          "line": 632,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -73377,7 +73827,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 635,
+          "line": 647,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -73408,7 +73858,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 652,
+          "line": 664,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -73439,7 +73889,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 663,
+          "line": 675,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -73470,7 +73920,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 681,
+          "line": 693,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -73495,7 +73945,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 707,
+          "line": 719,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -73520,7 +73970,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 720,
+          "line": 732,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -73545,7 +73995,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 734,
+          "line": 746,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -73570,7 +74020,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 758,
+          "line": 770,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -73595,7 +74045,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 783,
+          "line": 795,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -73620,7 +74070,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 807,
+          "line": 819,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -73645,7 +74095,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 825,
+          "line": 837,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -73670,7 +74120,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 866,
+          "line": 878,
           "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
           "params": [
             {
@@ -73695,7 +74145,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 883,
+          "line": 895,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -73717,7 +74167,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 27,
+      "incomingLocalImports": 29,
       "importanceScore": 121,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -74810,118 +75260,108 @@
     },
     {
       "path": "src/utils/speech.js",
-      "lines": 236,
+      "lines": 221,
       "extension": ".js",
-      "jsdocBlockCount": 12,
+      "jsdocBlockCount": 11,
       "sourceSummary": "Reading text aloud with the browser's speech synthesis (Web Speech API, `window.speechSynthesis`).",
       "imports": [],
       "exports": [
         {
           "name": "SPEECH_MAX_CHUNK_LENGTH",
           "kind": "variable",
-          "line": 18
+          "line": 19
         },
         {
           "name": "isSpeechSynthesisAvailable",
           "kind": "function",
-          "line": 23
+          "line": 24
         },
         {
           "name": "resolveSpeechLanguage",
           "kind": "function",
-          "line": 35
+          "line": 36
         },
         {
           "name": "splitSpeechChunks",
           "kind": "function",
-          "line": 51
+          "line": 52
         },
         {
           "name": "isLocalSpeechVoice",
           "kind": "function",
-          "line": 92
-        },
-        {
-          "name": "listSpeechLocales",
-          "kind": "function",
-          "line": 103
+          "line": 93
         },
         {
           "name": "speechLocaleLabel",
           "kind": "function",
-          "line": 121
+          "line": 105
         },
         {
           "name": "pickSpeechVoice",
           "kind": "function",
-          "line": 143
+          "line": 127
         },
         {
           "name": "speakText",
           "kind": "function",
-          "line": 178
+          "line": 163
         }
       ],
       "declarations": [
         {
           "name": "isSpeechSynthesisAvailable",
           "kind": "function",
-          "line": 23
+          "line": 24
         },
         {
           "name": "resolveSpeechLanguage",
           "kind": "function",
-          "line": 35
+          "line": 36
         },
         {
           "name": "splitSpeechChunks",
           "kind": "function",
-          "line": 51
+          "line": 52
         },
         {
           "name": "canonicalLocale",
           "kind": "function",
-          "line": 78
+          "line": 79
         },
         {
           "name": "isLocalSpeechVoice",
           "kind": "function",
-          "line": 92
-        },
-        {
-          "name": "listSpeechLocales",
-          "kind": "function",
-          "line": 103
+          "line": 93
         },
         {
           "name": "speechLocaleLabel",
           "kind": "function",
-          "line": 121
+          "line": 105
         },
         {
           "name": "pickSpeechVoice",
           "kind": "function",
-          "line": 143
+          "line": 127
         },
         {
           "name": "normalize",
           "kind": "function",
-          "line": 148
+          "line": 132
         },
         {
           "name": "rank",
           "kind": "function",
-          "line": 149
+          "line": 133
         },
         {
           "name": "speakText",
           "kind": "function",
-          "line": 178
+          "line": 163
         },
         {
           "name": "finish",
           "kind": "function",
-          "line": 183
+          "line": 168
         }
       ],
       "parseError": null,
@@ -74937,7 +75377,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 18,
+          "line": 19,
           "description": "Longest chunk handed to the synthesiser (characters).",
           "params": [],
           "returns": [],
@@ -74950,7 +75390,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 23,
+          "line": 24,
           "description": "",
           "params": [],
           "returns": [
@@ -74968,7 +75408,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 35,
+          "line": 36,
           "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
           "params": [
             {
@@ -74993,7 +75433,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 51,
+          "line": 52,
           "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
           "params": [
             {
@@ -75024,7 +75464,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 78,
+          "line": 79,
           "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
           "params": [
             {
@@ -75049,7 +75489,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 92,
+          "line": 93,
           "description": "Whether a voice runs on the machine.",
           "params": [
             {
@@ -75068,38 +75508,13 @@
           "examples": 0
         },
         {
-          "id": "listSpeechLocales",
-          "name": "listSpeechLocales",
-          "longname": "listSpeechLocales",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/utils/speech.js",
-          "line": 103,
-          "description": "The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
-          "params": [
-            {
-              "name": "voices",
-              "type": "Array.<Object>",
-              "optional": false,
-              "description": "SpeechSynthesisVoice-like: { lang, localService } ."
-            }
-          ],
-          "returns": [
-            {
-              "type": "Array.<string>",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
           "id": "speechLocaleLabel",
           "name": "speechLocaleLabel",
           "longname": "speechLocaleLabel",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 121,
+          "line": 105,
           "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
           "params": [
             {
@@ -75130,7 +75545,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 143,
+          "line": 127,
           "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
           "params": [
             {
@@ -75161,7 +75576,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 156,
+          "line": 140,
           "description": "",
           "params": [],
           "returns": [],
@@ -75174,7 +75589,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 178,
+          "line": 163,
           "description": "Speak text aloud with a local voice.",
           "params": [
             {
@@ -75970,7 +76385,7 @@
     },
     {
       "path": "src/utils/viewerPreferences.js",
-      "lines": 558,
+      "lines": 562,
       "extension": ".js",
       "jsdocBlockCount": 45,
       "sourceSummary": "Lightweight persisted viewer preferences.",
@@ -75992,369 +76407,369 @@
         {
           "name": "getViewerPreferences",
           "kind": "function",
-          "line": 222
+          "line": 225
         },
         {
           "name": "setViewerPreferences",
           "kind": "function",
-          "line": 232
+          "line": 235
         },
         {
           "name": "getThemePreference",
           "kind": "function",
-          "line": 264
+          "line": 267
         },
         {
           "name": "setThemePreference",
           "kind": "function",
-          "line": 283
+          "line": 286
         },
         {
           "name": "getThemeModePreference",
           "kind": "function",
-          "line": 293
+          "line": 296
         },
         {
           "name": "setThemeModePreference",
           "kind": "function",
-          "line": 310
+          "line": 313
         },
         {
           "name": "clearThemeSharedRevision",
           "kind": "function",
-          "line": 334
+          "line": 337
         },
         {
           "name": "getLanguagePreference",
           "kind": "function",
-          "line": 343
+          "line": 346
         },
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 354
+          "line": 357
         },
         {
           "name": "getSpeechLanguagePreference",
           "kind": "function",
-          "line": 366
+          "line": 369
         },
         {
           "name": "setSpeechLanguagePreference",
           "kind": "function",
-          "line": 377
+          "line": 381
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 388
+          "line": 392
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 399
+          "line": 403
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 406
+          "line": 410
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 415
+          "line": 419
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 423
+          "line": 427
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 431
+          "line": 435
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 440
+          "line": 444
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 453
+          "line": 457
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 466
+          "line": 470
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 481
+          "line": 485
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 494
+          "line": 498
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 521
+          "line": 525
         },
         {
           "name": "getToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 533
+          "line": 537
         },
         {
           "name": "setToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 542
+          "line": 546
         },
         {
           "name": "getEffectiveToolbarLargeButtons",
           "kind": "function",
-          "line": 553
+          "line": 557
         }
       ],
       "declarations": [
         {
           "name": "isExplicitTheme",
           "kind": "function",
-          "line": 52
+          "line": 55
         },
         {
           "name": "isThemeMode",
           "kind": "function",
-          "line": 60
+          "line": 63
         },
         {
           "name": "normalizeThemeModeValue",
           "kind": "function",
-          "line": 70
+          "line": 73
         },
         {
           "name": "normalizeDefaultZoomModePreference",
           "kind": "function",
-          "line": 80
+          "line": 83
         },
         {
           "name": "normalizePreferences",
           "kind": "function",
-          "line": 107
+          "line": 110
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 110
+          "line": 113
         },
         {
           "name": "parsePreferences",
           "kind": "function",
-          "line": 157
+          "line": 160
         },
         {
           "name": "readPreferencesFromCookie",
           "kind": "function",
-          "line": 169
+          "line": 172
         },
         {
           "name": "readPreferencesFromStorage",
           "kind": "function",
-          "line": 186
+          "line": 189
         },
         {
           "name": "writePreferencesToCookie",
           "kind": "function",
-          "line": 199
+          "line": 202
         },
         {
           "name": "writePreferencesToStorage",
           "kind": "function",
-          "line": 212
+          "line": 215
         },
         {
           "name": "getViewerPreferences",
           "kind": "function",
-          "line": 222
+          "line": 225
         },
         {
           "name": "setViewerPreferences",
           "kind": "function",
-          "line": 232
+          "line": 235
         },
         {
           "name": "replaceViewerPreferences",
           "kind": "function",
-          "line": 254
+          "line": 257
         },
         {
           "name": "getThemePreference",
           "kind": "function",
-          "line": 264
+          "line": 267
         },
         {
           "name": "setThemePreference",
           "kind": "function",
-          "line": 283
+          "line": 286
         },
         {
           "name": "getThemeModePreference",
           "kind": "function",
-          "line": 293
+          "line": 296
         },
         {
           "name": "setThemeModePreference",
           "kind": "function",
-          "line": 310
+          "line": 313
         },
         {
           "name": "clearThemeSharedRevision",
           "kind": "function",
-          "line": 334
+          "line": 337
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 335
+          "line": 338
         },
         {
           "name": "getLanguagePreference",
           "kind": "function",
-          "line": 343
+          "line": 346
         },
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 354
+          "line": 357
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 357
+          "line": 360
         },
         {
           "name": "getSpeechLanguagePreference",
           "kind": "function",
-          "line": 366
+          "line": 369
         },
         {
           "name": "setSpeechLanguagePreference",
           "kind": "function",
-          "line": 377
+          "line": 381
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 380
+          "line": 384
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 388
+          "line": 392
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 399
+          "line": 403
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 406
+          "line": 410
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 407
+          "line": 411
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 415
+          "line": 419
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 423
+          "line": 427
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 431
+          "line": 435
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 432
+          "line": 436
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 440
+          "line": 444
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 453
+          "line": 457
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 466
+          "line": 470
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 467
+          "line": 471
         },
         {
           "name": "limits",
           "kind": "object",
-          "line": 470
+          "line": 474
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 481
+          "line": 485
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 494
+          "line": 498
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 500
+          "line": 504
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 521
+          "line": 525
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 522
+          "line": 526
         },
         {
           "name": "getToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 533
+          "line": 537
         },
         {
           "name": "setToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 542
+          "line": 546
         },
         {
           "name": "getEffectiveToolbarLargeButtons",
           "kind": "function",
-          "line": 553
+          "line": 557
         }
       ],
       "parseError": null,
@@ -76396,7 +76811,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 52,
+          "line": 55,
           "description": "",
           "params": [
             {
@@ -76421,7 +76836,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 60,
+          "line": 63,
           "description": "",
           "params": [
             {
@@ -76446,7 +76861,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 70,
+          "line": 73,
           "description": "Normalize legacy theme-mode values.",
           "params": [
             {
@@ -76471,7 +76886,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 80,
+          "line": 83,
           "description": "",
           "params": [
             {
@@ -76496,7 +76911,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 107,
+          "line": 110,
           "description": "",
           "params": [
             {
@@ -76521,7 +76936,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 157,
+          "line": 160,
           "description": "",
           "params": [
             {
@@ -76546,7 +76961,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 169,
+          "line": 172,
           "description": "",
           "params": [],
           "returns": [
@@ -76564,7 +76979,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 186,
+          "line": 189,
           "description": "",
           "params": [],
           "returns": [
@@ -76582,7 +76997,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 199,
+          "line": 202,
           "description": "",
           "params": [
             {
@@ -76607,7 +77022,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 212,
+          "line": 215,
           "description": "",
           "params": [
             {
@@ -76632,7 +77047,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 222,
+          "line": 225,
           "description": "",
           "params": [],
           "returns": [
@@ -76650,7 +77065,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 232,
+          "line": 235,
           "description": "",
           "params": [
             {
@@ -76675,7 +77090,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 254,
+          "line": 257,
           "description": "Persist an already-normalized full preference object.",
           "params": [
             {
@@ -76700,7 +77115,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 264,
+          "line": 267,
           "description": "",
           "params": [],
           "returns": [
@@ -76718,7 +77133,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 283,
+          "line": 286,
           "description": "",
           "params": [
             {
@@ -76743,7 +77158,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 293,
+          "line": 296,
           "description": "",
           "params": [],
           "returns": [
@@ -76761,7 +77176,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 310,
+          "line": 313,
           "description": "Persist the user's theme mode preference.",
           "params": [
             {
@@ -76786,7 +77201,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 334,
+          "line": 337,
           "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
           "params": [],
           "returns": [
@@ -76804,7 +77219,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 343,
+          "line": 346,
           "description": "",
           "params": [],
           "returns": [
@@ -76822,7 +77237,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 354,
+          "line": 357,
           "description": "Persist a language choice, or clear it when the normalized value is empty.",
           "params": [
             {
@@ -76847,8 +77262,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 366,
-          "description": "The locale the read-aloud button speaks in, or null to follow the UI language.",
+          "line": 369,
+          "description": "The read-aloud button's stored language choice (see speechLanguage ), or null for automatic.",
           "params": [],
           "returns": [
             {
@@ -76865,11 +77280,11 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 377,
-          "description": "Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.",
+          "line": 381,
+          "description": "Persist the read-aloud language choice (a language code or 'ui'), or clear it (automatic) when the value is empty.",
           "params": [
             {
-              "name": "locale",
+              "name": "choice",
               "type": "string",
               "optional": false,
               "description": ""
@@ -76890,7 +77305,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 388,
+          "line": 392,
           "description": "",
           "params": [],
           "returns": [
@@ -76908,7 +77323,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 399,
+          "line": 403,
           "description": "",
           "params": [
             {
@@ -76933,7 +77348,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 406,
+          "line": 410,
           "description": "",
           "params": [],
           "returns": [
@@ -76951,7 +77366,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 415,
+          "line": 419,
           "description": "",
           "params": [],
           "returns": [
@@ -76969,7 +77384,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 423,
+          "line": 427,
           "description": "",
           "params": [
             {
@@ -76994,7 +77409,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 431,
+          "line": 435,
           "description": "",
           "params": [],
           "returns": [
@@ -77012,7 +77427,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 440,
+          "line": 444,
           "description": "",
           "params": [],
           "returns": [
@@ -77030,7 +77445,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 453,
+          "line": 457,
           "description": "",
           "params": [
             {
@@ -77055,7 +77470,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 466,
+          "line": 470,
           "description": "",
           "params": [],
           "returns": [
@@ -77073,7 +77488,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 481,
+          "line": 485,
           "description": "",
           "params": [],
           "returns": [
@@ -77091,7 +77506,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 494,
+          "line": 498,
           "description": "",
           "params": [
             {
@@ -77116,7 +77531,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 521,
+          "line": 525,
           "description": "",
           "params": [],
           "returns": [
@@ -77134,7 +77549,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 533,
+          "line": 537,
           "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
           "params": [],
           "returns": [
@@ -77152,7 +77567,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 542,
+          "line": 546,
           "description": "",
           "params": [
             {
@@ -77177,7 +77592,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 553,
+          "line": 557,
           "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
           "params": [
             {
@@ -86402,14 +86817,14 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 153,
+      "line": 198,
       "description": "",
       "params": [
         {
-          "name": "locale",
+          "name": "value",
           "type": "string",
           "optional": false,
-          "description": "'' follows the UI language."
+          "description": "'' for automatic, FOLLOW_UI, or an ISO 639-1 language."
         }
       ],
       "returns": [],
@@ -86422,12 +86837,74 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 43,
+      "line": 82,
       "description": "",
       "params": [],
       "returns": [
         {
           "type": "React.ReactElement|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "FOLLOW_UI",
+      "name": "FOLLOW_UI",
+      "longname": "FOLLOW_UI",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+      "line": 39,
+      "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "layerSelection",
+      "name": "layerSelection",
+      "longname": "layerSelection",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+      "line": 46,
+      "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
+      "params": [],
+      "returns": [
+        {
+          "type": "Object|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "normalizeStoredLanguage",
+      "name": "normalizeStoredLanguage",
+      "longname": "normalizeStoredLanguage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+      "line": 71,
+      "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
+      "params": [
+        {
+          "name": "stored",
+          "type": "string|null",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "languages",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": "The OCR languages (ISO 639-1)."
+        }
+      ],
+      "returns": [
+        {
+          "type": "string|null",
           "description": ""
         }
       ],
@@ -86440,28 +86917,10 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 31,
+      "line": 37,
       "description": "How long the pointer may leave the button and its menu before the menu closes.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "selectedLayerText",
-      "name": "selectedLayerText",
-      "longname": "selectedLayerText",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 34,
-      "description": "",
-      "params": [],
-      "returns": [
-        {
-          "type": "string",
-          "description": "The selected text as it reads on the page, or '' outside the text layers."
-        }
-      ],
       "examples": 0
     },
     {
@@ -92503,7 +92962,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/OcrTextLayer.jsx",
-      "line": 60,
+      "line": 61,
       "description": "",
       "params": [
         {
@@ -92516,7 +92975,7 @@
           "name": "props.outcome",
           "type": "Object",
           "optional": false,
-          "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js) and rulingLinePixels (exposed a..."
+          "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js), language (the guessed ISO 639-..."
         },
         {
           "name": "props.renderWidth",
@@ -96406,7 +96865,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 41,
+      "line": 46,
       "description": "",
       "params": [
         {
@@ -96479,7 +96938,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 22,
+      "line": 27,
       "description": "Idle time after which the OCR worker is terminated to free its memory.",
       "params": [],
       "returns": [],
@@ -99838,6 +100297,128 @@
       "examples": 0
     },
     {
+      "id": "DETECTABLE_LANGUAGES",
+      "name": "DETECTABLE_LANGUAGES",
+      "longname": "DETECTABLE_LANGUAGES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 64,
+      "description": "The languages the guess knows function words for (ISO 639-1).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "detectTextLanguage",
+      "name": "detectTextLanguage",
+      "longname": "detectTextLanguage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 83,
+      "description": "",
+      "params": [
+        {
+          "name": "words",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": "The page's words in any order."
+        },
+        {
+          "name": "candidates",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": "ISO 639-1 codes to choose among; codes without function words are ignored. One candidate alone still needs MIN_HITS to be chosen, and still..."
+        }
+      ],
+      "returns": [
+        {
+          "type": "TextLanguageGuess",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "DISTINCTIVE_LETTERS",
+      "name": "DISTINCTIVE_LETTERS",
+      "longname": "DISTINCTIVE_LETTERS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 50,
+      "description": "Letters that point at a language more than at its neighbours.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "FUNCTION_WORDS",
+      "name": "FUNCTION_WORDS",
+      "longname": "FUNCTION_WORDS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 37,
+      "description": "Common function words per language (ISO 639-1), lower case.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "LETTER_SCORE",
+      "name": "LETTER_SCORE",
+      "longname": "LETTER_SCORE",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 28,
+      "description": "Score a distinctive letter adds, and the most such letters that count.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "MIN_HITS",
+      "name": "MIN_HITS",
+      "longname": "MIN_HITS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 24,
+      "description": "Fewest function-word hits the winning language needs.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "RUNNER_UP_RATIO",
+      "name": "RUNNER_UP_RATIO",
+      "longname": "RUNNER_UP_RATIO",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 26,
+      "description": "The winner must have at least this many times the runner-up's score.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "TextLanguageGuess",
+      "name": "TextLanguageGuess",
+      "longname": "TextLanguageGuess",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/ocr/detectLanguage.js",
+      "line": 68,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "ASSETS",
       "name": "ASSETS",
       "longname": "ASSETS",
@@ -101045,7 +101626,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/queue.js",
-      "line": 117,
+      "line": 120,
       "description": "",
       "params": [
         {
@@ -101083,6 +101664,12 @@
           "type": "function",
           "optional": false,
           "description": "Default classifyPageSource."
+        },
+        {
+          "name": "options.detectLanguage",
+          "type": "function",
+          "optional": false,
+          "description": "Given a done outcome, the ISO 639-1 language of its text or null when unsure (detectLanguage.js); the outcome then carries it as language ...."
         },
         {
           "name": "options.log",
@@ -101221,7 +101808,7 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/ocr/queue.js",
-      "line": 134,
+      "line": 138,
       "description": "null until retainSources is called: every source is retained.",
       "params": [],
       "returns": [],
@@ -106580,6 +107167,31 @@
       "returns": [
         {
           "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "speechLanguagesForOcr",
+      "name": "speechLanguagesForOcr",
+      "longname": "speechLanguagesForOcr",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrLanguageCodes.js",
+      "line": 23,
+      "description": "The ISO 639-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out.",
+      "params": [
+        {
+          "name": "ocrCodes",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<string>",
           "description": ""
         }
       ],
@@ -121696,7 +122308,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 506,
+      "line": 518,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -121791,7 +122403,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 429,
+      "line": 441,
       "description": "Describe how ocr.assetBaseUrl resolves.",
       "params": [
         {
@@ -121816,7 +122428,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 355,
+      "line": 367,
       "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
       "params": [
         {
@@ -121891,7 +122503,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 454,
+      "line": 466,
       "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
       "params": [
         {
@@ -121916,7 +122528,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 398,
+      "line": 410,
       "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
       "params": [
         {
@@ -121941,7 +122553,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 883,
+      "line": 895,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -122016,7 +122628,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 758,
+      "line": 770,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -122041,7 +122653,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 783,
+      "line": 795,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -122084,7 +122696,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 866,
+      "line": 878,
       "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
       "params": [
         {
@@ -122109,7 +122721,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 466,
+      "line": 478,
       "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
       "params": [
         {
@@ -122134,7 +122746,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 734,
+      "line": 746,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -122159,7 +122771,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 720,
+      "line": 732,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -122184,7 +122796,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 707,
+      "line": 719,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -122209,7 +122821,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 807,
+      "line": 819,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -122234,7 +122846,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 825,
+      "line": 837,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -122259,7 +122871,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 409,
+      "line": 421,
       "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
       "params": [],
       "returns": [],
@@ -122516,6 +123128,31 @@
       "examples": 0
     },
     {
+      "id": "isSpeechLanguageAutoDetectEnabled",
+      "name": "isSpeechLanguageAutoDetectEnabled",
+      "longname": "isSpeechLanguageAutoDetectEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 344,
+      "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "RuntimeConfig",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "KEYBOARD_PRINT_SHORTCUT_BEHAVIORS",
       "name": "KEYBOARD_PRINT_SHORTCUT_BEHAVIORS",
       "longname": "KEYBOARD_PRINT_SHORTCUT_BEHAVIORS",
@@ -122548,7 +123185,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 484,
+      "line": 496,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -122579,7 +123216,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 681,
+      "line": 693,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -122604,7 +123241,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 652,
+      "line": 664,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -122635,7 +123272,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 620,
+      "line": 632,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -122666,7 +123303,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 552,
+      "line": 564,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -122709,7 +123346,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 531,
+      "line": 543,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -122752,7 +123389,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 663,
+      "line": 675,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -122783,7 +123420,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 635,
+      "line": 647,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -122814,7 +123451,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 581,
+      "line": 593,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -122839,7 +123476,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 569,
+      "line": 581,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -122870,7 +123507,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 595,
+      "line": 607,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -122895,7 +123532,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 403,
+      "line": 415,
       "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
       "params": [],
       "returns": [],
@@ -122986,7 +123623,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 405,
+      "line": 417,
       "description": "The value carries ?",
       "params": [],
       "returns": [],
@@ -123056,7 +123693,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 606,
+      "line": 618,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {
@@ -123081,7 +123718,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 407,
+      "line": 419,
       "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
       "params": [],
       "returns": [],
@@ -124057,7 +124694,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 78,
+      "line": 79,
       "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
       "params": [
         {
@@ -124082,7 +124719,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 92,
+      "line": 93,
       "description": "Whether a voice runs on the machine.",
       "params": [
         {
@@ -124107,7 +124744,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 23,
+      "line": 24,
       "description": "",
       "params": [],
       "returns": [
@@ -124119,38 +124756,13 @@
       "examples": 0
     },
     {
-      "id": "listSpeechLocales",
-      "name": "listSpeechLocales",
-      "longname": "listSpeechLocales",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/utils/speech.js",
-      "line": 103,
-      "description": "The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
-      "params": [
-        {
-          "name": "voices",
-          "type": "Array.<Object>",
-          "optional": false,
-          "description": "SpeechSynthesisVoice-like: { lang, localService } ."
-        }
-      ],
-      "returns": [
-        {
-          "type": "Array.<string>",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "pickSpeechVoice",
       "name": "pickSpeechVoice",
       "longname": "pickSpeechVoice",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 143,
+      "line": 127,
       "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
       "params": [
         {
@@ -124181,7 +124793,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 35,
+      "line": 36,
       "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
       "params": [
         {
@@ -124206,7 +124818,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 178,
+      "line": 163,
       "description": "Speak text aloud with a local voice.",
       "params": [
         {
@@ -124267,7 +124879,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 18,
+      "line": 19,
       "description": "Longest chunk handed to the synthesiser (characters).",
       "params": [],
       "returns": [],
@@ -124280,7 +124892,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 156,
+      "line": 140,
       "description": "",
       "params": [],
       "returns": [],
@@ -124293,7 +124905,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 121,
+      "line": 105,
       "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
       "params": [
         {
@@ -124324,7 +124936,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 51,
+      "line": 52,
       "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
       "params": [
         {
@@ -124804,7 +125416,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 521,
+      "line": 525,
       "description": "",
       "params": [],
       "returns": [
@@ -124822,7 +125434,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 466,
+      "line": 470,
       "description": "",
       "params": [],
       "returns": [
@@ -124840,7 +125452,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 431,
+      "line": 435,
       "description": "",
       "params": [],
       "returns": [
@@ -124858,7 +125470,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 406,
+      "line": 410,
       "description": "",
       "params": [],
       "returns": [
@@ -124876,7 +125488,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 334,
+      "line": 337,
       "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
       "params": [],
       "returns": [
@@ -124907,7 +125519,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 481,
+      "line": 485,
       "description": "",
       "params": [],
       "returns": [
@@ -124925,7 +125537,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 440,
+      "line": 444,
       "description": "",
       "params": [],
       "returns": [
@@ -124943,7 +125555,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 415,
+      "line": 419,
       "description": "",
       "params": [],
       "returns": [
@@ -124961,7 +125573,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 553,
+      "line": 557,
       "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
       "params": [
         {
@@ -124986,7 +125598,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 343,
+      "line": 346,
       "description": "",
       "params": [],
       "returns": [
@@ -125004,7 +125616,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 388,
+      "line": 392,
       "description": "",
       "params": [],
       "returns": [
@@ -125022,8 +125634,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 366,
-      "description": "The locale the read-aloud button speaks in, or null to follow the UI language.",
+      "line": 369,
+      "description": "The read-aloud button's stored language choice (see speechLanguage ), or null for automatic.",
       "params": [],
       "returns": [
         {
@@ -125040,7 +125652,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 293,
+      "line": 296,
       "description": "",
       "params": [],
       "returns": [
@@ -125058,7 +125670,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 264,
+      "line": 267,
       "description": "",
       "params": [],
       "returns": [
@@ -125076,7 +125688,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 533,
+      "line": 537,
       "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
       "params": [],
       "returns": [
@@ -125094,7 +125706,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 222,
+      "line": 225,
       "description": "",
       "params": [],
       "returns": [
@@ -125112,7 +125724,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 52,
+      "line": 55,
       "description": "",
       "params": [
         {
@@ -125137,7 +125749,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 60,
+      "line": 63,
       "description": "",
       "params": [
         {
@@ -125162,7 +125774,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 80,
+      "line": 83,
       "description": "",
       "params": [
         {
@@ -125187,7 +125799,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 107,
+      "line": 110,
       "description": "",
       "params": [
         {
@@ -125212,7 +125824,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 70,
+      "line": 73,
       "description": "Normalize legacy theme-mode values.",
       "params": [
         {
@@ -125237,7 +125849,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 157,
+      "line": 160,
       "description": "",
       "params": [
         {
@@ -125262,7 +125874,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 169,
+      "line": 172,
       "description": "",
       "params": [],
       "returns": [
@@ -125280,7 +125892,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 186,
+      "line": 189,
       "description": "",
       "params": [],
       "returns": [
@@ -125298,7 +125910,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 254,
+      "line": 257,
       "description": "Persist an already-normalized full preference object.",
       "params": [
         {
@@ -125323,7 +125935,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 494,
+      "line": 498,
       "description": "",
       "params": [
         {
@@ -125348,7 +125960,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 453,
+      "line": 457,
       "description": "",
       "params": [
         {
@@ -125373,7 +125985,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 423,
+      "line": 427,
       "description": "",
       "params": [
         {
@@ -125398,7 +126010,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 354,
+      "line": 357,
       "description": "Persist a language choice, or clear it when the normalized value is empty.",
       "params": [
         {
@@ -125423,7 +126035,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 399,
+      "line": 403,
       "description": "",
       "params": [
         {
@@ -125448,11 +126060,11 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 377,
-      "description": "Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.",
+      "line": 381,
+      "description": "Persist the read-aloud language choice (a language code or 'ui'), or clear it (automatic) when the value is empty.",
       "params": [
         {
-          "name": "locale",
+          "name": "choice",
           "type": "string",
           "optional": false,
           "description": ""
@@ -125473,7 +126085,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 310,
+      "line": 313,
       "description": "Persist the user's theme mode preference.",
       "params": [
         {
@@ -125498,7 +126110,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 283,
+      "line": 286,
       "description": "",
       "params": [
         {
@@ -125523,7 +126135,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 542,
+      "line": 546,
       "description": "",
       "params": [
         {
@@ -125548,7 +126160,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 232,
+      "line": 235,
       "description": "",
       "params": [
         {
@@ -125586,7 +126198,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 199,
+      "line": 202,
       "description": "",
       "params": [
         {
@@ -125611,7 +126223,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 212,
+      "line": 215,
       "description": "",
       "params": [
         {

@@ -16,5 +16,6 @@ export { PDF_TEXT_DEFAULT_ASCENT, PDF_TEXT_DEFAULT_DESCENT, pdfTextLayerWords } 
 export { DEFAULT_OCR_CACHE_LIMIT, createOcrResultCache } from './resultCache.js';
 export { OCR_WINDOW_AHEAD, OCR_WINDOW_BEHIND, maxOcrWindowSize, planOcrWindow } from './window.js';
 export { OCR_OUTCOME_SOURCE, OCR_PAGE_STATUS, createOcrQueue } from './queue.js';
+export { DETECTABLE_LANGUAGES, MIN_HITS, RUNNER_UP_RATIO, detectTextLanguage } from './detectLanguage.js';
 export { RULING_LINE_DILATE_PX, createEventLoopYield, removeRulingLines, removeRulingLinesAsync, rulingLineMinRunPx } from './lineRemoval.js';
 export { OCR_LINE_REMOVAL_MAX_PIXELS, prepareOcrImage } from './prepareImage.js';

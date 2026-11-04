@@ -142,6 +142,14 @@
       // replaces this default completely. The viewer's own ocr/ folder holds the Swedish and
       // English models; a code with no model is dropped with a console warning when OCR starts.
       languages: ['swe', 'eng'],
+      speech: {
+        // Guess the language of each page's text among the OCR languages above, so the
+        // read-aloud button's "Automatic" choice reads a Swedish page with a Swedish voice and an
+        // English page with an English one, and the text layer tells screen readers the
+        // language. true (default) keeps the guess; only the literal false turns it off (the
+        // read-aloud language then follows the UI language unless the user picks one).
+        autoDetectLanguage: true
+      },
       // Where the OCR engine, worker and language files are served from. null (default) uses the
       // viewer's own ocr/ folder next to the application. A site can point this at a copy of that
       // folder on its own host (same layout; same origin, or CORS-enabled and allowed by the site

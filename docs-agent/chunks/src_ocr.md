@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 13. Line count: 1941. JSDoc symbol count: 93.
+File count: 14. Line count: 2085. JSDoc symbol count: 101.
 
 ## src/ocr/assetUrls.js
 
@@ -36,6 +36,23 @@ Symbols:
 - `minLetterShare` (member) - Below this share of letters and digits among visible characters the layer is garbled.
 - `maxPrivateUseShare` (member) - Above this share of private\-use or replacement characters the layer is garbled.
 
+## src/ocr/detectLanguage.js
+
+Guess the language of a page's text among a few candidate languages, from its words alone.
+
+Exports: `MIN_HITS`, `RUNNER_UP_RATIO`, `DETECTABLE_LANGUAGES`, `detectTextLanguage`
+
+Symbols:
+
+- `MIN_HITS` (constant) - Fewest function\-word hits the winning language needs.
+- `RUNNER_UP_RATIO` (constant) - The winner must have at least this many times the runner\-up's score.
+- `LETTER_SCORE` (constant) - Score a distinctive letter adds, and the most such letters that count.
+- `FUNCTION_WORDS` (constant) - Common function words per language \(ISO 639\-1\), lower case.
+- `DISTINCTIVE_LETTERS` (constant) - Letters that point at a language more than at its neighbours.
+- `DETECTABLE_LANGUAGES` (constant) - The languages the guess knows function words for \(ISO 639\-1\).
+- `TextLanguageGuess` (typedef) - No description.
+- `detectTextLanguage` (function) - No description.
+
 ## src/ocr/engine.js
 
 Thin wrapper around a tesseract.js worker.
@@ -63,7 +80,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
 ## src/ocr/languages.js
 

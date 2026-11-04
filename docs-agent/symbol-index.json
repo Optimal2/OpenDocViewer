@@ -7826,14 +7826,14 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 153,
+    "line": 198,
     "description": "",
     "params": [
       {
-        "name": "locale",
+        "name": "value",
         "type": "string",
         "optional": false,
-        "description": "'' follows the UI language."
+        "description": "'' for automatic, FOLLOW_UI, or an ISO 639-1 language."
       }
     ],
     "returns": [],
@@ -7846,12 +7846,74 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 43,
+    "line": 82,
     "description": "",
     "params": [],
     "returns": [
       {
         "type": "React.ReactElement|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "FOLLOW_UI",
+    "name": "FOLLOW_UI",
+    "longname": "FOLLOW_UI",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+    "line": 39,
+    "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "layerSelection",
+    "name": "layerSelection",
+    "longname": "layerSelection",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+    "line": 46,
+    "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "normalizeStoredLanguage",
+    "name": "normalizeStoredLanguage",
+    "longname": "normalizeStoredLanguage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+    "line": 71,
+    "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
+    "params": [
+      {
+        "name": "stored",
+        "type": "string|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "languages",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": "The OCR languages (ISO 639-1)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|null",
         "description": ""
       }
     ],
@@ -7864,28 +7926,10 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 31,
+    "line": 37,
     "description": "How long the pointer may leave the button and its menu before the menu closes.",
     "params": [],
     "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "selectedLayerText",
-    "name": "selectedLayerText",
-    "longname": "selectedLayerText",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 34,
-    "description": "",
-    "params": [],
-    "returns": [
-      {
-        "type": "string",
-        "description": "The selected text as it reads on the page, or '' outside the text layers."
-      }
-    ],
     "examples": 0
   },
   {
@@ -13927,7 +13971,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/OcrTextLayer.jsx",
-    "line": 60,
+    "line": 61,
     "description": "",
     "params": [
       {
@@ -13940,7 +13984,7 @@
         "name": "props.outcome",
         "type": "Object",
         "optional": false,
-        "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js) and rulingLinePixels (exposed a..."
+        "description": "A done OCR outcome: words , imageWidth , imageHeight , source ( recognition or pdf-text , src/ocr/queue.js), language (the guessed ISO 639-..."
       },
       {
         "name": "props.renderWidth",
@@ -17830,7 +17874,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 41,
+    "line": 46,
     "description": "",
     "params": [
       {
@@ -17903,7 +17947,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 22,
+    "line": 27,
     "description": "Idle time after which the OCR worker is terminated to free its memory.",
     "params": [],
     "returns": [],
@@ -21262,6 +21306,128 @@
     "examples": 0
   },
   {
+    "id": "DETECTABLE_LANGUAGES",
+    "name": "DETECTABLE_LANGUAGES",
+    "longname": "DETECTABLE_LANGUAGES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 64,
+    "description": "The languages the guess knows function words for (ISO 639-1).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "detectTextLanguage",
+    "name": "detectTextLanguage",
+    "longname": "detectTextLanguage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 83,
+    "description": "",
+    "params": [
+      {
+        "name": "words",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": "The page's words in any order."
+      },
+      {
+        "name": "candidates",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": "ISO 639-1 codes to choose among; codes without function words are ignored. One candidate alone still needs MIN_HITS to be chosen, and still..."
+      }
+    ],
+    "returns": [
+      {
+        "type": "TextLanguageGuess",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "DISTINCTIVE_LETTERS",
+    "name": "DISTINCTIVE_LETTERS",
+    "longname": "DISTINCTIVE_LETTERS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 50,
+    "description": "Letters that point at a language more than at its neighbours.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "FUNCTION_WORDS",
+    "name": "FUNCTION_WORDS",
+    "longname": "FUNCTION_WORDS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 37,
+    "description": "Common function words per language (ISO 639-1), lower case.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "LETTER_SCORE",
+    "name": "LETTER_SCORE",
+    "longname": "LETTER_SCORE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 28,
+    "description": "Score a distinctive letter adds, and the most such letters that count.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MIN_HITS",
+    "name": "MIN_HITS",
+    "longname": "MIN_HITS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 24,
+    "description": "Fewest function-word hits the winning language needs.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "RUNNER_UP_RATIO",
+    "name": "RUNNER_UP_RATIO",
+    "longname": "RUNNER_UP_RATIO",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 26,
+    "description": "The winner must have at least this many times the runner-up's score.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "TextLanguageGuess",
+    "name": "TextLanguageGuess",
+    "longname": "TextLanguageGuess",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/detectLanguage.js",
+    "line": 68,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ASSETS",
     "name": "ASSETS",
     "longname": "ASSETS",
@@ -22469,7 +22635,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 117,
+    "line": 120,
     "description": "",
     "params": [
       {
@@ -22507,6 +22673,12 @@
         "type": "function",
         "optional": false,
         "description": "Default classifyPageSource."
+      },
+      {
+        "name": "options.detectLanguage",
+        "type": "function",
+        "optional": false,
+        "description": "Given a done outcome, the ISO 639-1 language of its text or null when unsure (detectLanguage.js); the outcome then carries it as language ...."
       },
       {
         "name": "options.log",
@@ -22645,7 +22817,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 134,
+    "line": 138,
     "description": "null until retainSources is called: every source is retained.",
     "params": [],
     "returns": [],
@@ -28004,6 +28176,31 @@
     "returns": [
       {
         "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "speechLanguagesForOcr",
+    "name": "speechLanguagesForOcr",
+    "longname": "speechLanguagesForOcr",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrLanguageCodes.js",
+    "line": 23,
+    "description": "The ISO 639-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out.",
+    "params": [
+      {
+        "name": "ocrCodes",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
         "description": ""
       }
     ],
@@ -43120,7 +43317,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 506,
+    "line": 518,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -43215,7 +43412,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 429,
+    "line": 441,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -43240,7 +43437,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 355,
+    "line": 367,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -43315,7 +43512,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 454,
+    "line": 466,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -43340,7 +43537,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 398,
+    "line": 410,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -43365,7 +43562,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 883,
+    "line": 895,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -43440,7 +43637,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 758,
+    "line": 770,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -43465,7 +43662,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 783,
+    "line": 795,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -43508,7 +43705,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 866,
+    "line": 878,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -43533,7 +43730,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 466,
+    "line": 478,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -43558,7 +43755,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 734,
+    "line": 746,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -43583,7 +43780,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 720,
+    "line": 732,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -43608,7 +43805,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 707,
+    "line": 719,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -43633,7 +43830,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 807,
+    "line": 819,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -43658,7 +43855,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 825,
+    "line": 837,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -43683,7 +43880,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 409,
+    "line": 421,
     "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
     "params": [],
     "returns": [],
@@ -43940,6 +44137,31 @@
     "examples": 0
   },
   {
+    "id": "isSpeechLanguageAutoDetectEnabled",
+    "name": "isSpeechLanguageAutoDetectEnabled",
+    "longname": "isSpeechLanguageAutoDetectEnabled",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 344,
+    "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "RuntimeConfig",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "KEYBOARD_PRINT_SHORTCUT_BEHAVIORS",
     "name": "KEYBOARD_PRINT_SHORTCUT_BEHAVIORS",
     "longname": "KEYBOARD_PRINT_SHORTCUT_BEHAVIORS",
@@ -43972,7 +44194,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 484,
+    "line": 496,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -44003,7 +44225,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 681,
+    "line": 693,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -44028,7 +44250,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 652,
+    "line": 664,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -44059,7 +44281,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 620,
+    "line": 632,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -44090,7 +44312,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 552,
+    "line": 564,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -44133,7 +44355,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 531,
+    "line": 543,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -44176,7 +44398,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 663,
+    "line": 675,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -44207,7 +44429,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 635,
+    "line": 647,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -44238,7 +44460,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 581,
+    "line": 593,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -44263,7 +44485,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 569,
+    "line": 581,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -44294,7 +44516,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 595,
+    "line": 607,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -44319,7 +44541,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 403,
+    "line": 415,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -44410,7 +44632,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 405,
+    "line": 417,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -44480,7 +44702,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 606,
+    "line": 618,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -44505,7 +44727,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 407,
+    "line": 419,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],
@@ -45481,7 +45703,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 78,
+    "line": 79,
     "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
     "params": [
       {
@@ -45506,7 +45728,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 92,
+    "line": 93,
     "description": "Whether a voice runs on the machine.",
     "params": [
       {
@@ -45531,7 +45753,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 23,
+    "line": 24,
     "description": "",
     "params": [],
     "returns": [
@@ -45543,38 +45765,13 @@
     "examples": 0
   },
   {
-    "id": "listSpeechLocales",
-    "name": "listSpeechLocales",
-    "longname": "listSpeechLocales",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/utils/speech.js",
-    "line": 103,
-    "description": "The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
-    "params": [
-      {
-        "name": "voices",
-        "type": "Array.<Object>",
-        "optional": false,
-        "description": "SpeechSynthesisVoice-like: { lang, localService } ."
-      }
-    ],
-    "returns": [
-      {
-        "type": "Array.<string>",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "pickSpeechVoice",
     "name": "pickSpeechVoice",
     "longname": "pickSpeechVoice",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 143,
+    "line": 127,
     "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
     "params": [
       {
@@ -45605,7 +45802,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 35,
+    "line": 36,
     "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
     "params": [
       {
@@ -45630,7 +45827,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 178,
+    "line": 163,
     "description": "Speak text aloud with a local voice.",
     "params": [
       {
@@ -45691,7 +45888,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 18,
+    "line": 19,
     "description": "Longest chunk handed to the synthesiser (characters).",
     "params": [],
     "returns": [],
@@ -45704,7 +45901,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 156,
+    "line": 140,
     "description": "",
     "params": [],
     "returns": [],
@@ -45717,7 +45914,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 121,
+    "line": 105,
     "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
     "params": [
       {
@@ -45748,7 +45945,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 51,
+    "line": 52,
     "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
     "params": [
       {
@@ -46228,7 +46425,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 521,
+    "line": 525,
     "description": "",
     "params": [],
     "returns": [
@@ -46246,7 +46443,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 466,
+    "line": 470,
     "description": "",
     "params": [],
     "returns": [
@@ -46264,7 +46461,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 431,
+    "line": 435,
     "description": "",
     "params": [],
     "returns": [
@@ -46282,7 +46479,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 406,
+    "line": 410,
     "description": "",
     "params": [],
     "returns": [
@@ -46300,7 +46497,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 334,
+    "line": 337,
     "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
     "params": [],
     "returns": [
@@ -46331,7 +46528,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 481,
+    "line": 485,
     "description": "",
     "params": [],
     "returns": [
@@ -46349,7 +46546,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 440,
+    "line": 444,
     "description": "",
     "params": [],
     "returns": [
@@ -46367,7 +46564,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 415,
+    "line": 419,
     "description": "",
     "params": [],
     "returns": [
@@ -46385,7 +46582,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 553,
+    "line": 557,
     "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
     "params": [
       {
@@ -46410,7 +46607,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 343,
+    "line": 346,
     "description": "",
     "params": [],
     "returns": [
@@ -46428,7 +46625,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 388,
+    "line": 392,
     "description": "",
     "params": [],
     "returns": [
@@ -46446,8 +46643,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 366,
-    "description": "The locale the read-aloud button speaks in, or null to follow the UI language.",
+    "line": 369,
+    "description": "The read-aloud button's stored language choice (see speechLanguage ), or null for automatic.",
     "params": [],
     "returns": [
       {
@@ -46464,7 +46661,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 293,
+    "line": 296,
     "description": "",
     "params": [],
     "returns": [
@@ -46482,7 +46679,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 264,
+    "line": 267,
     "description": "",
     "params": [],
     "returns": [
@@ -46500,7 +46697,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 533,
+    "line": 537,
     "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
     "params": [],
     "returns": [
@@ -46518,7 +46715,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 222,
+    "line": 225,
     "description": "",
     "params": [],
     "returns": [
@@ -46536,7 +46733,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 52,
+    "line": 55,
     "description": "",
     "params": [
       {
@@ -46561,7 +46758,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 60,
+    "line": 63,
     "description": "",
     "params": [
       {
@@ -46586,7 +46783,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 80,
+    "line": 83,
     "description": "",
     "params": [
       {
@@ -46611,7 +46808,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 107,
+    "line": 110,
     "description": "",
     "params": [
       {
@@ -46636,7 +46833,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 70,
+    "line": 73,
     "description": "Normalize legacy theme-mode values.",
     "params": [
       {
@@ -46661,7 +46858,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 157,
+    "line": 160,
     "description": "",
     "params": [
       {
@@ -46686,7 +46883,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 169,
+    "line": 172,
     "description": "",
     "params": [],
     "returns": [
@@ -46704,7 +46901,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 186,
+    "line": 189,
     "description": "",
     "params": [],
     "returns": [
@@ -46722,7 +46919,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 254,
+    "line": 257,
     "description": "Persist an already-normalized full preference object.",
     "params": [
       {
@@ -46747,7 +46944,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 494,
+    "line": 498,
     "description": "",
     "params": [
       {
@@ -46772,7 +46969,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 453,
+    "line": 457,
     "description": "",
     "params": [
       {
@@ -46797,7 +46994,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 423,
+    "line": 427,
     "description": "",
     "params": [
       {
@@ -46822,7 +47019,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 354,
+    "line": 357,
     "description": "Persist a language choice, or clear it when the normalized value is empty.",
     "params": [
       {
@@ -46847,7 +47044,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 399,
+    "line": 403,
     "description": "",
     "params": [
       {
@@ -46872,11 +47069,11 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 377,
-    "description": "Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.",
+    "line": 381,
+    "description": "Persist the read-aloud language choice (a language code or 'ui'), or clear it (automatic) when the value is empty.",
     "params": [
       {
-        "name": "locale",
+        "name": "choice",
         "type": "string",
         "optional": false,
         "description": ""
@@ -46897,7 +47094,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 310,
+    "line": 313,
     "description": "Persist the user's theme mode preference.",
     "params": [
       {
@@ -46922,7 +47119,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 283,
+    "line": 286,
     "description": "",
     "params": [
       {
@@ -46947,7 +47144,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 542,
+    "line": 546,
     "description": "",
     "params": [
       {
@@ -46972,7 +47169,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 232,
+    "line": 235,
     "description": "",
     "params": [
       {
@@ -47010,7 +47207,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 199,
+    "line": 202,
     "description": "",
     "params": [
       {
@@ -47035,7 +47232,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 212,
+    "line": 215,
     "description": "",
     "params": [
       {

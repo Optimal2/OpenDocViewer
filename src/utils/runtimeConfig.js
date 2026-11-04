@@ -334,6 +334,18 @@ export function isOcrLineRemovalEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether the language of a page's text is guessed among the OCR languages, for the
+ * read-aloud language and the text layer's `lang` (`ocr.speech.autoDetectLanguage`). On by
+ * default; only the boolean literal `false` turns it off. Means nothing while OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isSpeechLanguageAutoDetectEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.speech?.autoDetectLanguage !== false;
+}
+
+/**
  * Describe how `ocr.languages` resolves: the usable codes, the entries that were ignored and
  * whether the default list stood in. This is the diagnostic form of getOcrLanguages and stays
  * side-effect free like every accessor here; the OCR module (src/ocr/setup.js) logs the outcome

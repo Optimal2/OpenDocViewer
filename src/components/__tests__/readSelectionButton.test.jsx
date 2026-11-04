@@ -40,10 +40,10 @@ function installSynthesis() {
   return synthesis;
 }
 
-function layerWithText() {
+function layerWithText(lang = '') {
   const layer = document.createElement('div');
   layer.className = 'ocr-text-layer';
-  layer.innerHTML = '<div class="ocr-text-layer-flow">'
+  layer.innerHTML = `<div class="ocr-text-layer-flow"${lang ? ` lang="${lang}"` : ''}>`
     + '<span class="ocr-text-layer-line"><span class="ocr-text-layer-word">Hej</span><span class="ocr-text-layer-gap"> </span><span class="ocr-text-layer-word">världen</span></span>'
     + ' <span class="ocr-text-layer-line"><span class="ocr-text-layer-word">Rad</span><span class="ocr-text-layer-gap"> </span><span class="ocr-text-layer-word">två</span></span>'
     + '</div>';
@@ -148,31 +148,54 @@ describe('ReadSelectionButton', () => {
     expect(menu()).not.toBeNull();
     expect(button().getAttribute('aria-expanded')).toBe('true');
     const items = () => [...menu().querySelectorAll('[role="menuitemradio"]')];
-    // Only local voices are listed: the online English GB voice is left out.
-    expect(items().map((item) => item.getAttribute('data-speech-locale'))).toEqual(['', 'en-US', 'sv-SE']);
-    expect(items()[0].textContent).toMatch(/Follow the interface language \(Svenska/);
+    // Automatic first, then the OCR languages (swe, eng by default) that have a local voice,
+    // then the interface language; the online English GB voice adds nothing.
+    expect(items().map((item) => item.getAttribute('data-speech-language'))).toEqual(['', 'sv', 'en', 'ui']);
+    expect(items().map((item) => item.disabled)).toEqual([false, false, false, false]);
+    // No language guessed for this page: automatic says so and reads in the UI language.
+    expect(items()[0].textContent).toMatch(/Automatic \(language not identified, reads in Svenska/);
     expect(items()[0].getAttribute('aria-checked')).toBe('true');
+    expect(items()[3].textContent).toMatch(/Follow the interface language \(Svenska/);
     // The menu keeps the selection: its mousedown is cancelled like the button's.
     const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
     act(() => { menu().dispatchEvent(mousedown); });
     expect(mousedown.defaultPrevented).toBe(true);
 
-    act(() => items()[1].click());
+    act(() => items()[2].click());
     expect(menu()).toBeNull();
-    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'en-US' });
-    // Named in the UI language (Swedish): "Amerikansk engelska".
+    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'en' });
+    // Named in the UI language (Swedish): "Engelska".
     expect(button().title).toMatch(/Reading language: .*engelska/i);
+    expect(button().getAttribute('data-reading-language')).toBe('en-US');
     act(() => button().click());
     expect(synthesis.spoken[0].lang).toBe('en-US');
     expect(synthesis.spoken[0].voice.name).toBe('English US');
     act(() => { synthesis.spoken[0].onend(); synthesis.spoken[1].onend(); });
 
-    // Back to the interface language: the preference is cleared and Swedish is spoken again.
+    // Back to automatic: the preference is cleared and, with no guess, Swedish is spoken again.
     act(() => { shell().dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
     act(() => items()[0].click());
     expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES') || '{}')).toEqual({});
     act(() => button().click());
     expect(synthesis.spoken[2].lang).toBe('sv-SE');
+  });
+
+  it('automatic reads in the language guessed for the selected page, shown in the menu, until the user picks one', () => {
+    render();
+    select(layerWithText('en'));
+    expect(button().getAttribute('data-reading-language')).toBe('en-US');
+    act(() => button().click());
+    expect(synthesis.spoken[0].lang).toBe('en-US');
+    expect(synthesis.spoken[0].voice.name).toBe('English US');
+    act(() => { synthesis.spoken[0].onend(); synthesis.spoken[1].onend(); });
+    const shell = container.querySelector('.toolbar-ocr-read-shell');
+    act(() => { shell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
+    const items = [...container.querySelectorAll('[data-odv-ocr="read-menu"] [role="menuitemradio"]')];
+    expect(items[0].textContent).toMatch(/Automatic \(Engelska\)/);
+    // "Follow the interface language" overrides the guess.
+    act(() => items[3].click());
+    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'ui' });
+    expect(button().getAttribute('data-reading-language')).toBe('sv-SE');
   });
 
   it('never speaks with an online voice: without a local voice for the language the button is disabled and says so', () => {
@@ -193,11 +216,34 @@ describe('ReadSelectionButton', () => {
     const shell = container.querySelector('.toolbar-ocr-read-shell');
     act(() => { shell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
     const items = [...container.querySelectorAll('[data-odv-ocr="read-menu"] [role="menuitemradio"]')];
-    expect(items.map((item) => item.getAttribute('data-speech-locale'))).toEqual(['', 'en-US']);
-    act(() => items[1].click());
+    expect(items.map((item) => item.getAttribute('data-speech-language'))).toEqual(['', 'sv', 'en', 'ui']);
+    // Swedish is offered but greyed: it has no local voice.
+    expect(items[1].disabled).toBe(true);
+    expect(items[1].textContent).toMatch(/Svenska.*\(no local voice installed\)/);
+    expect(items[2].disabled).toBe(false);
+    act(() => items[2].click());
     expect(button().getAttribute('data-voice-missing')).toBeNull();
     act(() => button().click());
     expect(synthesis.spoken[0].voice.name).toBe('English US');
+  });
+
+  it('reads an older choice stored as a locale as its language, and forgets one that is not an OCR language', () => {
+    window.localStorage.setItem('ODV_USER_PREFERENCES', JSON.stringify({ speechLanguage: 'en-US' }));
+    render();
+    select(layerWithText());
+    expect(button().getAttribute('data-reading-language')).toBe('en-US');
+    const shell = container.querySelector('.toolbar-ocr-read-shell');
+    act(() => { shell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
+    const checked = [...container.querySelectorAll('[data-odv-ocr="read-menu"] [role="menuitemradio"]')].find((item) => item.getAttribute('aria-checked') === 'true');
+    expect(checked.getAttribute('data-speech-language')).toBe('en');
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    window.localStorage.setItem('ODV_USER_PREFERENCES', JSON.stringify({ speechLanguage: 'de' }));
+    render();
+    select(layerWithText());
+    // German is no OCR language here: automatic (the UI language without a guess).
+    expect(button().getAttribute('data-reading-language')).toBe('sv-SE');
   });
 
   it('opens the language menu from the keyboard, keeps the viewer shortcuts off there, and gives the focus back on Escape', () => {

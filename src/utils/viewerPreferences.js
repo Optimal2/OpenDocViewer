@@ -30,7 +30,10 @@ import {
  * @property {('system'|'normal'|'light'|'dark')=} themeMode
  * @property {string=} themeSharedRevision
  * @property {string=} language
- * @property {string=} speechLanguage  Locale the read-aloud button speaks in ('sv-SE'); absent: the UI language.
+ * @property {string=} speechLanguage  The read-aloud button's language choice: an ISO 639-1
+ *   language ('en') or 'ui' for the interface language; absent: automatic (the page's guessed
+ *   language, else the interface language). Older values stored a locale ('en-US'), which the
+ *   button reads as its language.
  * @property {('active'|'all')=} printDefaultMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
  * @property {number=} customFitWidthFactorPercent
@@ -360,7 +363,7 @@ export function setLanguagePreference(language) {
 }
 
 /**
- * The locale the read-aloud button speaks in, or null to follow the UI language.
+ * The read-aloud button's stored language choice (see `speechLanguage`), or null for automatic.
  * @returns {(string|null)}
  */
 export function getSpeechLanguagePreference() {
@@ -369,13 +372,14 @@ export function getSpeechLanguagePreference() {
 }
 
 /**
- * Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.
+ * Persist the read-aloud language choice (a language code or 'ui'), or clear it (automatic)
+ * when the value is empty.
  *
- * @param {string} locale
+ * @param {string} choice
  * @returns {ViewerPreferences}
  */
-export function setSpeechLanguagePreference(locale) {
-  const normalized = String(locale || '').trim();
+export function setSpeechLanguagePreference(choice) {
+  const normalized = String(choice || '').trim();
   if (normalized) return setViewerPreferences({ speechLanguage: normalized });
   const next = { ...getViewerPreferences() };
   delete next.speechLanguage;

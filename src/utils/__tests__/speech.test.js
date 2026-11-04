@@ -8,7 +8,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   isLocalSpeechVoice,
   isSpeechSynthesisAvailable,
-  listSpeechLocales,
   pickSpeechVoice,
   resolveSpeechLanguage,
   SPEECH_MAX_CHUNK_LENGTH,
@@ -188,20 +187,6 @@ describe('isSpeechSynthesisAvailable', () => {
     expect(isSpeechSynthesisAvailable()).toBe(false);
     vi.stubGlobal('window', {});
     expect(isSpeechSynthesisAvailable()).toBe(false);
-  });
-});
-
-describe('listSpeechLocales', () => {
-  it('lists each locale of the installed local voices once, in canonical form, sorted', () => {
-    const local = (name, lang) => ({ name, lang, localService: true });
-    const voices = [
-      local('A', 'sv-SE'), local('B', 'sv_se'), local('C', 'en-GB'), local('D', 'en-US'), local('E', 'EN-us'),
-      local('F', ''), null,
-      // Online voices never make the list, even for a language no local voice has.
-      { name: 'G', lang: 'de-DE', localService: false }, { name: 'H', lang: 'fr-FR' },
-    ];
-    expect(listSpeechLocales(voices)).toEqual(['en-GB', 'en-US', 'sv-SE']);
-    expect(listSpeechLocales(null)).toEqual([]);
   });
 });
 

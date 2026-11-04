@@ -13,7 +13,7 @@ import { JSDOM } from 'jsdom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getOcrAssetBaseUrl, getOcrLanguages, isOcrEnabled, isOcrLineRemovalEnabled } from '../runtimeConfig.js';
 
-const SHIPPED_OCR_DEFAULTS = Object.freeze({ enabled: false, removeRulingLines: true, languages: ['swe', 'eng'], assetBaseUrl: null });
+const SHIPPED_OCR_DEFAULTS = Object.freeze({ enabled: false, removeRulingLines: true, languages: ['swe', 'eng'], speech: { autoDetectLanguage: true }, assetBaseUrl: null });
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -71,7 +71,7 @@ describe('shipped OCR configuration', () => {
 
   it('lets a site file turn OCR on with the literal true and deep-merges the sub keys', () => {
     const site = readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: ['swe'] } } });
-    expect(site.ocr).toEqual({ enabled: true, removeRulingLines: true, languages: ['swe'], assetBaseUrl: null });
+    expect(site.ocr).toEqual({ enabled: true, removeRulingLines: true, languages: ['swe'], speech: { autoDetectLanguage: true }, assetBaseUrl: null });
     expect(site.enabled).toBe(true);
     expect(site.languages).toEqual(['swe']);
     expect(site.assetBaseUrl).toBeNull();

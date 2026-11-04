@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 20. Line count: 8433. JSDoc symbol count: 117.
+File count: 20. Line count: 8443. JSDoc symbol count: 117.
 
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8672. JSDoc symbol count: 148.
+File count: 21. Line count: 8736. JSDoc symbol count: 150.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -58,7 +58,7 @@ File count: 21. Line count: 8672. JSDoc symbol count: 148.
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden liv
-- `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
+- `src/components/DocumentToolbar/ReadSelectionButton.jsx` - Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers \(components/OcrTextLayer.jsx\) and the browser can speak \(utils/speech.js\).
 
 ## src/components/DocumentViewer
 
@@ -90,7 +90,7 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/hooks
 
-File count: 8. Line count: 1038. JSDoc symbol count: 32.
+File count: 8. Line count: 1050. JSDoc symbol count: 32.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
@@ -135,7 +135,7 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 
 ## src/ocr
 
-File count: 13. Line count: 1941. JSDoc symbol count: 93.
+File count: 14. Line count: 2085. JSDoc symbol count: 101.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
@@ -143,8 +143,8 @@ File count: 13. Line count: 1941. JSDoc symbol count: 93.
 - `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
 - `src/ocr/pdfTextWords.js` - Word boxes from a PDF page's own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read\-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/
 - `src/ocr/queue.js` - The OCR page queue: one page at a time, bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
+- `src/ocr/detectLanguage.js` - Guess the language of a page's text among a few candidate languages, from its words alone.
 - `src/ocr/prepareImage.js` - Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
-- `src/ocr/window.js` - Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours.
 
 ## src/PerformanceMonitor.jsx
 
@@ -166,7 +166,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 61. Line count: 22991. JSDoc symbol count: 941.
+File count: 62. Line count: 23023. JSDoc symbol count: 942.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

@@ -42,7 +42,8 @@ export const OCR_WORD_CURRENT_MATCH_CLASS = 'ocr-text-layer-word--match-current'
 /**
  * @param {Object} props
  * @param {Object} props.outcome  A `done` OCR outcome: `words`, `imageWidth`, `imageHeight`,
- *   `source` (`recognition` or `pdf-text`, src/ocr/queue.js) and `rulingLinePixels` (exposed as
+ *   `source` (`recognition` or `pdf-text`, src/ocr/queue.js), `language` (the guessed ISO 639-1
+ *   language of the text, rendered as the text flow's `lang`) and `rulingLinePixels` (exposed as
  *   `data-ruling-lines-removed` when the line removal painted anything, for diagnostics and the
  *   end-to-end test; the geometry is unaffected, the copy had the same size as the page image).
  * @param {number} props.renderWidth  Stage width before zoom (the rotated page's layout size).
@@ -186,7 +187,15 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
       onCopy={copyAsPageText}
     >
       <div className="ocr-text-layer-frame" style={frameStyle}>
-        <div className="ocr-text-layer-flow" style={{ top: `${layout.top}px` }} ref={flowRef}>
+        <div
+          className="ocr-text-layer-flow"
+          style={{ top: `${layout.top}px` }}
+          ref={flowRef}
+          // The guessed language of the text (src/ocr/detectLanguage.js), on the flow rather
+          // than the labelled layer so the layer's localised name keeps the UI language: screen
+          // readers that switch voices by language follow it, and the read-aloud button reads it.
+          lang={typeof outcome.language === 'string' && outcome.language ? outcome.language : undefined}
+        >
           {layout.lines.map((line, lineIndex) => (
             <Fragment key={`${lineIndex}:${line.top}`}>
               {lineIndex > 0 ? ' ' : null}
@@ -231,6 +240,7 @@ OcrTextLayer.propTypes = {
   outcome: PropTypes.shape({
     status: PropTypes.string,
     source: PropTypes.string,
+    language: PropTypes.string,
     words: PropTypes.array,
     imageWidth: PropTypes.number,
     imageHeight: PropTypes.number,

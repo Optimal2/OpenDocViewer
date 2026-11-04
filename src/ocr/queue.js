@@ -107,6 +107,9 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
  *   The image for the engine (the rendered page, or its line-free copy), its pixel size and
  *   how many pixels the ruling-line removal painted.
  * @param {function(Object): Object=} options.classify  Default classifyPageSource.
+ * @param {function(Object): (string|null)=} options.detectLanguage  Given a `done` outcome,
+ *   the ISO 639-1 language of its text or null when unsure (detectLanguage.js); the outcome
+ *   then carries it as `language`. Absent: no guess.
  * @param {Object=} options.log  Logger with `warn` and `debug`.
  * @param {function(OcrQueueSnapshot): void=} options.onChange  Called after every state change.
  * @param {function(): void=} options.onBusy  Called when a page starts.
@@ -120,6 +123,7 @@ export function createOcrQueue({
   probeTextLayer,
   getPageImage,
   classify = classifyPageSource,
+  detectLanguage = null,
   log = console,
   onChange,
   onBusy,
@@ -257,6 +261,16 @@ export function createOcrQueue({
           // The worker stopped answering: drop it so the next page starts a fresh one.
           void engine.terminate();
         }
+      }
+    }
+    if (outcome?.status === OCR_PAGE_STATUS.DONE && typeof detectLanguage === 'function') {
+      // The text's language, for the read-aloud voice and the layer's `lang`; a guess that
+      // fails leaves the outcome without one.
+      try {
+        const language = detectLanguage(outcome);
+        if (typeof language === 'string' && language) outcome.language = language;
+      } catch (error) {
+        log.warn?.('OCR language guess failed', { sourceKey: job.sourceKey, error: String(error?.message || error) });
       }
     }
     inFlight = null;

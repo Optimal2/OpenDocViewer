@@ -11,7 +11,8 @@
  * one of the same base language; with no local voice for the language nothing is spoken at
  * all, because an utterance without a voice lets the browser pick one, which may be online.
  * Nothing is spoken before the first user gesture (browser policy), which is why the viewer
- * speaks only on a button click. Nothing here is loaded or called while OCR is off.
+ * speaks only on a button click. Imported only by the read-aloud button, which the toolbar
+ * mounts while OCR is on, so nothing here is called while OCR is off.
  */
 
 /** Longest chunk handed to the synthesiser (characters). */
@@ -94,23 +95,6 @@ export function isLocalSpeechVoice(voice) {
 }
 
 /**
- * The locales the installed local voices offer, each once, in canonical form, sorted: what the
- * read-aloud language menu lists. Online voices are left out.
- *
- * @param {Array<Object>} voices  SpeechSynthesisVoice-like: `{ lang, localService }`.
- * @returns {Array<string>}
- */
-export function listSpeechLocales(voices) {
-  const locales = new Set();
-  for (const voice of Array.isArray(voices) ? voices : []) {
-    if (!isLocalSpeechVoice(voice)) continue;
-    const locale = canonicalLocale(voice?.lang);
-    if (locale) locales.add(locale);
-  }
-  return [...locales].sort((a, b) => a.localeCompare(b, 'en'));
-}
-
-/**
  * The name of a locale in the UI language ('sv-SE' in Swedish: "svenska (Sverige)"), through
  * Intl.DisplayNames where the browser has it, else the code itself.
  *
@@ -162,7 +146,8 @@ export function pickSpeechVoice(voices, lang) {
 
 /**
  * Speak text aloud with a local voice. Anything the synthesiser was saying is cancelled first.
- * Without a local voice for the language nothing is spoken and `onEnd` gets `no-voice`.
+ * Without a local voice for the language nothing is spoken, nothing already speaking is
+ * cancelled, and `onEnd` gets `no-voice`.
  *
  * @param {*} text
  * @param {Object} options

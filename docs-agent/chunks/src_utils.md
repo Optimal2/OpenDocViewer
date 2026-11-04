@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 61. Line count: 22991. JSDoc symbol count: 941.
+File count: 62. Line count: 23023. JSDoc symbol count: 942.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -276,6 +276,16 @@ Symbols:
 - `isTrackedObjectUrl` (function) - Check whether a blob/object URL is still tracked as live by the viewer.
 - `getTrackedObjectUrlCount` (function) - No description.
 - `revokeAllTrackedObjectUrls` (function) - Revoke every tracked object URL.
+
+## src/utils/ocrLanguageCodes.js
+
+Tesseract language codes \(\`ocr.languages\`\) and the ISO 639\-1 language each one reads: what the read\-aloud menu offers and the language guess chooses among.
+
+Exports: `OCR_TO_SPEECH_LANGUAGE`, `speechLanguagesForOcr`
+
+Symbols:
+
+- `speechLanguagesForOcr` (function) - The ISO 639\-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out.
 
 ## src/utils/ocrLoader.js
 
@@ -964,7 +974,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `isSpeechLanguageAutoDetectEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 
@@ -1008,7 +1018,7 @@ Symbols:
 
 Reading text aloud with the browser's speech synthesis \(Web Speech API, \`window.speechSynthesis\`\).
 
-Exports: `SPEECH_MAX_CHUNK_LENGTH`, `isSpeechSynthesisAvailable`, `resolveSpeechLanguage`, `splitSpeechChunks`, `isLocalSpeechVoice`, `listSpeechLocales`, `speechLocaleLabel`, `pickSpeechVoice`, `speakText`
+Exports: `SPEECH_MAX_CHUNK_LENGTH`, `isSpeechSynthesisAvailable`, `resolveSpeechLanguage`, `splitSpeechChunks`, `isLocalSpeechVoice`, `speechLocaleLabel`, `pickSpeechVoice`, `speakText`
 
 Symbols:
 
@@ -1018,7 +1028,6 @@ Symbols:
 - `splitSpeechChunks` (function) - Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.
 - `canonicalLocale` (function) - A voice's locale in canonical form \('sv\_se' → 'sv\-SE'\), or '' for none.
 - `isLocalSpeechVoice` (function) - Whether a voice runs on the machine.
-- `listSpeechLocales` (function) - The locales the installed local voices offer, each once, in canonical form, sorted: what the read\-aloud language menu lists.
 - `speechLocaleLabel` (function) - The name of a locale in the UI language \('sv\-SE' in Swedish: &quot;svenska \(Sverige\)&quot;\), through Intl.DisplayNames where the browser has it, else the code itself.
 - `pickSpeechVoice` (function) - The local voice to use for a locale: exact locale first, then the same base language \(the browser's default voice first among equals\), else null.
 - `SpeechController` (typedef) - No description.

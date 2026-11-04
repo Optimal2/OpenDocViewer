@@ -128,6 +128,34 @@ describe('createOcrQueue', () => {
     expect(cache.get(scan.key)).toMatchObject({ status: OCR_PAGE_STATUS.DONE, source: OCR_OUTCOME_SOURCE.RECOGNITION });
   });
 
+  it('gives a done outcome the language the injected guess returns, from the engine and from a text layer alike', async () => {
+    const detectLanguage = vi.fn((outcome) => (outcome.words.some((word) => word.text === 'och') ? 'sv' : null));
+    const layerWords = [{ text: 'och', confidence: 100, bbox: { x0: 60, y0: 50, x1: 90, y1: 64 } }];
+    const probeTextLayer = vi.fn(async (sourceKey, pageIndex) => (pageIndex === 0
+      ? { usable: true, verdict: 'usable', characters: 400, letters: 380, privateUse: 0, words: layerWords, text: 'och', pageWidth: 595.28, pageHeight: 841.89 }
+      : { usable: false, verdict: 'empty', characters: 3, letters: 3, privateUse: 0 }));
+    const { queue, engine, cache } = makeQueue({ probeTextLayer, detectLanguage });
+    const [text, scan] = [candidate('file.pdf', 0, { fileExtension: 'pdf' }), candidate('file.pdf', 1, { fileExtension: 'pdf' })];
+    queue.setWindow([text, scan]);
+    await flush();
+    expect(cache.get(text.key)).toMatchObject({ status: OCR_PAGE_STATUS.DONE, language: 'sv' });
+    engine.pending[0].resolve(result('skannad'));
+    await flush();
+    // Unsure: no language on the outcome at all.
+    expect(cache.get(scan.key).status).toBe(OCR_PAGE_STATUS.DONE);
+    expect(cache.get(scan.key)).not.toHaveProperty('language');
+    expect(detectLanguage).toHaveBeenCalledTimes(2);
+
+    // A guess that throws costs nothing but the language.
+    const throwing = makeQueue({ detectLanguage: () => { throw new Error('boom'); } });
+    throwing.queue.setWindow([candidate('doc', 0)]);
+    await flush();
+    throwing.engine.pending[0].resolve(result('text'));
+    await flush();
+    expect(throwing.cache.get(candidate('doc', 0).key)).toMatchObject({ status: OCR_PAGE_STATUS.DONE });
+    expect(throwing.cache.get(candidate('doc', 0).key)).not.toHaveProperty('language');
+  });
+
   it('keeps a usable text layer without placeable words, or without a page size, as a skip, without the engine', async () => {
     const layerWords = [{ text: 'Egen', confidence: 100, bbox: { x0: 60, y0: 50, x1: 90, y1: 64 } }];
     const probeTextLayer = vi.fn(async (sourceKey, pageIndex) => (pageIndex === 0

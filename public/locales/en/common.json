@@ -462,6 +462,9 @@
       "speak": "Read the selected text aloud",
       "stop": "Stop reading aloud",
       "language": "Reading language",
+      "auto": "Automatic ({language})",
+      "autoUnknown": "Automatic (language not identified, reads in {language})",
+      "languageNoVoice": "{language} (no local voice installed)",
       "followUi": "Follow the interface language ({language})",
       "noLocalVoice": "No local voice installed for {language}; online voices are never used"
     }

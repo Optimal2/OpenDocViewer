@@ -21,6 +21,7 @@ const LINES = [
   'Provbolaget AB bekräftar registreringen av ärendet.',
   'Diarienummer 2026-4471 gäller tills vidare.',
   'Handläggningstiden är omkring sex veckor.',
+  'Vi har gått igenom handlingarna och kan bekräfta att ärendet är registrerat hos oss.',
 ];
 const SESSION = {
   session: { id: 'ui-ocr-pdf-text' },
@@ -65,6 +66,9 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   await expect(layer).toHaveCount(1);
   await expect(layer).toHaveAttribute('data-ocr-source', 'pdf-text');
   await expect(layer).toHaveAttribute('aria-label', /Sidans egen text|The page's own text/);
+  // The page's language is guessed among the OCR languages (Swedish here) and set as the
+  // text flow's lang; the labelled layer keeps the UI language for its name.
+  await expect(layer.locator('.ocr-text-layer-flow')).toHaveAttribute('lang', 'sv');
   const words = layer.locator('.ocr-text-layer-word');
   await expect(words).toHaveCount(LINES.join(' ').split(' ').length);
   await expect(words.first()).toHaveText('Provbolaget');

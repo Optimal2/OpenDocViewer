@@ -12,11 +12,16 @@
  * memory is released (the next page starts it again). Recognition input is the page image the
  * viewer already rendered (`ensurePageAsset`), so no page is rasterised twice; the module's
  * prepareOcrImage measures it and removes ruling lines on a private copy that is released right
- * after (the displayed image and printing are never touched).
+ * after (the displayed image and printing are never touched). With `ocr.speech.autoDetectLanguage`
+ * on (the default) each finished page's text is given a language guess among the viewer's OCR
+ * languages (src/ocr/detectLanguage.js), which the read-aloud button and the text layer's
+ * `lang` use; the guess is one pass over the page's words.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import logger from '../logging/systemLogger.js';
 import { ocrPageKeyOf } from '../utils/ocrPageKey.js';
+import { getOcrLanguages, isSpeechLanguageAutoDetectEnabled } from '../utils/runtimeConfig.js';
+import { speechLanguagesForOcr } from '../utils/ocrLanguageCodes.js';
 
 /** Idle time after which the OCR worker is terminated to free its memory. */
 export const OCR_IDLE_SHUTDOWN_MS = 60000;
@@ -90,11 +95,18 @@ export default function useOcrTextLayers({
         fallbackSize: { width: Math.max(0, Number(page?.realWidth) || 0), height: Math.max(0, Number(page?.realHeight) || 0) },
       });
     };
+    // The language guess chooses among the OCR languages only (what the viewer can recognise
+    // and the read-aloud menu offers); off when the site turned it off.
+    const languageCandidates = isSpeechLanguageAutoDetectEnabled() ? speechLanguagesForOcr(getOcrLanguages()) : [];
+    const detectLanguage = languageCandidates.length > 0 && typeof ocrModule.detectTextLanguage === 'function'
+      ? (outcome) => ocrModule.detectTextLanguage((outcome.words || []).map((word) => word?.text), languageCandidates).language
+      : null;
     const queue = ocrModule.createOcrQueue({
       engine,
       cache,
       probeTextLayer: (sourceKey, pageIndex) => prober.probe(sourceKey, pageIndex),
       getPageImage,
+      detectLanguage,
       log: logger,
       onChange: (next) => {
         if (active) setSnapshot({ pages: next.pages, engineFailure: next.engineFailure });

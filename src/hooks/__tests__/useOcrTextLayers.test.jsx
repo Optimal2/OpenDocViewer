@@ -37,6 +37,9 @@ function makeModule(engine, prober) {
     createOcrResultCache,
     planOcrWindow,
     createOcrQueue,
+    // The language guess the hook wires in for the OCR languages (the real one is in
+    // detectLanguage.test.js); here every finished page is Swedish.
+    detectTextLanguage: (words, candidates) => ({ language: candidates.includes('sv') ? 'sv' : null, scores: {}, words: words.length }),
     // The real prepareOcrImage decodes and copies the image (prepareImage.test.js); here it
     // records what the hook hands it and answers with the measured size a test sets, else the
     // hook's fallback (the page entry).
@@ -142,7 +145,8 @@ describe('useOcrTextLayers', () => {
 
     engine.pending[0].resolve(result('sida två'));
     await flush();
-    expect(latest.ocrPages[makeOcrPageKey('doc', 1)]).toMatchObject({ status: 'done', text: 'sida två', imageWidth: 1240, imageHeight: 1754 });
+    // The guess ran with the OCR languages (swe, eng → sv, en) and tagged the page.
+    expect(latest.ocrPages[makeOcrPageKey('doc', 1)]).toMatchObject({ status: 'done', text: 'sida två', imageWidth: 1240, imageHeight: 1754, language: 'sv' });
     expect(engine.recognize).toHaveBeenCalledTimes(2);
     expect(fetchCalls[1]).toBe('/pages/doc-2.png');
 

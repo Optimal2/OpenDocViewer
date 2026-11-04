@@ -24,10 +24,12 @@ vi.mock('../ocr/index.js', async () => {
   const { createOcrResultCache } = await import('../ocr/resultCache.js');
   const { planOcrWindow } = await import('../ocr/window.js');
   const { createOcrQueue } = await import('../ocr/queue.js');
+  const { detectTextLanguage } = await import('../ocr/detectLanguage.js');
   return {
     createOcrResultCache,
     planOcrWindow,
     createOcrQueue,
+    detectTextLanguage,
     prepareOcrImage: async (blob, options) => ({ blob, width: options?.fallbackSize?.width || 0, height: options?.fallbackSize?.height || 0, rulingLinePixels: 0 }),
     createConfiguredOcrEngine: () => {
       const engine = {

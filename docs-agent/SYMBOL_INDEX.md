@@ -289,10 +289,12 @@
 | <code>module:printRangeDialogHelpers.resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:50</code> | Resolve the string that should be used on physical print/log output for an option. |
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
-| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:153</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:43</code> |  |
-| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:31</code> | How long the pointer may leave the button and its menu before the menu closes. |
-| <code>selectedLayerText</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:34</code> |  |
+| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:198</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:82</code> |  |
+| <code>FOLLOW_UI</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:39</code> | Preference value for &amp;quot;follow the interface language&amp;quot; \(absent: automatic\). |
+| <code>layerSelection</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:46</code> | The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page&#39;s guessed language\), or null outside the la... |
+| <code>normalizeStoredLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:71</code> | A stored reading-language choice in today&#39;s form: ui , or one of the OCR languages, else null \(automatic\). |
+| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:37</code> | How long the pointer may leave the button and its menu before the menu closes. |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:97</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:89</code> |  |
@@ -517,7 +519,7 @@
 | <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:40</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:38</code> | Class of a word inside a match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:36</code> | Class of a word that the current selection touches. |
-| <code>OcrTextLayer</code> | function | <code>src/components/OcrTextLayer.jsx:60</code> |  |
+| <code>OcrTextLayer</code> | function | <code>src/components/OcrTextLayer.jsx:61</code> |  |
 | <code>getBestIncreasingDocumentEntryIndexes</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:528</code> | Find the document-run entries that best preserve natural page order. |
 | <code>&lt;anonymous&gt;~handleDone</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:1834</code> |  |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/PrintSelectionWorkspace.jsx:1774</code> |  |
@@ -679,8 +681,8 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
-| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:41</code> |  |
-| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:22</code> | Idle time after which the OCR worker is terminated to free its memory. |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:46</code> |  |
+| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:27</code> | Idle time after which the OCR worker is terminated to free its memory. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |
@@ -848,6 +850,14 @@
 | <code>SKIP</code> | member | <code>src/ocr/classify.js:20</code> | Not a page OCR can work on. |
 | <code>TEXT_LAYER</code> | member | <code>src/ocr/classify.js:29</code> | The PDF page has a usable text layer that could not be placed as words \(none of its text is upright, or the page has no size\); the viewer&#39;s own text wins. |
 | <code>UNSUPPORTED</code> | member | <code>src/ocr/classify.js:31</code> | A format the viewer does not rasterise into a page image. |
+| <code>DETECTABLE_LANGUAGES</code> | constant | <code>src/ocr/detectLanguage.js:64</code> | The languages the guess knows function words for \(ISO 639-1\). |
+| <code>detectTextLanguage</code> | function | <code>src/ocr/detectLanguage.js:83</code> |  |
+| <code>DISTINCTIVE_LETTERS</code> | constant | <code>src/ocr/detectLanguage.js:50</code> | Letters that point at a language more than at its neighbours. |
+| <code>FUNCTION_WORDS</code> | constant | <code>src/ocr/detectLanguage.js:37</code> | Common function words per language \(ISO 639-1\), lower case. |
+| <code>LETTER_SCORE</code> | constant | <code>src/ocr/detectLanguage.js:28</code> | Score a distinctive letter adds, and the most such letters that count. |
+| <code>MIN_HITS</code> | constant | <code>src/ocr/detectLanguage.js:24</code> | Fewest function-word hits the winning language needs. |
+| <code>RUNNER_UP_RATIO</code> | constant | <code>src/ocr/detectLanguage.js:26</code> | The winner must have at least this many times the runner-up&#39;s score. |
+| <code>TextLanguageGuess</code> | typedef | <code>src/ocr/detectLanguage.js:68</code> |  |
 | <code>ASSETS</code> | member | <code>src/ocr/engine.js:41</code> | The worker script, engine core or a language model could not be loaded. |
 | <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:85</code> | Classify a start-up error by its message. |
 | <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:148</code> | Create an engine for the given languages and asset URLs. |
@@ -901,7 +911,7 @@
 | <code>PreparedOcrImage</code> | typedef | <code>src/ocr/prepareImage.js:86</code> |  |
 | <code>prepareOcrImage</code> | function | <code>src/ocr/prepareImage.js:106</code> |  |
 | <code>releaseCanvas</code> | function | <code>src/ocr/prepareImage.js:62</code> | Free the canvas backing store. |
-| <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:117</code> |  |
+| <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:120</code> |  |
 | <code>OCR_OUTCOME_SOURCE</code> | constant | <code>src/ocr/queue.js:66</code> | Where a done outcome&#39;s words come from \( source \). |
 | <code>OCR_STEP_TIMEOUTS_MS</code> | constant | <code>src/ocr/queue.js:28</code> | Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo... |
 | <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:89</code> |  |
@@ -909,7 +919,7 @@
 | <code>OcrQueueSnapshot</code> | typedef | <code>src/ocr/queue.js:82</code> |  |
 | <code>PDF_TEXT</code> | member | <code>src/ocr/queue.js:70</code> | The PDF page&#39;s own text layer, read through pdf.js; the engine never ran. |
 | <code>RECOGNITION</code> | member | <code>src/ocr/queue.js:68</code> | The engine recognised the page image. |
-| <code>createOcrQueue~retained</code> | member | <code>src/ocr/queue.js:134</code> | null until retainSources is called: every source is retained. |
+| <code>createOcrQueue~retained</code> | member | <code>src/ocr/queue.js:138</code> | null until retainSources is called: every source is retained. |
 | <code>TIMEOUT_STEP</code> | constant | <code>src/ocr/queue.js:35</code> | Marker on the error of a step that exceeded its bound. |
 | <code>withTimeout</code> | function | <code>src/ocr/queue.js:43</code> |  |
 | <code>createOcrResultCache</code> | function | <code>src/ocr/resultCache.js:32</code> |  |
@@ -1139,6 +1149,7 @@
 | <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:89</code> | Revoke every tracked object URL. |
 | <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:47</code> |  |
 | <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:60</code> |  |
+| <code>speechLanguagesForOcr</code> | function | <code>src/utils/ocrLanguageCodes.js:23</code> | The ISO 639-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out. |
 | <code>isOcrModuleRequested</code> | function | <code>src/utils/ocrLoader.js:33</code> | True once the module import has been requested in this session. |
 | <code>loadOcrModule</code> | function | <code>src/utils/ocrLoader.js:20</code> |  |
 | <code>resetOcrModuleForTests</code> | function | <code>src/utils/ocrLoader.js:38</code> | Test hook: forget the cached import so the next call imports again. |
@@ -1721,31 +1732,31 @@
 | <code>withTimeout</code> | function | <code>src/utils/renderDecodeBenchmark.js:353</code> |  |
 | <code>clampRenderSurfaceSize</code> | function | <code>src/utils/renderSurfaceBounds.js:25</code> | Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio. |
 | <code>MAX_RENDER_SURFACE_DIMENSION</code> | constant | <code>src/utils/renderSurfaceBounds.js:9</code> | OpenDocViewer — conservative raster surface bounds. |
-| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:506</code> | Clamp a numeric config value to a safe range. |
+| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:518</code> | Clamp a numeric config value to a safe range. |
 | <code>COMPARE_ADJUST_TOOLBAR_MODES</code> | constant | <code>src/utils/runtimeConfig.js:34</code> | Runtime validation values for CompareAdjustToolbarMode; the first one is the default. |
 | <code>CompareAdjustToolbarMode</code> | typedef | <code>src/utils/runtimeConfig.js:12</code> |  |
 | <code>DEFAULT_OCR_LANGUAGES</code> | constant | <code>src/utils/runtimeConfig.js:306</code> | Default OCR languages \(Tesseract language codes\), tried together on every text line. |
 | <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:50</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
-| <code>describeOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:429</code> | Describe how ocr.assetBaseUrl resolves. |
-| <code>describeOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:355</code> | Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in. |
+| <code>describeOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:441</code> | Describe how ocr.assetBaseUrl resolves. |
+| <code>describeOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:367</code> | Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in. |
 | <code>getCompareAdjustToolbarMode</code> | function | <code>src/utils/runtimeConfig.js:241</code> | Resolve how the main toolbar&#39;s image controls behave in compare mode \( compare.adjust.toolbarMode \). |
 | <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:142</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:454</code> | Resolve where the OCR engine, worker and language files are served from \( ocr.assetBaseUrl \): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v... |
-| <code>getOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:398</code> | Resolve the OCR languages \( ocr.languages \): the languages of describeOcrLanguages. |
-| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:883</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
+| <code>getOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:466</code> | Resolve where the OCR engine, worker and language files are served from \( ocr.assetBaseUrl \): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v... |
+| <code>getOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:410</code> | Resolve the OCR languages \( ocr.languages \): the languages of describeOcrLanguages. |
+| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:895</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
 | <code>getPdfSignatureInspectionStart</code> | function | <code>src/utils/runtimeConfig.js:281</code> | Resolve when PDF signature inspection may start \( pdfSignatures.inspectAfter \): &#39;firstPage&#39; \(default\) starts once the first page is shown, &#39;allPages&#39; waits until every page of the... |
 | <code>getPdfSignatureUncheckedSeverity</code> | function | <code>src/utils/runtimeConfig.js:298</code> | Resolve the symbol severity for a signature the viewer could not check itself \(integrity not-checked-in-viewer : format, algorithm, budget, encryption, worker failure\), from pdfSi... |
-| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:758</code> | Resolve the default print page mode used when the user has not stored an override. |
-| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:783</code> | Resolve the print-selection workspace configuration. |
+| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:770</code> | Resolve the default print page mode used when the user has not stored an override. |
+| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:795</code> | Resolve the print-selection workspace configuration. |
 | <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:119</code> | Read the merged runtime configuration from the browser environment. |
-| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:866</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
-| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:466</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
-| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:734</code> | Resolve the configured custom-size limits. |
-| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:720</code> | Resolve the custom-size width factor percentage. |
-| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:707</code> | Resolve the initial page zoom mode. |
-| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:807</code> | Resolve the optional scroll-at-edge page turn gesture. |
-| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:825</code> | Resolve the configurable viewer-level problem notice. |
-| <code>INVALID_CHARACTERS</code> | member | <code>src/utils/runtimeConfig.js:409</code> | The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme. |
+| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:878</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
+| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:478</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
+| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:746</code> | Resolve the configured custom-size limits. |
+| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:732</code> | Resolve the custom-size width factor percentage. |
+| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:719</code> | Resolve the initial page zoom mode. |
+| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:819</code> | Resolve the optional scroll-at-edge page turn gesture. |
+| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:837</code> | Resolve the configurable viewer-level problem notice. |
+| <code>INVALID_CHARACTERS</code> | member | <code>src/utils/runtimeConfig.js:421</code> | The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme. |
 | <code>isCompareCurtainEnabled</code> | function | <code>src/utils/runtimeConfig.js:214</code> | Resolve whether the compare curtain view is available \( compare.curtain.enabled \). |
 | <code>isCompareCurtainPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:226</code> | Resolve whether the compare curtain view offers its print action \( compare.curtain.print.enabled \). |
 | <code>isCompareOverlayEnabled</code> | function | <code>src/utils/runtimeConfig.js:190</code> | Resolve whether the compare overlay view is available \( compare.overlay.enabled \). |
@@ -1756,32 +1767,33 @@
 | <code>isOcrLineRemovalEnabled</code> | function | <code>src/utils/runtimeConfig.js:332</code> | Resolve whether the ruling lines of tables and forms are removed from a copy of the page image before recognition \( ocr.removeRulingLines \). |
 | <code>isPdfSignatureInspectionEnabled</code> | function | <code>src/utils/runtimeConfig.js:268</code> | Resolve whether PDF signature inspection runs at all \( pdfSignatures.enabled \). |
 | <code>isSignatureThumbnailPageBadgeEnabled</code> | function | <code>src/utils/runtimeConfig.js:255</code> | Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol. |
+| <code>isSpeechLanguageAutoDetectEnabled</code> | function | <code>src/utils/runtimeConfig.js:344</code> | Resolve whether the language of a page&#39;s text is guessed among the OCR languages, for the read-aloud language and the text layer&#39;s lang \( ocr.speech.autoDetectLanguage \). |
 | <code>KEYBOARD_PRINT_SHORTCUT_BEHAVIORS</code> | constant | <code>src/utils/runtimeConfig.js:32</code> | Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. |
 | <code>KeyboardPrintShortcutBehavior</code> | typedef | <code>src/utils/runtimeConfig.js:9</code> |  |
-| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:484</code> | Normalize a runtime flag to a boolean. |
-| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:681</code> | Normalize the optional user custom-size limits. |
-| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:652</code> | Normalize a custom fit-width factor. |
-| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:620</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
-| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:552</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
-| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:531</code> | Normalize an integer config value and clamp it to the supplied range. |
-| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:663</code> | Normalize an optional custom-size limit percentage. |
-| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:635</code> | Normalize a user-facing print default mode. |
-| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:581</code> | Resolve the configured reset-session fallback target. |
-| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:569</code> | Normalize the runtime session-reset target. |
-| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:595</code> | Normalize a user-facing zoom mode string before alias lookup. |
-| <code>OCR_ASSET_BASE_URL_REJECTIONS</code> | constant | <code>src/utils/runtimeConfig.js:403</code> | Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once. |
+| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:496</code> | Normalize a runtime flag to a boolean. |
+| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:693</code> | Normalize the optional user custom-size limits. |
+| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:664</code> | Normalize a custom fit-width factor. |
+| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:632</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
+| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:564</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
+| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:543</code> | Normalize an integer config value and clamp it to the supplied range. |
+| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:675</code> | Normalize an optional custom-size limit percentage. |
+| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:647</code> | Normalize a user-facing print default mode. |
+| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:593</code> | Resolve the configured reset-session fallback target. |
+| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:581</code> | Normalize the runtime session-reset target. |
+| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:607</code> | Normalize a user-facing zoom mode string before alias lookup. |
+| <code>OCR_ASSET_BASE_URL_REJECTIONS</code> | constant | <code>src/utils/runtimeConfig.js:415</code> | Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once. |
 | <code>OCR_LANGUAGE_CODE_PATTERN</code> | constant | <code>src/utils/runtimeConfig.js:308</code> | Tesseract language codes: three lower-case letters, optionally with _suffixes \(chi_sim, aze_cyrl\). |
 | <code>PDF_SIGNATURE_UNCHECKED_SEVERITIES</code> | constant | <code>src/utils/runtimeConfig.js:36</code> | Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default. |
 | <code>PdfSignatureUncheckedSeverity</code> | typedef | <code>src/utils/runtimeConfig.js:13</code> |  |
 | <code>PRINT_DEFAULT_MODE_ALIASES</code> | constant | <code>src/utils/runtimeConfig.js:40</code> | User-facing print default mode aliases mapped to persisted PrintDefaultMode values. |
 | <code>PrintDefaultMode</code> | typedef | <code>src/utils/runtimeConfig.js:11</code> |  |
 | <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:78</code> |  |
-| <code>QUERY_OR_FRAGMENT</code> | member | <code>src/utils/runtimeConfig.js:405</code> | The value carries ? |
+| <code>QUERY_OR_FRAGMENT</code> | member | <code>src/utils/runtimeConfig.js:417</code> | The value carries ? |
 | <code>readBooleanSwitch</code> | function | <code>src/utils/runtimeConfig.js:167</code> | Read a strict boolean switch: only a real boolean counts, anything else \(missing, strings such as &amp;quot;false&amp;quot;, numbers, null, objects\) falls back to defaultValue . |
 | <code>RESET_SESSION_TARGETS</code> | constant | <code>src/utils/runtimeConfig.js:38</code> | Runtime validation values for ResetSessionTarget; the typedef documents the public contract. |
 | <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:14</code> | Session-reset target for the support/problem notice. |
-| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:606</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
-| <code>SCHEME</code> | member | <code>src/utils/runtimeConfig.js:407</code> | The value has a scheme other than http or https \(javascript:, data:, blob:, file:, a drive letter\). |
+| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:618</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
+| <code>SCHEME</code> | member | <code>src/utils/runtimeConfig.js:419</code> | The value has a scheme other than http or https \(javascript:, data:, blob:, file:, a drive letter\). |
 | <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:71</code> |  |
 | <code>ViewerDefaultZoomMode</code> | typedef | <code>src/utils/runtimeConfig.js:10</code> |  |
 | <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:85</code> |  |
@@ -1826,17 +1838,16 @@
 | <code>SourceTempStore#touchIndexedDbRecord</code> | function | <code>src/utils/sourceTempStore.js:858</code> |  |
 | <code>transactionDone</code> | function | <code>src/utils/sourceTempStore.js:134</code> |  |
 | <code>SourceTempStore#updateConfig</code> | function | <code>src/utils/sourceTempStore.js:374</code> | Update runtime thresholds for the active session. |
-| <code>canonicalLocale</code> | function | <code>src/utils/speech.js:78</code> | A voice&#39;s locale in canonical form \(&#39;sv_se&#39; → &#39;sv-SE&#39;\), or &#39;&#39; for none. |
-| <code>isLocalSpeechVoice</code> | function | <code>src/utils/speech.js:92</code> | Whether a voice runs on the machine. |
-| <code>isSpeechSynthesisAvailable</code> | function | <code>src/utils/speech.js:23</code> |  |
-| <code>listSpeechLocales</code> | function | <code>src/utils/speech.js:103</code> | The locales the installed local voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists. |
-| <code>pickSpeechVoice</code> | function | <code>src/utils/speech.js:143</code> | The local voice to use for a locale: exact locale first, then the same base language \(the browser&#39;s default voice first among equals\), else null. |
-| <code>resolveSpeechLanguage</code> | function | <code>src/utils/speech.js:35</code> | The speech locale for a viewer UI language \(&#39;sv&#39; → &#39;sv-SE&#39;\); other codes pass through. |
-| <code>speakText</code> | function | <code>src/utils/speech.js:178</code> | Speak text aloud with a local voice. |
-| <code>SPEECH_MAX_CHUNK_LENGTH</code> | constant | <code>src/utils/speech.js:18</code> | Longest chunk handed to the synthesiser \(characters\). |
-| <code>SpeechController</code> | typedef | <code>src/utils/speech.js:156</code> |  |
-| <code>speechLocaleLabel</code> | function | <code>src/utils/speech.js:121</code> | The name of a locale in the UI language \(&#39;sv-SE&#39; in Swedish: &amp;quot;svenska \(Sverige\)&amp;quot;\), through Intl.DisplayNames where the browser has it, else the code itself. |
-| <code>splitSpeechChunks</code> | function | <code>src/utils/speech.js:51</code> | Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long. |
+| <code>canonicalLocale</code> | function | <code>src/utils/speech.js:79</code> | A voice&#39;s locale in canonical form \(&#39;sv_se&#39; → &#39;sv-SE&#39;\), or &#39;&#39; for none. |
+| <code>isLocalSpeechVoice</code> | function | <code>src/utils/speech.js:93</code> | Whether a voice runs on the machine. |
+| <code>isSpeechSynthesisAvailable</code> | function | <code>src/utils/speech.js:24</code> |  |
+| <code>pickSpeechVoice</code> | function | <code>src/utils/speech.js:127</code> | The local voice to use for a locale: exact locale first, then the same base language \(the browser&#39;s default voice first among equals\), else null. |
+| <code>resolveSpeechLanguage</code> | function | <code>src/utils/speech.js:36</code> | The speech locale for a viewer UI language \(&#39;sv&#39; → &#39;sv-SE&#39;\); other codes pass through. |
+| <code>speakText</code> | function | <code>src/utils/speech.js:163</code> | Speak text aloud with a local voice. |
+| <code>SPEECH_MAX_CHUNK_LENGTH</code> | constant | <code>src/utils/speech.js:19</code> | Longest chunk handed to the synthesiser \(characters\). |
+| <code>SpeechController</code> | typedef | <code>src/utils/speech.js:140</code> |  |
+| <code>speechLocaleLabel</code> | function | <code>src/utils/speech.js:105</code> | The name of a locale in the UI language \(&#39;sv-SE&#39; in Swedish: &amp;quot;svenska \(Sverige\)&amp;quot;\), through Intl.DisplayNames where the browser has it, else the code itself. |
+| <code>splitSpeechChunks</code> | function | <code>src/utils/speech.js:52</code> | Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long. |
 | <code>collectConfigDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:137</code> |  |
 | <code>collectLocationDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:124</code> |  |
 | <code>collectNavigatorDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:107</code> |  |
@@ -1857,45 +1868,45 @@
 | <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:295</code> |  |
 | <code>applyToolbarDensityToDocument</code> | function | <code>src/utils/toolbarDensity.js:22</code> | Apply the toolbar density to the document root \(SSR-safe\). |
 | <code>toolbarDensityFor</code> | function | <code>src/utils/toolbarDensity.js:12</code> |  |
-| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:521</code> |  |
-| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:466</code> |  |
-| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:431</code> |  |
-| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:406</code> |  |
-| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:334</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
+| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:525</code> |  |
+| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:470</code> |  |
+| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:435</code> |  |
+| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:410</code> |  |
+| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:337</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
 | <code>CustomFitSizeLimitPreference</code> | typedef | <code>src/utils/viewerPreferences.js:20</code> |  |
-| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:481</code> |  |
-| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:440</code> |  |
-| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:415</code> |  |
-| <code>getEffectiveToolbarLargeButtons</code> | function | <code>src/utils/viewerPreferences.js:553</code> | Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons \(large unless explicitly false\). |
-| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:343</code> |  |
-| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:388</code> |  |
-| <code>getSpeechLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:366</code> | The locale the read-aloud button speaks in, or null to follow the UI language. |
-| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:293</code> |  |
-| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:264</code> |  |
-| <code>getToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:533</code> | The user&#39;s stored &amp;quot;Larger toolbar buttons&amp;quot; choice from the theme menu. |
-| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:222</code> |  |
-| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:52</code> |  |
-| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:60</code> |  |
-| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:80</code> |  |
-| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:107</code> |  |
-| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:70</code> | Normalize legacy theme-mode values. |
-| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:157</code> |  |
-| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:169</code> |  |
-| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:186</code> |  |
-| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:254</code> | Persist an already-normalized full preference object. |
-| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:494</code> |  |
-| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:453</code> |  |
-| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:423</code> |  |
-| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:354</code> | Persist a language choice, or clear it when the normalized value is empty. |
-| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:399</code> |  |
-| <code>setSpeechLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:377</code> | Persist the read-aloud locale, or clear it \(follow the UI language\) when the value is empty. |
-| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:310</code> | Persist the user&#39;s theme mode preference. |
-| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:283</code> |  |
-| <code>setToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:542</code> |  |
-| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:232</code> |  |
+| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:485</code> |  |
+| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:444</code> |  |
+| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:419</code> |  |
+| <code>getEffectiveToolbarLargeButtons</code> | function | <code>src/utils/viewerPreferences.js:557</code> | Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons \(large unless explicitly false\). |
+| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:346</code> |  |
+| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:392</code> |  |
+| <code>getSpeechLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:369</code> | The read-aloud button&#39;s stored language choice \(see speechLanguage \), or null for automatic. |
+| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:296</code> |  |
+| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:267</code> |  |
+| <code>getToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:537</code> | The user&#39;s stored &amp;quot;Larger toolbar buttons&amp;quot; choice from the theme menu. |
+| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:225</code> |  |
+| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:55</code> |  |
+| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:63</code> |  |
+| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:83</code> |  |
+| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:110</code> |  |
+| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:73</code> | Normalize legacy theme-mode values. |
+| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:160</code> |  |
+| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:172</code> |  |
+| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:189</code> |  |
+| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:257</code> | Persist an already-normalized full preference object. |
+| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:498</code> |  |
+| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:457</code> |  |
+| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:427</code> |  |
+| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:357</code> | Persist a language choice, or clear it when the normalized value is empty. |
+| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:403</code> |  |
+| <code>setSpeechLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:381</code> | Persist the read-aloud language choice \(a language code or &#39;ui&#39;\), or clear it \(automatic\) when the value is empty. |
+| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:313</code> | Persist the user&#39;s theme mode preference. |
+| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:286</code> |  |
+| <code>setToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:546</code> |  |
+| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:235</code> |  |
 | <code>ViewerPreferences</code> | typedef | <code>src/utils/viewerPreferences.js:27</code> |  |
-| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:199</code> |  |
-| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:212</code> |  |
+| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:202</code> |  |
+| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:215</code> |  |
 | <code>applyZoom</code> | function | <code>src/utils/zoomUtils.js:140</code> | Set a new zoom value using the provided setter, clamped to \[MIN_ZOOM, MAX_ZOOM\]. |
 | <code>calculateFitToScreenZoom</code> | function | <code>src/utils/zoomUtils.js:160</code> | Calculate and set a zoom that fits the render surface within both viewport axes. |
 | <code>calculateFitToWidthZoom</code> | function | <code>src/utils/zoomUtils.js:200</code> | Calculate and set a zoom that fits the render surface width within the pane viewport. |
