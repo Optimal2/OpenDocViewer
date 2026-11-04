@@ -30,6 +30,7 @@ import {
  * @property {('system'|'normal'|'light'|'dark')=} themeMode
  * @property {string=} themeSharedRevision
  * @property {string=} language
+ * @property {string=} speechLanguage  Locale the read-aloud button speaks in ('sv-SE'); absent: the UI language.
  * @property {('active'|'all')=} printDefaultMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
  * @property {number=} customFitWidthFactorPercent
@@ -115,6 +116,10 @@ function normalizePreferences(value) {
   if (typeof source.language === 'string') {
     const trimmedLanguage = source.language.trim();
     if (trimmedLanguage) next.language = trimmedLanguage.toLowerCase();
+  }
+  if (typeof source.speechLanguage === 'string') {
+    const trimmedSpeechLanguage = source.speechLanguage.trim();
+    if (trimmedSpeechLanguage) next.speechLanguage = trimmedSpeechLanguage;
   }
   if (source.printDefaultMode != null) {
     next.printDefaultMode = normalizePrintDefaultMode(source.printDefaultMode, 'active');
@@ -351,6 +356,29 @@ export function setLanguagePreference(language) {
   if (normalized) return setViewerPreferences({ language: normalized });
   const next = { ...getViewerPreferences() };
   delete next.language;
+  return replaceViewerPreferences(next);
+}
+
+/**
+ * The locale the read-aloud button speaks in, or null to follow the UI language.
+ * @returns {(string|null)}
+ */
+export function getSpeechLanguagePreference() {
+  const prefs = getViewerPreferences();
+  return typeof prefs.speechLanguage === 'string' && prefs.speechLanguage ? prefs.speechLanguage : null;
+}
+
+/**
+ * Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.
+ *
+ * @param {string} locale
+ * @returns {ViewerPreferences}
+ */
+export function setSpeechLanguagePreference(locale) {
+  const normalized = String(locale || '').trim();
+  if (normalized) return setViewerPreferences({ speechLanguage: normalized });
+  const next = { ...getViewerPreferences() };
+  delete next.speechLanguage;
   return replaceViewerPreferences(next);
 }
 

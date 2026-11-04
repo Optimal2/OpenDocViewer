@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 61. Line count: 22889. JSDoc symbol count: 935.
+File count: 61. Line count: 22966. JSDoc symbol count: 940.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -1008,7 +1008,7 @@ Symbols:
 
 Reading text aloud with the browser's speech synthesis \(Web Speech API, \`window.speechSynthesis\`\).
 
-Exports: `SPEECH_MAX_CHUNK_LENGTH`, `isSpeechSynthesisAvailable`, `resolveSpeechLanguage`, `splitSpeechChunks`, `pickSpeechVoice`, `speakText`
+Exports: `SPEECH_MAX_CHUNK_LENGTH`, `isSpeechSynthesisAvailable`, `resolveSpeechLanguage`, `splitSpeechChunks`, `listSpeechLocales`, `speechLocaleLabel`, `pickSpeechVoice`, `speakText`
 
 Symbols:
 
@@ -1016,6 +1016,9 @@ Symbols:
 - `isSpeechSynthesisAvailable` (function) - No description.
 - `resolveSpeechLanguage` (function) - The speech locale for a viewer UI language \('sv' → 'sv\-SE'\); other codes pass through.
 - `splitSpeechChunks` (function) - Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.
+- `canonicalLocale` (function) - A voice's locale in canonical form \('sv\_se' → 'sv\-SE'\), or '' for none.
+- `listSpeechLocales` (function) - The locales the installed voices offer, each once, in canonical form, sorted: what the read\-aloud language menu lists.
+- `speechLocaleLabel` (function) - The name of a locale in the UI language \('sv\-SE' in Swedish: &quot;svenska \(Sverige\)&quot;\), through Intl.DisplayNames where the browser has it, else the code itself.
 - `pickSpeechVoice` (function) - The installed voice to use for a locale: exact locale first, then the same base language \(preferring a local voice over a remote one\), else null \(the browser then picks by lang \).
 - `SpeechController` (typedef) - No description.
 - `speakText` (function) - Speak text aloud.
@@ -1058,7 +1061,7 @@ Symbols:
 
 Lightweight persisted viewer preferences.
 
-Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `clearThemeSharedRevision`, `getLanguagePreference`, `setLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`, `getToolbarLargeButtonsPreference`, `setToolbarLargeButtonsPreference`, `getEffectiveToolbarLargeButtons`
+Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `clearThemeSharedRevision`, `getLanguagePreference`, `setLanguagePreference`, `getSpeechLanguagePreference`, `setSpeechLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`, `getToolbarLargeButtonsPreference`, `setToolbarLargeButtonsPreference`, `getEffectiveToolbarLargeButtons`
 
 Local imports: `src/utils/runtimeConfig.js`
 

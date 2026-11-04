@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 178
-- Source lines: 66913
-- JSDoc symbols: 1909
+- Source lines: 67136
+- JSDoc symbols: 1916
 - Files with JSDoc: 177
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -35,9 +35,9 @@ Source commit: not embedded
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+- `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/compareTransform.js` - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
 - `src/utils/imageAdjustments.js` - File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
-- `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.

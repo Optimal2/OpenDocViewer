@@ -500,7 +500,11 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   line by line, with an installed voice of the viewer's UI language (Swedish text needs a
   Swedish voice installed in the operating system; otherwise the browser's default voice reads
   it). While reading, the button is a stop button. The voices are the ones the browser offers; a
-  voice installed locally is preferred over an online one of the same language.
+  voice installed locally is preferred over an online one of the same language. Resting the
+  pointer on the button (or pressing an arrow key on it) opens a menu of the locales the
+  installed voices offer, with "Follow the interface language" first; a choice there sets the
+  reading language without changing the UI language and is kept in the viewer preferences
+  (`speechLanguage`, next to `language`) across reloads.
 
 Printing and PDF export never include the layer or the toolbar's OCR group. Texts are in
 `public/locales/<lng>/common.json` under `ocr`.

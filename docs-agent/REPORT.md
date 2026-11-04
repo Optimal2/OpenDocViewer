@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 178
-- Source lines: 66913
-- JSDoc symbols: 1909
+- Source lines: 67136
+- JSDoc symbols: 1916
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -18,7 +18,7 @@
 - `src/utils/compareTransform.js`: 13 incoming local imports
 - `src/utils/imageAdjustments.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
-- `src/utils/viewerPreferences.js`: 7 incoming local imports
+- `src/utils/viewerPreferences.js`: 8 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 6 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports

@@ -2,8 +2,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   getLanguagePreference,
+  getSpeechLanguagePreference,
   getViewerPreferences,
   setLanguagePreference,
+  setSpeechLanguagePreference,
   setViewerPreferences,
 } from '../viewerPreferences.js';
 
@@ -37,5 +39,23 @@ describe('setLanguagePreference', () => {
     expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY))).toEqual({ language: 'en' });
     window.localStorage.clear();
     expect(getLanguagePreference()).toBe('en');
+  });
+});
+
+describe('setSpeechLanguagePreference', () => {
+  beforeEach(clearStores);
+  afterEach(clearStores);
+
+  it('saves a reading locale as given, next to the UI language, and clears it on an empty value', () => {
+    setViewerPreferences({ language: 'sv' });
+    expect(setSpeechLanguagePreference(' en-US ')).toEqual({ language: 'sv', speechLanguage: 'en-US' });
+    expect(getSpeechLanguagePreference()).toBe('en-US');
+    expect(getLanguagePreference()).toBe('sv');
+    window.localStorage.clear();
+    expect(getSpeechLanguagePreference()).toBe('en-US');
+
+    expect(setSpeechLanguagePreference('')).toEqual({ language: 'sv' });
+    expect(getSpeechLanguagePreference()).toBeNull();
+    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY))).toEqual({ language: 'sv' });
   });
 });

@@ -289,8 +289,10 @@
 | <code>module:printRangeDialogHelpers.resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:50</code> | Resolve the string that should be used on physical print/log output for an option. |
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:26</code> |  |
-| <code>selectedLayerText</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:17</code> |  |
+| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:150</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:40</code> |  |
+| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:28</code> | How long the pointer may leave the button and its menu before the menu closes. |
+| <code>selectedLayerText</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:31</code> |  |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:97</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:89</code> |  |
@@ -1824,12 +1826,15 @@
 | <code>SourceTempStore#touchIndexedDbRecord</code> | function | <code>src/utils/sourceTempStore.js:858</code> |  |
 | <code>transactionDone</code> | function | <code>src/utils/sourceTempStore.js:134</code> |  |
 | <code>SourceTempStore#updateConfig</code> | function | <code>src/utils/sourceTempStore.js:374</code> | Update runtime thresholds for the active session. |
+| <code>canonicalLocale</code> | function | <code>src/utils/speech.js:75</code> | A voice&#39;s locale in canonical form \(&#39;sv_se&#39; → &#39;sv-SE&#39;\), or &#39;&#39; for none. |
 | <code>isSpeechSynthesisAvailable</code> | function | <code>src/utils/speech.js:20</code> |  |
-| <code>pickSpeechVoice</code> | function | <code>src/utils/speech.js:78</code> | The installed voice to use for a locale: exact locale first, then the same base language \(preferring a local voice over a remote one\), else null \(the browser then picks by lang \). |
+| <code>listSpeechLocales</code> | function | <code>src/utils/speech.js:89</code> | The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists. |
+| <code>pickSpeechVoice</code> | function | <code>src/utils/speech.js:127</code> | The installed voice to use for a locale: exact locale first, then the same base language \(preferring a local voice over a remote one\), else null \(the browser then picks by lang \). |
 | <code>resolveSpeechLanguage</code> | function | <code>src/utils/speech.js:32</code> | The speech locale for a viewer UI language \(&#39;sv&#39; → &#39;sv-SE&#39;\); other codes pass through. |
-| <code>speakText</code> | function | <code>src/utils/speech.js:110</code> | Speak text aloud. |
+| <code>speakText</code> | function | <code>src/utils/speech.js:159</code> | Speak text aloud. |
 | <code>SPEECH_MAX_CHUNK_LENGTH</code> | constant | <code>src/utils/speech.js:15</code> | Longest chunk handed to the synthesiser \(characters\). |
-| <code>SpeechController</code> | typedef | <code>src/utils/speech.js:91</code> |  |
+| <code>SpeechController</code> | typedef | <code>src/utils/speech.js:140</code> |  |
+| <code>speechLocaleLabel</code> | function | <code>src/utils/speech.js:106</code> | The name of a locale in the UI language \(&#39;sv-SE&#39; in Swedish: &amp;quot;svenska \(Sverige\)&amp;quot;\), through Intl.DisplayNames where the browser has it, else the code itself. |
 | <code>splitSpeechChunks</code> | function | <code>src/utils/speech.js:48</code> | Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long. |
 | <code>collectConfigDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:137</code> |  |
 | <code>collectLocationDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:124</code> |  |
@@ -1851,43 +1856,45 @@
 | <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:295</code> |  |
 | <code>applyToolbarDensityToDocument</code> | function | <code>src/utils/toolbarDensity.js:22</code> | Apply the toolbar density to the document root \(SSR-safe\). |
 | <code>toolbarDensityFor</code> | function | <code>src/utils/toolbarDensity.js:12</code> |  |
-| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:493</code> |  |
-| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:438</code> |  |
-| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:403</code> |  |
-| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:378</code> |  |
-| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:329</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
+| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:521</code> |  |
+| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:466</code> |  |
+| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:431</code> |  |
+| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:406</code> |  |
+| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:334</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
 | <code>CustomFitSizeLimitPreference</code> | typedef | <code>src/utils/viewerPreferences.js:20</code> |  |
-| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:453</code> |  |
-| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:412</code> |  |
-| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:387</code> |  |
-| <code>getEffectiveToolbarLargeButtons</code> | function | <code>src/utils/viewerPreferences.js:525</code> | Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons \(large unless explicitly false\). |
-| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:338</code> |  |
-| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:360</code> |  |
-| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:288</code> |  |
-| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:259</code> |  |
-| <code>getToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:505</code> | The user&#39;s stored &amp;quot;Larger toolbar buttons&amp;quot; choice from the theme menu. |
-| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:217</code> |  |
-| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:51</code> |  |
-| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:59</code> |  |
-| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:79</code> |  |
-| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:106</code> |  |
-| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:69</code> | Normalize legacy theme-mode values. |
-| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:152</code> |  |
-| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:164</code> |  |
-| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:181</code> |  |
-| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:249</code> | Persist an already-normalized full preference object. |
-| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:466</code> |  |
-| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:425</code> |  |
-| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:395</code> |  |
-| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:349</code> | Persist a language choice, or clear it when the normalized value is empty. |
-| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:371</code> |  |
-| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:305</code> | Persist the user&#39;s theme mode preference. |
-| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:278</code> |  |
-| <code>setToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:514</code> |  |
-| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:227</code> |  |
+| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:481</code> |  |
+| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:440</code> |  |
+| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:415</code> |  |
+| <code>getEffectiveToolbarLargeButtons</code> | function | <code>src/utils/viewerPreferences.js:553</code> | Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons \(large unless explicitly false\). |
+| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:343</code> |  |
+| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:388</code> |  |
+| <code>getSpeechLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:366</code> | The locale the read-aloud button speaks in, or null to follow the UI language. |
+| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:293</code> |  |
+| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:264</code> |  |
+| <code>getToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:533</code> | The user&#39;s stored &amp;quot;Larger toolbar buttons&amp;quot; choice from the theme menu. |
+| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:222</code> |  |
+| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:52</code> |  |
+| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:60</code> |  |
+| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:80</code> |  |
+| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:107</code> |  |
+| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:70</code> | Normalize legacy theme-mode values. |
+| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:157</code> |  |
+| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:169</code> |  |
+| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:186</code> |  |
+| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:254</code> | Persist an already-normalized full preference object. |
+| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:494</code> |  |
+| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:453</code> |  |
+| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:423</code> |  |
+| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:354</code> | Persist a language choice, or clear it when the normalized value is empty. |
+| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:399</code> |  |
+| <code>setSpeechLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:377</code> | Persist the read-aloud locale, or clear it \(follow the UI language\) when the value is empty. |
+| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:310</code> | Persist the user&#39;s theme mode preference. |
+| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:283</code> |  |
+| <code>setToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:542</code> |  |
+| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:232</code> |  |
 | <code>ViewerPreferences</code> | typedef | <code>src/utils/viewerPreferences.js:27</code> |  |
-| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:194</code> |  |
-| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:207</code> |  |
+| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:199</code> |  |
+| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:212</code> |  |
 | <code>applyZoom</code> | function | <code>src/utils/zoomUtils.js:140</code> | Set a new zoom value using the provided setter, clamped to \[MIN_ZOOM, MAX_ZOOM\]. |
 | <code>calculateFitToScreenZoom</code> | function | <code>src/utils/zoomUtils.js:160</code> | Calculate and set a zoom that fits the render surface within both viewport axes. |
 | <code>calculateFitToWidthZoom</code> | function | <code>src/utils/zoomUtils.js:200</code> | Calculate and set a zoom that fits the render surface width within the pane viewport. |

@@ -7,10 +7,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   isSpeechSynthesisAvailable,
+  listSpeechLocales,
   pickSpeechVoice,
   resolveSpeechLanguage,
   SPEECH_MAX_CHUNK_LENGTH,
   speakText,
+  speechLocaleLabel,
   splitSpeechChunks,
 } from '../speech.js';
 
@@ -164,5 +166,27 @@ describe('isSpeechSynthesisAvailable', () => {
     expect(isSpeechSynthesisAvailable()).toBe(false);
     vi.stubGlobal('window', {});
     expect(isSpeechSynthesisAvailable()).toBe(false);
+  });
+});
+
+describe('listSpeechLocales', () => {
+  it('lists each locale of the installed voices once, in canonical form, sorted', () => {
+    const voices = [
+      { name: 'A', lang: 'sv-SE' }, { name: 'B', lang: 'sv_se' }, { name: 'C', lang: 'en-GB' },
+      { name: 'D', lang: 'en-US' }, { name: 'E', lang: 'EN-us' }, { name: 'F', lang: '' }, null,
+    ];
+    expect(listSpeechLocales(voices)).toEqual(['en-GB', 'en-US', 'sv-SE']);
+    expect(listSpeechLocales(null)).toEqual([]);
+  });
+});
+
+describe('speechLocaleLabel', () => {
+  it('names a locale in the UI language, capitalised, and falls back to the code', () => {
+    expect(speechLocaleLabel('sv-SE', 'sv')).toMatch(/^Svenska/);
+    expect(speechLocaleLabel('sv-SE', 'en')).toMatch(/^Swedish/);
+    expect(speechLocaleLabel('en-US', 'sv')).toMatch(/^[A-ZÅÄÖ].*engelska/);
+    // A code Intl rejects (a one-letter language) falls back to the code itself.
+    expect(speechLocaleLabel('x', 'sv')).toBe('x');
+    expect(speechLocaleLabel('', 'sv')).toBe('');
   });
 });

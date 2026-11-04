@@ -460,7 +460,9 @@
     },
     "read": {
       "speak": "Read the selected text aloud",
-      "stop": "Stop reading aloud"
+      "stop": "Stop reading aloud",
+      "language": "Reading language",
+      "followUi": "Follow the interface language ({language})"
     }
   },
   "viewer": {

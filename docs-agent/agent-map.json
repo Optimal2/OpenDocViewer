@@ -93,8 +93,8 @@
   },
   "stats": {
     "fileCount": 178,
-    "sourceLineCount": 66913,
-    "docletCount": 1909,
+    "sourceLineCount": 67136,
+    "docletCount": 1916,
     "documentedFileCount": 177,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -521,6 +521,15 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/utils/viewerPreferences.js",
+      "score": 118,
+      "lines": 558,
+      "incomingLocalImports": 8,
+      "doclets": 39,
+      "summary": "Lightweight persisted viewer preferences.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/utils/compareTransform.js",
       "score": 116,
       "lines": 353,
@@ -536,15 +545,6 @@
       "incomingLocalImports": 9,
       "doclets": 9,
       "summary": "File: src/utils/imageAdjustments.js Per-pane pixel adjustments (brightness, contrast, grayscale, invert) and the quarter turn the canvas draws.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/viewerPreferences.js",
-      "score": 114,
-      "lines": 530,
-      "incomingLocalImports": 7,
-      "doclets": 37,
-      "summary": "Lightweight persisted viewer preferences.",
       "summaryConfidence": "high"
     },
     {
@@ -1158,8 +1158,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8517,
-      "docletCount": 146,
+      "lineCount": 8663,
+      "docletCount": 148,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1730,8 +1730,8 @@
     {
       "name": "src/utils",
       "fileCount": 61,
-      "lineCount": 22889,
-      "docletCount": 935,
+      "lineCount": 22966,
+      "docletCount": 940,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1752,6 +1752,15 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/utils/viewerPreferences.js",
+          "score": 118,
+          "lines": 558,
+          "incomingLocalImports": 8,
+          "doclets": 39,
+          "summary": "Lightweight persisted viewer preferences.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/utils/compareTransform.js",
           "score": 116,
           "lines": 353,
@@ -1767,15 +1776,6 @@
           "incomingLocalImports": 9,
           "doclets": 9,
           "summary": "File: src/utils/imageAdjustments.js Per-pane pixel adjustments (brightness, contrast, grayscale, invert) and the quarter turn the canvas draws.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/utils/viewerPreferences.js",
-          "score": 114,
-          "lines": 530,
-          "incomingLocalImports": 7,
-          "doclets": 37,
-          "summary": "Lightweight persisted viewer preferences.",
           "summaryConfidence": "high"
         },
         {
@@ -15877,21 +15877,23 @@
     },
     {
       "path": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "lines": 87,
+      "lines": 233,
       "extension": ".jsx",
-      "jsdocBlockCount": 4,
+      "jsdocBlockCount": 10,
       "sourceSummary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
       "imports": [
         {
           "source": "react",
           "specifiers": [
             "React",
+            "useCallback",
             "useEffect",
+            "useId",
             "useMemo",
             "useRef",
             "useState"
           ],
-          "line": 11,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -15899,7 +15901,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 12,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -15908,17 +15910,28 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 13,
+          "line": 23,
           "kind": "static"
         },
         {
           "source": "../../utils/speech.js",
           "specifiers": [
             "isSpeechSynthesisAvailable",
+            "listSpeechLocales",
             "resolveSpeechLanguage",
-            "speakText"
+            "speakText",
+            "speechLocaleLabel"
           ],
-          "line": 14,
+          "line": 24,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/viewerPreferences.js",
+          "specifiers": [
+            "getSpeechLanguagePreference",
+            "setSpeechLanguagePreference"
+          ],
+          "line": 25,
           "kind": "static"
         }
       ],
@@ -15926,34 +15939,69 @@
         {
           "name": "ReadSelectionButton",
           "kind": "default",
-          "line": 26
+          "line": 40
         }
       ],
       "declarations": [
         {
           "name": "selectedLayerText",
           "kind": "function",
-          "line": 17
+          "line": 31
         },
         {
           "name": "ReadSelectionButton",
           "kind": "component",
-          "line": 26
+          "line": 40
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 35
+          "line": 59
+        },
+        {
+          "name": "read",
+          "kind": "function",
+          "line": 70
+        },
+        {
+          "name": "clearCloseTimer",
+          "kind": "function",
+          "line": 76
+        },
+        {
+          "name": "openMenu",
+          "kind": "function",
+          "line": 82
+        },
+        {
+          "name": "closeMenuSoon",
+          "kind": "function",
+          "line": 95
+        },
+        {
+          "name": "onPointerDown",
+          "kind": "function",
+          "line": 106
+        },
+        {
+          "name": "onKeyDown",
+          "kind": "function",
+          "line": 110
         },
         {
           "name": "stop",
           "kind": "function",
-          "line": 46
+          "line": 129
         },
         {
           "name": "speak",
           "kind": "function",
-          "line": 50
+          "line": 133
+        },
+        {
+          "name": "chooseLanguage",
+          "kind": "function",
+          "line": 150
         }
       ],
       "parseError": null,
@@ -15963,13 +16011,26 @@
       },
       "doclets": [
         {
+          "id": "READ_MENU_CLOSE_DELAY_MS",
+          "name": "READ_MENU_CLOSE_DELAY_MS",
+          "longname": "READ_MENU_CLOSE_DELAY_MS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+          "line": 28,
+          "description": "How long the pointer may leave the button and its menu before the menu closes.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "selectedLayerText",
           "name": "selectedLayerText",
           "longname": "selectedLayerText",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 17,
+          "line": 31,
           "description": "",
           "params": [],
           "returns": [
@@ -15987,7 +16048,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 26,
+          "line": 40,
           "description": "",
           "params": [],
           "returns": [
@@ -15996,6 +16057,26 @@
               "description": ""
             }
           ],
+          "examples": 0
+        },
+        {
+          "id": "ReadSelectionButton~chooseLanguage",
+          "name": "chooseLanguage",
+          "longname": "ReadSelectionButton~chooseLanguage",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+          "line": 150,
+          "description": "",
+          "params": [
+            {
+              "name": "locale",
+              "type": "string",
+              "optional": false,
+              "description": "'' follows the UI language."
+            }
+          ],
+          "returns": [],
           "examples": 0
         }
       ],
@@ -16007,7 +16088,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 13,
+          "line": 23,
           "kind": "static",
           "resolved": "src/utils/ocrTextLayout.js"
         },
@@ -16015,12 +16096,24 @@
           "source": "../../utils/speech.js",
           "specifiers": [
             "isSpeechSynthesisAvailable",
+            "listSpeechLocales",
             "resolveSpeechLanguage",
-            "speakText"
+            "speakText",
+            "speechLocaleLabel"
           ],
-          "line": 14,
+          "line": 24,
           "kind": "static",
           "resolved": "src/utils/speech.js"
+        },
+        {
+          "source": "../../utils/viewerPreferences.js",
+          "specifiers": [
+            "getSpeechLanguagePreference",
+            "setSpeechLanguagePreference"
+          ],
+          "line": 25,
+          "kind": "static",
+          "resolved": "src/utils/viewerPreferences.js"
         }
       ],
       "packageImports": [
@@ -16028,12 +16121,14 @@
           "source": "react",
           "specifiers": [
             "React",
+            "useCallback",
             "useEffect",
+            "useId",
             "useMemo",
             "useRef",
             "useState"
           ],
-          "line": 11,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -16041,12 +16136,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 12,
+          "line": 22,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 19,
+      "importanceScore": 26,
       "summary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -74713,9 +74808,9 @@
     },
     {
       "path": "src/utils/speech.js",
-      "lines": 162,
+      "lines": 211,
       "extension": ".js",
-      "jsdocBlockCount": 8,
+      "jsdocBlockCount": 11,
       "sourceSummary": "Reading text aloud with the browser's speech synthesis (Web Speech API, `window.speechSynthesis`).",
       "imports": [],
       "exports": [
@@ -74740,14 +74835,24 @@
           "line": 48
         },
         {
+          "name": "listSpeechLocales",
+          "kind": "function",
+          "line": 89
+        },
+        {
+          "name": "speechLocaleLabel",
+          "kind": "function",
+          "line": 106
+        },
+        {
           "name": "pickSpeechVoice",
           "kind": "function",
-          "line": 78
+          "line": 127
         },
         {
           "name": "speakText",
           "kind": "function",
-          "line": 110
+          "line": 159
         }
       ],
       "declarations": [
@@ -74767,29 +74872,44 @@
           "line": 48
         },
         {
+          "name": "canonicalLocale",
+          "kind": "function",
+          "line": 75
+        },
+        {
+          "name": "listSpeechLocales",
+          "kind": "function",
+          "line": 89
+        },
+        {
+          "name": "speechLocaleLabel",
+          "kind": "function",
+          "line": 106
+        },
+        {
           "name": "pickSpeechVoice",
           "kind": "function",
-          "line": 78
+          "line": 127
         },
         {
           "name": "normalize",
           "kind": "function",
-          "line": 83
+          "line": 132
         },
         {
           "name": "rank",
           "kind": "function",
-          "line": 84
+          "line": 133
         },
         {
           "name": "speakText",
           "kind": "function",
-          "line": 110
+          "line": 159
         },
         {
           "name": "finish",
           "kind": "function",
-          "line": 115
+          "line": 164
         }
       ],
       "parseError": null,
@@ -74886,13 +75006,94 @@
           "examples": 0
         },
         {
+          "id": "canonicalLocale",
+          "name": "canonicalLocale",
+          "longname": "canonicalLocale",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/speech.js",
+          "line": 75,
+          "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
+          "params": [
+            {
+              "name": "lang",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "listSpeechLocales",
+          "name": "listSpeechLocales",
+          "longname": "listSpeechLocales",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/speech.js",
+          "line": 89,
+          "description": "The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
+          "params": [
+            {
+              "name": "voices",
+              "type": "Array.<Object>",
+              "optional": false,
+              "description": "SpeechSynthesisVoice-like: { lang } ."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<string>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "speechLocaleLabel",
+          "name": "speechLocaleLabel",
+          "longname": "speechLocaleLabel",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/speech.js",
+          "line": 106,
+          "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
+          "params": [
+            {
+              "name": "locale",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "uiLanguage",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "pickSpeechVoice",
           "name": "pickSpeechVoice",
           "longname": "pickSpeechVoice",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 78,
+          "line": 127,
           "description": "The installed voice to use for a locale: exact locale first, then the same base language (preferring a local voice over a remote one), else null (the browser then picks by lang ).",
           "params": [
             {
@@ -74923,7 +75124,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 91,
+          "line": 140,
           "description": "",
           "params": [],
           "returns": [],
@@ -74936,7 +75137,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/speech.js",
-          "line": 110,
+          "line": 159,
           "description": "Speak text aloud.",
           "params": [
             {
@@ -74995,7 +75196,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 60,
+      "importanceScore": 63,
       "summary": "Reading text aloud with the browser's speech synthesis (Web Speech API, `window.speechSynthesis`).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -75732,9 +75933,9 @@
     },
     {
       "path": "src/utils/viewerPreferences.js",
-      "lines": 530,
+      "lines": 558,
       "extension": ".js",
-      "jsdocBlockCount": 43,
+      "jsdocBlockCount": 45,
       "sourceSummary": "Lightweight persisted viewer preferences.",
       "imports": [
         {
@@ -75754,344 +75955,369 @@
         {
           "name": "getViewerPreferences",
           "kind": "function",
-          "line": 217
+          "line": 222
         },
         {
           "name": "setViewerPreferences",
           "kind": "function",
-          "line": 227
+          "line": 232
         },
         {
           "name": "getThemePreference",
           "kind": "function",
-          "line": 259
+          "line": 264
         },
         {
           "name": "setThemePreference",
           "kind": "function",
-          "line": 278
+          "line": 283
         },
         {
           "name": "getThemeModePreference",
           "kind": "function",
-          "line": 288
+          "line": 293
         },
         {
           "name": "setThemeModePreference",
           "kind": "function",
-          "line": 305
+          "line": 310
         },
         {
           "name": "clearThemeSharedRevision",
           "kind": "function",
-          "line": 329
+          "line": 334
         },
         {
           "name": "getLanguagePreference",
           "kind": "function",
-          "line": 338
+          "line": 343
         },
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 349
+          "line": 354
+        },
+        {
+          "name": "getSpeechLanguagePreference",
+          "kind": "function",
+          "line": 366
+        },
+        {
+          "name": "setSpeechLanguagePreference",
+          "kind": "function",
+          "line": 377
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 360
+          "line": 388
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 371
+          "line": 399
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 378
+          "line": 406
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 387
+          "line": 415
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 395
+          "line": 423
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 403
+          "line": 431
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 412
+          "line": 440
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 425
+          "line": 453
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 438
+          "line": 466
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 453
+          "line": 481
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 466
+          "line": 494
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 493
+          "line": 521
         },
         {
           "name": "getToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 505
+          "line": 533
         },
         {
           "name": "setToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 514
+          "line": 542
         },
         {
           "name": "getEffectiveToolbarLargeButtons",
           "kind": "function",
-          "line": 525
+          "line": 553
         }
       ],
       "declarations": [
         {
           "name": "isExplicitTheme",
           "kind": "function",
-          "line": 51
+          "line": 52
         },
         {
           "name": "isThemeMode",
           "kind": "function",
-          "line": 59
+          "line": 60
         },
         {
           "name": "normalizeThemeModeValue",
           "kind": "function",
-          "line": 69
+          "line": 70
         },
         {
           "name": "normalizeDefaultZoomModePreference",
           "kind": "function",
-          "line": 79
+          "line": 80
         },
         {
           "name": "normalizePreferences",
           "kind": "function",
-          "line": 106
+          "line": 107
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 109
+          "line": 110
         },
         {
           "name": "parsePreferences",
           "kind": "function",
-          "line": 152
+          "line": 157
         },
         {
           "name": "readPreferencesFromCookie",
           "kind": "function",
-          "line": 164
+          "line": 169
         },
         {
           "name": "readPreferencesFromStorage",
           "kind": "function",
-          "line": 181
+          "line": 186
         },
         {
           "name": "writePreferencesToCookie",
           "kind": "function",
-          "line": 194
+          "line": 199
         },
         {
           "name": "writePreferencesToStorage",
           "kind": "function",
-          "line": 207
+          "line": 212
         },
         {
           "name": "getViewerPreferences",
           "kind": "function",
-          "line": 217
+          "line": 222
         },
         {
           "name": "setViewerPreferences",
           "kind": "function",
-          "line": 227
+          "line": 232
         },
         {
           "name": "replaceViewerPreferences",
           "kind": "function",
-          "line": 249
+          "line": 254
         },
         {
           "name": "getThemePreference",
           "kind": "function",
-          "line": 259
+          "line": 264
         },
         {
           "name": "setThemePreference",
           "kind": "function",
-          "line": 278
+          "line": 283
         },
         {
           "name": "getThemeModePreference",
           "kind": "function",
-          "line": 288
+          "line": 293
         },
         {
           "name": "setThemeModePreference",
           "kind": "function",
-          "line": 305
+          "line": 310
         },
         {
           "name": "clearThemeSharedRevision",
           "kind": "function",
-          "line": 329
+          "line": 334
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 330
+          "line": 335
         },
         {
           "name": "getLanguagePreference",
           "kind": "function",
-          "line": 338
+          "line": 343
         },
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 349
+          "line": 354
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 352
+          "line": 357
+        },
+        {
+          "name": "getSpeechLanguagePreference",
+          "kind": "function",
+          "line": 366
+        },
+        {
+          "name": "setSpeechLanguagePreference",
+          "kind": "function",
+          "line": 377
+        },
+        {
+          "name": "next",
+          "kind": "object",
+          "line": 380
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 360
+          "line": 388
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 371
+          "line": 399
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 378
+          "line": 406
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 379
+          "line": 407
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 387
+          "line": 415
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 395
+          "line": 423
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 403
+          "line": 431
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 404
+          "line": 432
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 412
+          "line": 440
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 425
-        },
-        {
-          "name": "clearCustomFitWidthFactorPreference",
-          "kind": "function",
-          "line": 438
-        },
-        {
-          "name": "next",
-          "kind": "object",
-          "line": 439
-        },
-        {
-          "name": "limits",
-          "kind": "object",
-          "line": 442
-        },
-        {
-          "name": "getCustomFitSizeLimitPreference",
-          "kind": "function",
           "line": 453
         },
         {
-          "name": "setCustomFitSizeLimitPreference",
+          "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
           "line": 466
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 472
+          "line": 467
         },
         {
-          "name": "clearCustomFitSizeLimitPreference",
+          "name": "limits",
+          "kind": "object",
+          "line": 470
+        },
+        {
+          "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 493
+          "line": 481
+        },
+        {
+          "name": "setCustomFitSizeLimitPreference",
+          "kind": "function",
+          "line": 494
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 494
+          "line": 500
+        },
+        {
+          "name": "clearCustomFitSizeLimitPreference",
+          "kind": "function",
+          "line": 521
+        },
+        {
+          "name": "next",
+          "kind": "object",
+          "line": 522
         },
         {
           "name": "getToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 505
+          "line": 533
         },
         {
           "name": "setToolbarLargeButtonsPreference",
           "kind": "function",
-          "line": 514
+          "line": 542
         },
         {
           "name": "getEffectiveToolbarLargeButtons",
           "kind": "function",
-          "line": 525
+          "line": 553
         }
       ],
       "parseError": null,
@@ -76133,7 +76359,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 51,
+          "line": 52,
           "description": "",
           "params": [
             {
@@ -76158,7 +76384,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 59,
+          "line": 60,
           "description": "",
           "params": [
             {
@@ -76183,7 +76409,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 69,
+          "line": 70,
           "description": "Normalize legacy theme-mode values.",
           "params": [
             {
@@ -76208,7 +76434,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 79,
+          "line": 80,
           "description": "",
           "params": [
             {
@@ -76233,7 +76459,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 106,
+          "line": 107,
           "description": "",
           "params": [
             {
@@ -76258,7 +76484,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 152,
+          "line": 157,
           "description": "",
           "params": [
             {
@@ -76283,7 +76509,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 164,
+          "line": 169,
           "description": "",
           "params": [],
           "returns": [
@@ -76301,7 +76527,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 181,
+          "line": 186,
           "description": "",
           "params": [],
           "returns": [
@@ -76319,7 +76545,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 194,
+          "line": 199,
           "description": "",
           "params": [
             {
@@ -76344,7 +76570,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 207,
+          "line": 212,
           "description": "",
           "params": [
             {
@@ -76369,7 +76595,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 217,
+          "line": 222,
           "description": "",
           "params": [],
           "returns": [
@@ -76387,7 +76613,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 227,
+          "line": 232,
           "description": "",
           "params": [
             {
@@ -76412,7 +76638,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 249,
+          "line": 254,
           "description": "Persist an already-normalized full preference object.",
           "params": [
             {
@@ -76437,7 +76663,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 259,
+          "line": 264,
           "description": "",
           "params": [],
           "returns": [
@@ -76455,7 +76681,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 278,
+          "line": 283,
           "description": "",
           "params": [
             {
@@ -76480,7 +76706,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 288,
+          "line": 293,
           "description": "",
           "params": [],
           "returns": [
@@ -76498,7 +76724,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 305,
+          "line": 310,
           "description": "Persist the user's theme mode preference.",
           "params": [
             {
@@ -76523,7 +76749,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 329,
+          "line": 334,
           "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
           "params": [],
           "returns": [
@@ -76541,7 +76767,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 338,
+          "line": 343,
           "description": "",
           "params": [],
           "returns": [
@@ -76559,11 +76785,54 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 349,
+          "line": 354,
           "description": "Persist a language choice, or clear it when the normalized value is empty.",
           "params": [
             {
               "name": "language",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "ViewerPreferences",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "getSpeechLanguagePreference",
+          "name": "getSpeechLanguagePreference",
+          "longname": "getSpeechLanguagePreference",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/viewerPreferences.js",
+          "line": 366,
+          "description": "The locale the read-aloud button speaks in, or null to follow the UI language.",
+          "params": [],
+          "returns": [
+            {
+              "type": "string|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "setSpeechLanguagePreference",
+          "name": "setSpeechLanguagePreference",
+          "longname": "setSpeechLanguagePreference",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/viewerPreferences.js",
+          "line": 377,
+          "description": "Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.",
+          "params": [
+            {
+              "name": "locale",
               "type": "string",
               "optional": false,
               "description": ""
@@ -76584,7 +76853,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 360,
+          "line": 388,
           "description": "",
           "params": [],
           "returns": [
@@ -76602,7 +76871,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 371,
+          "line": 399,
           "description": "",
           "params": [
             {
@@ -76627,7 +76896,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 378,
+          "line": 406,
           "description": "",
           "params": [],
           "returns": [
@@ -76645,7 +76914,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 387,
+          "line": 415,
           "description": "",
           "params": [],
           "returns": [
@@ -76663,7 +76932,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 395,
+          "line": 423,
           "description": "",
           "params": [
             {
@@ -76688,7 +76957,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 403,
+          "line": 431,
           "description": "",
           "params": [],
           "returns": [
@@ -76706,7 +76975,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 412,
+          "line": 440,
           "description": "",
           "params": [],
           "returns": [
@@ -76724,7 +76993,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 425,
+          "line": 453,
           "description": "",
           "params": [
             {
@@ -76749,7 +77018,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 438,
+          "line": 466,
           "description": "",
           "params": [],
           "returns": [
@@ -76767,7 +77036,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 453,
+          "line": 481,
           "description": "",
           "params": [],
           "returns": [
@@ -76785,7 +77054,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 466,
+          "line": 494,
           "description": "",
           "params": [
             {
@@ -76810,7 +77079,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 493,
+          "line": 521,
           "description": "",
           "params": [],
           "returns": [
@@ -76828,7 +77097,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 505,
+          "line": 533,
           "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
           "params": [],
           "returns": [
@@ -76846,7 +77115,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 514,
+          "line": 542,
           "description": "",
           "params": [
             {
@@ -76871,7 +77140,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 525,
+          "line": 553,
           "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
           "params": [
             {
@@ -76907,8 +77176,8 @@
         }
       ],
       "packageImports": [],
-      "incomingLocalImports": 7,
-      "importanceScore": 114,
+      "incomingLocalImports": 8,
+      "importanceScore": 118,
       "summary": "Lightweight persisted viewer preferences.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -86090,13 +86359,33 @@
       "examples": 0
     },
     {
+      "id": "ReadSelectionButton~chooseLanguage",
+      "name": "chooseLanguage",
+      "longname": "ReadSelectionButton~chooseLanguage",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+      "line": 150,
+      "description": "",
+      "params": [
+        {
+          "name": "locale",
+          "type": "string",
+          "optional": false,
+          "description": "'' follows the UI language."
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module.exports",
       "name": "exports",
       "longname": "module.exports",
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 26,
+      "line": 40,
       "description": "",
       "params": [],
       "returns": [
@@ -86108,13 +86397,26 @@
       "examples": 0
     },
     {
+      "id": "READ_MENU_CLOSE_DELAY_MS",
+      "name": "READ_MENU_CLOSE_DELAY_MS",
+      "longname": "READ_MENU_CLOSE_DELAY_MS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
+      "line": 28,
+      "description": "How long the pointer may leave the button and its menu before the menu closes.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "selectedLayerText",
       "name": "selectedLayerText",
       "longname": "selectedLayerText",
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 17,
+      "line": 31,
       "description": "",
       "params": [],
       "returns": [
@@ -123712,6 +124014,31 @@
       "examples": 0
     },
     {
+      "id": "canonicalLocale",
+      "name": "canonicalLocale",
+      "longname": "canonicalLocale",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/speech.js",
+      "line": 75,
+      "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
+      "params": [
+        {
+          "name": "lang",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "isSpeechSynthesisAvailable",
       "name": "isSpeechSynthesisAvailable",
       "longname": "isSpeechSynthesisAvailable",
@@ -123730,13 +124057,38 @@
       "examples": 0
     },
     {
+      "id": "listSpeechLocales",
+      "name": "listSpeechLocales",
+      "longname": "listSpeechLocales",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/speech.js",
+      "line": 89,
+      "description": "The locales the installed voices offer, each once, in canonical form, sorted: what the read-aloud language menu lists.",
+      "params": [
+        {
+          "name": "voices",
+          "type": "Array.<Object>",
+          "optional": false,
+          "description": "SpeechSynthesisVoice-like: { lang } ."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<string>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "pickSpeechVoice",
       "name": "pickSpeechVoice",
       "longname": "pickSpeechVoice",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 78,
+      "line": 127,
       "description": "The installed voice to use for a locale: exact locale first, then the same base language (preferring a local voice over a remote one), else null (the browser then picks by lang ).",
       "params": [
         {
@@ -123792,7 +124144,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 110,
+      "line": 159,
       "description": "Speak text aloud.",
       "params": [
         {
@@ -123866,10 +124218,41 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/speech.js",
-      "line": 91,
+      "line": 140,
       "description": "",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "speechLocaleLabel",
+      "name": "speechLocaleLabel",
+      "longname": "speechLocaleLabel",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/speech.js",
+      "line": 106,
+      "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
+      "params": [
+        {
+          "name": "locale",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "uiLanguage",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -124359,7 +124742,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 493,
+      "line": 521,
       "description": "",
       "params": [],
       "returns": [
@@ -124377,7 +124760,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 438,
+      "line": 466,
       "description": "",
       "params": [],
       "returns": [
@@ -124395,7 +124778,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 403,
+      "line": 431,
       "description": "",
       "params": [],
       "returns": [
@@ -124413,7 +124796,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 378,
+      "line": 406,
       "description": "",
       "params": [],
       "returns": [
@@ -124431,7 +124814,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 329,
+      "line": 334,
       "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
       "params": [],
       "returns": [
@@ -124462,7 +124845,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 453,
+      "line": 481,
       "description": "",
       "params": [],
       "returns": [
@@ -124480,7 +124863,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 412,
+      "line": 440,
       "description": "",
       "params": [],
       "returns": [
@@ -124498,7 +124881,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 387,
+      "line": 415,
       "description": "",
       "params": [],
       "returns": [
@@ -124516,7 +124899,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 525,
+      "line": 553,
       "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
       "params": [
         {
@@ -124541,7 +124924,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 338,
+      "line": 343,
       "description": "",
       "params": [],
       "returns": [
@@ -124559,12 +124942,30 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 360,
+      "line": 388,
       "description": "",
       "params": [],
       "returns": [
         {
           "type": "'active'|'all'|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "getSpeechLanguagePreference",
+      "name": "getSpeechLanguagePreference",
+      "longname": "getSpeechLanguagePreference",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/viewerPreferences.js",
+      "line": 366,
+      "description": "The locale the read-aloud button speaks in, or null to follow the UI language.",
+      "params": [],
+      "returns": [
+        {
+          "type": "string|null",
           "description": ""
         }
       ],
@@ -124577,7 +124978,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 288,
+      "line": 293,
       "description": "",
       "params": [],
       "returns": [
@@ -124595,7 +124996,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 259,
+      "line": 264,
       "description": "",
       "params": [],
       "returns": [
@@ -124613,7 +125014,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 505,
+      "line": 533,
       "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
       "params": [],
       "returns": [
@@ -124631,7 +125032,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 217,
+      "line": 222,
       "description": "",
       "params": [],
       "returns": [
@@ -124649,7 +125050,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 51,
+      "line": 52,
       "description": "",
       "params": [
         {
@@ -124674,7 +125075,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 59,
+      "line": 60,
       "description": "",
       "params": [
         {
@@ -124699,7 +125100,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 79,
+      "line": 80,
       "description": "",
       "params": [
         {
@@ -124724,7 +125125,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 106,
+      "line": 107,
       "description": "",
       "params": [
         {
@@ -124749,7 +125150,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 69,
+      "line": 70,
       "description": "Normalize legacy theme-mode values.",
       "params": [
         {
@@ -124774,7 +125175,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 152,
+      "line": 157,
       "description": "",
       "params": [
         {
@@ -124799,7 +125200,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 164,
+      "line": 169,
       "description": "",
       "params": [],
       "returns": [
@@ -124817,7 +125218,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 181,
+      "line": 186,
       "description": "",
       "params": [],
       "returns": [
@@ -124835,7 +125236,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 249,
+      "line": 254,
       "description": "Persist an already-normalized full preference object.",
       "params": [
         {
@@ -124860,7 +125261,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 466,
+      "line": 494,
       "description": "",
       "params": [
         {
@@ -124885,7 +125286,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 425,
+      "line": 453,
       "description": "",
       "params": [
         {
@@ -124910,7 +125311,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 395,
+      "line": 423,
       "description": "",
       "params": [
         {
@@ -124935,7 +125336,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 349,
+      "line": 354,
       "description": "Persist a language choice, or clear it when the normalized value is empty.",
       "params": [
         {
@@ -124960,12 +125361,37 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 371,
+      "line": 399,
       "description": "",
       "params": [
         {
           "name": "mode",
           "type": "'active'|'all'",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "ViewerPreferences",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "setSpeechLanguagePreference",
+      "name": "setSpeechLanguagePreference",
+      "longname": "setSpeechLanguagePreference",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/viewerPreferences.js",
+      "line": 377,
+      "description": "Persist the read-aloud locale, or clear it (follow the UI language) when the value is empty.",
+      "params": [
+        {
+          "name": "locale",
+          "type": "string",
           "optional": false,
           "description": ""
         }
@@ -124985,7 +125411,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 305,
+      "line": 310,
       "description": "Persist the user's theme mode preference.",
       "params": [
         {
@@ -125010,7 +125436,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 278,
+      "line": 283,
       "description": "",
       "params": [
         {
@@ -125035,7 +125461,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 514,
+      "line": 542,
       "description": "",
       "params": [
         {
@@ -125060,7 +125486,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 227,
+      "line": 232,
       "description": "",
       "params": [
         {
@@ -125098,7 +125524,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 194,
+      "line": 199,
       "description": "",
       "params": [
         {
@@ -125123,7 +125549,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 207,
+      "line": 212,
       "description": "",
       "params": [
         {

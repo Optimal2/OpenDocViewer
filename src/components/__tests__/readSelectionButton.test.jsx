@@ -28,7 +28,11 @@ function installSynthesis() {
   const synthesis = {
     spoken,
     cancel: vi.fn(),
-    getVoices: () => [{ name: 'Svenska', lang: 'sv-SE', localService: true }],
+    getVoices: () => [
+      { name: 'Svenska', lang: 'sv-SE', localService: true },
+      { name: 'English US', lang: 'en-US', localService: true },
+      { name: 'English GB', lang: 'en-GB', localService: false },
+    ],
     speak: vi.fn((utterance) => { spoken.push(utterance); }),
   };
   Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synthesis });
@@ -75,6 +79,8 @@ describe('ReadSelectionButton', () => {
     window.getSelection().removeAllRanges();
     delete window.speechSynthesis;
     delete window.SpeechSynthesisUtterance;
+    window.localStorage.clear();
+    document.cookie = 'ODV_USER_PREFERENCES=; Max-Age=0; Path=/';
   });
 
   const render = () => act(() => { root.render(createElement(ReadSelectionButton)); });
@@ -126,6 +132,63 @@ describe('ReadSelectionButton', () => {
 
     act(() => { synthesis.spoken[0].onend(); synthesis.spoken[1].onend(); });
     expect(button()).toBeNull();
+  });
+
+  it('offers the installed voices\' languages in a menu on hover; the choice is kept and spoken, without touching the UI language', () => {
+    render();
+    select(layerWithText());
+    const shell = () => container.querySelector('.toolbar-ocr-read-shell');
+    const menu = () => container.querySelector('[data-odv-ocr="read-menu"]');
+    expect(menu()).toBeNull();
+    expect(button().getAttribute('aria-expanded')).toBe('false');
+
+    act(() => { shell().dispatchEvent(new MouseEvent('mouseenter', { bubbles: false })); });
+    // React's onMouseEnter listens to mouseover; fire that too for jsdom.
+    act(() => { shell().dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
+    expect(menu()).not.toBeNull();
+    expect(button().getAttribute('aria-expanded')).toBe('true');
+    const items = () => [...menu().querySelectorAll('[role="menuitemradio"]')];
+    expect(items().map((item) => item.getAttribute('data-speech-locale'))).toEqual(['', 'en-GB', 'en-US', 'sv-SE']);
+    expect(items()[0].textContent).toMatch(/Follow the interface language \(Svenska/);
+    expect(items()[0].getAttribute('aria-checked')).toBe('true');
+    // The menu keeps the selection: its mousedown is cancelled like the button's.
+    const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    act(() => { menu().dispatchEvent(mousedown); });
+    expect(mousedown.defaultPrevented).toBe(true);
+
+    act(() => items()[2].click());
+    expect(menu()).toBeNull();
+    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'en-US' });
+    // Named in the UI language (Swedish): "Amerikansk engelska".
+    expect(button().title).toMatch(/Reading language: .*engelska/i);
+    act(() => button().click());
+    expect(synthesis.spoken[0].lang).toBe('en-US');
+    expect(synthesis.spoken[0].voice.name).toBe('English US');
+    act(() => { synthesis.spoken[0].onend(); synthesis.spoken[1].onend(); });
+
+    // Back to the interface language: the preference is cleared and Swedish is spoken again.
+    act(() => { shell().dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
+    act(() => items()[0].click());
+    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES') || '{}')).toEqual({});
+    act(() => button().click());
+    expect(synthesis.spoken[2].lang).toBe('sv-SE');
+  });
+
+  it('opens the language menu from the keyboard, keeps the viewer shortcuts off there, and gives the focus back on Escape', () => {
+    render();
+    select(layerWithText());
+    const menu = () => container.querySelector('[data-odv-ocr="read-menu"]');
+    // The viewer's arrow-key navigation stays out while the focus is in the button or the menu.
+    expect(button().closest('[data-odv-shortcuts="off"]')).not.toBeNull();
+    button().focus();
+    act(() => { button().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })); });
+    expect(menu()).not.toBeNull();
+    const item = menu().querySelector('[role="menuitemradio"]');
+    item.focus();
+    expect(document.activeElement).toBe(item);
+    act(() => { window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })); });
+    expect(menu()).toBeNull();
+    expect(document.activeElement).toBe(button());
   });
 
   it('a click while speaking stops the reading', () => {

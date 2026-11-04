@@ -68,6 +68,55 @@ export function splitSpeechChunks(text, maxLength = SPEECH_MAX_CHUNK_LENGTH) {
 }
 
 /**
+ * A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.
+ * @param {*} lang
+ * @returns {string}
+ */
+function canonicalLocale(lang) {
+  const parts = String(lang || '').trim().replace('_', '-').split('-').filter(Boolean);
+  if (parts.length === 0) return '';
+  const [base, ...rest] = parts;
+  return [base.toLowerCase(), ...rest.map((part) => (part.length === 2 ? part.toUpperCase() : part))].join('-');
+}
+
+/**
+ * The locales the installed voices offer, each once, in canonical form, sorted: what the
+ * read-aloud language menu lists.
+ *
+ * @param {Array<Object>} voices  SpeechSynthesisVoice-like: `{ lang }`.
+ * @returns {Array<string>}
+ */
+export function listSpeechLocales(voices) {
+  const locales = new Set();
+  for (const voice of Array.isArray(voices) ? voices : []) {
+    const locale = canonicalLocale(voice?.lang);
+    if (locale) locales.add(locale);
+  }
+  return [...locales].sort((a, b) => a.localeCompare(b, 'en'));
+}
+
+/**
+ * The name of a locale in the UI language ('sv-SE' in Swedish: "svenska (Sverige)"), through
+ * Intl.DisplayNames where the browser has it, else the code itself.
+ *
+ * @param {string} locale
+ * @param {*} uiLanguage
+ * @returns {string}
+ */
+export function speechLocaleLabel(locale, uiLanguage) {
+  const code = canonicalLocale(locale);
+  if (!code) return '';
+  try {
+    const names = new Intl.DisplayNames([String(uiLanguage || 'en')], { type: 'language' });
+    const label = names.of(code);
+    if (label && label !== code) return label.charAt(0).toUpperCase() + label.slice(1);
+  } catch {
+    // No display names for this language or browser: the code is the label.
+  }
+  return code;
+}
+
+/**
  * The installed voice to use for a locale: exact locale first, then the same base language
  * (preferring a local voice over a remote one), else null (the browser then picks by `lang`).
  *
