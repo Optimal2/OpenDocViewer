@@ -54,3 +54,4 @@ Direct DOM HTML assignment or access.
 
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 85, 86, 87 - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/utils/printDom.js` lines 264 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\).
+- `src/utils/standardManual.js` lines 400 - Filter and sanitize the bundled standard manual for a supplied runtime config.

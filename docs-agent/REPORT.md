@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 181
-- Source lines: 67618
-- JSDoc symbols: 1932
+- Files: 183
+- Source lines: 68123
+- JSDoc symbols: 1959
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -12,7 +12,7 @@
 ## Import Hubs
 
 - `src/logging/systemLogger.js`: 41 incoming local imports
-- `src/utils/runtimeConfig.js`: 30 incoming local imports
+- `src/utils/runtimeConfig.js`: 31 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 13 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports

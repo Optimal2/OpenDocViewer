@@ -92,15 +92,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 181,
-    "sourceLineCount": 67618,
-    "docletCount": 1932,
-    "documentedFileCount": 180,
+    "fileCount": 183,
+    "sourceLineCount": 68123,
+    "docletCount": 1959,
+    "documentedFileCount": 182,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 6195
+    "estimatedSourceTokens": 6246
   },
   "recommendations": [
     "1 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -320,6 +320,17 @@
       ]
     },
     {
+      "packageName": "dompurify",
+      "importCount": 4,
+      "dynamicImportCount": 0,
+      "files": [
+        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+        "src/utils/printDom.js",
+        "src/utils/printPdf.js",
+        "src/utils/standardManual.js"
+      ]
+    },
+    {
       "packageName": "utif2",
       "importCount": 4,
       "dynamicImportCount": 1,
@@ -328,16 +339,6 @@
         "src/components/DocumentLoader/mainThreadRenderer.js",
         "src/utils/pageAssetRenderer.js",
         "src/workers/imageWorker.js"
-      ]
-    },
-    {
-      "packageName": "dompurify",
-      "importCount": 3,
-      "dynamicImportCount": 0,
-      "files": [
-        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-        "src/utils/printDom.js",
-        "src/utils/printPdf.js"
       ]
     },
     {
@@ -508,7 +509,7 @@
       "path": "src/utils/runtimeConfig.js",
       "score": 121,
       "lines": 948,
-      "incomingLocalImports": 30,
+      "incomingLocalImports": 31,
       "doclets": 69,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
@@ -913,6 +914,13 @@
               264
             ],
             "summary": "OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print()."
+          },
+          {
+            "path": "src/utils/standardManual.js",
+            "lines": [
+              400
+            ],
+            "summary": "Filter and sanitize the bundled standard manual for a supplied runtime config."
           }
         ]
       }
@@ -1731,9 +1739,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 62,
-      "lineCount": 23075,
-      "docletCount": 945,
+      "fileCount": 64,
+      "lineCount": 23580,
+      "docletCount": 972,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1748,7 +1756,7 @@
           "path": "src/utils/runtimeConfig.js",
           "score": 121,
           "lines": 948,
-          "incomingLocalImports": 30,
+          "incomingLocalImports": 31,
           "doclets": 69,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
@@ -74484,7 +74492,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 30,
+      "incomingLocalImports": 31,
       "importanceScore": 121,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -75975,6 +75983,1035 @@
       "summary": "Reading text aloud with the browser's speech synthesis (Web Speech API, `window.speechSynthesis`).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/standardManual.js",
+      "lines": 403,
+      "extension": ".js",
+      "jsdocBlockCount": 21,
+      "sourceSummary": null,
+      "imports": [
+        {
+          "source": "dompurify",
+          "specifiers": [
+            "DOMPurify"
+          ],
+          "line": 3,
+          "kind": "static"
+        },
+        {
+          "source": "./standardManualRules.js",
+          "specifiers": [
+            "standardManualOcrSectionRules",
+            "standardManualSectionRules",
+            "resolveStandardManualRuleStates"
+          ],
+          "line": 4,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "filterStandardManual",
+          "kind": "function",
+          "line": 381
+        }
+      ],
+      "declarations": [
+        {
+          "name": "sanitizeManualHtml",
+          "kind": "function",
+          "line": 18
+        },
+        {
+          "name": "headingLevel",
+          "kind": "function",
+          "line": 31
+        },
+        {
+          "name": "guideContainerFor",
+          "kind": "function",
+          "line": 43
+        },
+        {
+          "name": "findHeadingSegment",
+          "kind": "function",
+          "line": 52
+        },
+        {
+          "name": "headingSegmentRange",
+          "kind": "function",
+          "line": 69
+        },
+        {
+          "name": "localFragmentId",
+          "kind": "function",
+          "line": 86
+        },
+        {
+          "name": "recordRemovedSubtree",
+          "kind": "function",
+          "line": 103
+        },
+        {
+          "name": "removeHeadingSegment",
+          "kind": "function",
+          "line": 121
+        },
+        {
+          "name": "matchesOcrRule",
+          "kind": "function",
+          "line": 132
+        },
+        {
+          "name": "filterHeadingRules",
+          "kind": "function",
+          "line": 145
+        },
+        {
+          "name": "isInsideRange",
+          "kind": "function",
+          "line": 174
+        },
+        {
+          "name": "normalizedText",
+          "kind": "function",
+          "line": 186
+        },
+        {
+          "name": "leadingStrongText",
+          "kind": "function",
+          "line": 194
+        },
+        {
+          "name": "filterComparePrintBlocks",
+          "kind": "function",
+          "line": 209
+        },
+        {
+          "name": "hasRemainingFragmentLink",
+          "kind": "function",
+          "line": 274
+        },
+        {
+          "name": "pruneOrphanedLightboxes",
+          "kind": "function",
+          "line": 287
+        },
+        {
+          "name": "unlinkRemovedTargets",
+          "kind": "function",
+          "line": 304
+        },
+        {
+          "name": "firstNumberedTextNode",
+          "kind": "function",
+          "line": 316
+        },
+        {
+          "name": "replaceNumberPrefix",
+          "kind": "function",
+          "line": 331
+        },
+        {
+          "name": "renumberVisibleHeadings",
+          "kind": "function",
+          "line": 343
+        },
+        {
+          "name": "filterStandardManual",
+          "kind": "function",
+          "line": 381
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": [
+          {
+            "key": "innerHTML",
+            "description": "Direct DOM HTML assignment or access",
+            "lines": [
+              400
+            ]
+          }
+        ]
+      },
+      "doclets": [
+        {
+          "id": "sanitizeManualHtml",
+          "name": "sanitizeManualHtml",
+          "longname": "sanitizeManualHtml",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 18,
+          "description": "",
+          "params": [
+            {
+              "name": "html",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "headingLevel",
+          "name": "headingLevel",
+          "longname": "headingLevel",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 31,
+          "description": "",
+          "params": [
+            {
+              "name": "heading",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "guideContainerFor",
+          "name": "guideContainerFor",
+          "longname": "guideContainerFor",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 43,
+          "description": "The embedded guide is a hard boundary.",
+          "params": [
+            {
+              "name": "heading",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "HTMLElement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Element|HTMLElement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "findHeadingSegment",
+          "name": "findHeadingSegment",
+          "longname": "findHeadingSegment",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 52,
+          "description": "",
+          "params": [
+            {
+              "name": "heading",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "HTMLElement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "headingSegmentRange",
+          "name": "headingSegmentRange",
+          "longname": "headingSegmentRange",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 69,
+          "description": "",
+          "params": [
+            {
+              "name": "heading",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "segment",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "includeHeading",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Range",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "localFragmentId",
+          "name": "localFragmentId",
+          "longname": "localFragmentId",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 86,
+          "description": "Decode a same-document fragment.",
+          "params": [
+            {
+              "name": "anchor",
+              "type": "HTMLAnchorElement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "recordRemovedSubtree",
+          "name": "recordRemovedSubtree",
+          "longname": "recordRemovedSubtree",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 103,
+          "description": "Remember ids and lightbox references before a subtree leaves the document.",
+          "params": [
+            {
+              "name": "root",
+              "type": "DocumentFragment|Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "removedIds",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "lightboxCandidates",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "removeHeadingSegment",
+          "name": "removeHeadingSegment",
+          "longname": "removeHeadingSegment",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 121,
+          "description": "",
+          "params": [
+            {
+              "name": "heading",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "HTMLElement",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "removedIds",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "lightboxCandidates",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "matchesOcrRule",
+          "name": "matchesOcrRule",
+          "longname": "matchesOcrRule",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 132,
+          "description": "",
+          "params": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "ruleIds",
+              "type": "Array.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "filterHeadingRules",
+          "name": "filterHeadingRules",
+          "longname": "filterHeadingRules",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 145,
+          "description": "Apply exact-id and OCR heading rules to a parsed manual.",
+          "params": [
+            {
+              "name": "doc",
+              "type": "Document",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "states",
+              "type": "Readonly.<Record<string, boolean>>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "removedIds",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "lightboxCandidates",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "isInsideRange",
+          "name": "isInsideRange",
+          "longname": "isInsideRange",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 174,
+          "description": "",
+          "params": [
+            {
+              "name": "element",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "range",
+              "type": "Range",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "normalizedText",
+          "name": "normalizedText",
+          "longname": "normalizedText",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 186,
+          "description": "",
+          "params": [
+            {
+              "name": "paragraph",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "leadingStrongText",
+          "name": "leadingStrongText",
+          "longname": "leadingStrongText",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 194,
+          "description": "",
+          "params": [
+            {
+              "name": "paragraph",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "filterComparePrintBlocks",
+          "name": "filterComparePrintBlocks",
+          "longname": "filterComparePrintBlocks",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 209,
+          "description": "Remove only the composed-print blocks disabled by site switches.",
+          "params": [
+            {
+              "name": "doc",
+              "type": "Document",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "states",
+              "type": "Readonly.<Record<string, boolean>>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "removedIds",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "lightboxCandidates",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "hasRemainingFragmentLink",
+          "name": "hasRemainingFragmentLink",
+          "longname": "hasRemainingFragmentLink",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 274,
+          "description": "",
+          "params": [
+            {
+              "name": "doc",
+              "type": "Document",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "target",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "pruneOrphanedLightboxes",
+          "name": "pruneOrphanedLightboxes",
+          "longname": "pruneOrphanedLightboxes",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 287,
+          "description": "Remove lightbox subtrees whose last thumbnail belonged to removed content.",
+          "params": [
+            {
+              "name": "doc",
+              "type": "Document",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "removedIds",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "lightboxCandidates",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "unlinkRemovedTargets",
+          "name": "unlinkRemovedTargets",
+          "longname": "unlinkRemovedTargets",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 304,
+          "description": "Preserve link text and inline markup while removing only links to ids that this filter actually removed.",
+          "params": [
+            {
+              "name": "doc",
+              "type": "Document",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "removedIds",
+              "type": "Set.<string>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "firstNumberedTextNode",
+          "name": "firstNumberedTextNode",
+          "longname": "firstNumberedTextNode",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 316,
+          "description": "",
+          "params": [
+            {
+              "name": "root",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Text|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "replaceNumberPrefix",
+          "name": "replaceNumberPrefix",
+          "longname": "replaceNumberPrefix",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 331,
+          "description": "",
+          "params": [
+            {
+              "name": "root",
+              "type": "Element",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "number",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "renumberVisibleHeadings",
+          "name": "renumberVisibleHeadings",
+          "longname": "renumberVisibleHeadings",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 343,
+          "description": "Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links.",
+          "params": [
+            {
+              "name": "doc",
+              "type": "Document",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "filterStandardManual",
+          "name": "filterStandardManual",
+          "longname": "filterStandardManual",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManual.js",
+          "line": 381,
+          "description": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
+          "params": [
+            {
+              "name": "html",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "runtimeConfig",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": "Filtered, sanitized HTML fragment with manual head styles retained."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [
+        {
+          "source": "./standardManualRules.js",
+          "specifiers": [
+            "standardManualOcrSectionRules",
+            "standardManualSectionRules",
+            "resolveStandardManualRuleStates"
+          ],
+          "line": 4,
+          "kind": "static",
+          "resolved": "src/utils/standardManualRules.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "dompurify",
+          "specifiers": [
+            "DOMPurify"
+          ],
+          "line": 3,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 0,
+      "importanceScore": 32,
+      "summary": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
+      "summaryConfidence": "high",
+      "summarySource": "doclet"
+    },
+    {
+      "path": "src/utils/standardManualRules.js",
+      "lines": 102,
+      "extension": ".js",
+      "jsdocBlockCount": 6,
+      "sourceSummary": null,
+      "imports": [
+        {
+          "source": "./runtimeConfig.js",
+          "specifiers": [
+            "isCompareCurtainEnabled",
+            "isCompareCurtainPrintEnabled",
+            "isCompareOverlayEnabled",
+            "isCompareOverlayPrintEnabled",
+            "isFineTuneEnabled",
+            "isOcrEnabled",
+            "isOcrSearchEnabled",
+            "isReadAloudEnabled"
+          ],
+          "line": 3,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "standardManualSectionRules",
+          "kind": "variable",
+          "line": 28
+        },
+        {
+          "name": "standardManualOcrSectionRules",
+          "kind": "variable",
+          "line": 47
+        },
+        {
+          "name": "standardManualRuleIds",
+          "kind": "variable",
+          "line": 59
+        },
+        {
+          "name": "resolveStandardManualRuleStates",
+          "kind": "function",
+          "line": 87
+        }
+      ],
+      "declarations": [
+        {
+          "name": "compareGuideIds",
+          "kind": "function",
+          "line": 20
+        },
+        {
+          "name": "failOpen",
+          "kind": "function",
+          "line": 71
+        },
+        {
+          "name": "resolveStandardManualRuleStates",
+          "kind": "function",
+          "line": 87
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "compareGuideIds",
+          "name": "compareGuideIds",
+          "longname": "compareGuideIds",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManualRules.js",
+          "line": 20,
+          "description": "Return the standalone and embedded-comparison forms of a Swedish/English id pair.",
+          "params": [
+            {
+              "name": "swedish",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "english",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<string>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "standardManualSectionRules",
+          "name": "standardManualSectionRules",
+          "longname": "standardManualSectionRules",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/standardManualRules.js",
+          "line": 28,
+          "description": "Exact-id heading rules.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "standardManualOcrSectionRules",
+          "name": "standardManualOcrSectionRules",
+          "longname": "standardManualOcrSectionRules",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/standardManualRules.js",
+          "line": 47,
+          "description": "OCR headings use the same id in standalone and embedded guides.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "standardManualRuleIds",
+          "name": "standardManualRuleIds",
+          "longname": "standardManualRuleIds",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/standardManualRules.js",
+          "line": 59,
+          "description": "A flat list of every exact element id in the generator-validated rule manifest.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "failOpen",
+          "name": "failOpen",
+          "longname": "failOpen",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManualRules.js",
+          "line": 71,
+          "description": "Read a UI predicate without letting a host-owned Proxy/getter hide manual content.",
+          "params": [
+            {
+              "name": "predicate",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "resolveStandardManualRuleStates",
+          "name": "resolveStandardManualRuleStates",
+          "longname": "resolveStandardManualRuleStates",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/standardManualRules.js",
+          "line": 87,
+          "description": "Resolve every site switch that can hide standard-manual content.",
+          "params": [
+            {
+              "name": "runtimeConfig",
+              "type": "Object",
+              "optional": false,
+              "description": "Supplied merged configuration; never read from globals or mutated."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Readonly.<Record<string, boolean>>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [
+        {
+          "source": "./runtimeConfig.js",
+          "specifiers": [
+            "isCompareCurtainEnabled",
+            "isCompareCurtainPrintEnabled",
+            "isCompareOverlayEnabled",
+            "isCompareOverlayPrintEnabled",
+            "isFineTuneEnabled",
+            "isOcrEnabled",
+            "isOcrSearchEnabled",
+            "isReadAloudEnabled"
+          ],
+          "line": 3,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 46,
+      "summary": "Resolve every site switch that can hide standard-manual content.",
+      "summaryConfidence": "high",
+      "summarySource": "doclet"
     },
     {
       "path": "src/utils/supportDiagnostics.js",
@@ -125423,6 +126460,755 @@
           "description": ""
         }
       ],
+      "examples": 0
+    },
+    {
+      "id": "filterComparePrintBlocks",
+      "name": "filterComparePrintBlocks",
+      "longname": "filterComparePrintBlocks",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 209,
+      "description": "Remove only the composed-print blocks disabled by site switches.",
+      "params": [
+        {
+          "name": "doc",
+          "type": "Document",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "states",
+          "type": "Readonly.<Record<string, boolean>>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "removedIds",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "lightboxCandidates",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "filterHeadingRules",
+      "name": "filterHeadingRules",
+      "longname": "filterHeadingRules",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 145,
+      "description": "Apply exact-id and OCR heading rules to a parsed manual.",
+      "params": [
+        {
+          "name": "doc",
+          "type": "Document",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "states",
+          "type": "Readonly.<Record<string, boolean>>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "removedIds",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "lightboxCandidates",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "filterStandardManual",
+      "name": "filterStandardManual",
+      "longname": "filterStandardManual",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 381,
+      "description": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
+      "params": [
+        {
+          "name": "html",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "runtimeConfig",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": "Filtered, sanitized HTML fragment with manual head styles retained."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "findHeadingSegment",
+      "name": "findHeadingSegment",
+      "longname": "findHeadingSegment",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 52,
+      "description": "",
+      "params": [
+        {
+          "name": "heading",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "body",
+          "type": "HTMLElement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "firstNumberedTextNode",
+      "name": "firstNumberedTextNode",
+      "longname": "firstNumberedTextNode",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 316,
+      "description": "",
+      "params": [
+        {
+          "name": "root",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Text|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "guideContainerFor",
+      "name": "guideContainerFor",
+      "longname": "guideContainerFor",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 43,
+      "description": "The embedded guide is a hard boundary.",
+      "params": [
+        {
+          "name": "heading",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "body",
+          "type": "HTMLElement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Element|HTMLElement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "hasRemainingFragmentLink",
+      "name": "hasRemainingFragmentLink",
+      "longname": "hasRemainingFragmentLink",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 274,
+      "description": "",
+      "params": [
+        {
+          "name": "doc",
+          "type": "Document",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "target",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "headingLevel",
+      "name": "headingLevel",
+      "longname": "headingLevel",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 31,
+      "description": "",
+      "params": [
+        {
+          "name": "heading",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "headingSegmentRange",
+      "name": "headingSegmentRange",
+      "longname": "headingSegmentRange",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 69,
+      "description": "",
+      "params": [
+        {
+          "name": "heading",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "segment",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "includeHeading",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Range",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "isInsideRange",
+      "name": "isInsideRange",
+      "longname": "isInsideRange",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 174,
+      "description": "",
+      "params": [
+        {
+          "name": "element",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "range",
+          "type": "Range",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "leadingStrongText",
+      "name": "leadingStrongText",
+      "longname": "leadingStrongText",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 194,
+      "description": "",
+      "params": [
+        {
+          "name": "paragraph",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "localFragmentId",
+      "name": "localFragmentId",
+      "longname": "localFragmentId",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 86,
+      "description": "Decode a same-document fragment.",
+      "params": [
+        {
+          "name": "anchor",
+          "type": "HTMLAnchorElement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "matchesOcrRule",
+      "name": "matchesOcrRule",
+      "longname": "matchesOcrRule",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 132,
+      "description": "",
+      "params": [
+        {
+          "name": "id",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "ruleIds",
+          "type": "Array.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "normalizedText",
+      "name": "normalizedText",
+      "longname": "normalizedText",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 186,
+      "description": "",
+      "params": [
+        {
+          "name": "paragraph",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "pruneOrphanedLightboxes",
+      "name": "pruneOrphanedLightboxes",
+      "longname": "pruneOrphanedLightboxes",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 287,
+      "description": "Remove lightbox subtrees whose last thumbnail belonged to removed content.",
+      "params": [
+        {
+          "name": "doc",
+          "type": "Document",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "removedIds",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "lightboxCandidates",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "recordRemovedSubtree",
+      "name": "recordRemovedSubtree",
+      "longname": "recordRemovedSubtree",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 103,
+      "description": "Remember ids and lightbox references before a subtree leaves the document.",
+      "params": [
+        {
+          "name": "root",
+          "type": "DocumentFragment|Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "removedIds",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "lightboxCandidates",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "removeHeadingSegment",
+      "name": "removeHeadingSegment",
+      "longname": "removeHeadingSegment",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 121,
+      "description": "",
+      "params": [
+        {
+          "name": "heading",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "body",
+          "type": "HTMLElement",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "removedIds",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "lightboxCandidates",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "renumberVisibleHeadings",
+      "name": "renumberVisibleHeadings",
+      "longname": "renumberVisibleHeadings",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 343,
+      "description": "Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links.",
+      "params": [
+        {
+          "name": "doc",
+          "type": "Document",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "replaceNumberPrefix",
+      "name": "replaceNumberPrefix",
+      "longname": "replaceNumberPrefix",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 331,
+      "description": "",
+      "params": [
+        {
+          "name": "root",
+          "type": "Element",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "number",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "sanitizeManualHtml",
+      "name": "sanitizeManualHtml",
+      "longname": "sanitizeManualHtml",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 18,
+      "description": "",
+      "params": [
+        {
+          "name": "html",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "unlinkRemovedTargets",
+      "name": "unlinkRemovedTargets",
+      "longname": "unlinkRemovedTargets",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManual.js",
+      "line": 304,
+      "description": "Preserve link text and inline markup while removing only links to ids that this filter actually removed.",
+      "params": [
+        {
+          "name": "doc",
+          "type": "Document",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "removedIds",
+          "type": "Set.<string>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "compareGuideIds",
+      "name": "compareGuideIds",
+      "longname": "compareGuideIds",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManualRules.js",
+      "line": 20,
+      "description": "Return the standalone and embedded-comparison forms of a Swedish/English id pair.",
+      "params": [
+        {
+          "name": "swedish",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "english",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<string>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "failOpen",
+      "name": "failOpen",
+      "longname": "failOpen",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManualRules.js",
+      "line": 71,
+      "description": "Read a UI predicate without letting a host-owned Proxy/getter hide manual content.",
+      "params": [
+        {
+          "name": "predicate",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "resolveStandardManualRuleStates",
+      "name": "resolveStandardManualRuleStates",
+      "longname": "resolveStandardManualRuleStates",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/standardManualRules.js",
+      "line": 87,
+      "description": "Resolve every site switch that can hide standard-manual content.",
+      "params": [
+        {
+          "name": "runtimeConfig",
+          "type": "Object",
+          "optional": false,
+          "description": "Supplied merged configuration; never read from globals or mutated."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Readonly.<Record<string, boolean>>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "standardManualOcrSectionRules",
+      "name": "standardManualOcrSectionRules",
+      "longname": "standardManualOcrSectionRules",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/standardManualRules.js",
+      "line": 47,
+      "description": "OCR headings use the same id in standalone and embedded guides.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "standardManualRuleIds",
+      "name": "standardManualRuleIds",
+      "longname": "standardManualRuleIds",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/standardManualRules.js",
+      "line": 59,
+      "description": "A flat list of every exact element id in the generator-validated rule manifest.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "standardManualSectionRules",
+      "name": "standardManualSectionRules",
+      "longname": "standardManualSectionRules",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/standardManualRules.js",
+      "line": 28,
+      "description": "Exact-id heading rules.",
+      "params": [],
+      "returns": [],
       "examples": 0
     },
     {

@@ -13,7 +13,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>asn1js</code> | <code>^4.0.0</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
 | <code>axios</code> | <code>^1.20.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
-| <code>dompurify</code> | <code>^3.4.17</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
+| <code>dompurify</code> | <code>^3.4.17</code> | 4 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code><br><code>src/utils/standardManual.js</code> |
 | <code>dotenv</code> | <code>^18.0.8</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express-rate-limit</code> | <code>^8.7.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |

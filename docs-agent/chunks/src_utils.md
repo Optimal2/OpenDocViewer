@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 62. Line count: 23075. JSDoc symbol count: 945.
+File count: 64. Line count: 23580. JSDoc symbol count: 972.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -1032,6 +1032,46 @@ Symbols:
 - `pickSpeechVoice` (function) - The local voice to use for a locale: exact locale first, then the same base language \(the browser's default voice first among equals\), else null.
 - `SpeechController` (typedef) - No description.
 - `speakText` (function) - Speak text aloud with a local voice.
+
+## src/utils/standardManual.js
+
+Filter and sanitize the bundled standard manual for a supplied runtime config.
+
+Exports: `filterStandardManual`
+
+Local imports: `src/utils/standardManualRules.js`
+
+Symbols:
+
+- `sanitizeManualHtml` (function) - No description.
+- `headingLevel` (function) - No description.
+- `guideContainerFor` (function) - The embedded guide is a hard boundary.
+- `findHeadingSegment` (function) - No description.
+- `headingSegmentRange` (function) - No description.
+- `localFragmentId` (function) - Decode a same\-document fragment.
+- `recordRemovedSubtree` (function) - Remember ids and lightbox references before a subtree leaves the document.
+- `removeHeadingSegment` (function) - No description.
+- `matchesOcrRule` (function) - No description.
+- `filterHeadingRules` (function) - Apply exact\-id and OCR heading rules to a parsed manual.
+- `isInsideRange` (function) - No description.
+- `normalizedText` (function) - No description.
+
+## src/utils/standardManualRules.js
+
+Resolve every site switch that can hide standard\-manual content.
+
+Exports: `standardManualSectionRules`, `standardManualOcrSectionRules`, `standardManualRuleIds`, `resolveStandardManualRuleStates`
+
+Local imports: `src/utils/runtimeConfig.js`
+
+Symbols:
+
+- `compareGuideIds` (function) - Return the standalone and embedded\-comparison forms of a Swedish/English id pair.
+- `standardManualSectionRules` (constant) - Exact\-id heading rules.
+- `standardManualOcrSectionRules` (constant) - OCR headings use the same id in standalone and embedded guides.
+- `standardManualRuleIds` (constant) - A flat list of every exact element id in the generator\-validated rule manifest.
+- `failOpen` (function) - Read a UI predicate without letting a host\-owned Proxy/getter hide manual content.
+- `resolveStandardManualRuleStates` (function) - Resolve every site switch that can hide standard\-manual content.
 
 ## src/utils/supportDiagnostics.js
 
