@@ -236,11 +236,11 @@ describe('standard manual generation', () => {
 });
 
 describe('standard manual package wiring', () => {
-  it('generates before development, tests, UI tests and production builds', () => {
+  it('generates before development, tests, UI tests, production builds and agent docs', () => {
     const scripts = JSON.parse(fs.readFileSync(PACKAGE_PATH, 'utf8')).scripts;
 
     expect(scripts['build:standard-manual']).toBe('node scripts/build-standard-manual.mjs');
-    for (const name of ['dev', 'test', 'test:watch', 'test:ui', 'build']) {
+    for (const name of ['dev', 'test', 'test:watch', 'test:ui', 'build', 'doc:agent']) {
       expect(scripts[name], name).toMatch(/^npm run build:standard-manual && /);
     }
   });

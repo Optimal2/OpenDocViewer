@@ -17,7 +17,7 @@
       "test:watch": "npm run build:standard-manual && vitest",
       "test:ui": "npm run build:standard-manual && playwright test",
       "doc": "jsdoc -c jsdoc.json",
-      "doc:agent": "node scripts/generate-agent-docs.mjs",
+      "doc:agent": "npm run build:standard-manual && node scripts/generate-agent-docs.mjs",
       "start:system-log": "node server/system-log-server.js",
       "start:user-log": "node server/user-log-server.js",
       "start:logs": "concurrently -n sys,user -c auto \"npm run start:system-log\" \"npm run start:user-log\"",
