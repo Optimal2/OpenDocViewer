@@ -302,11 +302,21 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   } else if (normalizedTerm) {
     statusLine = matches.length === 0
       ? t('ocr.search.none', { defaultValue: 'No matches' })
-      : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: '{current} of {total}' });
+      : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: '{current}/{total}' });
     if (!pageOnly && recognisedPages < pages.length) {
-      statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done} of {pages} pages ready' })}`;
+      statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done}/{pages} pages' })}`;
     }
   }
+  // The short status spelt out, for its tooltip ("3/12 · 2/300 pages" reads as matches and
+  // pages ready).
+  const statusTitle = normalizedTerm && matches.length > 0
+    ? [
+      t('ocr.search.positionLong', { current: currentPosition + 1, total: matches.length, defaultValue: 'Match {current} of {total}' }),
+      ...(!pageOnly && recognisedPages < pages.length
+        ? [t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: '{done} of {pages} pages ready' })]
+        : []),
+    ].join(' · ')
+    : statusLine;
 
   return (
     <div ref={rootRef} className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search">
@@ -356,7 +366,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           spellCheck={false}
           tabIndex={open ? 0 : -1}
         />
-        <span className="toolbar-ocr-search-status" aria-live="polite">{statusLine}</span>
+        <span className="toolbar-ocr-search-status" aria-live="polite" title={statusTitle}>{statusLine}</span>
         <button
           type="button"
           className={`odv-btn toolbar-ocr-search-scope${pageOnly ? ' is-active' : ''}`}

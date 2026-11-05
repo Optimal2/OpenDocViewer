@@ -10931,7 +10931,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 1045,
+    "line": 1050,
     "description": "",
     "params": [
       {
@@ -10956,7 +10956,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 1068,
+    "line": 1073,
     "description": "",
     "params": [
       {
@@ -18013,7 +18013,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 46,
+    "line": 48,
     "description": "",
     "params": [
       {
@@ -18069,6 +18069,12 @@
         "type": "number",
         "optional": true,
         "description": "Default OCR_IDLE_SHUTDOWN_MS."
+      },
+      {
+        "name": "options.wholeDocument",
+        "type": "boolean",
+        "optional": true,
+        "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration."
       }
     ],
     "returns": [
@@ -18441,14 +18447,14 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useReadAloud.js",
-    "line": 156,
+    "line": 168,
     "description": "",
     "params": [
       {
         "name": "value",
         "type": "string",
         "optional": false,
-        "description": "'' for automatic, FOLLOW_UI, or an ISO 639-1 language."
+        "description": "'' for automatic, or an ISO 639-1 language."
       }
     ],
     "returns": [],
@@ -18461,7 +18467,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useReadAloud.js",
-    "line": 72,
+    "line": 75,
     "description": "",
     "params": [],
     "returns": [
@@ -18473,26 +18479,13 @@
     "examples": 0
   },
   {
-    "id": "FOLLOW_UI",
-    "name": "FOLLOW_UI",
-    "longname": "FOLLOW_UI",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/hooks/useReadAloud.js",
-    "line": 29,
-    "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "layerSelection",
     "name": "layerSelection",
     "longname": "layerSelection",
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useReadAloud.js",
-    "line": 36,
+    "line": 39,
     "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
     "params": [],
     "returns": [
@@ -18504,14 +18497,27 @@
     "examples": 0
   },
   {
+    "id": "LEGACY_FOLLOW_UI",
+    "name": "LEGACY_FOLLOW_UI",
+    "longname": "LEGACY_FOLLOW_UI",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useReadAloud.js",
+    "line": 32,
+    "description": "Preference value an older viewer stored for &quot;follow the interface language&quot;; no longer offered, it counts as automatic.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "normalizeStoredLanguage",
     "name": "normalizeStoredLanguage",
     "longname": "normalizeStoredLanguage",
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useReadAloud.js",
-    "line": 61,
-    "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
+    "line": 65,
+    "description": "A stored reading-language choice in today's form: one of the OCR languages, else null (automatic).",
     "params": [
       {
         "name": "stored",
@@ -23281,7 +23287,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/window.js",
-    "line": 24,
+    "line": 27,
     "description": "",
     "params": [
       {
@@ -23324,7 +23330,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/window.js",
-    "line": 13,
+    "line": 16,
     "description": "Pages queued after each focus page.",
     "params": [],
     "returns": [],
@@ -23337,7 +23343,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/window.js",
-    "line": 15,
+    "line": 18,
     "description": "Pages queued before each focus page.",
     "params": [],
     "returns": [],
@@ -23350,8 +23356,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/window.js",
-    "line": 39,
-    "description": "Ordered page indexes to process: focus pages first, then the pages after them (nearest first), then the pages before them.",
+    "line": 45,
+    "description": "Ordered page indexes to process: focus pages first, then the pages after them (nearest first), then the pages before them; with wholeDocument , then every remaining page, from the...",
     "params": [
       {
         "name": "options",
@@ -23382,6 +23388,12 @@
         "type": "number",
         "optional": true,
         "description": "Default OCR_WINDOW_BEHIND."
+      },
+      {
+        "name": "options.wholeDocument",
+        "type": "boolean",
+        "optional": true,
+        "description": "Append the rest of the document after the window."
       }
     ],
     "returns": [
@@ -43649,7 +43661,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 560,
+    "line": 574,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -43744,7 +43756,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 483,
+    "line": 497,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -43769,7 +43781,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 409,
+    "line": 423,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -43844,7 +43856,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 508,
+    "line": 522,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -43869,7 +43881,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 452,
+    "line": 466,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -43894,7 +43906,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 937,
+    "line": 951,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -43969,7 +43981,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 812,
+    "line": 826,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -43994,7 +44006,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 837,
+    "line": 851,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -44037,7 +44049,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 920,
+    "line": 934,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -44062,7 +44074,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 520,
+    "line": 534,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -44087,7 +44099,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 788,
+    "line": 802,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -44112,7 +44124,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 774,
+    "line": 788,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -44137,7 +44149,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 761,
+    "line": 775,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -44162,7 +44174,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 861,
+    "line": 875,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -44187,7 +44199,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 879,
+    "line": 893,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -44212,7 +44224,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 463,
+    "line": 477,
     "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
     "params": [],
     "returns": [],
@@ -44425,7 +44437,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 371,
+    "line": 385,
     "description": "Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead of the browser's own find ( ocr.search.overridesCtrlF ).",
     "params": [
       {
@@ -44450,8 +44462,33 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 358,
+    "line": 372,
     "description": "Resolve whether the toolbar's search in the text layers is offered ( ocr.search.enabled ).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "RuntimeConfig",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isOcrWholeDocumentEnabled",
+    "name": "isOcrWholeDocumentEnabled",
+    "longname": "isOcrWholeDocumentEnabled",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 346,
+    "description": "Resolve whether the OCR queue works through the whole document in the background ( ocr.recognizeWholeDocument ): after the window around the shown page, the remaining pages in rea...",
     "params": [
       {
         "name": "cfg",
@@ -44500,7 +44537,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 386,
+    "line": 400,
     "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
     "params": [
       {
@@ -44550,7 +44587,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 344,
+    "line": 358,
     "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
     "params": [
       {
@@ -44601,7 +44638,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 538,
+    "line": 552,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -44632,7 +44669,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 735,
+    "line": 749,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -44657,7 +44694,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 706,
+    "line": 720,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -44688,7 +44725,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 674,
+    "line": 688,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -44719,7 +44756,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 606,
+    "line": 620,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -44762,7 +44799,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 585,
+    "line": 599,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -44805,7 +44842,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 717,
+    "line": 731,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -44836,7 +44873,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 689,
+    "line": 703,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -44867,7 +44904,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 635,
+    "line": 649,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -44892,7 +44929,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 623,
+    "line": 637,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -44923,7 +44960,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 649,
+    "line": 663,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -44948,7 +44985,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 457,
+    "line": 471,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -45039,7 +45076,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 459,
+    "line": 473,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -45109,7 +45146,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 660,
+    "line": 674,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -45134,7 +45171,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 461,
+    "line": 475,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],
@@ -48471,7 +48508,7 @@
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
     "line": 381,
-    "description": "Persist the read-aloud language choice (a language code or 'ui'), or clear it (automatic) when the value is empty.",
+    "description": "Persist the read-aloud language choice (a language code), or clear it (automatic) when the value is empty.",
     "params": [
       {
         "name": "choice",

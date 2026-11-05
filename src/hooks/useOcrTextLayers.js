@@ -20,7 +20,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import logger from '../logging/systemLogger.js';
 import { ocrPageKeyOf } from '../utils/ocrPageKey.js';
-import { getOcrLanguages, isSpeechLanguageAutoDetectEnabled } from '../utils/runtimeConfig.js';
+import { getOcrLanguages, isOcrWholeDocumentEnabled, isSpeechLanguageAutoDetectEnabled } from '../utils/runtimeConfig.js';
 import { speechLanguagesForOcr } from '../utils/ocrLanguageCodes.js';
 
 /** Idle time after which the OCR worker is terminated to free its memory. */
@@ -39,6 +39,8 @@ const EMPTY_PAGES = Object.freeze({});
  * @param {function(number, string): Promise<(string|null)>} options.ensurePageAsset
  *   `(pageIndex, 'full')` to the rendered page's object URL.
  * @param {number=} options.idleShutdownMs  Default OCR_IDLE_SHUTDOWN_MS.
+ * @param {boolean=} options.wholeDocument  Queue the rest of the document after the window
+ *   (`ocr.recognizeWholeDocument`); default from the runtime configuration.
  * @returns {{ ocrPages: Object<string, Object>, ocrEngineFailure: (string|null) }}
  *   `ocrPages` maps utils/ocrPageKey.js keys to outcomes (`status` done/skipped/failed with
  *   text, words and image size, or a transient queued/probing/recognizing state).
@@ -52,6 +54,7 @@ export default function useOcrTextLayers({
   readSourceArrayBuffer,
   ensurePageAsset,
   idleShutdownMs = OCR_IDLE_SHUTDOWN_MS,
+  wholeDocument = isOcrWholeDocumentEnabled(),
 }) {
   const [snapshot, setSnapshot] = useState({ pages: EMPTY_PAGES, engineFailure: null });
   const runtimeRef = useRef(/** @type {(Object|null)} */ (null));
@@ -151,19 +154,24 @@ export default function useOcrTextLayers({
     runtime.queue.retainSources(sourceKeys);
     void runtime.prober.retainSources(sourceKeys);
     if (!ready) return;
-    const order = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length });
+    const windowSize = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length }).length;
+    const order = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length, wholeDocument });
     const candidates = [];
-    for (const viewerIndex of order) {
+    for (const [position, viewerIndex] of order.entries()) {
       const page = pages[viewerIndex];
-      // A page joins the window once its full-size render exists (the viewer's own prefetch
-      // renders neighbours); a failed page is classified and skipped by the queue.
-      if (!page || (Number(page.status) !== -1 && Number(page.fullSizeStatus) !== 1)) continue;
+      if (!page) continue;
+      // A page of the window joins the queue once its full-size render exists (the viewer's own
+      // prefetch renders neighbours); a failed page is classified and skipped by the queue. A page
+      // beyond the window (the whole document asked for) joins once it is loaded: the queue has
+      // it rendered on demand through ensurePageAsset, like a page the viewer has not shown.
+      const inWindow = position < windowSize;
+      if (Number(page.status) !== -1 && (inWindow ? Number(page.fullSizeStatus) !== 1 : Number(page.status) !== 1)) continue;
       const key = ocrPageKeyOf(page);
       if (!key) continue;
       candidates.push({ key, sourceKey: String(page.sourceKey), pageIndex: Number(page.pageIndex) || 0, viewerIndex, page });
     }
     runtime.queue.setWindow(candidates);
-  }, [allPages, focusPageIndexes, ocrModule, ready]);
+  }, [allPages, focusPageIndexes, ocrModule, ready, wholeDocument]);
 
   return { ocrPages: snapshot.pages, ocrEngineFailure: snapshot.engineFailure };
 }

@@ -334,6 +334,20 @@ export function isOcrLineRemovalEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether the OCR queue works through the whole document in the background
+ * (`ocr.recognizeWholeDocument`): after the window around the shown page, the remaining pages
+ * in reading order, one at a time, while the viewer is open, so the search covers every page in
+ * time. Off by default (only the window is recognised); only the boolean literal `true` turns it
+ * on. Means nothing while OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isOcrWholeDocumentEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.recognizeWholeDocument === true;
+}
+
+/**
  * Resolve whether the language of a page's text is guessed among the OCR languages, for the
  * read-aloud language and the text layer's `lang` (`ocr.speech.autoDetectLanguage`). On by
  * default; only the boolean literal `false` turns it off. Means nothing while OCR is off.

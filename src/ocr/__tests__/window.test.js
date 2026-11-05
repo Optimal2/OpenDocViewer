@@ -50,4 +50,14 @@ describe('planOcrWindow', () => {
     expect(planOcrWindow({ focusIndexes: [5], pageCount: 20, ahead: 0, behind: 2 })).toEqual([5, 4, 3]);
     expect(planOcrWindow({ focusIndexes: [5], pageCount: 20, ahead: 1, behind: 0 })).toEqual([5, 6]);
   });
+
+  it('with the whole document asked for, follows the window with the rest: forward from the focus, then from the start', () => {
+    expect(planOcrWindow({ focusIndexes: [3], pageCount: 8, wholeDocument: true })).toEqual([3, 4, 5, 2, 6, 7, 0, 1]);
+    expect(planOcrWindow({ focusIndexes: [0], pageCount: 4, wholeDocument: true })).toEqual([0, 1, 2, 3]);
+    expect(planOcrWindow({ focusIndexes: [3, 6], pageCount: 10, wholeDocument: true })).toEqual([3, 6, 4, 7, 5, 8, 2, 9, 0, 1]);
+    expect(planOcrWindow({ focusIndexes: [], pageCount: 3, wholeDocument: true })).toEqual([0, 1, 2]);
+    expect(planOcrWindow({ focusIndexes: [1], pageCount: 0, wholeDocument: true })).toEqual([]);
+    // Off (the default), the window alone.
+    expect(planOcrWindow({ focusIndexes: [3], pageCount: 8 })).toEqual([3, 4, 5, 2]);
+  });
 });

@@ -31,9 +31,9 @@ import {
  * @property {string=} themeSharedRevision
  * @property {string=} language
  * @property {string=} speechLanguage  The read-aloud language choice: an ISO 639-1
- *   language ('en') or 'ui' for the interface language; absent: automatic (the page's guessed
- *   language, else the interface language). Older values stored a locale ('en-US'), which the
- *   button reads as its language.
+ *   language ('en'); absent: automatic (the page's guessed language, else the interface
+ *   language, among the languages with a local voice). Older values stored a locale ('en-US'),
+ *   read as its language, or 'ui' for the interface language, read as automatic.
  * @property {('active'|'all')=} printDefaultMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
  * @property {number=} customFitWidthFactorPercent
@@ -372,8 +372,8 @@ export function getSpeechLanguagePreference() {
 }
 
 /**
- * Persist the read-aloud language choice (a language code or 'ui'), or clear it (automatic)
- * when the value is empty.
+ * Persist the read-aloud language choice (a language code), or clear it (automatic) when the
+ * value is empty.
  *
  * @param {string} choice
  * @returns {ViewerPreferences}

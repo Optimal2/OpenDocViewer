@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 17. Line count: 7782. JSDoc symbol count: 157.
+File count: 17. Line count: 7787. JSDoc symbol count: 157.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 

@@ -16,6 +16,7 @@ import {
   getOcrLanguages,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
+  isOcrWholeDocumentEnabled,
   isOcrSearchEnabled,
   isOcrSearchCtrlFOverrideEnabled,
   isReadAloudEnabled,
@@ -25,6 +26,7 @@ import {
 const SHIPPED_OCR_DEFAULTS = Object.freeze({
   enabled: false,
   removeRulingLines: true,
+  recognizeWholeDocument: false,
   languages: ['swe', 'eng'],
   search: { enabled: true, overridesCtrlF: false },
   speech: { enabled: true, autoDetectLanguage: true },
@@ -51,6 +53,7 @@ function readOcrConfig({ siteConfig, useSampleSiteFile = false } = {}) {
       siteKeys: [...dom.window.__ODV_SITE_CONFIG_KEYS__],
       enabled: isOcrEnabled(),
       removeRulingLines: isOcrLineRemovalEnabled(),
+      wholeDocument: isOcrWholeDocumentEnabled(),
       search: isOcrSearchEnabled(),
       ctrlF: isOcrSearchCtrlFOverrideEnabled(),
       readAloud: isReadAloudEnabled(),
@@ -69,6 +72,7 @@ describe('shipped OCR configuration', () => {
     expect(shipped.ocr).toEqual(SHIPPED_OCR_DEFAULTS);
     expect(shipped.enabled).toBe(false);
     expect(shipped.removeRulingLines).toBe(true);
+    expect(shipped.wholeDocument).toBe(false);
     expect(shipped.search).toBe(true);
     expect(shipped.ctrlF).toBe(false);
     expect(shipped.readAloud).toBe(true);
@@ -90,6 +94,12 @@ describe('shipped OCR configuration', () => {
     expect(readAloudOff.ocr.speech).toEqual({ enabled: false, autoDetectLanguage: true });
     const guessOff = readOcrConfig({ siteConfig: { ocr: { enabled: true, speech: { autoDetectLanguage: false } } } });
     expect(guessOff).toMatchObject({ readAloud: true, autoDetect: false });
+  });
+
+  it('recognises the whole document only for a site file with the literal true', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } }).wholeDocument).toBe(false);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, recognizeWholeDocument: 'true' } } }).wholeDocument).toBe(false);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, recognizeWholeDocument: true } } }).wholeDocument).toBe(true);
   });
 
   it('hands Ctrl+F to the search only for a site file with the literal true, keeping the search switch', () => {

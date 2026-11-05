@@ -25,8 +25,11 @@ import { speechLanguagesForOcr } from '../utils/ocrLanguageCodes.js';
 import { isSpeechSynthesisAvailable, pickSpeechVoice, resolveSpeechLanguage, speakText, speechLocaleLabel } from '../utils/speech.js';
 import { getSpeechLanguagePreference, setSpeechLanguagePreference } from '../utils/viewerPreferences.js';
 
-/** Preference value for "follow the interface language" (absent: automatic). */
-export const FOLLOW_UI = 'ui';
+/**
+ * Preference value an older viewer stored for "follow the interface language"; no longer offered,
+ * it counts as automatic.
+ */
+const LEGACY_FOLLOW_UI = 'ui';
 
 /**
  * The selection inside the text layers: its text as it reads on the page, and the language the
@@ -52,16 +55,16 @@ export function layerSelection() {
 }
 
 /**
- * A stored reading-language choice in today's form: `ui`, or one of the OCR languages, else
- * null (automatic). An older choice stored as a locale ('en-US') counts as its language.
+ * A stored reading-language choice in today's form: one of the OCR languages, else null
+ * (automatic). An older choice stored as a locale ('en-US') counts as its language; the older
+ * "follow the interface language" choice counts as automatic.
  * @param {(string|null)} stored
  * @param {Array<string>} languages  The OCR languages (ISO 639-1).
  * @returns {(string|null)}
  */
 export function normalizeStoredLanguage(stored, languages) {
   const value = String(stored || '').trim().toLowerCase();
-  if (!value) return null;
-  if (value === FOLLOW_UI) return FOLLOW_UI;
+  if (!value || value === LEGACY_FOLLOW_UI) return null;
   const base = value.split(/[-_]/)[0];
   return languages.includes(base) ? base : null;
 }
@@ -80,11 +83,20 @@ export default function useReadAloud() {
   const [preferred, setPreferred] = useState(() => normalizeStoredLanguage(getSpeechLanguagePreference(), ocrLanguages));
   const controllerRef = useRef(/** @type {(Object|null)} */ (null));
   const uiLocale = resolveSpeechLanguage(i18n?.language);
+  const uiLanguage = String(uiLocale || '').split(/[-_]/)[0];
   const detected = autoDetect ? selection?.language || null : null;
-  // The reading language: the user's choice, else the page's guessed language, else the UI's.
-  const lang = preferred && preferred !== FOLLOW_UI
-    ? resolveSpeechLanguage(preferred)
-    : (preferred !== FOLLOW_UI && detected ? resolveSpeechLanguage(detected) : uiLocale);
+  // The OCR languages that have a voice installed on the machine: the only ones ever read.
+  const installed = ocrLanguages.filter((code) => !!pickSpeechVoice(voices, resolveSpeechLanguage(code)));
+  const single = installed.length === 1 ? installed[0] : null;
+  // The automatic reading language: the page's guessed language when it has a voice, else the
+  // UI language when it has one, else the first language that has one (null: nothing can be read).
+  const automatic = (detected && installed.includes(detected) ? detected : null)
+    || (installed.includes(uiLanguage) ? uiLanguage : null)
+    || installed[0]
+    || null;
+  // The user's choice counts while it is offered; with one installed language that one is read.
+  const chosen = single || (preferred && installed.includes(preferred) ? preferred : null);
+  const lang = resolveSpeechLanguage(chosen || automatic || uiLanguage);
 
   // The selection is kept by value: a selectionchange that leaves the text and language as they
   // were (the caret moving within a word during a drag) sets no new state, so the consumers of
@@ -152,7 +164,7 @@ export default function useReadAloud() {
     return true;
   }, [lang]);
 
-  /** @param {string} value  '' for automatic, FOLLOW_UI, or an ISO 639-1 language. */
+  /** @param {string} value  '' for automatic, or an ISO 639-1 language. */
   const chooseLanguage = useCallback((value) => {
     setSpeechLanguagePreference(value);
     setPreferred(value || null);
@@ -167,34 +179,33 @@ export default function useReadAloud() {
   // No local voice for the reading language: nothing is ever spoken with an online voice.
   const voiceMissing = !speaking && !pickSpeechVoice(voices, lang);
   const languageTitle = t('ocr.read.language', { defaultValue: 'Reading language' });
-  const followLabel = t('ocr.read.followUi', { language: inner(uiLocale), defaultValue: `Follow the interface language (${inner(uiLocale)})` });
   // "Auto" always names what it will do: the language guessed for the selected page's text, or,
-  // when the guess is unsure, the UI language it falls back to.
-  const autoLabel = detected
+  // when the guess is unsure (or has no voice), the language it falls back to.
+  const autoLabel = detected && automatic === detected
     ? t('ocr.read.auto', { language: inner(detected), defaultValue: `Auto (${inner(detected)})` })
-    : t('ocr.read.autoUnknown', { language: inner(uiLocale), defaultValue: `Auto (language not identified, reads in ${inner(uiLocale)})` });
+    : t('ocr.read.autoUnknown', { language: inner(automatic || uiLanguage), defaultValue: `Auto (language not identified, reads in ${inner(automatic || uiLanguage)})` });
+  // The choices: "Auto" (with the guess on) and the installed languages. One installed language
+  // is offered alone, there is nothing to choose; none gives one greyed line saying so.
+  const noVoicesLabel = t('ocr.read.noVoices', { defaultValue: 'No local voice installed for the recognised languages; online voices are never used' });
   /** @type {Array<{ value:string, label:string, disabled:boolean }>} */
-  const entries = [
-    ...(autoDetect ? [{ value: '', label: autoLabel, disabled: false }] : []),
-    ...ocrLanguages.map((code) => {
-      const hasVoice = !!pickSpeechVoice(voices, resolveSpeechLanguage(code));
-      return {
-        value: code,
-        label: hasVoice ? name(code) : t('ocr.read.languageNoVoice', { language: name(code), defaultValue: `${name(code)} (no local voice installed)` }),
-        disabled: !hasVoice,
-      };
-    }),
-    { value: FOLLOW_UI, label: followLabel, disabled: false },
-  ];
-  // With the guess off, an absent preference is the interface language.
-  const selectedValue = preferred ?? (autoDetect ? '' : FOLLOW_UI);
-  const currentLabel = entries.find((entry) => entry.value === selectedValue)?.label || followLabel;
+  const entries = installed.length === 0
+    ? [{ value: 'none', label: noVoicesLabel, disabled: true }]
+    : [
+      ...(autoDetect && !single ? [{ value: '', label: autoLabel, disabled: false }] : []),
+      ...installed.map((code) => ({ value: code, label: name(code), disabled: false })),
+    ];
+  // The current choice among the entries: the single language, the user's offered choice, else
+  // "Auto" when listed, else the automatic language itself.
+  const selectedValue = installed.length === 0 ? 'none' : (chosen || (autoDetect && !single ? '' : automatic || ''));
+  const currentLabel = entries.find((entry) => entry.value === selectedValue)?.label || entries[0].label;
   const reason = !available
     ? t('ocr.read.unavailable', { defaultValue: 'This browser cannot read text aloud' })
     : !selection
       ? t('ocr.read.noSelection', { defaultValue: "Select text in the page's text layer first" })
       : voiceMissing
-        ? t('ocr.read.noLocalVoice', { language: inner(lang), defaultValue: `No local voice installed for ${inner(lang)}; online voices are never used` })
+        ? (installed.length === 0
+          ? noVoicesLabel
+          : t('ocr.read.noLocalVoice', { language: inner(lang), defaultValue: `No local voice installed for ${inner(lang)}; online voices are never used` }))
         : null;
 
   return {

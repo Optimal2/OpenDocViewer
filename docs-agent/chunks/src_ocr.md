@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 14. Line count: 2088. JSDoc symbol count: 101.
+File count: 14. Line count: 2099. JSDoc symbol count: 101.
 
 ## src/ocr/assetUrls.js
 
@@ -216,7 +216,7 @@ Symbols:
 
 ## src/ocr/window.js
 
-Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours.
+Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours, and, when the site asks for the whole document, the rest after them.
 
 Exports: `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`
 
@@ -225,4 +225,4 @@ Symbols:
 - `OCR_WINDOW_AHEAD` (constant) - Pages queued after each focus page.
 - `OCR_WINDOW_BEHIND` (constant) - Pages queued before each focus page.
 - `maxOcrWindowSize` (function) - No description.
-- `planOcrWindow` (function) - Ordered page indexes to process: focus pages first, then the pages after them \(nearest first\), then the pages before them.
+- `planOcrWindow` (function) - Ordered page indexes to process: focus pages first, then the pages after them \(nearest first\), then the pages before them; with wholeDocument , then every remaining page, from the...

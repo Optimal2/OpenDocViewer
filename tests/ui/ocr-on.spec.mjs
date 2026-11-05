@@ -292,17 +292,22 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(contextMenu).toHaveCount(0);
 
   // The reading language is chosen in the toolbar's language menu, in a titled section of
-  // its own under the interface languages: "Auto" first, one entry per OCR language, then
-  // "Follow the interface language".
+  // its own under the interface languages: "Auto" first, then the OCR languages that have a
+  // local voice (both here; the online voice counts for nothing).
   await page.locator('.toolbar-end-actions button[aria-haspopup="menu"]').filter({ has: page.locator('.material-icons', { hasText: 'language' }) }).click();
   const readingSection = page.locator('.toolbar-popup-menu [data-odv-ocr="read-menu"]');
   await expect(readingSection).toBeVisible();
   await expect(readingSection.locator('.toolbar-split-menu-title')).toHaveText(/Uppläsningsspråk|Reading language/);
   const readingEntries = readingSection.locator('[data-speech-language]');
-  expect(await readingEntries.evaluateAll((items) => items.map((item) => item.getAttribute('data-speech-language')))).toEqual(['', 'sv', 'en', 'ui']);
+  expect(await readingEntries.evaluateAll((items) => items.map((item) => item.getAttribute('data-speech-language')))).toEqual(['', 'sv', 'en']);
   // (The entry's text starts with its check-mark ligature.)
   await expect(readingEntries.first()).toHaveText(/Auto \(/);
   await expect(page.locator('.toolbar-popup-menu .toolbar-split-menu-section').first().locator('[role="menuitemradio"]')).toHaveCount(2);
+  // With the focus in the toolbar's menu, Shift+F10 is not the page menu's.
+  await readingEntries.first().focus();
+  await page.keyboard.press('Shift+F10');
+  await expect(contextMenu).toHaveCount(0);
+  await expect(page.locator('.toolbar-popup-menu')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('.toolbar-popup-menu')).toHaveCount(0);
 
@@ -365,13 +370,13 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(inlineFit.closeRight).toBeLessThanOrEqual(inlineFit.right + 0.5);
   await searchField.fill('ocr hej');
   const searchStatus = page.locator('.toolbar-ocr-search-status');
-  await expect(searchStatus).toHaveText(/^1 (of|av) 1/);
+  await expect(searchStatus).toHaveText(/^1\/1/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['OCR', 'Hej']);
   await searchField.fill('hej');
-  await expect(searchStatus).toHaveText(/^1 (of|av) 1/);
+  await expect(searchStatus).toHaveText(/^1\/1/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['Hej']);
   await searchField.fill('o');
-  const matchCount = Number((await searchStatus.textContent()).match(/(\d+) (of|av) (\d+)/)[3]);
+  const matchCount = Number((await searchStatus.textContent()).match(/(\d+)\/(\d+)/)[2]);
   expect(matchCount).toBeGreaterThanOrEqual(3);
   // Several matches can fall in one word ("OpenDocViewer" holds two), so marked words are
   // fewer than matches, never more.
@@ -380,16 +385,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(markedWords).toBeLessThanOrEqual(matchCount);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
   await searchField.press('Enter');
-  await expect(searchStatus).toHaveText(new RegExp(`^2 (of|av) ${matchCount}`));
+  await expect(searchStatus).toHaveText(new RegExp(`^2/${matchCount}`));
   await searchField.press('Shift+Enter');
-  await expect(searchStatus).toHaveText(new RegExp(`^1 (of|av) ${matchCount}`));
+  await expect(searchStatus).toHaveText(new RegExp(`^1/${matchCount}`));
   // Limited to the displayed page (the only page here): the same matches, the toggle pressed,
   // the marks still on the page; off again afterwards.
   const scope = page.locator('.toolbar-ocr-search-scope');
   await expect(scope).toHaveAttribute('aria-pressed', 'false');
   await scope.click();
   await expect(scope).toHaveAttribute('aria-pressed', 'true');
-  await expect(searchStatus).toHaveText(new RegExp(`^1 (of|av) ${matchCount}$`));
+  await expect(searchStatus).toHaveText(new RegExp(`^1/${matchCount}$`));
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
   await scope.click();
   await expect(scope).toHaveAttribute('aria-pressed', 'false');

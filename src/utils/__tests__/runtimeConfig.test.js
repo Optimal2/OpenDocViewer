@@ -26,6 +26,7 @@ import {
   OCR_ASSET_BASE_URL_REJECTIONS,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
+  isOcrWholeDocumentEnabled,
   isSpeechLanguageAutoDetectEnabled,
   isOcrSearchEnabled,
   isOcrSearchCtrlFOverrideEnabled,
@@ -329,6 +330,18 @@ describe('runtimeConfig', () => {
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 'false' } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 0 } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: null } })).toBe(true);
+    });
+  });
+
+  describe('isOcrWholeDocumentEnabled', () => {
+    it('is off when the section or key is missing and turns on only for the boolean literal true', () => {
+      expect(isOcrWholeDocumentEnabled({})).toBe(false);
+      expect(isOcrWholeDocumentEnabled({ ocr: {} })).toBe(false);
+      expect(isOcrWholeDocumentEnabled(null)).toBe(false);
+      expect(isOcrWholeDocumentEnabled({ ocr: { recognizeWholeDocument: true } })).toBe(true);
+      expect(isOcrWholeDocumentEnabled({ ocr: { recognizeWholeDocument: false } })).toBe(false);
+      expect(isOcrWholeDocumentEnabled({ ocr: { recognizeWholeDocument: 'true' } })).toBe(false);
+      expect(isOcrWholeDocumentEnabled({ ocr: { recognizeWholeDocument: 1 } })).toBe(false);
     });
   });
 

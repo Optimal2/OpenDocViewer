@@ -187,6 +187,42 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(1);
   });
 
+  it('with the whole document asked for, queues the loaded pages beyond the window after it, rendered on demand', async () => {
+    const engine = makeEngine();
+    const ocrModule = makeModule(engine, makeProber());
+    // Pages 0-3 rendered (the window around page 0 is 0, 1, 2); pages 4-5 loaded but not
+    // rendered; page 6 still loading.
+    const allPages = [
+      page('doc', 0), page('doc', 1), page('doc', 2), page('doc', 3),
+      page('doc', 4, { fullSizeStatus: 0, fullSizeUrl: '' }), page('doc', 5, { fullSizeStatus: 0, fullSizeUrl: '' }),
+      page('doc', 6, { status: 0, fullSizeStatus: 0, fullSizeUrl: '' }),
+    ];
+    const ensurePageAsset = vi.fn(async (index) => `/pages/doc-${index}.png`);
+    await render(baseProps({ ocrModule, allPages, focusPageIndexes: [0], ensurePageAsset, wholeDocument: true }));
+    await flush();
+    // One page at a time: the window first (0, 1, 2), then the rest in order (3, 4, 5); the
+    // unrendered pages are asked for through ensurePageAsset like any other, the loading page
+    // never. Pages beyond the window are queued from the start, so the search can say so.
+    expect(latest.ocrPages[makeOcrPageKey('doc', 5)]).toEqual({ status: 'queued' });
+    expect(latest.ocrPages[makeOcrPageKey('doc', 6)]).toBeUndefined();
+    for (let step = 0; step < 6; step += 1) {
+      expect(engine.recognize).toHaveBeenCalledTimes(step + 1);
+      engine.pending[step].resolve(result(`sida ${step}`));
+      await flush();
+    }
+    expect(engine.recognize).toHaveBeenCalledTimes(6);
+    expect(ensurePageAsset.mock.calls.map(([index]) => index)).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(Object.values(latest.ocrPages).filter((entry) => entry.status === 'done')).toHaveLength(6);
+
+    // Off (the default), the window alone: nothing beyond it is even queued.
+    const engine2 = makeEngine();
+    await act(async () => { root.unmount(); });
+    root = createRoot(container);
+    await render(baseProps({ ocrModule: makeModule(engine2, makeProber()), allPages, focusPageIndexes: [0], wholeDocument: false }));
+    await flush();
+    expect(Object.keys(latest.ocrPages).sort()).toEqual([0, 1, 2].map((index) => makeOcrPageKey('doc', index)).sort());
+  });
+
   it('drops the queued neighbours when the focus moves and lets the page in flight finish', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());

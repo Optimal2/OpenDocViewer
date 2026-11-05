@@ -451,9 +451,11 @@
     "search": {
       "open": "Search in the recognised text",
       "placeholder": "Search",
-      "position": "{current} of {total}",
+      "position": "{current}/{total}",
+      "coverageLong": "{done} of {pages} pages ready",
+      "positionLong": "Match {current} of {total}",
       "none": "No matches",
-      "coverage": "{done} of {pages} pages ready",
+      "coverage": "{done}/{pages} pages",
       "pageOnly": "Search only on this page",
       "previous": "Previous match",
       "next": "Next match",
@@ -469,7 +471,7 @@
       "auto": "Auto ({language})",
       "autoUnknown": "Auto (language not identified, reads in {language})",
       "languageNoVoice": "{language} (no local voice installed)",
-      "followUi": "Follow the interface language ({language})",
+      "noVoices": "No local voice installed for the recognised languages; online voices are never used",
       "noLocalVoice": "No local voice installed for {language}; online voices are never used"
     }
   },

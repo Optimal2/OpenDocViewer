@@ -957,19 +957,24 @@ const DocumentViewerRender = ({
     /** @param {KeyboardEvent} event */
     const onKeyDown = (event) => {
       const isMenuKey = event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey);
-      if (!isMenuKey || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) return;
+      if (!isMenuKey || event.repeat || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) return;
       if (hasActiveModalDialog()) return;
       const active = document.activeElement;
       const inMenu = !!contextMenuRef.current && contextMenuRef.current.contains(active);
       if (!inMenu && isEditableTarget(active)) return;
       const container = primaryPaneRef.current?.closest?.('.document-viewer-container') || null;
       if (active && active !== document.body && container && !container.contains(active)) return;
+      // The toolbar and the thumbnail list have menus of their own (the thumbnails their own
+      // context menu): a focus there is left alone.
+      if (active instanceof Element && active.closest('.toolbar, .thumbnail-option-frame, [data-thumbnail-row]')) return;
       event.preventDefault();
       if (contextMenuState) {
         closeContextMenuRestoringFocus();
         return;
       }
-      const pane = isComparing && effectivePane === 'compare' ? 'compare' : 'primary';
+      // The pane the user works in, not the one Shift aims the viewer's shortcuts at: Shift+F10
+      // must not open the other pane's menu.
+      const pane = isComparing && activePane === 'compare' ? 'compare' : 'primary';
       const frame = pane === 'compare' ? comparePaneRef.current : primaryPaneRef.current;
       if (!frame) return;
       let x = 0;
@@ -991,7 +996,7 @@ const DocumentViewerRender = ({
     };
     window.addEventListener('keydown', onKeyDown);
     return () => { window.removeEventListener('keydown', onKeyDown); };
-  }, [closeContextMenuRestoringFocus, comparePageNumber, contextMenuState, effectivePane, handlePaneContextMenu, isComparing, pageNumber]);
+  }, [activePane, closeContextMenuRestoringFocus, comparePageNumber, contextMenuState, handlePaneContextMenu, isComparing, pageNumber]);
 
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;

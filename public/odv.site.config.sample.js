@@ -96,6 +96,9 @@
       // Ruling lines of tables and forms are removed from a copy of the page image before
       // recognition. Only the literal false turns the step off.
       // removeRulingLines: true,
+      // Recognise the whole document in the background (after the shown page and its
+      // neighbours), so the search covers every page in time. Only the literal true turns it on.
+      // recognizeWholeDocument: false,
       // Tesseract language codes tried together on every text line. Arrays replace the default
       // completely, so list every language the site needs. Each extra language adds some
       // recognition time per page. The viewer ships the Swedish and English models; another

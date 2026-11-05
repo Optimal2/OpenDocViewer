@@ -274,6 +274,7 @@ feature is opt-in and off by default:
 ocr: {
   enabled: false,              // only the literal true turns OCR on
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
+  recognizeWholeDocument: false, // true: after the shown page's neighbours, the rest of the document
   languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
   search: {
     enabled: true,             // the toolbar's search in the text layers; false leaves a status-only indicator
@@ -298,6 +299,17 @@ ocr: {
   of the page image before recognition (see "Ruled tables" below). `true` by default; only the
   boolean literal `false` turns the step off, a missing key or any other value keeps it. The key
   means nothing while OCR is off.
+- `ocr.recognizeWholeDocument`: whether the queue works through the whole document in the
+  background. `false` by default: only the shown page and its neighbours are recognised (see
+  "Which pages are recognised" below), and a page further away waits until the user reaches it,
+  so the search covers only the pages that have been near the user. With the boolean literal
+  `true`, the window keeps its priority and the remaining pages follow it, one at a time, in
+  reading order from the shown page to the end and then from the start of the document, while
+  the viewer is open; a page the viewer has not rendered is rendered for the purpose (and dropped
+  from the page cache again under its usual limits), and the queue still pauses for printing and
+  under memory pressure. On a long document this costs CPU in the background for as long as it
+  takes (a few seconds per page), which is why it is off by default. The key means nothing while
+  OCR is off.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
   (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
@@ -400,9 +412,11 @@ Which pages are recognised, and when:
   renderer keeps its own instance), at most two documents at a time, and closes them when the
   document leaves the viewer or the engine goes idle. Any other format is skipped.
 - Only the displayed page (both pages in the compare view) and a fixed number of neighbours are
-  queued, never the whole document: after each displayed page the next two pages, then the page
-  before it, so at most four pages per displayed page however long the document is. A page joins
-  the queue once the viewer has rendered it. Recognition starts after the first page is shown.
+  queued by default, never the whole document: after each displayed page the next two pages,
+  then the page before it, so at most four pages per displayed page however long the document
+  is. A page joins the queue once the viewer has rendered it. Recognition starts after the first
+  page is shown. With `ocr.recognizeWholeDocument: true` the rest of the document follows the
+  window (forward from the displayed page, then from the start), rendered on demand.
 - When the user moves to another page, the pages that have not started are dropped and the new
   window is queued; the page being recognised finishes (a Tesseract worker cannot be interrupted
   without discarding its loaded models) and its outcome is kept. Switching document drops that
@@ -564,13 +578,18 @@ Read-aloud (`ocr.speech.enabled`) is not a toolbar button. It lives in two place
   is spoken (an utterance without a voice would let the browser pick one, possibly online).
   While a reading runs the entry is "Stop reading aloud", and Escape stops it too.
 - The toolbar's language menu gets a second, titled section, "Reading language", under the
-  interface languages, so both are chosen in one place without being confused: "Auto" first (always naming what it will do, "Auto (svenska)", with
+  interface languages, so both are chosen in one place without being confused. It lists only
+  what can actually be read: "Auto" first (always naming what it will do, "Auto (svenska)", with
   the language guessed for the selected page's text, see `ocr.speech.autoDetectLanguage`; when
-  the guess is unsure it reads in the UI language; the entry is absent while the guess is turned
-  off, the reading language then being the UI language unless the user picks one), then one entry per OCR language
-  (`ocr.languages`), greyed when no local voice is installed for it, and "Follow the interface
-  language" last. A choice there sets the reading language without changing the UI language
-  and is kept in the viewer preferences (`speechLanguage`, next to `language`) across reloads.
+  the guess is unsure, or names a language without a voice, it reads in the UI language if that
+  has a local voice, else the first language that has one), then one entry per OCR language
+  (`ocr.languages`) that has a voice installed on the machine. A language without a local voice
+  is not offered. When exactly one language has a voice, the section shows that language alone
+  and reads in it, with no "Auto"; when none has, it shows one greyed line saying so, and nothing
+  can be read. With the guess turned off the section starts with the languages. A choice there
+  sets the reading language without changing the UI language and is kept in the viewer
+  preferences (`speechLanguage`, next to `language`) across reloads; a stored choice that is no
+  longer offered counts as automatic.
 
 Printing and PDF export never include the layer or the toolbar's OCR group. Texts are in
 `public/locales/<lng>/common.json` under `ocr`.

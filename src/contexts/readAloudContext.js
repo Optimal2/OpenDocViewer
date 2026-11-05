@@ -24,11 +24,13 @@
  * @property {boolean} autoDetect  The language guess is on (`ocr.speech.autoDetectLanguage`).
  * @property {string} languageTitle  "Reading language", for the menu section.
  * @property {Array<{ value:string, label:string, disabled:boolean }>} entries  The reading
- *   language choices: '' automatic (only with the guess on), one per OCR language, 'ui'.
+ *   language choices: '' automatic (only with the guess on and more than one language to choose
+ *   from), then one per OCR language that has a voice installed on the machine; one such
+ *   language is listed alone; none gives a single greyed line ('none') saying so.
  * @property {string} selectedValue  The current choice among `entries`.
  * @property {string} currentLabel  Its label.
- * @property {function(string): void} chooseLanguage  Keep a choice ('' automatic, 'ui', or
- *   an ISO 639-1 language) in the viewer preferences.
+ * @property {function(string): void} chooseLanguage  Keep a choice ('' automatic, or an
+ *   ISO 639-1 language) in the viewer preferences.
  */
 import { createContext } from 'react';
 

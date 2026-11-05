@@ -113,10 +113,10 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   await expect(searchField).toBeFocused();
   const searchStatus = page.locator('.toolbar-ocr-search-status');
   await searchField.fill('diarienummer');
-  await expect(searchStatus).toHaveText(/^1 (of|av) 1$/);
+  await expect(searchStatus).toHaveText(/^1\/1$/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['Diarienummer']);
   await searchField.fill('sex veckor');
-  await expect(searchStatus).toHaveText(/^1 (of|av) 1$/);
+  await expect(searchStatus).toHaveText(/^1\/1$/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['sex', 'veckor.']);
   await searchField.fill('finnsinte');
   await expect(searchStatus).toHaveText(/No matches|Inga träffar/);
@@ -225,7 +225,7 @@ test('ocr on with Ctrl+F handed over: Ctrl+F opens the toolbar search, not the b
   const searchField = page.locator('.toolbar-ocr-search-input');
   await expect(searchField).toBeFocused();
   await searchField.fill('diarienummer');
-  await expect(page.locator('.toolbar-ocr-search-status')).toHaveText(/^1 (of|av) 1$/);
+  await expect(page.locator('.toolbar-ocr-search-status')).toHaveText(/^1\/1$/);
   // Again with the field open: the cursor comes back with the text selected.
   await status.focus();
   await page.keyboard.press('Control+f');

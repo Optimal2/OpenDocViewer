@@ -150,18 +150,18 @@ describe('ReadAloudProvider', () => {
     expect(state().speaking).toBe(false);
   });
 
-  it('lists the reading languages, keeps a choice in the preferences and speaks in it, without touching the UI language', () => {
+  it('lists Auto and the OCR languages with a local voice, keeps a choice in the preferences and speaks in it, without touching the UI language', () => {
     render();
     select(layerWithText());
-    // Auto first, then the OCR languages (swe, eng by default) that have a local voice, then
-    // the interface language; the online English GB voice adds nothing.
-    expect(state().entries.map((entry) => entry.value)).toEqual(['', 'sv', 'en', 'ui']);
-    expect(state().entries.map((entry) => entry.disabled)).toEqual([false, false, false, false]);
+    // Auto first, then the OCR languages (swe, eng by default) that have a local voice; the
+    // online English GB voice adds nothing, and there is no "follow the interface language".
+    expect(state().entries.map((entry) => entry.value)).toEqual(['', 'sv', 'en']);
+    expect(state().entries.map((entry) => entry.disabled)).toEqual([false, false, false]);
     // No language guessed for this page: Auto says so and reads in the UI language, the
     // language inside the parenthesis in its own casing and without a region.
     expect(state().entries[0].label).toBe('Auto (language not identified, reads in svenska)');
     expect(state().entries[1].label).toBe('Svenska');
-    expect(state().entries[3].label).toBe('Follow the interface language (svenska)');
+    expect(state().entries[2].label).toBe('Engelska');
     expect(state().selectedValue).toBe('');
     expect(state().languageTitle).toBe('Reading language');
 
@@ -190,36 +190,63 @@ describe('ReadAloudProvider', () => {
     act(() => { state().speak(); });
     expect(synthesis.spoken[0].lang).toBe('en-US');
     act(() => { synthesis.spoken[0].onend(); synthesis.spoken[1].onend(); });
-    // "Follow the interface language" overrides the guess.
-    act(() => { state().chooseLanguage('ui'); });
-    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'ui' });
+    // A chosen language overrides the guess.
+    act(() => { state().chooseLanguage('sv'); });
+    expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'sv' });
     expect(state().lang).toBe('sv-SE');
-    expect(state().selectedValue).toBe('ui');
+    expect(state().selectedValue).toBe('sv');
   });
 
-  it('never speaks with an online voice: without a local voice for the language it says so and nothing is spoken', () => {
+  it('with one language installed offers that language alone, no Auto, and reads in it whatever the guess', () => {
     synthesis.getVoices = () => [
       { name: 'Remote Swedish', lang: 'sv-SE', localService: false },
       { name: 'English US', lang: 'en-US', localService: true },
     ];
     render();
-    select(layerWithText());
-    expect(state().voiceMissing).toBe(true);
-    expect(state().reason).toBe('No local voice installed for svenska; online voices are never used');
-    expect(state().speak()).toBe(false);
-    expect(synthesis.speak).not.toHaveBeenCalled();
-    // Swedish is offered but greyed: it has no local voice. English can be chosen.
-    expect(state().entries[1].disabled).toBe(true);
-    expect(state().entries[1].label).toBe('Svenska (no local voice installed)');
-    expect(state().entries[2].disabled).toBe(false);
-    act(() => { state().chooseLanguage('en'); });
+    // A Swedish page: Swedish has only an online voice, so English (the one installed) reads.
+    select(layerWithText('sv'));
+    expect(state().entries.map((entry) => entry.value)).toEqual(['en']);
+    expect(state().entries[0].label).toBe('Engelska');
+    expect(state().selectedValue).toBe('en');
+    expect(state().currentLabel).toBe('Engelska');
+    expect(state().lang).toBe('en-US');
     expect(state().voiceMissing).toBe(false);
     expect(state().reason).toBeNull();
     act(() => { state().speak(); });
     expect(synthesis.spoken[0].voice.name).toBe('English US');
+    expect(synthesis.spoken[0].lang).toBe('en-US');
   });
 
-  it('reads an older choice stored as a locale as its language, and forgets one that is not an OCR language', () => {
+  it('never speaks with an online voice: with no local voice for any OCR language it says so, lists one greyed line, and nothing is spoken', () => {
+    synthesis.getVoices = () => [
+      { name: 'Remote Swedish', lang: 'sv-SE', localService: false },
+      { name: 'Remote English', lang: 'en-US', localService: false },
+      { name: 'Deutsch', lang: 'de-DE', localService: true },
+    ];
+    render();
+    select(layerWithText());
+    expect(state().entries).toEqual([{ value: 'none', label: 'No local voice installed for the recognised languages; online voices are never used', disabled: true }]);
+    expect(state().selectedValue).toBe('none');
+    expect(state().voiceMissing).toBe(true);
+    expect(state().reason).toBe('No local voice installed for the recognised languages; online voices are never used');
+    expect(state().speak()).toBe(false);
+    expect(synthesis.speak).not.toHaveBeenCalled();
+  });
+
+  it('falls back from a guessed language without a voice to the UI language, then to the first installed one', () => {
+    synthesis.getVoices = () => [
+      { name: 'Svenska', lang: 'sv-SE', localService: true },
+      { name: 'Deutsch', lang: 'de-DE', localService: true },
+    ];
+    render();
+    // English guessed, but only Swedish (the UI language) is installed among the OCR languages.
+    select(layerWithText('en'));
+    expect(state().entries.map((entry) => entry.value)).toEqual(['sv']);
+    expect(state().lang).toBe('sv-SE');
+    expect(state().entries[0].label).toBe('Svenska');
+  });
+
+  it('reads an older choice stored as a locale as its language, and forgets one that is not offered', () => {
     window.localStorage.setItem('ODV_USER_PREFERENCES', JSON.stringify({ speechLanguage: 'en-US' }));
     render();
     select(layerWithText());
@@ -234,6 +261,15 @@ describe('ReadAloudProvider', () => {
     // German is no OCR language here: automatic (the UI language without a guess).
     expect(state().lang).toBe('sv-SE');
     expect(state().selectedValue).toBe('');
+
+    // The older "follow the interface language" choice counts as automatic too.
+    act(() => root.unmount());
+    root = createRoot(container);
+    window.localStorage.setItem('ODV_USER_PREFERENCES', JSON.stringify({ speechLanguage: 'ui' }));
+    render();
+    select(layerWithText('en'));
+    expect(state().selectedValue).toBe('');
+    expect(state().lang).toBe('en-US');
   });
 
   it('reads the voice list once the state is provided (a local call) and cancels a reading on unmount', () => {

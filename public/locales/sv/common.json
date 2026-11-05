@@ -451,9 +451,11 @@
     "search": {
       "open": "Sök i tolkad text",
       "placeholder": "Sök",
-      "position": "{current} av {total}",
+      "position": "{current}/{total}",
+      "coverageLong": "{done} av {pages} sidor klara",
+      "positionLong": "Träff {current} av {total}",
       "none": "Inga träffar",
-      "coverage": "{done} av {pages} sidor klara",
+      "coverage": "{done}/{pages} sidor",
       "pageOnly": "Sök bara på den här sidan",
       "previous": "Föregående träff",
       "next": "Nästa träff",
@@ -469,7 +471,7 @@
       "auto": "Auto ({language})",
       "autoUnknown": "Auto (språket kunde inte identifieras, läser på {language})",
       "languageNoVoice": "{language} (ingen lokal röst installerad)",
-      "followUi": "Som gränssnittets språk ({language})",
+      "noVoices": "Ingen lokal röst installerad för tolkningsspråken; molnröster används aldrig",
       "noLocalVoice": "Ingen lokal röst installerad för {language}; molnröster används aldrig"
     }
   },

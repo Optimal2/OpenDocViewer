@@ -30,8 +30,7 @@ const readAloudState = (overrides = {}) => ({
   entries: [
     { value: '', label: 'Auto (svenska)', disabled: false },
     { value: 'sv', label: 'Svenska', disabled: false },
-    { value: 'en', label: 'Engelska (no local voice installed)', disabled: true },
-    { value: 'ui', label: 'Follow the interface language (svenska)', disabled: false },
+    { value: 'en', label: 'Engelska', disabled: false },
   ],
   selectedValue: '',
   currentLabel: 'Auto (svenska)',
@@ -89,9 +88,8 @@ describe('LanguageMenuButton with read-aloud', () => {
     expect(sections[1].getAttribute('data-odv-ocr')).toBe('read-menu');
     expect(sections[1].querySelector('.toolbar-split-menu-title').textContent).toBe('Reading language');
     const entries = [...sections[1].querySelectorAll('[role="menuitemradio"]')];
-    expect(entries.map((item) => item.getAttribute('data-speech-language'))).toEqual(['', 'sv', 'en', 'ui']);
-    expect(entries.map((item) => item.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false', 'false']);
-    expect(entries[2].disabled).toBe(true);
+    expect(entries.map((item) => item.getAttribute('data-speech-language'))).toEqual(['', 'sv', 'en']);
+    expect(entries.map((item) => item.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false']);
     expect(entries[0].textContent).toBe('checkAuto (svenska)');
 
     // A reading choice is kept and closes the menu; the UI language is untouched.
