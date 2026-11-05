@@ -13,6 +13,8 @@ const compareSv = readFileSync(path.resolve('public/help/default/manual-jamforel
 const compareEn = readFileSync(path.resolve('public/help/default/manual-jamforelse.en.html'), 'utf8');
 const advancedSv = readFileSync(path.resolve('public/help/default/manual-avancerat.sv.html'), 'utf8');
 const advancedEn = readFileSync(path.resolve('public/help/default/manual-avancerat.en.html'), 'utf8');
+const selectionSv = readFileSync(path.resolve('public/help/default/manual-urval.sv.html'), 'utf8');
+const selectionEn = readFileSync(path.resolve('public/help/default/manual-urval.en.html'), 'utf8');
 
 function filterToDocument(html, config = {}) {
   const filtered = filterStandardManual(html, config);
@@ -397,5 +399,173 @@ describe('standard manual metadata and signature capability sections', () => {
     ));
     expect(ids).toEqual(expect.arrayContaining(['metadata', 'signaturer', 'signatures', 'fler-signaturer']));
     expect(ids.some((id) => id.includes('ocr'))).toBe(false);
+  });
+});
+
+describe('standard manual selection workspace capability', () => {
+  it.each([
+    ['Swedish standalone', selectionSv,
+      ['oppna', 'laggtill', 'ordning', 'forhandsvisa', 'spara'],
+      [['tabort', 'Ta bort sidor ur urvalet'], ['aktivt', 'Så ser du att ett urval är aktivt'],
+        ['skrivut', 'Skriv ut urvalet'], ['aterstall', 'Ta bort urvalet']],
+      'Öppna urvalsarbetsytan', 'Dölj denna sida', 'Från arbetsytan:'],
+    ['English standalone', selectionEn,
+      ['open', 'add', 'order', 'preview', 'save'],
+      [['remove', 'Remove pages from the selection'], ['active', 'How to tell that a selection is active'],
+        ['print', 'Print the selection'], ['reset', 'Remove the selection']],
+      'Open the selection workspace', 'Hide this page', 'From the workspace:'],
+    ['Swedish embedded', manualSv,
+      ['urval-oppna', 'urval-laggtill', 'urval-ordning', 'urval-forhandsvisa', 'urval-spara'],
+      [['urval-tabort', 'Ta bort sidor ur urvalet'], ['urval-aktivt', 'Så ser du att ett urval är aktivt'],
+        ['urval-skrivut', 'Skriv ut urvalet'], ['urval-aterstall', 'Ta bort urvalet']],
+      'Öppna urvalsarbetsytan', 'Dölj denna sida', 'Från arbetsytan:'],
+    ['English embedded', manualEn,
+      ['urval-open', 'urval-add', 'urval-order', 'urval-preview', 'urval-save'],
+      [['urval-remove', 'Remove pages from the selection'], ['urval-active', 'How to tell that a selection is active'],
+        ['urval-print', 'Print the selection'], ['urval-reset', 'Remove the selection']],
+      'Open the selection workspace', 'Hide this page', 'From the workspace:'],
+  ])('removes only workspace-specific %s help when the workspace is switched off',
+    (_label, html, removedIds, remainingSections, openingTitle, ordinaryHideText, workspaceResetText) => {
+      const doc = filterToDocument(html, { print: { selectionWorkspace: { enabled: false } } });
+
+      for (const id of removedIds) {
+        expect(doc.getElementById(id)).toBeNull();
+        expect(fragmentLinks(doc, id)).toHaveLength(0);
+      }
+      remainingSections.forEach(([id, title], index) => {
+        const preservedHeading = doc.getElementById(id) || Array.from(doc.querySelectorAll('h2'))
+          .find((candidate) => candidate.textContent.includes(title));
+        expect(preservedHeading, title).not.toBeUndefined();
+        expect(preservedHeading?.textContent).toMatch(new RegExp(`^${index + 1}\\.`));
+      });
+      expect(doc.getElementById('lb-urval-oversikt')).toBeNull();
+      expect(doc.getElementById('lb-urval-verktygsfalt')).toBeNull();
+      expect(doc.getElementById('lb-urval-forhandsvisning')).toBeNull();
+      expect(doc.getElementById('lb-huvudvy-efter-urval')).not.toBeNull();
+      expect(doc.getElementById('lb-panel-efter-urval')).not.toBeNull();
+      expect(doc.querySelector('a[href="#lb-miniatyr-hogerklick"]')).not.toBeNull();
+      expect(doc.querySelector('a[href="#lb-sida-hogerklick"]')).not.toBeNull();
+      expect(doc.body.textContent).toContain(ordinaryHideText);
+      expect(doc.body.textContent).toContain('Delete');
+      expect(doc.body.textContent).not.toContain(workspaceResetText);
+      for (const nav of doc.querySelectorAll('nav.sidonav, nav.toc')) {
+        expect(nav.textContent).not.toContain(openingTitle);
+      }
+    });
+
+  it('keeps every selection guide section when the workspace is enabled, malformed or unreadable', () => {
+    for (const config of [
+      { print: { selectionWorkspace: { enabled: true } } },
+      { print: { selectionWorkspace: { enabled: 'false' } } },
+      new Proxy({}, { get() { throw new Error('Unreadable host config'); } }),
+    ]) {
+      const doc = filterToDocument(selectionEn, config);
+      for (const title of [
+        'Open the selection workspace', 'Remove pages from the selection', 'Add pages back to the selection',
+        'Change the order', 'Preview a page in the workspace', 'Save the selection or leave the workspace',
+        'How to tell that a selection is active', 'Print the selection', 'Remove the selection',
+      ]) {
+        expect(Array.from(doc.querySelectorAll('h2')).some((candidate) => (
+          candidate.textContent.includes(title)
+        )), title).toBe(true);
+      }
+    }
+  });
+
+  it('requires the real per-language selection aliases in the logical manifest', async () => {
+    const { standardManualLogicalRules } = await import('../standardManualRules.js');
+    const selectionRules = standardManualLogicalRules.filter((rule) => rule.state === 'selectionWorkspace');
+    const ids = selectionRules.flatMap((rule) => (
+      Object.values(rule.documents).flatMap((documents) => documents.map((document) => document.id))
+    ));
+    expect(ids).toEqual(expect.arrayContaining([
+      'oppna', 'urval-oppna', 'open', 'urval-open',
+      'tabort', 'urval-tabort', 'remove', 'urval-remove',
+      'aterstall', 'urval-aterstall', 'reset', 'urval-reset',
+    ]));
+  });
+});
+
+describe('standard manual print action capability blocks', () => {
+  const printEnabled = {
+    print: {
+      pdf: {
+        enabled: true,
+        allowDownload: true,
+        orientation: { enabled: true, showOption: true },
+      },
+      actions: {
+        printHtml: { enabled: true },
+        printPdf: { enabled: true },
+        downloadPdf: { enabled: true },
+        reuseLastPrintSettings: { enabled: true },
+      },
+    },
+  };
+
+  it.each([
+    ['Swedish', manualSv, 'utskrift', 'Skillnaden mellan de två knapparna:', 'Fortsätt jobba',
+      'Återanvänd senaste utskriftsval', 'Automatisk sidorientering'],
+    ['English', manualEn, 'printing', 'The difference between the two buttons:', 'Continue working',
+      'Reuse latest print settings', 'Automatic page orientation'],
+  ])('removes PDF-only %s blocks without removing ordinary printing help',
+    (_label, html, printingId, differenceText, continueText, reuseText, orientationText) => {
+      const doc = filterToDocument(html, {
+        print: { pdf: { enabled: false }, actions: { printHtml: { enabled: true } } },
+      });
+
+      expect(doc.getElementById(printingId)).not.toBeNull();
+      expect(doc.getElementById('lb-utskrift-aktiv-sida')).not.toBeNull();
+      expect(doc.getElementById('lb-utskrift-forbereds')).toBeNull();
+      expect(fragmentLinks(doc, 'lb-utskrift-forbereds')).toHaveLength(0);
+      expect(doc.body.textContent).not.toContain(differenceText);
+      expect(doc.body.textContent).not.toContain(continueText);
+      expect(doc.body.textContent).not.toContain(reuseText);
+      expect(doc.body.textContent).not.toContain(orientationText);
+      expect(doc.body.textContent).toContain('HTML');
+    });
+
+  it('keeps all print blocks when both actions and their PDF options are available', () => {
+    const doc = filterToDocument(manualEn, printEnabled);
+    expect(doc.body.textContent).toContain('The difference between the two buttons:');
+    expect(doc.getElementById('lb-utskrift-forbereds')).not.toBeNull();
+    expect(doc.body.textContent).toContain('Continue working');
+    expect(doc.body.textContent).toContain('Reuse latest print settings');
+    expect(doc.body.textContent).toContain('Automatic page orientation');
+  });
+
+  it('removes the mixed backend paragraph when HTML printing is disabled but retains PDF help', () => {
+    const doc = filterToDocument(manualEn, {
+      print: { pdf: { enabled: true }, actions: { printHtml: { enabled: false } } },
+    });
+    expect(doc.body.textContent).not.toContain('The difference between the two buttons:');
+    expect(doc.getElementById('lb-utskrift-forbereds')).not.toBeNull();
+  });
+
+  it('gates the reuse and orientation items with the same predicates as the print dialog', () => {
+    const reuseOff = filterToDocument(manualEn, {
+      print: {
+        pdf: { enabled: true, orientation: { enabled: true, showOption: true } },
+        actions: { reuseLastPrintSettings: { enabled: false } },
+      },
+    });
+    expect(reuseOff.body.textContent).not.toContain('Reuse latest print settings');
+    expect(reuseOff.body.textContent).toContain('Continue working');
+    expect(reuseOff.body.textContent).toContain('Automatic page orientation');
+
+    const orientationOff = filterToDocument(manualEn, {
+      print: { pdf: { enabled: true, orientation: { enabled: true, showOption: false } } },
+    });
+    expect(orientationOff.body.textContent).not.toContain('Automatic page orientation');
+    expect(orientationOff.body.textContent).toContain('Continue working');
+    expect(orientationOff.body.textContent).toContain('Reuse latest print settings');
+  });
+
+  it('fails open for unreadable print configuration', () => {
+    const unreadable = new Proxy({}, { get() { throw new Error('Unreadable host config'); } });
+    const doc = filterToDocument(manualEn, unreadable);
+    expect(doc.body.textContent).toContain('The difference between the two buttons:');
+    expect(doc.getElementById('lb-utskrift-forbereds')).not.toBeNull();
+    expect(doc.body.textContent).toContain('Reuse latest print settings');
   });
 });

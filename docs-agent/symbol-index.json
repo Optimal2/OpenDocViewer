@@ -6275,13 +6275,38 @@
     "examples": 0
   },
   {
+    "id": "absoluteManualUrl",
+    "name": "absoluteManualUrl",
+    "longname": "absoluteManualUrl",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 40,
+    "description": "",
+    "params": [
+      {
+        "name": "candidate",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "Absolute URL used to resolve manual-relative images and other assets."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "appendManualRefreshToken",
     "name": "appendManualRefreshToken",
     "longname": "appendManualRefreshToken",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 96,
+    "line": 150,
     "description": "",
     "params": [
       {
@@ -6312,7 +6337,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 294,
+    "line": 348,
     "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
     "params": [
       {
@@ -6343,7 +6368,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 348,
+    "line": 402,
     "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
     "params": [
       {
@@ -6374,7 +6399,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 274,
+    "line": 328,
     "description": "",
     "params": [],
     "returns": [
@@ -6392,7 +6417,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 556,
+    "line": 610,
     "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
     "params": [
       {
@@ -6417,7 +6442,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 231,
+    "line": 285,
     "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
     "params": [
       {
@@ -6454,7 +6479,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 161,
+    "line": 215,
     "description": "Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.",
     "params": [
       {
@@ -6479,7 +6504,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 601,
+    "line": 655,
     "description": "",
     "params": [
       {
@@ -6522,7 +6547,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 515,
+    "line": 569,
     "description": "",
     "params": [
       {
@@ -6553,7 +6578,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 200,
+    "line": 254,
     "description": "Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from.",
     "params": [
       {
@@ -6584,7 +6609,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 802,
+    "line": 856,
     "description": "",
     "params": [
       {
@@ -6604,7 +6629,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 538,
+    "line": 592,
     "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
     "params": [
       {
@@ -6635,7 +6660,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 26,
+    "line": 80,
     "description": "",
     "params": [
       {
@@ -6654,13 +6679,56 @@
     "examples": 0
   },
   {
+    "id": "loadStandardManual",
+    "name": "loadStandardManual",
+    "longname": "loadStandardManual",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 59,
+    "description": "Load the preferred generated standard manual.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.language",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.fetchCandidate",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<({candidate: string, url: string, html: string}|null)>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "MANUAL_CONTENTS_ID",
     "name": "MANUAL_CONTENTS_ID",
     "longname": "MANUAL_CONTENTS_ID",
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 495,
+    "line": 549,
     "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
     "params": [],
     "returns": [],
@@ -6673,7 +6741,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 507,
+    "line": 561,
     "description": "Ids the dialog renders around the manual.",
     "params": [],
     "returns": [],
@@ -6686,7 +6754,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 143,
+    "line": 197,
     "description": "Name of the CSS Custom Highlight covering only the current manual search hit.",
     "params": [],
     "returns": [],
@@ -6699,7 +6767,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 133,
+    "line": 187,
     "description": "Debounce delay before a typed query is applied to the rendered manual text.",
     "params": [],
     "returns": [],
@@ -6712,7 +6780,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 138,
+    "line": 192,
     "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
     "params": [],
     "returns": [],
@@ -6725,7 +6793,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 498,
+    "line": 552,
     "description": "Id of the manual search field.",
     "params": [],
     "returns": [],
@@ -6738,7 +6806,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 150,
+    "line": 204,
     "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
     "params": [],
     "returns": [],
@@ -6751,7 +6819,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 128,
+    "line": 182,
     "description": "Minimum query length before the manual search runs.",
     "params": [],
     "returns": [],
@@ -6764,7 +6832,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 459,
+    "line": 513,
     "description": "Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read.",
     "params": [],
     "returns": [],
@@ -6777,7 +6845,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 462,
+    "line": 516,
     "description": "Gap in pixels kept above a heading when the content pane scrolls to it.",
     "params": [],
     "returns": [],
@@ -6790,7 +6858,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 501,
+    "line": 555,
     "description": "Id of the dialog title.",
     "params": [],
     "returns": [],
@@ -6803,7 +6871,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 705,
+    "line": 759,
     "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
     "params": [
       {
@@ -6823,7 +6891,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 470,
+    "line": 524,
     "description": "Open collapsed &lt;details&gt; ancestors so a target inside them can be shown.",
     "params": [
       {
@@ -6849,7 +6917,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 659,
+    "line": 713,
     "description": "Make the section holding target current and keep it current until the reader scrolls.",
     "params": [
       {
@@ -6869,7 +6937,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 112,
+    "line": 166,
     "description": "",
     "params": [
       {
@@ -6894,7 +6962,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 409,
+    "line": 463,
     "description": "Unwrap fallback marks and merge the split text nodes back together.",
     "params": [
       {
@@ -6920,7 +6988,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 1066,
+    "line": 1130,
     "description": "",
     "params": [
       {
@@ -6951,7 +7019,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 584,
+    "line": 638,
     "description": "Replace the URL fragment without adding a history entry.",
     "params": [
       {
@@ -6971,7 +7039,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 684,
+    "line": 738,
     "description": "Put back the URL fragment the viewer had before the manual set one.",
     "params": [],
     "returns": [],
@@ -6984,7 +7052,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 431,
+    "line": 485,
     "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
     "params": [
       {
@@ -7022,7 +7090,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 54,
+    "line": 108,
     "description": "",
     "params": [
       {
@@ -7053,7 +7121,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 40,
+    "line": 94,
     "description": "",
     "params": [
       {
@@ -7078,7 +7146,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 487,
+    "line": 541,
     "description": "Scroll only the given pane so the target sits at its top.",
     "params": [
       {
@@ -7104,7 +7172,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 390,
+    "line": 444,
     "description": "",
     "params": [
       {
@@ -7130,7 +7198,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 673,
+    "line": 727,
     "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
     "params": [
       {
@@ -27738,8 +27806,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 45,
-    "description": "Candidate manual URLs in priority order: site before default, UI language before fallback language.",
+    "line": 101,
+    "description": "Candidate manual URLs in priority order: UI language before fallback language.",
     "params": [
       {
         "name": "language",
@@ -27758,6 +27826,37 @@
       {
         "type": "Array.<string>",
         "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "buildManualLanguageCandidates",
+    "name": "buildManualLanguageCandidates",
+    "longname": "buildManualLanguageCandidates",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 82,
+    "description": "Language preference shared by fetched and generated manuals.",
+    "params": [
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "UI language, e.g. sv ."
+      },
+      {
+        "name": "manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config help.manual block."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": "UI language followed by the distinct fallback language."
       }
     ],
     "examples": 0
@@ -27813,7 +27912,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 76,
+    "line": 128,
     "description": "True when the HTML is OpenDocViewer's own application shell rather than a manual.",
     "params": [
       {
@@ -27838,10 +27937,35 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 80,
+    "line": 132,
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "normalizedManualSource",
+    "name": "normalizedManualSource",
+    "longname": "normalizedManualSource",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 42,
+    "description": "",
+    "params": [
+      {
+        "name": "manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config help.manual block."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "Normalized source value without diagnostics."
+      }
+    ],
     "examples": 0
   },
   {
@@ -27851,7 +27975,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 94,
+    "line": 146,
     "description": "Fetch candidates in order and return the first one the server delivers as a manual.",
     "params": [
       {
@@ -27870,6 +27994,37 @@
     "returns": [
       {
         "type": "Promise.<({candidate: string, url: string, html: string}|null)>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveManualSourceMode",
+    "name": "resolveManualSourceMode",
+    "longname": "resolveManualSourceMode",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 60,
+    "description": "Resolve help.manual.source.",
+    "params": [
+      {
+        "name": "manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config help.manual block."
+      },
+      {
+        "name": "warn",
+        "type": "function",
+        "optional": true,
+        "description": "Diagnostic sink, normally console.warn."
+      }
+    ],
+    "returns": [
+      {
+        "type": "'auto'|'standard'",
         "description": ""
       }
     ],
@@ -46234,7 +46389,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 209,
+    "line": 210,
     "description": "Remove only the composed-print blocks disabled by site switches.",
     "params": [
       {
@@ -46272,8 +46427,84 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 145,
+    "line": 146,
     "description": "Apply exact-id and OCR heading rules to a parsed manual.",
+    "params": [
+      {
+        "name": "doc",
+        "type": "Document",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "states",
+        "type": "Readonly.<Record<string, boolean>>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "removedIds",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "lightboxCandidates",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "filterPrintActionBlocks",
+    "name": "filterPrintActionBlocks",
+    "longname": "filterPrintActionBlocks",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/standardManual.js",
+    "line": 355,
+    "description": "Filter only self-contained print blocks that the actual print-dialog predicates disable.",
+    "params": [
+      {
+        "name": "doc",
+        "type": "Document",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "states",
+        "type": "Readonly.<Record<string, boolean>>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "removedIds",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "lightboxCandidates",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "filterSelectionWorkspaceBlocks",
+    "name": "filterSelectionWorkspaceBlocks",
+    "longname": "filterSelectionWorkspaceBlocks",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/standardManual.js",
+    "line": 292,
+    "description": "The selection switch removes the full-page workspace, not selection itself.",
     "params": [
       {
         "name": "doc",
@@ -46310,7 +46541,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 402,
+    "line": 528,
     "description": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
     "params": [
       {
@@ -46341,7 +46572,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 52,
+    "line": 53,
     "description": "",
     "params": [
       {
@@ -46372,7 +46603,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 337,
+    "line": 463,
     "description": "",
     "params": [
       {
@@ -46397,7 +46628,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 43,
+    "line": 44,
     "description": "The embedded guide is a hard boundary.",
     "params": [
       {
@@ -46428,7 +46659,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 274,
+    "line": 400,
     "description": "",
     "params": [
       {
@@ -46465,7 +46696,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 31,
+    "line": 32,
     "description": "",
     "params": [
       {
@@ -46490,7 +46721,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 69,
+    "line": 70,
     "description": "",
     "params": [
       {
@@ -46527,7 +46758,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 174,
+    "line": 175,
     "description": "",
     "params": [
       {
@@ -46558,7 +46789,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 194,
+    "line": 195,
     "description": "",
     "params": [
       {
@@ -46583,7 +46814,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 86,
+    "line": 87,
     "description": "Decode a same-document fragment.",
     "params": [
       {
@@ -46608,7 +46839,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 132,
+    "line": 133,
     "description": "",
     "params": [
       {
@@ -46639,7 +46870,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 186,
+    "line": 187,
     "description": "",
     "params": [
       {
@@ -46664,7 +46895,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 287,
+    "line": 413,
     "description": "Remove lightbox subtrees whose last thumbnail belonged to removed content.",
     "params": [
       {
@@ -46696,7 +46927,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 103,
+    "line": 104,
     "description": "Remember ids and lightbox references before a subtree leaves the document.",
     "params": [
       {
@@ -46728,7 +46959,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 305,
+    "line": 431,
     "description": "Authored contents repeat a section's full title, so unlinking alone would leave hidden headings searchable.",
     "params": [
       {
@@ -46754,7 +46985,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 121,
+    "line": 122,
     "description": "",
     "params": [
       {
@@ -46786,13 +47017,45 @@
     "examples": 0
   },
   {
+    "id": "removeStandardManualElements",
+    "name": "removeStandardManualElements",
+    "longname": "removeStandardManualElements",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/standardManual.js",
+    "line": 274,
+    "description": "",
+    "params": [
+      {
+        "name": "elements",
+        "type": "Iterable.<Element>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "removedIds",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "lightboxCandidates",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "renumberVisibleHeadings",
     "name": "renumberVisibleHeadings",
     "longname": "renumberVisibleHeadings",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 364,
+    "line": 490,
     "description": "Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links.",
     "params": [
       {
@@ -46812,7 +47075,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 352,
+    "line": 478,
     "description": "",
     "params": [
       {
@@ -46838,7 +47101,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 18,
+    "line": 19,
     "description": "",
     "params": [
       {
@@ -46863,7 +47126,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 325,
+    "line": 451,
     "description": "Preserve link text and inline markup while removing only links to ids that this filter actually removed.",
     "params": [
       {
@@ -46889,7 +47152,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 141,
+    "line": 173,
     "description": "Read a UI predicate without letting a host-owned Proxy/getter hide manual content.",
     "params": [
       {
@@ -46914,7 +47177,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 44,
+    "line": 46,
     "description": "Declare the actual authored aliases for one logical section.",
     "params": [
       {
@@ -46964,6 +47227,12 @@
         "type": "string",
         "optional": true,
         "description": "Actual combined-guide suffix when it differs from the filename."
+      },
+      {
+        "name": "behavior",
+        "type": "string",
+        "optional": true,
+        "description": "Whole-heading removal or a named structural partial-section cleanup."
       }
     ],
     "returns": [
@@ -46981,7 +47250,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 24,
+    "line": 25,
     "description": "",
     "params": [
       {
@@ -47018,7 +47287,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 157,
+    "line": 189,
     "description": "Resolve every site switch that can hide standard-manual content.",
     "params": [
       {
@@ -47043,7 +47312,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 75,
+    "line": 79,
     "description": "Generator-validated logical rules.",
     "params": [],
     "returns": [],
@@ -47056,7 +47325,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 115,
+    "line": 147,
     "description": "OCR headings use the same id in standalone and embedded guides.",
     "params": [],
     "returns": [],
@@ -47069,7 +47338,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 127,
+    "line": 159,
     "description": "A flat compatibility list of every real element id referenced by the logical manifest.",
     "params": [],
     "returns": [],
@@ -47082,8 +47351,21 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 96,
+    "line": 116,
     "description": "Exact-id heading rules.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "standardManualSelectionPartialRules",
+    "name": "standardManualSelectionPartialRules",
+    "longname": "standardManualSelectionPartialRules",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/standardManualRules.js",
+    "line": 130,
+    "description": "Structural cleanup for selection sections that also contain ordinary Delete/printing help.",
     "params": [],
     "returns": [],
     "examples": 0

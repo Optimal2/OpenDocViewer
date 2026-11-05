@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8600. JSDoc symbol count: 146.
+File count: 21. Line count: 8664. JSDoc symbol count: 148.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -98,10 +98,12 @@ Manual overlay that loads simple external HTML fragments from the public help fo
 
 Exports: `ManualOverlayDialog`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/utils/manualSources.js`, `src/utils/manualContentsTree.js`
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/manualSources.js`, `src/utils/standardManual.js`, `src/utils/manualContentsTree.js`, `src/generated/standard-manual/manual.sv.js`, `src/generated/standard-manual/manual.en.js`
 
 Symbols:
 
+- `absoluteManualUrl` (function) - No description.
+- `loadStandardManual` (function) - Load the preferred generated standard manual.
 - `isRewritableRelativeUrl` (function) - No description.
 - `sanitizeManualHtml` (function) - No description.
 - `rewriteManualHtml` (function) - No description.
@@ -112,8 +114,6 @@ Symbols:
 - `MANUAL_SEARCH_HIGHLIGHT_NAME` (constant) - Name of the shared CSS Custom Highlight covering every manual search hit.
 - `MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME` (constant) - Name of the CSS Custom Highlight covering only the current manual search hit.
 - `MANUAL_SEARCH_MARK_ATTRIBUTE` (constant) - Attribute marking fallback &lt;mark&gt; wrappers with their hit index.
-- `createManualSearchFolder` (function) - Build a case\-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.
-- `foldManualSearchText` (function) - Case\-fold text one code point at a time and keep, for every folded code unit, the original code\-unit range of the character it came from.
 
 ## src/components/DocumentToolbar/OcrSearchBar.jsx
 

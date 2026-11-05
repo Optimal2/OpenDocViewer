@@ -68,6 +68,7 @@ describe('ManualOverlayDialog manual search', () => {
   let root;
   let onClose;
   let manualHtml;
+  let runtimeConfig;
 
   function marks() {
     return Array.from(container.querySelectorAll('.odv-manual-content mark[data-odv-manual-mark]'));
@@ -88,6 +89,8 @@ describe('ManualOverlayDialog manual search', () => {
   beforeEach(() => {
     onClose = vi.fn();
     manualHtml = MANUAL_HTML;
+    runtimeConfig = {};
+    window.__ODV_GET_CONFIG__ = () => runtimeConfig;
     vi.stubGlobal('fetch', async (url) => {
       const html = manualHtml;
       return { ok: true, url: String(url), text: async () => html };
@@ -107,6 +110,7 @@ describe('ManualOverlayDialog manual search', () => {
       root.unmount();
     });
     container.remove();
+    delete window.__ODV_GET_CONFIG__;
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -375,6 +379,24 @@ describe('ManualOverlayDialog manual search', () => {
     expect(manual.querySelectorAll('mark[data-odv-manual-mark]')).toHaveLength(0);
     expect(paragraph.childNodes).toHaveLength(1);
     expect(paragraph.textContent).toBe('The manual explains the viewer. Read this manual page first.');
+  });
+
+  it('does not find disabled standard headings and finds them again when enabled', async () => {
+    const title = 'Lägg sidorna på varandra (överlagring)';
+    runtimeConfig = {
+      help: { manual: { source: 'standard' } },
+      compare: { overlay: { enabled: false } },
+    };
+    await waitForManual();
+    await searchFor(title);
+    expect(marks()).toHaveLength(0);
+    expect(counter().textContent).toBe('No matches');
+
+    runtimeConfig.compare.overlay.enabled = true;
+    act(() => { button('Reload manual from server').click(); });
+    await flush(100);
+    expect(marks().length).toBeGreaterThan(0);
+    expect(counter().textContent).toMatch(/^1 of [1-9]/);
   });
 
   describe('CSS Custom Highlight path', () => {

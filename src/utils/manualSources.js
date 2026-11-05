@@ -36,26 +36,78 @@ export function interpolateManualTemplate(template, language) {
 }
 
 /**
- * Candidate manual URLs in priority order: site before default, UI language before fallback language.
+ * @param {Object=} manualConfig Runtime config `help.manual` block.
+ * @returns {string} Normalized source value without diagnostics.
+ */
+function normalizedManualSource(manualConfig) {
+  try {
+    const source = manualConfig?.source;
+    if (source === undefined || source === null) return '';
+    return String(source).trim().toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Resolve help.manual.source. Missing and empty values mean auto; an unknown value is diagnosed and
+ * deliberately falls back to auto so an existing deployment keeps its current site-first behavior.
+ *
+ * @param {Object=} manualConfig Runtime config `help.manual` block.
+ * @param {function(string): void} [warn] Diagnostic sink, normally console.warn.
+ * @returns {'auto'|'standard'}
+ */
+export function resolveManualSourceMode(manualConfig, warn = undefined) {
+  const source = normalizedManualSource(manualConfig);
+  if (source === 'standard') return 'standard';
+  if (source && source !== 'auto') {
+    const message = `[OpenDocViewer] Unknown help.manual.source "${source}"; using "auto".`;
+    try {
+      if (typeof warn === 'function') warn(message);
+      else if (typeof console !== 'undefined' && typeof console.warn === 'function') console.warn(message);
+    } catch {
+      // A host-owned diagnostic sink must not prevent the manual from opening.
+    }
+  }
+  return 'auto';
+}
+
+/**
+ * Language preference shared by fetched and generated manuals.
  *
  * @param {string} language UI language, e.g. `sv`.
  * @param {Object=} manualConfig Runtime config `help.manual` block.
- * @returns {Array<string>}
+ * @returns {Array<string>} UI language followed by the distinct fallback language.
  */
-export function buildManualCandidates(language, manualConfig) {
+export function buildManualLanguageCandidates(language, manualConfig) {
   const fallbackLanguage = toText(manualConfig?.fallbackLanguage, 'en').toLowerCase();
-  const siteTemplate = toText(manualConfig?.sitePathTemplate, DEFAULT_SITE_MANUAL_TEMPLATE);
-  const fallbackTemplate = toText(manualConfig?.fallbackPathTemplate, DEFAULT_FALLBACK_MANUAL_TEMPLATE);
   const normalizedLanguage = toText(language, 'en').toLowerCase();
   const variants = [];
   [normalizedLanguage, fallbackLanguage].forEach((entry) => {
     if (!entry || variants.includes(entry)) return;
     variants.push(entry);
   });
+  return variants;
+}
+
+/**
+ * Candidate manual URLs in priority order: UI language before fallback language. Auto tries site
+ * before default; standard never lists site-owned HTML and uses only fallbackPathTemplate.
+ *
+ * @param {string} language UI language, e.g. `sv`.
+ * @param {Object=} manualConfig Runtime config `help.manual` block.
+ * @returns {Array<string>}
+ */
+export function buildManualCandidates(language, manualConfig) {
+  const siteTemplate = toText(manualConfig?.sitePathTemplate, DEFAULT_SITE_MANUAL_TEMPLATE);
+  const fallbackTemplate = toText(manualConfig?.fallbackPathTemplate, DEFAULT_FALLBACK_MANUAL_TEMPLATE);
+  const templates = normalizedManualSource(manualConfig) === 'standard'
+    ? [fallbackTemplate]
+    : [siteTemplate, fallbackTemplate];
 
   const candidates = [];
-  variants.forEach((lng) => {
-    [siteTemplate, fallbackTemplate].forEach((template) => {
+  buildManualLanguageCandidates(language, manualConfig).forEach((lng) => {
+    templates.forEach((template) => {
       const interpolated = interpolateManualTemplate(template, lng);
       if (!interpolated || candidates.includes(interpolated)) return;
       candidates.push(interpolated);

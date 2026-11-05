@@ -537,6 +537,10 @@
     // ---- HELP / ABOUT ---------------------------------------------------------
     help: {
       manual: {
+        // "auto" (default) prefers an existing site-local HTML file. "standard" always uses the
+        // bundled manual, applies its capability filters and never loads site HTML. Unknown values
+        // produce a console warning and behave as "auto".
+        source: 'auto',
         // Site-local HTML fragments can be added without rebuilding the React app.
         // The loader tries the site path first and falls back to the bundled default file.
         sitePathTemplate: baseHref + 'help/site/manual.{{lng}}.html',

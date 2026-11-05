@@ -10,7 +10,13 @@ import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
-import { buildManualCandidates, resolveManualSource } from '../../utils/manualSources.js';
+import {
+  buildManualCandidates,
+  buildManualLanguageCandidates,
+  resolveManualSource,
+  resolveManualSourceMode,
+} from '../../utils/manualSources.js';
+import { filterStandardManual } from '../../utils/standardManual.js';
 import {
   buildManualContentsTree,
   countManualMatchesPerSection,
@@ -18,6 +24,54 @@ import {
 } from '../../utils/manualContentsTree.js';
 
 const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
+
+// Static loader keys let Vite create one lazy chunk per generated language without executing any
+// script contained in the source HTML. Only these two generated modules exist; other UI languages
+// follow help.manual.fallbackLanguage exactly as the fetched source path does.
+const STANDARD_MANUAL_LOADERS = Object.freeze({
+  sv: () => import('../../generated/standard-manual/manual.sv.js'),
+  en: () => import('../../generated/standard-manual/manual.en.js'),
+});
+
+/**
+ * @param {string} candidate
+ * @returns {string} Absolute URL used to resolve manual-relative images and other assets.
+ */
+function absoluteManualUrl(candidate) {
+  try {
+    const base = typeof window !== 'undefined' ? window.location.href : undefined;
+    return new URL(String(candidate || ''), base).toString();
+  } catch {
+    return String(candidate || '');
+  }
+}
+
+/**
+ * Load the preferred generated standard manual. A chunk failure uses fallbackPathTemplate through
+ * the same response validation and abortable fetch path as auto, but still excludes every site file.
+ *
+ * @param {Object} options
+ * @param {string} options.language
+ * @param {Object=} options.manualConfig
+ * @param {function(string): Promise<Object>} options.fetchCandidate
+ * @returns {Promise<({candidate: string, url: string, html: string}|null)>}
+ */
+async function loadStandardManual({ language, manualConfig, fetchCandidate }) {
+  const standardConfig = { ...(manualConfig || {}), source: 'standard' };
+  const preferredLanguage = buildManualLanguageCandidates(language, standardConfig)
+    .find((entry) => typeof STANDARD_MANUAL_LOADERS[entry] === 'function');
+  if (preferredLanguage) {
+    try {
+      const module = await STANDARD_MANUAL_LOADERS[preferredLanguage]();
+      if (typeof module?.default !== 'string') throw new Error('Generated manual has no HTML string.');
+      const candidate = buildManualCandidates(preferredLanguage, standardConfig)[0];
+      return { candidate, url: absoluteManualUrl(candidate), html: module.default };
+    } catch {
+      // A missing/failed lazy chunk falls back to the configured static HTML below.
+    }
+  }
+  return resolveManualSource(buildManualCandidates(language, standardConfig), fetchCandidate);
+}
 
 /**
  * @param {string} value
@@ -844,7 +898,9 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     setManualState({ loading: true, error: '', html: '', resolvedUrl: '' });
 
     const load = async () => {
-      const candidates = buildManualCandidates(language, getRuntimeConfig()?.help?.manual);
+      const runtimeConfig = getRuntimeConfig();
+      const manualConfig = runtimeConfig?.help?.manual;
+      const sourceMode = resolveManualSourceMode(manualConfig);
       const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidate, refreshToken), {
         cache: refreshToken ? 'reload' : 'no-store',
         credentials: 'same-origin',
@@ -852,16 +908,24 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
         headers: { Accept: 'text/html, text/plain;q=0.9, */*;q=0.1' },
       });
 
-      const source = await resolveManualSource(candidates, fetchCandidate).catch(() => undefined);
+      const source = await (sourceMode === 'standard'
+        ? loadStandardManual({ language, manualConfig, fetchCandidate })
+        : resolveManualSource(buildManualCandidates(language, manualConfig), fetchCandidate)
+      ).catch(() => undefined);
       // undefined = aborted (the dialog closed or the language changed)
       if (cancelled || source === undefined) return;
 
       if (source) {
         const resolvedUrl = removeManualRefreshToken(source.url) || source.candidate;
+        // Only bundled standard content is capability-filtered. Site-owned HTML keeps its complete
+        // authored DOM and follows the original sanitize/rewrite path without these rules.
+        const html = sourceMode === 'standard'
+          ? filterStandardManual(source.html, runtimeConfig)
+          : source.html;
         setManualState({
           loading: false,
           error: '',
-          html: rewriteManualHtml(source.html, resolvedUrl),
+          html: rewriteManualHtml(html, resolvedUrl),
           resolvedUrl,
         });
         return;

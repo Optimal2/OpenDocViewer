@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 64. Line count: 23676. JSDoc symbol count: 975.
+File count: 64. Line count: 23899. JSDoc symbol count: 982.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -217,14 +217,17 @@ Symbols:
 
 Resolves which manual HTML file the help dialog shows.
 
-Exports: `DEFAULT_SITE_MANUAL_TEMPLATE`, `DEFAULT_FALLBACK_MANUAL_TEMPLATE`, `interpolateManualTemplate`, `buildManualCandidates`, `isApplicationShellHtml`, `resolveManualSource`
+Exports: `DEFAULT_SITE_MANUAL_TEMPLATE`, `DEFAULT_FALLBACK_MANUAL_TEMPLATE`, `interpolateManualTemplate`, `resolveManualSourceMode`, `buildManualLanguageCandidates`, `buildManualCandidates`, `isApplicationShellHtml`, `resolveManualSource`
 
 Symbols:
 
 - `DEFAULT_SITE_MANUAL_TEMPLATE` (constant) - Resolves which manual HTML file the help dialog shows.
 - `toText` (function) - No description.
 - `interpolateManualTemplate` (function) - No description.
-- `buildManualCandidates` (function) - Candidate manual URLs in priority order: site before default, UI language before fallback language.
+- `normalizedManualSource` (function) - No description.
+- `resolveManualSourceMode` (function) - Resolve help.manual.source.
+- `buildManualLanguageCandidates` (function) - Language preference shared by fetched and generated manuals.
+- `buildManualCandidates` (function) - Candidate manual URLs in priority order: UI language before fallback language.
 - `isApplicationShellHtml` (function) - True when the HTML is OpenDocViewer's own application shell rather than a manual.
 - `ManualCandidateResponse` (typedef) - No description.
 - `resolveManualSource` (function) - Fetch candidates in order and return the first one the server delivers as a manual.
@@ -1060,7 +1063,7 @@ Symbols:
 
 Resolve every site switch that can hide standard\-manual content.
 
-Exports: `standardManualLogicalRules`, `standardManualSectionRules`, `standardManualOcrSectionRules`, `standardManualRuleIds`, `resolveStandardManualRuleStates`
+Exports: `standardManualLogicalRules`, `standardManualSectionRules`, `standardManualSelectionPartialRules`, `standardManualOcrSectionRules`, `standardManualRuleIds`, `resolveStandardManualRuleStates`
 
 Local imports: `src/utils/runtimeConfig.js`
 
@@ -1070,6 +1073,7 @@ Symbols:
 - `localizedGuideRule` (function) - Declare the actual authored aliases for one logical section.
 - `standardManualLogicalRules` (constant) - Generator\-validated logical rules.
 - `standardManualSectionRules` (constant) - Exact\-id heading rules.
+- `standardManualSelectionPartialRules` (constant) - Structural cleanup for selection sections that also contain ordinary Delete/printing help.
 - `standardManualOcrSectionRules` (constant) - OCR headings use the same id in standalone and embedded guides.
 - `standardManualRuleIds` (constant) - A flat compatibility list of every real element id referenced by the logical manifest.
 - `failOpen` (function) - Read a UI predicate without letting a host\-owned Proxy/getter hide manual content.

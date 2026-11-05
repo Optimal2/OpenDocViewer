@@ -13,14 +13,20 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockTranslate, mockI18n } = vi.hoisted(() => ({
+const { mockTranslate, mockI18n, mockManualModules } = vi.hoisted(() => ({
   mockTranslate: (key, options) => options?.defaultValue ?? key,
   mockI18n: { language: 'sv', resolvedLanguage: 'sv' },
+  mockManualModules: { failEnglishChunk: false },
 }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: mockTranslate, i18n: mockI18n }),
 }));
+
+vi.mock('../../../generated/standard-manual/manual.en.js', async (importOriginal) => {
+  if (mockManualModules.failEnglishChunk) throw new Error('Simulated manual chunk failure');
+  return importOriginal();
+});
 
 import ManualOverlayDialog from '../ManualOverlayDialog.jsx';
 
@@ -50,12 +56,21 @@ describe('ManualOverlayDialog contents tree', () => {
   let root;
   let onClose;
   let manualHtml;
+  let runtimeConfig;
+  let requestedUrls;
 
   beforeEach(() => {
     onClose = vi.fn();
     manualHtml = MANUAL_HTML;
+    runtimeConfig = {};
+    requestedUrls = [];
+    mockManualModules.failEnglishChunk = false;
+    mockI18n.language = 'sv';
+    mockI18n.resolvedLanguage = 'sv';
+    window.__ODV_GET_CONFIG__ = () => runtimeConfig;
     vi.stubGlobal('fetch', async (url) => {
-      const html = manualHtml;
+      requestedUrls.push(String(url));
+      const html = typeof manualHtml === 'function' ? manualHtml(String(url)) : manualHtml;
       return { ok: true, url: String(url), text: async () => html };
     });
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
@@ -70,8 +85,10 @@ describe('ManualOverlayDialog contents tree', () => {
       root.unmount();
     });
     container.remove();
+    delete window.__ODV_GET_CONFIG__;
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    vi.resetModules();
   });
 
   async function openManual(html = MANUAL_HTML) {
@@ -79,7 +96,9 @@ describe('ManualOverlayDialog contents tree', () => {
     act(() => {
       root.render(h(ManualOverlayDialog, { isOpen: true, onClose }));
     });
-    await flush(50);
+    for (let attempt = 0; attempt < 20 && !container.querySelector('.odv-manual-content'); attempt += 1) {
+      await flush(50);
+    }
     expect(container.querySelector('.odv-manual-content')).not.toBeNull();
   }
 
@@ -361,5 +380,144 @@ describe('ManualOverlayDialog contents tree', () => {
     await openManual(parts.join(''));
     expect(links()).toHaveLength(300);
     expect(new Set(links().map((node) => node.getAttribute('href'))).size).toBe(300);
+  });
+
+  it('prefers an existing site manual in auto mode', async () => {
+    runtimeConfig = { help: { manual: { source: 'auto' } } };
+    await openManual((url) => (url.includes('help/site/')
+      ? '<h2 id="site-manual">Site-owned manual</h2>'
+      : '<h2 id="default-manual">Default manual</h2>'));
+
+    expect(content().querySelector('#site-manual')).not.toBeNull();
+    expect(content().querySelector('#default-manual')).toBeNull();
+    expect(requestedUrls[0]).toContain('help/site/manual.sv.html');
+  });
+
+  it('never applies standard-only heading filters to arbitrary site HTML', async () => {
+    runtimeConfig = {
+      help: { manual: { source: 'auto' } },
+      compare: { overlay: { enabled: false } },
+    };
+    await openManual([
+      '<h2 id="jmf-avstangt">Site switch notes</h2><p>Site-owned switch text</p>',
+      '<h2 id="jmf-overlay">Site overlay</h2><p>Site-owned overlay text</p>',
+    ].join(''));
+
+    expect(content().querySelector('#jmf-avstangt')).not.toBeNull();
+    expect(content().querySelector('#jmf-overlay')).not.toBeNull();
+    expect(content().textContent).toContain('Site-owned switch text');
+    expect(content().textContent).toContain('Site-owned overlay text');
+  });
+
+  it('ignores site files and fetches nothing on the normal standard path', async () => {
+    runtimeConfig = { help: { manual: { source: 'standard' } } };
+    await openManual('<h2 id="site-manual">Site manual must not load</h2>');
+
+    expect(content().querySelector('#urval-oppna')).not.toBeNull();
+    expect(content().querySelector('#site-manual')).toBeNull();
+    expect(requestedUrls).toEqual([]);
+  });
+
+  it('warns and uses auto for an invalid manual source', async () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    runtimeConfig = { help: { manual: { source: 'unexpected-mode' } } };
+    await openManual('<h2 id="site-manual">Site manual after warning</h2>');
+
+    expect(content().querySelector('#site-manual')).not.toBeNull();
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('help.manual.source'));
+    expect(warning).toHaveBeenCalledWith(expect.stringContaining('unexpected-mode'));
+    expect(requestedUrls[0]).toContain('help/site/manual.sv.html');
+  });
+
+  it('filters standard headings before building contents and restores them when enabled', async () => {
+    const title = 'Lägg sidorna på varandra (överlagring)';
+    runtimeConfig = {
+      help: { manual: { source: 'standard' } },
+      compare: { overlay: { enabled: false } },
+    };
+    await openManual();
+
+    expect(content().querySelector('#jmf-overlagring')).toBeNull();
+    expect(content().querySelector('#jmf-gardin')).not.toBeNull();
+    expect(links().some((node) => node.textContent.includes(title))).toBe(false);
+    expect(requestedUrls).toEqual([]);
+
+    runtimeConfig.compare.overlay.enabled = true;
+    act(() => { container.querySelector('button[aria-label="Reload manual from server"]').click(); });
+    await flush(50);
+    expect(content().querySelector('#jmf-overlagring')).not.toBeNull();
+    expect(links().some((node) => node.textContent.includes(title))).toBe(true);
+    expect(requestedUrls).toEqual([]);
+  });
+
+  it('filters configured fallback HTML after a standard chunk failure without fetching site files', async () => {
+    vi.resetModules();
+    mockManualModules.failEnglishChunk = true;
+    mockI18n.language = 'en';
+    mockI18n.resolvedLanguage = 'en';
+    runtimeConfig = {
+      help: { manual: { source: 'standard' } },
+      compare: { overlay: { enabled: false } },
+    };
+    await openManual([
+      '<h2 id="jmf-overlagring">Hidden fallback overlay</h2><p>Hidden fallback body</p>',
+      '<h2 id="following">Visible fallback section</h2><p>Visible fallback body</p>',
+    ].join(''));
+
+    expect(content().querySelector('#jmf-overlagring')).toBeNull();
+    expect(content().querySelector('#following')).not.toBeNull();
+    expect(content().textContent).not.toContain('Hidden fallback body');
+    expect(requestedUrls.length).toBeGreaterThan(0);
+    expect(requestedUrls.every((url) => url.includes('help/default/'))).toBe(true);
+  });
+
+  it('uses the standard fallback language when the UI language has no generated manual', async () => {
+    mockI18n.language = 'de';
+    mockI18n.resolvedLanguage = 'de';
+    runtimeConfig = { help: { manual: { source: 'standard', fallbackLanguage: 'en' } } };
+    await openManual();
+
+    expect(content().querySelector('#urval-open')).not.toBeNull();
+    expect(content().querySelector('#urval-oppna')).toBeNull();
+    expect(requestedUrls).toEqual([]);
+  });
+
+  it('resolves standard images and lightboxes against help/default', async () => {
+    runtimeConfig = { help: { manual: { source: 'standard' } } };
+    await openManual();
+
+    const image = content().querySelector('img[src*="help/default/img/"]');
+    expect(image).not.toBeNull();
+    expect(new URL(image.getAttribute('src')).pathname).toContain('/help/default/img/');
+    const lightboxLink = content().querySelector('a[href^="#lb-"]:not([href="#lb-stang"])');
+    expect(lightboxLink).not.toBeNull();
+    act(() => { lightboxLink.click(); });
+    expect(window.location.hash).toBe(lightboxLink.getAttribute('href'));
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: false, onClose }));
+    });
+  });
+
+  it('aborts a pending source fetch when the dialog closes', async () => {
+    let aborted = false;
+    vi.stubGlobal('fetch', (_url, options) => new Promise((_resolve, reject) => {
+      options.signal.addEventListener('abort', () => {
+        aborted = true;
+        const error = new Error('aborted');
+        error.name = 'AbortError';
+        reject(error);
+      });
+    }));
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: true, onClose }));
+    });
+    await flush(0);
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: false, onClose }));
+    });
+    await flush(20);
+
+    expect(aborted).toBe(true);
+    expect(content()).toBeNull();
   });
 });

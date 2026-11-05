@@ -523,6 +523,9 @@
     // =========================================================================
     help: {
       manual: {
+        // "auto" prefers site HTML when it exists; "standard" ignores site HTML and uses the bundled
+        // manual with runtime capability filtering. Unknown values warn and behave as "auto".
+        source: 'auto',
         // Site-local HTML fragments can be added without rebuilding the React app.
         // Create `help/site/manual.sv.html` / `help/site/manual.en.html` locally to override.
         sitePathTemplate: 'help/site/manual.{{lng}}.html',

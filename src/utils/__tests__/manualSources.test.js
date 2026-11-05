@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { buildManualCandidates, resolveManualSource } from '../manualSources.js';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  buildManualCandidates,
+  buildManualLanguageCandidates,
+  resolveManualSource,
+  resolveManualSourceMode,
+} from '../manualSources.js';
 
 // A static host with an SPA fallback (IIS rewrite in public/web.config, the Vite dev server)
 // answers a request for a missing file with the application shell and status 200.
@@ -110,5 +115,53 @@ describe('manual source order: help/site before help/default', () => {
       throw error;
     };
     await expect(resolveManualSource(['help/site/manual.sv.html'], fetchCandidate)).rejects.toThrow('aborted');
+  });
+});
+
+describe('manual source modes and language precedence', () => {
+  it('defaults to auto and accepts standard case-insensitively', () => {
+    expect(resolveManualSourceMode({})).toBe('auto');
+    expect(resolveManualSourceMode({ source: '' })).toBe('auto');
+    expect(resolveManualSourceMode({ source: 'auto' })).toBe('auto');
+    expect(resolveManualSourceMode({ source: ' Standard ' })).toBe('standard');
+  });
+
+  it('warns and behaves as auto for an invalid source', async () => {
+    const warn = vi.fn();
+    const config = { source: 'site-only' };
+    expect(resolveManualSourceMode(config, warn)).toBe('auto');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('help.manual.source'));
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('site-only'));
+    warn.mockClear();
+    expect(resolveManualSourceMode({ source: false }, warn)).toBe('auto');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('false'));
+
+    const { result, requested } = await resolve('sv', {
+      'help/site/manual.sv.html': SITE_SV,
+      'help/default/manual.sv.html': DEFAULT_SV,
+    });
+    expect(result.candidate).toBe('help/site/manual.sv.html');
+    expect(requested[0]).toBe('help/site/manual.sv.html');
+  });
+
+  it('never lists site files in standard mode', async () => {
+    const candidates = buildManualCandidates('sv', { source: 'standard' });
+    expect(candidates).toEqual([
+      'help/default/manual.sv.html',
+      'help/default/manual.en.html',
+    ]);
+    const host = staticHost({
+      'help/site/manual.sv.html': SITE_SV,
+      'help/default/manual.sv.html': DEFAULT_SV,
+    });
+    const result = await resolveManualSource(candidates, host.fetchCandidate);
+    expect(result.candidate).toBe('help/default/manual.sv.html');
+    expect(host.requested.some((path) => path.includes('help/site/'))).toBe(false);
+  });
+
+  it('keeps UI-language before fallback-language precedence', () => {
+    expect(buildManualLanguageCandidates('sv', {})).toEqual(['sv', 'en']);
+    expect(buildManualLanguageCandidates('de', { fallbackLanguage: 'sv' })).toEqual(['de', 'sv']);
+    expect(buildManualLanguageCandidates('en', { fallbackLanguage: 'en' })).toEqual(['en']);
   });
 });

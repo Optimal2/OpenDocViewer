@@ -5,6 +5,7 @@ import {
   isCompareCurtainPrintEnabled,
   isCompareOverlayEnabled,
   isCompareOverlayPrintEnabled,
+  getPrintSelectionWorkspaceConfig,
   isDocumentMetadataUiEnabled,
   isFineTuneEnabled,
   isOcrEnabled,
@@ -39,6 +40,7 @@ function requiredDocument(file, id, guide) {
  * @param {string} englishStandalone Actual id in the standalone English guide.
  * @param {string} englishEmbedded Actual id in the English combined manual.
  * @param {string} [embeddedGuideName] Actual combined-guide suffix when it differs from the filename.
+ * @param {string} [behavior] Whole-heading removal or a named structural partial-section cleanup.
  * @returns {Readonly<Object>}
  */
 function localizedGuideRule(
@@ -50,10 +52,12 @@ function localizedGuideRule(
   englishStandalone,
   englishEmbedded,
   embeddedGuideName = guideName,
+  behavior = 'heading',
 ) {
   return Object.freeze({
     id,
     state,
+    behavior,
     documents: Object.freeze({
       sv: Object.freeze([
         requiredDocument(`manual-${guideName}.sv.html`, swedishStandalone),
@@ -83,6 +87,22 @@ export const standardManualLogicalRules = Object.freeze([
     'gardin', 'jmf-gardin', 'curtain', 'jmf-curtain'),
   localizedGuideRule('compare.installationSwitches', 'never', 'jamforelse',
     'avstangt', 'jmf-avstangt', 'disabled', 'jmf-disabled'),
+  localizedGuideRule('selection.open', 'selectionWorkspace', 'urval',
+    'oppna', 'urval-oppna', 'open', 'urval-open'),
+  localizedGuideRule('selection.add', 'selectionWorkspace', 'urval',
+    'laggtill', 'urval-laggtill', 'add', 'urval-add'),
+  localizedGuideRule('selection.order', 'selectionWorkspace', 'urval',
+    'ordning', 'urval-ordning', 'order', 'urval-order'),
+  localizedGuideRule('selection.preview', 'selectionWorkspace', 'urval',
+    'forhandsvisa', 'urval-forhandsvisa', 'preview', 'urval-preview'),
+  localizedGuideRule('selection.save', 'selectionWorkspace', 'urval',
+    'spara', 'urval-spara', 'save', 'urval-save'),
+  localizedGuideRule('selection.remove', 'selectionWorkspace', 'urval',
+    'tabort', 'urval-tabort', 'remove', 'urval-remove', 'urval', 'selectionRemove'),
+  localizedGuideRule('selection.active', 'selectionWorkspace', 'urval',
+    'aktivt', 'urval-aktivt', 'active', 'urval-active', 'urval', 'selectionActive'),
+  localizedGuideRule('selection.reset', 'selectionWorkspace', 'urval',
+    'aterstall', 'urval-aterstall', 'reset', 'urval-reset', 'urval', 'selectionReset'),
   localizedGuideRule('advanced.metadata', 'metadata', 'avancerat',
     'metadata', 'fler-metadata', 'metadata', 'fler-metadata', 'fler'),
   localizedGuideRule('advanced.signatures', 'pdfSignatures', 'avancerat',
@@ -94,16 +114,28 @@ export const standardManualLogicalRules = Object.freeze([
  * {@link resolveStandardManualRuleStates}; `never` is unconditionally hidden.
  */
 export const standardManualSectionRules = Object.freeze(
-  ['fineTune', 'overlay', 'curtain', 'never', 'metadata', 'pdfSignatures'].map((state) => (
+  ['fineTune', 'overlay', 'curtain', 'never', 'selectionWorkspace', 'metadata', 'pdfSignatures'].map((state) => (
     Object.freeze({
       state,
       ids: Object.freeze(standardManualLogicalRules
-        .filter((rule) => rule.state === state)
+        .filter((rule) => rule.state === state && rule.behavior === 'heading')
         .flatMap((rule) => MANUAL_LANGUAGES.flatMap((language) => (
           rule.documents[language].map((document) => document.id)
         )))),
     })
   )),
+);
+
+/** Structural cleanup for selection sections that also contain ordinary Delete/printing help. */
+export const standardManualSelectionPartialRules = Object.freeze(
+  standardManualLogicalRules
+    .filter((rule) => rule.state === 'selectionWorkspace' && rule.behavior !== 'heading')
+    .map((rule) => Object.freeze({
+      behavior: rule.behavior,
+      ids: Object.freeze(MANUAL_LANGUAGES.flatMap((language) => (
+        rule.documents[language].map((document) => document.id)
+      ))),
+    })),
 );
 
 /**
@@ -165,6 +197,17 @@ export function resolveStandardManualRuleStates(runtimeConfig) {
     curtainPrint: failOpen(
       () => isCompareCurtainEnabled(runtimeConfig) && isCompareCurtainPrintEnabled(runtimeConfig),
     ),
+    selectionWorkspace: failOpen(() => getPrintSelectionWorkspaceConfig(runtimeConfig).enabled),
+    printHtml: failOpen(() => runtimeConfig?.print?.actions?.printHtml?.enabled !== false),
+    printPdf: failOpen(() => runtimeConfig?.print?.pdf?.enabled === true
+      && runtimeConfig?.print?.actions?.printPdf?.enabled !== false),
+    reuseLastPrintSettings: failOpen(() => runtimeConfig?.print?.pdf?.enabled === true
+      && runtimeConfig?.print?.actions?.printPdf?.enabled !== false
+      && runtimeConfig?.print?.actions?.reuseLastPrintSettings?.enabled !== false),
+    pdfOrientation: failOpen(() => runtimeConfig?.print?.pdf?.enabled === true
+      && runtimeConfig?.print?.actions?.printPdf?.enabled !== false
+      && runtimeConfig?.print?.pdf?.orientation?.enabled === true
+      && runtimeConfig?.print?.pdf?.orientation?.showOption !== false),
     metadata: failOpen(() => isDocumentMetadataUiEnabled(runtimeConfig)),
     pdfSignatures: failOpen(() => isPdfSignatureInspectionEnabled(runtimeConfig)),
     ocrSearch: failOpen(() => isOcrEnabled(runtimeConfig) && isOcrSearchEnabled(runtimeConfig)),

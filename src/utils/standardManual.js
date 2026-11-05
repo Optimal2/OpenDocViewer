@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 import {
   standardManualOcrSectionRules,
   standardManualSectionRules,
+  standardManualSelectionPartialRules,
   resolveStandardManualRuleStates,
 } from './standardManualRules.js';
 
@@ -266,6 +267,131 @@ function filterComparePrintBlocks(doc, states, removedIds, lightboxCandidates) {
 }
 
 /**
+ * @param {Iterable<Element>} elements
+ * @param {Set<string>} removedIds
+ * @param {Set<string>} lightboxCandidates
+ */
+function removeStandardManualElements(elements, removedIds, lightboxCandidates) {
+  for (const element of elements) {
+    if (!element.isConnected) continue;
+    recordRemovedSubtree(element, removedIds, lightboxCandidates);
+    element.remove();
+  }
+}
+
+/**
+ * The selection switch removes the full-page workspace, not selection itself. Keep the ordinary
+ * right-click/Delete workflow, active-selection indicators, printing and reset help while removing
+ * only the workspace-specific blocks in the sections that mix both surfaces.
+ *
+ * @param {Document} doc
+ * @param {Readonly<Record<string, boolean>>} states
+ * @param {Set<string>} removedIds
+ * @param {Set<string>} lightboxCandidates
+ */
+function filterSelectionWorkspaceBlocks(doc, states, removedIds, lightboxCandidates) {
+  if (states.selectionWorkspace) return;
+  for (const rule of standardManualSelectionPartialRules) {
+    const ids = new Set(rule.ids);
+    const headings = Array.from(doc.body.querySelectorAll('h2')).filter(
+      (heading) => heading.isConnected && ids.has(heading.id),
+    );
+    for (const heading of headings) {
+      const segment = findHeadingSegment(heading, doc.body);
+      const range = headingSegmentRange(heading, segment, false);
+      const removals = new Set();
+
+      if (rule.behavior === 'selectionRemove') {
+        const elements = Array.from(segment.container.children).filter((element) => isInsideRange(element, range));
+        const ordinaryHideDetails = elements.find((element) => (
+          String(element.tagName).toUpperCase() === 'DETAILS'
+          && element.querySelector('a[href="#lb-miniatyr-hogerklick"]')
+          && element.querySelector('a[href="#lb-sida-hogerklick"]')
+        ));
+        // Fail open if the authored structure changes: ordinary Delete help is more important than
+        // removing every workspace-only paragraph from this deliberately mixed section.
+        if (!ordinaryHideDetails) continue;
+        elements.forEach((element) => {
+          if (element !== ordinaryHideDetails) removals.add(element);
+        });
+      } else if (rule.behavior === 'selectionActive') {
+        const list = Array.from(segment.container.querySelectorAll('ul')).find(
+          (element) => isInsideRange(element, range),
+        );
+        const workspaceButtonItem = Array.from(list?.children || []).find(
+          (element) => String(element.tagName).toUpperCase() === 'LI',
+        );
+        if (workspaceButtonItem) removals.add(workspaceButtonItem);
+      } else if (rule.behavior === 'selectionReset') {
+        const elements = Array.from(segment.container.querySelectorAll('p, ul.checklist'))
+          .filter((element) => isInsideRange(element, range));
+        for (const element of elements) {
+          if (String(element.tagName).toUpperCase() === 'P') {
+            if (['från arbetsytan:', 'from the workspace:'].includes(leadingStrongText(element))) {
+              removals.add(element);
+            }
+            continue;
+          }
+          // The first three checklist items describe Save, the workspace button and the workspace's
+          // right panel. The final two items (selection printing and the red reset button) remain.
+          Array.from(element.children).slice(0, 3).forEach((item) => removals.add(item));
+        }
+      }
+
+      removeStandardManualElements(removals, removedIds, lightboxCandidates);
+    }
+  }
+}
+
+/**
+ * Filter only self-contained print blocks that the actual print-dialog predicates disable. Mixed
+ * conditional steps and conditional Save PDF wording remain; no replacement manual text is authored.
+ *
+ * @param {Document} doc
+ * @param {Readonly<Record<string, boolean>>} states
+ * @param {Set<string>} removedIds
+ * @param {Set<string>} lightboxCandidates
+ */
+function filterPrintActionBlocks(doc, states, removedIds, lightboxCandidates) {
+  const removals = new Set();
+  for (const element of doc.body.querySelectorAll('p, figure, li')) {
+    const tagName = String(element.tagName).toUpperCase();
+    const text = normalizedText(element);
+    if (tagName === 'P' && (!states.printHtml || !states.printPdf) && (
+      text.startsWith('skillnaden mellan de två knapparna:')
+      || text.startsWith('the difference between the two buttons:')
+    )) {
+      removals.add(element);
+      continue;
+    }
+    if (tagName === 'FIGURE' && !states.printPdf) {
+      const fragments = Array.from(element.querySelectorAll('a[href]')).map(localFragmentId);
+      if (fragments.includes('lb-utskrift-forbereds')) removals.add(element);
+      continue;
+    }
+    if (tagName !== 'LI') continue;
+
+    if (!states.printPdf && (
+      text.startsWith('fortsätt jobba')
+      || text.startsWith('continue working')
+    )) {
+      removals.add(element);
+    } else if (!states.reuseLastPrintSettings && (
+      (text.startsWith('efter en utskrift via pdf') && text.includes('återanvänd senaste utskriftsval'))
+      || (text.startsWith('after a print via pdf') && text.includes('reuse latest print settings'))
+    )) {
+      removals.add(element);
+    } else if (!states.pdfOrientation && (
+      (text.startsWith('hos vissa organisationer') && text.includes('automatisk sidorientering'))
+      || (text.startsWith('some organizations also have') && text.includes('automatic page orientation'))
+    )) {
+      removals.add(element);
+    }
+  }
+  removeStandardManualElements(removals, removedIds, lightboxCandidates);
+}
+
+/**
  * @param {Document} doc
  * @param {string} id
  * @param {Element} target
@@ -408,7 +534,9 @@ export function filterStandardManual(html, runtimeConfig) {
   const removedIds = new Set();
   const lightboxCandidates = new Set();
   filterHeadingRules(doc, states, removedIds, lightboxCandidates);
+  filterSelectionWorkspaceBlocks(doc, states, removedIds, lightboxCandidates);
   filterComparePrintBlocks(doc, states, removedIds, lightboxCandidates);
+  filterPrintActionBlocks(doc, states, removedIds, lightboxCandidates);
   pruneOrphanedLightboxes(doc, removedIds, lightboxCandidates);
   removeAuthoredNavigationEntries(doc, removedIds);
   unlinkRemovedTargets(doc, removedIds);
