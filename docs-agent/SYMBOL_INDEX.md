@@ -226,6 +226,7 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:29</code> |  |
 | <code>module:usePrintRangeConfig</code> | module | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:2</code> | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:30</code> |  |
+| <code>LanguageMenuButton~closeMenu</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:109</code> | Close the menu and give the focus back to the button \(a choice unmounts the focused item\). |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:73</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:65</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:92</code> |  |
@@ -372,13 +373,15 @@
 | <code>DocumentViewer~navigateToSignatureDocument</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:355</code> | Overview row activation: show the document&#39;s first page and keep the overview open. |
 | <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:388</code> |  |
 | <code>DocumentViewer~openSignatureDialog</code> | constant | <code>src/components/DocumentViewer/DocumentViewer.jsx:302</code> | Open the signature details dialog for the document that contains a file \(sourceKey\), with that file&#39;s tab preselected. |
+| <code>DocumentViewerRender~contextMenuItems</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:676</code> | The menu&#39;s entries in order; greyed ones included, so their reason can be reached. |
 | <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:218</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
 | <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:63</code> |  |
 | <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:135</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:836</code> |  |
-| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:862</code> |  |
+| <code>DocumentViewerRender~handleContextMenuKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:684</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:886</code> |  |
+| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:914</code> |  |
 | <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:497</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:830</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:880</code> |  |
 | <code>DocumentViewerRender~handleTransformWheel</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:352</code> | Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch. |
 | <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:155</code> |  |
 | <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:147</code> |  |
@@ -386,8 +389,8 @@
 | <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:97</code> |  |
 | <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:108</code> |  |
 | <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:166</code> |  |
-| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:943</code> |  |
-| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:966</code> |  |
+| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:998</code> |  |
+| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:1021</code> |  |
 | <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:47</code> |  |
 | <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:43</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
@@ -698,7 +701,7 @@
 | <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection. |
 | <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:26</code> |  |
 | <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:40</code> |  |
-| <code>useReadAloud~chooseLanguage</code> | constant | <code>src/hooks/useReadAloud.js:146</code> |  |
+| <code>useReadAloud~chooseLanguage</code> | constant | <code>src/hooks/useReadAloud.js:156</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useReadAloud.js:72</code> |  |
 | <code>FOLLOW_UI</code> | constant | <code>src/hooks/useReadAloud.js:29</code> | Preference value for &amp;quot;follow the interface language&amp;quot; \(absent: automatic\). |
 | <code>layerSelection</code> | function | <code>src/hooks/useReadAloud.js:36</code> | The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page&#39;s guessed language\), or null outside the la... |

@@ -2841,7 +2841,8 @@ canvas {
   background: color-mix(in srgb, var(--thumbnail-primary-color) 10%, transparent 90%);
 }
 
-.odv-context-menu-item:disabled {
+.odv-context-menu-item:disabled,
+.odv-context-menu-item[aria-disabled='true'] {
   opacity: 0.52;
   cursor: not-allowed;
 }

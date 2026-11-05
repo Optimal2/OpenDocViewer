@@ -86,9 +86,17 @@ export default function useReadAloud() {
     ? resolveSpeechLanguage(preferred)
     : (preferred !== FOLLOW_UI && detected ? resolveSpeechLanguage(detected) : uiLocale);
 
+  // The selection is kept by value: a selectionchange that leaves the text and language as they
+  // were (the caret moving within a word during a drag) sets no new state, so the consumers of
+  // the provided state do not re-render for it.
   useEffect(() => {
     if (!available || typeof document === 'undefined') return undefined;
-    const update = () => setSelection(layerSelection());
+    const update = () => setSelection((previous) => {
+      const next = layerSelection();
+      if (previous === next) return previous;
+      if (previous && next && previous.text === next.text && previous.language === next.language) return previous;
+      return next;
+    });
     document.addEventListener('selectionchange', update);
     update();
     return () => { document.removeEventListener('selectionchange', update); };
@@ -110,14 +118,16 @@ export default function useReadAloud() {
     controllerRef.current?.cancel();
   }, []);
 
-  // Escape stops a reading (the context menu that started it has long closed).
+  // Escape stops a reading (the context menu that started it has long closed). Listened to in
+  // the bubble phase and only when nothing else took the key: an Escape that closes a dialog or
+  // a menu (they cancel the event) leaves the reading alone.
   useEffect(() => {
     if (!speaking || typeof window === 'undefined') return undefined;
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') stop();
+      if (event.key === 'Escape' && !event.defaultPrevented) stop();
     };
-    window.addEventListener('keydown', onKeyDown, true);
-    return () => { window.removeEventListener('keydown', onKeyDown, true); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => { window.removeEventListener('keydown', onKeyDown); };
   }, [speaking, stop]);
 
   useEffect(() => () => {

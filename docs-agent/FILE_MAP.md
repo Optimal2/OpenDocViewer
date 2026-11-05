@@ -30,7 +30,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 110 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 233 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 163 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
-| <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 206 | 1 | 4 | high | Compact language selector for the toolbar. |
+| <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 212 | 1 | 5 | high | Compact language selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 1301 | 1 | 38 | high | Manual overlay that loads simple external HTML fragments from the public help folder. |
 | <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 418 | 1 | 6 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live |
 | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx</code> | 52 | 1 | 1 | high | The toolbar&#39;s OCR group, right after the image-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: - \`ocr.search.enabled\` \(default true; only the literal false |
@@ -53,7 +53,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentViewer/compareViewKeys.js</code> | 41 | 2 | 4 | high | File: src/components/DocumentViewer/compareViewKeys.js Keyboard targets shared by the full-surface compare views \(CompareOverlayView.jsx, CompareCurtainView.jsx\): which focused el... |
 | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx</code> | 240 | 1 | 3 | high | Per-pane “post-zoom” controls shown in comparison mode, tucked behind the pane marker ring at the top-left of each pane. |
 | <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 858 | 1 | 6 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
-| <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1304 | 1 | 18 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
+| <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1361 | 1 | 20 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
 | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx</code> | 230 | 1 | 1 | high | OpenDocViewer — Document Viewer Thumbnails \(Wrapper\) Provides the deterministic thumbnail list and local width controls for the viewer shell. |
 | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx</code> | 432 | 1 | 5 | high | Toolbar adapter for the document viewer. |
 | <code>src/components/DocumentViewer/hooks/useCompareOverlay.js</code> | 186 | 2 | 3 | high | File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\). |
@@ -69,7 +69,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
 | <code>src/components/OcrTextLayer.jsx</code> | 264 | 1 | 4 | high | Selectable, invisible text over a recognised page image. |
 | <code>src/components/PrintSelectionWorkspace.jsx</code> | 2504 | 1 | 5 | high | Full-window print-selection workspace. |
-| <code>src/components/ReadAloudMenuItem.jsx</code> | 54 | 1 | 1 | high | The page context menu&#39;s read-aloud entry \(DocumentViewer/DocumentViewerRender.jsx\): &quot;Read the selection aloud&quot; while nothing is being read, greyed with the reason in its tooltip when nothing can be read \(no selection in |
+| <code>src/components/ReadAloudMenuItem.jsx</code> | 57 | 1 | 1 | high | The page context menu&#39;s read-aloud entry \(DocumentViewer/DocumentViewerRender.jsx\): &quot;Read the selection aloud&quot; while nothing is being read, greyed with the reason in its tooltip when nothing can be read \(no selection in |
 | <code>src/components/ReadAloudProvider.jsx</code> | 26 | 1 | 1 | high | Provides the read-aloud state \(hooks/useReadAloud.js\) to the page&#39;s context menu and the toolbar&#39;s language menu \(contexts/readAloudContext.js\). |
 | <code>src/components/Resizer.jsx</code> | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
 | <code>src/components/SignatureDetailsDialog.jsx</code> | 573 | 1 | 12 | high | Signature details dialog \(browser integrity\). |
@@ -94,7 +94,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |
-| <code>src/hooks/useReadAloud.js</code> | 208 | 1 | 5 | high | Read the selected recognised text aloud: the state behind the page&#39;s context menu entry and the toolbar&#39;s &quot;Reading language&quot; section \(contexts/readAloudContext.js\). |
+| <code>src/hooks/useReadAloud.js</code> | 218 | 1 | 5 | high | Read the selected recognised text aloud: the state behind the page&#39;s context menu entry and the toolbar&#39;s &quot;Reading language&quot; section \(contexts/readAloudContext.js\). |
 | <code>src/i18n.js</code> | 562 | 2 | 21 | high | i18n bootstrap for OpenDocViewer. |
 | <code>src/index.jsx</code> | 67 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
 | <code>src/integrations/bootstrapRuntime.js</code> | 457 | 1 | 12 | high | Startup mode detection and host-integration entry point. |

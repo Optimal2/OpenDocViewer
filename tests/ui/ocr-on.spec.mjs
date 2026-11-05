@@ -219,9 +219,27 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const readEntry = contextMenu.locator('[data-odv-ocr="read"]');
   await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
   await expect(contextMenu).toBeVisible();
-  await expect(readEntry).toBeEnabled();
+  await expect(readEntry).not.toHaveAttribute('aria-disabled', 'true');
   await expect(readEntry).toHaveText(/Läs upp markering|Read the selection aloud/);
-  await readEntry.click();
+  // The menu took the focus (its first entry); the arrows move between the entries and wrap,
+  // without turning the page; Escape closes it.
+  await expect(readEntry).toBeFocused();
+  const entryCount = await contextMenu.locator('.odv-context-menu-item').count();
+  await page.keyboard.press('ArrowDown');
+  await expect(contextMenu.locator('.odv-context-menu-item').nth(entryCount > 1 ? 1 : 0)).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await expect(readEntry).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await expect(contextMenu.locator('.odv-context-menu-item').last()).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(readEntry).toBeFocused();
+  await expect(status).toHaveAttribute('data-ocr-state', 'done');
+  await page.keyboard.press('Escape');
+  await expect(contextMenu).toHaveCount(0);
+  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
+  await expect(readEntry).toBeFocused();
+  // Enter on the focused entry reads the selection (the menu closes).
+  await page.keyboard.press('Enter');
   await expect(contextMenu).toHaveCount(0);
   const spoken = await page.evaluate(() => window.__odvSpoken);
   expect(spoken.length).toBeGreaterThanOrEqual(3);
@@ -236,9 +254,13 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // Without a selection the entry stays listed, greyed with the reason.
   await page.evaluate(() => window.getSelection().removeAllRanges());
   await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
-  await expect(readEntry).toBeDisabled();
+  await expect(readEntry).toHaveAttribute('aria-disabled', 'true');
   await expect(readEntry).not.toHaveAttribute('data-speaking', 'true');
   await expect(readEntry).toHaveAttribute('title', /Markera text|Select text/);
+  // Greyed, it is still focusable (the reason is in its name) and does nothing on Enter.
+  await expect(readEntry).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(contextMenu).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(contextMenu).toHaveCount(0);
 

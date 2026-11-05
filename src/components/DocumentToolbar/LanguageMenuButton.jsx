@@ -101,8 +101,14 @@ const LanguageMenuButton = ({ className = '' }) => {
         await i18n.changeLanguage(normalized);
       }
     } finally {
-      setOpen(false);
+      closeMenu();
     }
+  };
+
+  /** Close the menu and give the focus back to the button (a choice unmounts the focused item). */
+  const closeMenu = () => {
+    setOpen(false);
+    buttonRef.current?.focus?.();
   };
 
   const currentLabel = resolveLanguageLabel(currentLanguage, t);
@@ -157,13 +163,13 @@ const LanguageMenuButton = ({ className = '' }) => {
           {readAloud ? (
             <>
               <div className="toolbar-split-menu-section" role="group" aria-labelledby={uiTitleId}>
-                <div id={uiTitleId} className="toolbar-split-menu-title">
+                <div id={uiTitleId} className="toolbar-split-menu-title" role="presentation">
                   {t('toolbar.language.uiTitle', { defaultValue: 'Interface language' })}
                 </div>
                 {uiEntries}
               </div>
               <div className="toolbar-split-menu-section" role="group" aria-labelledby={readTitleId} data-odv-ocr="read-menu">
-                <div id={readTitleId} className="toolbar-split-menu-title">{readAloud.languageTitle}</div>
+                <div id={readTitleId} className="toolbar-split-menu-title" role="presentation">{readAloud.languageTitle}</div>
                 {readAloud.entries.map((entry) => {
                   const selected = entry.value === readAloud.selectedValue;
                   return (
@@ -179,7 +185,7 @@ const LanguageMenuButton = ({ className = '' }) => {
                       title={entry.label}
                       onClick={() => {
                         readAloud.chooseLanguage(entry.value);
-                        setOpen(false);
+                        closeMenu();
                       }}
                     >
                       <span className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`} aria-hidden="true">

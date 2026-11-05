@@ -22,11 +22,20 @@ async function settle(page) {
   await page.waitForTimeout(1500);
 }
 
-test('ocr off by default: no engine requests, no OCR worker, no OCR element', async ({ page }) => {
+test('ocr off by default: no engine requests, no OCR worker, no OCR element, no read-aloud', async ({ page }) => {
   const requests = [];
   page.on('request', (request) => requests.push(request.url()));
   const workers = [];
   page.on('worker', (worker) => workers.push(worker.url()));
+  // A speech synthesiser whose voice list counts its readers: with OCR off the read-aloud state
+  // is never provided, so nothing reads it.
+  await page.addInitScript(() => {
+    window.__odvVoiceReads = 0;
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: { cancel() {}, getVoices() { window.__odvVoiceReads += 1; return []; }, speak() {}, addEventListener() {}, removeEventListener() {} },
+    });
+  });
 
   await loadSession(page);
   await expect(page.locator('#thumbnail-1 .thumbnail-image-stage img')).toBeVisible();
@@ -37,6 +46,17 @@ test('ocr off by default: no engine requests, no OCR worker, no OCR element', as
   expect(workers.filter((url) => OCR_URL_PATTERN.test(url))).toEqual([]);
   expect(workers.filter((url) => url.startsWith('blob:'))).toEqual([]);
   await expect(page.locator('[data-odv-ocr], .ocr-text-layer')).toHaveCount(0);
+
+  // The page's context menu has no read-aloud entry, the language menu no reading section, and
+  // the voice list was never read.
+  await page.locator('.document-render-container canvas, .document-render-container img').first().click({ button: 'right' });
+  await expect(page.locator('[data-odv-ocr="read"]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await page.locator('.toolbar-end-actions button[aria-haspopup="menu"]').filter({ has: page.locator('.material-icons', { hasText: 'language' }) }).click();
+  await expect(page.locator('.toolbar-popup-menu')).toBeVisible();
+  await expect(page.locator('[data-odv-ocr="read-menu"], [data-speech-language]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.__odvVoiceReads)).toBe(0);
 });
 
 test('ocr off stays off when a site file sets anything but the literal true', async ({ page }) => {

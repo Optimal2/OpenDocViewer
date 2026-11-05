@@ -94,8 +94,8 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 68303,
-    "docletCount": 1964,
+    "sourceLineCount": 68379,
+    "docletCount": 1967,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -752,7 +752,7 @@
           {
             "path": "src/hooks/useReadAloud.js",
             "score": 44,
-            "lines": 208,
+            "lines": 218,
             "summary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js)."
           },
           {
@@ -1011,7 +1011,7 @@
     {
       "name": "src/components",
       "fileCount": 22,
-      "lineCount": 8523,
+      "lineCount": 8526,
       "docletCount": 119,
       "importantFiles": [
         {
@@ -1188,8 +1188,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8594,
-      "docletCount": 145,
+      "lineCount": 8600,
+      "docletCount": 146,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1268,8 +1268,8 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 17,
-      "lineCount": 7678,
-      "docletCount": 154,
+      "lineCount": 7735,
+      "docletCount": 156,
       "importantFiles": [
         {
           "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
@@ -1291,10 +1291,10 @@
         },
         {
           "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "score": 47,
-          "lines": 1304,
+          "score": 48,
+          "lines": 1361,
           "incomingLocalImports": 1,
-          "doclets": 18,
+          "doclets": 20,
           "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
           "summaryConfidence": "high"
         },
@@ -1444,13 +1444,13 @@
     {
       "name": "src/hooks",
       "fileCount": 9,
-      "lineCount": 1258,
+      "lineCount": 1268,
       "docletCount": 37,
       "importantFiles": [
         {
           "path": "src/hooks/useReadAloud.js",
           "score": 44,
-          "lines": 208,
+          "lines": 218,
           "incomingLocalImports": 1,
           "doclets": 5,
           "summary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js).",
@@ -13067,9 +13067,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "lines": 206,
+      "lines": 212,
       "extension": ".jsx",
-      "jsdocBlockCount": 5,
+      "jsdocBlockCount": 6,
       "sourceSummary": "Compact language selector for the toolbar.",
       "imports": [
         {
@@ -13115,7 +13115,7 @@
         {
           "name": "LanguageMenuButton",
           "kind": "default",
-          "line": 205
+          "line": 211
         }
       ],
       "declarations": [
@@ -13143,6 +13143,11 @@
           "name": "handleSelectLanguage",
           "kind": "function",
           "line": 92
+        },
+        {
+          "name": "closeMenu",
+          "kind": "function",
+          "line": 109
         }
       ],
       "parseError": null,
@@ -13246,6 +13251,19 @@
             }
           ],
           "examples": 0
+        },
+        {
+          "id": "LanguageMenuButton~closeMenu",
+          "name": "closeMenu",
+          "longname": "LanguageMenuButton~closeMenu",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
+          "line": 109,
+          "description": "Close the menu and give the focus back to the button (a choice unmounts the focused item).",
+          "params": [],
+          "returns": [],
+          "examples": 0
         }
       ],
       "moduleKey": "src/components/DocumentToolbar",
@@ -13293,7 +13311,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 26,
+      "importanceScore": 29,
       "summary": "Compact language selector for the toolbar.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -21312,9 +21330,9 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "lines": 1304,
+      "lines": 1361,
       "extension": ".jsx",
-      "jsdocBlockCount": 31,
+      "jsdocBlockCount": 36,
       "sourceSummary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
       "imports": [
         {
@@ -21440,7 +21458,7 @@
         {
           "name": "DocumentViewerRender",
           "kind": "default",
-          "line": 1303
+          "line": 1360
         }
       ],
       "declarations": [
@@ -21525,24 +21543,34 @@
           "line": 651
         },
         {
+          "name": "contextMenuItems",
+          "kind": "function",
+          "line": 676
+        },
+        {
+          "name": "handleContextMenuKeyDown",
+          "kind": "function",
+          "line": 684
+        },
+        {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 830
+          "line": 880
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 836
+          "line": 886
         },
         {
           "name": "renderEdgeScrollIndicator",
           "kind": "component",
-          "line": 943
+          "line": 998
         },
         {
           "name": "renderPaneSelector",
           "kind": "component",
-          "line": 966
+          "line": 1021
         }
       ],
       "parseError": null,
@@ -22099,13 +22127,46 @@
           "examples": 0
         },
         {
+          "id": "DocumentViewerRender~contextMenuItems",
+          "name": "contextMenuItems",
+          "longname": "DocumentViewerRender~contextMenuItems",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+          "line": 676,
+          "description": "The menu's entries in order; greyed ones included, so their reason can be reached.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "DocumentViewerRender~handleContextMenuKeyDown",
+          "name": "handleContextMenuKeyDown",
+          "longname": "DocumentViewerRender~handleContextMenuKeyDown",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+          "line": 684,
+          "description": "",
+          "params": [
+            {
+              "name": "event",
+              "type": "React.KeyboardEvent.<HTMLDivElement>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "<anonymous>~handlePointerDown",
           "name": "handlePointerDown",
           "longname": "<anonymous>~handlePointerDown",
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 830,
+          "line": 880,
           "description": "",
           "params": [
             {
@@ -22125,7 +22186,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 836,
+          "line": 886,
           "description": "",
           "params": [
             {
@@ -22145,7 +22206,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 862,
+          "line": 914,
           "description": "",
           "params": [
             {
@@ -22182,7 +22243,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 943,
+          "line": 998,
           "description": "",
           "params": [
             {
@@ -22207,7 +22268,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 966,
+          "line": 1021,
           "description": "",
           "params": [
             {
@@ -22361,7 +22422,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 47,
+      "importanceScore": 48,
       "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -27970,7 +28031,7 @@
     },
     {
       "path": "src/components/ReadAloudMenuItem.jsx",
-      "lines": 54,
+      "lines": 57,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
       "sourceSummary": "The page context menu's read-aloud entry (DocumentViewer/DocumentViewerRender.jsx): \"Read the selection aloud\" while nothing is being read, greyed with the reason in its tooltip when nothing can be read (no selection in",
@@ -35354,7 +35415,7 @@
     },
     {
       "path": "src/hooks/useReadAloud.js",
-      "lines": 208,
+      "lines": 218,
       "extension": ".js",
       "jsdocBlockCount": 10,
       "sourceSummary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js).",
@@ -35468,32 +35529,32 @@
         {
           "name": "update",
           "kind": "function",
-          "line": 91
+          "line": 94
         },
         {
           "name": "read",
           "kind": "function",
-          "line": 103
+          "line": 111
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 116
+          "line": 126
         },
         {
           "name": "language",
           "kind": "function",
-          "line": 154
+          "line": 164
         },
         {
           "name": "name",
           "kind": "function",
-          "line": 155
+          "line": 165
         },
         {
           "name": "inner",
           "kind": "function",
-          "line": 156
+          "line": 166
         }
       ],
       "parseError": null,
@@ -35591,7 +35652,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useReadAloud.js",
-          "line": 146,
+          "line": 156,
           "description": "",
           "params": [
             {
@@ -87111,6 +87172,19 @@
       "examples": 0
     },
     {
+      "id": "LanguageMenuButton~closeMenu",
+      "name": "closeMenu",
+      "longname": "LanguageMenuButton~closeMenu",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
+      "line": 109,
+      "description": "Close the menu and give the focus back to the button (a choice unmounts the focused item).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~handleKeyDown",
       "name": "handleKeyDown",
       "longname": "<anonymous>~handleKeyDown",
@@ -91138,6 +91212,19 @@
       "examples": 0
     },
     {
+      "id": "DocumentViewerRender~contextMenuItems",
+      "name": "contextMenuItems",
+      "longname": "DocumentViewerRender~contextMenuItems",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+      "line": 676,
+      "description": "The menu's entries in order; greyed ones included, so their reason can be reached.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "DocumentViewerRender",
       "name": "DocumentViewerRender",
       "longname": "DocumentViewerRender",
@@ -91441,13 +91528,33 @@
       "examples": 0
     },
     {
+      "id": "DocumentViewerRender~handleContextMenuKeyDown",
+      "name": "handleContextMenuKeyDown",
+      "longname": "DocumentViewerRender~handleContextMenuKeyDown",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+      "line": 684,
+      "description": "",
+      "params": [
+        {
+          "name": "event",
+          "type": "React.KeyboardEvent.<HTMLDivElement>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~handleKeyDown",
       "name": "handleKeyDown",
       "longname": "<anonymous>~handleKeyDown",
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 836,
+      "line": 886,
       "description": "",
       "params": [
         {
@@ -91467,7 +91574,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 862,
+      "line": 914,
       "description": "",
       "params": [
         {
@@ -91535,7 +91642,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 830,
+      "line": 880,
       "description": "",
       "params": [
         {
@@ -91742,7 +91849,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 943,
+      "line": 998,
       "description": "",
       "params": [
         {
@@ -91767,7 +91874,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 966,
+      "line": 1021,
       "description": "",
       "params": [
         {
@@ -99252,7 +99359,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useReadAloud.js",
-      "line": 146,
+      "line": 156,
       "description": "",
       "params": [
         {

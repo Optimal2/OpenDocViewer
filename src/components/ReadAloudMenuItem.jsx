@@ -24,6 +24,8 @@ export default function ReadAloudMenuItem({ onDone }) {
   const label = speaking
     ? t('ocr.read.stop', { defaultValue: 'Stop reading aloud' })
     : t('ocr.read.menuSpeak', { defaultValue: 'Read the selection aloud' });
+  // Greyed with aria-disabled rather than disabled: the entry stays focusable, so the arrow keys
+  // reach it and a screen reader hears the reason (in its accessible name).
   const disabled = !speaking && !!reason;
   return (
     <button
@@ -32,13 +34,14 @@ export default function ReadAloudMenuItem({ onDone }) {
       role="menuitem"
       data-odv-ocr="read"
       data-speaking={speaking ? 'true' : undefined}
-      disabled={disabled}
       aria-disabled={disabled || undefined}
+      aria-label={disabled ? `${label} · ${reason}` : undefined}
       title={disabled ? `${label} · ${reason}` : (speaking ? label : t('ocr.read.speak', { defaultValue: 'Read the selected text aloud' }))}
       onMouseDown={(event) => event.preventDefault()}
       onClick={() => {
+        if (disabled) return;
         if (speaking) stop();
-        else if (!disabled) speak();
+        else speak();
         if (typeof onDone === 'function') onDone();
       }}
     >

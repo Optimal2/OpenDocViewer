@@ -63,12 +63,15 @@ describe('ReadAloudMenuItem', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('is greyed with the reason while nothing can be read', () => {
+  it('is greyed with the reason while nothing can be read, yet focusable so the reason is heard', () => {
     const state = { ...base, reason: "Select text in the page's text layer first" };
     const onDone = render(state);
-    expect(item().disabled).toBe(true);
+    expect(item().disabled).toBe(false);
     expect(item().getAttribute('aria-disabled')).toBe('true');
+    expect(item().getAttribute('aria-label')).toBe("Read the selection aloud · Select text in the page's text layer first");
     expect(item().title).toBe("Read the selection aloud · Select text in the page's text layer first");
+    item().focus();
+    expect(document.activeElement).toBe(item());
     act(() => item().click());
     expect(state.speak).not.toHaveBeenCalled();
     expect(onDone).not.toHaveBeenCalled();

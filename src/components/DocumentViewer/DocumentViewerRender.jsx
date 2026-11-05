@@ -660,6 +660,56 @@ const DocumentViewerRender = ({
     setContextMenuState(null);
   }, []);
 
+  // The element that had the focus when the menu opened (the menu takes it); a choice or
+  // Escape gives it back, a click elsewhere does not (the click decides the focus).
+  const contextMenuReturnFocusRef = useRef(/** @type {(HTMLElement|null)} */ (null));
+  const closeContextMenuRestoringFocus = useCallback(() => {
+    const target = contextMenuReturnFocusRef.current;
+    contextMenuReturnFocusRef.current = null;
+    setContextMenuState(null);
+    if (target instanceof HTMLElement && target.isConnected) {
+      try { target.focus({ preventScroll: true }); } catch { /* not focusable any more */ }
+    }
+  }, []);
+
+  /** The menu's entries in order; greyed ones included, so their reason can be reached. */
+  const contextMenuItems = () => (contextMenuRef.current
+    ? /** @type {Array<HTMLElement>} */ ([...contextMenuRef.current.querySelectorAll('.odv-context-menu-item')])
+    : []);
+
+  // Keyboard inside the menu: the arrows move between the entries (wrapping), Home/End to the
+  // first/last, Tab leaves (closes); Enter/Space activate the focused entry as buttons do.
+  // The menu is marked off for the viewer's shortcuts, so the arrows never turn the page.
+  /** @param {React.KeyboardEvent<HTMLDivElement>} event */
+  const handleContextMenuKeyDown = (event) => {
+    const items = contextMenuItems();
+    if (items.length === 0) return;
+    const index = items.indexOf(/** @type {HTMLElement} */ (document.activeElement));
+    let next;
+    switch (event.key) {
+      case 'ArrowDown': next = index < 0 ? 0 : (index + 1) % items.length; break;
+      case 'ArrowUp': next = index < 0 ? items.length - 1 : (index - 1 + items.length) % items.length; break;
+      case 'Home': next = 0; break;
+      case 'End': next = items.length - 1; break;
+      case 'Tab':
+        event.preventDefault();
+        closeContextMenuRestoringFocus();
+        return;
+      default:
+        return;
+    }
+    event.preventDefault();
+    items[next]?.focus({ preventScroll: true });
+  };
+
+  // The menu takes the focus as it opens: its first entry, so Shift+F10 or the Menu key lead
+  // straight into it and the arrows work from the start.
+  useEffect(() => {
+    if (!contextMenuState) return;
+    const [first] = contextMenuItems();
+    first?.focus({ preventScroll: true });
+  }, [contextMenuState]);
+
   const handlePanePointerDown = useCallback((event, pane) => {
     if (event?.button !== 0) return;
     if (event?.pointerType === 'touch') return;
@@ -835,7 +885,9 @@ const DocumentViewerRender = ({
     /** @param {KeyboardEvent} event */
     const handleKeyDown = (event) => {
       if (String(event?.key || '') !== 'Escape') return;
-      closeContextMenu();
+      // Taken: a reading in progress keeps going (its own Escape listener skips a cancelled key).
+      event.preventDefault();
+      closeContextMenuRestoringFocus();
     };
 
     window.addEventListener('mousedown', handlePointerDown, true);
@@ -851,7 +903,7 @@ const DocumentViewerRender = ({
       window.removeEventListener('resize', closeContextMenu, true);
       window.removeEventListener('scroll', closeContextMenu, true);
     };
-  }, [closeContextMenu, contextMenuState]);
+  }, [closeContextMenu, closeContextMenuRestoringFocus, contextMenuState]);
 
   /**
    * @param {*} event
@@ -883,6 +935,9 @@ const DocumentViewerRender = ({
       return;
     }
 
+    contextMenuReturnFocusRef.current = typeof document !== 'undefined' && document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
     setContextMenuState({
       x: Math.max(8, Number(event?.clientX) || 0),
       y: Math.max(8, Number(event?.clientY) || 0),
@@ -894,14 +949,14 @@ const DocumentViewerRender = ({
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
     onHidePageFromSelection(contextMenuState.originalIndex);
-    closeContextMenu();
-  }, [closeContextMenu, contextMenuState, onHidePageFromSelection]);
+    closeContextMenuRestoringFocus();
+  }, [closeContextMenuRestoringFocus, contextMenuState, onHidePageFromSelection]);
 
   const handleHideDocumentFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHideDocumentFromSelection !== 'function') return;
     onHideDocumentFromSelection(contextMenuState.originalIndex);
-    closeContextMenu();
-  }, [closeContextMenu, contextMenuState, onHideDocumentFromSelection]);
+    closeContextMenuRestoringFocus();
+  }, [closeContextMenuRestoringFocus, contextMenuState, onHideDocumentFromSelection]);
 
   const handleOpenMetadataFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onOpenDocumentMetadata !== 'function') return;
@@ -1140,10 +1195,12 @@ const DocumentViewerRender = ({
           ref={contextMenuRef}
           className="odv-context-menu"
           role="menu"
+          data-odv-shortcuts="off"
           style={{ left: `${contextMenuLeft}px`, top: `${contextMenuTop}px` }}
+          onKeyDown={handleContextMenuKeyDown}
         >
           {/* Read the selection aloud / stop: only with the read-aloud state provided. */}
-          <ReadAloudMenuItem onDone={closeContextMenu} />
+          <ReadAloudMenuItem onDone={closeContextMenuRestoringFocus} />
           {canOpenMetadataFromContextMenu ? (
             <button
               type="button"

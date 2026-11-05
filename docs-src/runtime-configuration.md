@@ -522,8 +522,8 @@ words and phrases in it; dragging on a blank part of the page still pans.
 
 The toolbar gets an OCR group right after the image-adjustment group (the one that ends with
 "Reset adjustments"), separated from it like the toolbar's other groups and spaced like its other
-loose buttons. Its two parts are offered independently (`ocr.search.enabled` and
-`ocr.speech.enabled` above; both on by default):
+loose buttons. It holds the search (`ocr.search.enabled`); read-aloud (`ocr.speech.enabled`) is
+not a toolbar button, see below:
 
 - A search button that doubles as the page's OCR status: a small LED on the button and the
   status as its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
@@ -552,10 +552,12 @@ loose buttons. Its two parts are offered independently (`ocr.search.enabled` and
 Read-aloud (`ocr.speech.enabled`) is not a toolbar button. It lives in two places:
 
 - The page's context menu (right-click on a page, next to "Hide this page" and "Hide document")
-  gets the entry "Read the selection aloud", if the browser has speech synthesis (Web Speech
-  API). It is always listed, greyed with the reason in its tooltip while nothing can be read
-  (no text selected in the page's text layer, no local voice for the reading language), so the
-  feature is found before anything is selected. Choosing it reads the selection as it reads on
+  gets the entry "Read the selection aloud". It is always listed, greyed with the reason in its
+  tooltip and accessible name while nothing can be read (no text selected in the page's text
+  layer, no local voice for the reading language, a browser without speech synthesis), so the
+  feature is found before anything is selected. The menu takes the keyboard focus when it
+  opens (the arrow keys move between its entries, Escape closes it and gives the focus back),
+  so Shift+F10 or the Menu key reach it too. Choosing it reads the selection as it reads on
   the page, line by line, with a voice installed in the operating system for the reading
   language. Only voices that run on the machine are used, never the browser's online voices:
   the text is document content and must not leave the computer; without a local voice nothing

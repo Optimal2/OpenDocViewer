@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 22. Line count: 8523. JSDoc symbol count: 119.
+File count: 22. Line count: 8526. JSDoc symbol count: 119.
 
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8594. JSDoc symbol count: 145.
+File count: 21. Line count: 8600. JSDoc symbol count: 146.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -62,7 +62,7 @@ File count: 21. Line count: 8594. JSDoc symbol count: 145.
 
 ## src/components/DocumentViewer
 
-File count: 17. Line count: 7678. JSDoc symbol count: 154.
+File count: 17. Line count: 7735. JSDoc symbol count: 156.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
@@ -98,7 +98,7 @@ File count: 2. Line count: 4. JSDoc symbol count: 0.
 
 ## src/hooks
 
-File count: 9. Line count: 1258. JSDoc symbol count: 37.
+File count: 9. Line count: 1268. JSDoc symbol count: 37.
 
 - `src/hooks/useReadAloud.js` - Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's "Reading language" section \(contexts/readAloudContext.js\).
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.

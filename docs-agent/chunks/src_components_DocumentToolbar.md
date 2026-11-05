@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8594. JSDoc symbol count: 145.
+File count: 21. Line count: 8600. JSDoc symbol count: 146.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -90,6 +90,7 @@ Symbols:
 - `<anonymous>~handlePointerDown` (function) - No description.
 - `<anonymous>~handleKeyDown` (function) - No description.
 - `LanguageMenuButton~handleSelectLanguage` (function) - No description.
+- `LanguageMenuButton~closeMenu` (function) - Close the menu and give the focus back to the button \(a choice unmounts the focused item\).
 
 ## src/components/DocumentToolbar/ManualOverlayDialog.jsx
 

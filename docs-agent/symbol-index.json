@@ -6166,6 +6166,19 @@
     "examples": 0
   },
   {
+    "id": "LanguageMenuButton~closeMenu",
+    "name": "closeMenu",
+    "longname": "LanguageMenuButton~closeMenu",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
+    "line": 109,
+    "description": "Close the menu and give the focus back to the button (a choice unmounts the focused item).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "<anonymous>~handleKeyDown",
     "name": "handleKeyDown",
     "longname": "<anonymous>~handleKeyDown",
@@ -10193,6 +10206,19 @@
     "examples": 0
   },
   {
+    "id": "DocumentViewerRender~contextMenuItems",
+    "name": "contextMenuItems",
+    "longname": "DocumentViewerRender~contextMenuItems",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+    "line": 676,
+    "description": "The menu's entries in order; greyed ones included, so their reason can be reached.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "DocumentViewerRender",
     "name": "DocumentViewerRender",
     "longname": "DocumentViewerRender",
@@ -10496,13 +10522,33 @@
     "examples": 0
   },
   {
+    "id": "DocumentViewerRender~handleContextMenuKeyDown",
+    "name": "handleContextMenuKeyDown",
+    "longname": "DocumentViewerRender~handleContextMenuKeyDown",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+    "line": 684,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "React.KeyboardEvent.<HTMLDivElement>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "<anonymous>~handleKeyDown",
     "name": "handleKeyDown",
     "longname": "<anonymous>~handleKeyDown",
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 836,
+    "line": 886,
     "description": "",
     "params": [
       {
@@ -10522,7 +10568,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 862,
+    "line": 914,
     "description": "",
     "params": [
       {
@@ -10590,7 +10636,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 830,
+    "line": 880,
     "description": "",
     "params": [
       {
@@ -10797,7 +10843,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 943,
+    "line": 998,
     "description": "",
     "params": [
       {
@@ -10822,7 +10868,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 966,
+    "line": 1021,
     "description": "",
     "params": [
       {
@@ -18307,7 +18353,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useReadAloud.js",
-    "line": 146,
+    "line": 156,
     "description": "",
     "params": [
       {
