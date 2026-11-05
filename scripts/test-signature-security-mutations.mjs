@@ -129,7 +129,7 @@ const mutations = [
 
 function run(file, name) {
   const result = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', file, '-t', name], {
-    encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024
+    encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024, windowsHide: true
   });
   if (result.error || result.signal) throw new Error(`Test could not be measured: ${result.error ?? result.signal}`);
   const output = result.stdout + result.stderr;
@@ -138,16 +138,31 @@ function run(file, name) {
   if (result.status !== 1 || !output.includes('AssertionError')) throw new Error(`Expected assertion failure, got:\n${output}`);
 }
 
+// Register before writing so even a partial write is restored. Untouched sources
+// must never be rewritten, including when --only selects nothing.
+const pendingRestores = new Set();
+function writeSource(file, content) {
+  pendingRestores.add(file);
+  writeFileSync(file, content);
+}
+
+function restoreSources() {
+  for (const file of pendingRestores) {
+    writeFileSync(file, originals.get(file));
+    pendingRestores.delete(file);
+  }
+}
+
 try {
   if (process.argv.includes('--baseline')) {
     for (const file of originals.keys()) {
-      const baseline = spawnSync('git', ['show', `9e73b809bba6fc8dcc84c1fe18c08ef17552f0e1:${file}`], { encoding: 'utf8' });
+      const baseline = spawnSync('git', ['show', `9e73b809bba6fc8dcc84c1fe18c08ef17552f0e1:${file}`], { encoding: 'utf8', windowsHide: true });
       if (baseline.status !== 0) throw new Error(baseline.stderr);
-      writeFileSync(file, baseline.stdout);
+      writeSource(file, baseline.stdout);
     }
     run(tests, 'F[1-57]');
     run(workerTests, 'F[68]');
-    for (const [file, content] of originals) writeFileSync(file, content);
+    restoreSources();
   }
   // Optional `--only=<text>` runs the subset of mutation ids containing <text> as a literal
   // substring (the full list takes several minutes). The argument is never compiled as a
@@ -158,11 +173,11 @@ try {
     const original = originals.get(file);
     if (!original.includes(from)) throw new Error(`Mutation ${id} no longer matches source`);
     try {
-      writeFileSync(file, original.replace(from, to));
+      writeSource(file, original.replace(from, to));
       run(testFile, name);
-    } finally { writeFileSync(file, original); }
+    } finally { restoreSources(); }
   }
   console.log(`All ${selected.length} selected mutation groups were killed; original sources restored.`);
 } finally {
-  for (const [file, content] of originals) writeFileSync(file, content);
+  restoreSources();
 }
