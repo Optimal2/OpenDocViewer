@@ -53,7 +53,7 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
  * @param {boolean} [props.ctrlFOverride=false]  True lets Ctrl+F (Cmd+F) open the field instead
  *   of the browser's find (`ocr.search.overridesCtrlF`); Ctrl+F stays the browser's in a modal
  *   dialog, in other text fields and in the toolbar's other menus (every `data-odv-shortcuts="off"`
- *   area, such as the read-aloud button and its menu), and with Shift or Alt held.
+ *   area, such as the language menu), and with Shift or Alt held.
  * @returns {React.ReactElement}
  */
 export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true, ctrlFOverride = false }) {
@@ -155,7 +155,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // Where the field goes: measured as it opens (the field is still closed, so the spacer shows
   // the room) and again while it is open whenever the window is resized, the toolbar or its
   // spacer changes size (another toolbar density) or the toolbar's contents change (the
-  // read-aloud button appearing, the signature overview button: with the toolbar already
+  // signature overview button: with the toolbar already
   // overflowing, the spacer stays at 0 and only the button's place moves). The OCR group's
   // wrapper has no box of its own (display: contents), so it is not worth observing. The anchor
   // is the button: the root also holds the open inline field.

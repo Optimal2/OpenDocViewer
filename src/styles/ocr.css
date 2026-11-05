@@ -1,7 +1,7 @@
 /* File: src/styles/ocr.css
    OCR text layer with its search marks (components/OcrTextLayer.jsx) and the toolbar's OCR group:
-   the search whose button shows the page's status, and the read-aloud button
-   (components/DocumentToolbar/OcrSearchBar.jsx, ReadSelectionButton.jsx).
+   the search whose button shows the page's status (components/DocumentToolbar/OcrSearchBar.jsx);
+   read-aloud lives in the page's context menu and the language menu, styled there.
    Mounted only while `ocr.enabled` is the literal true and a page has an outcome; with the
    switch off none of these selectors match anything. */
 
@@ -170,22 +170,6 @@
    but it is an indicator, not a forbidden action, so the cursor stays ordinary. */
 .toolbar .toolbar-ocr-search-toggle.is-status-only:disabled {
   cursor: default;
-}
-
-/* The read-aloud button's language menu (DocumentToolbar/ReadSelectionButton.jsx): the
-   toolbar's popup menu, with a heading, under the button at the toolbar's right end. */
-.toolbar-ocr-read-menu {
-  min-width: 220px;
-}
-
-.toolbar-ocr-read-menu-title {
-  padding: 6px 8px 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--text-color) 70%, transparent 30%);
-  user-select: none;
 }
 
 .toolbar-ocr-search {

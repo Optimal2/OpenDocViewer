@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
 import DocumentViewerRender from './DocumentViewerRender.jsx';
+import ReadAloudProvider from '../ReadAloudProvider.jsx';
 import CompareOverlayView from './CompareOverlayView.jsx';
 import CompareCurtainView from './CompareCurtainView.jsx';
 import PrintSelectionWorkspace from '../PrintSelectionWorkspace.jsx';
@@ -54,6 +55,8 @@ import {
   getViewerEdgeScrollPageTurnConfig,
   isDocumentMetadataUiEnabled,
   isFineTuneEnabled,
+  isOcrEnabled,
+  isReadAloudEnabled,
 } from '../../utils/runtimeConfig.js';
 
 const DocumentViewer = () => {
@@ -520,7 +523,13 @@ const DocumentViewer = () => {
     };
   }, []);
 
+  // Read-aloud state for the page's context menu and the language menu, only while OCR and
+  // read-aloud are on; otherwise the children render as they are and nothing follows the
+  // selection or touches speech synthesis.
+  const ReadAloudScope = isOcrEnabled() && isReadAloudEnabled() ? ReadAloudProvider : React.Fragment;
+
   return (
+    <ReadAloudScope>
     <div
       className="document-viewer-container"
       onClick={handleContainerClick}
@@ -841,6 +850,7 @@ const DocumentViewer = () => {
         uncheckedSeverity={signatureUncheckedSeverity}
       />
     </div>
+    </ReadAloudScope>
   );
 };
 

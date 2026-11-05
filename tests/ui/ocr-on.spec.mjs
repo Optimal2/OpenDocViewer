@@ -210,21 +210,52 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(copied.text).toContain('Konto Belopp\n');
   expect(copied.text).not.toMatch(/\u00a0/);
 
-  // The read-aloud button appears while recognised text is selected (the whole layer is) and
-  // speaks the selection line by line in the UI language; while speaking it is a stop button.
-  const read = page.locator('.toolbar [data-odv-ocr="read"]');
-  await expect(read).toBeVisible();
-  await read.click();
-  await expect(read).toHaveAttribute('data-speaking', 'true');
+  // Read-aloud lives in the page's context menu: a right-click on a word (the selection is
+  // the whole layer, and the right-click keeps it) offers "Read the selection aloud", which
+  // speaks the selection line by line in the reading language with a local voice; while a
+  // reading runs the entry is "Stop reading aloud". No read-aloud button in the toolbar.
+  await expect(page.locator('.toolbar [data-odv-ocr="read"]')).toHaveCount(0);
+  const contextMenu = page.locator('.odv-context-menu');
+  const readEntry = contextMenu.locator('[data-odv-ocr="read"]');
+  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
+  await expect(contextMenu).toBeVisible();
+  await expect(readEntry).toBeEnabled();
+  await expect(readEntry).toHaveText(/Läs upp markering|Read the selection aloud/);
+  await readEntry.click();
+  await expect(contextMenu).toHaveCount(0);
   const spoken = await page.evaluate(() => window.__odvSpoken);
   expect(spoken.length).toBeGreaterThanOrEqual(3);
   expect(spoken[0]).toEqual({ text: 'OpenDocViewer OCR', lang: expect.stringMatching(/^(sv|en)-/), voice: expect.stringMatching(/^Local /) });
   expect(spoken[1].text).toBe('Hej världen 2026');
   expect(spoken.every((utterance) => utterance.voice.startsWith('Local '))).toBe(true);
-  await read.click();
-  await expect(read).not.toHaveAttribute('data-speaking', 'true');
+  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
+  await expect(readEntry).toHaveAttribute('data-speaking', 'true');
+  await expect(readEntry).toHaveText(/Sluta läsa upp|Stop reading aloud/);
+  await readEntry.click();
+  await expect(contextMenu).toHaveCount(0);
+  // Without a selection the entry stays listed, greyed with the reason.
   await page.evaluate(() => window.getSelection().removeAllRanges());
-  await expect(read).toHaveCount(0);
+  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
+  await expect(readEntry).toBeDisabled();
+  await expect(readEntry).not.toHaveAttribute('data-speaking', 'true');
+  await expect(readEntry).toHaveAttribute('title', /Markera text|Select text/);
+  await page.keyboard.press('Escape');
+  await expect(contextMenu).toHaveCount(0);
+
+  // The reading language is chosen in the toolbar's language menu, in a titled section of
+  // its own under the interface languages: "Auto" first, one entry per OCR language, then
+  // "Follow the interface language".
+  await page.locator('.toolbar-end-actions button[aria-haspopup="menu"]').filter({ has: page.locator('.material-icons', { hasText: 'language' }) }).click();
+  const readingSection = page.locator('.toolbar-popup-menu [data-odv-ocr="read-menu"]');
+  await expect(readingSection).toBeVisible();
+  await expect(readingSection.locator('.toolbar-split-menu-title')).toHaveText(/Uppläsningsspråk|Reading language/);
+  const readingEntries = readingSection.locator('[data-speech-language]');
+  expect(await readingEntries.evaluateAll((items) => items.map((item) => item.getAttribute('data-speech-language')))).toEqual(['', 'sv', 'en', 'ui']);
+  // (The entry's text starts with its check-mark ligature.)
+  await expect(readingEntries.first()).toHaveText(/Auto \(/);
+  await expect(page.locator('.toolbar-popup-menu .toolbar-split-menu-section').first().locator('[role="menuitemradio"]')).toHaveCount(2);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.toolbar-popup-menu')).toHaveCount(0);
 
   // The toolbar's search in the recognised text: the field grows out of the status button, a
   // phrase across the line break is found, the match's words are marked on the page (the

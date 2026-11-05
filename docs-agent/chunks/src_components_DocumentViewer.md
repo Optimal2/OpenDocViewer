@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 17. Line count: 7659. JSDoc symbol count: 154.
+File count: 17. Line count: 7678. JSDoc symbol count: 154.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -92,7 +92,7 @@ OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(acti
 
 Exports: `DocumentViewer`
 
-Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`
+Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/ReadAloudProvider.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/DocumentViewer/CompareCurtainView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`
 
 Symbols:
 
@@ -109,7 +109,7 @@ OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane
 
 Exports: `DocumentViewerRender`
 
-Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/runtimeConfig.js`, `src/utils/documentMetadata.js`, `src/components/KeyTips.jsx`
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareZoomOverlay.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`, `src/utils/imageAdjustments.js`, `src/utils/runtimeConfig.js`, `src/utils/documentMetadata.js`, `src/components/KeyTips.jsx`, `src/contexts/readAloudContext.js`, `src/components/ReadAloudMenuItem.jsx`
 
 Symbols:
 

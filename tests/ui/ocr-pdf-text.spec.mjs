@@ -160,7 +160,6 @@ test('ocr on with the search and read-aloud switched off: the status stays, no f
   await expect(page.locator('.document-render-container img').first()).toBeVisible();
   const group = page.locator('.toolbar .toolbar-ocr-actions');
   await expect(group).toHaveAttribute('data-ocr-search', 'off');
-  await expect(group).toHaveAttribute('data-ocr-read-aloud', 'off');
 
   // The status indicator keeps the search button's place and LED, but never enables and has no
   // field; its name is the status itself.
@@ -188,7 +187,14 @@ test('ocr on with the search and read-aloud switched off: the status stays, no f
     document.dispatchEvent(new Event('selectionchange'));
   });
   await page.waitForTimeout(300);
+  // Neither the context menu's read-aloud entry nor the language menu's reading section exists.
+  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
   await expect(page.locator('[data-odv-ocr="read"]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await page.locator('.toolbar-end-actions button[aria-haspopup="menu"]').filter({ has: page.locator('.material-icons', { hasText: 'language' }) }).click();
+  await expect(page.locator('.toolbar-popup-menu')).toBeVisible();
+  await expect(page.locator('[data-odv-ocr="read-menu"], [data-speech-language]')).toHaveCount(0);
+  await page.keyboard.press('Escape');
   expect(await page.evaluate(() => window.__odvVoiceReads)).toBe(0);
 });
 

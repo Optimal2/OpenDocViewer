@@ -280,7 +280,7 @@ ocr: {
     overridesCtrlF: false      // true: Ctrl+F opens this search instead of the browser's find
   },
   speech: {
-    enabled: true,             // the read-aloud button (local voices only); false leaves it out
+    enabled: true,             // read-aloud (context menu entry, reading language in the language menu); false leaves it out
     autoDetectLanguage: true   // guess each page's language for read-aloud and the layer's lang
   },
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
@@ -322,12 +322,14 @@ ocr: {
   opens the field (or puts the cursor back in it, with its text selected, when it is already
   open) and the browser's find does not appear; the search button's tooltip says so. Ctrl+F stays
   the browser's while a dialog is open, while the focus is in another text field or in one of
-  the toolbar's menus (the read-aloud button and its language menu included), and with Shift or
+  the toolbar's menus (the language menu included), and with Shift or
   Alt held. The key means nothing while OCR or the search is off.
-- `ocr.speech.enabled`: whether the toolbar offers the read-aloud button for selected text. `true`
-  by default; only the boolean literal `false` turns it off. With it off, the button is never
-  mounted, so the toolbar neither follows the selection nor touches the browser's speech
-  synthesis (no voice list is read). Reading, when on, uses only voices installed on the machine,
+- `ocr.speech.enabled`: whether the viewer offers read-aloud of selected text: the entry "Read
+  the selection aloud" in the page's context menu and the "Reading language" section in the
+  toolbar's language menu (see "What the user sees" below). `true` by default; only the boolean
+  literal `false` turns it off. With it off, neither exists, so the viewer neither follows the
+  selection nor touches the browser's speech synthesis (no voice list is read). Reading, when
+  on, uses only voices installed on the machine,
   never the browser's online voices. The key is independent of `ocr.search.enabled` and of
   `ocr.speech.autoDetectLanguage` below: with read-aloud off, the guess still gives the text
   flow its `lang`, which screen readers follow. The key means nothing while OCR is off.
@@ -336,7 +338,7 @@ ocr: {
   words are counted against a few dozen function words per language, with a little weight for
   letters such as å, ä, ö or æ, ø; the winner needs at least four function-word hits, clearly
   more than the runner-up, and at least as much as every language the viewer is not configured
-  for, otherwise the page gets no language). The guess sets the read-aloud button's "Auto"
+  for, otherwise the page gets no language). The guess sets the reading language's "Auto"
   language and the text flow's `lang` attribute, which screen readers with automatic voice
   switching follow. Only languages in `ocr.languages` can be guessed: a German page in a viewer
   configured for Swedish and English gets no language (German fits its words better than
@@ -547,15 +549,20 @@ loose buttons. Its two parts are offered independently (`ocr.search.enabled` and
   match on a page the print selection hides lands on the nearest shown page. The browser's own
   find (Ctrl+F) keeps working on the layer. With `ocr.search.enabled: false` the button is a
   status-only indicator: never enabled, no field, the status as its name and tooltip.
-- A read-aloud button (`ocr.speech.enabled`) that appears only while recognised text is selected, if the browser has
-  speech synthesis (Web Speech API). Clicking it reads the selection as it reads on the page,
-  line by line, with a voice installed in the operating system for the reading language (the
-  viewer's UI language unless the user picks another). Only voices that run on the machine are
-  used, never the browser's online voices: the text is document content and must not leave the
-  computer. Without a local voice for the language the button is shown disabled with that
-  reason, and nothing is spoken (an utterance without a voice would let the browser pick one,
-  possibly online). While reading, the button is a stop button. Resting the
-  pointer on the button (or pressing an arrow key on it) opens a menu: "Auto" first (always naming what it will do, "Auto (svenska)", with
+Read-aloud (`ocr.speech.enabled`) is not a toolbar button. It lives in two places:
+
+- The page's context menu (right-click on a page, next to "Hide this page" and "Hide document")
+  gets the entry "Read the selection aloud", if the browser has speech synthesis (Web Speech
+  API). It is always listed, greyed with the reason in its tooltip while nothing can be read
+  (no text selected in the page's text layer, no local voice for the reading language), so the
+  feature is found before anything is selected. Choosing it reads the selection as it reads on
+  the page, line by line, with a voice installed in the operating system for the reading
+  language. Only voices that run on the machine are used, never the browser's online voices:
+  the text is document content and must not leave the computer; without a local voice nothing
+  is spoken (an utterance without a voice would let the browser pick one, possibly online).
+  While a reading runs the entry is "Stop reading aloud", and Escape stops it too.
+- The toolbar's language menu gets a second, titled section, "Reading language", under the
+  interface languages, so both are chosen in one place without being confused: "Auto" first (always naming what it will do, "Auto (svenska)", with
   the language guessed for the selected page's text, see `ocr.speech.autoDetectLanguage`; when
   the guess is unsure it reads in the UI language; the entry is absent while the guess is turned
   off, the reading language then being the UI language unless the user picks one), then one entry per OCR language

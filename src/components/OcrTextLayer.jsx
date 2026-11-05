@@ -193,7 +193,7 @@ function OcrTextLayer({ outcome, renderWidth, renderHeight, zoom, rotation = 0, 
           ref={flowRef}
           // The guessed language of the text (src/ocr/detectLanguage.js), on the flow rather
           // than the labelled layer so the layer's localised name keeps the UI language: screen
-          // readers that switch voices by language follow it, and the read-aloud button reads it.
+          // readers that switch voices by language follow it, and read-aloud reads it.
           lang={typeof outcome.language === 'string' && outcome.language ? outcome.language : undefined}
         >
           {layout.lines.map((line, lineIndex) => (

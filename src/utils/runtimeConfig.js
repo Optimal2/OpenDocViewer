@@ -373,9 +373,10 @@ export function isOcrSearchCtrlFOverrideEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
- * Resolve whether the read-aloud button is offered (`ocr.speech.enabled`). On by default; only
- * the boolean literal `false` turns it off. With it off, the button is never mounted, so the
- * toolbar neither follows the selection nor touches speech synthesis; the language guess
+ * Resolve whether read-aloud is offered (`ocr.speech.enabled`): the entry in the page's context
+ * menu and the "Reading language" section in the language menu. On by default; only the boolean
+ * literal `false` turns it off. With it off, the read-aloud state is never provided, so the
+ * viewer neither follows the selection nor touches speech synthesis; the language guess
  * (`ocr.speech.autoDetectLanguage`) is independent and still sets the text flow's `lang` for
  * screen readers. Means nothing while OCR is off.
  *

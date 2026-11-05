@@ -11,8 +11,9 @@
  * one of the same base language; with no local voice for the language nothing is spoken at
  * all, because an utterance without a voice lets the browser pick one, which may be online.
  * Nothing is spoken before the first user gesture (browser policy), which is why the viewer
- * speaks only on a button click. Imported only by the read-aloud button, which the toolbar
- * mounts while OCR is on, so nothing here is called while OCR is off.
+ * speaks only on a user's choice. Imported only by the read-aloud hook (hooks/useReadAloud.js),
+ * whose provider the viewer mounts while OCR and read-aloud are on, so nothing here is called
+ * while OCR is off.
  */
 
 /** Longest chunk handed to the synthesiser (characters). */

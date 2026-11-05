@@ -155,12 +155,14 @@
         overridesCtrlF: false
       },
       speech: {
-        // The read-aloud button for selected text. true (default) offers it; only the literal
-        // false turns it off, and the toolbar then never follows the selection or touches speech
-        // synthesis. Reading uses voices installed on the machine only, never online voices.
+        // Read-aloud of selected text: the entry "Read the selection aloud" in the page's
+        // context menu and the "Reading language" section in the language menu. true (default)
+        // offers them; only the literal false turns them off, and the viewer then never follows
+        // the selection or touches speech synthesis. Reading uses voices installed on the
+        // machine only, never online voices.
         enabled: true,
         // Guess the language of each page's text among the OCR languages above, so the
-        // read-aloud button's "Auto" choice reads a Swedish page with a Swedish voice and an
+        // reading language's "Auto" choice reads a Swedish page with a Swedish voice and an
         // English page with an English one, and the text layer tells screen readers the
         // language. true (default) keeps the guess; only the literal false turns it off (the
         // read-aloud language then follows the UI language unless the user picks one).

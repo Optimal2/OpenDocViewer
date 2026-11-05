@@ -78,7 +78,7 @@ describe('shipped OCR configuration', () => {
     expect(shipped.siteKeys).toEqual([]);
   });
 
-  it('offers the search and the read-aloud button unless a site file sets the literal false, each on its own', () => {
+  it('offers the search and read-aloud unless a site file sets the literal false, each on its own', () => {
     expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } })).toMatchObject({ search: true, readAloud: true, autoDetect: true });
     expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, search: { enabled: 'false' }, speech: { enabled: 0 } } } }))
       .toMatchObject({ search: true, readAloud: true });

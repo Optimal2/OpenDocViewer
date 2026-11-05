@@ -297,7 +297,7 @@ The config covers areas such as:
 - application base path / base href
 - optional integration-adapter metadata alias mappings
 - large-document loading (`documentLoading`) for warnings, temp storage, lazy rendering, and cache limits
-- optional in-browser OCR of scanned pages (`ocr.enabled`, off by default; see the OCR section in `docs-src/runtime-configuration.md`, including the CSP token a site must add); with it on, the toolbar's search in the text layers (`ocr.search.enabled`) and the read-aloud button (`ocr.speech.enabled`) can each be turned off on their own
+- optional in-browser OCR of scanned pages (`ocr.enabled`, off by default; see the OCR section in `docs-src/runtime-configuration.md`, including the CSP token a site must add); with it on, the toolbar's search in the text layers (`ocr.search.enabled`) and read-aloud (`ocr.speech.enabled`: an entry in the page's context menu, its reading language in the language menu) can each be turned off on their own
 
 For the full reference, deployment notes, and precedence rules, see `docs-src/runtime-configuration.md` and `odv.site.config.sample.js`.
 

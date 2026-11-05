@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 183
-- Source lines: 68123
-- JSDoc symbols: 1959
+- Files: 186
+- Source lines: 68205
+- JSDoc symbols: 1961
 - Files without JSDoc doclets: 1
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -25,7 +25,7 @@
 - `src/utils/pdfSignatureStatus.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
-- `src/utils/compareOverlay.js`: 4 incoming local imports
+- `src/contexts/readAloudContext.js`: 4 incoming local imports
 
 ## Largest Files
 
@@ -38,8 +38,8 @@
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 1563 lines
 - `src/utils/pdfSignatures.js`: 1560 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
+- `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1304 lines
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx`: 1301 lines
-- `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1295 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
 - `src/components/DocumentRender.jsx`: 1211 lines
 - `src/utils/documentLoadingConfig.js`: 1099 lines

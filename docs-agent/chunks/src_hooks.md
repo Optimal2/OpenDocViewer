@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 8. Line count: 1050. JSDoc symbol count: 32.
+File count: 9. Line count: 1258. JSDoc symbol count: 37.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -119,3 +119,19 @@ Symbols:
 - `module:hooks/usePdfSignatureReports` (module) - Browser PDF signature inspection.
 - `module:hooks/usePdfSignatureReports~isPdfPage` (function) - No description.
 - `module:hooks/usePdfSignatureReports` (function) - No description.
+
+## src/hooks/useReadAloud.js
+
+Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's "Reading language" section \(contexts/readAloudContext.js\).
+
+Exports: `FOLLOW_UI`, `layerSelection`, `normalizeStoredLanguage`, `useReadAloud`
+
+Local imports: `src/utils/ocrTextLayout.js`, `src/utils/runtimeConfig.js`, `src/utils/ocrLanguageCodes.js`, `src/utils/speech.js`, `src/utils/viewerPreferences.js`
+
+Symbols:
+
+- `FOLLOW_UI` (constant) - Preference value for &quot;follow the interface language&quot; \(absent: automatic\).
+- `layerSelection` (function) - The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page's guessed language\), or null outside the la...
+- `normalizeStoredLanguage` (function) - A stored reading\-language choice in today's form: ui , or one of the OCR languages, else null \(automatic\).
+- `module.exports` (function) - No description.
+- `useReadAloud~chooseLanguage` (constant) - No description.

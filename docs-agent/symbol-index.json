@@ -6172,7 +6172,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 61,
+    "line": 73,
     "description": "",
     "params": [
       {
@@ -6192,7 +6192,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 53,
+    "line": 65,
     "description": "",
     "params": [
       {
@@ -6212,7 +6212,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 80,
+    "line": 92,
     "description": "",
     "params": [
       {
@@ -6237,7 +6237,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 18,
+    "line": 27,
     "description": "",
     "params": [
       {
@@ -7285,7 +7285,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrToolbarActions.jsx",
-    "line": 37,
+    "line": 36,
     "description": "",
     "params": [
       {
@@ -7872,119 +7872,6 @@
         "description": ""
       }
     ],
-    "examples": 0
-  },
-  {
-    "id": "ReadSelectionButton~chooseLanguage",
-    "name": "chooseLanguage",
-    "longname": "ReadSelectionButton~chooseLanguage",
-    "kind": "function",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 200,
-    "description": "",
-    "params": [
-      {
-        "name": "value",
-        "type": "string",
-        "optional": false,
-        "description": "'' for automatic, FOLLOW_UI, or an ISO 639-1 language."
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "module.exports",
-    "name": "exports",
-    "longname": "module.exports",
-    "kind": "function",
-    "scope": "static",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 84,
-    "description": "",
-    "params": [],
-    "returns": [
-      {
-        "type": "React.ReactElement|null",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "FOLLOW_UI",
-    "name": "FOLLOW_UI",
-    "longname": "FOLLOW_UI",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 41,
-    "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "layerSelection",
-    "name": "layerSelection",
-    "longname": "layerSelection",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 48,
-    "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
-    "params": [],
-    "returns": [
-      {
-        "type": "Object|null",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizeStoredLanguage",
-    "name": "normalizeStoredLanguage",
-    "longname": "normalizeStoredLanguage",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 73,
-    "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
-    "params": [
-      {
-        "name": "stored",
-        "type": "string|null",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "languages",
-        "type": "Array.<string>",
-        "optional": false,
-        "description": "The OCR languages (ISO 639-1)."
-      }
-    ],
-    "returns": [
-      {
-        "type": "string|null",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "READ_MENU_CLOSE_DELAY_MS",
-    "name": "READ_MENU_CLOSE_DELAY_MS",
-    "longname": "READ_MENU_CLOSE_DELAY_MS",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 39,
-    "description": "How long the pointer may leave the button and its menu before the menu closes.",
-    "params": [],
-    "returns": [],
     "examples": 0
   },
   {
@@ -10185,7 +10072,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 506,
+    "line": 509,
     "description": "",
     "params": [
       {
@@ -10210,7 +10097,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 381,
+    "line": 384,
     "description": "",
     "params": [],
     "returns": [
@@ -10228,7 +10115,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 374,
+    "line": 377,
     "description": "",
     "params": [
       {
@@ -10248,7 +10135,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 352,
+    "line": 355,
     "description": "Overview row activation: show the document's first page and keep the overview open.",
     "params": [],
     "returns": [],
@@ -10261,7 +10148,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 385,
+    "line": 388,
     "description": "",
     "params": [
       {
@@ -10281,7 +10168,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewer.jsx",
-    "line": 299,
+    "line": 302,
     "description": "Open the signature details dialog for the document that contains a file (sourceKey), with that file's tab preselected.",
     "params": [
       {
@@ -10312,7 +10199,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 216,
+    "line": 218,
     "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
     "params": [
       {
@@ -10553,7 +10440,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 61,
+    "line": 63,
     "description": "",
     "params": [
       {
@@ -10584,7 +10471,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 133,
+    "line": 135,
     "description": "",
     "params": [
       {
@@ -10615,7 +10502,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 832,
+    "line": 836,
     "description": "",
     "params": [
       {
@@ -10635,7 +10522,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 858,
+    "line": 862,
     "description": "",
     "params": [
       {
@@ -10672,7 +10559,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 493,
+    "line": 497,
     "description": "",
     "params": [
       {
@@ -10703,7 +10590,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 826,
+    "line": 830,
     "description": "",
     "params": [
       {
@@ -10723,7 +10610,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 348,
+    "line": 352,
     "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
     "params": [
       {
@@ -10754,7 +10641,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 153,
+    "line": 155,
     "description": "",
     "params": [
       {
@@ -10779,7 +10666,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 145,
+    "line": 147,
     "description": "",
     "params": [
       {
@@ -10804,7 +10691,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 82,
+    "line": 84,
     "description": "",
     "params": [
       {
@@ -10829,7 +10716,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 95,
+    "line": 97,
     "description": "",
     "params": [
       {
@@ -10854,7 +10741,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 106,
+    "line": 108,
     "description": "",
     "params": [
       {
@@ -10885,7 +10772,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 164,
+    "line": 166,
     "description": "",
     "params": [
       {
@@ -10910,7 +10797,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 936,
+    "line": 943,
     "description": "",
     "params": [
       {
@@ -10935,7 +10822,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 959,
+    "line": 966,
     "description": "",
     "params": [
       {
@@ -10960,7 +10847,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 45,
+    "line": 47,
     "description": "",
     "params": [],
     "returns": [],
@@ -10973,7 +10860,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 41,
+    "line": 43,
     "description": "",
     "params": [],
     "returns": [],
@@ -14202,6 +14089,56 @@
     "examples": 0
   },
   {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/ReadAloudMenuItem.jsx",
+    "line": 19,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": "Called after a choice, so the menu closes."
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/ReadAloudProvider.jsx",
+    "line": 18,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "Resizer.propTypes.ariaLabel",
     "name": "ariaLabel",
     "longname": "Resizer.propTypes.ariaLabel",
@@ -15086,6 +15023,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "ReadAloudState",
+    "name": "ReadAloudState",
+    "longname": "ReadAloudState",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/contexts/readAloudContext.js",
+    "line": 2,
+    "description": "The read-aloud state shared by the page's context menu (&quot;Read the selection aloud&quot; / &quot;Stop reading aloud&quot;, components/ReadAloudMenuItem.jsx) and the toolbar's...",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -18346,6 +18296,106 @@
       {
         "type": "Object.<string, *>",
         "description": "Map of sourceKey to PdfSignatureReport."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "useReadAloud~chooseLanguage",
+    "name": "chooseLanguage",
+    "longname": "useReadAloud~chooseLanguage",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/hooks/useReadAloud.js",
+    "line": 146,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "string",
+        "optional": false,
+        "description": "'' for automatic, FOLLOW_UI, or an ISO 639-1 language."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/hooks/useReadAloud.js",
+    "line": 72,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "The read-aloud state (ReadAloudState in contexts/readAloudContext.js)."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "FOLLOW_UI",
+    "name": "FOLLOW_UI",
+    "longname": "FOLLOW_UI",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useReadAloud.js",
+    "line": 29,
+    "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "layerSelection",
+    "name": "layerSelection",
+    "longname": "layerSelection",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/hooks/useReadAloud.js",
+    "line": 36,
+    "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "normalizeStoredLanguage",
+    "name": "normalizeStoredLanguage",
+    "longname": "normalizeStoredLanguage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/hooks/useReadAloud.js",
+    "line": 61,
+    "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
+    "params": [
+      {
+        "name": "stored",
+        "type": "string|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "languages",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": "The OCR languages (ISO 639-1)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
       }
     ],
     "examples": 0
@@ -43378,7 +43428,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 559,
+    "line": 560,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -43473,7 +43523,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 482,
+    "line": 483,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -43498,7 +43548,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 408,
+    "line": 409,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -43573,7 +43623,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 507,
+    "line": 508,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -43598,7 +43648,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 451,
+    "line": 452,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -43623,7 +43673,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 936,
+    "line": 937,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -43698,7 +43748,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 811,
+    "line": 812,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -43723,7 +43773,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 836,
+    "line": 837,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -43766,7 +43816,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 919,
+    "line": 920,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -43791,7 +43841,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 519,
+    "line": 520,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -43816,7 +43866,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 787,
+    "line": 788,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -43841,7 +43891,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 773,
+    "line": 774,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -43866,7 +43916,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 760,
+    "line": 761,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -43891,7 +43941,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 860,
+    "line": 861,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -43916,7 +43966,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 878,
+    "line": 879,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -43941,7 +43991,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 462,
+    "line": 463,
     "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
     "params": [],
     "returns": [],
@@ -44229,8 +44279,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 385,
-    "description": "Resolve whether the read-aloud button is offered ( ocr.speech.enabled ).",
+    "line": 386,
+    "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
     "params": [
       {
         "name": "cfg",
@@ -44330,7 +44380,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 537,
+    "line": 538,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -44361,7 +44411,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 734,
+    "line": 735,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -44386,7 +44436,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 705,
+    "line": 706,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -44417,7 +44467,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 673,
+    "line": 674,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -44448,7 +44498,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 605,
+    "line": 606,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -44491,7 +44541,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 584,
+    "line": 585,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -44534,7 +44584,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 716,
+    "line": 717,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -44565,7 +44615,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 688,
+    "line": 689,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -44596,7 +44646,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 634,
+    "line": 635,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -44621,7 +44671,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 622,
+    "line": 623,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -44652,7 +44702,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 648,
+    "line": 649,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -44677,7 +44727,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 456,
+    "line": 457,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -44768,7 +44818,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 458,
+    "line": 459,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -44838,7 +44888,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 659,
+    "line": 660,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -44863,7 +44913,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 460,
+    "line": 461,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],
@@ -45839,7 +45889,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 79,
+    "line": 80,
     "description": "A voice's locale in canonical form ('sv_se' → 'sv-SE'), or '' for none.",
     "params": [
       {
@@ -45864,7 +45914,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 93,
+    "line": 94,
     "description": "Whether a voice runs on the machine.",
     "params": [
       {
@@ -45889,7 +45939,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 24,
+    "line": 25,
     "description": "",
     "params": [],
     "returns": [
@@ -45907,7 +45957,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 130,
+    "line": 131,
     "description": "The local voice to use for a locale: exact locale first, then the same base language (the browser's default voice first among equals), else null.",
     "params": [
       {
@@ -45938,7 +45988,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 36,
+    "line": 37,
     "description": "The speech locale for a viewer UI language ('sv' → 'sv-SE'); other codes pass through.",
     "params": [
       {
@@ -45963,7 +46013,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 166,
+    "line": 167,
     "description": "Speak text aloud with a local voice.",
     "params": [
       {
@@ -46024,7 +46074,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 19,
+    "line": 20,
     "description": "Longest chunk handed to the synthesiser (characters).",
     "params": [],
     "returns": [],
@@ -46037,7 +46087,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 143,
+    "line": 144,
     "description": "",
     "params": [],
     "returns": [],
@@ -46050,7 +46100,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 108,
+    "line": 109,
     "description": "The name of a locale in the UI language ('sv-SE' in Swedish: &quot;svenska (Sverige)&quot;), through Intl.DisplayNames where the browser has it, else the code itself.",
     "params": [
       {
@@ -46087,7 +46137,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/speech.js",
-    "line": 52,
+    "line": 53,
     "description": "Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long.",
     "params": [
       {
@@ -47535,7 +47585,7 @@
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
     "line": 369,
-    "description": "The read-aloud button's stored language choice (see speechLanguage ), or null for automatic.",
+    "description": "The stored read-aloud language choice (see speechLanguage ), or null for automatic.",
     "params": [],
     "returns": [
       {

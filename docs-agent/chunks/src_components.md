@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 20. Line count: 8443. JSDoc symbol count: 117.
+File count: 22. Line count: 8523. JSDoc symbol count: 119.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -189,6 +189,30 @@ Symbols:
 - `<anonymous>~handleKeyDown` (function) - No description.
 - `<anonymous>~handleMove` (function) - No description.
 - `<anonymous>~handleDone` (function) - No description.
+
+## src/components/ReadAloudMenuItem.jsx
+
+The page context menu's read\-aloud entry \(DocumentViewer/DocumentViewerRender.jsx\): "Read the selection aloud" while nothing is being read, greyed with the reason in its tooltip when nothing can be read \(no selection in
+
+Exports: `ReadAloudMenuItem`
+
+Local imports: `src/contexts/readAloudContext.js`
+
+Symbols:
+
+- `module.exports` (function) - No description.
+
+## src/components/ReadAloudProvider.jsx
+
+Provides the read\-aloud state \(hooks/useReadAloud.js\) to the page's context menu and the toolbar's language menu \(contexts/readAloudContext.js\).
+
+Exports: `ReadAloudProvider`
+
+Local imports: `src/contexts/readAloudContext.js`, `src/hooks/useReadAloud.js`
+
+Symbols:
+
+- `module.exports` (function) - No description.
 
 ## src/components/Resizer.jsx
 

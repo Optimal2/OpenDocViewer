@@ -30,7 +30,7 @@ import {
  * @property {('system'|'normal'|'light'|'dark')=} themeMode
  * @property {string=} themeSharedRevision
  * @property {string=} language
- * @property {string=} speechLanguage  The read-aloud button's language choice: an ISO 639-1
+ * @property {string=} speechLanguage  The read-aloud language choice: an ISO 639-1
  *   language ('en') or 'ui' for the interface language; absent: automatic (the page's guessed
  *   language, else the interface language). Older values stored a locale ('en-US'), which the
  *   button reads as its language.
@@ -363,7 +363,7 @@ export function setLanguagePreference(language) {
 }
 
 /**
- * The read-aloud button's stored language choice (see `speechLanguage`), or null for automatic.
+ * The stored read-aloud language choice (see `speechLanguage`), or null for automatic.
  * @returns {(string|null)}
  */
 export function getSpeechLanguagePreference() {

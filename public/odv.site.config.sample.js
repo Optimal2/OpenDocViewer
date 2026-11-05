@@ -105,7 +105,8 @@
       // place then keeps a status-only indicator of the page's recognition. overridesCtrlF: true
       // lets Ctrl+F open this search instead of the browser's find (off by default).
       // search: { enabled: true, overridesCtrlF: false },
-      // The read-aloud button (only the literal false turns it off; local voices only), and its
+      // Read-aloud (context menu entry and reading language in the language menu; only the
+      // literal false turns it off; local voices only), and its
       // language guess: each page's language among the OCR languages ("Auto" in the menu),
       // carried by the text layer as lang. Only the literal false turns the guess off.
       // speech: { enabled: true, autoDetectLanguage: true },

@@ -122,6 +122,7 @@
     "lastDocument": "Last document",
     "language": {
       "openMenu": "Choose language",
+      "uiTitle": "Interface language",
       "current": "Language: {language}",
       "switchTo": "Switch language to {language}",
       "options": {
@@ -460,6 +461,9 @@
     },
     "read": {
       "speak": "Read the selected text aloud",
+      "menuSpeak": "Read the selection aloud",
+      "noSelection": "Select text in the page's text layer first",
+      "unavailable": "This browser cannot read text aloud",
       "stop": "Stop reading aloud",
       "language": "Reading language",
       "auto": "Auto ({language})",

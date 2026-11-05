@@ -14,7 +14,7 @@
  * prepareOcrImage measures it and removes ruling lines on a private copy that is released right
  * after (the displayed image and printing are never touched). With `ocr.speech.autoDetectLanguage`
  * on (the default) each finished page's text is given a language guess among the viewer's OCR
- * languages (src/ocr/detectLanguage.js), which the read-aloud button and the text layer's
+ * languages (src/ocr/detectLanguage.js), which read-aloud and the text layer's
  * `lang` use; the guess is one pass over the page's words.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -96,7 +96,7 @@ export default function useOcrTextLayers({
       });
     };
     // The language guess chooses among the OCR languages only (what the viewer can recognise
-    // and the read-aloud menu offers); off when the site turned it off.
+    // and the reading-language menu offers); off when the site turned it off.
     const languageCandidates = isSpeechLanguageAutoDetectEnabled() ? speechLanguagesForOcr(getOcrLanguages()) : [];
     const detectLanguage = languageCandidates.length > 0 && typeof ocrModule.detectTextLanguage === 'function'
       ? (outcome) => ocrModule.detectTextLanguage((outcome.words || []).map((word) => word?.text), languageCandidates).language

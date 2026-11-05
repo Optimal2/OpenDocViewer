@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 22. Line count: 8860. JSDoc symbol count: 151.
+File count: 21. Line count: 8594. JSDoc symbol count: 145.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -82,6 +82,8 @@ Compact language selector for the toolbar.
 
 Exports: `LanguageMenuButton`
 
+Local imports: `src/contexts/readAloudContext.js`
+
 Symbols:
 
 - `resolveLanguageLabel` (function) - No description.
@@ -131,11 +133,11 @@ Symbols:
 
 ## src/components/DocumentToolbar/OcrToolbarActions.jsx
 
-The toolbar's OCR group, right after the image\-adjustment group \(a separator, then the buttons\): the read\-aloud button \(ReadSelectionButton.jsx\) and the search in the text layers \(OcrSearchBar.jsx\), each behind its own r
+The toolbar's OCR group, right after the image\-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: \- \`ocr.search.enabled\` \(default true; only the literal false
 
 Exports: `OcrToolbarActions`
 
-Local imports: `src/components/DocumentToolbar/OcrSearchBar.jsx`, `src/components/DocumentToolbar/ReadSelectionButton.jsx`, `src/utils/runtimeConfig.js`
+Local imports: `src/components/DocumentToolbar/OcrSearchBar.jsx`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -208,23 +210,6 @@ Symbols:
 - `module:printRangeDialogHelpers.normalizePdfOrientationMode` (function) - No description.
 - `module:printRangeDialogHelpers.buildSelectedOptionDetails` (function) - Build token\-friendly details for the selected option without forcing templates to use list indexes.
 - `module:printRangeDialogHelpers.ensureODVPrintCSS` (function) - Ensure base print CSS is injected once per document.
-
-## src/components/DocumentToolbar/ReadSelectionButton.jsx
-
-Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers \(components/OcrTextLayer.jsx\) and the browser can speak \(utils/speech.js\).
-
-Exports: `ReadSelectionButton`
-
-Local imports: `src/utils/ocrTextLayout.js`, `src/utils/runtimeConfig.js`, `src/utils/ocrLanguageCodes.js`, `src/utils/speech.js`, `src/utils/viewerPreferences.js`
-
-Symbols:
-
-- `READ_MENU_CLOSE_DELAY_MS` (constant) - How long the pointer may leave the button and its menu before the menu closes.
-- `FOLLOW_UI` (constant) - Preference value for &quot;follow the interface language&quot; \(absent: automatic\).
-- `layerSelection` (function) - The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page's guessed language\), or null outside the la...
-- `normalizeStoredLanguage` (function) - A stored reading\-language choice in today's form: ui , or one of the OCR languages, else null \(automatic\).
-- `module.exports` (function) - No description.
-- `ReadSelectionButton~chooseLanguage` (function) - No description.
 
 ## src/components/DocumentToolbar/SplitToolbarButton.jsx
 

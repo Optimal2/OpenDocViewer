@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 // File: src/components/__tests__/ocrToolbarActions.test.jsx
 /**
- * The toolbar's OCR group (DocumentToolbar/OcrToolbarActions.jsx): a separator first, the
- * read-aloud button only while `ocr.speech.enabled` is not the literal false, and the search
- * with `searchEnabled` from `ocr.search.enabled` and `ctrlFOverride` from
- * `ocr.search.overridesCtrlF`, each switch on its own. The children are stubs here; their own
- * behaviour has its own tests.
+ * The toolbar's OCR group (DocumentToolbar/OcrToolbarActions.jsx): a separator first, then the
+ * search with `searchEnabled` from `ocr.search.enabled` and `ctrlFOverride` from
+ * `ocr.search.overridesCtrlF`, each switch on its own. Read-aloud is no toolbar button any more
+ * (it lives in the page's context menu and the language menu). The search is a stub here; its
+ * own behaviour has its own tests.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
@@ -19,12 +19,8 @@ vi.mock('../../utils/runtimeConfig.js', async (importOriginal) => {
     ...actual,
     isOcrSearchEnabled: withConfig('isOcrSearchEnabled'),
     isOcrSearchCtrlFOverrideEnabled: withConfig('isOcrSearchCtrlFOverrideEnabled'),
-    isReadAloudEnabled: withConfig('isReadAloudEnabled'),
   };
 });
-vi.mock('../DocumentToolbar/ReadSelectionButton.jsx', () => ({
-  default: () => createElement('button', { type: 'button', 'data-odv-ocr': 'read' }, 'read'),
-}));
 vi.mock('../DocumentToolbar/OcrSearchBar.jsx', () => ({
   default: ({ searchEnabled, ctrlFOverride, pageNumber }) => createElement('div', {
     'data-odv-ocr': 'search',
@@ -60,33 +56,26 @@ describe('OcrToolbarActions', () => {
   const group = () => container.querySelector('.toolbar-ocr-actions');
   const search = () => container.querySelector('[data-odv-ocr="search"]');
 
-  it('mounts a separator and both parts with the shipped defaults, the search enabled and Ctrl+F left to the browser', () => {
+  it('mounts a separator and the search with the shipped defaults, enabled and with Ctrl+F left to the browser', () => {
     config.current = { ocr: { enabled: true } };
     render();
-    expect(group().getAttribute('data-ocr-read-aloud')).toBe('on');
     expect(group().getAttribute('data-ocr-search')).toBe('on');
     expect(group().getAttribute('data-ocr-search-ctrl-f')).toBe('off');
     // The separator comes first, as between the toolbar's other groups.
     expect(group().firstElementChild.classList.contains('separator')).toBe(true);
-    expect(container.querySelector('[data-odv-ocr="read"]')).not.toBeNull();
+    // No read-aloud button: that entry lives in the page's context menu.
+    expect(container.querySelector('[data-odv-ocr="read"]')).toBeNull();
+    expect(group().children.length).toBe(2);
     expect(search().getAttribute('data-search-enabled')).toBe('true');
     expect(search().getAttribute('data-ctrl-f')).toBe('false');
     expect(search().getAttribute('data-page')).toBe('3');
   });
 
-  it('leaves the read-aloud button out for ocr.speech.enabled: false and keeps the search', () => {
-    config.current = { ocr: { enabled: true, speech: { enabled: false } } };
-    render();
-    expect(group().getAttribute('data-ocr-read-aloud')).toBe('off');
-    expect(container.querySelector('[data-odv-ocr="read"]')).toBeNull();
-    expect(search().getAttribute('data-search-enabled')).toBe('true');
-  });
 
-  it('hands the search its off switch for ocr.search.enabled: false and keeps the read-aloud button', () => {
+  it('hands the search its off switch for ocr.search.enabled: false', () => {
     config.current = { ocr: { enabled: true, search: { enabled: false } } };
     render();
     expect(group().getAttribute('data-ocr-search')).toBe('off');
-    expect(container.querySelector('[data-odv-ocr="read"]')).not.toBeNull();
     expect(search().getAttribute('data-search-enabled')).toBe('false');
   });
 
@@ -102,10 +91,9 @@ describe('OcrToolbarActions', () => {
     expect(search().getAttribute('data-ctrl-f')).toBe('false');
   });
 
-  it('turns off only for the literal false, so a string or a number keeps both', () => {
-    config.current = { ocr: { enabled: true, search: { enabled: 'false' }, speech: { enabled: 0 } } };
+  it('turns the search off only for the literal false, so a string keeps it', () => {
+    config.current = { ocr: { enabled: true, search: { enabled: 'false' } } };
     render();
-    expect(container.querySelector('[data-odv-ocr="read"]')).not.toBeNull();
     expect(search().getAttribute('data-search-enabled')).toBe('true');
   });
 });

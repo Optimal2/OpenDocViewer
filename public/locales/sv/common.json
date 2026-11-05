@@ -122,6 +122,7 @@
     "lastDocument": "Sista dokumentet",
     "language": {
       "openMenu": "Välj språk",
+      "uiTitle": "Gränssnittets språk",
       "current": "Språk: {language}",
       "switchTo": "Byt språk till {language}",
       "options": {
@@ -460,6 +461,9 @@
     },
     "read": {
       "speak": "Läs upp markerad text",
+      "menuSpeak": "Läs upp markering",
+      "noSelection": "Markera text i sidans textlager först",
+      "unavailable": "Den här webbläsaren kan inte läsa upp text",
       "stop": "Sluta läsa upp",
       "language": "Uppläsningsspråk",
       "auto": "Auto ({language})",

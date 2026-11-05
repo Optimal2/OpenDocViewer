@@ -1,6 +1,16 @@
 # OpenDocViewer / src/contexts
 
-File count: 4. Line count: 3558. JSDoc symbol count: 99.
+File count: 5. Line count: 3597. JSDoc symbol count: 100.
+
+## src/contexts/readAloudContext.js
+
+The read\-aloud state shared by the page's context menu \("Read the selection aloud" / "Stop reading aloud", components/ReadAloudMenuItem.jsx\) and the toolbar's language menu \(the "Reading language" section, DocumentToolba
+
+Exports: `ReadAloudContext`
+
+Symbols:
+
+- `ReadAloudState` (typedef) - The read\-aloud state shared by the page's context menu \(&quot;Read the selection aloud&quot; / &quot;Stop reading aloud&quot;, components/ReadAloudMenuItem.jsx\) and the toolbar's...
 
 ## src/contexts/themeContext.js
 

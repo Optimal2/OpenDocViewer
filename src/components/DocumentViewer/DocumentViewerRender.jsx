@@ -37,6 +37,8 @@ import { needsCanvas } from '../../utils/imageAdjustments.js';
 import { isFineTuneEnabled } from '../../utils/runtimeConfig.js';
 import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
 import KeyTips from '../KeyTips.jsx';
+import ReadAloudContext from '../../contexts/readAloudContext.js';
+import ReadAloudMenuItem from '../ReadAloudMenuItem.jsx';
 
 /**
  * @typedef {'primary'|'compare'} ViewerPaneKey
@@ -257,6 +259,8 @@ const DocumentViewerRender = ({
   const { t } = useTranslation('common');
   const fineTuneShown = fineTuneVisible && isFineTuneEnabled();
   const { bundle } = useContext(ViewerContext);
+  // Null unless OCR and read-aloud are on (ReadAloudProvider is mounted by DocumentViewer).
+  const readAloud = useContext(ReadAloudContext);
   const contextMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const primaryPaneRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const comparePaneRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -864,8 +868,11 @@ const DocumentViewerRender = ({
     const hasCompareCloseAction = pane === 'compare' && isComparing && typeof closeCompare === 'function';
     const hasMetadataAction = typeof onOpenDocumentMetadata === 'function'
       && bundleDocumentHasMetadata(bundle, Array.isArray(allPages) ? allPages[Math.max(0, (Number(originalPageNumber) || 1) - 1)]?.documentId : undefined);
+    // Read-aloud (OCR on, read-aloud on): the entry is always listed, greyed when nothing can
+    // be read, so the feature is found even before anything is selected.
+    const hasReadAloudAction = !!readAloud;
 
-    if (!hasSelectionActions && !hasCompareCloseAction && !hasMetadataAction) {
+    if (!hasSelectionActions && !hasCompareCloseAction && !hasMetadataAction && !hasReadAloudAction) {
       closeContextMenu();
       return;
     }
@@ -882,7 +889,7 @@ const DocumentViewerRender = ({
       pane,
       ...selectionContext,
     });
-  }, [allPages, bundle, closeCompare, closeContextMenu, isComparing, onHideDocumentFromSelection, onHidePageFromSelection, onOpenDocumentMetadata, selectionPanelEnabled]);
+  }, [allPages, bundle, closeCompare, closeContextMenu, isComparing, onHideDocumentFromSelection, onHidePageFromSelection, onOpenDocumentMetadata, readAloud, selectionPanelEnabled]);
 
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
@@ -1135,6 +1142,8 @@ const DocumentViewerRender = ({
           role="menu"
           style={{ left: `${contextMenuLeft}px`, top: `${contextMenuTop}px` }}
         >
+          {/* Read the selection aloud / stop: only with the read-aloud state provided. */}
+          <ReadAloudMenuItem onDone={closeContextMenu} />
           {canOpenMetadataFromContextMenu ? (
             <button
               type="button"

@@ -4,11 +4,20 @@
  *
  * Uses the already-initialized i18next instance and persists the chosen language via the shared
  * viewer-preferences utility (handled centrally in `src/i18n.js`).
+ *
+ * With the read-aloud state provided (contexts/readAloudContext.js: OCR on, read-aloud on) the
+ * menu has two titled sections, "Interface language" and "Reading language", each its own
+ * radio group, so the UI language and the language read aloud are chosen in the same place
+ * without being confused: "Auto (svenska)" first (with the language guess on), one entry per
+ * OCR language (greyed without a local voice), and "Follow the interface language" last. The
+ * reading choice is kept in the viewer preferences. Without that state the menu is the plain
+ * language list it always was.
  */
 
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import ReadAloudContext from '../../contexts/readAloudContext.js';
 
 /**
  * @param {string} code
@@ -25,9 +34,12 @@ function resolveLanguageLabel(code, t) {
 
 const LanguageMenuButton = ({ className = '' }) => {
   const { t, i18n } = useTranslation('common');
+  const readAloud = useContext(ReadAloudContext);
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
   const menuId = useId();
+  const uiTitleId = useId();
+  const readTitleId = useId();
   const [open, setOpen] = useState(false);
 
   const supportedLanguages = useMemo(() => {
@@ -93,6 +105,37 @@ const LanguageMenuButton = ({ className = '' }) => {
     }
   };
 
+  const currentLabel = resolveLanguageLabel(currentLanguage, t);
+  const buttonTitle = t('toolbar.language.current', { language: currentLabel, defaultValue: `Language: ${currentLabel}` })
+    + (readAloud ? ` · ${readAloud.languageTitle}: ${readAloud.currentLabel}` : '');
+
+  const uiEntries = supportedLanguages.map((code) => {
+    const label = resolveLanguageLabel(code, t);
+    const selected = code === currentLanguage;
+    return (
+      <button
+        key={code}
+        type="button"
+        className={`toolbar-popup-menu-item${selected ? ' is-selected' : ''}`}
+        role="menuitemradio"
+        aria-checked={selected}
+        onClick={() => { void handleSelectLanguage(code); }}
+        title={t('toolbar.language.switchTo', {
+          language: label,
+          defaultValue: `Switch language to ${label}`,
+        })}
+      >
+        <span
+          className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`}
+          aria-hidden="true"
+        >
+          {selected ? 'check' : ''}
+        </span>
+        <span>{label}</span>
+      </button>
+    );
+  });
+
   return (
     <div className="toolbar-menu-shell">
       <button
@@ -100,10 +143,7 @@ const LanguageMenuButton = ({ className = '' }) => {
         type="button"
         className={`odv-btn${className ? ` ${className}` : ''}`}
         aria-label={t('toolbar.language.openMenu', { defaultValue: 'Choose language' })}
-        title={t('toolbar.language.current', {
-          language: resolveLanguageLabel(currentLanguage, t),
-          defaultValue: `Language: ${resolveLanguageLabel(currentLanguage, t)}`,
-        })}
+        title={buttonTitle}
         aria-haspopup="menu"
         aria-controls={open ? menuId : undefined}
         aria-expanded={open}
@@ -113,33 +153,45 @@ const LanguageMenuButton = ({ className = '' }) => {
       </button>
 
       {open ? (
-        <div ref={menuRef} id={menuId} className="toolbar-popup-menu" role="menu">
-          {supportedLanguages.map((code) => {
-            const label = resolveLanguageLabel(code, t);
-            const selected = code === currentLanguage;
-            return (
-              <button
-                key={code}
-                type="button"
-                className={`toolbar-popup-menu-item${selected ? ' is-selected' : ''}`}
-                role="menuitemradio"
-                aria-checked={selected}
-                onClick={() => { void handleSelectLanguage(code); }}
-                title={t('toolbar.language.switchTo', {
-                  language: label,
-                  defaultValue: `Switch language to ${label}`,
+        <div ref={menuRef} id={menuId} className={`toolbar-popup-menu${readAloud ? ' toolbar-split-menu' : ''}`} role="menu">
+          {readAloud ? (
+            <>
+              <div className="toolbar-split-menu-section" role="group" aria-labelledby={uiTitleId}>
+                <div id={uiTitleId} className="toolbar-split-menu-title">
+                  {t('toolbar.language.uiTitle', { defaultValue: 'Interface language' })}
+                </div>
+                {uiEntries}
+              </div>
+              <div className="toolbar-split-menu-section" role="group" aria-labelledby={readTitleId} data-odv-ocr="read-menu">
+                <div id={readTitleId} className="toolbar-split-menu-title">{readAloud.languageTitle}</div>
+                {readAloud.entries.map((entry) => {
+                  const selected = entry.value === readAloud.selectedValue;
+                  return (
+                    <button
+                      key={entry.value || 'auto'}
+                      type="button"
+                      className={`toolbar-popup-menu-item${selected ? ' is-selected' : ''}`}
+                      role="menuitemradio"
+                      aria-checked={selected}
+                      aria-disabled={entry.disabled || undefined}
+                      disabled={entry.disabled}
+                      data-speech-language={entry.value}
+                      title={entry.label}
+                      onClick={() => {
+                        readAloud.chooseLanguage(entry.value);
+                        setOpen(false);
+                      }}
+                    >
+                      <span className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`} aria-hidden="true">
+                        {selected ? 'check' : ''}
+                      </span>
+                      <span>{entry.label}</span>
+                    </button>
+                  );
                 })}
-              >
-                <span
-                  className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`}
-                  aria-hidden="true"
-                >
-                  {selected ? 'check' : ''}
-                </span>
-                <span>{label}</span>
-              </button>
-            );
-          })}
+              </div>
+            </>
+          ) : uiEntries}
         </div>
       ) : null}
     </div>
