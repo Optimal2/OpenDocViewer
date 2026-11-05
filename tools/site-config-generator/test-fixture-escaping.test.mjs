@@ -38,14 +38,6 @@ const VALUES = [
   `emoji ${String.fromCodePoint(0x1f600)}`,
 ];
 
-/**
- * The escaping the three suites used before this helper: a dot-only escape and a
- * parenthesis-only escape. They are the reason the helper exists, so the test below keeps them
- * visible: each of them turns a value into a pattern that means something else.
- */
-const LEGACY_DOT_ESCAPE = (value) => value.replace(/\./g, '\\.');
-const LEGACY_PAREN_ESCAPE = (value) => value.replace(/[()]/g, '\\$&');
-
 test('an escaped value matches itself', () => {
   for (const value of VALUES) {
     assert.ok(new RegExp(escapeRegExp(value)).test(value), `must match ${JSON.stringify(value)}`);
@@ -96,14 +88,4 @@ test('a line terminator becomes an escape sequence, so the pattern stays on one 
 test('a quote is left alone: a pattern may not use a non-standard escape', () => {
   // `\'` is a syntax error in a unicode pattern, so a quote must not be escaped.
   assert.equal(escapeRegExp(`it's "quoted"`), `it's "quoted"`);
-});
-
-test('the previous inline escaping was incomplete', () => {
-  // A dot-only escape leaves every other metacharacter active.
-  assert.equal(new RegExp(LEGACY_DOT_ESCAPE('a*b')).test('b'), true);
-  // A parenthesis-only escape leaves the dot a wildcard.
-  assert.equal(new RegExp(LEGACY_PAREN_ESCAPE('a.b')).test('axb'), true);
-  // Neither of them escapes a backslash.
-  assert.equal(new RegExp(LEGACY_DOT_ESCAPE('C:\\temp')).test('C:\\temp'), false);
-  assert.equal(new RegExp(LEGACY_PAREN_ESCAPE('C:\\temp')).test('C:\\temp'), false);
 });
