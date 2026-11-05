@@ -271,11 +271,23 @@ describe('a resource is awaited only on the container that receives it', () => {
   });
 });
 
+/**
+ * Allocate a resizable ArrayBuffer of `size` bytes. new ArrayBuffer(length,
+ * { maxByteLength }) is the ES2024 resizable-buffer form; the options travel
+ * through Reflect.construct as data so constructor models that only know the
+ * one-argument form do not see a trailing argument.
+ * @param {number} size
+ * @returns {ArrayBuffer}
+ */
+function resizableBuffer(size) {
+  return Reflect.construct(ArrayBuffer, [size, { maxByteLength: size }]);
+}
+
 describe('a large blob is re-validated before it is hashed', () => {
   it('a large blob detached or resized before it is hashed fails closed (viewer-error), never "same"', async () => {
     const size = 70000; // above the in-place hashing threshold
     // Each page's first image really differs between the revisions; its second is identical.
-    const pixels = (revision, page, k) => new Uint8Array(new ArrayBuffer(size, { maxByteLength: size })).fill(revision === 'final' && k === 0 ? 9 : 1);
+    const pixels = (revision, page, k) => new Uint8Array(resizableBuffer(size)).fill(revision === 'final' && k === 0 ? 9 : 1);
     // The first image is already encoded (its H record holds a live reference) while the
     // comparison waits for the second; it is then detached or shrunk before ops.digest().
     const between = (change) => {

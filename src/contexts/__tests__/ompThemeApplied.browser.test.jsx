@@ -38,6 +38,22 @@ function clearCookies() {
   }
 }
 
+/**
+ * Build a storage event carrying the given key. new StorageEvent(type, init)
+ * is the standard DOM shape; it is assembled here with the one-argument
+ * constructor plus an own `key` property so constructor models that only know
+ * `new StorageEvent(type)` do not see a trailing argument. The key payload
+ * keeps its meaning: ThemeProvider ignores storage events whose key is set to
+ * anything else.
+ * @param {string} key
+ * @returns {StorageEvent}
+ */
+function storageEventWithKey(key) {
+  const event = new StorageEvent('storage');
+  Object.defineProperty(event, 'key', { value: key });
+  return event;
+}
+
 describe('shared preference cookie drives data-theme', () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -116,9 +132,21 @@ it('keeps a mounted provider synchronized without echoing remote changes', async
       const mode = theme.themeMode === 'light' ? 'dark' : 'light';
       setSharedCookie(mode, createSharedThemeRevision());
       await act(() => window.dispatchEvent(eventType === 'storage'
-        ? new StorageEvent('storage', { key: OMP_THEME_STORAGE_KEY }) : new Event(eventType)));
+        ? storageEventWithKey(OMP_THEME_STORAGE_KEY) : new Event(eventType)));
       expect(document.documentElement.dataset.theme).toBe(mode);
     }
+    // A storage event for an unrelated key must not resync: the shared cookie
+    // now names the flipped mode, but the applied theme holds.
+    const held = document.documentElement.dataset.theme;
+    const flipped = held === 'light' ? 'dark' : 'light';
+    setSharedCookie(flipped, createSharedThemeRevision());
+    await act(() => window.dispatchEvent(storageEventWithKey('unrelated-key')));
+    expect(document.documentElement.dataset.theme).toBe(held);
+    // Restore the held mode through a matching key, resyncing and re-mirroring
+    // so the visibility check below sees the same loop-end state as before.
+    setSharedCookie(held, createSharedThemeRevision());
+    await act(() => window.dispatchEvent(storageEventWithKey(OMP_THEME_STORAGE_KEY)));
+    expect(document.documentElement.dataset.theme).toBe(held);
     expect(host.postMessage).toHaveBeenCalledTimes(1);
     const payload = localStorage.getItem(OMP_THEME_STORAGE_KEY);
     document.documentElement.dataset.theme = 'normal';
