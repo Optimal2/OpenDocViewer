@@ -14,31 +14,128 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const LANGUAGES = ['sv', 'en'];
-const ID_ATTRIBUTE_PATTERN = /\s+id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/i;
+const HTML_SPACES = '\t\n\f\r ';
+const RAW_TEXT_ELEMENTS = new Set([
+  'iframe', 'noembed', 'noframes', 'plaintext', 'script', 'style', 'textarea', 'title', 'xmp',
+]);
 
 /**
- * @param {string} tag
- * @returns {string|null}
+ * @param {string} character
+ * @returns {boolean}
  */
-function tagId(tag) {
-  const attribute = tag.match(ID_ATTRIBUTE_PATTERN);
-  return attribute ? (attribute[1] ?? attribute[2] ?? attribute[3]) : null;
+function isHtmlSpace(character) {
+  return Boolean(character) && HTML_SPACES.includes(character);
 }
 
 /**
- * Extracts element ids without treating data-id attributes or plain text as manifest coverage.
- * The bundled manuals use ordinary quoted HTML attributes; unquoted attributes are accepted too.
+ * Reads one ordinary HTML tag and its actual attributes. In particular, a `>` or tag-like example
+ * inside a quoted attribute does not terminate the tag or become a new candidate element.
+ * This is deliberately a tokenizer for the trusted generated manual format, not an HTML5
+ * error-recovery parser for arbitrary site-owned markup.
+ *
+ * @param {string} html
+ * @param {number} start Index of the opening `<`.
+ * @returns {{ tagName: string, id: string|null, closing: boolean, selfClosing: boolean, start: number, end: number }|null}
+ */
+function readHtmlTag(html, start) {
+  let cursor = start + 1;
+  const closing = html[cursor] === '/';
+  if (closing) cursor += 1;
+  if (!/[A-Za-z]/.test(html[cursor] || '')) return null;
+  const nameStart = cursor;
+  while (cursor < html.length && !isHtmlSpace(html[cursor]) && !['/', '>'].includes(html[cursor])) cursor += 1;
+  const tagName = html.slice(nameStart, cursor).toLowerCase();
+  let id = null;
+  let selfClosing = false;
+
+  while (cursor < html.length) {
+    while (isHtmlSpace(html[cursor])) cursor += 1;
+    if (html[cursor] === '>') {
+      return { tagName, id, closing, selfClosing, start, end: cursor + 1 };
+    }
+    if (html[cursor] === '/' && html[cursor + 1] === '>') {
+      selfClosing = !closing;
+      return { tagName, id, closing, selfClosing, start, end: cursor + 2 };
+    }
+
+    const attributeStart = cursor;
+    while (cursor < html.length && !isHtmlSpace(html[cursor]) && !['=', '/', '>'].includes(html[cursor])) cursor += 1;
+    if (cursor === attributeStart) {
+      cursor += 1;
+      continue;
+    }
+    const attributeName = html.slice(attributeStart, cursor).toLowerCase();
+    while (isHtmlSpace(html[cursor])) cursor += 1;
+    let value = '';
+    if (html[cursor] === '=') {
+      cursor += 1;
+      while (isHtmlSpace(html[cursor])) cursor += 1;
+      const quote = html[cursor] === '"' || html[cursor] === "'" ? html[cursor++] : '';
+      const valueStart = cursor;
+      if (quote) {
+        while (cursor < html.length && html[cursor] !== quote) cursor += 1;
+        value = html.slice(valueStart, cursor);
+        if (html[cursor] === quote) cursor += 1;
+      } else {
+        while (cursor < html.length && !isHtmlSpace(html[cursor]) && html[cursor] !== '>') cursor += 1;
+        value = html.slice(valueStart, cursor);
+      }
+    }
+    if (!closing && attributeName === 'id' && id === null) id = value;
+  }
+  return null;
+}
+
+/**
+ * Tokenizes actual tags while excluding comments, declarations and raw-text element bodies. Raw-text
+ * scanning follows HTML's first matching end-tag rule; malformed-markup recovery is intentionally
+ * outside this build validator's contract.
+ *
+ * @param {string} html
+ * @yields {{ tagName: string, id: string|null, closing: boolean, selfClosing: boolean, start: number, end: number }}
+ */
+function* htmlTags(html) {
+  let cursor = 0;
+  while (cursor < html.length) {
+    const start = html.indexOf('<', cursor);
+    if (start < 0) return;
+    if (html.startsWith('<!--', start)) {
+      const commentEnd = html.indexOf('-->', start + 4);
+      cursor = commentEnd < 0 ? html.length : commentEnd + 3;
+      continue;
+    }
+    if (html.startsWith('<!', start) || html.startsWith('<?', start)) {
+      const declarationEnd = html.indexOf('>', start + 2);
+      cursor = declarationEnd < 0 ? html.length : declarationEnd + 1;
+      continue;
+    }
+
+    const tag = readHtmlTag(html, start);
+    if (!tag) {
+      cursor = start + 1;
+      continue;
+    }
+    yield tag;
+    cursor = tag.end;
+    if (tag.closing || tag.selfClosing || !RAW_TEXT_ELEMENTS.has(tag.tagName)) continue;
+    if (tag.tagName === 'plaintext') return;
+    const closingPattern = new RegExp(`</${tag.tagName}(?=[\\t\\n\\f\\r />])[^>]*>`, 'gi');
+    closingPattern.lastIndex = cursor;
+    const rawTextEnd = closingPattern.exec(html);
+    cursor = rawTextEnd ? rawTextEnd.index + rawTextEnd[0].length : html.length;
+  }
+}
+
+/**
+ * Extracts ids only from actual elements, never from examples in comments, raw text or attributes.
  *
  * @param {string} html
  * @returns {Set<string>}
  */
 function elementIds(html) {
   const ids = new Set();
-  const attributePattern = new RegExp(ID_ATTRIBUTE_PATTERN.source, 'gi');
-  for (const tag of html.matchAll(/<[^>]+>/g)) {
-    for (const attribute of tag[0].matchAll(attributePattern)) {
-      ids.add(attribute[1] ?? attribute[2] ?? attribute[3]);
-    }
+  for (const tag of htmlTags(html)) {
+    if (!tag.closing && tag.id !== null) ids.add(tag.id);
   }
   return ids;
 }
@@ -52,22 +149,19 @@ function elementIds(html) {
  * @returns {string}
  */
 function embeddedGuideHtml(html, guideId) {
-  const tags = html.matchAll(/<\/?details\b[^>]*>/gi);
   let depth = 0;
   let start = -1;
-  for (const match of tags) {
-    const tag = match[0];
-    const closing = tag.startsWith('</');
+  for (const tag of htmlTags(html)) {
+    if (tag.tagName !== 'details') continue;
     if (start < 0) {
-      if (closing || tagId(tag) !== guideId) continue;
-      start = match.index;
+      if (tag.closing || tag.id !== guideId) continue;
+      start = tag.start;
       depth = 1;
       continue;
     }
-    depth += closing ? -1 : 1;
-    if (depth === 0) {
-      return html.slice(start, match.index + tag.length);
-    }
+    if (tag.closing) depth -= 1;
+    else if (!tag.selfClosing) depth += 1;
+    if (depth === 0) return html.slice(start, tag.end);
   }
   throw new Error(`embedded guide ${guideId} was not found or was not closed`);
 }

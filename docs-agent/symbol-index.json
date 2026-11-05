@@ -27818,7 +27818,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 101,
+    "line": 113,
     "description": "Candidate manual URLs in priority order: UI language before fallback language.",
     "params": [
       {
@@ -27849,7 +27849,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 82,
+    "line": 94,
     "description": "Language preference shared by fetched and generated manuals.",
     "params": [
       {
@@ -27918,13 +27918,38 @@
     "examples": 0
   },
   {
+    "id": "invalidSourceDescription",
+    "name": "invalidSourceDescription",
+    "longname": "invalidSourceDescription",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 44,
+    "description": "Formats an invalid value for diagnostics without invoking a host object's string coercion.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "isApplicationShellHtml",
     "name": "isApplicationShellHtml",
     "longname": "isApplicationShellHtml",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 128,
+    "line": 140,
     "description": "True when the HTML is OpenDocViewer's own application shell rather than a manual.",
     "params": [
       {
@@ -27949,35 +27974,10 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 132,
+    "line": 144,
     "description": "",
     "params": [],
     "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "normalizedManualSource",
-    "name": "normalizedManualSource",
-    "longname": "normalizedManualSource",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/utils/manualSources.js",
-    "line": 42,
-    "description": "",
-    "params": [
-      {
-        "name": "manualConfig",
-        "type": "Object",
-        "optional": true,
-        "description": "Runtime config help.manual block."
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": "Normalized source value without diagnostics."
-      }
-    ],
     "examples": 0
   },
   {
@@ -27987,7 +27987,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 146,
+    "line": 158,
     "description": "Fetch candidates in order and return the first one the server delivers as a manual.",
     "params": [
       {
@@ -28018,7 +28018,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualSources.js",
-    "line": 60,
+    "line": 65,
     "description": "Resolve help.manual.source.",
     "params": [
       {

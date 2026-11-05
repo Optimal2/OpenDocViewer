@@ -222,6 +222,41 @@ describe('standard manual generation', () => {
     );
   });
 
+  it.each([
+    ['an HTML comment', '<main><!-- <h2 id="intro">Comment only</h2> --><p>Visible</p></main>'],
+    ['a script example', '<main><script>const example = \'<h2 id="intro">Script only</h2>\';</script></main>'],
+    ['a style example', '<main><style>.example::after { content: "<h2 id=intro>Style only</h2>"; }</style></main>'],
+    ['a textarea example', '<main><textarea><h2 id="intro">Textarea only</h2></textarea></main>'],
+    ['a quoted attribute', '<main><p data-example="<h2 id=\'intro\'>Attribute only</h2>">Visible</p></main>'],
+  ])('rejects a required id that exists only in $1', async (_label, html) => {
+    const root = makeFixture({ sv: html, en: html });
+
+    await expect(generate(root)).rejects.toThrow(/manual\.sv\.html: intro[\s\S]*manual\.en\.html: intro/);
+    expect(fs.existsSync(path.join(root, 'src/generated/standard-manual'))).toBe(false);
+  });
+
+  it.each([
+    ['an HTML comment', '<main><!-- <details id="guide-jamforelse"><h2 id="jmf-overlagring">Hidden</h2></details> --></main>'],
+    ['a script example', '<main><script>const guide = \'<details id="guide-jamforelse"></details>\';</script></main>'],
+    ['a quoted attribute', '<main><p data-example="<details id=\'guide-jamforelse\'></details>">Visible</p></main>'],
+  ])('rejects a required guide tag that exists only in $1', async (_label, html) => {
+    const root = makeLocalizedFixture();
+    writeFixture(root, 'public/help/default/manual.sv.html', html);
+
+    await expect(generate(root)).rejects.toThrow(/guide-jamforelse[\s\S]*(not found|jmf-overlagring)/);
+  });
+
+  it('recognizes actual elements after ignored examples without rewriting the source', async () => {
+    const html = '<main><!-- <h2 id="other">Comment</h2> --><script>"<h2 id=other>";</script>'
+      + '<p data-example="<h2 id=\'other\'>">Visible</p><h2 id="intro">Actual heading</h2></main>';
+    const root = makeFixture({ sv: html, en: html });
+
+    await generate(root);
+
+    expect(await readGenerated(root, 'sv')).toBe(html);
+    expect(await readGenerated(root, 'en')).toBe(html);
+  });
+
   it('generates exact modules from the unchanged real Swedish and English manuals', async () => {
     await generate(REPOSITORY_ROOT);
 

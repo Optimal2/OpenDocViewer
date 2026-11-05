@@ -36,38 +36,50 @@ export function interpolateManualTemplate(template, language) {
 }
 
 /**
- * @param {Object=} manualConfig Runtime config `help.manual` block.
- * @returns {string} Normalized source value without diagnostics.
+ * Formats an invalid value for diagnostics without invoking a host object's string coercion.
+ *
+ * @param {*} value
+ * @returns {string}
  */
-function normalizedManualSource(manualConfig) {
+function invalidSourceDescription(value) {
+  if (typeof value === 'string') return value;
+  if (value === null) return 'null';
+  if (typeof value === 'object') return 'object';
+  if (typeof value === 'function') return 'function';
   try {
-    const source = manualConfig?.source;
-    if (source === undefined || source === null) return '';
-    return String(source).trim().toLowerCase();
+    return String(value);
   } catch {
-    return '';
+    return typeof value;
   }
 }
 
 /**
- * Resolve help.manual.source. Missing and empty values mean auto; an unknown value is diagnosed and
- * deliberately falls back to auto so an existing deployment keeps its current site-first behavior.
+ * Resolve help.manual.source. Only an omitted property and the exact primitive strings `auto` and
+ * `standard` are accepted. Every other value is diagnosed and deliberately falls back to auto so
+ * an invalid value cannot unexpectedly bypass a deployment's site-owned manual.
  *
  * @param {Object=} manualConfig Runtime config `help.manual` block.
  * @param {function(string): void} [warn] Diagnostic sink, normally console.warn.
  * @returns {'auto'|'standard'}
  */
 export function resolveManualSourceMode(manualConfig, warn = undefined) {
-  const source = normalizedManualSource(manualConfig);
-  if (source === 'standard') return 'standard';
-  if (source && source !== 'auto') {
-    const message = `[OpenDocViewer] Unknown help.manual.source "${source}"; using "auto".`;
-    try {
-      if (typeof warn === 'function') warn(message);
-      else if (typeof console !== 'undefined' && typeof console.warn === 'function') console.warn(message);
-    } catch {
-      // A host-owned diagnostic sink must not prevent the manual from opening.
-    }
+  let hasSource;
+  let source;
+  try {
+    hasSource = manualConfig !== null && manualConfig !== undefined && 'source' in Object(manualConfig);
+    if (hasSource) source = manualConfig.source;
+  } catch {
+    hasSource = true;
+  }
+  if (!hasSource) return 'auto';
+  if (source === 'auto' || source === 'standard') return source;
+
+  const message = `[OpenDocViewer] Unknown help.manual.source "${invalidSourceDescription(source)}"; using "auto".`;
+  try {
+    if (typeof warn === 'function') warn(message);
+    else if (typeof console !== 'undefined' && typeof console.warn === 'function') console.warn(message);
+  } catch {
+    // A host-owned diagnostic sink must not prevent the manual from opening.
   }
   return 'auto';
 }
@@ -101,7 +113,7 @@ export function buildManualLanguageCandidates(language, manualConfig) {
 export function buildManualCandidates(language, manualConfig) {
   const siteTemplate = toText(manualConfig?.sitePathTemplate, DEFAULT_SITE_MANUAL_TEMPLATE);
   const fallbackTemplate = toText(manualConfig?.fallbackPathTemplate, DEFAULT_FALLBACK_MANUAL_TEMPLATE);
-  const templates = normalizedManualSource(manualConfig) === 'standard'
+  const templates = resolveManualSourceMode(manualConfig, () => {}) === 'standard'
     ? [fallbackTemplate]
     : [siteTemplate, fallbackTemplate];
 

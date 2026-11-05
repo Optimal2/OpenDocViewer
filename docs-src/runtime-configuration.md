@@ -1098,6 +1098,7 @@ Configuration surface:
 ```js
 help: {
   manual: {
+    source: 'auto', // exact primitive string: "auto" (default) or "standard"
     sitePathTemplate: 'help/site/manual.{{lng}}.html',
     fallbackPathTemplate: 'help/default/manual.{{lng}}.html',
     fallbackLanguage: 'en'
@@ -1109,22 +1110,37 @@ help: {
 }
 ```
 
-Behavior (manual order: **site before default**):
+Source selection:
 
-- the manual dialog first tries the site-local HTML fragment under `help/site/`
-- if no site-local file exists for the current language, it falls back to the bundled default under `help/default/`
-- the order per language is `help/site/manual.<lng>.html`, `help/default/manual.<lng>.html`, then the
-  same two for `fallbackLanguage`
+- an omitted `source` and the exact string `auto` preserve the existing **site before default** order.
+  The exact string `standard` always uses the bundled standard manual and never requests site HTML.
+- every other value warns and behaves as `auto`. This includes `null`, an empty string, different case
+  or padding, and non-string values: values are never trimmed, case-folded or coerced into a valid mode.
+  A throwing warning sink does not prevent the manual from rendering.
+- `auto` tries `help/site/manual.<lng>.html`, `help/default/manual.<lng>.html`, then the same two for
+  `fallbackLanguage`. A site file therefore wins when it exists. Site-owned HTML is sanitized as
+  before but is never feature-filtered or rewritten into the standard manual's section structure.
+- `standard` lazy-loads a generated JavaScript module containing the unchanged bundled
+  `manual.<lng>.html`. It sanitizes and filters that standard content against the same effective
+  runtime config as the UI before contents, search and lightbox processing. Disabled feature sections
+  and their contents/search entries are removed; removed prose links keep their text, and visible
+  guide headings are renumbered. Unreadable feature state is treated as enabled. The installation
+  switch sections `avstangt` and `jmf-avstangt` are never shown in standard mode.
+- if a generated manual chunk fails to load, `standard` fetches `fallbackPathTemplate` instead and
+  applies the same standard filtering to that HTML. It still never falls back to site-owned HTML.
+- standard images and other relative assets resolve under `help/default/`; the complete bundled PDFs
+  remain available and are not feature-filtered. The generated modules are build artifacts, not a
+  second committed manual source (`docs-src/help-manuals.md`).
 - `*.sample.html` files in `help/site/` are templates only and never count as a site manual; a fresh
   installation therefore shows the bundled default manual until the deployment adds its own
   `help/site/manual.<lng>.html`
-- a candidate only counts when the server returns the manual itself: a response that is the
+- a fetched candidate only counts when the server returns the manual itself: a response that is the
   application shell (hosts with an SPA fallback answer a missing file with `index.html` and status 200)
   is skipped, and `public/web.config` keeps missing files under `help/` out of the SPA rewrite so they
   answer 404
 - site-local manuals can therefore be upgraded independently of the app bundle as long as the deployment keeps `help/site/manual.<lng>.html` outside the tracked repo
 - the manual dialog has a reload button that bypasses browser/server caches with a unique cache-busting URL when a site-local manual has been replaced during an active support session
-- relative links inside the loaded HTML are rewritten against the resolved file URL so images, PDFs, and other local help assets can live alongside the manual fragment
+- relative links inside fetched HTML are rewritten against the resolved file URL so images, PDFs, and other local help assets can live alongside the manual fragment
 - the About dialog always exposes the support diagnostics JSON download; benchmark execution controls are separate opt-in runtime flags and default to disabled
 
 Shipped public files:

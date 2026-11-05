@@ -1132,15 +1132,15 @@
 | <code>ManualContentsGroup</code> | typedef | <code>src/utils/manualContentsTree.js:21</code> |  |
 | <code>POSITION_FOLLOWING</code> | constant | <code>src/utils/manualContentsTree.js:33</code> | Node.compareDocumentPosition flags \(numeric so this also runs without a global Node\). |
 | <code>slugifyManualHeading</code> | function | <code>src/utils/manualContentsTree.js:51</code> | Derive a heading id from its text. |
-| <code>buildManualCandidates</code> | function | <code>src/utils/manualSources.js:101</code> | Candidate manual URLs in priority order: UI language before fallback language. |
-| <code>buildManualLanguageCandidates</code> | function | <code>src/utils/manualSources.js:82</code> | Language preference shared by fetched and generated manuals. |
+| <code>buildManualCandidates</code> | function | <code>src/utils/manualSources.js:113</code> | Candidate manual URLs in priority order: UI language before fallback language. |
+| <code>buildManualLanguageCandidates</code> | function | <code>src/utils/manualSources.js:94</code> | Language preference shared by fetched and generated manuals. |
 | <code>DEFAULT_SITE_MANUAL_TEMPLATE</code> | constant | <code>src/utils/manualSources.js:14</code> | Resolves which manual HTML file the help dialog shows. |
 | <code>interpolateManualTemplate</code> | function | <code>src/utils/manualSources.js:32</code> |  |
-| <code>isApplicationShellHtml</code> | function | <code>src/utils/manualSources.js:128</code> | True when the HTML is OpenDocViewer&#39;s own application shell rather than a manual. |
-| <code>ManualCandidateResponse</code> | typedef | <code>src/utils/manualSources.js:132</code> |  |
-| <code>normalizedManualSource</code> | function | <code>src/utils/manualSources.js:42</code> |  |
-| <code>resolveManualSource</code> | function | <code>src/utils/manualSources.js:146</code> | Fetch candidates in order and return the first one the server delivers as a manual. |
-| <code>resolveManualSourceMode</code> | function | <code>src/utils/manualSources.js:60</code> | Resolve help.manual.source. |
+| <code>invalidSourceDescription</code> | function | <code>src/utils/manualSources.js:44</code> | Formats an invalid value for diagnostics without invoking a host object&#39;s string coercion. |
+| <code>isApplicationShellHtml</code> | function | <code>src/utils/manualSources.js:140</code> | True when the HTML is OpenDocViewer&#39;s own application shell rather than a manual. |
+| <code>ManualCandidateResponse</code> | typedef | <code>src/utils/manualSources.js:144</code> |  |
+| <code>resolveManualSource</code> | function | <code>src/utils/manualSources.js:158</code> | Fetch candidates in order and return the first one the server delivers as a manual. |
+| <code>resolveManualSourceMode</code> | function | <code>src/utils/manualSources.js:65</code> | Resolve help.manual.source. |
 | <code>toText</code> | function | <code>src/utils/manualSources.js:22</code> |  |
 | <code>getRuntimeMemoryProfile</code> | function | <code>src/utils/memoryProfile.js:63</code> |  |
 | <code>readDeviceMemoryGb</code> | function | <code>src/utils/memoryProfile.js:24</code> |  |

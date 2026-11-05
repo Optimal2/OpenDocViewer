@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 64. Line count: 23913. JSDoc symbol count: 983.
+File count: 64. Line count: 23925. JSDoc symbol count: 983.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -224,7 +224,7 @@ Symbols:
 - `DEFAULT_SITE_MANUAL_TEMPLATE` (constant) - Resolves which manual HTML file the help dialog shows.
 - `toText` (function) - No description.
 - `interpolateManualTemplate` (function) - No description.
-- `normalizedManualSource` (function) - No description.
+- `invalidSourceDescription` (function) - Formats an invalid value for diagnostics without invoking a host object's string coercion.
 - `resolveManualSourceMode` (function) - Resolve help.manual.source.
 - `buildManualLanguageCandidates` (function) - Language preference shared by fetched and generated manuals.
 - `buildManualCandidates` (function) - Candidate manual URLs in priority order: UI language before fallback language.

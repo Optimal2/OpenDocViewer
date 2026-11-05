@@ -136,7 +136,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/keyTipLayout.js</code> | 65 | 1 | 6 | high | Where the key tips go \(components/KeyTips.jsx\): one label under each toolbar button, centred on the button, packed into rows so that the labels of neighbouring buttons do not cover each other. |
 | <code>src/utils/localizedValue.js</code> | 113 | 8 | 6 | high | Localized string resolver for admin-supplied config values. |
 | <code>src/utils/manualContentsTree.js</code> | 194 | 1 | 10 | high | Runtime contents tree for the manual overlay. |
-| <code>src/utils/manualSources.js</code> | 160 | 1 | 10 | high | Resolves which manual HTML file the help dialog shows. |
+| <code>src/utils/manualSources.js</code> | 172 | 1 | 10 | high | Resolves which manual HTML file the help dialog shows. |
 | <code>src/utils/memoryProfile.js</code> | 75 | 2 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |

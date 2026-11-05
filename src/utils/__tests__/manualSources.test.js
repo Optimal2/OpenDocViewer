@@ -119,29 +119,52 @@ describe('manual source order: help/site before help/default', () => {
 });
 
 describe('manual source modes and language precedence', () => {
-  it('defaults to auto and accepts standard case-insensitively', () => {
-    expect(resolveManualSourceMode({})).toBe('auto');
-    expect(resolveManualSourceMode({ source: '' })).toBe('auto');
-    expect(resolveManualSourceMode({ source: 'auto' })).toBe('auto');
-    expect(resolveManualSourceMode({ source: ' Standard ' })).toBe('standard');
+  it('defaults an omitted source to auto and accepts only the two exact primitive strings', () => {
+    const warn = vi.fn();
+    expect(resolveManualSourceMode({}, warn)).toBe('auto');
+    expect(resolveManualSourceMode({ source: 'auto' }, warn)).toBe('auto');
+    expect(resolveManualSourceMode({ source: 'standard' }, warn)).toBe('standard');
+    expect(warn).not.toHaveBeenCalled();
   });
 
-  it('warns and behaves as auto for an invalid source', async () => {
+  it.each([
+    ['uppercase', 'STANDARD'],
+    ['padded', ' standard '],
+    ['null', null],
+    ['empty', ''],
+    ['explicit undefined', undefined],
+    ['boolean', false],
+    ['coercible object', { toString: () => 'standard' }],
+  ])('warns and keeps the site-first path for $1 source', async (_label, source) => {
     const warn = vi.fn();
-    const config = { source: 'site-only' };
+    const config = { source };
     expect(resolveManualSourceMode(config, warn)).toBe('auto');
+    expect(warn).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('help.manual.source'));
+
+    const candidates = buildManualCandidates('sv', config);
+    expect(candidates[0]).toBe('help/site/manual.sv.html');
+    const host = staticHost({
+      'help/site/manual.sv.html': SITE_SV,
+      'help/default/manual.sv.html': DEFAULT_SV,
+    });
+    const result = await resolveManualSource(candidates, host.fetchCandidate);
+    expect(result.candidate).toBe('help/site/manual.sv.html');
+    expect(host.requested[0]).toBe('help/site/manual.sv.html');
+  });
+
+  it('includes useful primitive values in invalid-source warnings', () => {
+    const warn = vi.fn();
+    expect(resolveManualSourceMode({ source: 'site-only' }, warn)).toBe('auto');
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('site-only'));
     warn.mockClear();
     expect(resolveManualSourceMode({ source: false }, warn)).toBe('auto');
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('false'));
+  });
 
-    const { result, requested } = await resolve('sv', {
-      'help/site/manual.sv.html': SITE_SV,
-      'help/default/manual.sv.html': DEFAULT_SV,
-    });
-    expect(result.candidate).toBe('help/site/manual.sv.html');
-    expect(requested[0]).toBe('help/site/manual.sv.html');
+  it('renders in auto mode even when the warning sink throws', () => {
+    const warn = () => { throw new Error('host diagnostic failed'); };
+    expect(resolveManualSourceMode({ source: 'STANDARD' }, warn)).toBe('auto');
   });
 
   it('never lists site files in standard mode', async () => {
