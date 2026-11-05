@@ -321,7 +321,8 @@ ocr: {
   `false` by default; only the boolean literal `true` hands the shortcut over. With it on, Ctrl+F
   opens the field (or puts the cursor back in it, with its text selected, when it is already
   open) and the browser's find does not appear; the search button's tooltip says so. Ctrl+F stays
-  the browser's while a dialog is open or the focus is in another text field, and with Shift or
+  the browser's while a dialog is open, while the focus is in another text field or in one of
+  the toolbar's menus (the read-aloud button and its language menu included), and with Shift or
   Alt held. The key means nothing while OCR or the search is off.
 - `ocr.speech.enabled`: whether the toolbar offers the read-aloud button for selected text. `true`
   by default; only the boolean literal `false` turns it off. With it off, the button is never
@@ -556,7 +557,8 @@ loose buttons. Its two parts are offered independently (`ocr.search.enabled` and
   possibly online). While reading, the button is a stop button. Resting the
   pointer on the button (or pressing an arrow key on it) opens a menu: "Auto" first (always naming what it will do, "Auto (svenska)", with
   the language guessed for the selected page's text, see `ocr.speech.autoDetectLanguage`; when
-  the guess is unsure it reads in the UI language), then one entry per OCR language
+  the guess is unsure it reads in the UI language; the entry is absent while the guess is turned
+  off, the reading language then being the UI language unless the user picks one), then one entry per OCR language
   (`ocr.languages`), greyed when no local voice is installed for it, and "Follow the interface
   language" last. A choice there sets the reading language without changing the UI language
   and is kept in the viewer preferences (`speechLanguage`, next to `language`) across reloads.

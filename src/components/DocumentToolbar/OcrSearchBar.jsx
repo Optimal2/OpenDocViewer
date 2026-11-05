@@ -6,8 +6,8 @@
  * page's text is recognised, or any page's when the displayed page has none), and a field that
  * grows out of it to the right (a short width transition, styles/ocr.css) with the match
  * position, previous/next and close. The field takes only the room the toolbar's spacer leaves
- * (measured when it opens and whenever the window, the toolbar, its spacer or the OCR group
- * changes size or the toolbar's contents change, utils/ocrSearchPlacement.js); with too little
+ * (measured when it opens and whenever the window, the toolbar or its spacer changes size or
+ * the toolbar's contents change, utils/ocrSearchPlacement.js); with too little
  * room it hangs under the toolbar at the button's right edge instead, so the toolbar never
  * overflows for it.
  *
@@ -52,7 +52,8 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
  * @param {boolean} [props.searchEnabled=true]  False keeps only the status indicator.
  * @param {boolean} [props.ctrlFOverride=false]  True lets Ctrl+F (Cmd+F) open the field instead
  *   of the browser's find (`ocr.search.overridesCtrlF`); Ctrl+F stays the browser's in a modal
- *   dialog and in other text fields, and with Shift or Alt held.
+ *   dialog, in other text fields and in the toolbar's other menus (every `data-odv-shortcuts="off"`
+ *   area, such as the read-aloud button and its menu), and with Shift or Alt held.
  * @returns {React.ReactElement}
  */
 export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true, ctrlFOverride = false }) {
@@ -152,11 +153,12 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   }, [setOcrSearch]);
 
   // Where the field goes: measured as it opens (the field is still closed, so the spacer shows
-  // the room) and again while it is open whenever the window is resized, the toolbar, its
-  // spacer or the OCR group changes size (another toolbar density, the read-aloud button
-  // appearing) or the toolbar's contents change (the signature overview button: with the
-  // toolbar already overflowing, the spacer stays at 0 and only the button's place moves).
-  // The anchor is the button: the root also holds the open inline field.
+  // the room) and again while it is open whenever the window is resized, the toolbar or its
+  // spacer changes size (another toolbar density) or the toolbar's contents change (the
+  // read-aloud button appearing, the signature overview button: with the toolbar already
+  // overflowing, the spacer stays at 0 and only the button's place moves). The OCR group's
+  // wrapper has no box of its own (display: contents), so it is not worth observing. The anchor
+  // is the button: the root also holds the open inline field.
   useLayoutEffect(() => {
     if (!open) return undefined;
     const place = () => setPlacement(measureOcrSearchPlacement(rootRef.current, panelRef.current, buttonRef.current));
@@ -171,8 +173,6 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       sizes.observe(toolbar);
       const spacer = toolbar.querySelector('.toolbar-spacer');
       if (spacer) sizes.observe(spacer);
-      const group = rootRef.current?.parentElement;
-      if (group && group !== toolbar) sizes.observe(group);
     }
     if (toolbar && typeof MutationObserver === 'function') {
       contents = new MutationObserver(place);

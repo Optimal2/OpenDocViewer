@@ -150,8 +150,8 @@
         enabled: true,
         // Let Ctrl+F (Cmd+F on a Mac) open this search instead of the browser's own find, as the
         // portal's page search can. false (default) leaves Ctrl+F to the browser; only the
-        // literal true hands it over. Inside a dialog or another text field Ctrl+F stays the
-        // browser's.
+        // literal true hands it over. Inside a dialog, another text field or one of the
+        // toolbar's menus Ctrl+F stays the browser's.
         overridesCtrlF: false
       },
       speech: {
@@ -160,7 +160,7 @@
         // synthesis. Reading uses voices installed on the machine only, never online voices.
         enabled: true,
         // Guess the language of each page's text among the OCR languages above, so the
-        // read-aloud button's "Automatic" choice reads a Swedish page with a Swedish voice and an
+        // read-aloud button's "Auto" choice reads a Swedish page with a Swedish voice and an
         // English page with an English one, and the text layer tells screen readers the
         // language. true (default) keeps the guess; only the literal false turns it off (the
         // read-aloud language then follows the UI language unless the user picks one).

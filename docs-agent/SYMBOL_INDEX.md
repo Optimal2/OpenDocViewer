@@ -268,7 +268,7 @@
 | <code>scrollPaneToTarget</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:487</code> | Scroll only the given pane so the target sits at its top. |
 | <code>setCurrentMark</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:390</code> |  |
 | <code>ManualOverlayDialog~setManualFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:673</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the dialog or the page behind... |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:58</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:59</code> |  |
 | <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:220</code> |  |
 | <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:257</code> |  |
 | <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:265</code> | Escape closes the field from any of its controls. |
@@ -290,12 +290,12 @@
 | <code>module:printRangeDialogHelpers.resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:50</code> | Resolve the string that should be used on physical print/log output for an option. |
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
-| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:199</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:83</code> |  |
-| <code>FOLLOW_UI</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:40</code> | Preference value for &amp;quot;follow the interface language&amp;quot; \(absent: automatic\). |
-| <code>layerSelection</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:47</code> | The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page&#39;s guessed language\), or null outside the la... |
-| <code>normalizeStoredLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:72</code> | A stored reading-language choice in today&#39;s form: ui , or one of the OCR languages, else null \(automatic\). |
-| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:38</code> | How long the pointer may leave the button and its menu before the menu closes. |
+| <code>ReadSelectionButton~chooseLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:200</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:84</code> |  |
+| <code>FOLLOW_UI</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:41</code> | Preference value for &amp;quot;follow the interface language&amp;quot; \(absent: automatic\). |
+| <code>layerSelection</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:48</code> | The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page&#39;s guessed language\), or null outside the la... |
+| <code>normalizeStoredLanguage</code> | function | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:73</code> | A stored reading-language choice in today&#39;s form: ui , or one of the OCR languages, else null \(automatic\). |
+| <code>READ_MENU_CLOSE_DELAY_MS</code> | constant | <code>src/components/DocumentToolbar/ReadSelectionButton.jsx:39</code> | How long the pointer may leave the button and its menu before the menu closes. |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:97</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:89</code> |  |

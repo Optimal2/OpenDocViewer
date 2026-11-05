@@ -39,7 +39,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/PrintPipelineDialogs.jsx</code> | 220 | 2 | 3 | high | The dialogs of the ONE print pipeline \(usePrintPipeline.js\): the print dialog and the generated-PDF progress \(modal, or a dock while working in the background\). |
 | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx</code> | 566 | 1 | 1 | high | Unified print dialog with a single print-method selector and shared print-details section. |
 | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js</code> | 149 | 2 | 9 | high | Pure helpers and shared constants for the print-range dialog. |
-| <code>src/components/DocumentToolbar/ReadSelectionButton.jsx</code> | 314 | 1 | 6 | high | Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers \(components/OcrTextLayer.jsx\) and the browser can speak \(utils/speech.js\). |
+| <code>src/components/DocumentToolbar/ReadSelectionButton.jsx</code> | 315 | 1 | 6 | high | Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers \(components/OcrTextLayer.jsx\) and the browser can speak \(utils/speech.js\). |
 | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx</code> | 128 | 2 | 1 | high | Reusable toolbar split-button. |
 | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx</code> | 202 | 1 | 6 | high | Compact theme selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ThemeToggleButton.jsx</code> | 61 | 0 | 1 | high | Small button that toggles between light/dark themes using the ThemeContext. |

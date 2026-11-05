@@ -93,7 +93,7 @@
   },
   "stats": {
     "fileCount": 181,
-    "sourceLineCount": 67617,
+    "sourceLineCount": 67618,
     "docletCount": 1932,
     "documentedFileCount": 180,
     "lowConfidenceSummaryCount": 0,
@@ -1160,7 +1160,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 22,
-      "lineCount": 8859,
+      "lineCount": 8860,
       "docletCount": 151,
       "importantFiles": [
         {
@@ -1229,7 +1229,7 @@
         {
           "path": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
           "score": 33,
-          "lines": 314,
+          "lines": 315,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
@@ -14515,7 +14515,7 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 58
+          "line": 59
         }
       ],
       "declarations": [
@@ -14527,12 +14527,12 @@
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 58
+          "line": 59
         },
         {
           "name": "place",
           "kind": "function",
-          "line": 162
+          "line": 164
         },
         {
           "name": "onKeyDown",
@@ -14588,7 +14588,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 58,
+          "line": 59,
           "description": "",
           "params": [
             {
@@ -16073,7 +16073,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "lines": 314,
+      "lines": 315,
       "extension": ".jsx",
       "jsdocBlockCount": 14,
       "sourceSummary": "Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers (components/OcrTextLayer.jsx) and the browser can speak (utils/speech.js).",
@@ -16089,7 +16089,7 @@
             "useRef",
             "useState"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -16097,7 +16097,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -16106,7 +16106,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -16115,7 +16115,7 @@
             "getOcrLanguages",
             "isSpeechLanguageAutoDetectEnabled"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -16123,7 +16123,7 @@
           "specifiers": [
             "speechLanguagesForOcr"
           ],
-          "line": 33,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -16135,7 +16135,7 @@
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -16144,7 +16144,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static"
         }
       ],
@@ -16152,89 +16152,89 @@
         {
           "name": "ReadSelectionButton",
           "kind": "default",
-          "line": 83
+          "line": 84
         }
       ],
       "declarations": [
         {
           "name": "layerSelection",
           "kind": "function",
-          "line": 47
+          "line": 48
         },
         {
           "name": "normalizeStoredLanguage",
           "kind": "function",
-          "line": 72
+          "line": 73
         },
         {
           "name": "ReadSelectionButton",
           "kind": "component",
-          "line": 83
+          "line": 84
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 108
+          "line": 109
         },
         {
           "name": "read",
           "kind": "function",
-          "line": 119
+          "line": 120
         },
         {
           "name": "clearCloseTimer",
           "kind": "function",
-          "line": 125
+          "line": 126
         },
         {
           "name": "openMenu",
           "kind": "function",
-          "line": 131
+          "line": 132
         },
         {
           "name": "closeMenuSoon",
           "kind": "function",
-          "line": 144
+          "line": 145
         },
         {
           "name": "onPointerDown",
           "kind": "function",
-          "line": 155
+          "line": 156
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 159
+          "line": 160
         },
         {
           "name": "stop",
           "kind": "function",
-          "line": 178
+          "line": 179
         },
         {
           "name": "speak",
           "kind": "function",
-          "line": 182
+          "line": 183
         },
         {
           "name": "chooseLanguage",
           "kind": "function",
-          "line": 199
+          "line": 200
         },
         {
           "name": "language",
           "kind": "function",
-          "line": 210
+          "line": 211
         },
         {
           "name": "name",
           "kind": "function",
-          "line": 211
+          "line": 212
         },
         {
           "name": "inner",
           "kind": "function",
-          "line": 212
+          "line": 213
         }
       ],
       "parseError": null,
@@ -16250,7 +16250,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 38,
+          "line": 39,
           "description": "How long the pointer may leave the button and its menu before the menu closes.",
           "params": [],
           "returns": [],
@@ -16263,7 +16263,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 40,
+          "line": 41,
           "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
           "params": [],
           "returns": [],
@@ -16276,7 +16276,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 47,
+          "line": 48,
           "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
           "params": [],
           "returns": [
@@ -16294,7 +16294,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 72,
+          "line": 73,
           "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
           "params": [
             {
@@ -16325,7 +16325,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 83,
+          "line": 84,
           "description": "",
           "params": [],
           "returns": [
@@ -16343,7 +16343,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-          "line": 199,
+          "line": 200,
           "description": "",
           "params": [
             {
@@ -16365,7 +16365,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static",
           "resolved": "src/utils/ocrTextLayout.js"
         },
@@ -16375,7 +16375,7 @@
             "getOcrLanguages",
             "isSpeechLanguageAutoDetectEnabled"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
@@ -16384,7 +16384,7 @@
           "specifiers": [
             "speechLanguagesForOcr"
           ],
-          "line": 33,
+          "line": 34,
           "kind": "static",
           "resolved": "src/utils/ocrLanguageCodes.js"
         },
@@ -16397,7 +16397,7 @@
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static",
           "resolved": "src/utils/speech.js"
         },
@@ -16407,7 +16407,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         }
@@ -16424,7 +16424,7 @@
             "useRef",
             "useState"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -16432,7 +16432,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         }
       ],
@@ -86451,7 +86451,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 58,
+      "line": 59,
       "description": "",
       "params": [
         {
@@ -87195,7 +87195,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 199,
+      "line": 200,
       "description": "",
       "params": [
         {
@@ -87215,7 +87215,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 83,
+      "line": 84,
       "description": "",
       "params": [],
       "returns": [
@@ -87233,7 +87233,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 40,
+      "line": 41,
       "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
       "params": [],
       "returns": [],
@@ -87246,7 +87246,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 47,
+      "line": 48,
       "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
       "params": [],
       "returns": [
@@ -87264,7 +87264,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 72,
+      "line": 73,
       "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
       "params": [
         {
@@ -87295,7 +87295,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-      "line": 38,
+      "line": 39,
       "description": "How long the pointer may leave the button and its menu before the menu closes.",
       "params": [],
       "returns": [],

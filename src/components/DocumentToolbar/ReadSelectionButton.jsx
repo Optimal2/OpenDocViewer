@@ -14,7 +14,8 @@
  * The reading language is, by default, the language guessed for the selected page's text
  * (`ocr.speech.autoDetectLanguage`, the text layer's `lang`), or the viewer's UI language when
  * the guess is unsure or the guess is turned off. A menu opens under the button while the
- * pointer rests on it (and from the keyboard with the arrow keys): "Automatic" first, then one
+ * pointer rests on it (and from the keyboard with the arrow keys): "Auto" first (naming the
+ * guessed language, or the UI language it falls back to; absent while the guess is off), then one
  * entry per OCR language (`ocr.languages`), greyed when no local voice is installed for it,
  * and "Follow the interface language" last. The choice is kept in the viewer preferences
  * (utils/viewerPreferences.js): absent for automatic, `ui` for the interface language, or an

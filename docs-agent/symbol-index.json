@@ -7137,7 +7137,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 58,
+    "line": 59,
     "description": "",
     "params": [
       {
@@ -7881,7 +7881,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 199,
+    "line": 200,
     "description": "",
     "params": [
       {
@@ -7901,7 +7901,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 83,
+    "line": 84,
     "description": "",
     "params": [],
     "returns": [
@@ -7919,7 +7919,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 40,
+    "line": 41,
     "description": "Preference value for &quot;follow the interface language&quot; (absent: automatic).",
     "params": [],
     "returns": [],
@@ -7932,7 +7932,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 47,
+    "line": 48,
     "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
     "params": [],
     "returns": [
@@ -7950,7 +7950,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 72,
+    "line": 73,
     "description": "A stored reading-language choice in today's form: ui , or one of the OCR languages, else null (automatic).",
     "params": [
       {
@@ -7981,7 +7981,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ReadSelectionButton.jsx",
-    "line": 38,
+    "line": 39,
     "description": "How long the pointer may leave the button and its menu before the menu closes.",
     "params": [],
     "returns": [],
