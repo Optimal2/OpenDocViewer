@@ -39,20 +39,35 @@ function clearCookies() {
 }
 
 /**
- * Build a storage event carrying the given key. new StorageEvent(type, init)
- * is the standard DOM shape; it is assembled here with the one-argument
- * constructor plus an own `key` property so constructor models that only know
- * `new StorageEvent(type)` do not see a trailing argument. The key payload
- * keeps its meaning: ThemeProvider ignores storage events whose key is set to
- * anything else.
+ * Build a storage event carrying the given key.
+ *
+ * The event is a plain `Event` of type `storage` with an own, readonly `key`
+ * property. That models exactly what ThemeProvider consumes: the listener is
+ * registered for the `storage` type, and the handler only reads `event.key`.
+ * The DOM `StorageEvent` constructor is deliberately not used, because
+ * static analysis models it as taking no arguments at all, which makes the
+ * required event type read as a superfluous trailing argument.
+ *
+ * The key payload keeps its meaning: ThemeProvider ignores storage events
+ * whose key is set to anything else.
  * @param {string} key
- * @returns {StorageEvent}
+ * @returns {Event}
  */
 function storageEventWithKey(key) {
-  const event = new StorageEvent('storage');
+  const event = new Event('storage');
   Object.defineProperty(event, 'key', { value: key });
   return event;
 }
+
+it('models a storage event with an own readonly key', () => {
+  const event = storageEventWithKey(OMP_THEME_STORAGE_KEY);
+  expect(event.type).toBe('storage');
+  expect(event.key).toBe(OMP_THEME_STORAGE_KEY);
+  const descriptor = Object.getOwnPropertyDescriptor(event, 'key');
+  expect(descriptor?.value).toBe(OMP_THEME_STORAGE_KEY);
+  expect(descriptor?.writable).toBe(false);
+  expect(Object.getPrototypeOf(event)).toBe(Event.prototype);
+});
 
 describe('shared preference cookie drives data-theme', () => {
   beforeEach(() => {
