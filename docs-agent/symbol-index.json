@@ -10212,7 +10212,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 676,
+    "line": 677,
     "description": "The menu's entries in order; greyed ones included, so their reason can be reached.",
     "params": [],
     "returns": [],
@@ -10225,7 +10225,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 218,
+    "line": 219,
     "description": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.",
     "params": [
       {
@@ -10466,7 +10466,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 63,
+    "line": 64,
     "description": "",
     "params": [
       {
@@ -10497,7 +10497,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 135,
+    "line": 136,
     "description": "",
     "params": [
       {
@@ -10528,7 +10528,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 684,
+    "line": 685,
     "description": "",
     "params": [
       {
@@ -10548,7 +10548,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 886,
+    "line": 887,
     "description": "",
     "params": [
       {
@@ -10568,7 +10568,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 914,
+    "line": 915,
     "description": "",
     "params": [
       {
@@ -10605,7 +10605,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 497,
+    "line": 498,
     "description": "",
     "params": [
       {
@@ -10636,7 +10636,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 880,
+    "line": 881,
     "description": "",
     "params": [
       {
@@ -10656,7 +10656,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 352,
+    "line": 353,
     "description": "Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch.",
     "params": [
       {
@@ -10687,7 +10687,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 155,
+    "line": 156,
     "description": "",
     "params": [
       {
@@ -10712,7 +10712,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 147,
+    "line": 148,
     "description": "",
     "params": [
       {
@@ -10737,7 +10737,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 84,
+    "line": 85,
     "description": "",
     "params": [
       {
@@ -10762,7 +10762,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 97,
+    "line": 98,
     "description": "",
     "params": [
       {
@@ -10787,7 +10787,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 108,
+    "line": 109,
     "description": "",
     "params": [
       {
@@ -10812,13 +10812,33 @@
     "examples": 0
   },
   {
+    "id": "<anonymous>~onKeyDown",
+    "name": "onKeyDown",
+    "longname": "<anonymous>~onKeyDown",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
+    "line": 958,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "KeyboardEvent",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "preventDefaultIfCancelable",
     "name": "preventDefaultIfCancelable",
     "longname": "preventDefaultIfCancelable",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 166,
+    "line": 167,
     "description": "",
     "params": [
       {
@@ -10843,7 +10863,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 998,
+    "line": 1045,
     "description": "",
     "params": [
       {
@@ -10868,7 +10888,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 1021,
+    "line": 1068,
     "description": "",
     "params": [
       {
@@ -10893,7 +10913,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 47,
+    "line": 48,
     "description": "",
     "params": [],
     "returns": [],
@@ -10906,7 +10926,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 43,
+    "line": 44,
     "description": "",
     "params": [],
     "returns": [],

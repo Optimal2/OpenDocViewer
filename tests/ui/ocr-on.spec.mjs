@@ -233,10 +233,27 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(contextMenu.locator('.odv-context-menu-item').last()).toBeFocused();
   await page.keyboard.press('Home');
   await expect(readEntry).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(contextMenu.locator('.odv-context-menu-item').last()).toBeFocused();
   await expect(status).toHaveAttribute('data-ocr-state', 'done');
   await page.keyboard.press('Escape');
   await expect(contextMenu).toHaveCount(0);
-  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
+  // Escape gave the focus back to where it was before the menu opened (the viewer's
+  // container, focused by the right-click); Tab leaves the menu the same way.
+  const returnedFocus = await page.evaluate(() => document.activeElement?.id || document.activeElement?.className || document.activeElement?.tagName);
+  expect(returnedFocus).not.toBe('BODY');
+  // Shift+F10 opens the menu from the keyboard, at the selection, with the focus on its first
+  // entry; the Menu key too; pressed again it closes; Tab leaves it.
+  await page.keyboard.press('Shift+F10');
+  await expect(contextMenu).toBeVisible();
+  await expect(readEntry).toBeFocused();
+  await page.keyboard.press('Shift+F10');
+  await expect(contextMenu).toHaveCount(0);
+  await page.keyboard.press('ContextMenu');
+  await expect(contextMenu).toBeVisible();
+  await page.keyboard.press('Tab');
+  await expect(contextMenu).toHaveCount(0);
+  await page.keyboard.press('Shift+F10');
   await expect(readEntry).toBeFocused();
   // Enter on the focused entry reads the selection (the menu closes).
   await page.keyboard.press('Enter');
@@ -249,6 +266,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
   await expect(readEntry).toHaveAttribute('data-speaking', 'true');
   await expect(readEntry).toHaveText(/Sluta läsa upp|Stop reading aloud/);
+  // An Escape that closes this menu, or the language menu, leaves the reading alone; only a
+  // plain Escape on the page stops it.
+  await page.keyboard.press('Escape');
+  await expect(contextMenu).toHaveCount(0);
+  await page.locator('.toolbar-end-actions button[aria-haspopup="menu"]').filter({ has: page.locator('.material-icons', { hasText: 'language' }) }).click();
+  await expect(page.locator('.toolbar-popup-menu')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.toolbar-popup-menu')).toHaveCount(0);
+  await layer.locator('.ocr-text-layer-word').first().click({ button: 'right' });
+  await expect(readEntry).toHaveAttribute('data-speaking', 'true');
   await readEntry.click();
   await expect(contextMenu).toHaveCount(0);
   // Without a selection the entry stays listed, greyed with the reason.

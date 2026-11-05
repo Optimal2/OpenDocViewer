@@ -35,6 +35,7 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import { IDENTITY_COMPARE_TRANSFORM, buildCompareTransformCss } from '../../utils/compareTransform.js';
 import { needsCanvas } from '../../utils/imageAdjustments.js';
 import { isFineTuneEnabled } from '../../utils/runtimeConfig.js';
+import { hasActiveModalDialog, isEditableTarget } from './hooks/useViewerEffects.js';
 import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
 import KeyTips from '../KeyTips.jsx';
 import ReadAloudContext from '../../contexts/readAloudContext.js';
@@ -656,13 +657,13 @@ const DocumentViewerRender = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [isComparing, updatePanePannability]);
 
-  const closeContextMenu = useCallback(() => {
-    setContextMenuState(null);
-  }, []);
-
   // The element that had the focus when the menu opened (the menu takes it); a choice or
   // Escape gives it back, a click elsewhere does not (the click decides the focus).
   const contextMenuReturnFocusRef = useRef(/** @type {(HTMLElement|null)} */ (null));
+  const closeContextMenu = useCallback(() => {
+    contextMenuReturnFocusRef.current = null;
+    setContextMenuState(null);
+  }, []);
   const closeContextMenuRestoringFocus = useCallback(() => {
     const target = contextMenuReturnFocusRef.current;
     contextMenuReturnFocusRef.current = null;
@@ -946,6 +947,52 @@ const DocumentViewerRender = ({
     });
   }, [allPages, bundle, closeCompare, closeContextMenu, isComparing, onHideDocumentFromSelection, onHidePageFromSelection, onOpenDocumentMetadata, readAloud, selectionPanelEnabled]);
 
+  // Shift+F10 and the Menu key open the menu for the shown pane from the keyboard (a browser
+  // fires its contextmenu event at the focused element, the viewer's container, which the panes
+  // never see). Taken while the focus lies in the viewer or nowhere; left alone in text fields,
+  // the toolbar's menus and modal dialogs. The menu lands at the selection when there is one in
+  // the pane, else near the pane's top-left corner; pressed again while open it closes.
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    /** @param {KeyboardEvent} event */
+    const onKeyDown = (event) => {
+      const isMenuKey = event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey);
+      if (!isMenuKey || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) return;
+      if (hasActiveModalDialog()) return;
+      const active = document.activeElement;
+      const inMenu = !!contextMenuRef.current && contextMenuRef.current.contains(active);
+      if (!inMenu && isEditableTarget(active)) return;
+      const container = primaryPaneRef.current?.closest?.('.document-viewer-container') || null;
+      if (active && active !== document.body && container && !container.contains(active)) return;
+      event.preventDefault();
+      if (contextMenuState) {
+        closeContextMenuRestoringFocus();
+        return;
+      }
+      const pane = isComparing && effectivePane === 'compare' ? 'compare' : 'primary';
+      const frame = pane === 'compare' ? comparePaneRef.current : primaryPaneRef.current;
+      if (!frame) return;
+      let x = 0;
+      let y = 0;
+      const selection = window.getSelection?.();
+      if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+        const rect = selection.getRangeAt(0).getBoundingClientRect();
+        if ((rect.width > 0 || rect.height > 0) && frame.contains(selection.anchorNode)) {
+          x = rect.left + Math.min(rect.width, 24);
+          y = rect.bottom;
+        }
+      }
+      if (!x && !y) {
+        const rect = frame.getBoundingClientRect();
+        x = rect.left + 24;
+        y = rect.top + 24;
+      }
+      handlePaneContextMenu({ clientX: x, clientY: y }, pane === 'compare' ? comparePageNumber : pageNumber, pane);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => { window.removeEventListener('keydown', onKeyDown); };
+  }, [closeContextMenuRestoringFocus, comparePageNumber, contextMenuState, effectivePane, handlePaneContextMenu, isComparing, pageNumber]);
+
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
     onHidePageFromSelection(contextMenuState.originalIndex);
@@ -967,8 +1014,8 @@ const DocumentViewerRender = ({
   const handleCloseCompareFromContextMenu = useCallback(() => {
     if (!contextMenuState || contextMenuState.pane !== 'compare' || typeof closeCompare !== 'function') return;
     closeCompare();
-    closeContextMenu();
-  }, [closeCompare, closeContextMenu, contextMenuState]);
+    closeContextMenuRestoringFocus();
+  }, [closeCompare, closeContextMenuRestoringFocus, contextMenuState]);
 
   // The per-page compare transform (scale, offset, fine rotation) is a CSS transform on the page
   // stage; both panes keep laying out at the shared base zoom.
