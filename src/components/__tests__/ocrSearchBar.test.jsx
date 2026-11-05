@@ -129,6 +129,10 @@ describe('OcrSearchBar', () => {
     expect(count().textContent).toBe('1/3');
     expect(count().querySelector('.toolbar-ocr-search-count-divider')).not.toBeNull();
     expect(count().getAttribute('aria-hidden')).toBe('true');
+    // Assistive technology gets the count as the button's description, spelt out.
+    const described = document.getElementById(button().getAttribute('aria-describedby'));
+    expect(described.textContent).toBe('1 of 3 pages ready');
+    expect(described.getAttribute('data-odv-ocr')).toBe('coverage-text');
     render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(2)]: done(['Då']) } });
     expect(count().textContent).toBe('2/3');
 

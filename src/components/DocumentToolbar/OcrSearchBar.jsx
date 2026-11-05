@@ -69,6 +69,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const rootRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const panelRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const panelId = useId();
+  const coverageId = useId();
   const [placement, setPlacement] = useState({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
   // The match whose page was last asked for: a match on a page the print selection hides lands
   // on the nearest shown page, and the next step must then move on instead of asking again.
@@ -328,6 +329,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
         data-odv-ocr="status"
         data-ocr-state={statusKey || 'notStarted'}
         aria-label={openLabel}
+        aria-describedby={coverageId}
         title={buttonTitle}
         aria-expanded={open}
         aria-controls={panelId}
@@ -344,6 +346,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
         <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
       </button>
       <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
+      {/* The count spelt out as the button's description (read on focus, never announced on
+          its own), so assistive technology gets the search's reach too. */}
+      <span className="sr-only" id={coverageId} data-odv-ocr="coverage-text">{coverageTitle}</span>
       <div
         ref={panelRef}
         id={panelId}

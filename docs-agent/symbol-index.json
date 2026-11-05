@@ -7273,7 +7273,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 220,
+    "line": 221,
     "description": "",
     "params": [
       {
@@ -7293,7 +7293,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 257,
+    "line": 258,
     "description": "",
     "params": [
       {
@@ -7313,7 +7313,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 265,
+    "line": 266,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -7346,7 +7346,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 241,
+    "line": 242,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -18026,7 +18026,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 53,
+    "line": 54,
     "description": "",
     "params": [
       {
@@ -18081,7 +18081,7 @@
         "name": "options.releasePageAsset",
         "type": "function|null",
         "optional": true,
-        "description": "(pageIndex) drops the rendered page again; called for a page rendered only for OCR (beyond the window) once its bytes are in hand, so the w..."
+        "description": "(pageIndex, url) drops that render of the page again; called for a page rendered only for OCR (beyond the window) once its bytes are in han..."
       },
       {
         "name": "options.idleShutdownMs",
@@ -18124,7 +18124,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 76,
+    "line": 77,
     "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],

@@ -191,7 +191,8 @@
   display: inline-flex;
   align-items: center;
   max-width: 8em;
-  margin-right: 0.3em;
+  /* Clear of the status LED in the button's bottom-right corner, in both densities. */
+  margin-right: 0.6em;
   overflow: hidden;
   white-space: nowrap;
   font-size: 0.78rem;

@@ -38,9 +38,10 @@ const EMPTY_PAGES = Object.freeze({});
  * @param {function(string): Promise<(ArrayBuffer|null)>} options.readSourceArrayBuffer
  * @param {function(number, string): Promise<(string|null)>} options.ensurePageAsset
  *   `(pageIndex, 'full')` to the rendered page's object URL.
- * @param {(function(number): void|null)=} options.releasePageAsset  `(pageIndex)` drops the
- *   rendered page again; called for a page rendered only for OCR (beyond the window) once its
- *   bytes are in hand, so the whole document does not pile up renders. Optional.
+ * @param {(function(number, string): void|null)=} options.releasePageAsset  `(pageIndex, url)`
+ *   drops that render of the page again; called for a page rendered only for OCR (beyond the
+ *   window) once its bytes are in hand, so the whole document does not pile up renders. The
+ *   URL names the render, so a newer one is left alone. Optional.
  * @param {number=} options.idleShutdownMs  Default OCR_IDLE_SHUTDOWN_MS.
  * @param {boolean=} options.wholeDocument  Queue the rest of the document after the window
  *   (`ocr.recognizeWholeDocument`); default from the runtime configuration. The outcome cache
@@ -102,7 +103,8 @@ export default function useOcrTextLayers({
       // released again as soon as its bytes are in hand, so a long document does not pile up
       // hundreds of page renders; a page the user has reached meanwhile is left to the viewer.
       if (candidate.renderedForOcr && !windowIndexesRef.current.has(candidate.viewerIndex)) {
-        try { releasePageAssetRef.current?.(candidate.viewerIndex); } catch { /* the viewer keeps it */ }
+        // The URL names the render to drop: a newer one (the viewer re-rendered meanwhile) stays.
+        try { releasePageAssetRef.current?.(candidate.viewerIndex, url); } catch { /* the viewer keeps it */ }
       }
       // prepareOcrImage measures the fetched bytes themselves and removes ruling lines on a
       // private copy (the displayed image is never touched). The page entry's

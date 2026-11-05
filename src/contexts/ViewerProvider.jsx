@@ -2742,8 +2742,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // (utils/ocrPageKey.js) for the text layer.
   const ocrModule = useOcrModule();
   /** Drop a page render made only for OCR (the whole document asked for) once its bytes are read. */
-  const releaseOcrPageAsset = useCallback((pageIndex) => {
-    clearPageAssetReference(pageIndex, 'full');
+  const releaseOcrPageAsset = useCallback((pageIndex, url) => {
+    clearPageAssetReference(pageIndex, 'full', url);
   }, [clearPageAssetReference]);
   const { ocrPages, ocrEngineFailure } = useOcrTextLayers({
     ocrModule,

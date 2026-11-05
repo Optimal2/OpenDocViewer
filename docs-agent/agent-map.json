@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 68871,
+    "sourceLineCount": 68878,
     "docletCount": 1980,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
@@ -812,7 +812,7 @@
           {
             "path": "src/hooks/useOcrTextLayers.js",
             "score": 28,
-            "lines": 208,
+            "lines": 210,
             "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
@@ -1188,7 +1188,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8693,
+      "lineCount": 8698,
       "docletCount": 148,
       "importantFiles": [
         {
@@ -1248,7 +1248,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 34,
-          "lines": 440,
+          "lines": 445,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -1444,7 +1444,7 @@
     {
       "name": "src/hooks",
       "fileCount": 9,
-      "lineCount": 1330,
+      "lineCount": 1332,
       "docletCount": 38,
       "importantFiles": [
         {
@@ -1495,7 +1495,7 @@
         {
           "path": "src/hooks/useOcrTextLayers.js",
           "score": 28,
-          "lines": 208,
+          "lines": 210,
           "incomingLocalImports": 1,
           "doclets": 3,
           "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -14642,7 +14642,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 440,
+      "lines": 445,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -14763,27 +14763,27 @@
         {
           "name": "place",
           "kind": "function",
-          "line": 164
+          "line": 165
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 197
+          "line": 198
         },
         {
           "name": "within",
           "kind": "function",
-          "line": 202
+          "line": 203
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 257
+          "line": 258
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 265
+          "line": 266
         }
       ],
       "parseError": null,
@@ -14874,7 +14874,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 220,
+          "line": 221,
           "description": "",
           "params": [
             {
@@ -14894,7 +14894,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 241,
+          "line": 242,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14914,7 +14914,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 257,
+          "line": 258,
           "description": "",
           "params": [
             {
@@ -14934,7 +14934,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 265,
+          "line": 266,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -34730,7 +34730,7 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 208,
+      "lines": 210,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -34790,19 +34790,19 @@
         {
           "name": "useOcrTextLayers",
           "kind": "default",
-          "line": 53
+          "line": 54
         }
       ],
       "declarations": [
         {
           "name": "useOcrTextLayers",
           "kind": "function",
-          "line": 53
+          "line": 54
         },
         {
           "name": "getPageImage",
           "kind": "function",
-          "line": 95
+          "line": 96
         }
       ],
       "parseError": null,
@@ -34833,7 +34833,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 53,
+          "line": 54,
           "description": "",
           "params": [
             {
@@ -34888,7 +34888,7 @@
               "name": "options.releasePageAsset",
               "type": "function|null",
               "optional": true,
-              "description": "(pageIndex) drops the rendered page again; called for a page rendered only for OCR (beyond the window) once its bytes are in hand, so the w..."
+              "description": "(pageIndex, url) drops that render of the page again; called for a page rendered only for OCR (beyond the window) once its bytes are in han..."
             },
             {
               "name": "options.idleShutdownMs",
@@ -34918,7 +34918,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 76,
+          "line": 77,
           "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
           "params": [],
           "returns": [],
@@ -88797,7 +88797,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 220,
+      "line": 221,
       "description": "",
       "params": [
         {
@@ -88817,7 +88817,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 257,
+      "line": 258,
       "description": "",
       "params": [
         {
@@ -88837,7 +88837,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 265,
+      "line": 266,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -88870,7 +88870,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 241,
+      "line": 242,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -99550,7 +99550,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 53,
+      "line": 54,
       "description": "",
       "params": [
         {
@@ -99605,7 +99605,7 @@
           "name": "options.releasePageAsset",
           "type": "function|null",
           "optional": true,
-          "description": "(pageIndex) drops the rendered page again; called for a page rendered only for OCR (beyond the window) once its bytes are in hand, so the w..."
+          "description": "(pageIndex, url) drops that render of the page again; called for a page rendered only for OCR (beyond the window) once its bytes are in han..."
         },
         {
           "name": "options.idleShutdownMs",
@@ -99648,7 +99648,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 76,
+      "line": 77,
       "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
       "params": [],
       "returns": [],

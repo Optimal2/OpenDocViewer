@@ -220,7 +220,7 @@ describe('useOcrTextLayers', () => {
     expect(Object.values(latest.ocrPages).filter((entry) => entry.status === 'done')).toHaveLength(6);
     // Only the pages rendered for OCR (beyond the window and unrendered before) were released
     // again, once their bytes were read; the window's and the already rendered page 3 never.
-    expect(releasePageAsset.mock.calls.map(([index]) => index)).toEqual([4, 5]);
+    expect(releasePageAsset.mock.calls).toEqual([[4, '/pages/doc-4.png'], [5, '/pages/doc-5.png']]);
 
     // Off (the default), the window alone: nothing beyond it is even queued.
     const engine2 = makeEngine();
