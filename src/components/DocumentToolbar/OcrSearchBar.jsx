@@ -21,8 +21,13 @@
  * text layer marks the matches on its page and scrolls the current one into view. While not
  * every page has an outcome yet, the status says how many pages the search covers. Page
  * numbers here are original session page numbers (they index `allPages` and are what
- * `setPageNumber` takes), not ordinals among the visible pages. Mounted by DocumentToolbar
- * only while `ocr.enabled` is the literal true.
+ * `setPageNumber` takes), not ordinals among the visible pages. Mounted by OcrToolbarActions
+ * (from DocumentToolbar) only while `ocr.enabled` is the literal true.
+ *
+ * With `searchEnabled` false (`ocr.search.enabled: false`) only the status remains: the button
+ * stays a never-enabled, status-only indicator with its LED, the status as its name and tooltip
+ * and the live region, and no field exists, so no term is ever published and the layers mark
+ * nothing.
  */
 import React, { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -43,9 +48,10 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
  *   page: DocumentToolbar's `pageNumberDisplay`.
  * @param {function(number): void} props.setPageNumber  Takes an original session page number.
  * @param {Array<Object>} props.allPages  The viewer's pages.
+ * @param {boolean} [props.searchEnabled=true]  False keeps only the status indicator.
  * @returns {React.ReactElement}
  */
-export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
+export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true }) {
   const { t } = useTranslation('common');
   const { ocrPages, ocrEngineFailure, setOcrSearch } = useContext(ViewerContext);
   const [open, setOpen] = useState(false);
@@ -232,6 +238,28 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages }) {
     }
   };
 
+  if (!searchEnabled) {
+    // Status only: the same place and LED as the search button, never enabled, no field.
+    return (
+      <div ref={rootRef} className="toolbar-ocr-search is-status-only" data-odv-ocr="search" data-ocr-search="off">
+        <button
+          ref={buttonRef}
+          type="button"
+          className="odv-btn odv-btn--with-status-led toolbar-ocr-search-toggle is-status-only"
+          data-odv-ocr="status"
+          data-ocr-state={statusKey || 'notStarted'}
+          aria-label={statusText}
+          title={statusText}
+          disabled
+        >
+          <span className="material-icons" aria-hidden="true">text_fields</span>
+          <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
+        </button>
+        <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
+      </div>
+    );
+  }
+
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const buttonTitle = ready || open ? `${openLabel} · ${statusText}` : statusText;
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
@@ -352,4 +380,5 @@ OcrSearchBar.propTypes = {
   pageNumber: PropTypes.number.isRequired,
   setPageNumber: PropTypes.func.isRequired,
   allPages: PropTypes.array,
+  searchEnabled: PropTypes.bool,
 };

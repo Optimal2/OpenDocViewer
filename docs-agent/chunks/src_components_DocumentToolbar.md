@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8736. JSDoc symbol count: 150.
+File count: 22. Line count: 8810. JSDoc symbol count: 151.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -22,7 +22,7 @@ Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, 
 
 Exports: `DocumentToolbar`
 
-Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/components/DocumentToolbar/PageNavigationButtons.jsx`, `src/components/DocumentToolbar/ZoomButtons.jsx`, `src/components/DocumentToolbar/SplitToolbarButton.jsx`, `src/components/DocumentToolbar/LanguageMenuButton.jsx`, `src/components/DocumentToolbar/ThemeMenuButton.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/DocumentToolbar/HelpMenuButton.jsx`, `src/components/DocumentToolbar/OcrSearchBar.jsx`, `src/components/DocumentToolbar/ReadSelectionButton.jsx`
+Local imports: `src/logging/userLogger.js`, `src/logging/systemLogger.js`, `src/components/DocumentToolbar/PageNavigationButtons.jsx`, `src/components/DocumentToolbar/ZoomButtons.jsx`, `src/components/DocumentToolbar/SplitToolbarButton.jsx`, `src/components/DocumentToolbar/LanguageMenuButton.jsx`, `src/components/DocumentToolbar/ThemeMenuButton.jsx`, `src/components/DocumentToolbar/PrintPipelineDialogs.jsx`, `src/components/DocumentToolbar/usePrintPipeline.js`, `src/components/DocumentToolbar/HelpMenuButton.jsx`, `src/components/DocumentToolbar/OcrToolbarActions.jsx`, `src/components/DocumentToolbar/ManualOverlayDialog.jsx`
 
 Symbols:
 
@@ -128,6 +128,18 @@ Symbols:
 - `OcrSearchBar~step` (constant) - Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on...
 - `OcrSearchBar~handleInputKeyDown` (function) - No description.
 - `OcrSearchBar~handlePanelKeyDown` (function) - Escape closes the field from any of its controls.
+
+## src/components/DocumentToolbar/OcrToolbarActions.jsx
+
+The toolbar's OCR group, right of the end actions: the read\-aloud button \(ReadSelectionButton.jsx\) and the search in the text layers \(OcrSearchBar.jsx\), each behind its own runtime switch so a site can offer one without
+
+Exports: `OcrToolbarActions`
+
+Local imports: `src/components/DocumentToolbar/OcrSearchBar.jsx`, `src/components/DocumentToolbar/ReadSelectionButton.jsx`, `src/utils/runtimeConfig.js`
+
+Symbols:
+
+- `module.exports` (function) - No description.
 
 ## src/components/DocumentToolbar/PageNavigationButtons.jsx
 

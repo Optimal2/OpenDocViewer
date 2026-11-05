@@ -27,6 +27,8 @@ import {
   isOcrEnabled,
   isOcrLineRemovalEnabled,
   isSpeechLanguageAutoDetectEnabled,
+  isOcrSearchEnabled,
+  isReadAloudEnabled,
   describeOcrLanguages,
   getOcrLanguages,
   describeOcrAssetBaseUrl,
@@ -339,6 +341,44 @@ describe('runtimeConfig', () => {
       expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: false } } })).toBe(false);
       expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: 'false' } } })).toBe(true);
       expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { autoDetectLanguage: 0 } } })).toBe(true);
+    });
+  });
+
+  describe('isOcrSearchEnabled', () => {
+    it('is on when the section or key is missing and turns off only for the boolean literal false', () => {
+      expect(isOcrSearchEnabled({})).toBe(true);
+      expect(isOcrSearchEnabled({ ocr: {} })).toBe(true);
+      expect(isOcrSearchEnabled({ ocr: { search: {} } })).toBe(true);
+      expect(isOcrSearchEnabled(null)).toBe(true);
+      expect(isOcrSearchEnabled({ ocr: { search: { enabled: true } } })).toBe(true);
+      expect(isOcrSearchEnabled({ ocr: { search: { enabled: false } } })).toBe(false);
+      expect(isOcrSearchEnabled({ ocr: { search: { enabled: 'false' } } })).toBe(true);
+      expect(isOcrSearchEnabled({ ocr: { search: { enabled: 0 } } })).toBe(true);
+      expect(isOcrSearchEnabled({ ocr: { search: { enabled: null } } })).toBe(true);
+    });
+
+    it('is independent of the read-aloud switch', () => {
+      expect(isOcrSearchEnabled({ ocr: { speech: { enabled: false } } })).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { search: { enabled: false } } })).toBe(true);
+    });
+  });
+
+  describe('isReadAloudEnabled', () => {
+    it('is on when the section or key is missing and turns off only for the boolean literal false', () => {
+      expect(isReadAloudEnabled({})).toBe(true);
+      expect(isReadAloudEnabled({ ocr: {} })).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { speech: {} } })).toBe(true);
+      expect(isReadAloudEnabled(null)).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { speech: { enabled: true } } })).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { speech: { enabled: false } } })).toBe(false);
+      expect(isReadAloudEnabled({ ocr: { speech: { enabled: 'false' } } })).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { speech: { enabled: 0 } } })).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { speech: { enabled: null } } })).toBe(true);
+    });
+
+    it('leaves the language guess to its own key', () => {
+      expect(isSpeechLanguageAutoDetectEnabled({ ocr: { speech: { enabled: false } } })).toBe(true);
+      expect(isReadAloudEnabled({ ocr: { speech: { autoDetectLanguage: false } } })).toBe(true);
     });
   });
 

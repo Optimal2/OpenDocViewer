@@ -346,6 +346,34 @@ export function isSpeechLanguageAutoDetectEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether the toolbar's search in the text layers is offered (`ocr.search.enabled`). On
+ * by default; only the boolean literal `false` turns it off. With it off, the toolbar keeps a
+ * status-only indicator of the page's recognition in the search button's place (no field ever
+ * opens, so the layers mark nothing), while the layers themselves and the browser's own find
+ * stay. Means nothing while OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isOcrSearchEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.search?.enabled !== false;
+}
+
+/**
+ * Resolve whether the read-aloud button is offered (`ocr.speech.enabled`). On by default; only
+ * the boolean literal `false` turns it off. With it off, the button is never mounted, so the
+ * toolbar neither follows the selection nor touches speech synthesis; the language guess
+ * (`ocr.speech.autoDetectLanguage`) is independent and still sets the text flow's `lang` for
+ * screen readers. Means nothing while OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isReadAloudEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.speech?.enabled !== false;
+}
+
+/**
  * Describe how `ocr.languages` resolves: the usable codes, the entries that were ignored and
  * whether the default list stood in. This is the diagnostic form of getOcrLanguages and stays
  * side-effect free like every accessor here; the OCR module (src/ocr/setup.js) logs the outcome

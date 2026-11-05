@@ -142,12 +142,25 @@
       // replaces this default completely. The viewer's own ocr/ folder holds the Swedish and
       // English models; a code with no model is dropped with a console warning when OCR starts.
       languages: ['swe', 'eng'],
+      search: {
+        // The toolbar's search in the text layers (the button that also shows the page's
+        // recognition status). true (default) offers it; only the literal false turns it off,
+        // leaving a status-only indicator in its place. The text layers and the browser's own
+        // find (Ctrl+F) stay either way.
+        enabled: true
+      },
       speech: {
+        // The read-aloud button for selected text. true (default) offers it; only the literal
+        // false turns it off, and the toolbar then never follows the selection or touches speech
+        // synthesis. Reading uses voices installed on the machine only, never online voices.
+        enabled: true,
         // Guess the language of each page's text among the OCR languages above, so the
         // read-aloud button's "Automatic" choice reads a Swedish page with a Swedish voice and an
         // English page with an English one, and the text layer tells screen readers the
         // language. true (default) keeps the guess; only the literal false turns it off (the
         // read-aloud language then follows the UI language unless the user picks one).
+        // Independent of `enabled` above: with read-aloud off, the guess still gives the text
+        // layer its lang for screen readers.
         autoDetectLanguage: true
       },
       // Where the OCR engine, worker and language files are served from. null (default) uses the

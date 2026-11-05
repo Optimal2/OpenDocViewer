@@ -21,9 +21,10 @@
  * ISO 639-1 language. The menu, like the button, never takes the selection away; the viewer's
  * own shortcuts are off while the focus is in the button or the menu (`data-odv-shortcuts="off"`),
  * so the arrow keys open the menu without turning the page, and a choice or Escape made from
- * the keyboard puts the focus back on the button. Mounted by DocumentToolbar only while
- * `ocr.enabled` is the literal true, so the default code path neither listens to the selection
- * nor touches speech.
+ * the keyboard puts the focus back on the button. Mounted by OcrToolbarActions (from
+ * DocumentToolbar) only while `ocr.enabled` is the literal true and `ocr.speech.enabled` is not
+ * the literal false, so with either off the toolbar neither listens to the selection nor touches
+ * speech.
  */
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -122,3 +122,57 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   expect(foreign).toEqual([]);
   expect(consoleErrors).toEqual([]);
 });
+
+test('ocr on with the search and read-aloud switched off: the status stays, no field, no read-aloud button', async ({ page }) => {
+  test.setTimeout(120000);
+  const { bytes } = await buildTextPdf();
+  // A speech synthesiser is present so that, were the button mounted, it would show; a probe
+  // records whether anything read the voices (the toolbar must not touch speech at all).
+  await page.addInitScript(() => {
+    window.__odvVoiceReads = 0;
+    const voices = [{ name: 'Local Swedish', lang: 'sv-SE', localService: true, default: true }];
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: { cancel() {}, getVoices() { window.__odvVoiceReads += 1; return voices; }, speak() {}, addEventListener() {}, removeEventListener() {} },
+    });
+  });
+  await loadSession(page, {
+    siteConfig: { ocr: { enabled: true, search: { enabled: false }, speech: { enabled: false } } },
+    session: SESSION,
+    extraFixtures: new Map([['synthetic-text.pdf', { body: bytes, contentType: 'application/pdf' }]]),
+  });
+
+  await expect(page.locator('.document-render-container img').first()).toBeVisible();
+  const group = page.locator('.toolbar .toolbar-ocr-actions');
+  await expect(group).toHaveAttribute('data-ocr-search', 'off');
+  await expect(group).toHaveAttribute('data-ocr-read-aloud', 'off');
+
+  // The status indicator keeps the search button's place and LED, but never enables and has no
+  // field; its name is the status itself.
+  const status = page.locator('.toolbar [data-odv-ocr="status"]');
+  await expect(status).toHaveAttribute('data-ocr-state', 'pdfText', { timeout: 60000 });
+  await expect(status).toBeDisabled();
+  await expect(status).toHaveAttribute('aria-label', /Sidan har egen text|The page has its own text/);
+  await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
+  await expect(page.locator('.toolbar-ocr-search-panel, .toolbar-ocr-search-input')).toHaveCount(0);
+  await status.click({ force: true });
+  await expect(page.locator('.toolbar-ocr-search-input')).toHaveCount(0);
+
+  // The text layer is there as usual, with the page's guessed language; selecting its text
+  // brings no read-aloud button, and the voices were never read.
+  const layer = page.locator('.ocr-text-layer');
+  await expect(layer).toHaveCount(1);
+  await expect(layer.locator('.ocr-text-layer-flow')).toHaveAttribute('lang', 'sv');
+  await page.evaluate(() => {
+    const flow = document.querySelector('.ocr-text-layer-flow');
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    const range = document.createRange();
+    range.selectNodeContents(flow);
+    selection.addRange(range);
+    document.dispatchEvent(new Event('selectionchange'));
+  });
+  await page.waitForTimeout(300);
+  await expect(page.locator('[data-odv-ocr="read"]')).toHaveCount(0);
+  expect(await page.evaluate(() => window.__odvVoiceReads)).toBe(0);
+});

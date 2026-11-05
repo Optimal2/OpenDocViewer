@@ -101,9 +101,13 @@
       // recognition time per page. The viewer ships the Swedish and English models; another
       // language needs assetBaseUrl pointing at a folder that has its <lang>.traineddata.gz.
       // languages: ['swe', 'eng'],
-      // The read-aloud button guesses each page's language among the OCR languages ("Automatic"
-      // in its menu) and the text layer carries it as lang. Only the literal false turns it off.
-      // speech: { autoDetectLanguage: true },
+      // The toolbar's search in the text layers. Only the literal false turns it off; the button's
+      // place then keeps a status-only indicator of the page's recognition.
+      // search: { enabled: true },
+      // The read-aloud button (only the literal false turns it off; local voices only), and its
+      // language guess: each page's language among the OCR languages ("Automatic" in the menu),
+      // carried by the text layer as lang. Only the literal false turns the guess off.
+      // speech: { enabled: true, autoDetectLanguage: true },
       // Serve the engine, worker and language files from a copy of the viewer's ocr/ folder at
       // the site's own location (same layout; same origin, or CORS-enabled and allowed by the
       // site CSP). No query string or fragment, and only http(s) or relative values.

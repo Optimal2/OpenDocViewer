@@ -27,8 +27,7 @@ import ThemeMenuButton from './ThemeMenuButton.jsx';
 import PrintPipelineDialogs from './PrintPipelineDialogs.jsx';
 import { normalizeToolbarPageNumber } from './usePrintPipeline.js';
 import HelpMenuButton from './HelpMenuButton.jsx';
-import OcrSearchBar from './OcrSearchBar.jsx';
-import ReadSelectionButton from './ReadSelectionButton.jsx';
+import OcrToolbarActions from './OcrToolbarActions.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import {
@@ -1381,14 +1380,12 @@ const DocumentToolbar = ({
       </div>
 
       {/* OCR (only while `ocr.enabled` is the literal true): read the selection aloud, and the
-          search in the recognised text whose button doubles as the page's OCR status. */}
+          search in the recognised text whose button doubles as the page's OCR status; each behind
+          its own switch (OcrToolbarActions.jsx). Original session page numbers: `pageNumberDisplay`
+          indexes allPages and is what setPageNumber takes; `pageNumber` is the ordinal among the
+          visible pages. */}
       {isOcrEnabled() ? (
-        <div className="toolbar-ocr-actions">
-          <ReadSelectionButton />
-          {/* Original session page numbers: `pageNumberDisplay` indexes allPages and is what
-              setPageNumber takes; `pageNumber` is the ordinal among the visible pages. */}
-          <OcrSearchBar pageNumber={pageNumberDisplay} setPageNumber={setPageNumber} allPages={allPages} />
-        </div>
+        <OcrToolbarActions pageNumber={pageNumberDisplay} setPageNumber={setPageNumber} allPages={allPages} />
       ) : null}
 
       {/* Print dialog and PDF progress of the shared print pipeline (also hosted by the compare views) */}

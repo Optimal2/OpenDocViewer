@@ -160,6 +160,13 @@
   flex-shrink: 0;
 }
 
+/* With the search turned off (`ocr.search.enabled: false`) the button's place holds a
+   status-only indicator: a button that never enables, so the toolbar's disabled look applies,
+   but it is an indicator, not a forbidden action, so the cursor stays ordinary. */
+.toolbar .toolbar-ocr-search-toggle.is-status-only:disabled {
+  cursor: default;
+}
+
 /* The read-aloud button's language menu (DocumentToolbar/ReadSelectionButton.jsx): the
    toolbar's popup menu, with a heading, under the button at the toolbar's right end. */
 .toolbar-ocr-read-menu {

@@ -55,12 +55,12 @@ describe('OcrSearchBar', () => {
     container.remove();
   });
 
-  const render = ({ ocrPages = {}, ocrEngineFailure = null, pageNumber = 1, setPageNumber = vi.fn(), setOcrSearch = vi.fn() }) => {
+  const render = ({ ocrPages = {}, ocrEngineFailure = null, pageNumber = 1, setPageNumber = vi.fn(), setOcrSearch = vi.fn(), searchEnabled }) => {
     act(() => {
       root.render(createElement(
         ViewerContext.Provider,
         { value: { ocrPages, ocrEngineFailure, setOcrSearch } },
-        createElement(OcrSearchBar, { pageNumber, setPageNumber, allPages: PAGES })
+        createElement(OcrSearchBar, { pageNumber, setPageNumber, allPages: PAGES, ...(searchEnabled === undefined ? {} : { searchEnabled }) })
       ));
     });
     return { setPageNumber, setOcrSearch };
@@ -458,5 +458,31 @@ describe('OcrSearchBar', () => {
     act(() => button().click());
     expect(input().tabIndex).toBe(0);
     expect(container.querySelector('.toolbar-ocr-search-panel').getAttribute('aria-hidden')).toBe('false');
+  });
+
+  it('with searchEnabled false keeps only the status: a never-enabled indicator, no field, nothing published', () => {
+    const { setOcrSearch } = render({ ocrPages: { [KEY(0)]: done(['Hej']) }, searchEnabled: false });
+    expect(container.querySelector('.toolbar-ocr-search').getAttribute('data-ocr-search')).toBe('off');
+    expect(button().disabled).toBe(true);
+    expect(button().classList.contains('is-status-only')).toBe(true);
+    expect(button().getAttribute('data-ocr-state')).toBe('done');
+    // The status is the indicator's own name and tooltip (no "Search in…" label to promise).
+    expect(button().getAttribute('aria-label')).toBe('Text recognised');
+    expect(button().title).toBe('Text recognised');
+    expect(button().hasAttribute('aria-expanded')).toBe(false);
+    expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
+    expect(container.querySelector('[data-odv-ocr="status-text"]').textContent).toBe('Text recognised');
+    expect(input()).toBeNull();
+    expect(container.querySelector('.toolbar-ocr-search-panel')).toBeNull();
+    act(() => button().click());
+    expect(input()).toBeNull();
+    // Nothing but the closed state reaches the viewer, so the layers mark nothing.
+    expect(setOcrSearch.mock.calls.every(([value]) => value === null)).toBe(true);
+
+    // The status follows the page as usual.
+    render({ ocrPages: { [KEY(0)]: { status: 'recognizing' } }, searchEnabled: false });
+    expect(button().getAttribute('data-ocr-state')).toBe('working');
+    expect(button().getAttribute('aria-label')).toBe('Recognising text…');
+    expect(container.querySelector('.odv-status-led--pending')).not.toBeNull();
   });
 });

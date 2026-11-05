@@ -275,7 +275,11 @@ ocr: {
   enabled: false,              // only the literal true turns OCR on
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
+  search: {
+    enabled: true              // the toolbar's search in the text layers; false leaves a status-only indicator
+  },
   speech: {
+    enabled: true,             // the read-aloud button (local voices only); false leaves it out
     autoDetectLanguage: true   // guess each page's language for read-aloud and the layer's lang
   },
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
@@ -303,6 +307,21 @@ ocr: {
   a folder that has its model (`<lang>.traineddata.gz`). Every listed model runs on every text
   line and the best match wins, so each extra language adds some recognition time per page. As
   with every array in the site file, an override replaces the default completely.
+- `ocr.search.enabled`: whether the toolbar offers the search in the text layers (the button that
+  also shows the page's recognition status, see "What the user sees" below). `true` by default;
+  only the boolean literal `false` turns it off. With it off, the button's place keeps a
+  status-only indicator (the same LED, the status as its name and tooltip, and the live region
+  for screen readers), so the user still sees that text is being recognised, but no search field
+  opens and no match is ever marked on a page. The text layers themselves, selecting and copying,
+  read-aloud and the browser's own find (Ctrl+F) are unaffected. The key means nothing while OCR
+  is off.
+- `ocr.speech.enabled`: whether the toolbar offers the read-aloud button for selected text. `true`
+  by default; only the boolean literal `false` turns it off. With it off, the button is never
+  mounted, so the toolbar neither follows the selection nor touches the browser's speech
+  synthesis (no voice list is read). Reading, when on, uses only voices installed on the machine,
+  never the browser's online voices. The key is independent of `ocr.search.enabled` and of
+  `ocr.speech.autoDetectLanguage` below: with read-aloud off, the guess still gives the text
+  flow its `lang`, which screen readers follow. The key means nothing while OCR is off.
 - `ocr.speech.autoDetectLanguage`: whether the language of each page's text is guessed among the
   OCR languages, once per page when its text is ready (`src/ocr/detectLanguage.js`: the page's
   words are counted against a few dozen function words per language, with a little weight for
@@ -490,7 +509,9 @@ on the ink, in one text flow with the lines of the page), so dragging over the w
 text, Ctrl+C copies it as it reads on the page, and the browser's own find (Ctrl+F) matches
 words and phrases in it; dragging on a blank part of the page still pans.
 
-The toolbar gets an OCR group to the right of the theme, language and help buttons:
+The toolbar gets an OCR group to the right of the theme, language and help buttons. Its two
+parts are offered independently (`ocr.search.enabled` and `ocr.speech.enabled` above; both on by
+default):
 
 - A search button that doubles as the page's OCR status: a small LED on the button and the
   status as its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
@@ -514,8 +535,9 @@ The toolbar gets an OCR group to the right of the theme, language and help butto
   page (in compare mode the compared page's layer still marks its matches, but the position and
   the status are the primary page's; limited to a page, only that page's layer marks), and a
   match on a page the print selection hides lands on the nearest shown page. The browser's own
-  find (Ctrl+F) keeps working on the layer.
-- A read-aloud button that appears only while recognised text is selected, if the browser has
+  find (Ctrl+F) keeps working on the layer. With `ocr.search.enabled: false` the button is a
+  status-only indicator: never enabled, no field, the status as its name and tooltip.
+- A read-aloud button (`ocr.speech.enabled`) that appears only while recognised text is selected, if the browser has
   speech synthesis (Web Speech API). Clicking it reads the selection as it reads on the page,
   line by line, with a voice installed in the operating system for the reading language (the
   viewer's UI language unless the user picks another). Only voices that run on the machine are

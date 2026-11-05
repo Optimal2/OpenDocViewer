@@ -11,9 +11,24 @@
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getOcrAssetBaseUrl, getOcrLanguages, isOcrEnabled, isOcrLineRemovalEnabled } from '../runtimeConfig.js';
+import {
+  getOcrAssetBaseUrl,
+  getOcrLanguages,
+  isOcrEnabled,
+  isOcrLineRemovalEnabled,
+  isOcrSearchEnabled,
+  isReadAloudEnabled,
+  isSpeechLanguageAutoDetectEnabled,
+} from '../runtimeConfig.js';
 
-const SHIPPED_OCR_DEFAULTS = Object.freeze({ enabled: false, removeRulingLines: true, languages: ['swe', 'eng'], speech: { autoDetectLanguage: true }, assetBaseUrl: null });
+const SHIPPED_OCR_DEFAULTS = Object.freeze({
+  enabled: false,
+  removeRulingLines: true,
+  languages: ['swe', 'eng'],
+  search: { enabled: true },
+  speech: { enabled: true, autoDetectLanguage: true },
+  assetBaseUrl: null,
+});
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -35,6 +50,9 @@ function readOcrConfig({ siteConfig, useSampleSiteFile = false } = {}) {
       siteKeys: [...dom.window.__ODV_SITE_CONFIG_KEYS__],
       enabled: isOcrEnabled(),
       removeRulingLines: isOcrLineRemovalEnabled(),
+      search: isOcrSearchEnabled(),
+      readAloud: isReadAloudEnabled(),
+      autoDetect: isSpeechLanguageAutoDetectEnabled(),
       languages: getOcrLanguages(),
       assetBaseUrl: getOcrAssetBaseUrl(),
     };
@@ -49,9 +67,26 @@ describe('shipped OCR configuration', () => {
     expect(shipped.ocr).toEqual(SHIPPED_OCR_DEFAULTS);
     expect(shipped.enabled).toBe(false);
     expect(shipped.removeRulingLines).toBe(true);
+    expect(shipped.search).toBe(true);
+    expect(shipped.readAloud).toBe(true);
+    expect(shipped.autoDetect).toBe(true);
     expect(shipped.languages).toEqual(['swe', 'eng']);
     expect(shipped.assetBaseUrl).toBeNull();
     expect(shipped.siteKeys).toEqual([]);
+  });
+
+  it('offers the search and the read-aloud button unless a site file sets the literal false, each on its own', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } })).toMatchObject({ search: true, readAloud: true, autoDetect: true });
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, search: { enabled: 'false' }, speech: { enabled: 0 } } } }))
+      .toMatchObject({ search: true, readAloud: true });
+    const searchOff = readOcrConfig({ siteConfig: { ocr: { enabled: true, search: { enabled: false } } } });
+    expect(searchOff).toMatchObject({ enabled: true, search: false, readAloud: true, autoDetect: true });
+    const readAloudOff = readOcrConfig({ siteConfig: { ocr: { enabled: true, speech: { enabled: false } } } });
+    expect(readAloudOff).toMatchObject({ enabled: true, search: true, readAloud: false, autoDetect: true });
+    // The deep merge keeps the sibling key a site file does not mention.
+    expect(readAloudOff.ocr.speech).toEqual({ enabled: false, autoDetectLanguage: true });
+    const guessOff = readOcrConfig({ siteConfig: { ocr: { enabled: true, speech: { autoDetectLanguage: false } } } });
+    expect(guessOff).toMatchObject({ readAloud: true, autoDetect: false });
   });
 
   it('keeps the ruling-line removal unless a site file sets the literal false', () => {
@@ -71,7 +106,7 @@ describe('shipped OCR configuration', () => {
 
   it('lets a site file turn OCR on with the literal true and deep-merges the sub keys', () => {
     const site = readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: ['swe'] } } });
-    expect(site.ocr).toEqual({ enabled: true, removeRulingLines: true, languages: ['swe'], speech: { autoDetectLanguage: true }, assetBaseUrl: null });
+    expect(site.ocr).toEqual({ ...SHIPPED_OCR_DEFAULTS, enabled: true, languages: ['swe'] });
     expect(site.enabled).toBe(true);
     expect(site.languages).toEqual(['swe']);
     expect(site.assetBaseUrl).toBeNull();
