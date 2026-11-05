@@ -525,6 +525,45 @@ describe('standard manual print action capability blocks', () => {
       expect(doc.body.textContent).toContain('HTML');
     });
 
+  it.each([
+    ['Swedish', 'utskrift', 'Fortsätt jobba', 'Skillnaden mellan de två knapparna:'],
+    ['English', 'printing', 'Continue working', 'The difference between the two buttons:'],
+  ])('scopes print-action removal to the declared %s print segment and its nested headings',
+    (_label, printId, continueText, differenceText) => {
+      const html = [
+        '<div class="odv-manual">',
+        `<h2 id="before">Before</h2><ul><li id="before-print">${continueText} before printing.</li></ul>`,
+        `<h2 id="${printId}">1. Print</h2><p id="print-difference">${differenceText}</p>`,
+        `<ul><li id="print-step">${continueText} while the PDF is prepared.</li></ul>`,
+        `<h3 id="print-options">PDF options</h3><ul><li id="nested-print-step">${continueText} with nested options.</li></ul>`,
+        `<h2 id="unrelated">2. Another feature</h2><ul><li id="unrelated-step">${continueText} with your selection.</li></ul>`,
+        '<details class="embedded" id="guide-next"><summary>Next guide</summary>',
+        `<h2 id="next-guide-heading">1. Next guide</h2><ul><li id="next-guide-step">${continueText} in the next guide.</li></ul>`,
+        '</details></div>',
+      ].join('');
+      const doc = filterToDocument(html, { print: { pdf: { enabled: false } } });
+
+      expect(doc.getElementById('print-difference')).toBeNull();
+      expect(doc.getElementById('print-step')).toBeNull();
+      expect(doc.getElementById('nested-print-step')).toBeNull();
+      expect(doc.getElementById('before-print')).not.toBeNull();
+      expect(doc.getElementById('unrelated-step')).not.toBeNull();
+      expect(doc.getElementById('next-guide-step')).not.toBeNull();
+      expect(doc.getElementById('guide-next')).not.toBeNull();
+    });
+
+  it('preserves same-prefix help when the document has no declared print heading', () => {
+    const html = [
+      '<div class="odv-manual"><h2 id="overview">Overview</h2>',
+      '<p id="difference">The difference between the two buttons: unrelated explanation</p>',
+      '<ul><li id="continue">Continue working with your selection.</li></ul></div>',
+    ].join('');
+    const doc = filterToDocument(html, { print: { pdf: { enabled: false } } });
+
+    expect(doc.getElementById('difference')).not.toBeNull();
+    expect(doc.getElementById('continue')).not.toBeNull();
+  });
+
   it('keeps all print blocks when both actions and their PDF options are available', () => {
     const doc = filterToDocument(manualEn, printEnabled);
     expect(doc.body.textContent).toContain('The difference between the two buttons:');

@@ -66,10 +66,12 @@ guide tags inside comments, script/style/other raw-text examples or another quot
 satisfy validation. Validation fails before either output module is written. The output module still
 exports the exact original HTML string.
 
-At runtime the existing DOMPurify policy runs before the pure standard filter. Filtering happens
-before contents-tree, search and lightbox processing, removes each disabled heading's complete segment
-and obsolete navigation entries, unlinks removed prose targets without deleting their text, and
-renumbers the remaining visible guide sections. If lazy chunk loading fails, the dialog fetches
+At runtime the pure standard filter parses the raw HTML, applies its rules and then sanitizes the
+filtered result with the existing DOMPurify policy; the overlay's rewrite path sanitizes it again
+before rendering, so no unsanitized content is rendered. Filtering happens before contents-tree,
+search and lightbox processing, removes each disabled heading's complete segment and obsolete
+navigation entries, unlinks removed prose targets without deleting their text, and renumbers the
+remaining visible guide sections. If lazy chunk loading fails, the dialog fetches
 `fallbackPathTemplate` and applies the same filter; it never falls back to site HTML. Standard images
 resolve under `help/default/img/`. The complete PDF copies are not filtered and remain available for
 printing or reading every guide regardless of the interactive feature switches. Site-owned HTML in

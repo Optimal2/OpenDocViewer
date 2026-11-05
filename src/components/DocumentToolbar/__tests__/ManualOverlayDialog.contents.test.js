@@ -498,6 +498,94 @@ describe('ManualOverlayDialog contents tree', () => {
     });
   });
 
+  it.each(['auto', 'standard'])('renders %s mode without reading an unrelated throwing manual getter', async (source) => {
+    runtimeConfig = {
+      help: {
+        manual: {
+          source,
+          get hostOnlySetting() { throw new Error('Unrelated host getter must not be read'); },
+        },
+      },
+    };
+    await openManual('<h2 id="loaded-manual">Loaded manual</h2>');
+
+    expect(content()).not.toBeNull();
+    expect(container.querySelector('.odv-help-placeholder.is-error')).toBeNull();
+    expect(container.querySelector('button[aria-label="Reload manual from server"]').disabled).toBe(false);
+    if (source === 'auto') expect(content().querySelector('#loaded-manual')).not.toBeNull();
+    else expect(content().querySelector('#urval-oppna')).not.toBeNull();
+  });
+
+  it('uses existing defaults when optional standard-manual settings cannot be read', async () => {
+    runtimeConfig = {
+      help: {
+        manual: {
+          source: 'standard',
+          get fallbackLanguage() { throw new Error('Unreadable fallback language'); },
+          get fallbackPathTemplate() { throw new Error('Unreadable fallback path'); },
+        },
+      },
+    };
+    await openManual();
+
+    expect(content().querySelector('#urval-oppna')).not.toBeNull();
+    expect(requestedUrls).toEqual([]);
+  });
+
+  it('settles a non-abort standard load failure to a visible error', async () => {
+    runtimeConfig = {
+      help: {
+        manual: {
+          source: 'standard',
+          fallbackPathTemplate: { toString() { throw new Error('Invalid fallback path'); } },
+        },
+      },
+    };
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: true, onClose }));
+    });
+    for (let attempt = 0; attempt < 20 && !container.querySelector('.odv-help-placeholder.is-error'); attempt += 1) {
+      await flush(50);
+    }
+
+    expect(container.querySelector('.odv-help-placeholder.is-error')?.textContent)
+      .toContain('No manual file could be loaded for this language.');
+    expect(container.querySelector('.odv-help-placeholder')?.textContent).not.toContain('Loading manual');
+    expect(container.querySelector('button[aria-label="Reload manual from server"]').disabled).toBe(false);
+  });
+
+  it('does not apply an aborted Swedish load after switching to English', async () => {
+    vi.stubGlobal('fetch', (url, options) => new Promise((resolve, reject) => {
+      if (String(url).includes('manual.sv.html')) {
+        options.signal.addEventListener('abort', () => {
+          const error = new Error('aborted');
+          error.name = 'AbortError';
+          reject(error);
+        });
+        return;
+      }
+      resolve({
+        ok: true,
+        url: String(url),
+        text: async () => '<h2 id="english-manual">English manual</h2>',
+      });
+    }));
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: true, onClose }));
+    });
+    await flush(0);
+
+    mockI18n.language = 'en';
+    mockI18n.resolvedLanguage = 'en';
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: true, onClose }));
+    });
+    await flush(50);
+
+    expect(content().querySelector('#english-manual')).not.toBeNull();
+    expect(container.querySelector('.odv-help-placeholder.is-error')).toBeNull();
+  });
+
   it('aborts a pending source fetch when the dialog closes', async () => {
     let aborted = false;
     vi.stubGlobal('fetch', (_url, options) => new Promise((_resolve, reject) => {

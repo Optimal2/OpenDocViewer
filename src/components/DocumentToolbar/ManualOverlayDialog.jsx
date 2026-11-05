@@ -57,7 +57,18 @@ function absoluteManualUrl(candidate) {
  * @returns {Promise<({candidate: string, url: string, html: string}|null)>}
  */
 async function loadStandardManual({ language, manualConfig, fetchCandidate }) {
-  const standardConfig = { ...(manualConfig || {}), source: 'standard' };
+  // The host owns this object. Read only settings used by standard mode, and let the existing
+  // candidate builders apply their defaults when an optional getter is unreadable. In particular,
+  // never enumerate unrelated host properties with object spread.
+  const standardConfig = { source: 'standard' };
+  for (const key of ['fallbackLanguage', 'fallbackPathTemplate']) {
+    try {
+      const value = manualConfig?.[key];
+      if (value !== undefined) standardConfig[key] = value;
+    } catch {
+      // Use the existing default for this optional setting.
+    }
+  }
   const preferredLanguage = buildManualLanguageCandidates(language, standardConfig)
     .find((entry) => typeof STANDARD_MANUAL_LOADERS[entry] === 'function');
   if (preferredLanguage) {
@@ -897,46 +908,57 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     setManualState({ loading: true, error: '', html: '', resolvedUrl: '' });
 
-    const load = async () => {
-      const runtimeConfig = getRuntimeConfig();
-      const manualConfig = runtimeConfig?.help?.manual;
-      const sourceMode = resolveManualSourceMode(manualConfig);
-      const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidate, refreshToken), {
-        cache: refreshToken ? 'reload' : 'no-store',
-        credentials: 'same-origin',
-        signal: controller?.signal,
-        headers: { Accept: 'text/html, text/plain;q=0.9, */*;q=0.1' },
-      });
-
-      const source = await (sourceMode === 'standard'
-        ? loadStandardManual({ language, manualConfig, fetchCandidate })
-        : resolveManualSource(buildManualCandidates(language, manualConfig), fetchCandidate)
-      ).catch(() => undefined);
-      // undefined = aborted (the dialog closed or the language changed)
-      if (cancelled || source === undefined) return;
-
-      if (source) {
-        const resolvedUrl = removeManualRefreshToken(source.url) || source.candidate;
-        // Only bundled standard content is capability-filtered. Site-owned HTML keeps its complete
-        // authored DOM and follows the original sanitize/rewrite path without these rules.
-        const html = sourceMode === 'standard'
-          ? filterStandardManual(source.html, runtimeConfig)
-          : source.html;
-        setManualState({
-          loading: false,
-          error: '',
-          html: rewriteManualHtml(html, resolvedUrl),
-          resolvedUrl,
-        });
-        return;
-      }
-
+    const showManualNotAvailable = () => {
+      if (cancelled) return;
       setManualState({
         loading: false,
         error: t('help.manualNotAvailable', { defaultValue: 'No manual file could be loaded for this language.' }),
         html: '',
         resolvedUrl: '',
       });
+    };
+
+    const load = async () => {
+      try {
+        const runtimeConfig = getRuntimeConfig();
+        const manualConfig = runtimeConfig?.help?.manual;
+        const sourceMode = resolveManualSourceMode(manualConfig);
+        const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidate, refreshToken), {
+          cache: refreshToken ? 'reload' : 'no-store',
+          credentials: 'same-origin',
+          signal: controller?.signal,
+          headers: { Accept: 'text/html, text/plain;q=0.9, */*;q=0.1' },
+        });
+
+        const source = await (sourceMode === 'standard'
+          ? loadStandardManual({ language, manualConfig, fetchCandidate })
+          : resolveManualSource(buildManualCandidates(language, manualConfig), fetchCandidate)
+        );
+        if (cancelled) return;
+
+        if (source) {
+          const resolvedUrl = removeManualRefreshToken(source.url) || source.candidate;
+          // Only bundled standard content is capability-filtered. Site-owned HTML keeps its complete
+          // authored DOM and follows the original sanitize/rewrite path without these rules.
+          const html = sourceMode === 'standard'
+            ? filterStandardManual(source.html, runtimeConfig)
+            : source.html;
+          setManualState({
+            loading: false,
+            error: '',
+            html: rewriteManualHtml(html, resolvedUrl),
+            resolvedUrl,
+          });
+          return;
+        }
+
+        showManualNotAvailable();
+      } catch {
+        // Cleanup aborts the active request when the dialog closes or the language changes. Any
+        // other failure must settle visibly instead of leaving a permanent loading placeholder.
+        if (cancelled || controller?.signal?.aborted) return;
+        showManualNotAvailable();
+      }
     };
 
     void load();

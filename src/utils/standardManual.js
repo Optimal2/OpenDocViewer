@@ -353,42 +353,58 @@ function filterSelectionWorkspaceBlocks(doc, states, removedIds, lightboxCandida
  * @param {Set<string>} lightboxCandidates
  */
 function filterPrintActionBlocks(doc, states, removedIds, lightboxCandidates) {
-  const removals = new Set();
-  for (const element of doc.body.querySelectorAll('p, figure, li')) {
-    const tagName = String(element.tagName).toUpperCase();
-    const text = normalizedText(element);
-    if (tagName === 'P' && (!states.printHtml || !states.printPdf) && (
-      text.startsWith('skillnaden mellan de två knapparna:')
-      || text.startsWith('the difference between the two buttons:')
-    )) {
-      removals.add(element);
-      continue;
-    }
-    if (tagName === 'FIGURE' && !states.printPdf) {
-      const fragments = Array.from(element.querySelectorAll('a[href]')).map(localFragmentId);
-      if (fragments.includes('lb-utskrift-forbereds')) removals.add(element);
-      continue;
-    }
-    if (tagName !== 'LI') continue;
+  // These phrases are scoped to the actual getting-started print sections. A same-prefix sentence
+  // in another section or guide is ordinary help and must survive. Unknown structures fail open.
+  const printHeadingIds = new Set(['utskrift', 'printing', 'print']);
+  const headings = Array.from(doc.body.querySelectorAll('h2')).filter(
+    (heading) => printHeadingIds.has(heading.id),
+  );
 
-    if (!states.printPdf && (
-      text.startsWith('fortsätt jobba')
-      || text.startsWith('continue working')
-    )) {
-      removals.add(element);
-    } else if (!states.reuseLastPrintSettings && (
-      (text.startsWith('efter en utskrift via pdf') && text.includes('återanvänd senaste utskriftsval'))
-      || (text.startsWith('after a print via pdf') && text.includes('reuse latest print settings'))
-    )) {
-      removals.add(element);
-    } else if (!states.pdfOrientation && (
-      (text.startsWith('hos vissa organisationer') && text.includes('automatisk sidorientering'))
-      || (text.startsWith('some organizations also have') && text.includes('automatic page orientation'))
-    )) {
-      removals.add(element);
+  for (const heading of headings) {
+    const segment = findHeadingSegment(heading, doc.body);
+    const range = headingSegmentRange(heading, segment, false);
+    const elements = Array.from(segment.container.querySelectorAll('p, figure, li')).filter(
+      (element) => guideContainerFor(element, doc.body) === segment.container
+        && isInsideRange(element, range),
+    );
+    const removals = new Set();
+
+    for (const element of elements) {
+      const tagName = String(element.tagName).toUpperCase();
+      const text = normalizedText(element);
+      if (tagName === 'P' && (!states.printHtml || !states.printPdf) && (
+        text.startsWith('skillnaden mellan de två knapparna:')
+        || text.startsWith('the difference between the two buttons:')
+      )) {
+        removals.add(element);
+        continue;
+      }
+      if (tagName === 'FIGURE' && !states.printPdf) {
+        const fragments = Array.from(element.querySelectorAll('a[href]')).map(localFragmentId);
+        if (fragments.includes('lb-utskrift-forbereds')) removals.add(element);
+        continue;
+      }
+      if (tagName !== 'LI') continue;
+
+      if (!states.printPdf && (
+        text.startsWith('fortsätt jobba')
+        || text.startsWith('continue working')
+      )) {
+        removals.add(element);
+      } else if (!states.reuseLastPrintSettings && (
+        (text.startsWith('efter en utskrift via pdf') && text.includes('återanvänd senaste utskriftsval'))
+        || (text.startsWith('after a print via pdf') && text.includes('reuse latest print settings'))
+      )) {
+        removals.add(element);
+      } else if (!states.pdfOrientation && (
+        (text.startsWith('hos vissa organisationer') && text.includes('automatisk sidorientering'))
+        || (text.startsWith('some organizations also have') && text.includes('automatic page orientation'))
+      )) {
+        removals.add(element);
+      }
     }
+    removeStandardManualElements(removals, removedIds, lightboxCandidates);
   }
-  removeStandardManualElements(removals, removedIds, lightboxCandidates);
 }
 
 /**

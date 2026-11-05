@@ -31,7 +31,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 233 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 163 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 219 | 1 | 5 | high | Compact language selector for the toolbar. |
-| <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 1365 | 1 | 40 | high | Manual overlay that loads simple external HTML fragments from the public help folder. |
+| <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 1387 | 1 | 40 | high | Manual overlay that loads simple external HTML fragments from the public help folder. |
 | <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 445 | 1 | 6 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live |
 | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx</code> | 52 | 1 | 1 | high | The toolbar&#39;s OCR group, right after the image-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: - \`ocr.search.enabled\` \(default true; only the literal false |
 | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 333 | 1 | 1 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
@@ -182,7 +182,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/runtimeConfig.js</code> | 963 | 31 | 70 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
-| <code>src/utils/standardManual.js</code> | 553 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
+| <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
 | <code>src/utils/standardManualRules.js</code> | 217 | 1 | 9 | high | Resolve every site switch that can hide standard-manual content. |
 | <code>src/utils/supportDiagnostics.js</code> | 375 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/toolbarDensity.js</code> | 30 | 2 | 2 | high | Toolbar density on the document root. |

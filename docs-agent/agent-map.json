@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 68878,
+    "sourceLineCount": 68916,
     "docletCount": 1980,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
@@ -909,7 +909,7 @@
           {
             "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
             "lines": [
-              1344
+              1366
             ],
             "summary": "Manual overlay that loads simple external HTML fragments from the public help folder."
           }
@@ -922,9 +922,9 @@
           {
             "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
             "lines": [
-              139,
-              140,
-              141
+              150,
+              151,
+              152
             ],
             "summary": "Manual overlay that loads simple external HTML fragments from the public help folder."
           },
@@ -938,7 +938,7 @@
           {
             "path": "src/utils/standardManual.js",
             "lines": [
-              550
+              566
             ],
             "summary": "Filter and sanitize the bundled standard manual for a supplied runtime config."
           }
@@ -1188,7 +1188,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8698,
+      "lineCount": 8720,
       "docletCount": 148,
       "importantFiles": [
         {
@@ -1230,7 +1230,7 @@
         {
           "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
           "score": 48,
-          "lines": 1365,
+          "lines": 1387,
           "incomingLocalImports": 1,
           "doclets": 40,
           "summary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
@@ -1795,7 +1795,7 @@
     {
       "name": "src/utils",
       "fileCount": 64,
-      "lineCount": 23925,
+      "lineCount": 23941,
       "docletCount": 983,
       "importantFiles": [
         {
@@ -13318,7 +13318,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "lines": 1365,
+      "lines": 1387,
       "extension": ".jsx",
       "jsdocBlockCount": 54,
       "sourceSummary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
@@ -13415,7 +13415,7 @@
         {
           "name": "ManualOverlayDialog",
           "kind": "default",
-          "line": 655
+          "line": 666
         }
       ],
       "declarations": [
@@ -13432,147 +13432,152 @@
         {
           "name": "standardConfig",
           "kind": "object",
-          "line": 60
+          "line": 63
         },
         {
           "name": "isRewritableRelativeUrl",
           "kind": "function",
-          "line": 80
+          "line": 91
         },
         {
           "name": "sanitizeManualHtml",
           "kind": "function",
-          "line": 94
+          "line": 105
         },
         {
           "name": "rewriteManualHtml",
           "kind": "function",
-          "line": 108
+          "line": 119
         },
         {
           "name": "appendManualRefreshToken",
           "kind": "function",
-          "line": 150
+          "line": 161
         },
         {
           "name": "removeManualRefreshToken",
           "kind": "function",
-          "line": 166
+          "line": 177
         },
         {
           "name": "createManualSearchFolder",
           "kind": "function",
-          "line": 215
+          "line": 226
         },
         {
           "name": "foldManualSearchText",
           "kind": "function",
-          "line": 254
+          "line": 265
         },
         {
           "name": "collectManualTextMatches",
           "kind": "function",
-          "line": 285
+          "line": 296
         },
         {
           "name": "canUseCustomHighlight",
           "kind": "function",
-          "line": 328
+          "line": 339
         },
         {
           "name": "applyCustomHighlight",
           "kind": "function",
-          "line": 348
+          "line": 359
         },
         {
           "name": "setCurrent",
           "kind": "function",
-          "line": 363
+          "line": 374
         },
         {
           "name": "applyMarkFallback",
           "kind": "function",
-          "line": 402
+          "line": 413
         },
         {
           "name": "setCurrentMark",
           "kind": "function",
-          "line": 444
+          "line": 455
         },
         {
           "name": "removeMarkFallback",
           "kind": "function",
-          "line": 463
+          "line": 474
         },
         {
           "name": "revealManualMatch",
           "kind": "function",
-          "line": 485
+          "line": 496
         },
         {
           "name": "openDetailsAncestors",
           "kind": "function",
-          "line": 524
+          "line": 535
         },
         {
           "name": "scrollPaneToTarget",
           "kind": "function",
-          "line": 541
+          "line": 552
         },
         {
           "name": "findManualElementById",
           "kind": "function",
-          "line": 569
+          "line": 580
         },
         {
           "name": "isHiddenInManual",
           "kind": "function",
-          "line": 592
+          "line": 603
         },
         {
           "name": "captureScrollPositions",
           "kind": "function",
-          "line": 610
+          "line": 621
         },
         {
           "name": "replaceUrlFragment",
           "kind": "function",
-          "line": 638
+          "line": 649
         },
         {
           "name": "ManualOverlayDialog",
           "kind": "component",
-          "line": 655
+          "line": 666
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 856
+          "line": 867
+        },
+        {
+          "name": "showManualNotAvailable",
+          "kind": "function",
+          "line": 911
         },
         {
           "name": "load",
           "kind": "function",
-          "line": 900
+          "line": 921
         },
         {
           "name": "fetchCandidate",
           "kind": "function",
-          "line": 904
+          "line": 926
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 981
+          "line": 1003
         },
         {
           "name": "schedule",
           "kind": "function",
-          "line": 1001
+          "line": 1023
         },
         {
           "name": "renderContentsLink",
           "kind": "component",
-          "line": 1130
+          "line": 1152
         }
       ],
       "parseError": null,
@@ -13583,16 +13588,16 @@
             "key": "dangerouslySetInnerHTML",
             "description": "React raw HTML rendering",
             "lines": [
-              1344
+              1366
             ]
           },
           {
             "key": "innerHTML",
             "description": "Direct DOM HTML assignment or access",
             "lines": [
-              139,
-              140,
-              141
+              150,
+              151,
+              152
             ]
           }
         ]
@@ -13673,7 +13678,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 80,
+          "line": 91,
           "description": "",
           "params": [
             {
@@ -13698,7 +13703,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 94,
+          "line": 105,
           "description": "",
           "params": [
             {
@@ -13723,7 +13728,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 108,
+          "line": 119,
           "description": "",
           "params": [
             {
@@ -13754,7 +13759,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 150,
+          "line": 161,
           "description": "",
           "params": [
             {
@@ -13785,7 +13790,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 166,
+          "line": 177,
           "description": "",
           "params": [
             {
@@ -13810,7 +13815,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 182,
+          "line": 193,
           "description": "Minimum query length before the manual search runs.",
           "params": [],
           "returns": [],
@@ -13823,7 +13828,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 187,
+          "line": 198,
           "description": "Debounce delay before a typed query is applied to the rendered manual text.",
           "params": [],
           "returns": [],
@@ -13836,7 +13841,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 192,
+          "line": 203,
           "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
           "params": [],
           "returns": [],
@@ -13849,7 +13854,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 197,
+          "line": 208,
           "description": "Name of the CSS Custom Highlight covering only the current manual search hit.",
           "params": [],
           "returns": [],
@@ -13862,7 +13867,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 204,
+          "line": 215,
           "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
           "params": [],
           "returns": [],
@@ -13875,7 +13880,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 215,
+          "line": 226,
           "description": "Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.",
           "params": [
             {
@@ -13900,7 +13905,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 254,
+          "line": 265,
           "description": "Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from.",
           "params": [
             {
@@ -13931,7 +13936,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 285,
+          "line": 296,
           "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
           "params": [
             {
@@ -13968,7 +13973,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 328,
+          "line": 339,
           "description": "",
           "params": [],
           "returns": [
@@ -13986,7 +13991,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 348,
+          "line": 359,
           "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
           "params": [
             {
@@ -14017,7 +14022,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 402,
+          "line": 413,
           "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
           "params": [
             {
@@ -14048,7 +14053,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 444,
+          "line": 455,
           "description": "",
           "params": [
             {
@@ -14074,7 +14079,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 463,
+          "line": 474,
           "description": "Unwrap fallback marks and merge the split text nodes back together.",
           "params": [
             {
@@ -14100,7 +14105,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 485,
+          "line": 496,
           "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
           "params": [
             {
@@ -14138,7 +14143,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 513,
+          "line": 524,
           "description": "Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read.",
           "params": [],
           "returns": [],
@@ -14151,7 +14156,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 516,
+          "line": 527,
           "description": "Gap in pixels kept above a heading when the content pane scrolls to it.",
           "params": [],
           "returns": [],
@@ -14164,7 +14169,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 524,
+          "line": 535,
           "description": "Open collapsed &lt;details&gt; ancestors so a target inside them can be shown.",
           "params": [
             {
@@ -14190,7 +14195,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 541,
+          "line": 552,
           "description": "Scroll only the given pane so the target sits at its top.",
           "params": [
             {
@@ -14216,7 +14221,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 549,
+          "line": 560,
           "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
           "params": [],
           "returns": [],
@@ -14229,7 +14234,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 552,
+          "line": 563,
           "description": "Id of the manual search field.",
           "params": [],
           "returns": [],
@@ -14242,7 +14247,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 555,
+          "line": 566,
           "description": "Id of the dialog title.",
           "params": [],
           "returns": [],
@@ -14255,7 +14260,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 561,
+          "line": 572,
           "description": "Ids the dialog renders around the manual.",
           "params": [],
           "returns": [],
@@ -14268,7 +14273,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 569,
+          "line": 580,
           "description": "",
           "params": [
             {
@@ -14299,7 +14304,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 592,
+          "line": 603,
           "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
           "params": [
             {
@@ -14330,7 +14335,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 610,
+          "line": 621,
           "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
           "params": [
             {
@@ -14355,7 +14360,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 638,
+          "line": 649,
           "description": "Replace the URL fragment without adding a history entry.",
           "params": [
             {
@@ -14375,7 +14380,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 655,
+          "line": 666,
           "description": "",
           "params": [
             {
@@ -14418,7 +14423,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 713,
+          "line": 724,
           "description": "Make the section holding target current and keep it current until the reader scrolls.",
           "params": [
             {
@@ -14438,7 +14443,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 727,
+          "line": 738,
           "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
           "params": [
             {
@@ -14458,7 +14463,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 738,
+          "line": 749,
           "description": "Put back the URL fragment the viewer had before the manual set one.",
           "params": [],
           "returns": [],
@@ -14471,7 +14476,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 759,
+          "line": 770,
           "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
           "params": [
             {
@@ -14491,7 +14496,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 856,
+          "line": 867,
           "description": "",
           "params": [
             {
@@ -14511,7 +14516,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 1130,
+          "line": 1152,
           "description": "",
           "params": [
             {
@@ -76877,7 +76882,7 @@
     },
     {
       "path": "src/utils/standardManual.js",
-      "lines": 553,
+      "lines": 569,
       "extension": ".js",
       "jsdocBlockCount": 25,
       "sourceSummary": null,
@@ -76906,7 +76911,7 @@
         {
           "name": "filterStandardManual",
           "kind": "function",
-          "line": 528
+          "line": 544
         }
       ],
       "declarations": [
@@ -76998,42 +77003,42 @@
         {
           "name": "hasRemainingFragmentLink",
           "kind": "function",
-          "line": 400
+          "line": 416
         },
         {
           "name": "pruneOrphanedLightboxes",
           "kind": "function",
-          "line": 413
+          "line": 429
         },
         {
           "name": "removeAuthoredNavigationEntries",
           "kind": "function",
-          "line": 431
+          "line": 447
         },
         {
           "name": "unlinkRemovedTargets",
           "kind": "function",
-          "line": 451
+          "line": 467
         },
         {
           "name": "firstNumberedTextNode",
           "kind": "function",
-          "line": 463
+          "line": 479
         },
         {
           "name": "replaceNumberPrefix",
           "kind": "function",
-          "line": 478
+          "line": 494
         },
         {
           "name": "renumberVisibleHeadings",
           "kind": "function",
-          "line": 490
+          "line": 506
         },
         {
           "name": "filterStandardManual",
           "kind": "function",
-          "line": 528
+          "line": 544
         }
       ],
       "parseError": null,
@@ -77044,7 +77049,7 @@
             "key": "innerHTML",
             "description": "Direct DOM HTML assignment or access",
             "lines": [
-              550
+              566
             ]
           }
         ]
@@ -77597,7 +77602,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 400,
+          "line": 416,
           "description": "",
           "params": [
             {
@@ -77634,7 +77639,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 413,
+          "line": 429,
           "description": "Remove lightbox subtrees whose last thumbnail belonged to removed content.",
           "params": [
             {
@@ -77666,7 +77671,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 431,
+          "line": 447,
           "description": "Authored contents repeat a section's full title, so unlinking alone would leave hidden headings searchable.",
           "params": [
             {
@@ -77692,7 +77697,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 451,
+          "line": 467,
           "description": "Preserve link text and inline markup while removing only links to ids that this filter actually removed.",
           "params": [
             {
@@ -77718,7 +77723,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 463,
+          "line": 479,
           "description": "",
           "params": [
             {
@@ -77743,7 +77748,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 478,
+          "line": 494,
           "description": "",
           "params": [
             {
@@ -77769,7 +77774,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 490,
+          "line": 506,
           "description": "Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links.",
           "params": [
             {
@@ -77789,7 +77794,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/standardManual.js",
-          "line": 528,
+          "line": 544,
           "description": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
           "params": [
             {
@@ -87830,7 +87835,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 150,
+      "line": 161,
       "description": "",
       "params": [
         {
@@ -87861,7 +87866,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 348,
+      "line": 359,
       "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
       "params": [
         {
@@ -87892,7 +87897,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 402,
+      "line": 413,
       "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
       "params": [
         {
@@ -87923,7 +87928,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 328,
+      "line": 339,
       "description": "",
       "params": [],
       "returns": [
@@ -87941,7 +87946,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 610,
+      "line": 621,
       "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
       "params": [
         {
@@ -87966,7 +87971,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 285,
+      "line": 296,
       "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
       "params": [
         {
@@ -88003,7 +88008,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 215,
+      "line": 226,
       "description": "Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.",
       "params": [
         {
@@ -88028,7 +88033,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 655,
+      "line": 666,
       "description": "",
       "params": [
         {
@@ -88071,7 +88076,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 569,
+      "line": 580,
       "description": "",
       "params": [
         {
@@ -88102,7 +88107,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 254,
+      "line": 265,
       "description": "Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from.",
       "params": [
         {
@@ -88133,7 +88138,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 856,
+      "line": 867,
       "description": "",
       "params": [
         {
@@ -88153,7 +88158,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 592,
+      "line": 603,
       "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
       "params": [
         {
@@ -88184,7 +88189,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 80,
+      "line": 91,
       "description": "",
       "params": [
         {
@@ -88252,7 +88257,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 549,
+      "line": 560,
       "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
       "params": [],
       "returns": [],
@@ -88265,7 +88270,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 561,
+      "line": 572,
       "description": "Ids the dialog renders around the manual.",
       "params": [],
       "returns": [],
@@ -88278,7 +88283,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 197,
+      "line": 208,
       "description": "Name of the CSS Custom Highlight covering only the current manual search hit.",
       "params": [],
       "returns": [],
@@ -88291,7 +88296,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 187,
+      "line": 198,
       "description": "Debounce delay before a typed query is applied to the rendered manual text.",
       "params": [],
       "returns": [],
@@ -88304,7 +88309,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 192,
+      "line": 203,
       "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
       "params": [],
       "returns": [],
@@ -88317,7 +88322,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 552,
+      "line": 563,
       "description": "Id of the manual search field.",
       "params": [],
       "returns": [],
@@ -88330,7 +88335,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 204,
+      "line": 215,
       "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
       "params": [],
       "returns": [],
@@ -88343,7 +88348,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 182,
+      "line": 193,
       "description": "Minimum query length before the manual search runs.",
       "params": [],
       "returns": [],
@@ -88356,7 +88361,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 513,
+      "line": 524,
       "description": "Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read.",
       "params": [],
       "returns": [],
@@ -88369,7 +88374,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 516,
+      "line": 527,
       "description": "Gap in pixels kept above a heading when the content pane scrolls to it.",
       "params": [],
       "returns": [],
@@ -88382,7 +88387,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 555,
+      "line": 566,
       "description": "Id of the dialog title.",
       "params": [],
       "returns": [],
@@ -88395,7 +88400,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 759,
+      "line": 770,
       "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
       "params": [
         {
@@ -88415,7 +88420,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 524,
+      "line": 535,
       "description": "Open collapsed &lt;details&gt; ancestors so a target inside them can be shown.",
       "params": [
         {
@@ -88441,7 +88446,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 713,
+      "line": 724,
       "description": "Make the section holding target current and keep it current until the reader scrolls.",
       "params": [
         {
@@ -88461,7 +88466,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 166,
+      "line": 177,
       "description": "",
       "params": [
         {
@@ -88486,7 +88491,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 463,
+      "line": 474,
       "description": "Unwrap fallback marks and merge the split text nodes back together.",
       "params": [
         {
@@ -88512,7 +88517,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 1130,
+      "line": 1152,
       "description": "",
       "params": [
         {
@@ -88543,7 +88548,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 638,
+      "line": 649,
       "description": "Replace the URL fragment without adding a history entry.",
       "params": [
         {
@@ -88563,7 +88568,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 738,
+      "line": 749,
       "description": "Put back the URL fragment the viewer had before the manual set one.",
       "params": [],
       "returns": [],
@@ -88576,7 +88581,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 485,
+      "line": 496,
       "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
       "params": [
         {
@@ -88614,7 +88619,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 108,
+      "line": 119,
       "description": "",
       "params": [
         {
@@ -88645,7 +88650,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 94,
+      "line": 105,
       "description": "",
       "params": [
         {
@@ -88670,7 +88675,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 541,
+      "line": 552,
       "description": "Scroll only the given pane so the target sits at its top.",
       "params": [
         {
@@ -88696,7 +88701,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 444,
+      "line": 455,
       "description": "",
       "params": [
         {
@@ -88722,7 +88727,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 727,
+      "line": 738,
       "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
       "params": [
         {
@@ -128134,7 +128139,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 528,
+      "line": 544,
       "description": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
       "params": [
         {
@@ -128196,7 +128201,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 463,
+      "line": 479,
       "description": "",
       "params": [
         {
@@ -128252,7 +128257,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 400,
+      "line": 416,
       "description": "",
       "params": [
         {
@@ -128488,7 +128493,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 413,
+      "line": 429,
       "description": "Remove lightbox subtrees whose last thumbnail belonged to removed content.",
       "params": [
         {
@@ -128552,7 +128557,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 431,
+      "line": 447,
       "description": "Authored contents repeat a section's full title, so unlinking alone would leave hidden headings searchable.",
       "params": [
         {
@@ -128648,7 +128653,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 490,
+      "line": 506,
       "description": "Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links.",
       "params": [
         {
@@ -128668,7 +128673,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 478,
+      "line": 494,
       "description": "",
       "params": [
         {
@@ -128719,7 +128724,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/standardManual.js",
-      "line": 451,
+      "line": 467,
       "description": "Preserve link text and inline markup while removing only links to ids that this filter actually removed.",
       "params": [
         {
