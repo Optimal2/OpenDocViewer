@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 64. Line count: 23582. JSDoc symbol count: 972.
+File count: 64. Line count: 23676. JSDoc symbol count: 975.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -1060,16 +1060,18 @@ Symbols:
 
 Resolve every site switch that can hide standard\-manual content.
 
-Exports: `standardManualSectionRules`, `standardManualOcrSectionRules`, `standardManualRuleIds`, `resolveStandardManualRuleStates`
+Exports: `standardManualLogicalRules`, `standardManualSectionRules`, `standardManualOcrSectionRules`, `standardManualRuleIds`, `resolveStandardManualRuleStates`
 
 Local imports: `src/utils/runtimeConfig.js`
 
 Symbols:
 
-- `compareGuideIds` (function) - Return the standalone and embedded\-comparison forms of a Swedish/English id pair.
+- `requiredDocument` (function) - No description.
+- `localizedGuideRule` (function) - Declare the actual authored aliases for one logical section.
+- `standardManualLogicalRules` (constant) - Generator\-validated logical rules.
 - `standardManualSectionRules` (constant) - Exact\-id heading rules.
 - `standardManualOcrSectionRules` (constant) - OCR headings use the same id in standalone and embedded guides.
-- `standardManualRuleIds` (constant) - A flat list of every exact element id in the generator\-validated rule manifest.
+- `standardManualRuleIds` (constant) - A flat compatibility list of every real element id referenced by the logical manifest.
 - `failOpen` (function) - Read a UI predicate without letting a host\-owned Proxy/getter hide manual content.
 - `resolveStandardManualRuleStates` (function) - Resolve every site switch that can hide standard\-manual content.
 

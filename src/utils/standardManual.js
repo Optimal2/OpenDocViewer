@@ -294,6 +294,27 @@ function pruneOrphanedLightboxes(doc, removedIds, lightboxCandidates) {
 }
 
 /**
+ * Authored contents repeat a section's full title, so unlinking alone would leave hidden headings
+ * searchable. Remove only entries that target content removed by this filter. Side navigation uses
+ * one link per list item, making the wrapper item part of that entry; ordinary prose links are not
+ * handled here and retain their text through unlinkRemovedTargets instead.
+ *
+ * @param {Document} doc
+ * @param {Set<string>} removedIds
+ */
+function removeAuthoredNavigationEntries(doc, removedIds) {
+  for (const nav of Array.from(doc.querySelectorAll('nav.sidonav, nav.toc'))) {
+    for (const anchor of Array.from(nav.querySelectorAll('a[href]'))) {
+      const id = localFragmentId(anchor);
+      if (!id || !removedIds.has(id) || doc.getElementById(id)) continue;
+      const item = anchor.closest('li');
+      if (item && nav.contains(item)) item.remove();
+      else anchor.remove();
+    }
+  }
+}
+
+/**
  * Preserve link text and inline markup while removing only links to ids that this
  * filter actually removed. Existing target-less fragments (notably #lb-stang)
  * retain their script-free lightbox behavior.
@@ -389,6 +410,7 @@ export function filterStandardManual(html, runtimeConfig) {
   filterHeadingRules(doc, states, removedIds, lightboxCandidates);
   filterComparePrintBlocks(doc, states, removedIds, lightboxCandidates);
   pruneOrphanedLightboxes(doc, removedIds, lightboxCandidates);
+  removeAuthoredNavigationEntries(doc, removedIds);
   unlinkRemovedTargets(doc, removedIds);
   renumberVisibleHeadings(doc);
 

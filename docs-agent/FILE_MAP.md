@@ -84,6 +84,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/viewerContext.js</code> | 260 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
 | <code>src/contexts/ViewerProvider.jsx</code> | 2914 | 1 | 70 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
+| <code>src/generated/standard-manual/manual.en.js</code> | 2 | 0 | 0 | low | Default export for manual.en. |
+| <code>src/generated/standard-manual/manual.sv.js</code> | 2 | 0 | 0 | low | Default export for manual.sv. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | <code>src/hooks/useKeyTipsHeld.js</code> | 67 | 1 | 3 | high | Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
@@ -180,8 +182,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/runtimeConfig.js</code> | 949 | 31 | 69 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
-| <code>src/utils/standardManual.js</code> | 403 | 0 | 21 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
-| <code>src/utils/standardManualRules.js</code> | 102 | 1 | 6 | high | Resolve every site switch that can hide standard-manual content. |
+| <code>src/utils/standardManual.js</code> | 425 | 0 | 22 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
+| <code>src/utils/standardManualRules.js</code> | 174 | 1 | 8 | high | Resolve every site switch that can hide standard-manual content. |
 | <code>src/utils/supportDiagnostics.js</code> | 375 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/toolbarDensity.js</code> | 30 | 2 | 2 | high | Toolbar density on the document root. |
 | <code>src/utils/viewerPreferences.js</code> | 562 | 8 | 39 | high | Lightweight persisted viewer preferences. |

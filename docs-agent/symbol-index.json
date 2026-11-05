@@ -46244,7 +46244,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 381,
+    "line": 402,
     "description": "Filter and sanitize the bundled standard manual for a supplied runtime config.",
     "params": [
       {
@@ -46306,7 +46306,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 316,
+    "line": 337,
     "description": "",
     "params": [
       {
@@ -46656,6 +46656,32 @@
     "examples": 0
   },
   {
+    "id": "removeAuthoredNavigationEntries",
+    "name": "removeAuthoredNavigationEntries",
+    "longname": "removeAuthoredNavigationEntries",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/standardManual.js",
+    "line": 305,
+    "description": "Authored contents repeat a section's full title, so unlinking alone would leave hidden headings searchable.",
+    "params": [
+      {
+        "name": "doc",
+        "type": "Document",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "removedIds",
+        "type": "Set.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "removeHeadingSegment",
     "name": "removeHeadingSegment",
     "longname": "removeHeadingSegment",
@@ -46700,7 +46726,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 343,
+    "line": 364,
     "description": "Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links.",
     "params": [
       {
@@ -46720,7 +46746,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 331,
+    "line": 352,
     "description": "",
     "params": [
       {
@@ -46771,7 +46797,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManual.js",
-    "line": 304,
+    "line": 325,
     "description": "Preserve link text and inline markup while removing only links to ids that this filter actually removed.",
     "params": [
       {
@@ -46791,44 +46817,13 @@
     "examples": 0
   },
   {
-    "id": "compareGuideIds",
-    "name": "compareGuideIds",
-    "longname": "compareGuideIds",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/utils/standardManualRules.js",
-    "line": 20,
-    "description": "Return the standalone and embedded-comparison forms of a Swedish/English id pair.",
-    "params": [
-      {
-        "name": "swedish",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "english",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Array.<string>",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "failOpen",
     "name": "failOpen",
     "longname": "failOpen",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 71,
+    "line": 141,
     "description": "Read a UI predicate without letting a host-owned Proxy/getter hide manual content.",
     "params": [
       {
@@ -46847,13 +46842,117 @@
     "examples": 0
   },
   {
+    "id": "localizedGuideRule",
+    "name": "localizedGuideRule",
+    "longname": "localizedGuideRule",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/standardManualRules.js",
+    "line": 44,
+    "description": "Declare the actual authored aliases for one logical section.",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": "Stable logical-rule id shared by both languages."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "optional": false,
+        "description": "Runtime state consumed by the pure filter."
+      },
+      {
+        "name": "guideName",
+        "type": "string",
+        "optional": false,
+        "description": "Standalone source guide basename."
+      },
+      {
+        "name": "swedishStandalone",
+        "type": "string",
+        "optional": false,
+        "description": "Actual id in the standalone Swedish guide."
+      },
+      {
+        "name": "swedishEmbedded",
+        "type": "string",
+        "optional": false,
+        "description": "Actual id in the Swedish combined manual."
+      },
+      {
+        "name": "englishStandalone",
+        "type": "string",
+        "optional": false,
+        "description": "Actual id in the standalone English guide."
+      },
+      {
+        "name": "englishEmbedded",
+        "type": "string",
+        "optional": false,
+        "description": "Actual id in the English combined manual."
+      },
+      {
+        "name": "embeddedGuideName",
+        "type": "string",
+        "optional": true,
+        "description": "Actual combined-guide suffix when it differs from the filename."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Readonly.<Object>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "requiredDocument",
+    "name": "requiredDocument",
+    "longname": "requiredDocument",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/standardManualRules.js",
+    "line": 24,
+    "description": "",
+    "params": [
+      {
+        "name": "file",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "guide",
+        "type": "string",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Readonly.<Object>",
+        "description": "Frozen required-document descriptor."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "resolveStandardManualRuleStates",
     "name": "resolveStandardManualRuleStates",
     "longname": "resolveStandardManualRuleStates",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 87,
+    "line": 157,
     "description": "Resolve every site switch that can hide standard-manual content.",
     "params": [
       {
@@ -46872,13 +46971,26 @@
     "examples": 0
   },
   {
+    "id": "standardManualLogicalRules",
+    "name": "standardManualLogicalRules",
+    "longname": "standardManualLogicalRules",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/standardManualRules.js",
+    "line": 75,
+    "description": "Generator-validated logical rules.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "standardManualOcrSectionRules",
     "name": "standardManualOcrSectionRules",
     "longname": "standardManualOcrSectionRules",
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 47,
+    "line": 115,
     "description": "OCR headings use the same id in standalone and embedded guides.",
     "params": [],
     "returns": [],
@@ -46891,8 +47003,8 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 59,
-    "description": "A flat list of every exact element id in the generator-validated rule manifest.",
+    "line": 127,
+    "description": "A flat compatibility list of every real element id referenced by the logical manifest.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -46904,7 +47016,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/standardManualRules.js",
-    "line": 28,
+    "line": 96,
     "description": "Exact-id heading rules.",
     "params": [],
     "returns": [],

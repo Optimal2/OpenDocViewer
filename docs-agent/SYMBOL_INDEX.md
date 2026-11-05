@@ -1856,9 +1856,9 @@
 | <code>splitSpeechChunks</code> | function | <code>src/utils/speech.js:53</code> | Split text into chunks the synthesiser reads through: lines first, then sentences, then at word boundaries when a sentence is still too long. |
 | <code>filterComparePrintBlocks</code> | function | <code>src/utils/standardManual.js:209</code> | Remove only the composed-print blocks disabled by site switches. |
 | <code>filterHeadingRules</code> | function | <code>src/utils/standardManual.js:145</code> | Apply exact-id and OCR heading rules to a parsed manual. |
-| <code>filterStandardManual</code> | function | <code>src/utils/standardManual.js:381</code> | Filter and sanitize the bundled standard manual for a supplied runtime config. |
+| <code>filterStandardManual</code> | function | <code>src/utils/standardManual.js:402</code> | Filter and sanitize the bundled standard manual for a supplied runtime config. |
 | <code>findHeadingSegment</code> | function | <code>src/utils/standardManual.js:52</code> |  |
-| <code>firstNumberedTextNode</code> | function | <code>src/utils/standardManual.js:316</code> |  |
+| <code>firstNumberedTextNode</code> | function | <code>src/utils/standardManual.js:337</code> |  |
 | <code>guideContainerFor</code> | function | <code>src/utils/standardManual.js:43</code> | The embedded guide is a hard boundary. |
 | <code>hasRemainingFragmentLink</code> | function | <code>src/utils/standardManual.js:274</code> |  |
 | <code>headingLevel</code> | function | <code>src/utils/standardManual.js:31</code> |  |
@@ -1870,17 +1870,20 @@
 | <code>normalizedText</code> | function | <code>src/utils/standardManual.js:186</code> |  |
 | <code>pruneOrphanedLightboxes</code> | function | <code>src/utils/standardManual.js:287</code> | Remove lightbox subtrees whose last thumbnail belonged to removed content. |
 | <code>recordRemovedSubtree</code> | function | <code>src/utils/standardManual.js:103</code> | Remember ids and lightbox references before a subtree leaves the document. |
+| <code>removeAuthoredNavigationEntries</code> | function | <code>src/utils/standardManual.js:305</code> | Authored contents repeat a section&#39;s full title, so unlinking alone would leave hidden headings searchable. |
 | <code>removeHeadingSegment</code> | function | <code>src/utils/standardManual.js:121</code> |  |
-| <code>renumberVisibleHeadings</code> | function | <code>src/utils/standardManual.js:343</code> | Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links. |
-| <code>replaceNumberPrefix</code> | function | <code>src/utils/standardManual.js:331</code> |  |
+| <code>renumberVisibleHeadings</code> | function | <code>src/utils/standardManual.js:364</code> | Renumber visible h2 prefixes per guide and mirror those numbers into contents and cross-links. |
+| <code>replaceNumberPrefix</code> | function | <code>src/utils/standardManual.js:352</code> |  |
 | <code>sanitizeManualHtml</code> | function | <code>src/utils/standardManual.js:18</code> |  |
-| <code>unlinkRemovedTargets</code> | function | <code>src/utils/standardManual.js:304</code> | Preserve link text and inline markup while removing only links to ids that this filter actually removed. |
-| <code>compareGuideIds</code> | function | <code>src/utils/standardManualRules.js:20</code> | Return the standalone and embedded-comparison forms of a Swedish/English id pair. |
-| <code>failOpen</code> | function | <code>src/utils/standardManualRules.js:71</code> | Read a UI predicate without letting a host-owned Proxy/getter hide manual content. |
-| <code>resolveStandardManualRuleStates</code> | function | <code>src/utils/standardManualRules.js:87</code> | Resolve every site switch that can hide standard-manual content. |
-| <code>standardManualOcrSectionRules</code> | constant | <code>src/utils/standardManualRules.js:47</code> | OCR headings use the same id in standalone and embedded guides. |
-| <code>standardManualRuleIds</code> | constant | <code>src/utils/standardManualRules.js:59</code> | A flat list of every exact element id in the generator-validated rule manifest. |
-| <code>standardManualSectionRules</code> | constant | <code>src/utils/standardManualRules.js:28</code> | Exact-id heading rules. |
+| <code>unlinkRemovedTargets</code> | function | <code>src/utils/standardManual.js:325</code> | Preserve link text and inline markup while removing only links to ids that this filter actually removed. |
+| <code>failOpen</code> | function | <code>src/utils/standardManualRules.js:141</code> | Read a UI predicate without letting a host-owned Proxy/getter hide manual content. |
+| <code>localizedGuideRule</code> | function | <code>src/utils/standardManualRules.js:44</code> | Declare the actual authored aliases for one logical section. |
+| <code>requiredDocument</code> | function | <code>src/utils/standardManualRules.js:24</code> |  |
+| <code>resolveStandardManualRuleStates</code> | function | <code>src/utils/standardManualRules.js:157</code> | Resolve every site switch that can hide standard-manual content. |
+| <code>standardManualLogicalRules</code> | constant | <code>src/utils/standardManualRules.js:75</code> | Generator-validated logical rules. |
+| <code>standardManualOcrSectionRules</code> | constant | <code>src/utils/standardManualRules.js:115</code> | OCR headings use the same id in standalone and embedded guides. |
+| <code>standardManualRuleIds</code> | constant | <code>src/utils/standardManualRules.js:127</code> | A flat compatibility list of every real element id referenced by the logical manifest. |
+| <code>standardManualSectionRules</code> | constant | <code>src/utils/standardManualRules.js:96</code> | Exact-id heading rules. |
 | <code>collectConfigDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:137</code> |  |
 | <code>collectLocationDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:124</code> |  |
 | <code>collectNavigatorDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:107</code> |  |

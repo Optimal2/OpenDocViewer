@@ -2,11 +2,11 @@
 
 ## Coverage
 
-- Files: 186
-- Source lines: 68205
-- JSDoc symbols: 1961
-- Files without JSDoc doclets: 1
-- Low-confidence summaries: 0
+- Files: 188
+- Source lines: 68303
+- JSDoc symbols: 1964
+- Files without JSDoc doclets: 3
+- Low-confidence summaries: 2
 - Parse errors: 0
 
 ## Import Hubs
@@ -50,6 +50,14 @@
 - Files without JSDoc doclets are covered by source-derived summaries only.
 
 Files without JSDoc doclets:
+- `src/generated/standard-manual/manual.en.js`
+- `src/generated/standard-manual/manual.sv.js`
 - `src/ocr/index.js`
+
+- Low-confidence summaries are generated from source shape rather than primary JSDoc.
+
+Low-confidence summaries:
+- `src/generated/standard-manual/manual.en.js`: Default export for manual.en.
+- `src/generated/standard-manual/manual.sv.js`: Default export for manual.sv.
 
 - Compare this report after each generator change to confirm signal quality improved.

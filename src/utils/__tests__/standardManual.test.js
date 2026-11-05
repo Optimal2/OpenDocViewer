@@ -11,6 +11,8 @@ const manualSv = readFileSync(path.resolve('public/help/default/manual.sv.html')
 const manualEn = readFileSync(path.resolve('public/help/default/manual.en.html'), 'utf8');
 const compareSv = readFileSync(path.resolve('public/help/default/manual-jamforelse.sv.html'), 'utf8');
 const compareEn = readFileSync(path.resolve('public/help/default/manual-jamforelse.en.html'), 'utf8');
+const advancedSv = readFileSync(path.resolve('public/help/default/manual-avancerat.sv.html'), 'utf8');
+const advancedEn = readFileSync(path.resolve('public/help/default/manual-avancerat.en.html'), 'utf8');
 
 function filterToDocument(html, config = {}) {
   const filtered = filterStandardManual(html, config);
@@ -269,5 +271,131 @@ describe('filterStandardManual OCR and DOM boundaries', () => {
     expect(doc.querySelector('p strong')?.textContent).toBe('Overlay cross-link');
     expect(doc.querySelector('a[href="#jmf-%E0%A4%A"]')).not.toBeNull();
     expect(doc.getElementById('jmf-curtain')).not.toBeNull();
+  });
+});
+
+describe('standard manual authored navigation cleanup', () => {
+  it.each([
+    ['Swedish', manualSv, 'jmf-overlagring', 'Lägg sidorna på varandra (överlagring)'],
+    ['English', manualEn, 'jmf-overlay', 'Lay the pages on top of each other (overlay)'],
+  ])('removes the hidden %s section title from searchable text and authored contents', (_label, html, id, title) => {
+    const disabled = filterToDocument(html, { compare: { overlay: { enabled: false } } });
+    expect(disabled.getElementById(id)).toBeNull();
+    expect(disabled.body.textContent).not.toContain(title);
+    for (const nav of disabled.querySelectorAll('nav.sidonav, nav.toc')) {
+      expect(nav.textContent).not.toContain(title);
+    }
+
+    const enabled = filterToDocument(html, { compare: { overlay: { enabled: true } } });
+    expect(enabled.getElementById(id)).not.toBeNull();
+    expect(enabled.body.textContent).toContain(title);
+    expect(Array.from(enabled.querySelectorAll('nav.sidonav, nav.toc'))
+      .some((nav) => nav.textContent.includes(title))).toBe(true);
+  });
+
+  it.each([
+    ['Swedish combined', manualSv, 'jmf-avstangt', 'Det här kan din organisation ha stängt av'],
+    ['English combined', manualEn, 'jmf-disabled', 'What your organization may have switched off'],
+    ['Swedish standalone', compareSv, 'avstangt', 'Det här kan din organisation ha stängt av'],
+    ['English standalone', compareEn, 'disabled', 'What your organization may have switched off'],
+  ])('removes the never-show %s title from authored contents without deleting prose', (_label, html, id, title) => {
+    const doc = filterToDocument(html);
+    expect(doc.getElementById(id)).toBeNull();
+    for (const nav of doc.querySelectorAll('nav.sidonav, nav.toc')) {
+      expect(nav.textContent).not.toContain(title);
+    }
+    expect(doc.body.textContent).toContain(title);
+  });
+
+  it('removes navigation entries and wrapper items but preserves ordinary prose cross-link text', () => {
+    const title = 'Lay the pages on top of each other (overlay)';
+    const html = [
+      '<div class="odv-manual"><nav class="sidonav"><ol>',
+      `<li id="overlay-nav-item"><a href="#overlay">4. ${title}</a></li>`,
+      '<li><a href="#curtain">5. Curtain</a></li></ol></nav>',
+      `<nav class="toc"><a href="#overlay">4. ${title}</a><a href="#curtain">5. Curtain</a></nav>`,
+      '<p>Ordinary <a href="#overlay"><strong>overlay cross-link text</strong></a> survives.</p>',
+      `<h2 id="overlay">4. ${title}</h2><p>Hidden section body</p>`,
+      '<h2 id="curtain">5. Curtain</h2><p>Visible curtain body</p></div>',
+    ].join('');
+    const doc = filterToDocument(html, { compare: { overlay: { enabled: false } } });
+
+    expect(doc.getElementById('overlay-nav-item')).toBeNull();
+    expect(doc.body.textContent).not.toContain(title);
+    expect(doc.querySelector('p strong')?.textContent).toBe('overlay cross-link text');
+    expect(fragmentLinks(doc, 'overlay')).toHaveLength(0);
+    expect(doc.getElementById('curtain')).not.toBeNull();
+  });
+});
+
+describe('standard manual metadata and signature capability sections', () => {
+  it.each([
+    ['Swedish combined', manualSv, 'fler-metadata', 'fler-signaturer', 'fler-hq',
+      'Se dokumentets metadata', 'Kontrollera signaturer i PDF-dokument'],
+    ['English combined', manualEn, 'fler-metadata', 'fler-signatures', 'fler-hq',
+      "View the document's metadata", 'Check signatures in PDF documents'],
+    ['Swedish standalone', advancedSv, 'metadata', 'signaturer', 'hq',
+      'Se dokumentets metadata', 'Kontrollera signaturer i PDF-dokument'],
+    ['English standalone', advancedEn, 'metadata', 'signatures', 'hq',
+      "View the document's metadata", 'Check signatures in PDF documents'],
+  ])('removes disabled %s capability segments, contents and links while preserving unrelated help',
+    (_label, html, metadataId, signatureId, unrelatedId, metadataTitle, signatureTitle) => {
+      const doc = filterToDocument(html, {
+        metadata: { enabled: false },
+        pdfSignatures: { enabled: false },
+      });
+
+      expect(doc.getElementById(metadataId)).toBeNull();
+      expect(doc.getElementById(signatureId)).toBeNull();
+      expect(doc.getElementById(unrelatedId)).not.toBeNull();
+      expect(fragmentLinks(doc, metadataId)).toHaveLength(0);
+      expect(fragmentLinks(doc, signatureId)).toHaveLength(0);
+      for (const nav of doc.querySelectorAll('nav.sidonav, nav.toc')) {
+        expect(nav.textContent).not.toContain(metadataTitle);
+        expect(nav.textContent).not.toContain(signatureTitle);
+      }
+    });
+
+  it('gates metadata and PDF signatures independently and keeps enabled sections', () => {
+    const metadataOff = filterToDocument(manualEn, { metadata: { enabled: false } });
+    expect(metadataOff.getElementById('fler-metadata')).toBeNull();
+    expect(metadataOff.getElementById('fler-signatures')).not.toBeNull();
+
+    const signaturesOff = filterToDocument(manualEn, { pdfSignatures: { enabled: false } });
+    expect(signaturesOff.getElementById('fler-metadata')).not.toBeNull();
+    expect(signaturesOff.getElementById('fler-signatures')).toBeNull();
+
+    const enabled = filterToDocument(advancedEn, {
+      metadata: { enabled: true },
+      pdfSignatures: { enabled: true },
+    });
+    expect(enabled.getElementById('metadata')).not.toBeNull();
+    expect(enabled.getElementById('signatures')).not.toBeNull();
+  });
+
+  it('fails open for malformed and unreadable metadata/signature configuration', () => {
+    const malformed = filterToDocument(advancedEn, {
+      metadata: { enabled: 'false' },
+      pdfSignatures: { enabled: 0 },
+    });
+    expect(malformed.getElementById('metadata')).not.toBeNull();
+    expect(malformed.getElementById('signatures')).not.toBeNull();
+
+    const unreadable = new Proxy({}, { get() { throw new Error('Unreadable host config'); } });
+    const doc = filterToDocument(advancedEn, unreadable);
+    expect(doc.getElementById('metadata')).not.toBeNull();
+    expect(doc.getElementById('signatures')).not.toBeNull();
+  });
+
+  it('requires the real capability aliases without inventing required OCR section ids', async () => {
+    const { standardManualLogicalRules } = await import('../standardManualRules.js');
+    expect(Array.isArray(standardManualLogicalRules)).toBe(true);
+    const states = standardManualLogicalRules.map((rule) => rule.state);
+    expect(states).toEqual(expect.arrayContaining(['metadata', 'pdfSignatures']));
+    const ids = standardManualLogicalRules.flatMap((rule) => (
+      Object.values(rule.documents).flatMap((documents) => documents.map((document) => document.id))
+    ));
+    expect(ids).toEqual(expect.arrayContaining(['metadata', 'signaturer', 'signatures', 'fler-signaturer']));
+    expect(ids.some((id) => id.includes('ocr'))).toBe(false);
   });
 });

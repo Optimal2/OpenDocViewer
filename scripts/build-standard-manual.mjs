@@ -1,11 +1,11 @@
 // File: scripts/build-standard-manual.mjs
 /**
- * Converts the bundled manual HTML into lazy-loadable JavaScript modules.
+ * Converts the bundled main manual HTML into lazy-loadable JavaScript modules.
  *
- * The generated files contain no filtered manual text. The standardManualRules module supplies the
- * manifest whose rule ids are validated here; runtime filtering is outside this generator.
- * Generation deliberately fails when that manifest is absent or when either language does not
- * contain every manifest-named element id.
+ * The generated files contain no filtered or rewritten manual text. Logical rules name the actual
+ * localized aliases in their standalone and embedded source documents. Generation fails when a
+ * required id is absent from its own document/guide or when Swedish and English logical coverage
+ * differs; a literal id intersection across languages would accept precisely the wrong contract.
  */
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
@@ -14,6 +14,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const LANGUAGES = ['sv', 'en'];
+const ID_ATTRIBUTE_PATTERN = /\s+id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/i;
+
+/**
+ * @param {string} tag
+ * @returns {string|null}
+ */
+function tagId(tag) {
+  const attribute = tag.match(ID_ATTRIBUTE_PATTERN);
+  return attribute ? (attribute[1] ?? attribute[2] ?? attribute[3]) : null;
+}
 
 /**
  * Extracts element ids without treating data-id attributes or plain text as manifest coverage.
@@ -24,7 +34,7 @@ const LANGUAGES = ['sv', 'en'];
  */
 function elementIds(html) {
   const ids = new Set();
-  const attributePattern = /\s+id\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/gi;
+  const attributePattern = new RegExp(ID_ATTRIBUTE_PATTERN.source, 'gi');
   for (const tag of html.matchAll(/<[^>]+>/g)) {
     for (const attribute of tag[0].matchAll(attributePattern)) {
       ids.add(attribute[1] ?? attribute[2] ?? attribute[3]);
@@ -34,16 +44,53 @@ function elementIds(html) {
 }
 
 /**
- * Loads and validates the agreed standardManualRules interface.
+ * Scopes an embedded requirement to its own details element. A depth counter is required because
+ * manual sections contain nested ordinary details elements before the embedded guide closes.
+ *
+ * @param {string} html
+ * @param {string} guideId
+ * @returns {string}
+ */
+function embeddedGuideHtml(html, guideId) {
+  const tags = html.matchAll(/<\/?details\b[^>]*>/gi);
+  let depth = 0;
+  let start = -1;
+  for (const match of tags) {
+    const tag = match[0];
+    const closing = tag.startsWith('</');
+    if (start < 0) {
+      if (closing || tagId(tag) !== guideId) continue;
+      start = match.index;
+      depth = 1;
+      continue;
+    }
+    depth += closing ? -1 : 1;
+    if (depth === 0) {
+      return html.slice(start, match.index + tag.length);
+    }
+  }
+  throw new Error(`embedded guide ${guideId} was not found or was not closed`);
+}
+
+/**
+ * @param {string} value
+ * @returns {boolean}
+ */
+function nonEmptyString(value) {
+  return typeof value === 'string' && Boolean(value.trim());
+}
+
+/**
+ * Loads and validates the language/document-aware manifest interface.
  *
  * @param {string} manifestPath
- * @returns {Promise<Array<string>>}
+ * @returns {Promise<Array<Object>>}
  */
-async function loadRuleIds(manifestPath) {
+async function loadLogicalRules(manifestPath) {
   if (!existsSync(manifestPath)) {
     throw new Error(
       `Standard manual manifest not found: ${manifestPath}. `
-      + 'Expected src/utils/standardManualRules.js to export standardManualRuleIds.',
+      + 'Expected src/utils/standardManualRules.js to export standardManualLogicalRules.',
     );
   }
 
@@ -55,36 +102,120 @@ async function loadRuleIds(manifestPath) {
     throw new Error(`Could not load standard manual manifest ${manifestPath}: ${error.message}`, { cause: error });
   }
 
-  const ruleIds = manifest.standardManualRuleIds;
-  if (!Array.isArray(ruleIds) || ruleIds.some((id) => typeof id !== 'string' || !id.trim())) {
-    throw new Error(`${manifestPath} must export standardManualRuleIds as a flat array of non-empty strings.`);
+  const logicalRules = manifest.standardManualLogicalRules;
+  if (!Array.isArray(logicalRules) || logicalRules.length === 0) {
+    throw new Error(`${manifestPath} must export standardManualLogicalRules as a non-empty array.`);
   }
-  const uniqueIds = new Set(ruleIds);
-  if (uniqueIds.size !== ruleIds.length) {
-    throw new Error(`${manifestPath} exports duplicate ids in standardManualRuleIds.`);
+  const logicalIds = new Set();
+  for (const rule of logicalRules) {
+    if (!nonEmptyString(rule?.id) || !nonEmptyString(rule?.state) || logicalIds.has(rule.id)) {
+      throw new Error(`${manifestPath} has a missing or duplicate logical rule id/state.`);
+    }
+    logicalIds.add(rule.id);
+    for (const language of LANGUAGES) {
+      const documents = rule.documents?.[language];
+      if (!Array.isArray(documents) || documents.length === 0) {
+        throw new Error(`${manifestPath} logical rule ${rule.id} has no ${language} documents.`);
+      }
+      for (const document of documents) {
+        const validFile = nonEmptyString(document?.file)
+          && document.file === path.basename(document.file)
+          && !document.file.includes('/')
+          && !document.file.includes('\\')
+          && document.file.endsWith(`.${language}.html`);
+        if (!validFile || !nonEmptyString(document?.id)
+          || (document.guide !== undefined && !nonEmptyString(document.guide))) {
+          throw new Error(`${manifestPath} logical rule ${rule.id} has an invalid ${language} document entry.`);
+        }
+      }
+    }
   }
-  return ruleIds;
+  return logicalRules;
 }
 
 /**
- * Validates every rule in both languages before any output is written.
- *
- * @param {Array<string>} ruleIds
- * @param {Array<{ language: string, sourcePath: string, html: string }>} sources
+ * @param {Object} rule
+ * @param {string} language
+ * @returns {Array<string>}
  */
-function validateRuleCoverage(ruleIds, sources) {
-  const coverage = sources.map((source) => {
-    const ids = elementIds(source.html);
-    return { ...source, missing: ruleIds.filter((id) => !ids.has(id)) };
-  });
-  if (coverage.every((source) => source.missing.length === 0)) return;
+function coverageSlots(rule, language) {
+  return rule.documents[language].map((document) => (
+    `${document.file.replace(`.${language}.html`, '.<language>.html')}#${document.guide || ''}`
+  )).sort();
+}
 
-  const mismatch = new Set(coverage.map((source) => source.missing.join('\0'))).size > 1;
-  const heading = mismatch
+/**
+ * Requires the same logical standalone/embedded slots in both languages. Localized ids themselves
+ * deliberately differ and are checked later against their own source HTML.
+ *
+ * @param {Array<Object>} logicalRules
+ */
+function validateLogicalCoverage(logicalRules) {
+  for (const rule of logicalRules) {
+    const swedish = coverageSlots(rule, 'sv');
+    const english = coverageSlots(rule, 'en');
+    if (JSON.stringify(swedish) === JSON.stringify(english)) continue;
+    throw new Error(
+      `Standard manual logical rule coverage mismatch for ${rule.id}.\n`
+      + `  sv: ${swedish.join(', ')}\n  en: ${english.join(', ')}`,
+    );
+  }
+}
+
+/**
+ * @param {Array<Object>} logicalRules
+ * @param {string} sourceDir
+ * @returns {Promise<Map<string, { sourcePath: string, html: string }>>}
+ */
+async function readRequiredSources(logicalRules, sourceDir) {
+  const files = new Set(LANGUAGES.map((language) => `manual.${language}.html`));
+  for (const rule of logicalRules) {
+    for (const language of LANGUAGES) {
+      for (const document of rule.documents[language]) files.add(document.file);
+    }
+  }
+  const entries = await Promise.all([...files].sort().map(async (file) => {
+    const sourcePath = path.join(sourceDir, file);
+    return [file, { sourcePath, html: await readFile(sourcePath, 'utf8') }];
+  }));
+  return new Map(entries);
+}
+
+/**
+ * Validates every real localized id in its declared source before any output is written.
+ *
+ * @param {Array<Object>} logicalRules
+ * @param {Map<string, { sourcePath: string, html: string }>} sources
+ */
+function validateRequiredIds(logicalRules, sources) {
+  const missing = [];
+  for (const rule of logicalRules) {
+    for (const language of LANGUAGES) {
+      for (const document of rule.documents[language]) {
+        let html = sources.get(document.file).html;
+        try {
+          if (document.guide) html = embeddedGuideHtml(html, document.guide);
+        } catch (error) {
+          missing.push({ ...document, language, ruleId: rule.id, reason: error.message });
+          continue;
+        }
+        if (!elementIds(html).has(document.id)) {
+          missing.push({ ...document, language, ruleId: rule.id });
+        }
+      }
+    }
+  }
+  if (missing.length === 0) return;
+
+  const languageCoverage = LANGUAGES.map((language) => (
+    missing.filter((document) => document.language === language).map((document) => document.id).sort().join('\0')
+  ));
+  const heading = new Set(languageCoverage).size > 1
     ? 'Standard manual manifest id coverage mismatch between languages.'
-    : 'Standard manual rule ids are missing from the source HTML.';
-  const details = coverage.map((source) => (
-    `  ${path.basename(source.sourcePath)}: ${source.missing.length ? source.missing.join(', ') : 'none'}`
+    : 'Standard manual required rule ids are missing from their declared sources.';
+  const details = missing.map((document) => (
+    `  ${document.ruleId}: ${document.file}${document.guide ? ` [${document.guide}]` : ''}: ${document.id}`
+      + `${document.reason ? ` (${document.reason})` : ''}`
   ));
   throw new Error(`${heading}\n${details.join('\n')}`);
 }
@@ -117,12 +248,14 @@ export async function buildStandardManual(options = {}) {
   const sourceDir = path.resolve(rootDir, options.sourceDir || 'public/help/default');
   const outputDir = path.resolve(rootDir, options.outputDir || 'src/generated/standard-manual');
 
-  const ruleIds = await loadRuleIds(manifestPath);
-  const sources = await Promise.all(LANGUAGES.map(async (language) => {
-    const sourcePath = path.join(sourceDir, `manual.${language}.html`);
-    return { language, sourcePath, html: await readFile(sourcePath, 'utf8') };
+  const logicalRules = await loadLogicalRules(manifestPath);
+  validateLogicalCoverage(logicalRules);
+  const requiredSources = await readRequiredSources(logicalRules, sourceDir);
+  validateRequiredIds(logicalRules, requiredSources);
+  const sources = LANGUAGES.map((language) => ({
+    language,
+    ...requiredSources.get(`manual.${language}.html`),
   }));
-  validateRuleCoverage(ruleIds, sources);
 
   await mkdir(outputDir, { recursive: true });
   const outputFiles = [];
@@ -131,7 +264,10 @@ export async function buildStandardManual(options = {}) {
     await writeFile(outputPath, manualModule(source.html), 'utf8');
     outputFiles.push(outputPath);
   }
-  return { outputFiles, ruleIds: [...ruleIds] };
+  const ruleIds = [...new Set(logicalRules.flatMap((rule) => (
+    LANGUAGES.flatMap((language) => rule.documents[language].map((document) => document.id))
+  )))];
+  return { outputFiles, ruleIds };
 }
 
 /**

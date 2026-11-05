@@ -89,6 +89,13 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 - `src/ErrorBoundary.jsx` - OpenDocViewer — React Error Boundary \- Catch unexpected render/runtime errors in descendant components.
 
+## src/generated
+
+File count: 2. Line count: 4. JSDoc symbol count: 0.
+
+- `src/generated/standard-manual/manual.en.js` - Default export for manual.en.
+- `src/generated/standard-manual/manual.sv.js` - Default export for manual.sv.
+
 ## src/hooks
 
 File count: 9. Line count: 1258. JSDoc symbol count: 37.
@@ -167,7 +174,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 64. Line count: 23582. JSDoc symbol count: 972.
+File count: 64. Line count: 23676. JSDoc symbol count: 975.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

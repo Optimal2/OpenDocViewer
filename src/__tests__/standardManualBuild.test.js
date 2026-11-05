@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const GENERATOR_PATH = fileURLToPath(new URL('../../scripts/build-standard-manual.mjs', import.meta.url));
 const PACKAGE_PATH = fileURLToPath(new URL('../../package.json', import.meta.url));
+const REPOSITORY_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const tempRoots = [];
 let importSequence = 0;
 
@@ -23,18 +24,80 @@ function writeFixture(root, relativePath, content) {
   fs.writeFileSync(destination, content, 'utf8');
 }
 
+function mainDocument(language, id, guide) {
+  return { file: `manual.${language}.html`, ...(guide ? { guide } : {}), id };
+}
+
+function standaloneDocument(guideName, language, id) {
+  return { file: `manual-${guideName}.${language}.html`, id };
+}
+
+function manifestSource(logicalRules) {
+  const ruleIds = logicalRules.flatMap((rule) => (
+    Object.values(rule.documents).flatMap((documents) => documents.map((document) => document.id))
+  ));
+  return `export const standardManualLogicalRules = ${JSON.stringify(logicalRules)};\n`
+    + `export const standardManualRuleIds = ${JSON.stringify([...new Set(ruleIds)])};\n`;
+}
+
+function localizedLogicalRules() {
+  return [{
+    id: 'compare.overlay',
+    state: 'overlay',
+    documents: {
+      sv: [
+        standaloneDocument('jamforelse', 'sv', 'overlagring'),
+        mainDocument('sv', 'jmf-overlagring', 'guide-jamforelse'),
+      ],
+      en: [
+        standaloneDocument('jamforelse', 'en', 'overlay'),
+        mainDocument('en', 'jmf-overlay', 'guide-jamforelse'),
+      ],
+    },
+  }];
+}
+
 function makeFixture({
   sv = '<main><h2 id="intro">Introduktion</h2></main>',
   en = '<main><h2 id="intro">Introduction</h2></main>',
   ruleIds = ['intro'],
-  manifest = `export const standardManualRuleIds = ${JSON.stringify(ruleIds)};\n`,
+  logicalRules,
+  manifest,
+  extraFiles = {},
 } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-standard-manual-'));
   tempRoots.push(root);
   writeFixture(root, 'public/help/default/manual.sv.html', sv);
   writeFixture(root, 'public/help/default/manual.en.html', en);
-  if (manifest !== null) writeFixture(root, 'src/utils/standardManualRules.js', manifest);
+  for (const [relativePath, content] of Object.entries(extraFiles)) {
+    writeFixture(root, path.join('public/help/default', relativePath), content);
+  }
+  const rules = logicalRules || [{
+    id: 'fixture.rule',
+    state: 'fixture',
+    documents: {
+      sv: ruleIds.map((id) => mainDocument('sv', id)),
+      en: ruleIds.map((id) => mainDocument('en', id)),
+    },
+  }];
+  if (manifest !== null) {
+    writeFixture(root, 'src/utils/standardManualRules.js', manifest ?? manifestSource(rules));
+  }
   return root;
+}
+
+function makeLocalizedFixture({ logicalRules = localizedLogicalRules() } = {}) {
+  return makeFixture({
+    sv: '<main><details id="guide-jamforelse"><details><summary>Nested</summary></details>'
+      + '<h2 id="jmf-overlagring">Överlagring</h2></details></main>',
+    en: '<main><details id="guide-jamforelse"><details><summary>Nested</summary></details>'
+      + '<h2 id="jmf-overlay">Overlay</h2></details></main>',
+    logicalRules,
+    extraFiles: {
+      'manual-jamforelse.sv.html': '<main><h2 id="overlagring">Överlagring</h2></main>',
+      'manual-jamforelse.en.html': '<main><h2 id="overlay">Overlay</h2></main>',
+    },
+  });
 }
 
 async function generate(root) {
@@ -73,7 +136,7 @@ describe('standard manual generation', () => {
     expect(await readGenerated(root, 'en')).toBe(updated);
   });
 
-  it('fails when a manifest id is absent from both languages and writes no partial output', async () => {
+  it('fails when a required id is absent from both languages and writes no partial output', async () => {
     const root = makeFixture({ ruleIds: ['intro', 'missing-rule'] });
 
     await expect(generate(root)).rejects.toThrow(
@@ -93,14 +156,14 @@ describe('standard manual generation', () => {
     );
   });
 
-  it('fails clearly when the manifest or its standardManualRuleIds export is absent', async () => {
+  it('fails clearly when the manifest or its logical-rule export is absent', async () => {
     const withoutManifest = makeFixture({ manifest: null });
     await expect(generate(withoutManifest)).rejects.toThrow(
-      /standard manual manifest not found[\s\S]*standardManualRuleIds/i,
+      /standard manual manifest not found[\s\S]*standardManualLogicalRules/i,
     );
 
-    const withoutExport = makeFixture({ manifest: 'export const somethingElse = [];\n' });
-    await expect(generate(withoutExport)).rejects.toThrow(/standardManualRuleIds.*flat array/i);
+    const withoutExport = makeFixture({ manifest: 'export const standardManualRuleIds = ["intro"];\n' });
+    await expect(generate(withoutExport)).rejects.toThrow(/standardManualLogicalRules.*array/i);
   });
 
   it('returns a non-zero CLI exit code when validation fails', () => {
@@ -114,6 +177,61 @@ describe('standard manual generation', () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/manual\.sv\.html: missing-rule/);
     expect(fs.existsSync(path.join(root, 'src/generated/standard-manual'))).toBe(false);
+  });
+
+  it('accepts localized aliases in their own standalone and embedded documents', async () => {
+    const root = makeLocalizedFixture();
+
+    await generate(root);
+
+    expect(await readGenerated(root, 'sv')).toContain('id="jmf-overlagring"');
+    expect(await readGenerated(root, 'en')).toContain('id="jmf-overlay"');
+  });
+
+  it.each([
+    ['manual-jamforelse.sv.html', 'overlagring'],
+    ['manual-jamforelse.en.html', 'overlay'],
+    ['manual.sv.html', 'jmf-overlagring'],
+    ['manual.en.html', 'jmf-overlay'],
+  ])('fails when %s loses its actual required id %s', async (file, id) => {
+    const root = makeLocalizedFixture();
+    const source = fs.readFileSync(path.join(root, 'public/help/default', file), 'utf8');
+    writeFixture(root, path.join('public/help/default', file), source.replace(`id="${id}"`, 'id="removed"'));
+
+    await expect(generate(root)).rejects.toThrow(new RegExp(`compare\\.overlay[\\s\\S]*${file}[\\s\\S]*${id}`));
+  });
+
+  it('rejects an embedded id that is present only outside its required guide', async () => {
+    const root = makeLocalizedFixture();
+    const file = 'manual.en.html';
+    const source = fs.readFileSync(path.join(root, 'public/help/default', file), 'utf8');
+    const moved = source.replace('<h2 id="jmf-overlay">Overlay</h2>', '')
+      .replace('</main>', '<h2 id="jmf-overlay">Overlay</h2></main>');
+    writeFixture(root, path.join('public/help/default', file), moved);
+
+    await expect(generate(root)).rejects.toThrow(/guide-jamforelse[\s\S]*jmf-overlay/);
+  });
+
+  it('fails when one language omits a logical rule document', async () => {
+    const logicalRules = localizedLogicalRules();
+    logicalRules[0].documents.en = logicalRules[0].documents.en.slice(1);
+    const root = makeLocalizedFixture({ logicalRules });
+
+    await expect(generate(root)).rejects.toThrow(
+      /logical rule coverage mismatch[\s\S]*compare\.overlay[\s\S]*manual-jamforelse/i,
+    );
+  });
+
+  it('generates exact modules from the unchanged real Swedish and English manuals', async () => {
+    await generate(REPOSITORY_ROOT);
+
+    for (const language of ['sv', 'en']) {
+      const source = fs.readFileSync(
+        path.join(REPOSITORY_ROOT, 'public/help/default', `manual.${language}.html`),
+        'utf8',
+      );
+      expect(await readGenerated(REPOSITORY_ROOT, language)).toBe(source);
+    }
   });
 });
 
