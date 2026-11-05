@@ -149,9 +149,11 @@ try {
     run(workerTests, 'F[68]');
     for (const [file, content] of originals) writeFileSync(file, content);
   }
-  // Optional `--only=<regex>` runs a subset of mutation ids (the full list takes several minutes).
+  // Optional `--only=<text>` runs the subset of mutation ids containing <text> as a literal
+  // substring (the full list takes several minutes). The argument is never compiled as a
+  // regular expression, so metacharacters such as `[`, `.`, `+` or `^...$` match literally.
   const only = process.argv.find((arg) => arg.startsWith('--only='))?.slice('--only='.length);
-  const selected = only ? mutations.filter(([id]) => new RegExp(only).test(id)) : mutations;
+  const selected = only ? mutations.filter(([id]) => id.includes(only)) : mutations;
   for (const [id, file, from, to, testFile, name] of selected) {
     const original = originals.get(file);
     if (!original.includes(from)) throw new Error(`Mutation ${id} no longer matches source`);
