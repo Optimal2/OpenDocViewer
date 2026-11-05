@@ -14,6 +14,7 @@ import {
   readSampleVersion,
   verifyGenerated,
 } from './site-config-generator.mjs';
+import { escapeRegExp } from './test-fixture-escaping.mjs';
 
 const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(TOOL_DIR, 'site-config-generator.mjs');
@@ -73,9 +74,9 @@ test('sample round-trip with example.profile.json: generate, verify through node
   // Every set and unset key is listed with old -> new.
   for (const key of Object.keys(profile.set)) {
     const p = key.replace(/^\+/, '');
-    assert.match(gen.stdout, new RegExp(`\\s${p.replace(/\./g, '\\.')}\\s.* -> `), `listing for ${p}`);
+    assert.match(gen.stdout, new RegExp(`\\s${escapeRegExp(p)}\\s.* -> `), `listing for ${p}`);
   }
-  for (const p of profile.unset) assert.match(gen.stdout, new RegExp(`unset ${p.replace(/\./g, '\\.')}\\s`));
+  for (const p of profile.unset) assert.match(gen.stdout, new RegExp(`unset ${escapeRegExp(p)}\\s`));
 
   const text = readGenerated(out);
   assert.ok(text.startsWith(HEADER_MARKER));

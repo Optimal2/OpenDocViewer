@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, test } from 'vitest';
 import { DEFAULT_LOADER, DEFAULT_SAMPLE, PROFILE_TEMPLATE, main } from './site-config-generator.mjs';
+import { escapeRegExp } from './test-fixture-escaping.mjs';
 
 // The sample/loader refusal judges FILE IDENTITY, not path spelling, and every write command
 // refuses an output file name that is not a plain file name. Specs that point a destination at a
@@ -179,7 +180,7 @@ test.skipIf(process.platform !== 'win32')('a real \\\\?\\ spelling of the sample
           const writes = [];
           const result = run([...argv, ...extra], { writeFile: guardedWriter(writes), fileOps: guardedOps(calls) });
           assert.equal(result.code, 1, `${what} ${argv[0]} ${out} ${extra.join(' ')}`);
-          const refused = new RegExp(`^ERROR: (--out must not be the ${label.replace(/[()]/g, '\\$&')} itself \\(it is the same file as |Cannot resolve )`);
+          const refused = new RegExp(`^ERROR: (--out must not be the ${escapeRegExp(label)} itself \\(it is the same file as |Cannot resolve )`);
           assert.match(result.stderr, refused, result.stderr);
           assert.deepEqual(writes, []);
           assert.equal(calls.some(([name]) => name === 'renameSync'), false);
@@ -372,7 +373,7 @@ for (const [shape, name, problem] of BAD_NAMES) {
     const result = run(['generate-all', '--profile', EXAMPLE_PROFILE, '--versions', '2.10.0', '--out-dir', outDir, '--name', name, '--force'],
       { writeFile: refusingWriter([]), fileOps: unreachableOps([]) });
     assert.equal(result.code, 2);
-    assert.match(result.stderr, new RegExp(`--name must be a plain file name: .* ${problem.replace(/[()]/g, '\\$&')}\\.`));
+    assert.match(result.stderr, new RegExp(`--name must be a plain file name: .* ${escapeRegExp(problem)}\\.`));
     assert.deepEqual(fs.readdirSync(dir), []);
   });
 }

@@ -18,6 +18,7 @@ import {
   plainFileNameProblem,
   readSampleVersion,
 } from './site-config-generator.mjs';
+import { escapeRegExp } from './test-fixture-escaping.mjs';
 
 const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const CLI = path.join(TOOL_DIR, 'site-config-generator.mjs');
@@ -99,7 +100,7 @@ test('explicit --sample at the shipped path keeps the repository version in head
   for (const extra of [[], ['--sample', DEFAULT_SAMPLE]]) {
     const checked = run(['check', '--profile', EXAMPLE_PROFILE, '--config', out, ...extra]);
     assert.equal(checked.code, 0, checked.stdout + checked.stderr);
-    assert.match(checked.stdout, new RegExp(`OpenDocViewer ${version.replace(/\./g, '\\.')}\\)`));
+    assert.match(checked.stdout, new RegExp(`OpenDocViewer ${escapeRegExp(version)}\\)`));
   }
 });
 
