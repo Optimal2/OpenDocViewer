@@ -16,15 +16,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const { mockTranslate, mockI18n, mockManualModules } = vi.hoisted(() => ({
   mockTranslate: (key, options) => options?.defaultValue ?? key,
   mockI18n: { language: 'sv', resolvedLanguage: 'sv' },
-  mockManualModules: { failEnglishChunk: false },
+  mockManualModules: { failSwedishChunk: false, failEnglishChunk: false },
 }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: mockTranslate, i18n: mockI18n }),
 }));
 
+vi.mock('../../../generated/standard-manual/manual.sv.js', async (importOriginal) => {
+  if (mockManualModules.failSwedishChunk) throw new Error('Simulated Swedish manual chunk failure');
+  return importOriginal();
+});
+
 vi.mock('../../../generated/standard-manual/manual.en.js', async (importOriginal) => {
-  if (mockManualModules.failEnglishChunk) throw new Error('Simulated manual chunk failure');
+  if (mockManualModules.failEnglishChunk) throw new Error('Simulated English manual chunk failure');
   return importOriginal();
 });
 
@@ -64,6 +69,7 @@ describe('ManualOverlayDialog contents tree', () => {
     manualHtml = MANUAL_HTML;
     runtimeConfig = {};
     requestedUrls = [];
+    mockManualModules.failSwedishChunk = false;
     mockManualModules.failEnglishChunk = false;
     mockI18n.language = 'sv';
     mockI18n.resolvedLanguage = 'sv';
@@ -393,9 +399,91 @@ describe('ManualOverlayDialog contents tree', () => {
     expect(requestedUrls[0]).toContain('help/site/manual.sv.html');
   });
 
-  it('never applies standard-only heading filters to arbitrary site HTML', async () => {
+  it.each([
+    ['omitted', {}],
+    ['invalid', { source: 'unexpected-mode' }],
+  ])('uses filtered generated standard content with an %s source when no site manual exists', async (_label, manual) => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
     runtimeConfig = {
-      help: { manual: { source: 'auto' } },
+      help: { manual },
+      compare: { overlay: { enabled: false } },
+    };
+    vi.stubGlobal('fetch', async (url) => {
+      const target = String(url);
+      requestedUrls.push(target);
+      if (target.includes('help/site/')) return { ok: false, url: target, text: async () => '' };
+      return { ok: true, url: target, text: async () => '<h2 id="default-manual">Unfiltered default</h2>' };
+    });
+    await openManual();
+
+    expect(content().querySelector('#urval-oppna')).not.toBeNull();
+    expect(content().querySelector('#default-manual')).toBeNull();
+    expect(content().querySelector('#jmf-overlagring')).toBeNull();
+    expect(linkByHref('#jmf-overlagring')).toBeUndefined();
+    expect(requestedUrls).toEqual(['help/site/manual.sv.html']);
+    if (manual.source) expect(warning).toHaveBeenCalledWith(expect.stringContaining('unexpected-mode'));
+
+    act(() => { container.querySelector('button[aria-label="Reload manual from server"]').click(); });
+    await flush(50);
+    expect(content().querySelector('#urval-oppna')).not.toBeNull();
+    expect(requestedUrls).toHaveLength(2);
+    expect(requestedUrls[0]).toBe('help/site/manual.sv.html');
+    expect(requestedUrls[1]).toContain('/help/site/manual.sv.html?odvManualRefresh=');
+    expect(requestedUrls.some((url) => url.includes('help/default/manual.'))).toBe(false);
+  });
+
+  it('loads preferred-language standard content before trying the fallback-language site', async () => {
+    runtimeConfig = {
+      help: { manual: { source: 'auto', fallbackLanguage: 'en' } },
+      compare: { overlay: { enabled: false } },
+    };
+    vi.stubGlobal('fetch', async (url) => {
+      const target = String(url);
+      requestedUrls.push(target);
+      if (target === 'help/site/manual.sv.html') return { ok: false, url: target, text: async () => '' };
+      return { ok: true, url: target, text: async () => '<h2 id="wrong-source">Wrong source</h2>' };
+    });
+    await openManual();
+
+    expect(content().querySelector('#urval-oppna')).not.toBeNull();
+    expect(content().querySelector('#wrong-source')).toBeNull();
+    expect(content().querySelector('#jmf-overlagring')).toBeNull();
+    expect(requestedUrls).toEqual(['help/site/manual.sv.html']);
+  });
+
+  it('lets the fallback-language site win after an unsupported language and its HTML fallback fail', async () => {
+    mockI18n.language = 'de';
+    mockI18n.resolvedLanguage = 'de';
+    runtimeConfig = {
+      help: { manual: { source: 'auto', fallbackLanguage: 'en' } },
+      compare: { overlay: { enabled: false } },
+    };
+    vi.stubGlobal('fetch', async (url) => {
+      const target = String(url);
+      requestedUrls.push(target);
+      if (target === 'help/site/manual.en.html') {
+        return {
+          ok: true,
+          url: target,
+          text: async () => '<h2 id="fallback-site">Fallback site</h2><h2 id="jmf-overlay">Site overlay</h2>',
+        };
+      }
+      return { ok: false, url: target, text: async () => '' };
+    });
+    await openManual();
+
+    expect(content().querySelector('#fallback-site')).not.toBeNull();
+    expect(content().querySelector('#jmf-overlay')).not.toBeNull();
+    expect(requestedUrls).toEqual([
+      'help/site/manual.de.html',
+      'help/default/manual.de.html',
+      'help/site/manual.en.html',
+    ]);
+  });
+
+  it('never filters arbitrary site HTML from a configurable site template', async () => {
+    runtimeConfig = {
+      help: { manual: { source: 'auto', sitePathTemplate: 'organization/help.{{lng}}.html' } },
       compare: { overlay: { enabled: false } },
     };
     await openManual([
@@ -407,6 +495,7 @@ describe('ManualOverlayDialog contents tree', () => {
     expect(content().querySelector('#jmf-overlay')).not.toBeNull();
     expect(content().textContent).toContain('Site-owned switch text');
     expect(content().textContent).toContain('Site-owned overlay text');
+    expect(requestedUrls).toEqual(['organization/help.sv.html']);
   });
 
   it('ignores site files and fetches nothing on the normal standard path', async () => {
@@ -450,25 +539,39 @@ describe('ManualOverlayDialog contents tree', () => {
     expect(requestedUrls).toEqual([]);
   });
 
-  it('filters configured fallback HTML after a standard chunk failure without fetching site files', async () => {
+  it.each(['standard', 'auto'])('filters configured fallback HTML after a chunk failure in %s mode', async (source) => {
     vi.resetModules();
     mockManualModules.failEnglishChunk = true;
     mockI18n.language = 'en';
     mockI18n.resolvedLanguage = 'en';
     runtimeConfig = {
-      help: { manual: { source: 'standard' } },
+      help: { manual: { source, fallbackPathTemplate: 'custom-fallback/manual.{{lng}}.html' } },
       compare: { overlay: { enabled: false } },
     };
-    await openManual([
-      '<h2 id="jmf-overlagring">Hidden fallback overlay</h2><p>Hidden fallback body</p>',
-      '<h2 id="following">Visible fallback section</h2><p>Visible fallback body</p>',
-    ].join(''));
+    vi.stubGlobal('fetch', async (url) => {
+      const target = String(url);
+      requestedUrls.push(target);
+      if (target.includes('help/site/')) return { ok: false, url: target, text: async () => '' };
+      return {
+        ok: true,
+        url: 'http://localhost:3000/custom-fallback/manual.en.html',
+        text: async () => [
+          '<h2 id="jmf-overlay">Hidden fallback overlay</h2><p>Hidden fallback body</p>',
+          '<h2 id="following">Visible fallback section</h2><p>Visible fallback body</p>',
+          '<img id="fallback-image" src="img/fallback.png" alt="Fallback">',
+        ].join(''),
+      };
+    });
+    await openManual();
 
-    expect(content().querySelector('#jmf-overlagring')).toBeNull();
+    expect(content().querySelector('#jmf-overlay')).toBeNull();
     expect(content().querySelector('#following')).not.toBeNull();
     expect(content().textContent).not.toContain('Hidden fallback body');
-    expect(requestedUrls.length).toBeGreaterThan(0);
-    expect(requestedUrls.every((url) => url.includes('help/default/'))).toBe(true);
+    expect(content().querySelector('#fallback-image').getAttribute('src'))
+      .toBe('http://localhost:3000/custom-fallback/img/fallback.png');
+    expect(requestedUrls).toEqual(source === 'standard'
+      ? ['custom-fallback/manual.en.html']
+      : ['help/site/manual.en.html', 'custom-fallback/manual.en.html']);
   });
 
   it('uses the standard fallback language when the UI language has no generated manual', async () => {
@@ -482,17 +585,26 @@ describe('ManualOverlayDialog contents tree', () => {
     expect(requestedUrls).toEqual([]);
   });
 
-  it('resolves standard images and lightboxes against help/default', async () => {
-    runtimeConfig = { help: { manual: { source: 'standard' } } };
+  it.each(['standard', 'auto'])('resolves healthy %s module images and lightboxes against help/default with a custom HTML fallback', async (source) => {
+    runtimeConfig = {
+      help: { manual: { source, fallbackPathTemplate: 'custom-fallback/manual.{{lng}}.html' } },
+    };
+    vi.stubGlobal('fetch', async (url) => {
+      const target = String(url);
+      requestedUrls.push(target);
+      return { ok: false, url: target, text: async () => '' };
+    });
     await openManual();
 
     const image = content().querySelector('img[src*="help/default/img/"]');
     expect(image).not.toBeNull();
     expect(new URL(image.getAttribute('src')).pathname).toContain('/help/default/img/');
+    expect(image.getAttribute('src')).not.toContain('custom-fallback');
     const lightboxLink = content().querySelector('a[href^="#lb-"]:not([href="#lb-stang"])');
     expect(lightboxLink).not.toBeNull();
     act(() => { lightboxLink.click(); });
     expect(window.location.hash).toBe(lightboxLink.getAttribute('href'));
+    expect(requestedUrls).toEqual(source === 'auto' ? ['help/site/manual.sv.html'] : []);
     act(() => {
       root.render(h(ManualOverlayDialog, { isOpen: false, onClose }));
     });

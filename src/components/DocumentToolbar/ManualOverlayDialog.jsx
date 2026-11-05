@@ -13,6 +13,8 @@ import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import {
   buildManualCandidates,
   buildManualLanguageCandidates,
+  DEFAULT_FALLBACK_MANUAL_TEMPLATE,
+  interpolateManualTemplate,
   resolveManualSource,
   resolveManualSourceMode,
 } from '../../utils/manualSources.js';
@@ -47,6 +49,28 @@ function absoluteManualUrl(candidate) {
 }
 
 /**
+ * Copy only settings used by the selected source. Host objects can have unrelated throwing getters.
+ *
+ * @param {Object=} manualConfig Runtime config `help.manual` block.
+ * @param {'auto'|'standard'} sourceMode Resolved source mode.
+ * @returns {Object} Safe internal configuration.
+ */
+function copyManualConfig(manualConfig, sourceMode) {
+  const config = { source: sourceMode };
+  const keys = ['fallbackLanguage', 'fallbackPathTemplate'];
+  if (sourceMode === 'auto') keys.push('sitePathTemplate');
+  for (const key of keys) {
+    try {
+      const value = manualConfig?.[key];
+      if (value !== undefined) config[key] = value;
+    } catch {
+      // Use the existing default for this optional setting.
+    }
+  }
+  return config;
+}
+
+/**
  * Load the preferred generated standard manual. A chunk failure uses fallbackPathTemplate through
  * the same response validation and abortable fetch path as auto, but still excludes every site file.
  *
@@ -54,34 +78,62 @@ function absoluteManualUrl(candidate) {
  * @param {string} options.language
  * @param {Object=} options.manualConfig
  * @param {function(string): Promise<Object>} options.fetchCandidate
- * @returns {Promise<({candidate: string, url: string, html: string}|null)>}
+ * @returns {Promise<({candidate: string, url: string, html: string, sourceType: string}|null)>}
  */
 async function loadStandardManual({ language, manualConfig, fetchCandidate }) {
-  // The host owns this object. Read only settings used by standard mode, and let the existing
-  // candidate builders apply their defaults when an optional getter is unreadable. In particular,
-  // never enumerate unrelated host properties with object spread.
-  const standardConfig = { source: 'standard' };
-  for (const key of ['fallbackLanguage', 'fallbackPathTemplate']) {
-    try {
-      const value = manualConfig?.[key];
-      if (value !== undefined) standardConfig[key] = value;
-    } catch {
-      // Use the existing default for this optional setting.
-    }
-  }
+  const standardConfig = copyManualConfig(manualConfig, 'standard');
+  // Preserve configuration failure settlement even when a healthy generated module needs no fetch.
+  const fallbackCandidates = buildManualCandidates(language, standardConfig);
   const preferredLanguage = buildManualLanguageCandidates(language, standardConfig)
     .find((entry) => typeof STANDARD_MANUAL_LOADERS[entry] === 'function');
   if (preferredLanguage) {
     try {
       const module = await STANDARD_MANUAL_LOADERS[preferredLanguage]();
       if (typeof module?.default !== 'string') throw new Error('Generated manual has no HTML string.');
-      const candidate = buildManualCandidates(preferredLanguage, standardConfig)[0];
-      return { candidate, url: absoluteManualUrl(candidate), html: module.default };
+      // Generated modules come from public/help/default, independently of the emergency HTML path.
+      const candidate = interpolateManualTemplate(DEFAULT_FALLBACK_MANUAL_TEMPLATE, preferredLanguage);
+      return {
+        candidate,
+        url: absoluteManualUrl(candidate),
+        html: module.default,
+        sourceType: 'standard',
+      };
     } catch {
       // A missing/failed lazy chunk falls back to the configured static HTML below.
     }
   }
-  return resolveManualSource(buildManualCandidates(language, standardConfig), fetchCandidate);
+  const source = await resolveManualSource(fallbackCandidates, fetchCandidate);
+  return source ? { ...source, sourceType: 'standard' } : null;
+}
+
+/**
+ * Resolve auto mode per language: site HTML first, then generated standard content or its emergency
+ * HTML fallback. Provenance is explicit because arbitrary site and fallback templates can overlap.
+ *
+ * @param {Object} options
+ * @param {string} options.language
+ * @param {Object=} options.manualConfig
+ * @param {function(string): Promise<Object>} options.fetchCandidate
+ * @returns {Promise<({candidate: string, url: string, html: string, sourceType: string}|null)>}
+ */
+async function loadAutoManual({ language, manualConfig, fetchCandidate }) {
+  const autoConfig = copyManualConfig(manualConfig, 'auto');
+  const languages = buildManualLanguageCandidates(language, autoConfig);
+  for (const candidateLanguage of languages) {
+    // Restrict each iteration to one language so an English chunk cannot overtake English site HTML.
+    const languageConfig = { ...autoConfig, fallbackLanguage: candidateLanguage };
+    const siteCandidate = buildManualCandidates(candidateLanguage, languageConfig)[0];
+    const siteSource = await resolveManualSource([siteCandidate], fetchCandidate);
+    if (siteSource) return { ...siteSource, sourceType: 'site' };
+
+    const standardSource = await loadStandardManual({
+      language: candidateLanguage,
+      manualConfig: languageConfig,
+      fetchCandidate,
+    });
+    if (standardSource) return standardSource;
+  }
+  return null;
 }
 
 /**
@@ -932,17 +984,17 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
 
         const source = await (sourceMode === 'standard'
           ? loadStandardManual({ language, manualConfig, fetchCandidate })
-          : resolveManualSource(buildManualCandidates(language, manualConfig), fetchCandidate)
+          : loadAutoManual({ language, manualConfig, fetchCandidate })
         );
         if (cancelled) return;
 
         if (source) {
           const resolvedUrl = removeManualRefreshToken(source.url) || source.candidate;
-          // Only bundled standard content is capability-filtered. Site-owned HTML keeps its complete
-          // authored DOM and follows the original sanitize/rewrite path without these rules.
-          const html = sourceMode === 'standard'
-            ? filterStandardManual(source.html, runtimeConfig)
-            : source.html;
+          // Only actual site-owned HTML bypasses capability filtering. Generated and emergency
+          // standard HTML carry standard provenance even though their URL templates are arbitrary.
+          const html = source.sourceType === 'site'
+            ? source.html
+            : filterStandardManual(source.html, runtimeConfig);
           setManualState({
             loading: false,
             error: '',
