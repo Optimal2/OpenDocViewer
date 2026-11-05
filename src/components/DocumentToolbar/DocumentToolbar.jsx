@@ -1359,6 +1359,16 @@ const DocumentToolbar = ({
         </>)}
       </div>
 
+      {/* OCR (only while `ocr.enabled` is the literal true), right after the image-adjustment
+          group: a separator, the read-aloud button and the search in the recognised text whose
+          button doubles as the page's OCR status; each behind its own switch
+          (OcrToolbarActions.jsx). Original session page numbers: `pageNumberDisplay` indexes
+          allPages and is what setPageNumber takes; `pageNumber` is the ordinal among the visible
+          pages. */}
+      {isOcrEnabled() ? (
+        <OcrToolbarActions pageNumber={pageNumberDisplay} setPageNumber={setPageNumber} allPages={allPages} />
+      ) : null}
+
       <div className="toolbar-spacer" />
 
       {signatureSummary && typeof onOpenSignatureOverview === 'function' ? (
@@ -1378,15 +1388,6 @@ const DocumentToolbar = ({
           statusLedTitle={runtimeStatusLedTitle}
         />
       </div>
-
-      {/* OCR (only while `ocr.enabled` is the literal true): read the selection aloud, and the
-          search in the recognised text whose button doubles as the page's OCR status; each behind
-          its own switch (OcrToolbarActions.jsx). Original session page numbers: `pageNumberDisplay`
-          indexes allPages and is what setPageNumber takes; `pageNumber` is the ordinal among the
-          visible pages. */}
-      {isOcrEnabled() ? (
-        <OcrToolbarActions pageNumber={pageNumberDisplay} setPageNumber={setPageNumber} allPages={allPages} />
-      ) : null}
 
       {/* Print dialog and PDF progress of the shared print pipeline (also hosted by the compare views) */}
       <PrintPipelineDialogs pipeline={printPipeline} />

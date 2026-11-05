@@ -360,6 +360,19 @@ export function isOcrSearchEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead
+ * of the browser's own find (`ocr.search.overridesCtrlF`). Off by default: only the boolean
+ * literal `true` hands the shortcut over, as the portal's page search does with its user
+ * setting. Means nothing while OCR or the search is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isOcrSearchCtrlFOverrideEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.ocr?.search?.overridesCtrlF === true;
+}
+
+/**
  * Resolve whether the read-aloud button is offered (`ocr.speech.enabled`). On by default; only
  * the boolean literal `false` turns it off. With it off, the button is never mounted, so the
  * toolbar neither follows the selection nor touches speech synthesis; the language guess

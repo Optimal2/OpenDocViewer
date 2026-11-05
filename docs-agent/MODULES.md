@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 22. Line count: 8810. JSDoc symbol count: 151.
+File count: 22. Line count: 8859. JSDoc symbol count: 151.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -57,7 +57,7 @@ File count: 22. Line count: 8810. JSDoc symbol count: 151.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
-- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden liv
+- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live
 - `src/components/DocumentToolbar/ReadSelectionButton.jsx` - Read the selected recognised text aloud: a toolbar button that appears only while the selection lies in OCR text layers \(components/OcrTextLayer.jsx\) and the browser can speak \(utils/speech.js\).
 
 ## src/components/DocumentViewer
@@ -166,7 +166,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 62. Line count: 23059. JSDoc symbol count: 944.
+File count: 62. Line count: 23075. JSDoc symbol count: 945.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

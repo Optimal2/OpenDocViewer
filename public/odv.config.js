@@ -147,7 +147,12 @@
         // recognition status). true (default) offers it; only the literal false turns it off,
         // leaving a status-only indicator in its place. The text layers and the browser's own
         // find (Ctrl+F) stay either way.
-        enabled: true
+        enabled: true,
+        // Let Ctrl+F (Cmd+F on a Mac) open this search instead of the browser's own find, as the
+        // portal's page search can. false (default) leaves Ctrl+F to the browser; only the
+        // literal true hands it over. Inside a dialog or another text field Ctrl+F stays the
+        // browser's.
+        overridesCtrlF: false
       },
       speech: {
         // The read-aloud button for selected text. true (default) offers it; only the literal

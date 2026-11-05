@@ -276,7 +276,8 @@ ocr: {
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
   search: {
-    enabled: true              // the toolbar's search in the text layers; false leaves a status-only indicator
+    enabled: true,             // the toolbar's search in the text layers; false leaves a status-only indicator
+    overridesCtrlF: false      // true: Ctrl+F opens this search instead of the browser's find
   },
   speech: {
     enabled: true,             // the read-aloud button (local voices only); false leaves it out
@@ -315,6 +316,13 @@ ocr: {
   opens and no match is ever marked on a page. The text layers themselves, selecting and copying,
   read-aloud and the browser's own find (Ctrl+F) are unaffected. The key means nothing while OCR
   is off.
+- `ocr.search.overridesCtrlF`: whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search
+  instead of the browser's own find, as the portal's page search does with its user setting.
+  `false` by default; only the boolean literal `true` hands the shortcut over. With it on, Ctrl+F
+  opens the field (or puts the cursor back in it, with its text selected, when it is already
+  open) and the browser's find does not appear; the search button's tooltip says so. Ctrl+F stays
+  the browser's while a dialog is open or the focus is in another text field, and with Shift or
+  Alt held. The key means nothing while OCR or the search is off.
 - `ocr.speech.enabled`: whether the toolbar offers the read-aloud button for selected text. `true`
   by default; only the boolean literal `false` turns it off. With it off, the button is never
   mounted, so the toolbar neither follows the selection nor touches the browser's speech
@@ -327,7 +335,7 @@ ocr: {
   words are counted against a few dozen function words per language, with a little weight for
   letters such as å, ä, ö or æ, ø; the winner needs at least four function-word hits, clearly
   more than the runner-up, and at least as much as every language the viewer is not configured
-  for, otherwise the page gets no language). The guess sets the read-aloud button's "Automatic"
+  for, otherwise the page gets no language). The guess sets the read-aloud button's "Auto"
   language and the text flow's `lang` attribute, which screen readers with automatic voice
   switching follow. Only languages in `ocr.languages` can be guessed: a German page in a viewer
   configured for Swedish and English gets no language (German fits its words better than
@@ -509,9 +517,10 @@ on the ink, in one text flow with the lines of the page), so dragging over the w
 text, Ctrl+C copies it as it reads on the page, and the browser's own find (Ctrl+F) matches
 words and phrases in it; dragging on a blank part of the page still pans.
 
-The toolbar gets an OCR group to the right of the theme, language and help buttons. Its two
-parts are offered independently (`ocr.search.enabled` and `ocr.speech.enabled` above; both on by
-default):
+The toolbar gets an OCR group right after the image-adjustment group (the one that ends with
+"Reset adjustments"), separated from it like the toolbar's other groups and spaced like its other
+loose buttons. Its two parts are offered independently (`ocr.search.enabled` and
+`ocr.speech.enabled` above; both on by default):
 
 - A search button that doubles as the page's OCR status: a small LED on the button and the
   status as its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
@@ -545,7 +554,7 @@ default):
   computer. Without a local voice for the language the button is shown disabled with that
   reason, and nothing is spoken (an utterance without a voice would let the browser pick one,
   possibly online). While reading, the button is a stop button. Resting the
-  pointer on the button (or pressing an arrow key on it) opens a menu: "Automatic" first (with
+  pointer on the button (or pressing an arrow key on it) opens a menu: "Auto" first (always naming what it will do, "Auto (svenska)", with
   the language guessed for the selected page's text, see `ocr.speech.autoDetectLanguage`; when
   the guess is unsure it reads in the UI language), then one entry per OCR language
   (`ocr.languages`), greyed when no local voice is installed for it, and "Follow the interface

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 22. Line count: 8810. JSDoc symbol count: 151.
+File count: 22. Line count: 8859. JSDoc symbol count: 151.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -114,11 +114,11 @@ Symbols:
 
 ## src/components/DocumentToolbar/OcrSearchBar.jsx
 
-Search in the recognised text, from the toolbar: a search button to the right of the toolbar's end group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden liv
+Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live
 
 Exports: `OcrSearchBar`
 
-Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`, `src/utils/ocrSearchPlacement.js`
+Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`, `src/utils/ocrSearchPlacement.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 
 Symbols:
 
@@ -131,7 +131,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/OcrToolbarActions.jsx
 
-The toolbar's OCR group, right of the end actions: the read\-aloud button \(ReadSelectionButton.jsx\) and the search in the text layers \(OcrSearchBar.jsx\), each behind its own runtime switch so a site can offer one without
+The toolbar's OCR group, right after the image\-adjustment group \(a separator, then the buttons\): the read\-aloud button \(ReadSelectionButton.jsx\) and the search in the text layers \(OcrSearchBar.jsx\), each behind its own r
 
 Exports: `OcrToolbarActions`
 

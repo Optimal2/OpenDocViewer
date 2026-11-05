@@ -102,8 +102,9 @@
       // language needs assetBaseUrl pointing at a folder that has its <lang>.traineddata.gz.
       // languages: ['swe', 'eng'],
       // The toolbar's search in the text layers. Only the literal false turns it off; the button's
-      // place then keeps a status-only indicator of the page's recognition.
-      // search: { enabled: true },
+      // place then keeps a status-only indicator of the page's recognition. overridesCtrlF: true
+      // lets Ctrl+F open this search instead of the browser's find (off by default).
+      // search: { enabled: true, overridesCtrlF: false },
       // The read-aloud button (only the literal false turns it off; local voices only), and its
       // language guess: each page's language among the OCR languages ("Automatic" in the menu),
       // carried by the text layer as lang. Only the literal false turns the guess off.

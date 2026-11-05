@@ -1,7 +1,7 @@
 // File: src/components/DocumentToolbar/OcrSearchBar.jsx
 /**
- * Search in the recognised text, from the toolbar: a search button to the right of the
- * toolbar's end group that doubles as the page's OCR status (an LED on the button, the status
+ * Search in the recognised text, from the toolbar: a search button right after the
+ * image-adjustment group that doubles as the page's OCR status (an LED on the button, the status
  * as its tooltip and in a visually hidden live region; the button is enabled once the displayed
  * page's text is recognised, or any page's when the displayed page has none), and a field that
  * grows out of it to the right (a short width transition, styles/ocr.css) with the match
@@ -38,6 +38,7 @@ import { ocrPageKeyOf } from '../../utils/ocrPageKey.js';
 import { hasSearchableOcrText, OCR_STATUS_FALLBACK, OCR_STATUS_LED, ocrStatusKeyOf } from '../../utils/ocrStatus.js';
 import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js';
 import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
+import { hasActiveModalDialog, isEditableTarget } from '../DocumentViewer/hooks/useViewerEffects.js';
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -49,9 +50,12 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
  * @param {function(number): void} props.setPageNumber  Takes an original session page number.
  * @param {Array<Object>} props.allPages  The viewer's pages.
  * @param {boolean} [props.searchEnabled=true]  False keeps only the status indicator.
+ * @param {boolean} [props.ctrlFOverride=false]  True lets Ctrl+F (Cmd+F) open the field instead
+ *   of the browser's find (`ocr.search.overridesCtrlF`); Ctrl+F stays the browser's in a modal
+ *   dialog and in other text fields, and with Shift or Alt held.
  * @returns {React.ReactElement}
  */
-export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true }) {
+export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true, ctrlFOverride = false }) {
   const { t } = useTranslation('common');
   const { ocrPages, ocrEngineFailure, setOcrSearch } = useContext(ViewerContext);
   const [open, setOpen] = useState(false);
@@ -185,6 +189,33 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     if (open) inputRef.current?.focus?.();
   }, [open]);
 
+  // Ctrl+F handed over: open the field, or put the cursor back in it with its text selected.
+  // Captured on the window so the browser's find never shows; left alone in a modal dialog and
+  // in other text fields (there Ctrl+F is theirs), and with Shift or Alt held.
+  useEffect(() => {
+    if (!ctrlFOverride || !searchEnabled || typeof window === 'undefined') return undefined;
+    const onKeyDown = (event) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) return;
+      if (String(event.key).toLowerCase() !== 'f' || event.defaultPrevented || event.isComposing) return;
+      if (hasActiveModalDialog()) return;
+      const panel = panelRef.current;
+      const within = (node) => !!panel && node instanceof Node && panel.contains(node);
+      // In the field (by target or by focus) the shortcut is ours; in another text field it is
+      // the browser's.
+      if (!within(event.target) && isEditableTarget(event.target)) return;
+      if (!within(document.activeElement) && isEditableTarget(document.activeElement)) return;
+      event.preventDefault();
+      setOpen(true);
+      const input = inputRef.current;
+      if (input) {
+        input.focus?.();
+        input.select?.();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => { window.removeEventListener('keydown', onKeyDown, true); };
+  }, [ctrlFOverride, searchEnabled]);
+
   /** @param {number} position */
   const goToMatch = useCallback((position) => {
     const match = matches[position];
@@ -261,7 +292,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   }
 
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
-  const buttonTitle = ready || open ? `${openLabel} · ${statusText}` : statusText;
+  const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
+  const buttonTitle = ready || open ? `${openTitle} · ${statusText}` : statusText;
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   let statusLine = '';
   if (normalizedTerm && pageOnly && !hasSearchableOcrText(displayedEntry)) {
@@ -381,4 +413,5 @@ OcrSearchBar.propTypes = {
   setPageNumber: PropTypes.func.isRequired,
   allPages: PropTypes.array,
   searchEnabled: PropTypes.bool,
+  ctrlFOverride: PropTypes.bool,
 };

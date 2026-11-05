@@ -28,6 +28,7 @@ import {
   isOcrLineRemovalEnabled,
   isSpeechLanguageAutoDetectEnabled,
   isOcrSearchEnabled,
+  isOcrSearchCtrlFOverrideEnabled,
   isReadAloudEnabled,
   describeOcrLanguages,
   getOcrLanguages,
@@ -360,6 +361,20 @@ describe('runtimeConfig', () => {
     it('is independent of the read-aloud switch', () => {
       expect(isOcrSearchEnabled({ ocr: { speech: { enabled: false } } })).toBe(true);
       expect(isReadAloudEnabled({ ocr: { search: { enabled: false } } })).toBe(true);
+    });
+  });
+
+  describe('isOcrSearchCtrlFOverrideEnabled', () => {
+    it('is off when the section or key is missing and turns on only for the boolean literal true', () => {
+      expect(isOcrSearchCtrlFOverrideEnabled({})).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: {} })).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: { search: {} } })).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled(null)).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: { search: { overridesCtrlF: true } } })).toBe(true);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: { search: { overridesCtrlF: false } } })).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: { search: { overridesCtrlF: 'true' } } })).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: { search: { overridesCtrlF: 1 } } })).toBe(false);
+      expect(isOcrSearchCtrlFOverrideEnabled({ ocr: { search: { enabled: true } } })).toBe(false);
     });
   });
 

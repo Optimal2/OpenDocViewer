@@ -199,4 +199,11 @@ describe('speechLocaleLabel', () => {
     expect(speechLocaleLabel('x', 'sv')).toBe('x');
     expect(speechLocaleLabel('', 'sv')).toBe('');
   });
+
+  it('keeps the language\'s own casing when asked not to capitalise (for a parenthesis)', () => {
+    expect(speechLocaleLabel('sv-SE', 'sv', false)).toMatch(/^svenska/);
+    expect(speechLocaleLabel('en', 'sv', false)).toBe('engelska');
+    expect(speechLocaleLabel('sv', 'en', false)).toBe('Swedish');
+    expect(speechLocaleLabel('x', 'sv', false)).toBe('x');
+  });
 });

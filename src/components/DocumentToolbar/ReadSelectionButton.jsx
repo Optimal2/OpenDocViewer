@@ -204,14 +204,21 @@ export default function ReadSelectionButton() {
 
   if (!shown) return null;
 
-  const name = (code) => speechLocaleLabel(code, i18n?.language);
+  // Labels name the language, never the region ("svenska", not "svenska (Sverige)" for the
+  // sv-SE interface locale). A menu entry's own name is capitalised; a language inside a
+  // parenthesis keeps its own casing.
+  const language = (code) => String(code || '').split(/[-_]/)[0];
+  const name = (code) => speechLocaleLabel(language(code), i18n?.language);
+  const inner = (code) => speechLocaleLabel(language(code), i18n?.language, false);
   // No local voice for the reading language: nothing is ever spoken with an online voice.
   const voiceMissing = !speaking && !pickSpeechVoice(voices, lang);
   const languageTitle = t('ocr.read.language', { defaultValue: 'Reading language' });
-  const followLabel = t('ocr.read.followUi', { language: name(uiLocale), defaultValue: `Follow the interface language (${name(uiLocale)})` });
+  const followLabel = t('ocr.read.followUi', { language: inner(uiLocale), defaultValue: `Follow the interface language (${inner(uiLocale)})` });
+  // "Auto" always names what it will do: the language guessed for the selected page's text, or,
+  // when the guess is unsure, the UI language it falls back to.
   const autoLabel = detected
-    ? t('ocr.read.auto', { language: name(detected), defaultValue: `Automatic (${name(detected)})` })
-    : t('ocr.read.autoUnknown', { language: name(uiLocale), defaultValue: `Automatic (language not identified, reads in ${name(uiLocale)})` });
+    ? t('ocr.read.auto', { language: inner(detected), defaultValue: `Auto (${inner(detected)})` })
+    : t('ocr.read.autoUnknown', { language: inner(uiLocale), defaultValue: `Auto (language not identified, reads in ${inner(uiLocale)})` });
   /** @type {Array<{ value:string, label:string, disabled:boolean }>} */
   const entries = [
     ...(autoDetect ? [{ value: '', label: autoLabel, disabled: false }] : []),

@@ -55,12 +55,18 @@ describe('OcrSearchBar', () => {
     container.remove();
   });
 
-  const render = ({ ocrPages = {}, ocrEngineFailure = null, pageNumber = 1, setPageNumber = vi.fn(), setOcrSearch = vi.fn(), searchEnabled }) => {
+  const render = ({ ocrPages = {}, ocrEngineFailure = null, pageNumber = 1, setPageNumber = vi.fn(), setOcrSearch = vi.fn(), searchEnabled, ctrlFOverride }) => {
     act(() => {
       root.render(createElement(
         ViewerContext.Provider,
         { value: { ocrPages, ocrEngineFailure, setOcrSearch } },
-        createElement(OcrSearchBar, { pageNumber, setPageNumber, allPages: PAGES, ...(searchEnabled === undefined ? {} : { searchEnabled }) })
+        createElement(OcrSearchBar, {
+          pageNumber,
+          setPageNumber,
+          allPages: PAGES,
+          ...(searchEnabled === undefined ? {} : { searchEnabled }),
+          ...(ctrlFOverride === undefined ? {} : { ctrlFOverride }),
+        })
       ));
     });
     return { setPageNumber, setOcrSearch };
@@ -484,5 +490,68 @@ describe('OcrSearchBar', () => {
     expect(button().getAttribute('data-ocr-state')).toBe('working');
     expect(button().getAttribute('aria-label')).toBe('Recognising text…');
     expect(container.querySelector('.odv-status-led--pending')).not.toBeNull();
+  });
+
+  describe('Ctrl+F handed over (ctrlFOverride)', () => {
+    const ctrlF = (target, init = {}) => {
+      const event = new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true, cancelable: true, ...init });
+      act(() => { target.dispatchEvent(event); });
+      return event;
+    };
+
+    it('is left to the browser without the switch', () => {
+      render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
+      expect(ctrlF(document.body).defaultPrevented).toBe(false);
+      expect(input().tabIndex).toBe(-1);
+      expect(button().title).toBe('Search in the recognised text · Text recognised');
+    });
+
+    it('opens the field, says so in the tooltip, and puts the cursor back in the open field with its text selected', () => {
+      render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ctrlFOverride: true });
+      expect(button().title).toBe('Search in the recognised text (Ctrl+F) · Text recognised');
+      expect(button().getAttribute('aria-label')).toBe('Search in the recognised text');
+      expect(ctrlF(document.body).defaultPrevented).toBe(true);
+      expect(input().tabIndex).toBe(0);
+      expect(document.activeElement).toBe(input());
+      type('hej');
+      // Already open, focus elsewhere: the cursor comes back and the text is selected.
+      act(() => { button().focus(); });
+      expect(ctrlF(button()).defaultPrevented).toBe(true);
+      expect(document.activeElement).toBe(input());
+      expect(input().selectionStart).toBe(0);
+      expect(input().selectionEnd).toBe(3);
+      // From inside the field too (its own panel is marked off for the viewer shortcuts).
+      expect(ctrlF(input()).defaultPrevented).toBe(true);
+      // Meta (Cmd on a Mac) works the same.
+      expect(ctrlF(document.body, { ctrlKey: false, metaKey: true }).defaultPrevented).toBe(true);
+    });
+
+    it('stays the browser\'s with Shift or Alt, in another text field and while a modal dialog is open', () => {
+      render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ctrlFOverride: true });
+      expect(ctrlF(document.body, { shiftKey: true }).defaultPrevented).toBe(false);
+      expect(ctrlF(document.body, { altKey: true }).defaultPrevented).toBe(false);
+      expect(input().tabIndex).toBe(-1);
+
+      const other = document.createElement('input');
+      document.body.appendChild(other);
+      other.focus();
+      expect(ctrlF(other).defaultPrevented).toBe(false);
+      expect(input().tabIndex).toBe(-1);
+      other.remove();
+
+      const dialog = document.createElement('div');
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
+      document.body.appendChild(dialog);
+      expect(ctrlF(document.body).defaultPrevented).toBe(false);
+      expect(input().tabIndex).toBe(-1);
+      dialog.remove();
+    });
+
+    it('is never taken while the search itself is off', () => {
+      render({ ocrPages: { [KEY(0)]: done(['Hej']) }, searchEnabled: false, ctrlFOverride: true });
+      expect(ctrlF(document.body).defaultPrevented).toBe(false);
+      expect(input()).toBeNull();
+    });
   });
 });

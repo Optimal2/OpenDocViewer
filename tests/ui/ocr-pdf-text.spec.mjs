@@ -61,6 +61,21 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   await expect(status).toHaveAttribute('title', /Sidan har egen text|The page has its own text/);
   await expect(status).toBeEnabled();
   await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
+  // The OCR group sits right after the image-adjustment group (the one ending with "Reset
+  // adjustments"), behind a separator and before the toolbar's spacer, laid out as the
+  // toolbar's own flex items (the wrapper has no box).
+  const order = await page.evaluate(() => {
+    const toolbar = document.querySelector('.toolbar');
+    const children = [...toolbar.children];
+    const group = toolbar.querySelector('.toolbar-ocr-actions');
+    return {
+      afterEditing: children.indexOf(group) === children.indexOf(toolbar.querySelector('.editing-tools')) + 1,
+      beforeSpacer: children.indexOf(group) < children.indexOf(toolbar.querySelector('.toolbar-spacer')),
+      separatorFirst: group.firstElementChild.classList.contains('separator'),
+      display: getComputedStyle(group).display,
+    };
+  });
+  expect(order).toEqual({ afterEditing: true, beforeSpacer: true, separatorFirst: true, display: 'contents' });
 
   const layer = page.locator('.ocr-text-layer');
   await expect(layer).toHaveCount(1);
@@ -175,4 +190,39 @@ test('ocr on with the search and read-aloud switched off: the status stays, no f
   await page.waitForTimeout(300);
   await expect(page.locator('[data-odv-ocr="read"]')).toHaveCount(0);
   expect(await page.evaluate(() => window.__odvVoiceReads)).toBe(0);
+});
+
+test('ocr on with Ctrl+F handed over: Ctrl+F opens the toolbar search, not the browser find', async ({ page }) => {
+  test.setTimeout(120000);
+  const { bytes } = await buildTextPdf();
+  await loadSession(page, {
+    siteConfig: { ocr: { enabled: true, search: { overridesCtrlF: true } } },
+    session: SESSION,
+    extraFixtures: new Map([['synthetic-text.pdf', { body: bytes, contentType: 'application/pdf' }]]),
+  });
+  await expect(page.locator('.document-render-container img').first()).toBeVisible();
+  await expect(page.locator('.toolbar .toolbar-ocr-actions')).toHaveAttribute('data-ocr-search-ctrl-f', 'on');
+  const status = page.locator('.toolbar [data-odv-ocr="status"]');
+  await expect(status).toHaveAttribute('data-ocr-state', 'pdfText', { timeout: 60000 });
+  await expect(status).toHaveAttribute('title', /\(Ctrl\+F\)/);
+
+  // The viewer itself sees the keystroke and keeps it (the browser's find never opens, which
+  // the page can only show by the event being consumed): the field opens with the focus.
+  await page.evaluate(() => {
+    window.__odvCtrlF = null;
+    // Bubble phase on the window: the viewer's capture listener has already decided by then.
+    // Not `once`: the Control key's own keydown comes first.
+    window.addEventListener('keydown', (event) => { if (event.key === 'f') window.__odvCtrlF = event.defaultPrevented; });
+  });
+  await page.locator('body').press('Control+f');
+  await expect.poll(() => page.evaluate(() => window.__odvCtrlF)).toBe(true);
+  const searchField = page.locator('.toolbar-ocr-search-input');
+  await expect(searchField).toBeFocused();
+  await searchField.fill('diarienummer');
+  await expect(page.locator('.toolbar-ocr-search-status')).toHaveText(/^1 (of|av) 1$/);
+  // Again with the field open: the cursor comes back with the text selected.
+  await status.focus();
+  await page.keyboard.press('Control+f');
+  await expect(searchField).toBeFocused();
+  expect(await searchField.evaluate((input) => [input.selectionStart, input.selectionEnd])).toEqual([0, 'diarienummer'.length]);
 });

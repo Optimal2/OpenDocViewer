@@ -149,15 +149,20 @@
   }
 }
 
-/* The toolbar's OCR group, right of the end actions (theme, language, help): the read-aloud
-   button, shown only while recognised text is selected, and the search button, whose field grows
-   out of it to the right. */
-.toolbar-ocr-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--odv-toolbar-end-gap);
-  margin-left: var(--odv-toolbar-end-group-margin-left);
-  flex-shrink: 0;
+/* The toolbar's OCR group, right after the image-adjustment group: a separator, the read-aloud
+   button (shown only while recognised text is selected) and the search button, whose field grows
+   out of it to the right into the spacer's room. The wrapper has no box of its own: its separator
+   and buttons are the toolbar's flex items, so the toolbar's gap applies between them, and they
+   take the same margins as the toolbar's other loose buttons and separators (toolbar.css:
+   `.toolbar > *`, `.toolbar > .toolbar-menu-shell`, `.toolbar .separator`). */
+.toolbar > .toolbar-ocr-actions {
+  display: contents;
+}
+
+.toolbar > .toolbar-ocr-actions > .toolbar-menu-shell,
+.toolbar > .toolbar-ocr-actions > .toolbar-ocr-search {
+  margin: var(--odv-toolbar-item-margin);
+  margin-block: var(--odv-toolbar-frame-inset);
 }
 
 /* With the search turned off (`ocr.search.enabled: false`) the button's place holds a

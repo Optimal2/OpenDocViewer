@@ -148,14 +148,17 @@ describe('ReadSelectionButton', () => {
     expect(menu()).not.toBeNull();
     expect(button().getAttribute('aria-expanded')).toBe('true');
     const items = () => [...menu().querySelectorAll('[role="menuitemradio"]')];
-    // Automatic first, then the OCR languages (swe, eng by default) that have a local voice,
+    // Auto first, then the OCR languages (swe, eng by default) that have a local voice,
     // then the interface language; the online English GB voice adds nothing.
     expect(items().map((item) => item.getAttribute('data-speech-language'))).toEqual(['', 'sv', 'en', 'ui']);
     expect(items().map((item) => item.disabled)).toEqual([false, false, false, false]);
-    // No language guessed for this page: automatic says so and reads in the UI language.
-    expect(items()[0].textContent).toMatch(/Automatic \(language not identified, reads in Svenska/);
+    // No language guessed for this page: Auto says so and reads in the UI language. A language
+    // inside a parenthesis keeps its own casing (Swedish names are lower case); the entries
+    // themselves are capitalised.
+    expect(items()[0].textContent).toMatch(/Auto \(language not identified, reads in svenska/);
     expect(items()[0].getAttribute('aria-checked')).toBe('true');
-    expect(items()[3].textContent).toMatch(/Follow the interface language \(Svenska/);
+    expect(items()[1].textContent).toMatch(/Svenska/);
+    expect(items()[3].textContent).toMatch(/Follow the interface language \(svenska/);
     // The menu keeps the selection: its mousedown is cancelled like the button's.
     const mousedown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
     act(() => { menu().dispatchEvent(mousedown); });
@@ -191,7 +194,7 @@ describe('ReadSelectionButton', () => {
     const shell = container.querySelector('.toolbar-ocr-read-shell');
     act(() => { shell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })); });
     const items = [...container.querySelectorAll('[data-odv-ocr="read-menu"] [role="menuitemradio"]')];
-    expect(items[0].textContent).toMatch(/Automatic \(Engelska\)/);
+    expect(items[0].textContent).toMatch(/Auto \(engelska\)/);
     // "Follow the interface language" overrides the guess.
     act(() => items[3].click());
     expect(JSON.parse(window.localStorage.getItem('ODV_USER_PREFERENCES'))).toEqual({ speechLanguage: 'ui' });

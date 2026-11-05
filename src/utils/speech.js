@@ -96,19 +96,22 @@ export function isLocalSpeechVoice(voice) {
 
 /**
  * The name of a locale in the UI language ('sv-SE' in Swedish: "svenska (Sverige)"), through
- * Intl.DisplayNames where the browser has it, else the code itself.
+ * Intl.DisplayNames where the browser has it, else the code itself. Capitalised by default (a
+ * menu entry); `capitalize` false keeps the language's own casing ("svenska" inside a Swedish
+ * parenthesis, "English" in an English one).
  *
  * @param {string} locale
  * @param {*} uiLanguage
+ * @param {boolean} [capitalize=true]
  * @returns {string}
  */
-export function speechLocaleLabel(locale, uiLanguage) {
+export function speechLocaleLabel(locale, uiLanguage, capitalize = true) {
   const code = canonicalLocale(locale);
   if (!code) return '';
   try {
     const names = new Intl.DisplayNames([String(uiLanguage || 'en')], { type: 'language' });
     const label = names.of(code);
-    if (label && label !== code) return label.charAt(0).toUpperCase() + label.slice(1);
+    if (label && label !== code) return capitalize ? label.charAt(0).toUpperCase() + label.slice(1) : label;
   } catch {
     // No display names for this language or browser: the code is the label.
   }

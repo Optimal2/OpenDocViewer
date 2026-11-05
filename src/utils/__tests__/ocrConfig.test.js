@@ -17,6 +17,7 @@ import {
   isOcrEnabled,
   isOcrLineRemovalEnabled,
   isOcrSearchEnabled,
+  isOcrSearchCtrlFOverrideEnabled,
   isReadAloudEnabled,
   isSpeechLanguageAutoDetectEnabled,
 } from '../runtimeConfig.js';
@@ -25,7 +26,7 @@ const SHIPPED_OCR_DEFAULTS = Object.freeze({
   enabled: false,
   removeRulingLines: true,
   languages: ['swe', 'eng'],
-  search: { enabled: true },
+  search: { enabled: true, overridesCtrlF: false },
   speech: { enabled: true, autoDetectLanguage: true },
   assetBaseUrl: null,
 });
@@ -51,6 +52,7 @@ function readOcrConfig({ siteConfig, useSampleSiteFile = false } = {}) {
       enabled: isOcrEnabled(),
       removeRulingLines: isOcrLineRemovalEnabled(),
       search: isOcrSearchEnabled(),
+      ctrlF: isOcrSearchCtrlFOverrideEnabled(),
       readAloud: isReadAloudEnabled(),
       autoDetect: isSpeechLanguageAutoDetectEnabled(),
       languages: getOcrLanguages(),
@@ -68,6 +70,7 @@ describe('shipped OCR configuration', () => {
     expect(shipped.enabled).toBe(false);
     expect(shipped.removeRulingLines).toBe(true);
     expect(shipped.search).toBe(true);
+    expect(shipped.ctrlF).toBe(false);
     expect(shipped.readAloud).toBe(true);
     expect(shipped.autoDetect).toBe(true);
     expect(shipped.languages).toEqual(['swe', 'eng']);
@@ -87,6 +90,14 @@ describe('shipped OCR configuration', () => {
     expect(readAloudOff.ocr.speech).toEqual({ enabled: false, autoDetectLanguage: true });
     const guessOff = readOcrConfig({ siteConfig: { ocr: { enabled: true, speech: { autoDetectLanguage: false } } } });
     expect(guessOff).toMatchObject({ readAloud: true, autoDetect: false });
+  });
+
+  it('hands Ctrl+F to the search only for a site file with the literal true, keeping the search switch', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } }).ctrlF).toBe(false);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, search: { overridesCtrlF: 'true' } } } }).ctrlF).toBe(false);
+    const on = readOcrConfig({ siteConfig: { ocr: { enabled: true, search: { overridesCtrlF: true } } } });
+    expect(on).toMatchObject({ search: true, ctrlF: true });
+    expect(on.ocr.search).toEqual({ enabled: true, overridesCtrlF: true });
   });
 
   it('keeps the ruling-line removal unless a site file sets the literal false', () => {
