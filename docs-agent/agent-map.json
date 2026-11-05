@@ -94,8 +94,8 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 68786,
-    "docletCount": 1978,
+    "sourceLineCount": 68871,
+    "docletCount": 1980,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -699,7 +699,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2914,
+            "lines": 2920,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -774,16 +774,16 @@
             "summary": "OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia"
           },
           {
+            "path": "src/hooks/useReadAloud.js",
+            "score": 40,
+            "lines": 242,
+            "summary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js)."
+          },
+          {
             "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
             "score": 39,
             "lines": 311,
             "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer."
-          },
-          {
-            "path": "src/hooks/useReadAloud.js",
-            "score": 39,
-            "lines": 229,
-            "summary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js)."
           },
           {
             "path": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
@@ -810,6 +810,12 @@
             "summary": "File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer-side access to the free per-page compare transform kept in the viewer context (utils/compareTransform.js,..."
           },
           {
+            "path": "src/hooks/useOcrTextLayers.js",
+            "score": 28,
+            "lines": 208,
+            "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
+          },
+          {
             "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
             "score": 26,
             "lines": 162,
@@ -820,12 +826,6 @@
             "score": 25,
             "lines": 210,
             "summary": "Reusable press-and-hold behavior for toolbar buttons."
-          },
-          {
-            "path": "src/hooks/useOcrTextLayers.js",
-            "score": 25,
-            "lines": 178,
-            "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
             "path": "src/hooks/usePdfSignatureReports.js",
@@ -1188,7 +1188,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8674,
+      "lineCount": 8693,
       "docletCount": 148,
       "importantFiles": [
         {
@@ -1248,7 +1248,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 34,
-          "lines": 428,
+          "lines": 440,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -1348,8 +1348,8 @@
     {
       "name": "src/contexts",
       "fileCount": 5,
-      "lineCount": 3599,
-      "docletCount": 100,
+      "lineCount": 3605,
+      "docletCount": 101,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
@@ -1363,9 +1363,9 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2914,
+          "lines": 2920,
           "incomingLocalImports": 1,
-          "doclets": 70,
+          "doclets": 71,
           "summary": "OpenDocViewer — Viewer state provider.",
           "summaryConfidence": "high"
         },
@@ -1444,8 +1444,8 @@
     {
       "name": "src/hooks",
       "fileCount": 9,
-      "lineCount": 1287,
-      "docletCount": 37,
+      "lineCount": 1330,
+      "docletCount": 38,
       "importantFiles": [
         {
           "path": "src/hooks/useNavigationModifierState.js",
@@ -1467,8 +1467,8 @@
         },
         {
           "path": "src/hooks/useReadAloud.js",
-          "score": 39,
-          "lines": 229,
+          "score": 40,
+          "lines": 242,
           "incomingLocalImports": 1,
           "doclets": 5,
           "summary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js).",
@@ -1493,21 +1493,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/hooks/useOcrTextLayers.js",
+          "score": 28,
+          "lines": 208,
+          "incomingLocalImports": 1,
+          "doclets": 3,
+          "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/hooks/useAcceleratingHoldRepeat.js",
           "score": 25,
           "lines": 210,
           "incomingLocalImports": 2,
           "doclets": 1,
           "summary": "Reusable press-and-hold behavior for toolbar buttons.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/hooks/useOcrTextLayers.js",
-          "score": 25,
-          "lines": 178,
-          "incomingLocalImports": 1,
-          "doclets": 2,
-          "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
           "summaryConfidence": "high"
         },
         {
@@ -1664,7 +1664,7 @@
     {
       "name": "src/ocr",
       "fileCount": 14,
-      "lineCount": 2099,
+      "lineCount": 2116,
       "docletCount": 101,
       "importantFiles": [
         {
@@ -13067,7 +13067,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "lines": 212,
+      "lines": 219,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
       "sourceSummary": "Compact language selector for the toolbar.",
@@ -13083,7 +13083,7 @@
             "useRef",
             "useState"
           ],
-          "line": 17,
+          "line": 18,
           "kind": "static"
         },
         {
@@ -13091,7 +13091,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 18,
+          "line": 19,
           "kind": "static"
         },
         {
@@ -13099,7 +13099,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 19,
+          "line": 20,
           "kind": "static"
         },
         {
@@ -13107,7 +13107,7 @@
           "specifiers": [
             "ReadAloudContext"
           ],
-          "line": 20,
+          "line": 21,
           "kind": "static"
         }
       ],
@@ -13115,39 +13115,39 @@
         {
           "name": "LanguageMenuButton",
           "kind": "default",
-          "line": 211
+          "line": 218
         }
       ],
       "declarations": [
         {
           "name": "resolveLanguageLabel",
           "kind": "function",
-          "line": 27
+          "line": 28
         },
         {
           "name": "LanguageMenuButton",
           "kind": "component",
-          "line": 35
+          "line": 36
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 65
+          "line": 66
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 73
+          "line": 74
         },
         {
           "name": "handleSelectLanguage",
           "kind": "function",
-          "line": 92
+          "line": 93
         },
         {
           "name": "closeMenu",
           "kind": "function",
-          "line": 109
+          "line": 110
         }
       ],
       "parseError": null,
@@ -13163,7 +13163,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-          "line": 27,
+          "line": 28,
           "description": "",
           "params": [
             {
@@ -13194,7 +13194,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-          "line": 65,
+          "line": 66,
           "description": "",
           "params": [
             {
@@ -13214,7 +13214,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-          "line": 73,
+          "line": 74,
           "description": "",
           "params": [
             {
@@ -13234,7 +13234,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-          "line": 92,
+          "line": 93,
           "description": "",
           "params": [
             {
@@ -13259,7 +13259,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-          "line": 109,
+          "line": 110,
           "description": "Close the menu and give the focus back to the button (a choice unmounts the focused item).",
           "params": [],
           "returns": [],
@@ -13273,7 +13273,7 @@
           "specifiers": [
             "ReadAloudContext"
           ],
-          "line": 20,
+          "line": 21,
           "kind": "static",
           "resolved": "src/contexts/readAloudContext.js"
         }
@@ -13290,7 +13290,7 @@
             "useRef",
             "useState"
           ],
-          "line": 17,
+          "line": 18,
           "kind": "static"
         },
         {
@@ -13298,7 +13298,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 18,
+          "line": 19,
           "kind": "static"
         },
         {
@@ -13306,7 +13306,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 19,
+          "line": 20,
           "kind": "static"
         }
       ],
@@ -14642,7 +14642,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 428,
+      "lines": 440,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -31214,9 +31214,9 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2914,
+      "lines": 2920,
       "extension": ".jsx",
-      "jsdocBlockCount": 77,
+      "jsdocBlockCount": 78,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
       "imports": [
         {
@@ -33238,13 +33238,26 @@
           "examples": 0
         },
         {
+          "id": "ViewerProvider~releaseOcrPageAsset",
+          "name": "releaseOcrPageAsset",
+          "longname": "ViewerProvider~releaseOcrPageAsset",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/contexts/ViewerProvider.jsx",
+          "line": 2745,
+          "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "ViewerProvider~setOcrFocusPageIndexes",
           "name": "setOcrFocusPageIndexes",
           "longname": "ViewerProvider~setOcrFocusPageIndexes",
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2757,
+          "line": 2763,
           "description": "",
           "params": [
             {
@@ -33264,7 +33277,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2770,
+          "line": 2776,
           "description": "",
           "params": [
             {
@@ -33284,7 +33297,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2783,
+          "line": 2789,
           "description": "",
           "params": [
             {
@@ -33304,7 +33317,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2792,
+          "line": 2798,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -33330,7 +33343,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2797,
+          "line": 2803,
           "description": "",
           "params": [
             {
@@ -33350,7 +33363,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2802,
+          "line": 2808,
           "description": "",
           "params": [
             {
@@ -34717,9 +34730,9 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 178,
+      "lines": 208,
       "extension": ".js",
-      "jsdocBlockCount": 5,
+      "jsdocBlockCount": 7,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
       "imports": [
         {
@@ -34777,19 +34790,19 @@
         {
           "name": "useOcrTextLayers",
           "kind": "default",
-          "line": 48
+          "line": 53
         }
       ],
       "declarations": [
         {
           "name": "useOcrTextLayers",
           "kind": "function",
-          "line": 48
+          "line": 53
         },
         {
           "name": "getPageImage",
           "kind": "function",
-          "line": 85
+          "line": 95
         }
       ],
       "parseError": null,
@@ -34820,7 +34833,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 48,
+          "line": 53,
           "description": "",
           "params": [
             {
@@ -34872,6 +34885,12 @@
               "description": "(pageIndex, 'full') to the rendered page's object URL."
             },
             {
+              "name": "options.releasePageAsset",
+              "type": "function|null",
+              "optional": true,
+              "description": "(pageIndex) drops the rendered page again; called for a page rendered only for OCR (beyond the window) once its bytes are in hand, so the w..."
+            },
+            {
               "name": "options.idleShutdownMs",
               "type": "number",
               "optional": true,
@@ -34881,7 +34900,7 @@
               "name": "options.wholeDocument",
               "type": "boolean",
               "optional": true,
-              "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration."
+              "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration. The outcome cache i..."
             }
           ],
           "returns": [
@@ -34890,6 +34909,19 @@
               "description": "ocrPages maps utils/ocrPageKey.js keys to outcomes ( status done/skipped/failed with text, words and image size, or a transient queued/prob..."
             }
           ],
+          "examples": 0
+        },
+        {
+          "id": "useOcrTextLayers~windowIndexesRef",
+          "name": "windowIndexesRef",
+          "longname": "useOcrTextLayers~windowIndexesRef",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/hooks/useOcrTextLayers.js",
+          "line": 76,
+          "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
+          "params": [],
+          "returns": [],
           "examples": 0
         }
       ],
@@ -34948,7 +34980,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 25,
+      "importanceScore": 28,
       "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -35597,7 +35629,7 @@
     },
     {
       "path": "src/hooks/useReadAloud.js",
-      "lines": 229,
+      "lines": 242,
       "extension": ".js",
       "jsdocBlockCount": 10,
       "sourceSummary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js).",
@@ -35611,7 +35643,7 @@
             "useRef",
             "useState"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -35619,7 +35651,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 21,
+          "line": 23,
           "kind": "static"
         },
         {
@@ -35628,7 +35660,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 22,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -35637,7 +35669,7 @@
             "getOcrLanguages",
             "isSpeechLanguageAutoDetectEnabled"
           ],
-          "line": 23,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -35645,7 +35677,7 @@
           "specifiers": [
             "speechLanguagesForOcr"
           ],
-          "line": 24,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -35657,7 +35689,7 @@
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -35666,7 +35698,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         }
       ],
@@ -35674,64 +35706,64 @@
         {
           "name": "layerSelection",
           "kind": "function",
-          "line": 39
+          "line": 41
         },
         {
           "name": "normalizeStoredLanguage",
           "kind": "function",
-          "line": 65
+          "line": 67
         },
         {
           "name": "useReadAloud",
           "kind": "default",
-          "line": 75
+          "line": 77
         }
       ],
       "declarations": [
         {
           "name": "layerSelection",
           "kind": "function",
-          "line": 39
+          "line": 41
         },
         {
           "name": "normalizeStoredLanguage",
           "kind": "function",
-          "line": 65
+          "line": 67
         },
         {
           "name": "useReadAloud",
           "kind": "function",
-          "line": 75
+          "line": 77
         },
         {
           "name": "update",
           "kind": "function",
-          "line": 106
+          "line": 117
         },
         {
           "name": "read",
           "kind": "function",
-          "line": 123
+          "line": 134
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 138
+          "line": 149
         },
         {
           "name": "language",
           "kind": "function",
-          "line": 176
+          "line": 187
         },
         {
           "name": "name",
           "kind": "function",
-          "line": 177
+          "line": 188
         },
         {
           "name": "inner",
           "kind": "function",
-          "line": 178
+          "line": 189
         }
       ],
       "parseError": null,
@@ -35749,7 +35781,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useReadAloud.js",
-          "line": 32,
+          "line": 34,
           "description": "Preference value an older viewer stored for &quot;follow the interface language&quot;; no longer offered, it counts as automatic.",
           "params": [],
           "returns": [],
@@ -35762,7 +35794,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useReadAloud.js",
-          "line": 39,
+          "line": 41,
           "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
           "params": [],
           "returns": [
@@ -35780,7 +35812,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useReadAloud.js",
-          "line": 65,
+          "line": 67,
           "description": "A stored reading-language choice in today's form: one of the OCR languages, else null (automatic).",
           "params": [
             {
@@ -35811,7 +35843,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useReadAloud.js",
-          "line": 75,
+          "line": 77,
           "description": "",
           "params": [],
           "returns": [
@@ -35829,7 +35861,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useReadAloud.js",
-          "line": 168,
+          "line": 179,
           "description": "",
           "params": [
             {
@@ -35851,7 +35883,7 @@
             "isOcrLayerSelection",
             "ocrSelectionText"
           ],
-          "line": 22,
+          "line": 24,
           "kind": "static",
           "resolved": "src/utils/ocrTextLayout.js"
         },
@@ -35861,7 +35893,7 @@
             "getOcrLanguages",
             "isSpeechLanguageAutoDetectEnabled"
           ],
-          "line": 23,
+          "line": 25,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
@@ -35870,7 +35902,7 @@
           "specifiers": [
             "speechLanguagesForOcr"
           ],
-          "line": 24,
+          "line": 26,
           "kind": "static",
           "resolved": "src/utils/ocrLanguageCodes.js"
         },
@@ -35883,7 +35915,7 @@
             "speakText",
             "speechLocaleLabel"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static",
           "resolved": "src/utils/speech.js"
         },
@@ -35893,7 +35925,7 @@
             "getSpeechLanguagePreference",
             "setSpeechLanguagePreference"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         }
@@ -35908,7 +35940,7 @@
             "useRef",
             "useState"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -35916,12 +35948,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 21,
+          "line": 23,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 39,
+      "importanceScore": 40,
       "summary": "Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's \"Reading language\" section (contexts/readAloudContext.js).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -43474,7 +43506,7 @@
     },
     {
       "path": "src/ocr/resultCache.js",
-      "lines": 79,
+      "lines": 96,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "In-memory cache of OCR outcomes, one entry per document page.",
@@ -43488,14 +43520,19 @@
         {
           "name": "createOcrResultCache",
           "kind": "function",
-          "line": 32
+          "line": 38
         }
       ],
       "declarations": [
         {
           "name": "createOcrResultCache",
           "kind": "function",
-          "line": 32
+          "line": 38
+        },
+        {
+          "name": "trim",
+          "kind": "function",
+          "line": 42
         }
       ],
       "parseError": null,
@@ -43537,7 +43574,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/resultCache.js",
-          "line": 32,
+          "line": 38,
           "description": "",
           "params": [
             {
@@ -87659,7 +87696,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "line": 109,
+      "line": 110,
       "description": "Close the menu and give the focus back to the button (a choice unmounts the focused item).",
       "params": [],
       "returns": [],
@@ -87672,7 +87709,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "line": 73,
+      "line": 74,
       "description": "",
       "params": [
         {
@@ -87692,7 +87729,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "line": 65,
+      "line": 66,
       "description": "",
       "params": [
         {
@@ -87712,7 +87749,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "line": 92,
+      "line": 93,
       "description": "",
       "params": [
         {
@@ -87737,7 +87774,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-      "line": 27,
+      "line": 28,
       "description": "",
       "params": [
         {
@@ -97340,7 +97377,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2797,
+      "line": 2803,
       "description": "",
       "params": [
         {
@@ -97360,7 +97397,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2783,
+      "line": 2789,
       "description": "",
       "params": [
         {
@@ -97531,7 +97568,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2802,
+      "line": 2808,
       "description": "",
       "params": [
         {
@@ -98428,6 +98465,19 @@
       "examples": 0
     },
     {
+      "id": "ViewerProvider~releaseOcrPageAsset",
+      "name": "releaseOcrPageAsset",
+      "longname": "ViewerProvider~releaseOcrPageAsset",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/contexts/ViewerProvider.jsx",
+      "line": 2745,
+      "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "ViewerProvider~releasePrintablePageUrls",
       "name": "releasePrintablePageUrls",
       "longname": "ViewerProvider~releasePrintablePageUrls",
@@ -98631,7 +98681,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2792,
+      "line": 2798,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -98657,7 +98707,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2757,
+      "line": 2763,
       "description": "",
       "params": [
         {
@@ -98677,7 +98727,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2770,
+      "line": 2776,
       "description": "",
       "params": [
         {
@@ -99500,7 +99550,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 48,
+      "line": 53,
       "description": "",
       "params": [
         {
@@ -99552,6 +99602,12 @@
           "description": "(pageIndex, 'full') to the rendered page's object URL."
         },
         {
+          "name": "options.releasePageAsset",
+          "type": "function|null",
+          "optional": true,
+          "description": "(pageIndex) drops the rendered page again; called for a page rendered only for OCR (beyond the window) once its bytes are in hand, so the w..."
+        },
+        {
           "name": "options.idleShutdownMs",
           "type": "number",
           "optional": true,
@@ -99561,7 +99617,7 @@
           "name": "options.wholeDocument",
           "type": "boolean",
           "optional": true,
-          "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration."
+          "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration. The outcome cache i..."
         }
       ],
       "returns": [
@@ -99581,6 +99637,19 @@
       "file": "src/hooks/useOcrTextLayers.js",
       "line": 27,
       "description": "Idle time after which the OCR worker is terminated to free its memory.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "useOcrTextLayers~windowIndexesRef",
+      "name": "windowIndexesRef",
+      "longname": "useOcrTextLayers~windowIndexesRef",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/hooks/useOcrTextLayers.js",
+      "line": 76,
+      "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -99934,7 +100003,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useReadAloud.js",
-      "line": 168,
+      "line": 179,
       "description": "",
       "params": [
         {
@@ -99954,7 +100023,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useReadAloud.js",
-      "line": 75,
+      "line": 77,
       "description": "",
       "params": [],
       "returns": [
@@ -99972,7 +100041,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useReadAloud.js",
-      "line": 39,
+      "line": 41,
       "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
       "params": [],
       "returns": [
@@ -99990,7 +100059,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useReadAloud.js",
-      "line": 32,
+      "line": 34,
       "description": "Preference value an older viewer stored for &quot;follow the interface language&quot;; no longer offered, it counts as automatic.",
       "params": [],
       "returns": [],
@@ -100003,7 +100072,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useReadAloud.js",
-      "line": 65,
+      "line": 67,
       "description": "A stored reading-language choice in today's form: one of the OCR languages, else null (automatic).",
       "params": [
         {
@@ -104612,7 +104681,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/resultCache.js",
-      "line": 32,
+      "line": 38,
       "description": "",
       "params": [
         {

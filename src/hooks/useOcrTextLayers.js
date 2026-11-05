@@ -38,9 +38,14 @@ const EMPTY_PAGES = Object.freeze({});
  * @param {function(string): Promise<(ArrayBuffer|null)>} options.readSourceArrayBuffer
  * @param {function(number, string): Promise<(string|null)>} options.ensurePageAsset
  *   `(pageIndex, 'full')` to the rendered page's object URL.
+ * @param {(function(number): void|null)=} options.releasePageAsset  `(pageIndex)` drops the
+ *   rendered page again; called for a page rendered only for OCR (beyond the window) once its
+ *   bytes are in hand, so the whole document does not pile up renders. Optional.
  * @param {number=} options.idleShutdownMs  Default OCR_IDLE_SHUTDOWN_MS.
  * @param {boolean=} options.wholeDocument  Queue the rest of the document after the window
- *   (`ocr.recognizeWholeDocument`); default from the runtime configuration.
+ *   (`ocr.recognizeWholeDocument`); default from the runtime configuration. The outcome cache
+ *   is then bounded by the page count, so no planned page's outcome is dropped and recognised
+ *   again.
  * @returns {{ ocrPages: Object<string, Object>, ocrEngineFailure: (string|null) }}
  *   `ocrPages` maps utils/ocrPageKey.js keys to outcomes (`status` done/skipped/failed with
  *   text, words and image size, or a transient queued/probing/recognizing state).
@@ -53,6 +58,7 @@ export default function useOcrTextLayers({
   paused,
   readSourceArrayBuffer,
   ensurePageAsset,
+  releasePageAsset = null,
   idleShutdownMs = OCR_IDLE_SHUTDOWN_MS,
   wholeDocument = isOcrWholeDocumentEnabled(),
 }) {
@@ -64,6 +70,10 @@ export default function useOcrTextLayers({
   ensurePageAssetRef.current = ensurePageAsset;
   const readSourceRef = useRef(readSourceArrayBuffer);
   readSourceRef.current = readSourceArrayBuffer;
+  const releasePageAssetRef = useRef(releasePageAsset);
+  releasePageAssetRef.current = releasePageAsset;
+  /** Viewer indexes of the current window (focus pages and neighbours): never released. */
+  const windowIndexesRef = useRef(/** @type {Set<number>} */ (new Set()));
   const idleTimerRef = useRef(/** @type {*} */ (null));
 
   const clearIdleTimer = useCallback(() => {
@@ -88,6 +98,12 @@ export default function useOcrTextLayers({
       const response = await fetch(url);
       if (!response.ok) throw new Error(`Page image could not be read (${response.status})`);
       const blob = await response.blob();
+      // A page rendered only for OCR (beyond the window, the whole document asked for) is
+      // released again as soon as its bytes are in hand, so a long document does not pile up
+      // hundreds of page renders; a page the user has reached meanwhile is left to the viewer.
+      if (candidate.renderedForOcr && !windowIndexesRef.current.has(candidate.viewerIndex)) {
+        try { releasePageAssetRef.current?.(candidate.viewerIndex); } catch { /* the viewer keeps it */ }
+      }
       // prepareOcrImage measures the fetched bytes themselves and removes ruling lines on a
       // private copy (the displayed image is never touched). The page entry's
       // realWidth/realHeight also track thumbnail commits and resolution boosts, so they may
@@ -125,7 +141,7 @@ export default function useOcrTextLayers({
         }, Math.max(0, Number(idleShutdownMs) || 0));
       },
     });
-    runtimeRef.current = { queue, prober };
+    runtimeRef.current = { queue, prober, cache };
     return () => {
       active = false;
       clearIdleTimer();
@@ -154,8 +170,14 @@ export default function useOcrTextLayers({
     runtime.queue.retainSources(sourceKeys);
     void runtime.prober.retainSources(sourceKeys);
     if (!ready) return;
-    const windowSize = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length }).length;
-    const order = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length, wholeDocument });
+    const windowOrder = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length });
+    windowIndexesRef.current = new Set(windowOrder);
+    const order = wholeDocument
+      ? ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length, wholeDocument: true })
+      : windowOrder;
+    // With the whole document planned, every page's outcome must stay cached while it is
+    // planned, or the queue would recognise an evicted page again, without end.
+    if (wholeDocument && typeof runtime.cache?.setLimit === 'function') runtime.cache.setLimit(pages.length);
     const candidates = [];
     for (const [position, viewerIndex] of order.entries()) {
       const page = pages[viewerIndex];
@@ -163,12 +185,20 @@ export default function useOcrTextLayers({
       // A page of the window joins the queue once its full-size render exists (the viewer's own
       // prefetch renders neighbours); a failed page is classified and skipped by the queue. A page
       // beyond the window (the whole document asked for) joins once it is loaded: the queue has
-      // it rendered on demand through ensurePageAsset, like a page the viewer has not shown.
-      const inWindow = position < windowSize;
+      // it rendered on demand through ensurePageAsset, like a page the viewer has not shown, and
+      // released again once its bytes are read (`renderedForOcr`).
+      const inWindow = position < windowOrder.length;
       if (Number(page.status) !== -1 && (inWindow ? Number(page.fullSizeStatus) !== 1 : Number(page.status) !== 1)) continue;
       const key = ocrPageKeyOf(page);
       if (!key) continue;
-      candidates.push({ key, sourceKey: String(page.sourceKey), pageIndex: Number(page.pageIndex) || 0, viewerIndex, page });
+      candidates.push({
+        key,
+        sourceKey: String(page.sourceKey),
+        pageIndex: Number(page.pageIndex) || 0,
+        viewerIndex,
+        page,
+        renderedForOcr: !inWindow && Number(page.fullSizeStatus) !== 1,
+      });
     }
     runtime.queue.setWindow(candidates);
   }, [allPages, focusPageIndexes, ocrModule, ready, wholeDocument]);

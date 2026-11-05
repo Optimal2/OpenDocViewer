@@ -198,8 +198,13 @@ describe('useOcrTextLayers', () => {
       page('doc', 6, { status: 0, fullSizeStatus: 0, fullSizeUrl: '' }),
     ];
     const ensurePageAsset = vi.fn(async (index) => `/pages/doc-${index}.png`);
-    await render(baseProps({ ocrModule, allPages, focusPageIndexes: [0], ensurePageAsset, wholeDocument: true }));
+    const releasePageAsset = vi.fn();
+    // The outcome cache is bounded by the page count once the whole document is planned.
+    let cache = null;
+    ocrModule.createOcrResultCache = (options) => { cache = createOcrResultCache(options); cache.setLimit = vi.fn(cache.setLimit); return cache; };
+    await render(baseProps({ ocrModule, allPages, focusPageIndexes: [0], ensurePageAsset, releasePageAsset, wholeDocument: true }));
     await flush();
+    expect(cache.setLimit).toHaveBeenCalledWith(allPages.length);
     // One page at a time: the window first (0, 1, 2), then the rest in order (3, 4, 5); the
     // unrendered pages are asked for through ensurePageAsset like any other, the loading page
     // never. Pages beyond the window are queued from the start, so the search can say so.
@@ -213,6 +218,9 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(6);
     expect(ensurePageAsset.mock.calls.map(([index]) => index)).toEqual([0, 1, 2, 3, 4, 5]);
     expect(Object.values(latest.ocrPages).filter((entry) => entry.status === 'done')).toHaveLength(6);
+    // Only the pages rendered for OCR (beyond the window and unrendered before) were released
+    // again, once their bytes were read; the window's and the already rendered page 3 never.
+    expect(releasePageAsset.mock.calls.map(([index]) => index)).toEqual([4, 5]);
 
     // Off (the default), the window alone: nothing beyond it is even queued.
     const engine2 = makeEngine();

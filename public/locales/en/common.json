@@ -470,6 +470,7 @@
       "language": "Reading language",
       "auto": "Auto ({language})",
       "autoUnknown": "Auto (language not identified, reads in {language})",
+      "autoNoVoice": "Auto ({guessed} has no local voice; reads in {language})",
       "languageNoVoice": "{language} (no local voice installed)",
       "noVoices": "No local voice installed for the recognised languages; online voices are never used",
       "noLocalVoice": "No local voice installed for {language}; online voices are never used"

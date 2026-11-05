@@ -178,6 +178,45 @@
   align-items: center;
 }
 
+/* The search button holds its icon and, behind a thin divider, the count of pages with a text
+   layer over all pages ("4/300"). The count folds away in a short ease while the field is open
+   (the field takes the room) and comes back when it closes. Tabular digits keep it steady. */
+.toolbar .toolbar-ocr-search-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-ocr-search-count {
+  display: inline-flex;
+  align-items: center;
+  max-width: 8em;
+  margin-right: 0.3em;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  opacity: 1;
+  transition: max-width 150ms ease, margin-right 150ms ease, opacity 150ms ease;
+}
+
+.toolbar-ocr-search-count-divider {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 1.1em;
+  margin: 0 0.45em 0 0.35em;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.toolbar-ocr-search.is-open .toolbar-ocr-search-count {
+  max-width: 0;
+  margin-right: 0;
+  opacity: 0;
+}
+
 /* The field: zero wide and hidden until opened, then grown to its width (an inline style the
    component measures, utils/ocrSearchPlacement.js) in a short ease; closed again it shrinks back
    first and hides when the transition has ended. */
@@ -224,6 +263,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .toolbar-ocr-search-count,
   .toolbar-ocr-search-panel,
   .toolbar-ocr-search.is-open .toolbar-ocr-search-panel {
     transition: none;

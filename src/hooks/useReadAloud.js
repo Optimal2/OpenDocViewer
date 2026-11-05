@@ -4,16 +4,18 @@
  * the toolbar's "Reading language" section (contexts/readAloudContext.js). Follows the
  * selection inside the OCR text layers (components/OcrTextLayer.jsx), speaks it as it reads
  * on the page, line by line (utils/speech.js), and keeps the reading-language choice in the
- * viewer preferences (utils/viewerPreferences.js): absent for automatic, `ui` for the
- * interface language, or an ISO 639-1 language.
+ * viewer preferences (utils/viewerPreferences.js): absent for automatic, or an ISO 639-1
+ * language (an older `ui` value counts as automatic).
  *
  * Only voices that run on the machine are used: the text is document content and must not
- * reach an online voice service. Without a local voice for the reading language nothing is
- * spoken and `voiceMissing` says so.
+ * reach an online voice service. The choices are "Auto" and the OCR languages that have a
+ * local voice; one such language is offered alone and always read, none means nothing can be
+ * read and `voiceMissing` says so.
  *
- * The reading language is, by default, the language guessed for the selected page's text
- * (`ocr.speech.autoDetectLanguage`, the text flow's `lang`), or the viewer's UI language when
- * the guess is unsure or turned off. Escape stops a reading. Used only by ReadAloudProvider,
+ * The automatic reading language is the language guessed for the selected page's text
+ * (`ocr.speech.autoDetectLanguage`, the text flow's `lang`) when it has a voice, else the
+ * viewer's UI language when it has one, else the first language that has one. Escape stops a
+ * reading. Used only by ReadAloudProvider,
  * which is mounted while `ocr.enabled` is the literal true and `ocr.speech.enabled` is not the
  * literal false; on the default code path this hook never runs.
  */
@@ -79,7 +81,16 @@ export default function useReadAloud() {
   const ocrLanguages = useMemo(() => speechLanguagesForOcr(getOcrLanguages()), []);
   const [selection, setSelection] = useState(/** @type {({ text:string, language:(string|null) }|null)} */ (null));
   const [speaking, setSpeaking] = useState(false);
-  const [voices, setVoices] = useState(/** @type {Array<Object>} */ ([]));
+  // Read at once where the browser already has the list (Chromium after its first session use),
+  // so the language menu does not open on "no voices" and then change.
+  const [voices, setVoices] = useState(/** @type {Array<Object>} */ (() => {
+    try {
+      const synth = available && typeof window !== 'undefined' ? window.speechSynthesis : null;
+      return synth && typeof synth.getVoices === 'function' ? synth.getVoices() || [] : [];
+    } catch {
+      return [];
+    }
+  }));
   const [preferred, setPreferred] = useState(() => normalizeStoredLanguage(getSpeechLanguagePreference(), ocrLanguages));
   const controllerRef = useRef(/** @type {(Object|null)} */ (null));
   const uiLocale = resolveSpeechLanguage(i18n?.language);
@@ -115,8 +126,8 @@ export default function useReadAloud() {
   }, [available]);
 
   // The installed voices (Chromium lists them only after `voiceschanged` the first time). Read
-  // while the state is provided, so the language menu can grey the languages without a local
-  // voice before anything is selected. A local call; nothing leaves the machine.
+  // while the state is provided, so the language menu lists the languages with a local voice
+  // before anything is selected. A local call; nothing leaves the machine.
   useEffect(() => {
     if (!available) return undefined;
     const synth = window.speechSynthesis;
@@ -183,7 +194,9 @@ export default function useReadAloud() {
   // when the guess is unsure (or has no voice), the language it falls back to.
   const autoLabel = detected && automatic === detected
     ? t('ocr.read.auto', { language: inner(detected), defaultValue: `Auto (${inner(detected)})` })
-    : t('ocr.read.autoUnknown', { language: inner(automatic || uiLanguage), defaultValue: `Auto (language not identified, reads in ${inner(automatic || uiLanguage)})` });
+    : detected
+      ? t('ocr.read.autoNoVoice', { guessed: inner(detected), language: inner(automatic || uiLanguage), defaultValue: `Auto (${inner(detected)} has no local voice; reads in ${inner(automatic || uiLanguage)})` })
+      : t('ocr.read.autoUnknown', { language: inner(automatic || uiLanguage), defaultValue: `Auto (language not identified, reads in ${inner(automatic || uiLanguage)})` });
   // The choices: "Auto" (with the guess on) and the installed languages. One installed language
   // is offered alone, there is nothing to choose; none gives one greyed line saying so.
   const noVoicesLabel = t('ocr.read.noVoices', { defaultValue: 'No local voice installed for the recognised languages; online voices are never used' });

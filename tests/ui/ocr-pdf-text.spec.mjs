@@ -76,6 +76,17 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
     };
   });
   expect(order).toEqual({ afterEditing: true, beforeSpacer: true, separatorFirst: true, display: 'contents' });
+  // The button counts the pages the search can cover ("1/1"), behind a divider; the count folds
+  // away while the field is open and comes back when it closes.
+  const count = status.locator('[data-odv-ocr="count"]');
+  await expect(count).toHaveText('1/1');
+  await expect(status).toHaveAttribute('title', /1 (of|av) 1 (pages ready|sidor klara)/);
+  const countWidth = () => count.evaluate((element) => element.getBoundingClientRect().width);
+  expect(await countWidth()).toBeGreaterThan(10);
+  await status.click();
+  await expect.poll(countWidth).toBe(0);
+  await page.keyboard.press('Escape');
+  await expect.poll(countWidth).toBeGreaterThan(10);
 
   const layer = page.locator('.ocr-text-layer');
   await expect(layer).toHaveCount(1);
@@ -111,7 +122,7 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   await status.click();
   const searchField = page.locator('.toolbar-ocr-search-input');
   await expect(searchField).toBeFocused();
-  const searchStatus = page.locator('.toolbar-ocr-search-status');
+  const searchStatus = page.locator('.toolbar-ocr-search-status-short');
   await searchField.fill('diarienummer');
   await expect(searchStatus).toHaveText(/^1\/1$/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['Diarienummer']);
@@ -168,7 +179,7 @@ test('ocr on with the search and read-aloud switched off: the status stays, no f
   await expect(status).toBeDisabled();
   await expect(status).toHaveAttribute('aria-label', /Sidan har egen text|The page has its own text/);
   await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
-  await expect(page.locator('.toolbar-ocr-search-panel, .toolbar-ocr-search-input')).toHaveCount(0);
+  await expect(page.locator('.toolbar-ocr-search-panel, .toolbar-ocr-search-input, [data-odv-ocr="count"]')).toHaveCount(0);
   await status.click({ force: true });
   await expect(page.locator('.toolbar-ocr-search-input')).toHaveCount(0);
 
@@ -225,7 +236,7 @@ test('ocr on with Ctrl+F handed over: Ctrl+F opens the toolbar search, not the b
   const searchField = page.locator('.toolbar-ocr-search-input');
   await expect(searchField).toBeFocused();
   await searchField.fill('diarienummer');
-  await expect(page.locator('.toolbar-ocr-search-status')).toHaveText(/^1\/1$/);
+  await expect(page.locator('.toolbar-ocr-search-status-short')).toHaveText(/^1\/1$/);
   // Again with the field open: the cursor comes back with the text selected.
   await status.focus();
   await page.keyboard.press('Control+f');

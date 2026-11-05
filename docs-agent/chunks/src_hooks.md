@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 9. Line count: 1287. JSDoc symbol count: 37.
+File count: 9. Line count: 1330. JSDoc symbol count: 38.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -69,6 +69,7 @@ Symbols:
 
 - `OCR_IDLE_SHUTDOWN_MS` (constant) - Idle time after which the OCR worker is terminated to free its memory.
 - `module.exports` (function) - No description.
+- `useOcrTextLayers~windowIndexesRef` (constant) - Viewer indexes of the current window \(focus pages and neighbours\): never released.
 
 ## src/hooks/usePageNavigation.js
 

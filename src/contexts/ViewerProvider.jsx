@@ -2741,6 +2741,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // print PDF is assembled, and not under hard memory pressure. Outcomes are keyed per page
   // (utils/ocrPageKey.js) for the text layer.
   const ocrModule = useOcrModule();
+  /** Drop a page render made only for OCR (the whole document asked for) once its bytes are read. */
+  const releaseOcrPageAsset = useCallback((pageIndex) => {
+    clearPageAssetReference(pageIndex, 'full');
+  }, [clearPageAssetReference]);
   const { ocrPages, ocrEngineFailure } = useOcrTextLayers({
     ocrModule,
     allPages,
@@ -2749,6 +2753,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     paused: printActivity || memoryPressureStage === 'hard',
     readSourceArrayBuffer,
     ensurePageAsset,
+    // A page rendered only for OCR (the whole document asked for) is dropped again once read.
+    releasePageAsset: releaseOcrPageAsset,
   });
   /**
    * @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first.

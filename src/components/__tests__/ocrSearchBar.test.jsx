@@ -93,7 +93,8 @@ describe('OcrSearchBar', () => {
   };
   const button = () => container.querySelector('[data-odv-ocr="status"]');
   const input = () => container.querySelector('.toolbar-ocr-search-input');
-  const status = () => container.querySelector('.toolbar-ocr-search-status').textContent;
+  const status = () => container.querySelector('.toolbar-ocr-search-status-short').textContent;
+  const statusLong = () => container.querySelector('.toolbar-ocr-search-status .sr-only').textContent;
   const type = (value) => act(() => {
     const field = input();
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
@@ -115,14 +116,21 @@ describe('OcrSearchBar', () => {
     expect(button().disabled).toBe(true);
     expect(container.querySelector('[data-odv-ocr="status-text"]').textContent).toBe('Recognising text…');
     expect(container.querySelector('[data-odv-ocr="status-text"]').getAttribute('aria-live')).toBe('polite');
-    expect(button().title).toBe('Recognising text…');
+    expect(button().title).toBe('Recognising text… · 0 of 3 pages ready');
     expect(container.querySelector('.odv-status-led--pending')).not.toBeNull();
 
     render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
     expect(button().getAttribute('data-ocr-state')).toBe('done');
     expect(button().disabled).toBe(false);
-    expect(button().title).toBe('Search in the recognised text · Text recognised');
+    expect(button().title).toBe('Search in the recognised text · Text recognised · 1 of 3 pages ready');
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
+    // The count on the button: pages with a text layer over all pages, behind a divider.
+    const count = () => container.querySelector('[data-odv-ocr="count"]');
+    expect(count().textContent).toBe('1/3');
+    expect(count().querySelector('.toolbar-ocr-search-count-divider')).not.toBeNull();
+    expect(count().getAttribute('aria-hidden')).toBe('true');
+    render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(2)]: done(['Då']) } });
+    expect(count().textContent).toBe('2/3');
 
     // The engine failed later in the session: a page already done keeps its own status and
     // can still be searched; a page without a final outcome says the engine is unavailable.
@@ -142,12 +150,15 @@ describe('OcrSearchBar', () => {
     const pdfText = { ...done(['diarienummer', '2026-4471']), source: 'pdf-text', imageWidth: 595.28, imageHeight: 841.89 };
     const { setOcrSearch } = render({ ocrPages: { [KEY(0)]: pdfText, [KEY(1)]: done(['diarienummer']) } });
     expect(button().getAttribute('data-ocr-state')).toBe('pdfText');
-    expect(button().title).toBe('Search in the recognised text · The page has its own text');
+    expect(button().title).toBe('Search in the recognised text · The page has its own text · 2 of 3 pages ready');
     expect(button().disabled).toBe(false);
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
     act(() => button().click());
     type('diarienummer 2026');
     expect(status()).toBe('1/1 · 2/3 pages');
+    // Spelt out for assistive technology (and the tooltip).
+    expect(statusLong()).toBe('Match 1 of 1 · 2 of 3 pages ready');
+    expect(container.querySelector('.toolbar-ocr-search-status').title).toBe('Match 1 of 1 · 2 of 3 pages ready');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'diarienummer 2026', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     type('diarienummer');
     expect(status()).toBe('1/2 · 2/3 pages');
@@ -156,7 +167,7 @@ describe('OcrSearchBar', () => {
   it('a text-layer PDF page whose text could not be placed says so; the search opens from it once another page has text', () => {
     render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' } } });
     expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
-    expect(button().title).toBe('Not recognised: the page has its own text');
+    expect(button().title).toBe('Not recognised: the page has its own text · 0 of 3 pages ready');
     expect(button().disabled).toBe(true);
     render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' }, [KEY(2)]: done(['hej']) } });
     expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
@@ -503,12 +514,12 @@ describe('OcrSearchBar', () => {
       render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
       expect(ctrlF(document.body).defaultPrevented).toBe(false);
       expect(input().tabIndex).toBe(-1);
-      expect(button().title).toBe('Search in the recognised text · Text recognised');
+      expect(button().title).toBe('Search in the recognised text · Text recognised · 1 of 3 pages ready');
     });
 
     it('opens the field, says so in the tooltip, and puts the cursor back in the open field with its text selected', () => {
       render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ctrlFOverride: true });
-      expect(button().title).toBe('Search in the recognised text (Ctrl+F) · Text recognised');
+      expect(button().title).toBe('Search in the recognised text (Ctrl+F) · Text recognised · 1 of 3 pages ready');
       expect(button().getAttribute('aria-label')).toBe('Search in the recognised text');
       expect(ctrlF(document.body).defaultPrevented).toBe(true);
       expect(input().tabIndex).toBe(0);

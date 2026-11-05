@@ -369,7 +369,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(inlineFit.right).toBeLessThanOrEqual(inlineFit.viewport);
   expect(inlineFit.closeRight).toBeLessThanOrEqual(inlineFit.right + 0.5);
   await searchField.fill('ocr hej');
-  const searchStatus = page.locator('.toolbar-ocr-search-status');
+  const searchStatus = page.locator('.toolbar-ocr-search-status-short');
   await expect(searchStatus).toHaveText(/^1\/1/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['OCR', 'Hej']);
   await searchField.fill('hej');

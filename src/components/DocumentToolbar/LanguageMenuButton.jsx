@@ -8,10 +8,11 @@
  * With the read-aloud state provided (contexts/readAloudContext.js: OCR on, read-aloud on) the
  * menu has two titled sections, "Interface language" and "Reading language", each its own
  * radio group, so the UI language and the language read aloud are chosen in the same place
- * without being confused: "Auto (svenska)" first (with the language guess on), one entry per
- * OCR language (greyed without a local voice), and "Follow the interface language" last. The
- * reading choice is kept in the viewer preferences. Without that state the menu is the plain
- * language list it always was.
+ * without being confused: "Auto (svenska)" first (with the language guess on), then one entry
+ * per OCR language that has a voice installed on the machine; one such language stands alone,
+ * none gives a single line saying so (a plain note, not a choice). The reading choice is kept
+ * in the viewer preferences. Without that state the menu is the plain language list it always
+ * was.
  */
 
 import React, { useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -172,6 +173,12 @@ const LanguageMenuButton = ({ className = '' }) => {
                 <div id={readTitleId} className="toolbar-split-menu-title" role="presentation">{readAloud.languageTitle}</div>
                 {readAloud.entries.map((entry) => {
                   const selected = entry.value === readAloud.selectedValue;
+                  if (entry.value === 'none') {
+                    // Nothing to choose: a note, not a radio entry.
+                    return (
+                      <div key="none" className="toolbar-split-menu-description" data-speech-language="none">{entry.label}</div>
+                    );
+                  }
                   return (
                     <button
                       key={entry.value || 'auto'}

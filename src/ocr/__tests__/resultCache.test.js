@@ -63,4 +63,18 @@ describe('createOcrResultCache', () => {
     cache.clear();
     expect(cache.size()).toBe(0);
   });
+
+  it('can be bounded by the page count (never below the default) and trims when the bound shrinks', () => {
+    const cache = createOcrResultCache({ limit: 3 });
+    expect(cache.limit()).toBe(3);
+    expect(cache.setLimit(500)).toBe(500);
+    for (let index = 0; index < 400; index += 1) cache.set(`p${index}`, 'doc', outcome(index));
+    expect(cache.size()).toBe(400);
+    // Lowered under the size, the oldest go; never below the default bound.
+    expect(cache.setLimit(10)).toBe(200);
+    expect(cache.size()).toBe(200);
+    expect(cache.has('p199')).toBe(false);
+    expect(cache.has('p200')).toBe(true);
+    expect(cache.setLimit(0)).toBe(200);
+  });
 });

@@ -6172,7 +6172,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 109,
+    "line": 110,
     "description": "Close the menu and give the focus back to the button (a choice unmounts the focused item).",
     "params": [],
     "returns": [],
@@ -6185,7 +6185,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 73,
+    "line": 74,
     "description": "",
     "params": [
       {
@@ -6205,7 +6205,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 65,
+    "line": 66,
     "description": "",
     "params": [
       {
@@ -6225,7 +6225,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 92,
+    "line": 93,
     "description": "",
     "params": [
       {
@@ -6250,7 +6250,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-    "line": 27,
+    "line": 28,
     "description": "",
     "params": [
       {
@@ -15853,7 +15853,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2797,
+    "line": 2803,
     "description": "",
     "params": [
       {
@@ -15873,7 +15873,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2783,
+    "line": 2789,
     "description": "",
     "params": [
       {
@@ -16044,7 +16044,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2802,
+    "line": 2808,
     "description": "",
     "params": [
       {
@@ -16941,6 +16941,19 @@
     "examples": 0
   },
   {
+    "id": "ViewerProvider~releaseOcrPageAsset",
+    "name": "releaseOcrPageAsset",
+    "longname": "ViewerProvider~releaseOcrPageAsset",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/contexts/ViewerProvider.jsx",
+    "line": 2745,
+    "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ViewerProvider~releasePrintablePageUrls",
     "name": "releasePrintablePageUrls",
     "longname": "ViewerProvider~releasePrintablePageUrls",
@@ -17144,7 +17157,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2792,
+    "line": 2798,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -17170,7 +17183,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2757,
+    "line": 2763,
     "description": "",
     "params": [
       {
@@ -17190,7 +17203,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2770,
+    "line": 2776,
     "description": "",
     "params": [
       {
@@ -18013,7 +18026,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 48,
+    "line": 53,
     "description": "",
     "params": [
       {
@@ -18065,6 +18078,12 @@
         "description": "(pageIndex, 'full') to the rendered page's object URL."
       },
       {
+        "name": "options.releasePageAsset",
+        "type": "function|null",
+        "optional": true,
+        "description": "(pageIndex) drops the rendered page again; called for a page rendered only for OCR (beyond the window) once its bytes are in hand, so the w..."
+      },
+      {
         "name": "options.idleShutdownMs",
         "type": "number",
         "optional": true,
@@ -18074,7 +18093,7 @@
         "name": "options.wholeDocument",
         "type": "boolean",
         "optional": true,
-        "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration."
+        "description": "Queue the rest of the document after the window ( ocr.recognizeWholeDocument ); default from the runtime configuration. The outcome cache i..."
       }
     ],
     "returns": [
@@ -18094,6 +18113,19 @@
     "file": "src/hooks/useOcrTextLayers.js",
     "line": 27,
     "description": "Idle time after which the OCR worker is terminated to free its memory.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "useOcrTextLayers~windowIndexesRef",
+    "name": "windowIndexesRef",
+    "longname": "useOcrTextLayers~windowIndexesRef",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/hooks/useOcrTextLayers.js",
+    "line": 76,
+    "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -18447,7 +18479,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useReadAloud.js",
-    "line": 168,
+    "line": 179,
     "description": "",
     "params": [
       {
@@ -18467,7 +18499,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useReadAloud.js",
-    "line": 75,
+    "line": 77,
     "description": "",
     "params": [],
     "returns": [
@@ -18485,7 +18517,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useReadAloud.js",
-    "line": 39,
+    "line": 41,
     "description": "The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given (the page's guessed language), or null outside the la...",
     "params": [],
     "returns": [
@@ -18503,7 +18535,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useReadAloud.js",
-    "line": 32,
+    "line": 34,
     "description": "Preference value an older viewer stored for &quot;follow the interface language&quot;; no longer offered, it counts as automatic.",
     "params": [],
     "returns": [],
@@ -18516,7 +18548,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useReadAloud.js",
-    "line": 65,
+    "line": 67,
     "description": "A stored reading-language choice in today's form: one of the OCR languages, else null (automatic).",
     "params": [
       {
@@ -23125,7 +23157,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/resultCache.js",
-    "line": 32,
+    "line": 38,
     "description": "",
     "params": [
       {

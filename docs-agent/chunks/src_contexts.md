@@ -1,6 +1,6 @@
 # OpenDocViewer / src/contexts
 
-File count: 5. Line count: 3599. JSDoc symbol count: 100.
+File count: 5. Line count: 3605. JSDoc symbol count: 101.
 
 ## src/contexts/readAloudContext.js
 

@@ -305,11 +305,13 @@ ocr: {
   so the search covers only the pages that have been near the user. With the boolean literal
   `true`, the window keeps its priority and the remaining pages follow it, one at a time, in
   reading order from the shown page to the end and then from the start of the document, while
-  the viewer is open; a page the viewer has not rendered is rendered for the purpose (and dropped
-  from the page cache again under its usual limits), and the queue still pauses for printing and
-  under memory pressure. On a long document this costs CPU in the background for as long as it
-  takes (a few seconds per page), which is why it is off by default. The key means nothing while
-  OCR is off.
+  the viewer is open; a page the viewer has not rendered is rendered for the purpose and dropped
+  again as soon as its bytes are read (so a long document does not pile up page renders; a page
+  the user has reached meanwhile is left to the viewer), the outcome cache grows to the page
+  count (an outcome is never dropped while its page is still planned), and the queue still
+  pauses for printing and under memory pressure. On a long document this costs CPU in the
+  background for as long as it takes (a few seconds per page), also while the tab is in the
+  background, which is why it is off by default. The key means nothing while OCR is off.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
   (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
@@ -543,13 +545,15 @@ not a toolbar button, see below:
   status as its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
   "No text found", "Not recognised: the page has its own text", "The text could not be
   recognised" or "Text recognition is unavailable", the last when the engine could not start; see
-  CSP below). The button is enabled once the displayed page has a text layer (recognised, or the
+  CSP below). Behind a thin divider the button also counts the pages the search can cover over
+  all pages ("4/300", spelt out in the tooltip); the count folds away while the field is open.
+  The button is enabled once the displayed page has a text layer (recognised, or the
   PDF page's own). Clicking it grows a search field out of
   the button to the right (a short ease) into the room the toolbar has; when there is too little,
   the field hangs under the toolbar at the button's right edge instead. The search covers only the text layers (recognised text and PDF pages' own text), of every
   page that has an outcome, in page order; it is case-insensitive and finds a phrase also across
-  a line break. Typing shows the position ("1 of 5") and, while not every page has an outcome,
-  how many pages the search covers ("2 of 300 pages ready"); the matches are marked on the
+  a line break. Typing shows the position ("1/5") and, while not every page has an outcome,
+  how many pages the search covers ("2/300 pages", spelt out in the tooltip); the matches are marked on the
   page over the words, the current match stronger and scrolled into view. Enter and the arrow
   buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
   one; Escape closes the field. A toggle in the field ("Search only on this page") limits the

@@ -22,6 +22,12 @@ export const DEFAULT_OCR_CACHE_LIMIT = 200;
  * @property {function(): Array<Array<*>>} entries  `[key, outcome]` pairs, oldest first.
  * @property {function(): void} clear
  * @property {function(): number} size
+ * @property {function(number): number} setLimit  Raise or lower the bound (never below the
+ *   default); the oldest outcomes go when the bound shrinks under the size. Returns the bound.
+ *   The viewer raises it to the page count when the whole document is recognised, so that an
+ *   outcome is never dropped while its page is still planned (the queue would recognise it
+ *   again, without end).
+ * @property {function(): number} limit  The current bound.
  */
 
 /**
@@ -30,11 +36,25 @@ export const DEFAULT_OCR_CACHE_LIMIT = 200;
  * @returns {OcrResultCache}
  */
 export function createOcrResultCache({ limit = DEFAULT_OCR_CACHE_LIMIT } = {}) {
-  const max = Math.max(1, Math.floor(Number(limit)) || DEFAULT_OCR_CACHE_LIMIT);
+  let max = Math.max(1, Math.floor(Number(limit)) || DEFAULT_OCR_CACHE_LIMIT);
   /** @type {Map<string, { sourceKey: string, outcome: Object }>} */
   const store = new Map();
+  const trim = () => {
+    while (store.size > max) {
+      const oldest = store.keys().next().value;
+      store.delete(oldest);
+    }
+  };
 
   return {
+    setLimit(next) {
+      max = Math.max(DEFAULT_OCR_CACHE_LIMIT, Math.floor(Number(next)) || 0);
+      trim();
+      return max;
+    },
+    limit() {
+      return max;
+    },
     has(key) {
       return store.has(key);
     },
@@ -49,10 +69,7 @@ export function createOcrResultCache({ limit = DEFAULT_OCR_CACHE_LIMIT } = {}) {
       if (!key || !outcome) return;
       store.delete(key);
       store.set(key, { sourceKey: String(sourceKey ?? ''), outcome });
-      while (store.size > max) {
-        const oldest = store.keys().next().value;
-        store.delete(oldest);
-      }
+      trim();
     },
     delete(key) {
       return store.delete(key);

@@ -226,11 +226,11 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:29</code> |  |
 | <code>module:usePrintRangeConfig</code> | module | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:2</code> | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:30</code> |  |
-| <code>LanguageMenuButton~closeMenu</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:109</code> | Close the menu and give the focus back to the button \(a choice unmounts the focused item\). |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:73</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:65</code> |  |
-| <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:92</code> |  |
-| <code>resolveLanguageLabel</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:27</code> |  |
+| <code>LanguageMenuButton~closeMenu</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:110</code> | Close the menu and give the focus back to the button \(a choice unmounts the focused item\). |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:74</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:66</code> |  |
+| <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:93</code> |  |
+| <code>resolveLanguageLabel</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:28</code> |  |
 | <code>absoluteManualUrl</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:40</code> |  |
 | <code>appendManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:150</code> |  |
 | <code>applyCustomHighlight</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:348</code> | Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all. |
@@ -597,8 +597,8 @@
 | <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1105</code> |  |
 | <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:578</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:219</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2797</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2783</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2803</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2789</code> |  |
 | <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1177</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:61</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:55</code> |  |
@@ -606,7 +606,7 @@
 | <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2054</code> | Render one PDF page again at twice its effective PDF scale. |
 | <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1861</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:76</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2802</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2808</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:151</code> |  |
 | <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2451</code> |  |
 | <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1517</code> |  |
@@ -639,6 +639,7 @@
 | <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1381</code> |  |
 | <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2136</code> |  |
 | <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1329</code> |  |
+| <code>ViewerProvider~releaseOcrPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:2745</code> | Drop a page render made only for OCR \(the whole document asked for\) once its bytes are read. |
 | <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:988</code> | Release print leases previously acquired through getPrintablePageUrls . |
 | <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1769</code> |  |
 | <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:737</code> |  |
@@ -646,9 +647,9 @@
 | <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1697</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:709</code> |  |
 | <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2408</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2792</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
-| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2757</code> |  |
-| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2770</code> |  |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2798</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2763</code> |  |
+| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2776</code> |  |
 | <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1684</code> |  |
 | <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1348</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:66</code> |  |
@@ -685,8 +686,9 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
-| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:48</code> |  |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:53</code> |  |
 | <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:27</code> | Idle time after which the OCR worker is terminated to free its memory. |
+| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:76</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |
@@ -704,11 +706,11 @@
 | <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection. |
 | <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:26</code> |  |
 | <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:40</code> |  |
-| <code>useReadAloud~chooseLanguage</code> | constant | <code>src/hooks/useReadAloud.js:168</code> |  |
-| <code>module.exports</code> | function | <code>src/hooks/useReadAloud.js:75</code> |  |
-| <code>layerSelection</code> | function | <code>src/hooks/useReadAloud.js:39</code> | The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page&#39;s guessed language\), or null outside the la... |
-| <code>LEGACY_FOLLOW_UI</code> | constant | <code>src/hooks/useReadAloud.js:32</code> | Preference value an older viewer stored for &amp;quot;follow the interface language&amp;quot;; no longer offered, it counts as automatic. |
-| <code>normalizeStoredLanguage</code> | function | <code>src/hooks/useReadAloud.js:65</code> | A stored reading-language choice in today&#39;s form: one of the OCR languages, else null \(automatic\). |
+| <code>useReadAloud~chooseLanguage</code> | constant | <code>src/hooks/useReadAloud.js:179</code> |  |
+| <code>module.exports</code> | function | <code>src/hooks/useReadAloud.js:77</code> |  |
+| <code>layerSelection</code> | function | <code>src/hooks/useReadAloud.js:41</code> | The selection inside the text layers: its text as it reads on the page, and the language the text flow of its start was given \(the page&#39;s guessed language\), or null outside the la... |
+| <code>LEGACY_FOLLOW_UI</code> | constant | <code>src/hooks/useReadAloud.js:34</code> | Preference value an older viewer stored for &amp;quot;follow the interface language&amp;quot;; no longer offered, it counts as automatic. |
+| <code>normalizeStoredLanguage</code> | function | <code>src/hooks/useReadAloud.js:67</code> | A stored reading-language choice in today&#39;s form: one of the OCR languages, else null \(automatic\). |
 | <code>appendQuery</code> | function | <code>src/i18n.js:134</code> | Helper: append query params safely to a URL. |
 | <code>BUNDLED_I18N_RESOURCE_REVISION</code> | constant | <code>src/i18n.js:93</code> | Fallback cache-busting token for bundled locale resources. |
 | <code>computeBaseHref</code> | function | <code>src/i18n.js:366</code> | Compute a normalized base href. |
@@ -931,7 +933,7 @@
 | <code>createOcrQueue~retained</code> | member | <code>src/ocr/queue.js:138</code> | null until retainSources is called: every source is retained. |
 | <code>TIMEOUT_STEP</code> | constant | <code>src/ocr/queue.js:35</code> | Marker on the error of a step that exceeded its bound. |
 | <code>withTimeout</code> | function | <code>src/ocr/queue.js:43</code> |  |
-| <code>createOcrResultCache</code> | function | <code>src/ocr/resultCache.js:32</code> |  |
+| <code>createOcrResultCache</code> | function | <code>src/ocr/resultCache.js:38</code> |  |
 | <code>DEFAULT_OCR_CACHE_LIMIT</code> | constant | <code>src/ocr/resultCache.js:12</code> | Pages kept per session before the least recently used outcome is dropped. |
 | <code>OcrResultCache</code> | typedef | <code>src/ocr/resultCache.js:14</code> |  |
 | <code>createConfiguredOcrEngine</code> | function | <code>src/ocr/setup.js:90</code> | Create an engine for the configured languages and asset location. |

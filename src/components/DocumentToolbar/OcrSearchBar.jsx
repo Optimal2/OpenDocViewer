@@ -293,7 +293,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
 
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
-  const buttonTitle = ready || open ? `${openTitle} · ${statusText}` : statusText;
+  const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
+  const buttonTitle = `${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}`;
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   let statusLine = '';
   if (normalizedTerm && pageOnly && !hasSearchableOcrText(displayedEntry)) {
@@ -334,6 +335,12 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
         onClick={() => (open ? close() : setOpen(true))}
       >
         <span className="material-icons" aria-hidden="true">search</span>
+        {/* The count: pages with a text layer over all pages ("4/300"), behind a thin divider;
+            folded away (styles/ocr.css) while the field is open. The tooltip spells it out. */}
+        <span className="toolbar-ocr-search-count" data-odv-ocr="count" aria-hidden="true">
+          <span className="toolbar-ocr-search-count-divider" />
+          <span className="toolbar-ocr-search-count-text">{`${recognisedPages}/${pages.length}`}</span>
+        </span>
         <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
       </button>
       <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
@@ -366,7 +373,12 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           spellCheck={false}
           tabIndex={open ? 0 : -1}
         />
-        <span className="toolbar-ocr-search-status" aria-live="polite" title={statusTitle}>{statusLine}</span>
+        {/* The short status for the eye, the spelt-out one for assistive technology (a tooltip
+            on a span is out of a screen reader's reach). */}
+        <span className="toolbar-ocr-search-status" aria-live="polite" title={statusTitle}>
+          <span className="toolbar-ocr-search-status-short" aria-hidden="true">{statusLine}</span>
+          <span className="sr-only">{statusTitle}</span>
+        </span>
         <button
           type="button"
           className={`odv-btn toolbar-ocr-search-scope${pageOnly ? ' is-active' : ''}`}

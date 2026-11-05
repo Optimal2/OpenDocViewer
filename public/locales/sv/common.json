@@ -470,6 +470,7 @@
       "language": "Uppläsningsspråk",
       "auto": "Auto ({language})",
       "autoUnknown": "Auto (språket kunde inte identifieras, läser på {language})",
+      "autoNoVoice": "Auto ({guessed} saknar lokal röst, läser på {language})",
       "languageNoVoice": "{language} (ingen lokal röst installerad)",
       "noVoices": "Ingen lokal röst installerad för tolkningsspråken; molnröster används aldrig",
       "noLocalVoice": "Ingen lokal röst installerad för {language}; molnröster används aldrig"
