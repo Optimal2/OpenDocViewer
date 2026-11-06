@@ -335,16 +335,18 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const measureToolbar = () => page.locator('.toolbar').evaluate((toolbar) => {
     const panel = toolbar.querySelector('.toolbar-ocr-search-panel');
     const rect = panel.getBoundingClientRect();
-    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: rect.right, top: rect.top, toolbarBottom: toolbar.getBoundingClientRect().bottom, viewport: document.documentElement.clientWidth };
+    const anchorRight = toolbar.querySelector('[data-odv-ocr="status"]').getBoundingClientRect().right;
+    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: rect.right, anchorRight, top: rect.top, toolbarBottom: toolbar.getBoundingClientRect().bottom, viewport: document.documentElement.clientWidth };
   });
   // The field may already hang (a 1400 px window leaves it less than its inline minimum), so
   // wait for the re-placement the resize causes rather than for the placement attribute.
   await expect.poll(async () => (await measureToolbar()).right).toBeLessThanOrEqual(1000);
   const hanging = await measureToolbar();
   expect(hanging.right).toBeLessThanOrEqual(hanging.viewport);
-  // Re-placed for the narrow window: anchored at the button, pulled just inside the window
-  // (not by the open field's own width, which would leave it hundreds of px further left).
-  expect(hanging.right).toBeGreaterThanOrEqual(hanging.viewport - 10);
+  // Re-placed for the narrow window: anchored at the button, pulled just inside the window only
+  // when the button itself is outside (not by the open field's own width, which would leave it
+  // hundreds of px further left). Where the button lands depends on what else the toolbar holds.
+  expect(Math.abs(hanging.right - Math.min(hanging.anchorRight, hanging.viewport - 8))).toBeLessThanOrEqual(2);
   expect(hanging.top).toBeGreaterThanOrEqual(hanging.toolbarBottom);
   await searchField.press('Escape');
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
