@@ -353,45 +353,135 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
       scrollX: window.scrollX,
     };
   });
-  // Independent geometry contract: align to the actual anchor when it fits, but clamp to the
-  // viewport's 8 px margin when the anchor lies beyond it. The anchor is font- and subpixel-
-  // dependent, so its position is measured rather than assumed to be near the window edge.
-  // Exercise both branches and repeat a width to prove that resizing preserves visibility.
+  // Independent geometry contract: the product freezes a CSS right offset when it places the
+  // hanging panel. Measure the anchor at that placement, not after later font/count/layout drift.
+  // An attribute observer records real product commits without changing styles or sending events.
+  await page.evaluate(() => {
+    const root = document.querySelector('.toolbar-ocr-search');
+    const panel = root.querySelector('.toolbar-ocr-search-panel');
+    const anchor = root.querySelector('[data-odv-ocr="status"]');
+    const toolbar = root.closest('.toolbar');
+    const records = [];
+    window.__odvOcrPlacementRecords = records;
+    const record = () => {
+      if (!root.classList.contains('is-open') || panel.dataset.placement !== 'hanging') return;
+      const rect = panel.getBoundingClientRect();
+      const anchorRect = anchor.getBoundingClientRect();
+      records.push({
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        anchorRight: anchorRect.right,
+        offset: Number.parseFloat(panel.style.right) || 0,
+        viewport: document.documentElement.clientWidth,
+        toolbarBottom: toolbar.getBoundingClientRect().bottom,
+      });
+    };
+    const observer = new MutationObserver(record);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(panel, { attributes: true, attributeFilter: ['data-placement', 'style'] });
+    window.__odvOcrPlacementObserver = observer;
+    // A real resize can produce the same attributes (notably offset 0). Sample after the product's
+    // resize handler and React commit as well, so a broken placement still reaches the oracle.
+    window.addEventListener('resize', () => {
+      requestAnimationFrame(() => requestAnimationFrame(record));
+    });
+    record();
+  });
+  const clearPlacementRecords = () => page.evaluate(() => { window.__odvOcrPlacementRecords.length = 0; });
+  const placementRecords = () => page.evaluate(() => window.__odvOcrPlacementRecords);
+  const settleToolbarLayout = () => page.evaluate(async () => {
+    await document.fonts.ready;
+    const toolbar = document.querySelector('.toolbar');
+    await Promise.all(toolbar.getAnimations({ subtree: true }).map((animation) => (
+      animation.finished.catch(() => undefined)
+    )));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  const assertContained = (geometry) => {
+    expect(geometry.right).toBeLessThanOrEqual(geometry.viewport + 0.5);
+    expect(geometry.left).toBeGreaterThanOrEqual(-0.5);
+    expect(geometry.closeRight).toBeLessThanOrEqual(geometry.right + 0.5);
+    expect(geometry.right - geometry.left).toBeGreaterThan(150);
+    expect(geometry.top).toBeGreaterThanOrEqual(geometry.toolbarBottom);
+  };
+  // Exercise clamping and unclamped anchoring through all four transitions. Containment is checked
+  // after real animations settle; anchoring and clamping are checked against the placement record.
   const geometries = [];
   for (const width of [1000, 900, 1100, 1000]) {
+    await clearPlacementRecords();
     await page.setViewportSize({ width, height: 900 });
     await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'hanging');
-    let current = await measureToolbar();
+    await expect.poll(async () => {
+      const records = await placementRecords();
+      return records.at(-1)?.viewport === width;
+    }).toBe(true);
+    await settleToolbarLayout();
+    const placed = (await placementRecords()).at(-1);
+    const current = await measureToolbar();
     try {
-      await expect.poll(async () => {
-        current = await measureToolbar();
-        const expectedRight = Math.min(current.anchorRight, current.viewport - 8);
-        return Math.abs(current.right - expectedRight);
-      }).toBeLessThanOrEqual(1);
+      const expectedRight = Math.min(placed.anchorRight, placed.viewport - 8);
+      expect(Math.abs(placed.right - expectedRight)).toBeLessThanOrEqual(1);
+      if (placed.anchorRight > placed.viewport - 8) expect(placed.offset).toBeGreaterThan(0);
+      else expect(placed.offset).toBe(0);
+      assertContained(current);
     } catch (error) {
-      // CI has no layout artifact on this path: retain the actual failed measurement in its log.
-      console.log(`OCR hanging geometry at viewport ${width}: ${JSON.stringify(current)}`);
+      // CI has no layout artifact on this path: retain both placement and failed live measurement.
+      console.log(`OCR hanging geometry at viewport ${width}: ${JSON.stringify({ placed, current })}`);
       throw error;
     }
-    current = await measureToolbar();
-    expect(current.right).toBeLessThanOrEqual(current.viewport + 0.5);
-    expect(current.left).toBeGreaterThanOrEqual(-0.5);
-    expect(current.closeRight).toBeLessThanOrEqual(current.right + 0.5);
-    expect(current.right - current.left).toBeGreaterThan(150);
-    expect(current.top).toBeGreaterThanOrEqual(current.toolbarBottom);
-    geometries.push(current);
+    geometries.push({ viewport: width, placed, settled: current });
   }
-  expect(geometries.some((geometry) => geometry.anchorRight <= geometry.viewport - 8)).toBe(true);
-  expect(geometries.some((geometry) => geometry.anchorRight > geometry.viewport - 8)).toBe(true);
-  await test.info().attach('ocr-hanging-geometry', {
-    body: JSON.stringify(geometries, null, 2),
-    contentType: 'application/json',
-  });
+  expect(geometries.some(({ placed }) => placed.anchorRight <= placed.viewport - 8)).toBe(true);
+  expect(geometries.some(({ placed }) => placed.anchorRight > placed.viewport - 8)).toBe(true);
   const hanging = await measureToolbar();
   await searchField.press('Escape');
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
   const closedNarrow = await measureToolbar();
   expect(hanging.overflow).toBeLessThanOrEqual(closedNarrow.overflow);
+
+  // Deterministic counterexample to the old moving-anchor equality: place with a small positive
+  // clamp offset, then let count collapse move the live anchor back inside the unclamped range.
+  // The root and panel drift together, preserving the frozen offset and a correct contained layout.
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await settleToolbarLayout();
+  const countWidth = () => page.locator('.toolbar-ocr-search-count').evaluate((count) => ({
+    width: count.getBoundingClientRect().width,
+    maxWidth: getComputedStyle(count).maxWidth,
+  }));
+  await expect.poll(async () => (await countWidth()).width).toBeGreaterThan(0);
+  const expandedCount = await countWidth();
+  const expandedAnchorRight = (await measureToolbar()).anchorRight;
+  const driftViewport = Math.ceil(expandedAnchorRight);
+  await page.setViewportSize({ width: driftViewport, height: 900 });
+  await settleToolbarLayout();
+  await clearPlacementRecords();
+  await status.click();
+  await expect(searchField).toBeFocused();
+  await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'hanging');
+  await expect.poll(async () => (await placementRecords()).length).toBeGreaterThan(0);
+  await settleToolbarLayout();
+  const driftPlacement = (await placementRecords()).at(-1);
+  const drifted = await measureToolbar();
+  const collapsedCount = await countWidth();
+  expect(driftPlacement.offset).toBeGreaterThan(0);
+  expect(Math.abs(driftPlacement.right - (driftPlacement.viewport - 8))).toBeLessThanOrEqual(1);
+  expect(drifted.anchorRight).toBeLessThan(drifted.viewport - 8);
+  expect(Math.abs(drifted.anchorRight - drifted.right - driftPlacement.offset)).toBeLessThanOrEqual(1);
+  expect(collapsedCount.width).toBe(0);
+  assertContained(drifted);
+  const oldMovingAnchorError = Math.abs(drifted.right - Math.min(drifted.anchorRight, drifted.viewport - 8));
+  console.log(`OCR count-collapse counterexample: ${JSON.stringify({ expandedCount, collapsedCount, driftPlacement, drifted, oldMovingAnchorError })}`);
+  // The old oracle rejects this supported-correct layout; the placement and containment checks
+  // above accept it without assigning a tolerance to unrelated later anchor drift.
+  expect(oldMovingAnchorError).toBeGreaterThan(1);
+  geometries.push({ viewport: driftViewport, placed: driftPlacement, settled: drifted, expandedCount, collapsedCount, oldMovingAnchorError });
+  await test.info().attach('ocr-hanging-geometry', {
+    body: JSON.stringify(geometries, null, 2),
+    contentType: 'application/json',
+  });
+  await searchField.press('Escape');
+  await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
   await status.click();
   await expect(searchField).toBeFocused();
   // Wide enough for the field inline (at 1400 px the toolbar leaves it less than its minimum).
