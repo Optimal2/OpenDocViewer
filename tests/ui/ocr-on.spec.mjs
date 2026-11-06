@@ -314,6 +314,23 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // The toolbar's search in the recognised text: the field grows out of the status button, a
   // phrase across the line break is found, the match's words are marked on the page (the
   // current match stronger), Enter walks the matches and Escape closes the field.
+  // Observe the exact anchor measurement supplied to product placement. The wrapper returns the
+  // original DOMRect unchanged; test reads below use the original function to avoid self-sampling.
+  await status.evaluate((anchor) => {
+    const original = anchor.getBoundingClientRect.bind(anchor);
+    window.__odvOcrOriginalAnchorMeasure = original;
+    window.__odvOcrAnchorMeasurements = [];
+    anchor.getBoundingClientRect = () => {
+      const rect = original();
+      if (anchor.closest('.toolbar-ocr-search').classList.contains('is-open')) {
+        window.__odvOcrAnchorMeasurements.push({
+          right: rect.right,
+          viewport: document.documentElement.clientWidth,
+        });
+      }
+      return rect;
+    };
+  });
   await status.click();
   const searchField = page.locator('.toolbar-ocr-search-input');
   await expect(searchField).toBeFocused();
@@ -335,7 +352,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     const rect = panel.getBoundingClientRect();
     const root = toolbar.querySelector('.toolbar-ocr-search').getBoundingClientRect();
     const close = panel.querySelector('.toolbar-ocr-search-close').getBoundingClientRect();
-    const anchor = toolbar.querySelector('[data-odv-ocr="status"]').getBoundingClientRect();
+    const anchor = window.__odvOcrOriginalAnchorMeasure();
     return {
       overflow: toolbar.scrollWidth - toolbar.clientWidth,
       left: rect.left,
@@ -366,12 +383,15 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     const record = () => {
       if (!root.classList.contains('is-open') || panel.dataset.placement !== 'hanging') return;
       const rect = panel.getBoundingClientRect();
-      const anchorRect = anchor.getBoundingClientRect();
+      const anchorRect = window.__odvOcrOriginalAnchorMeasure();
+      const measured = window.__odvOcrAnchorMeasurements.at(-1);
       records.push({
         left: rect.left,
         right: rect.right,
         top: rect.top,
         anchorRight: anchorRect.right,
+        measuredAnchorRight: measured?.right,
+        measuredViewport: measured?.viewport,
         offset: Number.parseFloat(panel.style.right) || 0,
         viewport: document.documentElement.clientWidth,
         toolbarBottom: toolbar.getBoundingClientRect().bottom,
@@ -388,7 +408,10 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     });
     record();
   });
-  const clearPlacementRecords = () => page.evaluate(() => { window.__odvOcrPlacementRecords.length = 0; });
+  const clearPlacementRecords = () => page.evaluate(() => {
+    window.__odvOcrPlacementRecords.length = 0;
+    window.__odvOcrAnchorMeasurements.length = 0;
+  });
   const placementRecords = () => page.evaluate(() => window.__odvOcrPlacementRecords);
   const settleToolbarLayout = () => page.evaluate(async () => {
     await document.fonts.ready;
@@ -405,8 +428,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     expect(geometry.right - geometry.left).toBeGreaterThan(150);
     expect(geometry.top).toBeGreaterThanOrEqual(geometry.toolbarBottom);
   };
+  const assertPlacementOffset = (placed) => {
+    expect(placed.measuredViewport).toBe(placed.viewport);
+    expect(Number.isFinite(placed.measuredAnchorRight)).toBe(true);
+    const expectedOffset = placed.measuredAnchorRight > placed.viewport - 8
+      ? Math.ceil(placed.measuredAnchorRight - (placed.viewport - 8))
+      : 0;
+    expect(placed.offset).toBe(expectedOffset);
+  };
   // Exercise clamping and unclamped anchoring through all four transitions. Containment is checked
-  // after real animations settle; anchoring and clamping are checked against the placement record.
+  // after real animations settle; anchoring and clamping use the product's actual measurement.
   const geometries = [];
   for (const width of [1000, 900, 1100, 1000]) {
     await clearPlacementRecords();
@@ -420,10 +451,8 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     const placed = (await placementRecords()).at(-1);
     const current = await measureToolbar();
     try {
-      const expectedRight = Math.min(placed.anchorRight, placed.viewport - 8);
-      expect(Math.abs(placed.right - expectedRight)).toBeLessThanOrEqual(1);
-      if (placed.anchorRight > placed.viewport - 8) expect(placed.offset).toBeGreaterThan(0);
-      else expect(placed.offset).toBe(0);
+      assertPlacementOffset(placed);
+      expect(Math.abs(current.anchorRight - current.right - current.offset)).toBeLessThanOrEqual(1);
       assertContained(current);
     } catch (error) {
       // CI has no layout artifact on this path: retain both placement and failed live measurement.
@@ -432,8 +461,8 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
     }
     geometries.push({ viewport: width, placed, settled: current });
   }
-  expect(geometries.some(({ placed }) => placed.anchorRight <= placed.viewport - 8)).toBe(true);
-  expect(geometries.some(({ placed }) => placed.anchorRight > placed.viewport - 8)).toBe(true);
+  expect(geometries.some(({ placed }) => placed.measuredAnchorRight <= placed.viewport - 8)).toBe(true);
+  expect(geometries.some(({ placed }) => placed.measuredAnchorRight > placed.viewport - 8)).toBe(true);
   const hanging = await measureToolbar();
   await searchField.press('Escape');
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
@@ -464,8 +493,8 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const driftPlacement = (await placementRecords()).at(-1);
   const drifted = await measureToolbar();
   const collapsedCount = await countWidth();
+  assertPlacementOffset(driftPlacement);
   expect(driftPlacement.offset).toBeGreaterThan(0);
-  expect(Math.abs(driftPlacement.right - (driftPlacement.viewport - 8))).toBeLessThanOrEqual(1);
   expect(drifted.anchorRight).toBeLessThan(drifted.viewport - 8);
   expect(Math.abs(drifted.anchorRight - drifted.right - driftPlacement.offset)).toBeLessThanOrEqual(1);
   expect(collapsedCount.width).toBe(0);
