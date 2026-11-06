@@ -24,8 +24,9 @@ const LINE_TERMINATOR_ESCAPES = new Map([
 /**
  * Escapes `value` so that it can be used as a literal part of a regular expression.
  *
- * The result is the source of a pattern: `new RegExp(escapeRegExp(value))` matches `value`
- * itself and nothing else. Every metacharacter is escaped, the backslash among them, because a
+ * The result is the source of an unanchored pattern: `new RegExp(escapeRegExp(value))` matches
+ * `value` literally wherever it occurs in the searched string. Add `^` and `$` when whole-string
+ * matching is intended. Every metacharacter is escaped, the backslash among them, because a
  * backslash is what gives the next character its meaning. A line terminator is written as its
  * escape sequence, so that the pattern stays on one line.
  *
