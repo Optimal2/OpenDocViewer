@@ -333,18 +333,24 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const measureToolbar = () => page.locator('.toolbar').evaluate((toolbar) => {
     const panel = toolbar.querySelector('.toolbar-ocr-search-panel');
     const rect = panel.getBoundingClientRect();
+    const root = toolbar.querySelector('.toolbar-ocr-search').getBoundingClientRect();
     const close = panel.querySelector('.toolbar-ocr-search-close').getBoundingClientRect();
     const anchor = toolbar.querySelector('[data-odv-ocr="status"]').getBoundingClientRect();
     return {
       overflow: toolbar.scrollWidth - toolbar.clientWidth,
       left: rect.left,
       right: rect.right,
+      rootLeft: root.left,
+      rootRight: root.right,
       closeRight: close.right,
       top: rect.top,
       toolbarBottom: toolbar.getBoundingClientRect().bottom,
+      anchorLeft: anchor.left,
       anchorRight: anchor.right,
       offset: Number.parseFloat(panel.style.right) || 0,
       viewport: document.documentElement.clientWidth,
+      innerWidth: window.innerWidth,
+      scrollX: window.scrollX,
     };
   });
   // Independent geometry contract: align to the actual anchor when it fits, but clamp to the
@@ -355,12 +361,19 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   for (const width of [1000, 900, 1100, 1000]) {
     await page.setViewportSize({ width, height: 900 });
     await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'hanging');
-    await expect.poll(async () => {
-      const current = await measureToolbar();
-      const expectedRight = Math.min(current.anchorRight, current.viewport - 8);
-      return Math.abs(current.right - expectedRight);
-    }).toBeLessThanOrEqual(1);
-    const current = await measureToolbar();
+    let current = await measureToolbar();
+    try {
+      await expect.poll(async () => {
+        current = await measureToolbar();
+        const expectedRight = Math.min(current.anchorRight, current.viewport - 8);
+        return Math.abs(current.right - expectedRight);
+      }).toBeLessThanOrEqual(1);
+    } catch (error) {
+      // CI has no layout artifact on this path: retain the actual failed measurement in its log.
+      console.log(`OCR hanging geometry at viewport ${width}: ${JSON.stringify(current)}`);
+      throw error;
+    }
+    current = await measureToolbar();
     expect(current.right).toBeLessThanOrEqual(current.viewport + 0.5);
     expect(current.left).toBeGreaterThanOrEqual(-0.5);
     expect(current.closeRight).toBeLessThanOrEqual(current.right + 0.5);
