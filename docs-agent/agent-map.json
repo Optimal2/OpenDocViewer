@@ -94,8 +94,8 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 69147,
-    "docletCount": 1988,
+    "sourceLineCount": 69169,
+    "docletCount": 1989,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -1795,8 +1795,8 @@
     {
       "name": "src/utils",
       "fileCount": 64,
-      "lineCount": 23993,
-      "docletCount": 987,
+      "lineCount": 24015,
+      "docletCount": 988,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -52144,78 +52144,88 @@
     },
     {
       "path": "src/utils/ocrSearchPlacement.js",
-      "lines": 160,
+      "lines": 182,
       "extension": ".js",
-      "jsdocBlockCount": 12,
+      "jsdocBlockCount": 13,
       "sourceSummary": "Where the toolbar's OCR search field goes and how wide it is (components/DocumentToolbar/OcrSearchBar.jsx): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when",
       "imports": [],
       "exports": [
         {
           "name": "OCR_SEARCH_PANEL_WIDTH",
           "kind": "variable",
-          "line": 14
+          "line": 17
         },
         {
           "name": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
           "kind": "variable",
-          "line": 20
+          "line": 23
         },
         {
           "name": "OCR_SEARCH_INPUT_MIN_WIDTH",
           "kind": "variable",
-          "line": 22
+          "line": 25
+        },
+        {
+          "name": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+          "kind": "variable",
+          "line": 31
         },
         {
           "name": "OCR_SEARCH_PANEL_HANG_INSET",
           "kind": "variable",
-          "line": 24
+          "line": 33
         },
         {
           "name": "OCR_SEARCH_PANEL_MARGIN",
           "kind": "variable",
-          "line": 26
+          "line": 35
         },
         {
           "name": "OCR_SEARCH_PANEL_HANG_GAP",
           "kind": "variable",
-          "line": 28
+          "line": 37
         },
         {
           "name": "resolveOcrSearchPlacement",
           "kind": "function",
-          "line": 61
+          "line": 74
+        },
+        {
+          "name": "measureOcrSearchInputMinWidth",
+          "kind": "function",
+          "line": 117
         },
         {
           "name": "measureOcrSearchContentWidth",
           "kind": "function",
-          "line": 113
+          "line": 134
         },
         {
           "name": "measureOcrSearchPlacement",
           "kind": "function",
-          "line": 138
+          "line": 159
         }
       ],
       "declarations": [
         {
           "name": "resolveOcrSearchPlacement",
           "kind": "function",
-          "line": 61
+          "line": 74
         },
         {
           "name": "measureOcrSearchInputMinWidth",
           "kind": "function",
-          "line": 97
+          "line": 117
         },
         {
           "name": "measureOcrSearchContentWidth",
           "kind": "function",
-          "line": 113
+          "line": 134
         },
         {
           "name": "measureOcrSearchPlacement",
           "kind": "function",
-          "line": 138
+          "line": 159
         }
       ],
       "parseError": null,
@@ -52231,7 +52241,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 14,
+          "line": 17,
           "description": "Full width of the field (CSS px).",
           "params": [],
           "returns": [],
@@ -52244,7 +52254,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 20,
+          "line": 23,
           "description": "Below this inline width the field hangs under the toolbar instead: the field's contents (the input at its minimum, an empty status, the four buttons and their gaps) need about 210...",
           "params": [],
           "returns": [],
@@ -52257,8 +52267,21 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 22,
+          "line": 25,
           "description": "The input's least width (CSS px), as .toolbar-ocr-search-input has it.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+          "name": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+          "longname": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 31,
+          "description": "The input's width the field asks for (CSS px, laid out) when it has been measured: room for a few words of a term.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -52270,7 +52293,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 24,
+          "line": 33,
           "description": "Padding and border a hanging field adds around its contents (CSS px, both sides).",
           "params": [],
           "returns": [],
@@ -52283,7 +52306,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 26,
+          "line": 35,
           "description": "Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.",
           "params": [],
           "returns": [],
@@ -52296,7 +52319,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 28,
+          "line": 37,
           "description": "Air between the toolbar's lower edge and a hanging field.",
           "params": [],
           "returns": [],
@@ -52309,7 +52332,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 30,
+          "line": 39,
           "description": "",
           "params": [],
           "returns": [],
@@ -52322,7 +52345,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 61,
+          "line": 74,
           "description": "",
           "params": [
             {
@@ -52384,6 +52407,12 @@
               "type": "number",
               "optional": true,
               "description": "CSS px the field's contents need with the input at its minimum (the status at its full width, the buttons, the gaps); the field is never na..."
+            },
+            {
+              "name": "measures.inputMinWidth",
+              "type": "number",
+              "optional": true,
+              "description": "The input's least laid-out width (CSS px) counted in contentWidth ; with it the field asks for OCR_SEARCH_INPUT_PREFERRED_WIDTH for the inp..."
             }
           ],
           "returns": [
@@ -52401,12 +52430,12 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 97,
+          "line": 117,
           "description": "The input's least width as laid out (CSS px): its min-width , plus its padding and border when they lie outside it (the input is content-box: 48 px of content and 14 px around it).",
           "params": [
             {
               "name": "input",
-              "type": "HTMLElement",
+              "type": "HTMLElement|null",
               "optional": false,
               "description": ""
             }
@@ -52426,7 +52455,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 113,
+          "line": 134,
           "description": "CSS px the field's contents need with the input at its minimum: every child but the input at its width (the status is not shrunk, so its width is its text's), the gaps between the...",
           "params": [
             {
@@ -52451,7 +52480,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 138,
+          "line": 159,
           "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
           "params": [
             {
@@ -110799,7 +110828,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 113,
+      "line": 134,
       "description": "CSS px the field's contents need with the input at its minimum: every child but the input at its width (the status is not shrunk, so its width is its text's), the gaps between the...",
       "params": [
         {
@@ -110824,12 +110853,12 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 97,
+      "line": 117,
       "description": "The input's least width as laid out (CSS px): its min-width , plus its padding and border when they lie outside it (the input is content-box: 48 px of content and 14 px around it).",
       "params": [
         {
           "name": "input",
-          "type": "HTMLElement",
+          "type": "HTMLElement|null",
           "optional": false,
           "description": ""
         }
@@ -110849,7 +110878,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 138,
+      "line": 159,
       "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
       "params": [
         {
@@ -110886,8 +110915,21 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 22,
+      "line": 25,
       "description": "The input's least width (CSS px), as .toolbar-ocr-search-input has it.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+      "name": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+      "longname": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 31,
+      "description": "The input's width the field asks for (CSS px, laid out) when it has been measured: room for a few words of a term.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -110899,7 +110941,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 28,
+      "line": 37,
       "description": "Air between the toolbar's lower edge and a hanging field.",
       "params": [],
       "returns": [],
@@ -110912,7 +110954,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 24,
+      "line": 33,
       "description": "Padding and border a hanging field adds around its contents (CSS px, both sides).",
       "params": [],
       "returns": [],
@@ -110925,7 +110967,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 26,
+      "line": 35,
       "description": "Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.",
       "params": [],
       "returns": [],
@@ -110938,7 +110980,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 20,
+      "line": 23,
       "description": "Below this inline width the field hangs under the toolbar instead: the field's contents (the input at its minimum, an empty status, the four buttons and their gaps) need about 210...",
       "params": [],
       "returns": [],
@@ -110951,7 +110993,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 14,
+      "line": 17,
       "description": "Full width of the field (CSS px).",
       "params": [],
       "returns": [],
@@ -110964,7 +111006,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 30,
+      "line": 39,
       "description": "",
       "params": [],
       "returns": [],
@@ -110977,7 +111019,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 61,
+      "line": 74,
       "description": "",
       "params": [
         {
@@ -111039,6 +111081,12 @@
           "type": "number",
           "optional": true,
           "description": "CSS px the field's contents need with the input at its minimum (the status at its full width, the buttons, the gaps); the field is never na..."
+        },
+        {
+          "name": "measures.inputMinWidth",
+          "type": "number",
+          "optional": true,
+          "description": "The input's least laid-out width (CSS px) counted in contentWidth ; with it the field asks for OCR_SEARCH_INPUT_PREFERRED_WIDTH for the inp..."
         }
       ],
       "returns": [

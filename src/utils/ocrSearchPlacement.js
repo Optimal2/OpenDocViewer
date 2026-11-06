@@ -7,7 +7,10 @@
  * field (an overflowing toolbar is shifted as a whole, as measured). The field is never
  * narrower than its contents need with the input at its minimum: its status ("Match 3/12 ·
  * 118/300 pages searched") is never cut short, the field grows for it instead, and hangs when
- * the toolbar has no room for it. Pure: the component gathers the numbers.
+ * the toolbar has no room for it. Measured, the field also asks for a comfortable input
+ * (OCR_SEARCH_INPUT_PREFERRED_WIDTH) as far as the toolbar's room or the viewport allows, so
+ * that a long status does not leave the input at its minimum. Pure: the component gathers the
+ * numbers.
  */
 
 /** Full width of the field (CSS px). */
@@ -20,6 +23,12 @@ export const OCR_SEARCH_PANEL_WIDTH = 340;
 export const OCR_SEARCH_PANEL_MIN_INLINE_WIDTH = 220;
 /** The input's least width (CSS px), as `.toolbar-ocr-search-input` has it. */
 export const OCR_SEARCH_INPUT_MIN_WIDTH = 48;
+/**
+ * The input's width the field asks for (CSS px, laid out) when it has been measured: room for a
+ * few words of a term. The field grows for it when the toolbar or the viewport has the room, and
+ * gives it up down to the input's minimum when they have not.
+ */
+export const OCR_SEARCH_INPUT_PREFERRED_WIDTH = 200;
 /** Padding and border a hanging field adds around its contents (CSS px, both sides). */
 export const OCR_SEARCH_PANEL_HANG_INSET = 10;
 /** Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging. */
@@ -55,19 +64,29 @@ export const OCR_SEARCH_PANEL_HANG_GAP = 6;
  *   field starts below it.
  * @param {number=} measures.contentWidth  CSS px the field's contents need with the input at
  *   its minimum (the status at its full width, the buttons, the gaps); the field is never
- *   narrower inline, and hangs when the room is. 0 or omitted: the inline minimum.
+ *   narrower inline, and hangs when the room is. 0 or omitted: the inline minimum, and no
+ *   preferred width either (nothing was measured).
+ * @param {number=} measures.inputMinWidth  The input's least laid-out width (CSS px) counted in
+ *   `contentWidth`; with it the field asks for OCR_SEARCH_INPUT_PREFERRED_WIDTH for the input
+ *   instead, as far as the room (inline) or the viewport (hanging) allows. Default 48.
  * @returns {OcrSearchPlacement}
  */
 export function resolveOcrSearchPlacement({
-  toolbarWidth, toolbarScrollWidth, spacerWidth, inlinePanelWidth, viewportWidth, anchorRight, anchorBottom, toolbarBottom, contentWidth,
+  toolbarWidth, toolbarScrollWidth, spacerWidth, inlinePanelWidth, viewportWidth, anchorRight, anchorBottom, toolbarBottom, contentWidth, inputMinWidth,
 }) {
   const width = Number(toolbarWidth) || 0;
   if (!(width > 0)) return { mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 };
-  const needed = Math.max(OCR_SEARCH_PANEL_MIN_INLINE_WIDTH, Math.ceil(Number(contentWidth) || 0));
+  const measured = Math.ceil(Number(contentWidth) || 0);
+  const needed = Math.max(OCR_SEARCH_PANEL_MIN_INLINE_WIDTH, measured);
+  // The field asks for a comfortable input once its contents are measured: what the input gets
+  // beyond its minimum. Nothing when nothing was measured (the usual 340 then).
+  const preferred = measured > 0
+    ? needed + Math.max(0, OCR_SEARCH_INPUT_PREFERRED_WIDTH - (Number(inputMinWidth) || OCR_SEARCH_INPUT_MIN_WIDTH))
+    : needed;
   const overflow = Math.max(0, (Number(toolbarScrollWidth) || 0) - width);
   const room = (Number(spacerWidth) || 0) + (Number(inlinePanelWidth) || 0) - overflow - OCR_SEARCH_PANEL_MARGIN;
   if (room >= needed) {
-    return { mode: 'inline', width: Math.min(Math.max(OCR_SEARCH_PANEL_WIDTH, needed), Math.floor(room)), offset: 0, top: 0 };
+    return { mode: 'inline', width: Math.min(Math.max(OCR_SEARCH_PANEL_WIDTH, preferred), Math.floor(room)), offset: 0, top: 0 };
   }
   const viewport = Number(viewportWidth) || 0;
   const cap = viewport > 0 ? viewport - OCR_SEARCH_PANEL_MARGIN : OCR_SEARCH_PANEL_WIDTH;
@@ -76,9 +95,10 @@ export function resolveOcrSearchPlacement({
     ? Math.ceil(anchor - (viewport - OCR_SEARCH_PANEL_MARGIN / 2))
     : 0;
   const top = Math.max(0, Math.ceil((Number(toolbarBottom) || 0) - (Number(anchorBottom) || 0))) + OCR_SEARCH_PANEL_HANG_GAP;
-  // A hanging field holds its contents inside its padding and border; the viewport caps it
-  // (a status wider than the viewport is cut, there is nowhere else for it).
-  const hanging = Math.max(OCR_SEARCH_PANEL_WIDTH, needed + OCR_SEARCH_PANEL_HANG_INSET);
+  // A hanging field holds its contents, the input at its preferred width, inside its padding
+  // and border; the viewport caps it (a status wider than the viewport is cut, there is nowhere
+  // else for it).
+  const hanging = Math.max(OCR_SEARCH_PANEL_WIDTH, preferred + OCR_SEARCH_PANEL_HANG_INSET);
   return {
     mode: 'hanging',
     width: Math.max(OCR_SEARCH_PANEL_MIN_INLINE_WIDTH, Math.min(hanging, Math.floor(cap))),
@@ -91,10 +111,11 @@ export function resolveOcrSearchPlacement({
  * The input's least width as laid out (CSS px): its `min-width`, plus its padding and border
  * when they lie outside it (the input is content-box: 48 px of content and 14 px around it).
  *
- * @param {HTMLElement} input
+ * @param {(HTMLElement|null)} input
  * @returns {number}
  */
-function measureOcrSearchInputMinWidth(input) {
+export function measureOcrSearchInputMinWidth(input) {
+  if (!input) return OCR_SEARCH_INPUT_MIN_WIDTH;
   const style = typeof getComputedStyle === 'function' ? getComputedStyle(input) : null;
   const min = Number.parseFloat(style?.minWidth || '') || OCR_SEARCH_INPUT_MIN_WIDTH;
   if (!style || style.boxSizing === 'border-box') return min;
@@ -155,5 +176,6 @@ export function measureOcrSearchPlacement(root, panel, anchor = null) {
     anchorBottom: rootRect.bottom,
     toolbarBottom: toolbar.getBoundingClientRect().bottom,
     contentWidth: measureOcrSearchContentWidth(panel),
+    inputMinWidth: measureOcrSearchInputMinWidth(panel.querySelector('.toolbar-ocr-search-input')),
   });
 }

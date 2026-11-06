@@ -421,7 +421,9 @@ describe('OcrSearchBar', () => {
     render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
     expect(panel().style.width).toBe('0px');
     act(() => button().click());
-    expect(panel().style.width).toBe('340px');
+    // Measured (jsdom: the input's 48 px minimum, nothing else), the field asks for 200 px of
+    // input: 220 + 152 = 372 of the 584 px of room.
+    expect(panel().style.width).toBe('372px');
     expect(panel().getAttribute('data-placement')).toBe('inline');
 
     fakeToolbar({ width: 1400, spacerWidth: 250 });
@@ -477,29 +479,31 @@ describe('OcrSearchBar', () => {
       return computed(element, pseudo);
     });
     act(() => button().click());
-    expect(panel().style.width).toBe('340px');
-    // 130 px of status: 62 + 130 + 128 + 10 = 330 px needed, within the usual 340.
+    // Opened with an empty status (0 px in jsdom): 62 + 128 + 10 = 200 px needed, so the inline
+    // minimum of 220, and 358 with the input at its preferred 200 instead of its 62.
+    expect(panel().style.width).toBe('358px');
+    // 130 px of status: 330 px needed, 468 with the comfortable input, within the 584 px of room.
     lend(statusBox(), 130);
     type('hej');
     expect(status()).toBe('Match 1/2 · 1/3 pages searched');
     expect(panel().getAttribute('data-placement')).toBe('inline');
-    expect(panel().style.width).toBe('340px');
-    // 250 px of status: 450 px needed, within the 584 px of room, so the field grows inline.
+    expect(panel().style.width).toBe('468px');
+    // 250 px of status: 450 px needed, 588 asked for, so the field takes all 584 px of the room.
     lend(statusBox(), 250);
     type('he');
     expect(panel().getAttribute('data-placement')).toBe('inline');
-    expect(panel().style.width).toBe('450px');
+    expect(panel().style.width).toBe('584px');
     // 400 px of status: 600 px needed, more than the room, so the field hangs under the toolbar,
-    // 610 wide with its padding and border.
+    // 748 wide (738 with the comfortable input, plus its padding and border).
     lend(statusBox(), 400);
     type('hej');
     expect(panel().getAttribute('data-placement')).toBe('hanging');
-    expect(panel().style.width).toBe('610px');
+    expect(panel().style.width).toBe('748px');
     // Hanging, a shorter status brings the field back inline (the room is still there).
     lend(statusBox(), 130);
     type('he');
     expect(panel().getAttribute('data-placement')).toBe('inline');
-    expect(panel().style.width).toBe('340px');
+    expect(panel().style.width).toBe('468px');
     vi.restoreAllMocks();
     delete document.documentElement.clientWidth;
   });

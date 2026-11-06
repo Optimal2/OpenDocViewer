@@ -555,7 +555,9 @@ not a toolbar button, see below:
   a line break. Typing shows the position ("Match 1/5") and, while not every page has an outcome,
   how many pages the search covers ("2/300 pages searched", spelt out in the tooltip); the status
   is never cut short: the field grows to hold it with the input at its least width, and hangs
-  under the toolbar when the toolbar has no room for that. The matches are marked on the
+  under the toolbar when the toolbar has no room for that. The field also asks for a comfortable
+  input (about 200 px) beyond what the status needs, as far as the toolbar's room or the viewport
+  allows, so that a long status does not leave the input at its minimum. The matches are marked on the
   page over the words, the current match stronger and scrolled into view. Enter and the arrow
   buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
   one; Escape closes the field. A toggle in the field ("Search only on this page") limits the

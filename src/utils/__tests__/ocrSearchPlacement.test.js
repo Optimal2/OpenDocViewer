@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   measureOcrSearchContentWidth,
   OCR_SEARCH_INPUT_MIN_WIDTH,
+  OCR_SEARCH_INPUT_PREFERRED_WIDTH,
   OCR_SEARCH_PANEL_HANG_INSET,
   OCR_SEARCH_PANEL_MARGIN,
   OCR_SEARCH_PANEL_MIN_INLINE_WIDTH,
@@ -66,19 +67,31 @@ describe('resolveOcrSearchPlacement', () => {
     expect(resolveOcrSearchPlacement({})).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
   });
 
-  it('is never narrower than its contents need: wider inline when the room allows, hanging when it does not, a wider hanging field, capped to the viewport', () => {
-    // Contents below the inline minimum change nothing.
+  it('is never narrower than its contents need, and asks for a comfortable input: wider inline when the room allows, hanging when it does not, a wider hanging field, capped to the viewport', () => {
+    // Measured contents count the input at its minimum (48 by default); the field asks for 200
+    // for it, 152 more, as far as the room allows.
+    const extra = OCR_SEARCH_INPUT_PREFERRED_WIDTH - OCR_SEARCH_INPUT_MIN_WIDTH;
+    // Contents below the inline minimum in 234 px of room: all of the room, as before.
     expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 250, contentWidth: 200 })).toEqual({ mode: 'inline', width: 234, offset: 0, top: 0 });
-    // 300 px of contents in 600 px of room: inline, but the field is 340 (its usual) as that holds them.
-    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 300 })).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
-    // 380.2 px of contents in 600 px of room: inline and 381 wide.
-    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 380.2 })).toEqual({ mode: 'inline', width: 381, offset: 0, top: 0 });
-    // 300 px of contents in 284 px of room: hanging, at its usual width.
-    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 300, contentWidth: 300 })).toEqual({ mode: 'hanging', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 6 });
-    // 400 px of contents: a hanging field of 410, padding and border included.
-    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 300, contentWidth: 400 })).toEqual({ mode: 'hanging', width: 400 + OCR_SEARCH_PANEL_HANG_INSET, offset: 0, top: 6 });
+    // 300 px of contents in 600 px of room: inline, 452 wide (300 + 152 for the input).
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 300 })).toEqual({ mode: 'inline', width: 300 + extra, offset: 0, top: 0 });
+    // 380.2 px of contents in 600 px of room: inline and 533 wide.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 380.2 })).toEqual({ mode: 'inline', width: 381 + extra, offset: 0, top: 0 });
+    // 300 px of contents in 400 px of room: inline, all of the room (the input gets what is left).
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 416, contentWidth: 300 })).toEqual({ mode: 'inline', width: 400, offset: 0, top: 0 });
+    // The input's laid-out minimum counts: 62 of the 300 are the input, so 138 more is asked for.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 300, inputMinWidth: 62 })).toEqual({ mode: 'inline', width: 300 + OCR_SEARCH_INPUT_PREFERRED_WIDTH - 62, offset: 0, top: 0 });
+    // An input already at its preferred width or wider asks for nothing more.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 300, inputMinWidth: 240 })).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
+    // 300 px of contents in 284 px of room: hanging, 462 wide (300 + 152, padding and border).
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 300, contentWidth: 300 })).toEqual({ mode: 'hanging', width: 300 + extra + OCR_SEARCH_PANEL_HANG_INSET, offset: 0, top: 6 });
+    // 400 px of contents: a hanging field of 562.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 300, contentWidth: 400 })).toEqual({ mode: 'hanging', width: 400 + extra + OCR_SEARCH_PANEL_HANG_INSET, offset: 0, top: 6 });
     // The viewport caps a hanging field whatever its contents need.
     expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 0, viewportWidth: 300, contentWidth: 400 })).toEqual({ mode: 'hanging', width: 284, offset: 0, top: 6 });
+    // Nothing measured: the usual 340 and no preferred width.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 0, inputMinWidth: 62 })).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 0, inputMinWidth: 62 })).toEqual({ mode: 'hanging', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 6 });
   });
 });
 
