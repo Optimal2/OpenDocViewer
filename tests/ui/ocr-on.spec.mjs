@@ -328,26 +328,53 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(fit.overflow).toBeLessThanOrEqual(0);
   expect(fit.right).toBeLessThanOrEqual(fit.viewport);
   // A narrow window: the field hangs under the toolbar at the button's right edge, still inside,
-  // and the toolbar overflows no more than it does with the field closed (at this width the
+  // and the toolbar overflows no more than it does with the field closed (at these widths the
   // toolbar's own groups already overflow; that is not the field's doing).
-  await page.setViewportSize({ width: 1000, height: 900 });
-  await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'hanging');
   const measureToolbar = () => page.locator('.toolbar').evaluate((toolbar) => {
     const panel = toolbar.querySelector('.toolbar-ocr-search-panel');
     const rect = panel.getBoundingClientRect();
-    const anchorRight = toolbar.querySelector('[data-odv-ocr="status"]').getBoundingClientRect().right;
-    return { overflow: toolbar.scrollWidth - toolbar.clientWidth, right: rect.right, anchorRight, top: rect.top, toolbarBottom: toolbar.getBoundingClientRect().bottom, viewport: document.documentElement.clientWidth };
+    const close = panel.querySelector('.toolbar-ocr-search-close').getBoundingClientRect();
+    const anchor = toolbar.querySelector('[data-odv-ocr="status"]').getBoundingClientRect();
+    return {
+      overflow: toolbar.scrollWidth - toolbar.clientWidth,
+      left: rect.left,
+      right: rect.right,
+      closeRight: close.right,
+      top: rect.top,
+      toolbarBottom: toolbar.getBoundingClientRect().bottom,
+      anchorRight: anchor.right,
+      offset: Number.parseFloat(panel.style.right) || 0,
+      viewport: document.documentElement.clientWidth,
+    };
   });
-  // The field may already hang (a 1400 px window leaves it less than its inline minimum), so
-  // wait for the re-placement the resize causes rather than for the placement attribute.
-  await expect.poll(async () => (await measureToolbar()).right).toBeLessThanOrEqual(1000);
+  // Independent geometry contract: align to the actual anchor when it fits, but clamp to the
+  // viewport's 8 px margin when the anchor lies beyond it. The anchor is font- and subpixel-
+  // dependent, so its position is measured rather than assumed to be near the window edge.
+  // Exercise both branches and repeat a width to prove that resizing preserves visibility.
+  const geometries = [];
+  for (const width of [1000, 900, 1100, 1000]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator('.toolbar-ocr-search-panel')).toHaveAttribute('data-placement', 'hanging');
+    await expect.poll(async () => {
+      const current = await measureToolbar();
+      const expectedRight = Math.min(current.anchorRight, current.viewport - 8);
+      return Math.abs(current.right - expectedRight);
+    }).toBeLessThanOrEqual(1);
+    const current = await measureToolbar();
+    expect(current.right).toBeLessThanOrEqual(current.viewport + 0.5);
+    expect(current.left).toBeGreaterThanOrEqual(-0.5);
+    expect(current.closeRight).toBeLessThanOrEqual(current.right + 0.5);
+    expect(current.right - current.left).toBeGreaterThan(150);
+    expect(current.top).toBeGreaterThanOrEqual(current.toolbarBottom);
+    geometries.push(current);
+  }
+  expect(geometries.some((geometry) => geometry.anchorRight <= geometry.viewport - 8)).toBe(true);
+  expect(geometries.some((geometry) => geometry.anchorRight > geometry.viewport - 8)).toBe(true);
+  await test.info().attach('ocr-hanging-geometry', {
+    body: JSON.stringify(geometries, null, 2),
+    contentType: 'application/json',
+  });
   const hanging = await measureToolbar();
-  expect(hanging.right).toBeLessThanOrEqual(hanging.viewport);
-  // Re-placed for the narrow window: anchored at the button, pulled just inside the window only
-  // when the button itself is outside (not by the open field's own width, which would leave it
-  // hundreds of px further left). Where the button lands depends on what else the toolbar holds.
-  expect(Math.abs(hanging.right - Math.min(hanging.anchorRight, hanging.viewport - 8))).toBeLessThanOrEqual(6);
-  expect(hanging.top).toBeGreaterThanOrEqual(hanging.toolbarBottom);
   await searchField.press('Escape');
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
   const closedNarrow = await measureToolbar();
