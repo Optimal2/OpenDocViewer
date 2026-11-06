@@ -1258,8 +1258,23 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     const dialogNode = dialogRef.current;
     if (!dialogNode) return;
     const focusable = Array.from(dialogNode.querySelectorAll(MANUAL_FOCUSABLE_SELECTOR))
-      .filter((element) => !element.disabled && element.tabIndex >= 0
-        && !element.closest('[hidden], [aria-hidden="true"]'));
+      .filter((element) => {
+        if (element.disabled || element.tabIndex < 0
+          || element.closest('[hidden], [aria-hidden="true"]')) return false;
+        // Browser layout excludes display:none, collapsed-details and visibility-hidden targets.
+        // jsdom has no checkVisibility; its attribute-based fallback above preserves the unit fixture.
+        return typeof element.checkVisibility !== 'function'
+          || element.checkVisibility({ checkVisibilityCSS: true });
+      })
+      .map((element, domOrder) => ({ element, domOrder, tabIndex: element.tabIndex }))
+      .sort((a, b) => {
+        // Sequential focus navigation visits positive values in ascending order before zero and
+        // default targets. DOM order breaks ties within each group, including custom manual HTML.
+        if (a.tabIndex > 0 && b.tabIndex > 0 && a.tabIndex !== b.tabIndex) return a.tabIndex - b.tabIndex;
+        if ((a.tabIndex > 0) !== (b.tabIndex > 0)) return a.tabIndex > 0 ? -1 : 1;
+        return a.domOrder - b.domOrder;
+      })
+      .map(({ element }) => element);
     if (focusable.length === 0) {
       event.preventDefault();
       dialogNode.focus();
@@ -1269,12 +1284,18 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     const last = focusable[focusable.length - 1];
     const active = document.activeElement;
     const outside = active === dialogNode || !dialogNode.contains(active);
-    if (event.shiftKey && (active === first || outside)) {
+    const activeIndex = focusable.indexOf(active);
+    if (outside) {
       event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && (active === last || outside)) {
+      (event.shiftKey ? last : first).focus();
+    } else if (activeIndex >= 0) {
+      // Move explicitly through the sequence: after a positive target the browser can otherwise
+      // continue in DOM order to a zero target outside the dialog instead of the first zero here.
+      // A programmatically focused tabindex=-1 heading keeps the browser's native starting point.
       event.preventDefault();
-      first.focus();
+      const delta = event.shiftKey ? -1 : 1;
+      const nextIndex = (activeIndex + delta + focusable.length) % focusable.length;
+      focusable[nextIndex].focus();
     }
   };
 
