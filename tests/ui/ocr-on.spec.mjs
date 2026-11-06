@@ -531,7 +531,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(inlineFit.closeRight).toBeLessThanOrEqual(inlineFit.right + 0.5);
   await searchField.fill('ocr hej');
   const searchStatus = page.locator('.toolbar-ocr-search-status-short');
-  await expect(searchStatus).toHaveText(/^(Match|Träff) 1\/1/);
+  await expect(searchStatus).toHaveText(/^1\/1/);
   // The status is never cut short: the field holds all of its contents (nothing scrolls out of
   // its overflow) and the status ends before the page toggle starts.
   const statusFit = await page.locator('.toolbar-ocr-search-panel').evaluate((panel) => {
@@ -543,7 +543,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(statusFit.statusRight).toBeLessThanOrEqual(statusFit.scopeLeft + 0.5);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['OCR', 'Hej']);
   await searchField.fill('hej');
-  await expect(searchStatus).toHaveText(/^(Match|Träff) 1\/1/);
+  await expect(searchStatus).toHaveText(/^1\/1/);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveText(['Hej']);
   await searchField.fill('o');
   const matchCount = Number((await searchStatus.textContent()).match(/(\d+)\/(\d+)/)[2]);
@@ -555,16 +555,16 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(markedWords).toBeLessThanOrEqual(matchCount);
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
   await searchField.press('Enter');
-  await expect(searchStatus).toHaveText(new RegExp(`^(Match|Träff) 2/${matchCount}`));
+  await expect(searchStatus).toHaveText(new RegExp(`^2/${matchCount}`));
   await searchField.press('Shift+Enter');
-  await expect(searchStatus).toHaveText(new RegExp(`^(Match|Träff) 1/${matchCount}`));
+  await expect(searchStatus).toHaveText(new RegExp(`^1/${matchCount}`));
   // Limited to the displayed page (the only page here): the same matches, the toggle pressed,
   // the marks still on the page; off again afterwards.
   const scope = page.locator('.toolbar-ocr-search-scope');
   await expect(scope).toHaveAttribute('aria-pressed', 'false');
   await scope.click();
   await expect(scope).toHaveAttribute('aria-pressed', 'true');
-  await expect(searchStatus).toHaveText(new RegExp(`^(Match|Träff) 1/${matchCount}$`));
+  await expect(searchStatus).toHaveText(new RegExp(`^1/${matchCount}$`));
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
   await scope.click();
   await expect(scope).toHaveAttribute('aria-pressed', 'false');

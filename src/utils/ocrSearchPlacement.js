@@ -5,8 +5,8 @@
  * to the right into the room the toolbar's spacer leaves, or, when that room is too small,
  * hanging under the toolbar at the button's right edge. The toolbar never overflows for the
  * field (an overflowing toolbar is shifted as a whole, as measured). The field is never
- * narrower than its contents need with the input at its minimum: its status ("Match 3/12 ·
- * 118/300 pages searched") is never cut short, the field grows for it instead, and hangs when
+ * narrower than its contents need with the input at its minimum: its status ("3/12 · 118/300
+ * pages searched") is never cut short, the field grows for it instead, and hangs when
  * the toolbar has no room for it. Measured, the field also asks for a comfortable input
  * (OCR_SEARCH_INPUT_PREFERRED_WIDTH) as far as the toolbar's room or the viewport allows, so
  * that a long status does not leave the input at its minimum. Pure: the component gathers the

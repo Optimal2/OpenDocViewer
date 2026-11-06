@@ -451,7 +451,7 @@
     "search": {
       "open": "Sök i tolkad text",
       "placeholder": "Sök",
-      "position": "Träff {current}/{total}",
+      "position": "{current}/{total}",
       "coverageLong": "{done} av {pages} sidor klara",
       "positionLong": "Träff {current} av {total}",
       "none": "Inga träffar",

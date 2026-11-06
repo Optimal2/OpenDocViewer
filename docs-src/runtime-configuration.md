@@ -552,7 +552,7 @@ not a toolbar button, see below:
   the button to the right (a short ease) into the room the toolbar has; when there is too little,
   the field hangs under the toolbar at the button's right edge instead. The search covers only the text layers (recognised text and PDF pages' own text), of every
   page that has an outcome, in page order; it is case-insensitive and finds a phrase also across
-  a line break. Typing shows the position ("Match 1/5") and, while not every page has an outcome,
+  a line break. Typing shows the position ("1/5", "Match 1 of 5" in the tooltip) and, while not every page has an outcome,
   how many pages the search covers ("2/300 pages searched", spelt out in the tooltip); the status
   is never cut short: the field grows to hold it with the input at its least width, and hangs
   under the toolbar when the toolbar has no room for that. The field also asks for a comfortable

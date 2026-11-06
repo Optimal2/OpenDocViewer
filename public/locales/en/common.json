@@ -451,7 +451,7 @@
     "search": {
       "open": "Search in the recognised text",
       "placeholder": "Search",
-      "position": "Match {current}/{total}",
+      "position": "{current}/{total}",
       "coverageLong": "{done} of {pages} pages ready",
       "positionLong": "Match {current} of {total}",
       "none": "No matches",

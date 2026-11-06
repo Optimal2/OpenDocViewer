@@ -322,7 +322,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   } else if (normalizedTerm) {
     statusLine = matches.length === 0
       ? t('ocr.search.none', { defaultValue: 'No matches' })
-      : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: 'Match {current}/{total}' });
+      : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: '{current}/{total}' });
     if (!pageOnly && recognisedPages < pages.length) {
       statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done}/{pages} pages searched' })}`;
     }

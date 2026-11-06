@@ -159,13 +159,13 @@ describe('OcrSearchBar', () => {
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
     act(() => button().click());
     type('diarienummer 2026');
-    expect(status()).toBe('Match 1/1 · 2/3 pages searched');
+    expect(status()).toBe('1/1 · 2/3 pages searched');
     // Spelt out for assistive technology (and the tooltip).
     expect(statusLong()).toBe('Match 1 of 1 · Searched 2 of 3 pages');
     expect(container.querySelector('.toolbar-ocr-search-status').title).toBe('Match 1 of 1 · Searched 2 of 3 pages');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'diarienummer 2026', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     type('diarienummer');
-    expect(status()).toBe('Match 1/2 · 2/3 pages searched');
+    expect(status()).toBe('1/2 · 2/3 pages searched');
   });
 
   it('a text-layer PDF page whose text could not be placed says so; the search opens from it once another page has text', () => {
@@ -184,7 +184,7 @@ describe('OcrSearchBar', () => {
     expect(button().getAttribute('data-ocr-state')).toBe('done');
     act(() => button().click());
     type('hej');
-    expect(status()).toBe('Match 1/1 · 1/3 pages searched');
+    expect(status()).toBe('1/1 · 1/3 pages searched');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
@@ -208,7 +208,7 @@ describe('OcrSearchBar', () => {
     type('hej');
     record(observer.takeRecords());
     observer.disconnect();
-    expect(status()).toBe('Match 1/2 · 1/3 pages searched');
+    expect(status()).toBe('1/2 · 1/3 pages searched');
     for (const text of before) expect(text).not.toMatch(/^0 /);
   });
 
@@ -275,7 +275,7 @@ describe('OcrSearchBar', () => {
     const { setOcrSearch, setPageNumber } = render({ ocrPages: pages });
     act(() => button().click());
     type('hej');
-    expect(status()).toBe('Match 1/5 · 2/3 pages searched');
+    expect(status()).toBe('1/5 · 2/3 pages searched');
     const scope = () => container.querySelector('.toolbar-ocr-search-scope');
     expect(scope().getAttribute('aria-pressed')).toBe('false');
     expect(scope().title).toBe('Search only on this page');
@@ -284,17 +284,17 @@ describe('OcrSearchBar', () => {
     expect(scope().getAttribute('aria-pressed')).toBe('true');
     expect(scope().classList.contains('is-active')).toBe(true);
     // Only page 1's matches, no coverage line, and the page is published with the term.
-    expect(status()).toBe('Match 1/2');
+    expect(status()).toBe('1/2');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: KEY(0) });
     key('Enter');
-    expect(status()).toBe('Match 2/2');
+    expect(status()).toBe('2/2');
     key('Enter');
-    expect(status()).toBe('Match 1/2');
+    expect(status()).toBe('1/2');
     expect(setPageNumber).not.toHaveBeenCalled();
 
     // The viewer moves to page 3 (the user): the matches are that page's now.
     render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
-    expect(status()).toBe('Match 1/3');
+    expect(status()).toBe('1/3');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: KEY(2) });
     // Page 2 is still being recognised: its status, not "No matches".
     render({ ocrPages: pages, pageNumber: 2, setPageNumber, setOcrSearch });
@@ -305,7 +305,7 @@ describe('OcrSearchBar', () => {
     // Off again: the whole document, from the displayed page on.
     act(() => scope().click());
     expect(scope().getAttribute('aria-pressed')).toBe('false');
-    expect(status()).toBe('Match 3/5 · 2/3 pages searched');
+    expect(status()).toBe('3/5 · 2/3 pages searched');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
@@ -323,7 +323,7 @@ describe('OcrSearchBar', () => {
     expect(scope.getAttribute('aria-pressed')).toBe('true');
     expect(document.activeElement).toBe(input());
     key('Enter');
-    expect(status()).toBe('Match 2/2');
+    expect(status()).toBe('2/2');
     expect(scope.getAttribute('aria-pressed')).toBe('true');
   });
 
@@ -348,7 +348,7 @@ describe('OcrSearchBar', () => {
     expect(document.activeElement).toBe(input());
 
     type('HEJ');
-    expect(status()).toBe('Match 1/2 · 2/3 pages searched');
+    expect(status()).toBe('1/2 · 2/3 pages searched');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     expect(setPageNumber).not.toHaveBeenCalled();
   });
@@ -358,18 +358,18 @@ describe('OcrSearchBar', () => {
     const { setOcrSearch, setPageNumber } = render({ ocrPages: pages });
     act(() => button().click());
     type('hej');
-    expect(status()).toBe('Match 1/3 · 2/3 pages searched');
+    expect(status()).toBe('1/3 · 2/3 pages searched');
 
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(3);
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
     // The viewer shows page 3 now.
     render({ ocrPages: pages, pageNumber: 3, setPageNumber, setOcrSearch });
-    expect(status()).toBe('Match 2/3 · 2/3 pages searched');
+    expect(status()).toBe('2/3 · 2/3 pages searched');
 
     key('Enter');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 1 }, onlyPageKey: null });
-    expect(status()).toBe('Match 3/3 · 2/3 pages searched');
+    expect(status()).toBe('3/3 · 2/3 pages searched');
 
     key('Enter');
     expect(setPageNumber).toHaveBeenLastCalledWith(1);
@@ -406,7 +406,7 @@ describe('OcrSearchBar', () => {
     type('hej');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
     render({ ocrPages: { ...pages, [KEY(1)]: done(['hej']), [KEY(2)]: done(['hej']) }, setOcrSearch });
-    expect(status()).toBe('Match 1/3');
+    expect(status()).toBe('1/3');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(0), ordinal: 0 }, onlyPageKey: null });
 
     key('Escape');
@@ -485,7 +485,7 @@ describe('OcrSearchBar', () => {
     // 130 px of status: 330 px needed, 468 with the comfortable input, within the 584 px of room.
     lend(statusBox(), 130);
     type('hej');
-    expect(status()).toBe('Match 1/2 · 1/3 pages searched');
+    expect(status()).toBe('1/2 · 1/3 pages searched');
     expect(panel().getAttribute('data-placement')).toBe('inline');
     expect(panel().style.width).toBe('468px');
     // 250 px of status: 450 px needed, 588 asked for, so the field takes all 584 px of the room.
