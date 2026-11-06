@@ -298,6 +298,53 @@ describe('ManualOverlayDialog contents tree', () => {
     opener.remove();
   });
 
+  it('keeps forward and reverse Tab navigation inside the modal dialog', async () => {
+    await openManual();
+    const first = container.querySelector('button[aria-label="Reload manual from server"]');
+    const last = container.querySelector('.odv-help-footer button');
+    last.focus();
+    act(() => {
+      last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(first);
+
+    first.focus();
+    act(() => {
+      first.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).toBe(last);
+  });
+
+  it('rewrites responsive srcset candidates against the resolved manual URL', async () => {
+    const resolvedUrl = 'https://manual.example.test/help/site/manual.sv.html';
+    vi.stubGlobal('fetch', async (url) => {
+      requestedUrls.push(String(url));
+      return {
+        ok: true,
+        url: resolvedUrl,
+        text: async () => [
+          '<picture>',
+          '<source id="responsive-source" srcset="img/manual-480.png 480w, img/manual-960.png 960w">',
+          '<img id="responsive-image" src="img/fallback.png" alt="Responsive" ',
+          'srcset="img/manual-small.png 1x, https://cdn.example.test/manual@2x.png 2x, data:image/png;base64,AAAA 3x">',
+          '</picture>',
+        ].join(''),
+      };
+    });
+    await openManual();
+
+    expect(content().querySelector('#responsive-source').getAttribute('srcset')).toBe(
+      'https://manual.example.test/help/site/img/manual-480.png 480w, '
+      + 'https://manual.example.test/help/site/img/manual-960.png 960w'
+    );
+    expect(content().querySelector('#responsive-image').getAttribute('srcset')).toBe(
+      'https://manual.example.test/help/site/img/manual-small.png 1x, '
+      + 'https://cdn.example.test/manual@2x.png 2x, data:image/png;base64,AAAA 3x'
+    );
+    expect(content().querySelector('#responsive-image').getAttribute('src'))
+      .toBe('https://manual.example.test/help/site/img/fallback.png');
+  });
+
   it('never gives a manual heading one of the dialog\'s own ids', async () => {
     await openManual('<h2 id="odv-manual-contents">Innehåll</h2><h2>Mer</h2>');
     expect(document.querySelectorAll('#odv-manual-contents')).toHaveLength(1);
