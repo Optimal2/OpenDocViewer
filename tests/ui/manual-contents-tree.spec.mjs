@@ -109,18 +109,29 @@ test('wide dialog: near full width, sticky tree column, entry scrolls only the c
   expect(focusedInTree).toBe(true);
 });
 
-test('custom manual: Tab and Shift+Tab follow browser sequential order and restore focus on every close', async ({ page }) => {
+test('custom manual: Tab and Shift+Tab follow browser eligibility and restore focus on every close', async ({ page }) => {
   await page.setViewportSize({ width: 1400, height: 900 });
-  // Site manuals may retain positive tabindex. Put the positive targets out of DOM order and
-  // include targets that a browser must skip, so DOM-order first/last trapping cannot pass.
+  // Site manuals may retain positive tabindex and fieldset/select/textarea/disabled markup. Put
+  // positive targets out of DOM order and inherited-disabled controls between eligible targets.
   const customManual = [
     '<!doctype html><html lang="en"><body><h1>Keyboard order</h1>',
+    '<h2 id="keyboard-heading">Keyboard heading</h2>',
     '<a id="zero-in-content" href="#zero-in-content" tabindex="0">Zero in content</a>',
     '<a id="positive-two" href="#positive-two" tabindex="2">Positive two</a>',
     '<a id="negative" href="#negative" tabindex="-1">Negative</a>',
     '<a id="hidden" href="#hidden" tabindex="0" hidden>Hidden</a>',
     '<a id="positive-one" href="#positive-one" tabindex="1">Positive one</a>',
     '<a id="css-hidden" href="#css-hidden" tabindex="0" style="display: none">CSS hidden</a>',
+    '<a id="before-disabled" href="#before-disabled">Before disabled controls</a>',
+    '<fieldset disabled><legend>',
+    '<select id="first-legend-select"><option>First legend select</option></select>',
+    '<a id="first-legend-link" href="#first-legend-link">First legend link</a>',
+    '</legend>',
+    '<select id="inherited-disabled-select"><option>Inherited disabled select</option></select>',
+    '<textarea id="inherited-disabled-textarea">Inherited disabled textarea</textarea>',
+    '<a id="disabled-fieldset-link" href="#disabled-fieldset-link">Link in disabled fieldset</a>',
+    '</fieldset>',
+    '<a id="after-disabled" href="#after-disabled">After disabled controls</a>',
     '</body></html>',
   ].join('');
   await page.route((url) => /\/help\/site\/manual\.en\.html$/.test(url.pathname), (route) => route.fulfill({
@@ -149,6 +160,51 @@ test('custom manual: Tab and Shift+Tab follow browser sequential order and resto
     await expect(page.getByRole('button', { name: 'Reload manual from server' })).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await expect(page.locator('#positive-two')).toBeFocused();
+
+    // The browser reports inherited fieldset disability, except in its first legend. Links are
+    // not form controls and remain eligible even inside the disabled fieldset.
+    const eligibility = await page.locator('.odv-manual-content fieldset').evaluate((fieldset) => (
+      Array.from(fieldset.querySelectorAll('select, textarea, a')).map((element) => ({
+        id: element.id,
+        ownDisabled: element.disabled,
+        actuallyDisabled: element.matches(':disabled'),
+      }))
+    ));
+    expect(eligibility).toEqual([
+      { id: 'first-legend-select', ownDisabled: false, actuallyDisabled: false },
+      { id: 'first-legend-link', ownDisabled: undefined, actuallyDisabled: false },
+      { id: 'inherited-disabled-select', ownDisabled: false, actuallyDisabled: true },
+      { id: 'inherited-disabled-textarea', ownDisabled: false, actuallyDisabled: true },
+      { id: 'disabled-fieldset-link', ownDisabled: undefined, actuallyDisabled: false },
+    ]);
+
+    // Contents navigation programmatically focuses a tabindex=-1 heading. Native navigation
+    // continues from that DOM position; the trap must not redirect it to its own sorted start.
+    await page.locator('nav.odv-manual-toc a[href="#keyboard-heading"]').click();
+    await expect(page.locator('#keyboard-heading')).toBeFocused();
+    await expect(page.locator('#keyboard-heading')).toHaveAttribute('tabindex', '-1');
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#zero-in-content')).toBeFocused();
+
+    await page.locator('#before-disabled').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#first-legend-select')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#first-legend-link')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#disabled-fieldset-link')).toBeFocused();
+    await expect(page.locator('#inherited-disabled-select')).not.toBeFocused();
+    await expect(page.locator('#inherited-disabled-textarea')).not.toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#after-disabled')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#disabled-fieldset-link')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#first-legend-link')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#first-legend-select')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#before-disabled')).toBeFocused();
 
     const close = page.locator('.odv-help-footer button');
     await close.focus();
