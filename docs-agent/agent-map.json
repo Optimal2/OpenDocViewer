@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 69054,
+    "sourceLineCount": 69075,
     "docletCount": 1984,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
@@ -909,7 +909,7 @@
           {
             "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
             "lines": [
-              1504
+              1525
             ],
             "summary": "Manual overlay that loads simple external HTML fragments from the public help folder."
           }
@@ -1188,7 +1188,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8858,
+      "lineCount": 8879,
       "docletCount": 152,
       "importantFiles": [
         {
@@ -1230,7 +1230,7 @@
         {
           "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
           "score": 49,
-          "lines": 1525,
+          "lines": 1546,
           "incomingLocalImports": 1,
           "doclets": 44,
           "summary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
@@ -13318,7 +13318,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "lines": 1525,
+      "lines": 1546,
       "extension": ".jsx",
       "jsdocBlockCount": 58,
       "sourceSummary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
@@ -13609,7 +13609,7 @@
         {
           "name": "renderContentsLink",
           "kind": "component",
-          "line": 1289
+          "line": 1310
         }
       ],
       "parseError": null,
@@ -13620,7 +13620,7 @@
             "key": "dangerouslySetInnerHTML",
             "description": "React raw HTML rendering",
             "lines": [
-              1504
+              1525
             ]
           },
           {
@@ -14666,7 +14666,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 1289,
+          "line": 1310,
           "description": "",
           "params": [
             {
@@ -88756,7 +88756,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 1289,
+      "line": 1310,
       "description": "",
       "params": [
         {
