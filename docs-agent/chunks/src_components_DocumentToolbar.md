@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8772. JSDoc symbol count: 150.
+File count: 21. Line count: 8858. JSDoc symbol count: 152.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -107,13 +107,13 @@ Symbols:
 - `loadStandardManual` (function) - Load the preferred generated standard manual.
 - `loadAutoManual` (function) - Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.
 - `isRewritableRelativeUrl` (function) - No description.
+- `rewriteManualSrcset` (function) - Rewrite the URL in each srcset candidate while retaining its width or density descriptor.
 - `sanitizeManualHtml` (function) - No description.
 - `rewriteManualHtml` (function) - No description.
 - `appendManualRefreshToken` (function) - No description.
 - `removeManualRefreshToken` (function) - No description.
 - `MANUAL_SEARCH_MIN_LENGTH` (constant) - Minimum query length before the manual search runs.
 - `MANUAL_SEARCH_DEBOUNCE_MS` (constant) - Debounce delay before a typed query is applied to the rendered manual text.
-- `MANUAL_SEARCH_HIGHLIGHT_NAME` (constant) - Name of the shared CSS Custom Highlight covering every manual search hit.
 
 ## src/components/DocumentToolbar/OcrSearchBar.jsx
 
