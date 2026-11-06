@@ -109,6 +109,59 @@ test('wide dialog: near full width, sticky tree column, entry scrolls only the c
   expect(focusedInTree).toBe(true);
 });
 
+test('custom manual: Tab and Shift+Tab follow browser sequential order and restore focus on every close', async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 900 });
+  // Site manuals may retain positive tabindex. Put the positive targets out of DOM order and
+  // include targets that a browser must skip, so DOM-order first/last trapping cannot pass.
+  const customManual = [
+    '<!doctype html><html lang="en"><body><h1>Keyboard order</h1>',
+    '<a id="zero-in-content" href="#zero-in-content" tabindex="0">Zero in content</a>',
+    '<a id="positive-two" href="#positive-two" tabindex="2">Positive two</a>',
+    '<a id="negative" href="#negative" tabindex="-1">Negative</a>',
+    '<a id="hidden" href="#hidden" tabindex="0" hidden>Hidden</a>',
+    '<a id="positive-one" href="#positive-one" tabindex="1">Positive one</a>',
+    '<a id="css-hidden" href="#css-hidden" tabindex="0" style="display: none">CSS hidden</a>',
+    '</body></html>',
+  ].join('');
+  await page.route((url) => /\/help\/site\/manual\.en\.html$/.test(url.pathname), (route) => route.fulfill({
+    status: 200,
+    contentType: 'text/html; charset=utf-8',
+    body: customManual,
+  }));
+  await loadSession(page, { query: 'lng=en' });
+
+  const openCustomManual = async () => {
+    await page.locator('button.help-button').click();
+    await page.getByRole('menuitem', { name: 'Manual' }).click();
+    await expect(page.locator('.odv-manual-content #positive-one')).toBeVisible();
+    await expect(page.locator('.odv-manual-dialog')).toBeFocused();
+  };
+
+  for (let opening = 0; opening < 2; opening += 1) {
+    await openCustomManual();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#positive-one')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#positive-two')).toBeFocused();
+    // Positive targets precede every zero/default target, including dialog chrome earlier in
+    // the DOM. Real browser Tab navigation, rather than synthetic keydown events, moves focus.
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Reload manual from server' })).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#positive-two')).toBeFocused();
+
+    const close = page.locator('.odv-help-footer button');
+    await close.focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#positive-one')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(close).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.odv-manual-dialog')).toHaveCount(0);
+    await expect(page.locator('button.help-button')).toBeFocused();
+  }
+});
+
 test('narrow dialog: column hidden, Swedish toggle opens the list, selection and Escape close it', async ({ page }) => {
   await page.setViewportSize({ width: 820, height: 900 });
   await openManual(page, 'sv');
