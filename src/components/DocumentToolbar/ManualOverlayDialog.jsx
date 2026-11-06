@@ -1259,7 +1259,8 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     if (!dialogNode) return;
     const focusable = Array.from(dialogNode.querySelectorAll(MANUAL_FOCUSABLE_SELECTOR))
       .filter((element) => {
-        if (element.disabled || element.tabIndex < 0
+        // :disabled includes inherited fieldset disability and preserves the first-legend exception.
+        if (element.matches(':disabled') || element.tabIndex < 0
           || element.closest('[hidden], [aria-hidden="true"]')) return false;
         // Browser layout excludes display:none, collapsed-details and visibility-hidden targets.
         // jsdom has no checkVisibility; its attribute-based fallback above preserves the unit fixture.
