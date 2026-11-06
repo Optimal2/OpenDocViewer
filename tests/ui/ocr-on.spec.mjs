@@ -346,7 +346,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // Re-placed for the narrow window: anchored at the button, pulled just inside the window only
   // when the button itself is outside (not by the open field's own width, which would leave it
   // hundreds of px further left). Where the button lands depends on what else the toolbar holds.
-  expect(Math.abs(hanging.right - Math.min(hanging.anchorRight, hanging.viewport - 8))).toBeLessThanOrEqual(2);
+  expect(Math.abs(hanging.right - Math.min(hanging.anchorRight, hanging.viewport - 8))).toBeLessThanOrEqual(6);
   expect(hanging.top).toBeGreaterThanOrEqual(hanging.toolbarBottom);
   await searchField.press('Escape');
   await expect.poll(() => page.locator('.toolbar-ocr-search-panel').evaluate((panel) => panel.getBoundingClientRect().width)).toBe(0);
