@@ -26,6 +26,7 @@ import {
 } from '../../utils/manualContentsTree.js';
 
 const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
+const MANUAL_FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 
 // Static loader keys let Vite create one lazy chunk per generated language without executing any
 // script contained in the source HTML. Only these two generated modules exist; other UI languages
@@ -151,6 +152,60 @@ function isRewritableRelativeUrl(value) {
 }
 
 /**
+ * Rewrite the URL in each srcset candidate while retaining its width or density descriptor.
+ * Commas inside URLs (notably data URLs) are preserved; only a comma outside a descriptor ends a
+ * candidate. This mirrors the browser's tokenization instead of splitting the attribute on commas.
+ *
+ * @param {string} value
+ * @param {string} resolvedUrl
+ * @returns {string}
+ */
+function rewriteManualSrcset(value, resolvedUrl) {
+  const input = String(value || '');
+  const candidates = [];
+  let position = 0;
+  const isWhitespace = (character) => character === ' ' || character === '\t'
+    || character === '\n' || character === '\f' || character === '\r';
+
+  while (position < input.length) {
+    while (position < input.length && (isWhitespace(input[position]) || input[position] === ',')) position += 1;
+    if (position >= input.length) break;
+
+    const urlStart = position;
+    while (position < input.length && !isWhitespace(input[position])) position += 1;
+    let url = input.slice(urlStart, position);
+    let descriptor = '';
+    if (url.endsWith(',')) {
+      url = url.replace(/,+$/, '');
+    } else {
+      const descriptorStart = position;
+      let parentheses = 0;
+      while (position < input.length) {
+        const character = input[position];
+        if (character === '(') parentheses += 1;
+        else if (character === ')' && parentheses > 0) parentheses -= 1;
+        else if (character === ',' && parentheses === 0) break;
+        position += 1;
+      }
+      descriptor = input.slice(descriptorStart, position).trim();
+      if (input[position] === ',') position += 1;
+    }
+    if (!url) continue;
+
+    let rewrittenUrl = url;
+    if (isRewritableRelativeUrl(url)) {
+      try {
+        rewrittenUrl = new URL(url, resolvedUrl).toString();
+      } catch {
+        // Leave this candidate as-is if URL rewriting fails.
+      }
+    }
+    candidates.push(`${rewrittenUrl}${descriptor ? ` ${descriptor}` : ''}`);
+  }
+  return candidates.join(', ');
+}
+
+/**
  * @param {string} html
  * @returns {string}
  */
@@ -185,6 +240,10 @@ function rewriteManualHtml(html, resolvedUrl) {
         // Leave the attribute as-is if URL rewriting fails.
       }
     });
+  });
+
+  doc.querySelectorAll('[srcset]').forEach((node) => {
+    node.setAttribute('srcset', rewriteManualSrcset(node.getAttribute('srcset') || '', resolvedUrl));
   });
 
   doc.querySelectorAll('a[href]').forEach((node) => {
@@ -1193,6 +1252,32 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     });
   }, [debouncedSearchQuery, searchMatchCount, currentSearchMatch, t]);
 
+  /** Keep forward and reverse Tab navigation inside the open modal dialog. */
+  const handleManualTabTrap = (event) => {
+    if (String(event?.key || '') !== 'Tab') return;
+    const dialogNode = dialogRef.current;
+    if (!dialogNode) return;
+    const focusable = Array.from(dialogNode.querySelectorAll(MANUAL_FOCUSABLE_SELECTOR))
+      .filter((element) => !element.disabled && element.tabIndex >= 0
+        && !element.closest('[hidden], [aria-hidden="true"]'));
+    if (focusable.length === 0) {
+      event.preventDefault();
+      dialogNode.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+    const outside = active === dialogNode || !dialogNode.contains(active);
+    if (event.shiftKey && (active === first || outside)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (active === last || outside)) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   if (!isOpen) return null;
 
   const hasContents = contentsGroups.length > 0;
@@ -1251,6 +1336,7 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
         className="odv-help-dialog odv-manual-dialog"
         tabIndex={-1}
         data-odv-shortcuts="off"
+        onKeyDown={handleManualTabTrap}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="odv-help-header">
