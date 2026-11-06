@@ -265,7 +265,7 @@
 | <code>ManualOverlayDialog~pinSectionFor</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:835</code> | Make the section holding target current and keep it current until the reader scrolls. |
 | <code>removeManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:288</code> |  |
 | <code>removeMarkFallback</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:585</code> | Unwrap fallback marks and merge the split text nodes back together. |
-| <code>ManualOverlayDialog~renderContentsLink</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:1310</code> |  |
+| <code>ManualOverlayDialog~renderContentsLink</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:1311</code> |  |
 | <code>replaceUrlFragment</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:760</code> | Replace the URL fragment without adding a history entry. |
 | <code>ManualOverlayDialog~restoreViewerFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:860</code> | Put back the URL fragment the viewer had before the manual set one. |
 | <code>revealManualMatch</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:607</code> | Open collapsed &amp;lt;details&amp;gt; ancestors of the hit and scroll it into the dialog scroll container. |
