@@ -102,17 +102,17 @@ describe('signature mutation CLI isolation and literal selection', () => {
   it.each([
     ['F12', 'src/utils/pdfSignatureInspector.js', 'return null;\n', 'F12'],
     ['(guess the curve from the key)', 'src/utils/pdfSignatures.js', 'return CURVE_OID_TO_POINT_SIZE.get(oidOf(params)) ?? 32;\n', 'row 24b unknown ECDSA curve']
-  ])('runs a positive literal selection %s and restores sources', (only, file, mutation, name) => {
-    withFixture(({ root, run, calls }) => {
+  ])('runs a positive literal selection %s and restores the complete source snapshots', (only, file, mutation, name) => {
+    withFixture(({ root, before, run, calls }) => {
       const result = run(only, { EXPECT_FILE: file, EXPECT_MUTATION: mutation });
       expect(result.status, result.output).toBe(0);
       expect(result.output).toContain('All 1 selected mutation groups were killed');
       expect(calls()).toEqual([{ args: ['run', expect.any(String), '-t', name], changed: true }]);
-      expect(snapshot(root).map(({ file, content }) => [file, content])).toEqual(Object.entries(sources));
+      expect(snapshot(root)).toEqual(before);
     });
   });
 
-  it('fails when a selected mutation survives and restores sources', () => withFixture(({ root, run, calls }) => {
+  it('fails when a selected mutation survives and restores the complete source snapshots', () => withFixture(({ root, before, run, calls }) => {
     const result = run('F12', {
       EXPECT_FILE: 'src/utils/pdfSignatureInspector.js', EXPECT_MUTATION: 'return null;\n', SURVIVE: 'F12'
     });
@@ -120,7 +120,7 @@ describe('signature mutation CLI isolation and literal selection', () => {
     expect(result.output).toContain('Expected assertion failure');
     expect(calls()).toHaveLength(1);
     expect(calls()[0].changed).toBe(true);
-    expect(snapshot(root).map(({ file, content }) => [file, content])).toEqual(Object.entries(sources));
+    expect(snapshot(root)).toEqual(before);
   }));
 
   it('rejects a missing mutation anchor without writing sources', () => withFixture(({ root, before, run, calls }) => {
@@ -131,8 +131,8 @@ describe('signature mutation CLI isolation and literal selection', () => {
     expect(snapshot(root)).toEqual(before);
   }));
 
-  it.each([false, true])('restores baseline writes when baseline failure is %s', (fail) => {
-    withFixture(({ root, run, calls }) => {
+  it.each([false, true])('restores complete source snapshots when baseline failure is %s', (fail) => {
+    withFixture(({ root, before, run, calls }) => {
       const result = run('F12', {
         baseline: true, EXPECT_FILE: 'src/utils/pdfSignatureInspector.js', EXPECT_MUTATION: 'return null;\n',
         ...(fail ? { SURVIVE: 'F[68]' } : {})
@@ -141,7 +141,7 @@ describe('signature mutation CLI isolation and literal selection', () => {
       expect(calls().map(({ changed }) => changed)).toEqual(fail ? [true, true] : [true, true, true]);
       if (fail) expect(result.output).toContain('Expected assertion failure');
       else expect(result.output).toContain('All 1 selected mutation groups were killed');
-      expect(snapshot(root).map(({ file, content }) => [file, content])).toEqual(Object.entries(sources));
+      expect(snapshot(root)).toEqual(before);
     });
   });
 });
