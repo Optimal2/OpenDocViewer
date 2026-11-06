@@ -68,9 +68,10 @@ test('an escaped value matches nothing else', () => {
   }
 });
 
-test('an escaped value survives a template literal', () => {
-  // The suites embed the escaped value into a template literal. A backtick or an interpolation in
-  // the value must not change the pattern.
+test('an escaped value survives interpolation into a runtime template literal', () => {
+  // The suites interpolate the escaped value while constructing a RegExp at runtime. They do not
+  // generate JavaScript source, so template parsing is already complete before the value arrives.
+  // A backtick or interpolation marker in the value therefore cannot change the template syntax.
   for (const value of VALUES) {
     const pattern = new RegExp(`\\s${escapeRegExp(value)}\\s`);
     assert.ok(pattern.test(` ${value} `), `must match ${JSON.stringify(value)}`);
