@@ -7391,7 +7391,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 221,
+    "line": 239,
     "description": "",
     "params": [
       {
@@ -7411,7 +7411,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 258,
+    "line": 276,
     "description": "",
     "params": [
       {
@@ -7431,7 +7431,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 266,
+    "line": 284,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -7464,7 +7464,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 242,
+    "line": 260,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -29010,13 +29010,63 @@
     "examples": 0
   },
   {
+    "id": "measureOcrSearchContentWidth",
+    "name": "measureOcrSearchContentWidth",
+    "longname": "measureOcrSearchContentWidth",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 113,
+    "description": "CSS px the field's contents need with the input at its minimum: every child but the input at its width (the status is not shrunk, so its width is its text's), the gaps between the...",
+    "params": [
+      {
+        "name": "panel",
+        "type": "HTMLElement|null",
+        "optional": false,
+        "description": "The .toolbar-ocr-search-panel element."
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "measureOcrSearchInputMinWidth",
+    "name": "measureOcrSearchInputMinWidth",
+    "longname": "measureOcrSearchInputMinWidth",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 97,
+    "description": "The input's least width as laid out (CSS px): its min-width , plus its padding and border when they lie outside it (the input is content-box: 48 px of content and 14 px around it).",
+    "params": [
+      {
+        "name": "input",
+        "type": "HTMLElement",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "measureOcrSearchPlacement",
     "name": "measureOcrSearchPlacement",
     "longname": "measureOcrSearchPlacement",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 87,
+    "line": 138,
     "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
     "params": [
       {
@@ -29047,14 +29097,40 @@
     "examples": 0
   },
   {
+    "id": "OCR_SEARCH_INPUT_MIN_WIDTH",
+    "name": "OCR_SEARCH_INPUT_MIN_WIDTH",
+    "longname": "OCR_SEARCH_INPUT_MIN_WIDTH",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 22,
+    "description": "The input's least width (CSS px), as .toolbar-ocr-search-input has it.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "OCR_SEARCH_PANEL_HANG_GAP",
     "name": "OCR_SEARCH_PANEL_HANG_GAP",
     "longname": "OCR_SEARCH_PANEL_HANG_GAP",
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 22,
+    "line": 28,
     "description": "Air between the toolbar's lower edge and a hanging field.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OCR_SEARCH_PANEL_HANG_INSET",
+    "name": "OCR_SEARCH_PANEL_HANG_INSET",
+    "longname": "OCR_SEARCH_PANEL_HANG_INSET",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 24,
+    "description": "Padding and border a hanging field adds around its contents (CSS px, both sides).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -29066,7 +29142,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 20,
+    "line": 26,
     "description": "Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.",
     "params": [],
     "returns": [],
@@ -29079,8 +29155,8 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 18,
-    "description": "Below this inline width the field hangs under the toolbar instead: the field's contents (the input at its minimum, the status, the four buttons and their gaps) need about 210 px,...",
+    "line": 20,
+    "description": "Below this inline width the field hangs under the toolbar instead: the field's contents (the input at its minimum, an empty status, the four buttons and their gaps) need about 210...",
     "params": [],
     "returns": [],
     "examples": 0
@@ -29092,7 +29168,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 12,
+    "line": 14,
     "description": "Full width of the field (CSS px).",
     "params": [],
     "returns": [],
@@ -29105,7 +29181,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 24,
+    "line": 30,
     "description": "",
     "params": [],
     "returns": [],
@@ -29118,7 +29194,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 52,
+    "line": 61,
     "description": "",
     "params": [
       {
@@ -29174,6 +29250,12 @@
         "type": "number",
         "optional": true,
         "description": "Lower edge of the toolbar in viewport px; a hanging field starts below it."
+      },
+      {
+        "name": "measures.contentWidth",
+        "type": "number",
+        "optional": true,
+        "description": "CSS px the field's contents need with the input at its minimum (the status at its full width, the buttons, the gaps); the field is never na..."
       }
     ],
     "returns": [

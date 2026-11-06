@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 64. Line count: 23941. JSDoc symbol count: 983.
+File count: 64. Line count: 23993. JSDoc symbol count: 987.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -340,16 +340,20 @@ Symbols:
 
 Where the toolbar's OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when
 
-Exports: `OCR_SEARCH_PANEL_WIDTH`, `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH`, `OCR_SEARCH_PANEL_MARGIN`, `OCR_SEARCH_PANEL_HANG_GAP`, `resolveOcrSearchPlacement`, `measureOcrSearchPlacement`
+Exports: `OCR_SEARCH_PANEL_WIDTH`, `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH`, `OCR_SEARCH_INPUT_MIN_WIDTH`, `OCR_SEARCH_PANEL_HANG_INSET`, `OCR_SEARCH_PANEL_MARGIN`, `OCR_SEARCH_PANEL_HANG_GAP`, `resolveOcrSearchPlacement`, `measureOcrSearchContentWidth`, `measureOcrSearchPlacement`
 
 Symbols:
 
 - `OCR_SEARCH_PANEL_WIDTH` (constant) - Full width of the field \(CSS px\).
-- `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH` (constant) - Below this inline width the field hangs under the toolbar instead: the field's contents \(the input at its minimum, the status, the four buttons and their gaps\) need about 210 px,...
+- `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH` (constant) - Below this inline width the field hangs under the toolbar instead: the field's contents \(the input at its minimum, an empty status, the four buttons and their gaps\) need about 210...
+- `OCR_SEARCH_INPUT_MIN_WIDTH` (constant) - The input's least width \(CSS px\), as .toolbar\-ocr\-search\-input has it.
+- `OCR_SEARCH_PANEL_HANG_INSET` (constant) - Padding and border a hanging field adds around its contents \(CSS px, both sides\).
 - `OCR_SEARCH_PANEL_MARGIN` (constant) - Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.
 - `OCR_SEARCH_PANEL_HANG_GAP` (constant) - Air between the toolbar's lower edge and a hanging field.
 - `OcrSearchPlacement` (typedef) - No description.
 - `resolveOcrSearchPlacement` (function) - No description.
+- `measureOcrSearchInputMinWidth` (function) - The input's least width as laid out \(CSS px\): its min\-width , plus its padding and border when they lie outside it \(the input is content\-box: 48 px of content and 14 px around it\).
+- `measureOcrSearchContentWidth` (function) - CSS px the field's contents need with the input at its minimum: every child but the input at its width \(the status is not shrunk, so its width is its text's\), the gaps between the...
 - `measureOcrSearchPlacement` (function) - Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.
 
 ## src/utils/ocrStatus.js

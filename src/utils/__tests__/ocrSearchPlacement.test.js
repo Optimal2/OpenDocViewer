@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // File: src/utils/__tests__/ocrSearchPlacement.test.js
 /**
  * Where the OCR search field goes (utils/ocrSearchPlacement.js): the full width when the
@@ -5,13 +6,20 @@
  * when it leaves too little, an open inline field counting as room when re-placed, an
  * overflowing toolbar counting against it, and the inline default without layout.
  */
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  measureOcrSearchContentWidth,
+  OCR_SEARCH_INPUT_MIN_WIDTH,
+  OCR_SEARCH_PANEL_HANG_INSET,
   OCR_SEARCH_PANEL_MARGIN,
   OCR_SEARCH_PANEL_MIN_INLINE_WIDTH,
   OCR_SEARCH_PANEL_WIDTH,
   resolveOcrSearchPlacement,
 } from '../ocrSearchPlacement.js';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 const base = { toolbarWidth: 1400, toolbarScrollWidth: 1400, spacerWidth: 0, inlinePanelWidth: 0, viewportWidth: 1400 };
 
@@ -56,5 +64,62 @@ describe('resolveOcrSearchPlacement', () => {
   it('is the inline default without a laid-out toolbar', () => {
     expect(resolveOcrSearchPlacement({ toolbarWidth: 0 })).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
     expect(resolveOcrSearchPlacement({})).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
+  });
+
+  it('is never narrower than its contents need: wider inline when the room allows, hanging when it does not, a wider hanging field, capped to the viewport', () => {
+    // Contents below the inline minimum change nothing.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 250, contentWidth: 200 })).toEqual({ mode: 'inline', width: 234, offset: 0, top: 0 });
+    // 300 px of contents in 600 px of room: inline, but the field is 340 (its usual) as that holds them.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 300 })).toEqual({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
+    // 380.2 px of contents in 600 px of room: inline and 381 wide.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 600, contentWidth: 380.2 })).toEqual({ mode: 'inline', width: 381, offset: 0, top: 0 });
+    // 300 px of contents in 284 px of room: hanging, at its usual width.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 300, contentWidth: 300 })).toEqual({ mode: 'hanging', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 6 });
+    // 400 px of contents: a hanging field of 410, padding and border included.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 300, contentWidth: 400 })).toEqual({ mode: 'hanging', width: 400 + OCR_SEARCH_PANEL_HANG_INSET, offset: 0, top: 6 });
+    // The viewport caps a hanging field whatever its contents need.
+    expect(resolveOcrSearchPlacement({ ...base, spacerWidth: 0, viewportWidth: 300, contentWidth: 400 })).toEqual({ mode: 'hanging', width: 284, offset: 0, top: 6 });
+  });
+});
+
+describe('measureOcrSearchContentWidth', () => {
+  const child = (className, width) => {
+    const element = document.createElement(className === 'toolbar-ocr-search-input' ? 'input' : 'span');
+    element.className = className;
+    element.getBoundingClientRect = () => ({ width, height: 0, top: 0, left: 0, right: width, bottom: 0 });
+    return element;
+  };
+
+  it('sums every child but the input at its width, the input at its least laid-out width, and the gaps', () => {
+    const panel = document.createElement('div');
+    const input = child('toolbar-ocr-search-input', 150);
+    // jsdom computes nothing from a stylesheet: the field's 2 px gap and the input's min-width,
+    // padding and border (content-box: 48 + 6 + 6 + 1 + 1 = 62) are lent to it.
+    const computed = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+      if (element === panel) return { columnGap: '2px' };
+      if (element === input) return { minWidth: '48px', boxSizing: 'content-box', paddingLeft: '6px', paddingRight: '6px', borderLeftWidth: '1px', borderRightWidth: '1px' };
+      return computed(element, pseudo);
+    });
+    panel.append(input, child('toolbar-ocr-search-status', 120.5), child('odv-btn', 28), child('odv-btn', 28));
+    expect(measureOcrSearchContentWidth(panel)).toBeCloseTo(62 + 120.5 + 28 + 28 + 3 * 2, 5);
+  });
+
+  it('takes the input at its min-width alone when that is border-box, and at 48 px without computed style', () => {
+    const panel = document.createElement('div');
+    const input = child('toolbar-ocr-search-input', 150);
+    panel.append(input, child('odv-btn', 28));
+    const computed = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => (
+      element === input ? { minWidth: '50px', boxSizing: 'border-box', paddingLeft: '6px', paddingRight: '6px' } : computed(element, pseudo)
+    ));
+    expect(measureOcrSearchContentWidth(panel)).toBe(50 + 28);
+    vi.restoreAllMocks();
+    expect(measureOcrSearchContentWidth(panel)).toBe(OCR_SEARCH_INPUT_MIN_WIDTH + 28);
+  });
+
+  it('is 0 without a field or children', () => {
+    expect(measureOcrSearchContentWidth(null)).toBe(0);
+    expect(measureOcrSearchContentWidth(document.createElement('div'))).toBe(0);
   });
 });

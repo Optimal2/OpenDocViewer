@@ -283,16 +283,16 @@
   font-size: 0.85rem;
 }
 
+/* Never shrunk or cut short: the field is measured to hold it with the input at its minimum
+   (utils/ocrSearchPlacement.js), so the input gives way instead. */
 .toolbar-ocr-search-status {
-  flex: 0 1 auto;
-  max-width: 45%;
+  flex: 0 0 auto;
   padding: 0 4px;
-  overflow: hidden;
   color: var(--text-muted-color, rgba(0, 0, 0, 0.68));
   font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 /* Printing and PDF export use the page images only: the layer never prints. */

@@ -552,8 +552,10 @@ not a toolbar button, see below:
   the button to the right (a short ease) into the room the toolbar has; when there is too little,
   the field hangs under the toolbar at the button's right edge instead. The search covers only the text layers (recognised text and PDF pages' own text), of every
   page that has an outcome, in page order; it is case-insensitive and finds a phrase also across
-  a line break. Typing shows the position ("1/5") and, while not every page has an outcome,
-  how many pages the search covers ("2/300 pages", spelt out in the tooltip); the matches are marked on the
+  a line break. Typing shows the position ("Match 1/5") and, while not every page has an outcome,
+  how many pages the search covers ("2/300 pages searched", spelt out in the tooltip); the status
+  is never cut short: the field grows to hold it with the input at its least width, and hangs
+  under the toolbar when the toolbar has no room for that. The matches are marked on the
   page over the words, the current match stronger and scrolled into view. Enter and the arrow
   buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
   one; Escape closes the field. A toggle in the field ("Search only on this page") limits the

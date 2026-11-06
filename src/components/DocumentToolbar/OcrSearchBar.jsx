@@ -159,10 +159,19 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // signature overview button: with the toolbar already
   // overflowing, the spacer stays at 0 and only the button's place moves). The OCR group's
   // wrapper has no box of its own (display: contents), so it is not worth observing. The anchor
-  // is the button: the root also holds the open inline field.
+  // is the button: the root also holds the open inline field. The field's status is measured
+  // too (its width is part of what the field needs), again whenever its text changes.
+  const place = useCallback(() => {
+    const next = measureOcrSearchPlacement(rootRef.current, panelRef.current, buttonRef.current);
+    // The same placement again (most keystrokes) is no render.
+    setPlacement((current) => (
+      current.mode === next.mode && current.width === next.width && current.offset === next.offset && current.top === next.top
+        ? current
+        : next
+    ));
+  }, []);
   useLayoutEffect(() => {
     if (!open) return undefined;
-    const place = () => setPlacement(measureOcrSearchPlacement(rootRef.current, panelRef.current, buttonRef.current));
     place();
     if (typeof window === 'undefined') return undefined;
     window.addEventListener('resize', place);
@@ -174,6 +183,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       sizes.observe(toolbar);
       const spacer = toolbar.querySelector('.toolbar-spacer');
       if (spacer) sizes.observe(spacer);
+      const status = panelRef.current?.querySelector?.('.toolbar-ocr-search-status');
+      if (status) sizes.observe(status);
     }
     if (toolbar && typeof MutationObserver === 'function') {
       contents = new MutationObserver(place);
@@ -184,7 +195,14 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       sizes?.disconnect();
       contents?.disconnect();
     };
-  }, [open]);
+  }, [open, place]);
+
+  // The status changes with the term, the matches, the current one, the pages recognised, the
+  // scope and (limited to a page without text) the page's status: measured again in the same
+  // layout pass (the observer above sees it too, a frame later and only where there is one).
+  useLayoutEffect(() => {
+    if (open) place();
+  }, [open, place, normalizedTerm, matches.length, currentPosition, recognisedPages, pageOnly, statusKey]);
 
   useEffect(() => {
     if (open) inputRef.current?.focus?.();
@@ -304,18 +322,19 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   } else if (normalizedTerm) {
     statusLine = matches.length === 0
       ? t('ocr.search.none', { defaultValue: 'No matches' })
-      : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: '{current}/{total}' });
+      : t('ocr.search.position', { current: currentPosition + 1, total: matches.length, defaultValue: 'Match {current}/{total}' });
     if (!pageOnly && recognisedPages < pages.length) {
-      statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done}/{pages} pages' })}`;
+      statusLine += ` · ${t('ocr.search.coverage', { done: recognisedPages, pages: pages.length, defaultValue: '{done}/{pages} pages searched' })}`;
     }
   }
-  // The short status spelt out, for its tooltip ("3/12 · 2/300 pages" reads as matches and
-  // pages ready).
+  // The status spelt out, for its tooltip and assistive technology ("Match 3 of 12 · Searched 2
+  // of 300 pages"). The status is never cut short: the field grows for it
+  // (utils/ocrSearchPlacement.js).
   const statusTitle = normalizedTerm && matches.length > 0
     ? [
       t('ocr.search.positionLong', { current: currentPosition + 1, total: matches.length, defaultValue: 'Match {current} of {total}' }),
       ...(!pageOnly && recognisedPages < pages.length
-        ? [t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: '{done} of {pages} pages ready' })]
+        ? [t('ocr.search.coverageSearched', { done: recognisedPages, pages: pages.length, defaultValue: 'Searched {done} of {pages} pages' })]
         : []),
     ].join(' · ')
     : statusLine;

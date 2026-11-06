@@ -276,11 +276,11 @@
 | <code>setCurrentMark</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:566</code> |  |
 | <code>ManualOverlayDialog~setManualFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:849</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the dialog or the page behind... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:59</code> |  |
-| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:221</code> |  |
-| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:258</code> |  |
-| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:266</code> | Escape closes the field from any of its controls. |
+| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:239</code> |  |
+| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:276</code> |  |
+| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:284</code> | Escape closes the field from any of its controls. |
 | <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:44</code> |  |
-| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:242</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
+| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:260</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx:36</code> |  |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |
@@ -1183,13 +1183,17 @@
 | <code>ocrSearchIndexOf</code> | function | <code>src/utils/ocrSearch.js:48</code> | Build \(or reuse\) the search index of a done outcome. |
 | <code>OcrSearchMatch</code> | typedef | <code>src/utils/ocrSearch.js:23</code> |  |
 | <code>searchOcrPages</code> | function | <code>src/utils/ocrSearch.js:125</code> | Matches of a term across the recognised pages of a document, in page order, each page&#39;s matches in reading order. |
-| <code>measureOcrSearchPlacement</code> | function | <code>src/utils/ocrSearchPlacement.js:87</code> | Gather the measures for resolveOcrSearchPlacement from the DOM around the search&#39;s root. |
-| <code>OCR_SEARCH_PANEL_HANG_GAP</code> | constant | <code>src/utils/ocrSearchPlacement.js:22</code> | Air between the toolbar&#39;s lower edge and a hanging field. |
-| <code>OCR_SEARCH_PANEL_MARGIN</code> | constant | <code>src/utils/ocrSearchPlacement.js:20</code> | Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging. |
-| <code>OCR_SEARCH_PANEL_MIN_INLINE_WIDTH</code> | constant | <code>src/utils/ocrSearchPlacement.js:18</code> | Below this inline width the field hangs under the toolbar instead: the field&#39;s contents \(the input at its minimum, the status, the four buttons and their gaps\) need about 210 px,... |
-| <code>OCR_SEARCH_PANEL_WIDTH</code> | constant | <code>src/utils/ocrSearchPlacement.js:12</code> | Full width of the field \(CSS px\). |
-| <code>OcrSearchPlacement</code> | typedef | <code>src/utils/ocrSearchPlacement.js:24</code> |  |
-| <code>resolveOcrSearchPlacement</code> | function | <code>src/utils/ocrSearchPlacement.js:52</code> |  |
+| <code>measureOcrSearchContentWidth</code> | function | <code>src/utils/ocrSearchPlacement.js:113</code> | CSS px the field&#39;s contents need with the input at its minimum: every child but the input at its width \(the status is not shrunk, so its width is its text&#39;s\), the gaps between the... |
+| <code>measureOcrSearchInputMinWidth</code> | function | <code>src/utils/ocrSearchPlacement.js:97</code> | The input&#39;s least width as laid out \(CSS px\): its min-width , plus its padding and border when they lie outside it \(the input is content-box: 48 px of content and 14 px around it\). |
+| <code>measureOcrSearchPlacement</code> | function | <code>src/utils/ocrSearchPlacement.js:138</code> | Gather the measures for resolveOcrSearchPlacement from the DOM around the search&#39;s root. |
+| <code>OCR_SEARCH_INPUT_MIN_WIDTH</code> | constant | <code>src/utils/ocrSearchPlacement.js:22</code> | The input&#39;s least width \(CSS px\), as .toolbar-ocr-search-input has it. |
+| <code>OCR_SEARCH_PANEL_HANG_GAP</code> | constant | <code>src/utils/ocrSearchPlacement.js:28</code> | Air between the toolbar&#39;s lower edge and a hanging field. |
+| <code>OCR_SEARCH_PANEL_HANG_INSET</code> | constant | <code>src/utils/ocrSearchPlacement.js:24</code> | Padding and border a hanging field adds around its contents \(CSS px, both sides\). |
+| <code>OCR_SEARCH_PANEL_MARGIN</code> | constant | <code>src/utils/ocrSearchPlacement.js:26</code> | Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging. |
+| <code>OCR_SEARCH_PANEL_MIN_INLINE_WIDTH</code> | constant | <code>src/utils/ocrSearchPlacement.js:20</code> | Below this inline width the field hangs under the toolbar instead: the field&#39;s contents \(the input at its minimum, an empty status, the four buttons and their gaps\) need about 210... |
+| <code>OCR_SEARCH_PANEL_WIDTH</code> | constant | <code>src/utils/ocrSearchPlacement.js:14</code> | Full width of the field \(CSS px\). |
+| <code>OcrSearchPlacement</code> | typedef | <code>src/utils/ocrSearchPlacement.js:30</code> |  |
+| <code>resolveOcrSearchPlacement</code> | function | <code>src/utils/ocrSearchPlacement.js:61</code> |  |
 | <code>hasSearchableOcrText</code> | function | <code>src/utils/ocrStatus.js:70</code> | Whether a page&#39;s recognised text can be searched: the outcome is final and holds words. |
 | <code>OCR_STATUS_FALLBACK</code> | constant | <code>src/utils/ocrStatus.js:9</code> | Status keys and their English fallbacks. |
 | <code>OCR_STATUS_LED</code> | constant | <code>src/utils/ocrStatus.js:24</code> | LED state \(components/common/StatusLed.jsx\) per status key; &#39;&#39; \(no outcome yet\) is off. |
