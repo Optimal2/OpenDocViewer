@@ -1,13 +1,15 @@
 // Bounded red-before-green proof. Each mutation is restored in finally; no git
 // state is changed. Run only in an isolated worktree without concurrent edits.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const parser = 'src/utils/pdfSignatures.js';
 const inspector = 'src/utils/pdfSignatureInspector.js';
 const revisions = 'src/utils/pdfSignatureRevisions.js';
 const renderCheck = 'src/utils/pdfSignatureRenderCheck.js';
-const originals = new Map([parser, inspector, revisions, renderCheck].map((file) => [file, readFileSync(file, 'utf8')]));
+const sourceFiles = [parser, inspector, revisions, renderCheck];
+const originalStats = new Map(sourceFiles.map((file) => [file, statSync(file)]));
+const originals = new Map(sourceFiles.map((file) => [file, readFileSync(file, 'utf8')]));
 const renderCheckTests = 'src/utils/__tests__/pdfSignatureRenderCheck.test.js';
 const guardsDisabledTests = 'src/utils/__tests__/pdfSignatureRenderCheckGuardsDisabled.test.js';
 const tests = 'src/utils/__tests__/pdfSignatureSecurity.test.js';
@@ -149,6 +151,8 @@ function writeSource(file, content) {
 function restoreSources() {
   for (const file of pendingRestores) {
     writeFileSync(file, originals.get(file));
+    const { atime, mtime } = originalStats.get(file);
+    utimesSync(file, atime, mtime);
     pendingRestores.delete(file);
   }
 }
