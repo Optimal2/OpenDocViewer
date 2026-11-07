@@ -2,11 +2,10 @@
 
 Base: `267b1e8fc804c72a95bd9fd202dd610ee77a5fbe` (`origin/main` at job start).
 
-Scope: the `## OpenDocViewer` section of
-`DEV/AI-Vaults/Projects/OMP-ODV/60-Reports/prep/2026-11-06-github-fynd-ai-forslag-alla-repon-wp0.md`,
-which lists six AI findings in five files. The list is a set of hypotheses from a scan, not
-instructions. Each hypothesis was re-tested against the current source in this repository; the
-disposition below records what the code actually does now.
+Scope: the `## OpenDocViewer` section of the campaign's WP0 preparation report for
+`github-fynd-ai-forslag-alla-repon`, which lists six AI findings in five files. The list is a
+set of hypotheses from a scan, not instructions. Each hypothesis was re-tested against the
+current source in this repository; the disposition below records what the code actually does now.
 
 Nothing was dismissed on GitHub and no analyzer suppression was added.
 
