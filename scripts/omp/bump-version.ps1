@@ -74,11 +74,158 @@ function Resolve-FullPath {
     return [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $Path))
 }
 
+$script:MaxVersionCorePart = 2147483647
+
 function Test-VersionText {
+    <#
+    .SYNOPSIS
+    Validate a version against the platform's supported version contract.
+
+    .DESCRIPTION
+    The platform compares artifact versions with System.Version, whose major,
+    minor and patch are Int32, so every numeric core component must be in
+    0..2147483647. A core outside that range is NOT rejected by the platform:
+    Version.TryParse fails, ArtifactVersionComparer falls back to an ordinal
+    string comparison, and 2147483648.0.0 is then ordered BEFORE 999999999.0.0.
+    The helper refuses such a version instead of writing one the host would
+    order wrongly.
+
+    The core must use ASCII decimal digits without leading zeroes, because
+    Version parses '01.2.3' as 1.2.3: the text stored in the manifest would no
+    longer be the text the host compares. Build metadata keeps its leading
+    zeroes ('1.2.3+001'), and so does an alphanumeric prerelease identifier
+    ('1.2.3-01a'); only a NUMERIC prerelease identifier must not have any.
+    #>
     param([Parameter(Mandatory = $true)][string]$Value)
 
-    if ($Value -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
-        throw "Version must use simplified SemVer-compatible text such as 1.2.3, 1.2.3-beta.1, or 1.2.3+build.5."
+    $text = $Value.Trim()
+
+    # [0-9] and not \d: .NET's \d also matches Unicode decimal digits, which
+    # System.Version does not parse the same way.
+    if ($text -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
+        throw "Version '$Value' must use simplified SemVer-compatible text such as 1.2.3, 1.2.3-beta.1, or 1.2.3+build.5."
+    }
+
+    $withoutMetadata = ($text -split '\+', 2)[0]
+    $parts = $withoutMetadata -split '-', 2
+    foreach ($corePart in ($parts[0] -split '\.')) {
+        if ($corePart.Length -gt 1 -and $corePart.StartsWith('0')) {
+            throw "Version '$Value' has a leading zero in the numeric core. Numeric core components must not have leading zeroes."
+        }
+
+        Assert-VersionCorePartInRange -Value $corePart -Version $Value
+    }
+
+    if ($parts.Count -gt 1) {
+        foreach ($identifier in ($parts[1] -split '\.')) {
+            if ($identifier -match '^[0-9]+$' -and $identifier.Length -gt 1 -and $identifier.StartsWith('0')) {
+                throw "Version '$Value' has a leading zero in the numeric prerelease identifier '$identifier'. Numeric prerelease identifiers must not have leading zeroes."
+            }
+        }
+    }
+}
+
+function Assert-VersionCorePartInRange {
+    <#
+    .SYNOPSIS
+    Refuse a numeric core component outside the supported 0..2147483647 range.
+
+    .DESCRIPTION
+    The comparison is made on the digit text instead of on a parsed number, so
+    a component with any number of digits is refused exactly and without
+    widening the platform's Int32 contract to an unlimited one.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Value,
+        [Parameter(Mandatory = $true)][string]$Version
+    )
+
+    $maxText = $script:MaxVersionCorePart.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+    if ($Value.Length -lt $maxText.Length) {
+        return
+    }
+
+    if ($Value.Length -eq $maxText.Length -and [string]::CompareOrdinal($Value, $maxText) -le 0) {
+        return
+    }
+
+    throw "Version '$Version' has the numeric core component '$Value', which is outside the supported range 0..$maxText. The platform compares artifact versions with System.Version, whose major, minor and patch are Int32."
+}
+
+function Assert-VersionTextInContract {
+    <#
+    .SYNOPSIS
+    Validate one version text against the supported contract and name the
+    target it came from in the error message.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Value,
+        [Parameter(Mandatory = $true)][string]$Description
+    )
+
+    try {
+        Test-VersionText -Value $Value
+    }
+    catch {
+        throw "$Description holds the unsupported version '$Value'. $($_.Exception.Message)"
+    }
+}
+
+function Assert-SelectedVersionTargets {
+    <#
+    .SYNOPSIS
+    Validate the existing version text of every selected target before the
+    first write.
+
+    .DESCRIPTION
+    The automatic bump validates the version it reads, but an explicit
+    -Version replaces the result without ever reading the existing text. The
+    existing version of every selected target is therefore validated here, so
+    a manifest that already holds an unsupported version is refused before
+    anything is written instead of being carried forward unchanged.
+
+    The input version is validated by Test-VersionText, and every result is
+    validated by the bounded increment in Get-BumpedVersion.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Components,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ModuleDefinitions,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Widgets,
+        [Parameter(Mandatory = $true)][string]$RepositoryVersion,
+        [Parameter(Mandatory = $true)][bool]$RepositoryVersionIsSelected
+    )
+
+    foreach ($component in $Components) {
+        $componentKey = [string](Get-JsonPropertyValue -Object $component -Name 'componentKey')
+        $componentVersion = [string](Get-JsonPropertyValue -Object $component -Name 'version')
+        if ([string]::IsNullOrWhiteSpace($componentVersion)) {
+            throw "Component '$componentKey' has no version in the manifest. Set it manually before bumping."
+        }
+
+        Assert-VersionTextInContract -Value $componentVersion -Description "Component '$componentKey'"
+    }
+
+    foreach ($moduleDefinition in $ModuleDefinitions) {
+        $moduleKey = [string](Get-JsonPropertyValue -Object $moduleDefinition -Name 'moduleKey')
+        $definitionVersion = [string](Get-JsonPropertyValue -Object $moduleDefinition -Name 'definitionVersion')
+        if ([string]::IsNullOrWhiteSpace($definitionVersion)) {
+            throw "Module definition '$moduleKey' has no definitionVersion in the manifest. Set it manually before bumping."
+        }
+
+        Assert-VersionTextInContract -Value $definitionVersion -Description "Module definition '$moduleKey'"
+    }
+
+    foreach ($widgetEntry in $Widgets) {
+        $widgetVersion = [string]$widgetEntry.WidgetVersion
+        if ([string]::IsNullOrWhiteSpace($widgetVersion)) {
+            continue
+        }
+
+        Assert-VersionTextInContract -Value $widgetVersion -Description "Dashboard widget '$($widgetEntry.Path)'"
+    }
+
+    if ($RepositoryVersionIsSelected -and -not [string]::IsNullOrWhiteSpace($RepositoryVersion)) {
+        Assert-VersionTextInContract -Value $RepositoryVersion -Description 'repositoryVersion'
     }
 }
 
@@ -152,32 +299,63 @@ function ConvertTo-VersionPart {
     return $normalized
 }
 
+function Get-IncrementedVersionPart {
+    <#
+    .SYNOPSIS
+    Increment one numeric core component, refusing to leave the supported
+    0..2147483647 range.
+
+    .DESCRIPTION
+    The increment is made on a 64-bit value and checked against the range
+    before it is narrowed again, so an upper-bound bump produces a clear
+    supported-range error instead of an Int32 overflow or a silent wrap.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][long]$Value,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Version
+    )
+
+    $next = $Value + 1
+    if ($next -gt $script:MaxVersionCorePart) {
+        throw "Cannot bump the $Name component of '$Version': the result $next is outside the supported range 0..$($script:MaxVersionCorePart). The platform compares artifact versions with System.Version, whose major, minor and patch are Int32."
+    }
+
+    return [int]$next
+}
+
 function Get-BumpedVersion {
     param(
         [Parameter(Mandatory = $true)][string]$CurrentVersion,
         [Parameter(Mandatory = $true)][string]$VersionPart
     )
 
-    if ($CurrentVersion -notmatch '^(\d+)\.(\d+)\.(\d+)$') {
+    $match = [regex]::Match($CurrentVersion, '^([0-9]+)\.([0-9]+)\.([0-9]+)$')
+    if (-not $match.Success) {
         throw "Cannot bump '$CurrentVersion' automatically. Automatic bumps only support plain major.minor.patch versions such as 1.2.3. Use -Version for prerelease/build metadata or other non-standard text."
     }
 
-    $major = [int]$Matches[1]
-    $minor = [int]$Matches[2]
-    $patch = [int]$Matches[3]
+    # Validate the CURRENT core before the arithmetic. A leading zero or a
+    # component outside the supported range would otherwise be normalized
+    # away by the increment instead of being refused.
+    Test-VersionText -Value $CurrentVersion
+
+    $major = [long]$match.Groups[1].Value
+    $minor = [long]$match.Groups[2].Value
+    $patch = [long]$match.Groups[3].Value
 
     switch ($VersionPart) {
         'major' {
-            $major += 1
+            $major = Get-IncrementedVersionPart -Value $major -Name 'major' -Version $CurrentVersion
             $minor = 0
             $patch = 0
         }
         'minor' {
-            $minor += 1
+            $minor = Get-IncrementedVersionPart -Value $minor -Name 'minor' -Version $CurrentVersion
             $patch = 0
         }
         default {
-            $patch += 1
+            $patch = Get-IncrementedVersionPart -Value $patch -Name 'patch' -Version $CurrentVersion
         }
     }
 
@@ -512,15 +690,19 @@ function Save-JsonFile {
         [Parameter(Mandatory = $true)][object]$Value
     )
 
+    # The CALLER owns the confirmation for this file. This function used to ask
+    # ShouldProcess a second time, inside the caller's own ShouldProcess block,
+    # so -Confirm asked twice for ONE write and a declined inner prompt left the
+    # version report claiming a write that never happened. One real write now
+    # has exactly one confirmation boundary, taken by the caller.
     $formattedJson = Get-JsonFileText -Value $Value
-    if ($PSCmdlet.ShouldProcess($Path, 'Write JSON file')) {
-        # The selection was already checked before the first write; this repeat
-        # is the last line of defence for the file actually being written.
-        $expectedNonAscii = Assert-JsonFileWritable -Path $Path -FormattedJson $formattedJson
 
-        [IO.File]::WriteAllText($Path, $formattedJson, $script:Utf8NoBomStrict)
-        Assert-NonAsciiPreserved -Path $Path -ExpectedNonAscii $expectedNonAscii
-    }
+    # The selection was already checked before the first write; this repeat
+    # is the last line of defence for the file actually being written.
+    $expectedNonAscii = Assert-JsonFileWritable -Path $Path -FormattedJson $formattedJson
+
+    [IO.File]::WriteAllText($Path, $formattedJson, $script:Utf8NoBomStrict)
+    Assert-NonAsciiPreserved -Path $Path -ExpectedNonAscii $expectedNonAscii
 }
 
 function Convert-KeyInput {
@@ -624,7 +806,12 @@ function Set-WidgetFileEntryVersion {
     Set-JsonProperty -Object $WidgetEntry.Entry -Name 'widgetVersion' -Value $Version
 }
 
-function Update-WidgetPackageFile {
+function Get-WidgetPackageFileContent {
+    <#
+    .SYNOPSIS
+    Reads a dashboard widget package file and returns it with the given version
+    stamped on the package root and on every widget inside it.
+    #>
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string]$Version
@@ -642,9 +829,7 @@ function Update-WidgetPackageFile {
         }
     }
 
-    if ($PSCmdlet.ShouldProcess($Path, "Set dashboard widget packageVersion/widgetVersion to $Version")) {
-        Save-JsonFile -Path $Path -Value $json
-    }
+    return $json
 }
 
 $exitCode = 0
@@ -961,12 +1146,19 @@ try {
         if (-not $definitionJsonByKey.ContainsKey($componentModuleKey)) {
             $definitionPath = Resolve-FullPath -Path (Join-Path $repositoryRoot $relativeDefinitionPath)
             $definitionPathByKey[$componentModuleKey] = $definitionPath
-            if (Test-Path -LiteralPath $definitionPath -PathType Leaf) {
-                $definitionJsonByKey[$componentModuleKey] = Read-JsonFile -Path $definitionPath
+            if (-not (Test-Path -LiteralPath $definitionPath -PathType Leaf)) {
+                # A component whose module definition file is absent cannot have
+                # its compatibleArtifacts.maxVersion cap raised, so the component
+                # version would advance while the cap stayed behind it -- exactly
+                # the drift that made HostAgent reject the produced artifact on
+                # 2026-08-18. This used to store null and skip the definition,
+                # which bumped the component and exited 0 with the cap stale.
+                # Refuse HERE, before the first write, so no selected file is
+                # left half bumped and the failure is not hidden.
+                throw "Module definition '$componentModuleKey' file was not found: $definitionPath"
             }
-            else {
-                $definitionJsonByKey[$componentModuleKey] = $null
-            }
+
+            $definitionJsonByKey[$componentModuleKey] = Read-JsonFile -Path $definitionPath
         }
 
         $definitionJson = $definitionJsonByKey[$componentModuleKey]
@@ -1061,7 +1253,7 @@ try {
     # Rather than duplicating the bump logic, the touched definitions are added to the normal
     # selection below, so they go through exactly the same code path as an explicit -ModuleKey.
     # Accumulate into a List and flatten once afterwards: appending with @(...) + ... rebuilds
-    # the whole selection array on every touched key, which is O(n²) when many definitions change.
+    # the whole selection array on every touched key, which is O(n^2) when many definitions change.
     $touchedSelection = [System.Collections.Generic.List[object]]::new()
     foreach ($moduleKey in $touchedModuleKeys) {
         if ($selectedModuleDefinitions | Where-Object { $_.moduleKey -eq $moduleKey }) {
@@ -1081,6 +1273,20 @@ try {
     # or an encoding-guard refusal cannot leave earlier definitions, widgets or the
     # manifest partially bumped. Version edits are ASCII-only, so the encoding
     # check on the current in-memory text holds for the text eventually written.
+    #
+    # The version contract is checked here as well: every selected target's
+    # existing version has to be one the platform can parse and order, and the
+    # result of every bump has to stay inside the supported range. A refusal
+    # here happens before the first write, so a rejected run leaves the
+    # manifest, the definitions and the widget packages byte for byte as they
+    # were.
+    $null = Assert-SelectedVersionTargets `
+        -Components $selectedComponents.ToArray() `
+        -ModuleDefinitions $selectedModuleDefinitions `
+        -Widgets $selectedWidgets `
+        -RepositoryVersion ([string](Get-JsonPropertyValue -Object $manifest -Name 'repositoryVersion')) `
+        -RepositoryVersionIsSelected ((-not $SkipRepositoryVersion) -and ($hasSelectedVersionTargets -or $RepositoryOnly))
+
     foreach ($moduleDefinition in $selectedModuleDefinitions) {
         $definitionKey = [string]$moduleDefinition.moduleKey
         $definitionPath = Resolve-FullPath -Path (Join-Path $repositoryRoot ([string]$moduleDefinition.path))
@@ -1119,6 +1325,22 @@ try {
         $null = Assert-JsonFileWritable -Path $manifestPath -FormattedJson (Get-JsonFileText -Value $manifest)
     }
 
+    # ---------------------------------------------------------------------
+    # Plan every write, confirm it once, then apply it.
+    #
+    # One real write has exactly ONE confirmation boundary. Save-JsonFile used
+    # to ask ShouldProcess a second time inside the caller's own ShouldProcess
+    # block, so -Confirm asked twice for ONE file, and a declined inner prompt
+    # left the version report claiming a write that never happened.
+    #
+    # The confirmations all happen before the first write, so a declined file
+    # means NOTHING is written. That keeps the version matrix consistent, which
+    # is the same invariant the pre-write validation above protects: a run that
+    # stops half way leaves a manifest, a module definition and a widget package
+    # that disagree about the same version.
+    # ---------------------------------------------------------------------
+    $plannedWrites = [System.Collections.Generic.List[object]]::new()
+
     # Persist any compatibleArtifacts changes made above.
     #
     # Definitions that are in the selection are deliberately NOT written here: the
@@ -1147,9 +1369,11 @@ try {
             continue
         }
 
-        if ($PSCmdlet.ShouldProcess($definitionPath, "Update compatibleArtifacts.maxVersion for module '$moduleKey'")) {
-            Save-JsonFile -Path $definitionPath -Value $definitionJson
-        }
+        $plannedWrites.Add([pscustomobject]@{
+            Path = $definitionPath
+            Value = $definitionJson
+            Action = "Update compatibleArtifacts.maxVersion for module '$moduleKey'"
+        })
     }
 
     $moduleVersionByKey = @{}
@@ -1172,9 +1396,11 @@ try {
                 $definitionJson = Read-JsonFile -Path $definitionPath
             }
             Set-JsonProperty -Object $definitionJson -Name 'definitionVersion' -Value $nextVersion
-            if ($PSCmdlet.ShouldProcess($definitionPath, "Set definitionVersion to $nextVersion")) {
-                Save-JsonFile -Path $definitionPath -Value $definitionJson
-            }
+            $plannedWrites.Add([pscustomobject]@{
+                Path = $definitionPath
+                Value = $definitionJson
+                Action = "Set definitionVersion to $nextVersion"
+            })
         }
 
         [void]$updates.Add([pscustomobject]@{
@@ -1223,7 +1449,11 @@ try {
         Set-WidgetFileEntryVersion -Manifest $manifest -WidgetEntry $widgetEntry -Version $nextVersion
 
         $widgetPath = Resolve-FullPath -Path (Join-Path $repositoryRoot ([string]$widgetEntry.Path))
-        Update-WidgetPackageFile -Path $widgetPath -Version $nextVersion
+        $plannedWrites.Add([pscustomobject]@{
+            Path = $widgetPath
+            Value = (Get-WidgetPackageFileContent -Path $widgetPath -Version $nextVersion)
+            Action = "Set dashboard widget packageVersion/widgetVersion to $nextVersion"
+        })
 
         [void]$updates.Add([pscustomobject]@{
             Item = 'dashboard-widget'
@@ -1233,12 +1463,59 @@ try {
         })
     }
 
-    if ($updates.Count -gt 0 -and $PSCmdlet.ShouldProcess($manifestPath, 'Update OMP component manifest versions')) {
-        Save-JsonFile -Path $manifestPath -Value $manifest
+    if ($updates.Count -gt 0) {
+        $plannedWrites.Add([pscustomobject]@{
+            Path = $manifestPath
+            Value = $manifest
+            Action = 'Update OMP component manifest versions'
+        })
+    }
+
+    # One confirmation per planned write. -WhatIf turns every ShouldProcess into
+    # a refusal and prints the plan; a declined confirmation refuses one file
+    # the same way, and is reported as a decline below instead of as a write.
+    $isPreview = [bool]$WhatIfPreference
+    $declinedWrites = [System.Collections.Generic.List[object]]::new()
+    foreach ($plannedWrite in $plannedWrites) {
+        if (-not $PSCmdlet.ShouldProcess($plannedWrite.Path, $plannedWrite.Action)) {
+            $declinedWrites.Add($plannedWrite)
+        }
+    }
+
+    if ($isPreview) {
+        # -WhatIf: the plan is printed, no file is written.
+    }
+    elseif ($declinedWrites.Count -gt 0) {
+        # A declined file means the whole bump is refused: writing the other
+        # files anyway would leave the manifest, the module definition and the
+        # widget package disagreeing about the same version.
+        foreach ($declinedWrite in $declinedWrites) {
+            Write-Error -Message ("Version update was declined for '{0}': {1}" -f $declinedWrite.Path, $declinedWrite.Action) -ErrorAction Continue
+        }
+
+        $exitCode = 1
+    }
+    else {
+        foreach ($plannedWrite in $plannedWrites) {
+            Save-JsonFile -Path $plannedWrite.Path -Value $plannedWrite.Value
+        }
     }
 
     Write-Host ''
-    if ($updates.Count -eq 0) {
+    if ($isPreview) {
+        if ($updates.Count -eq 0) {
+            Write-Host 'No versions were changed.'
+        }
+        else {
+            $updates | Format-Table -AutoSize
+        }
+
+        Write-Host 'WhatIf: no files were written.'
+    }
+    elseif ($declinedWrites.Count -gt 0) {
+        Write-Host 'No versions were changed: the confirmation was declined.'
+    }
+    elseif ($updates.Count -eq 0) {
         Write-Host 'No versions were changed.'
     }
     else {
