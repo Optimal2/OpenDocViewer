@@ -315,6 +315,25 @@ describe('ManualOverlayDialog contents tree', () => {
     expect(document.activeElement).toBe(last);
   });
 
+  it('retains supported media controls and leaves their internal Tab navigation native', async () => {
+    await openManual([
+      '<h2>Media</h2>',
+      '<audio id="manual-audio" controls tabindex="3" src="audio.wav"></audio>',
+      '<video id="manual-video" controls src="video.webm"></video>',
+    ].join(''));
+    const audio = content().querySelector('#manual-audio');
+    const video = content().querySelector('#manual-video');
+    expect(audio.controls).toBe(true);
+    expect(video.controls).toBe(true);
+    expect(audio.getAttribute('src')).toBe(new URL('audio.wav', new URL(requestedUrls[0], window.location.href)).href);
+    audio.focus();
+    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    act(() => { audio.dispatchEvent(event); });
+    // jsdom has no UA media controls or native Tab default; only Chromium proves the focus stops.
+    expect(event.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(audio);
+  });
+
   it('rewrites responsive srcset candidates against the resolved manual URL', async () => {
     const resolvedUrl = 'https://manual.example.test/help/site/manual.sv.html';
     vi.stubGlobal('fetch', async (url) => {
