@@ -359,3 +359,162 @@ test('documentation screenshot of the bundled manual', async ({ page }) => {
   await page.waitForTimeout(500);
   await page.screenshot({ path: 'docs/img/manual-overlay.png' });
 });
+
+for (const mediaOrder of ['default', 'positive-last', 'positive-first', 'positive-reversed']) {
+  test(`custom manual: native media controls retain their internal Tab stops (${mediaOrder})`, async ({ page, context }) => {
+    const wav = Buffer.alloc(44 + 32000);
+    wav.write('RIFF'); wav.writeUInt32LE(wav.length - 8, 4); wav.write('WAVEfmt ', 8);
+    wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(8000, 24); wav.writeUInt32LE(16000, 28); wav.writeUInt16LE(2, 32);
+    wav.writeUInt16LE(16, 34); wav.write('data', 36); wav.writeUInt32LE(32000, 40);
+    // This VP8 WebM is a locally generated canvas recording, with no external media or audio.
+    const webm = Buffer.from('GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQRChYECGFOAZwEAAAAAAAS7EU2bdLlNu4tTq4QVSalmU6yBbk27i1OrhBZUrmtTrIGTTbuLU6uEH0O2dVOsgdRNu4xTq4QcU7trU6yCBKnsrgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmoCrXsYMPQkBEiYREb8PnTYCGQ2hyb21lV0GGQ2hyb21lFlSua7yuuteBAXPFhx88h/E6k5KDgQFV7oEBhoVWX1ZQOOCdsIGguoFaU8CBAVWwkFWxgQFVuYECVbqBDVW7gQEfQ7Z1AQAAAAAAA8nngQCgQJShz4EAAADwBQCdASqgAFoAAAcIhYWImYSIASQQE61QH8AQNNCfBDVUmu4h1VJruIdVSa7iHVUmu4h1VJruIMD+5zD/+N24w34Lv/ILlhdcRgB1ocCmvu6BAaW5UAUAnQEqoABaAABHCIWFiJmEiAICAAYoDwh1VJruIdVSa7iHVUmu4h1VJruIdVSa7iG8AP7/uoMAoNihtYEAkQCRAwAAEAkgAMAAxb+gYAAArABWACsAFYAKwAVgAq8A/v0+Av/G7cYb8F3/kFywuuIwdaGbppnugQGllBECAAEQGAAYABhYL/QACICBAAAA+4EAoNihtYEA2QCRAwAAEAkgAMAAxb+gYAAArABWACsAFYAKwAVgAq8A/ucw//jduMN+C7/yC5YXXEYAdaGbppnugQGllBECAAEQEAAYABhYL/QACICBAAAA+4GRoNihtYEBOwCRAwAAEAkgAMAAxb+gYAAArABWACsAFYAKwAVgAq8A/v0+Av/G7cYb8F3/kFywuuIwdaGbppnugQGllBECAAEQCSAAwADCwX+gAEQECAAA+4HZoNmhtYEBpwCRAwAAEAkgAMAAxb+gYAAArABWACsAFYAKwAVgAq8A/ucw//jduMN+C7/yC5YXXEYAdaGbppnugQGllBECAAEQCSAAwADCwX+gAEQECAAA+4IBO6DZobWBAhMAkQMAABAJIADAAMW/oGAAAKwAVgArABWACsAFYAKvAP79PgL/xu3GG/Bd/5BcsLriMHWhm6aZ7oEBpZQRAgABEAkgAMAAwsF/oABEBAgAAPuCAaeg2aG1gQKAAJEDAAAQCSAAwADFv6BgAACsAFYAKwAVgArABWACrwD+5zD/+N24w34Lv/ILlhdcRgB1oZumme6BAaWUEQIAARAJIADAAMLBf6AARAQIAAD7ggIToNihtYEC6wCRAwAAEAkgAMAAxb+gYAAArABWACsAFYAKwAVgAq8A/v0+Av/G7cYb8F3/kFywuuIwdaGappjugQGlk/EBAAEQEBRgAGFgv9AAIgIEAAD7ggKAoNmhtYEDVQCRAwAAEAkgAMAAxb+gYAAArABWACsAFYAKwAVgAq8A/ucw//jduMN+C7/yC5YXXEYAdaGbppnugQGllBECAAEQCSAAwADCwX+gAEQECAAA+4IC66DZobWBA78AkQMAABAJIADAAMW/oGAAAKwAVgArABWACsAFYAKvAP79PgL/xu3GG/Bd/5BcsLriMHWhm6aZ7oEBpZQRAgABEAkgAMAAwsF/oABEBAgAAPuCA1UcU7trjbuLs4EAt4b3gQHxgdQ=', 'base64');
+    const serveMedia = async (target) => {
+      await target.route('**/focus-media.wav', route => route.fulfill({ contentType: 'audio/wav', body: wav }));
+      await target.route('**/focus-media.webm', route => route.fulfill({ contentType: 'video/webm', body: webm }));
+    };
+    await serveMedia(page);
+    const mediaTabIndex = (position) => mediaOrder === 'default' ? ''
+      : ` tabindex="${mediaOrder === 'positive-reversed' ? 5 - position : position + (mediaOrder === 'positive-last' ? 2 : 0)}"`;
+    const anchorTabIndex = mediaOrder === 'positive-first' ? 2 : 0;
+    const html = [
+      '<h1>Media keyboard order</h1><h2 id="media-heading">Media controls</h2>',
+      '<a id="zero-in-content" href="#zero-in-content">Zero in content</a>',
+      `<a id="positive-two" href="#positive-two" tabindex="${anchorTabIndex + 2}">Positive two</a>`,
+      `<a id="positive-one" href="#positive-one" tabindex="${anchorTabIndex + 1}">Positive one</a>`,
+      '<a id="before-media" href="#before-media">Before media</a>',
+      `<audio id="manual-audio" controls loop preload="auto" src="/focus-media.wav"${mediaTabIndex(1)}></audio>`,
+      `<video id="manual-video" controls preload="auto" width="320" height="180" src="/focus-media.webm"${mediaTabIndex(2)}></video>`,
+      '<a id="after-media" href="#after-media">After media</a>',
+    ].join('');
+    await page.route(url => /\/help\/site\/manual\.en\.html$/.test(url.pathname), route => route.fulfill({ contentType: 'text/html', body: html }));
+    await loadSession(page, { query: 'lng=en' });
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Accessibility.enable');
+    const snapshot = async (target, session) => ({
+      id: await target.evaluate(() => document.activeElement.id),
+      focused: (await session.send('Accessibility.getFullAXTree')).nodes
+        .filter(node => node.role?.value !== 'RootWebArea'
+          && node.properties?.some(property => property.name === 'focused' && property.value.value === true))
+        .map(node => ({ role: node.role?.value, name: node.name?.value })),
+    });
+    const waitForMedia = async (target) => {
+      await target.waitForFunction(() => [...document.querySelectorAll('audio, video')]
+        .every(node => node.readyState >= 2 || node.error));
+      expect(await target.locator('audio, video').evaluateAll(nodes => nodes.map(node => ({
+        controls: node.controls, loaded: node.readyState >= 2, error: node.error?.code || null,
+      })))).toEqual([
+        { controls: true, loaded: true, error: null },
+        { controls: true, loaded: true, error: null },
+      ]);
+    };
+    const close = page.locator('.odv-help-footer button');
+    const refresh = page.getByRole('button', { name: 'Reload manual from server' });
+    let native;
+    const trace = [];
+    try {
+      for (let opening = 0; opening < 2; opening += 1) {
+        await page.locator('button.help-button').click();
+        await page.getByRole('menuitem', { name: 'Manual', exact: true }).click();
+        await expect(page.locator('#manual-audio')).toBeVisible();
+        await waitForMedia(page);
+        const sanitized = await page.locator('.odv-manual-content').innerHTML();
+        expect(sanitized).toContain('<audio');
+        expect(sanitized).toContain('<video');
+        // The oracle is the very same product-sanitized fixture with no application key handler.
+        native = await context.newPage();
+        await serveMedia(native);
+        await native.route('**/native-media-fixture', route => route.fulfill({ contentType: 'text/html', body: sanitized }));
+        await native.goto('/native-media-fixture');
+        await waitForMedia(native);
+        const nativeCdp = await context.newCDPSession(native);
+        await nativeCdp.send('Accessibility.enable');
+        const oracle = {};
+        for (const id of ['manual-audio', 'manual-video']) {
+          await native.locator(`#${id}`).focus();
+          const forward = [];
+          // A finite bound detects a stuck native fixture; it never truncates a passing trace.
+          for (let step = 0; step < 20; step += 1) {
+            const state = await snapshot(native, nativeCdp);
+            if (state.id !== id) break;
+            forward.push(state);
+            await native.keyboard.press('Tab');
+          }
+          expect((await snapshot(native, nativeCdp)).id).not.toBe(id);
+          expect(forward.flatMap(state => state.focused)).toEqual(expect.arrayContaining([
+            { role: 'button', name: 'play' },
+            { role: 'button', name: 'show more media controls' },
+            { role: 'slider', name: id === 'manual-audio' ? 'audio time scrubber' : 'video time scrubber' },
+          ]));
+          expect(forward.flatMap(state => state.focused)).toEqual(expect.arrayContaining(id === 'manual-audio' ? [
+            { role: 'slider', name: 'volume' }, { role: 'button', name: 'mute' },
+          ] : [{ role: 'button', name: 'enter full screen' }]));
+          const reverse = [];
+          for (let step = 0; step < forward.length; step += 1) {
+            await native.keyboard.press('Shift+Tab');
+            reverse.push(await snapshot(native, nativeCdp));
+          }
+          expect(reverse).toEqual([...forward].reverse());
+          oracle[id] = forward;
+        }
+        trace.push({ opening, sanitized, oracle });
+        // Keyboard input and page focus must belong to the dialog tab, not the oracle tab.
+        await page.bringToFront();
+        expect(await page.evaluate(() => document.hasFocus())).toBe(true);
+        const mediaSequence = mediaOrder === 'positive-reversed'
+          ? ['manual-video', 'manual-audio'] : ['manual-audio', 'manual-video'];
+        const beforeMedia = mediaOrder === 'default' ? page.locator('#before-media')
+          : mediaOrder === 'positive-first' ? close : page.locator('#positive-two');
+        const afterMedia = mediaOrder === 'default' ? page.locator('#after-media')
+          : mediaOrder === 'positive-first' ? page.locator('#positive-one') : refresh;
+        await beforeMedia.focus();
+        await page.keyboard.press('Tab');
+        for (const id of mediaSequence) {
+          for (const state of oracle[id]) {
+            const actual = await snapshot(page, cdp);
+            trace.push({ opening, direction: 'forward', actual });
+            expect(actual).toEqual(state);
+            expect(await page.evaluate(() => document.querySelector('.odv-manual-dialog').contains(document.activeElement))).toBe(true);
+            await expect(page.locator('.odv-manual-content span[tabindex="-1"]')).toHaveCount(0);
+            if (id === 'manual-audio' && state.focused.some(node => node.name === 'play')) {
+              await page.keyboard.press('Space');
+              await expect(page.locator('#manual-audio')).toHaveJSProperty('paused', false);
+              await page.keyboard.press('Space');
+              await expect(page.locator('#manual-audio')).toHaveJSProperty('paused', true);
+            }
+            await page.keyboard.press('Tab');
+          }
+        }
+        await expect(afterMedia).toBeFocused();
+        await expect(page.locator('.odv-manual-content span[tabindex]')).toHaveCount(0);
+        await page.keyboard.press('Shift+Tab');
+        for (const id of [...mediaSequence].reverse()) {
+          for (const state of [...oracle[id]].reverse()) {
+            const actual = await snapshot(page, cdp);
+            trace.push({ opening, direction: 'reverse', actual });
+            expect(actual).toEqual(state);
+            expect(await page.evaluate(() => document.querySelector('.odv-manual-dialog').contains(document.activeElement))).toBe(true);
+            await page.keyboard.press('Shift+Tab');
+          }
+        }
+        trace.push({ opening, direction: 'reverse-exit', actual: await snapshot(page, cdp), documentHasFocus: await page.evaluate(() => document.hasFocus()) });
+        await expect(beforeMedia).toBeFocused();
+        await expect(page.locator('.odv-manual-content span[tabindex]')).toHaveCount(0);
+        // Native continuation from a programmatically focused heading still starts at its DOM position.
+        await page.locator('nav.odv-manual-toc a[href="#media-heading"]').click();
+        await expect(page.locator('#media-heading')).toHaveAttribute('tabindex', '-1');
+        await page.keyboard.press('Tab');
+        await expect(page.locator('#zero-in-content')).toBeFocused();
+        await page.keyboard.press('Escape');
+        await expect(page.locator('.odv-manual-dialog')).toHaveCount(0);
+        await expect(page.locator('button.help-button')).toBeFocused();
+        await native.close();
+        native = null;
+      }
+    } finally {
+      await test.info().attach(`media-focus-${mediaOrder}`, { body: JSON.stringify(trace, null, 2), contentType: 'application/json' });
+      await native?.close();
+      await cdp.detach();
+    }
+  });
+}
