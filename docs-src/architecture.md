@@ -183,6 +183,17 @@ the archived page image without adjustments.
   `cache: 'no-store'` and sanitizes it with DOMPurify before insertion; the candidate order
   (`help/site/` before `help/default/`, skipping an SPA-fallback app shell) lives in
   `src/utils/manualSources.js`
+- the manual dialog traps Tab and Shift+Tab while it is open, so focus cannot reach the page
+  behind the backdrop even though `aria-modal` declares it unavailable. The eligible sequence is
+  the browser's own: ordinary controls in sequential order, positive `tabindex` first in
+  ascending order, and inherited-disabled and hidden targets excluded. Controlled `audio[controls]`
+  and `video[controls]` hosts are part of that sequence, but the trap does not cancel the Tab
+  inside them: their UA controls (play, scrubber, volume, mute, full screen, "show more media
+  controls") stay native and reachable. A media host is entered through a temporary
+  `tabindex="-1"` starting point and left through a temporary same-index guard, so the browser
+  keeps ownership of the media focus scope in both directions. Both helpers are removed on the
+  next keydown, on pointer navigation, and when the dialog opens or closes. The media behavior is
+  proven in Chromium, not inferred from jsdom — see "Native verification" below
 - the manual overlay fills almost the whole viewport and shows a contents tree built at runtime
   from the sanitised manual's h2/h3 headings (`src/utils/manualContentsTree.js`); headings without
   an id get one derived from their text, so the manual files themselves never carry the tree.
@@ -200,6 +211,25 @@ the archived page image without adjustments.
   through a `CustomEvent` (same-origin parent) or `postMessage` (cross-origin parent, allowed
   origin only)
 - `PerformanceMonitor.jsx` is the opt-in performance HUD
+
+## Native verification
+
+Some of the viewer's behaviour has no jsdom equivalent: UA media controls, real layout, real
+focus order and CSS visibility. A Vitest run proves the JavaScript contract; it cannot prove what
+the browser does. The rule is therefore that a behaviour of this kind is only claimed when a
+Chromium run measured it, and the claim names the browser engine it was measured in.
+
+The manual dialog's media focus behaviour is the current case. jsdom has no UA media controls and
+no native Tab default, so the unit test
+(`src/components/DocumentToolbar/__tests__/ManualOverlayDialog.contents.test.js`) can only prove
+that the trap does not cancel the Tab inside a media host. The reachable stops themselves are
+proven by `tests/ui/manual-contents-tree.spec.mjs`, which drives real Chromium keyboard input and
+compares the observed focused accessibility state against an oracle built from the same
+product-sanitized fixture, forward and reverse, and asserts that focus stays inside the dialog.
+
+The measured status, the RED/GREEN pair and the limits of the claim are recorded in
+`docs/quality/github-fynd-ai-forslag-alla-repon-opendocviewer.md`. The cross-engine case is
+explicitly unmeasured: only Chromium was run, and no other engine is claimed.
 
 ## Logging boundaries
 
