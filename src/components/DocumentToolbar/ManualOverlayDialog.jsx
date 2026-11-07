@@ -26,7 +26,8 @@ import {
 } from '../../utils/manualContentsTree.js';
 
 const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
-const MANUAL_FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
+const MANUAL_MEDIA_SELECTOR = 'audio[controls], video[controls]';
+const MANUAL_FOCUSABLE_SELECTOR = `button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), ${MANUAL_MEDIA_SELECTOR}`;
 
 // Static loader keys let Vite create one lazy chunk per generated language without executing any
 // script contained in the source HTML. Only these two generated modules exist; other UI languages
@@ -777,6 +778,7 @@ function replaceUrlFragment(fragment) {
 export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = undefined }) {
   const { t, i18n } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const mediaTabRef = useRef(null);
   const contentRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const searchInputRef = useRef(/** @type {(HTMLInputElement|null)} */ (null));
   const searchQueryRef = useRef('');
@@ -954,6 +956,8 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
   // field or a manual heading the reader just navigated to.
   // On close the fragment a lightbox link set is put back and focus returns to the opener.
   useEffect(() => {
+    mediaTabRef.current?.remove();
+    mediaTabRef.current = null;
     if (isOpen) {
       wasOpenRef.current = true;
       dialogRef.current?.focus?.();
@@ -1254,6 +1258,8 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
 
   /** Keep forward and reverse Tab navigation inside the open modal dialog. */
   const handleManualTabTrap = (event) => {
+    mediaTabRef.current?.remove();
+    mediaTabRef.current = null;
     if (String(event?.key || '') !== 'Tab') return;
     const dialogNode = dialogRef.current;
     if (!dialogNode) return;
@@ -1293,10 +1299,42 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
       // Move explicitly through the sequence: after a positive target the browser can otherwise
       // continue in DOM order to a zero target outside the dialog instead of the first zero here.
       // A programmatically focused tabindex=-1 heading keeps the browser's native starting point.
-      event.preventDefault();
       const delta = event.shiftKey ? -1 : 1;
       const nextIndex = (activeIndex + delta + focusable.length) % focusable.length;
-      focusable[nextIndex].focus();
+      const next = focusable[nextIndex];
+      if (active.matches(MANUAL_MEDIA_SELECTOR)) {
+        // The host stays document.activeElement while Tab visits its UA shadow controls.
+        // A same-index guard catches host exit before the browser can leave the document.
+        // Consecutive media hosts keep their native focus-scope ordering without a guard.
+        if (!next.matches(MANUAL_MEDIA_SELECTOR)) {
+          const end = document.createElement('span');
+          end.tabIndex = active.tabIndex;
+          active.insertAdjacentElement(event.shiftKey ? 'beforebegin' : 'afterend', end);
+          end.addEventListener('focus', () => {
+            end.remove();
+            mediaTabRef.current = null;
+            next.focus();
+          }, { once: true });
+          mediaTabRef.current = end;
+        }
+        return;
+      }
+      if (next.matches(MANUAL_MEDIA_SELECTOR)) {
+        // A temporary native starting point also enters the last UA control in reverse, even
+        // when positive tabindex order differs from DOM order. Remove it on native focus exit.
+        const start = document.createElement('span');
+        start.tabIndex = -1;
+        next.insertAdjacentElement(event.shiftKey ? 'afterend' : 'beforebegin', start);
+        start.addEventListener('blur', () => {
+          start.remove();
+          mediaTabRef.current = null;
+        }, { once: true });
+        mediaTabRef.current = start;
+        start.focus({ preventScroll: true });
+        return;
+      }
+      event.preventDefault();
+      next.focus();
     }
   };
 
@@ -1342,6 +1380,10 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
       aria-modal="true"
       aria-labelledby={MANUAL_TITLE_ID}
       data-odv-shortcuts="off"
+      onMouseDownCapture={() => {
+        mediaTabRef.current?.remove();
+        mediaTabRef.current = null;
+      }}
       onKeyDownCapture={(event) => {
         if (String(event?.key || '') !== 'Escape') return;
         event.preventDefault();
