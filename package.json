@@ -125,6 +125,7 @@
     "mdn-data": "^2.37.2",
     "media-typer": "^2.0.0",
     "mime-db": "^1.54.0",
+    "mime-types": "^3.0.2",
     "minimatch": "^11.0.4",
     "mkdirp": "^3.0.1",
     "ms": "^2.1.3",
