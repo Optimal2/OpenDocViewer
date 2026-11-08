@@ -183,17 +183,23 @@ the archived page image without adjustments.
   `cache: 'no-store'` and sanitizes it with DOMPurify before insertion; the candidate order
   (`help/site/` before `help/default/`, skipping an SPA-fallback app shell) lives in
   `src/utils/manualSources.js`
-- the manual dialog traps Tab and Shift+Tab while it is open, so focus cannot reach the page
-  behind the backdrop even though `aria-modal` declares it unavailable. The eligible sequence is
-  the browser's own: ordinary controls in sequential order, positive `tabindex` first in
-  ascending order, and inherited-disabled and hidden targets excluded. Controlled `audio[controls]`
-  and `video[controls]` hosts are part of that sequence, but the trap does not cancel the Tab
-  inside them: their UA controls (play, scrubber, volume, mute, full screen, "show more media
-  controls") stay native and reachable. A media host is entered through a temporary
+- the manual dialog traps Tab and Shift+Tab while it is open. In the tested Chromium sequences,
+  focus stayed inside the dialog even though `aria-modal` declares the page behind the backdrop
+  unavailable; this is a measured result, not an unconditional containment guarantee. The eligible
+  sequence is the browser's own: ordinary controls in sequential order, positive `tabindex` first
+  in ascending order, and inherited-disabled and hidden targets excluded. Controlled
+  `audio[controls]` and `video[controls]` hosts are part of that sequence, but the trap does not
+  cancel the Tab inside them: their UA controls (play, scrubber, volume, mute, full screen, "show
+  more media controls") stay native and reachable. A media host is entered through a temporary
   `tabindex="-1"` starting point and left through a temporary same-index guard, so the browser
   keeps ownership of the media focus scope in both directions. Both helpers are removed on the
-  next keydown, on pointer navigation, and when the dialog opens or closes. The media behavior is
-  proven in Chromium, not inferred from jsdom — see "Native verification" below
+  next keydown, on pointer navigation, and when the dialog opens or closes. Known boundaries are
+  focus already on `body` (a body-targeted Tab does not bubble through the dialog's `onKeyDown`
+  and is not recaptured), a positive-`tabindex` target between consecutive media hosts (native
+  focus ownership is retained and containment is not guaranteed), and an authored media host with
+  `tabindex="-1"` (excluded from the eligible sequence and skipped, which is pre-existing
+  behavior). The media behavior is proven in Chromium, not inferred from jsdom — see "Native
+  verification" below
 - the manual overlay fills almost the whole viewport and shows a contents tree built at runtime
   from the sanitised manual's h2/h3 headings (`src/utils/manualContentsTree.js`); headings without
   an id get one derived from their text, so the manual files themselves never carry the tree.
