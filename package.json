@@ -105,12 +105,15 @@
   },
   "overrides": {
     "@keyv/bigmap": "^6.1.0",
+    "ansi-styles": "^7.0.0",
     "argparse": "^3.0.4",
     "asynckit": "^0.5.0",
     "balanced-match": "^5.0.0",
     "body-parser": "^2.4.0",
     "catharsis": "^0.11.0",
+    "chalk": "^6.0.1",
     "debug": "^4.4.3",
+    "emoji-regex": "^11.0.0",
     "entities": "^9.0.0",
     "eslint-visitor-keys": "^5.0.1",
     "fast-levenshtein": "^3.0.0",
@@ -135,7 +138,9 @@
     "regenerator-runtime": "^0.14.1",
     "safe-buffer": "^5.2.1",
     "shell-quote": "^1.12.0",
+    "supports-color": "^11.0.0",
     "why-is-node-running": "^3.2.3",
+    "wrap-ansi": "^10.0.2",
     "yargs": "^18.2.0"
   }
 }
