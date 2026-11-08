@@ -17,13 +17,26 @@
  */
 
 /**
+ * @param {string} property the CSS property to canonicalise
+ * @param {string} value a non-empty CSS value
+ * @returns {string} the value as the DOM stores it
+ */
+function canonicalCssValue(property, value) {
+  const probe = document.createElement('div');
+  probe.style[property] = value;
+  const canonicalValue = probe.style[property];
+  if (value !== '' && canonicalValue === '') {
+    throw new Error(`CSS ${property} did not serialise the non-empty value ${JSON.stringify(value)}`);
+  }
+  return canonicalValue;
+}
+
+/**
  * @param {string} value a `clip-path` value, e.g. `inset(50% 0% 0% 0%)`
  * @returns {string} the value as the DOM stores it
  */
 export function canonicalClipPath(value) {
-  const probe = document.createElement('div');
-  probe.style.clipPath = value;
-  return probe.style.clipPath;
+  return canonicalCssValue('clipPath', value);
 }
 
 /**
@@ -31,7 +44,5 @@ export function canonicalClipPath(value) {
  * @returns {string} the value as the DOM stores it
  */
 export function canonicalTransformOrigin(value) {
-  const probe = document.createElement('div');
-  probe.style.transformOrigin = value;
-  return probe.style.transformOrigin;
+  return canonicalCssValue('transformOrigin', value);
 }
