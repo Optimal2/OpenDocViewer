@@ -120,6 +120,8 @@
     "eslint-visitor-keys": "^5.0.1",
     "fast-levenshtein": "^3.0.0",
     "flatted": "^3.4.2",
+    "hermes-estree": "^0.37.0",
+    "hermes-parser": "^0.37.0",
     "ignore": "^7.0.14",
     "ipaddr.js": "^2.5.0",
     "js2xmlparser": "^5.0.0",
@@ -147,6 +149,7 @@
     "which": "^7.0.0",
     "why-is-node-running": "^3.2.3",
     "wrap-ansi": "^10.0.2",
-    "yargs": "^18.2.0"
+    "yargs": "^18.2.0",
+    "zod-validation-error": "^5.0.0"
   }
 }
