@@ -131,12 +131,30 @@ export async function createBoundaryFixtures() {
   }
   const signingTimeAttr = (...values) => new pkijs.Attribute({ type: '1.2.840.113549.1.9.5', values });
   const time = (iso) => new asn1js.GeneralizedTime({ valueDate: new Date(iso) });
+  /**
+   * Keep the attribute order the fixture chose in the signed bytes. pkijs 4.0.1
+   * encodes signed attributes as a DER SET OF (RFC 5652 section 5.4) and sorts
+   * them, which would silently swap the two signingTime attributes and hide
+   * which one the viewer picks. Encoding the set here and keeping the bytes in
+   * `encodedValue` makes pkijs sign exactly this order.
+   */
+  const pinAttributeOrder = (signedAttrs, attrs) => {
+    const encoded = new asn1js.Constructed({
+      idBlock: { tagClass: 3, tagNumber: 0 },
+      value: attrs.map((attr) => attr.toSchema()),
+    }).toBER(false);
+    const view = new Uint8Array(encoded);
+    view[0] = 49; // SET OF tag: the bytes a CMS signature covers (RFC 5652 section 5.4)
+    signedAttrs.encodedValue = view.buffer;
+  };
   /** Insert extra signingTime attributes before or after the builder's own (2026-03-05T12:30:00Z). */
   const withSigningTimes = (before, after = []) => ({ configure(sd) {
-    const attrs = sd.signerInfos[0].signedAttrs.attributes;
+    const signedAttrs = sd.signerInfos[0].signedAttrs;
+    const attrs = signedAttrs.attributes;
     const at = attrs.findIndex((attr) => attr.type === '1.2.840.113549.1.9.5');
     attrs.splice(at, 0, ...before);
     attrs.splice(at + before.length + 1, 0, ...after);
+    pinAttributeOrder(signedAttrs, attrs);
   } });
   // The builder's signingTime attribute replaced by `attr` (null removes it).
   const replaceSigningTime = (attr) => ({ configure(sd) {

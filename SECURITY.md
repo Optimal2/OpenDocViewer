@@ -29,6 +29,21 @@ it when OCR is enabled; all header and meta policies are enforced together. See
 [runtime configuration](docs-src/runtime-configuration.md#csp-for-ocr).
 This is an OMP artifact update, not a new official release.
 
+## Unreleased dependency baseline update (2026-11-08)
+
+The development baseline moves every npm package that was behind by a patch or minor gap
+to the latest release on its own line, and raises the transitive `overrides` floors for
+asynckit, body-parser, catharsis, flatted, linkify-it, lodash, mdn-data, mime-db,
+minimatch, ms, path-to-regexp, picomatch, regenerator-runtime, safe-buffer,
+shell-quote, why-is-node-running and yargs. The pinned PDF.js line moves from 6.4.299 to
+6.5.438, with annotation and signature rendering still locked by the Vitest and
+Chromium regression tests, and pkijs moves from 4.0.0 to 4.0.1. pkijs 4.0.1 encodes the
+signed CMS attributes as a DER SET OF and sorts them (RFC 5652 section 5.4); the viewer
+is unchanged and still uses the first `signingTime` attribute in the order the signer
+encoded, and the signature fixtures now encode the attribute set themselves so the
+pinned order is the signer's own and not a canonical one. `npm audit` reports no
+advisories. This is an OMP artifact update, not a new official release.
+
 ## Recent release context
 
 The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.11.0 is supported.

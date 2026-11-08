@@ -1,12 +1,14 @@
 // File: tests/ui/signature-appearance.spec.mjs
 /**
- * Pixel-level regression lock for pdfjs 6.4 annotation rendering (campaign
+ * Pixel-level regression lock for pdfjs annotation rendering (pdfjs-dist
+ * 6.5.438; the lock was introduced in campaign
  * opendocviewer-pdfjs-6-4-renderingsregression).
  *
  * The viewer rasterizes PDF pages through `page.render({ canvasContext, viewport })`
  * without an explicit annotationMode, so pdfjs' default (AnnotationMode.ENABLE)
  * decides whether signature appearances are painted into the page image. pdfjs
- * 6.4 changed annotation rendering; these specs prove, in a real browser, that
+ * 6.4 changed annotation rendering and the pinned line is now 6.5.438; these
+ * specs prove, in a real browser, that
  *
  *   - a signature widget WITH an /AP appearance stream (visible signature) is
  *     painted into the main page image and into the thumbnail, and

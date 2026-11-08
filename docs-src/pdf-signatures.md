@@ -189,6 +189,9 @@ attributes (RFC 5652 allows one) or several values in one, the first in encoded 
 A value without a usable time (no value, or a string that is not a date) is ignored and the
 next source is used; a string that does read as a date is used as that date. All of these
 are signed by the signer, so they carry the same backdating caveat as a regular attribute.
+The regression fixtures encode the signed attribute set themselves, because pkijs 4.0.1
+encodes it as a DER SET OF and sorts it, so the pinned "first in encoded order" is the
+order the signer put in the file and not a canonical order.
 
 Unless the source is a verified timestamp, the dialog states as neutral information that the
 signing time is the signer's own claim. This is the residual backdating risk: a signer can
@@ -1048,10 +1051,10 @@ regenerated per run, and the generator CLI (`node
 scripts/generate-signature-fixtures.mjs --out <dir>`) reproduces any fixture on demand for
 manual inspection.
 
-### PDF.js 6.4 rendering regression checks
+### PDF.js 6.5 rendering regression checks
 
 Campaign `opendocviewer-pdfjs-6-4-renderingsregression` checks the installed,
-lockfile-resolved PDF.js **6.4.299**; it does not upgrade the dependency again.
+lockfile-resolved PDF.js; the pinned line is now **6.5.438**.
 `src/utils/__tests__/pdfjsAnnotationRendering.test.js` uses the real PDF.js parser
 and operator lists, including signature appearances, text widgets, checked checkbox
 appearance selection, ordinary square annotations, and Hidden/NoView filtering.

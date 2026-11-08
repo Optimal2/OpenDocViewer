@@ -1,5 +1,6 @@
 /**
- * Regression lock for the pdfjs-dist 6.4 annotation contract (campaign
+ * Regression lock for the pdfjs-dist annotation contract (pdfjs-dist 6.5.438;
+ * the lock was introduced in campaign
  * opendocviewer-pdfjs-6-4-renderingsregression).
  *
  * The viewer renders PDF pages with `page.render({ canvasContext, viewport })`
@@ -7,8 +8,8 @@
  * (AnnotationMode.ENABLE) decides whether signature appearances and other
  * widget annotations are painted into the page raster. pdfjs 6.4 touched
  * annotation rendering, which is the same surface the Level-1/Level-2
- * signature display relies on. These tests pin, against the REAL pdfjs build
- * and real signed fixtures:
+ * signature display relies on, and the pinned line is now 6.5.438. These tests
+ * pin, against the REAL pdfjs build and real signed fixtures:
  *
  *   1. the pdfjs version under test (the lock is meaningless on another line);
  *   2. the annotation contract for a signature widget WITH an appearance
@@ -50,9 +51,9 @@ async function getDisplayAnnotations(bytes) {
   }
 }
 
-describe('pdfjs 6.4 annotation contract', () => {
-  it('runs against the locked pdfjs 6.4.299 build', () => {
-    expect(pdfjs.version).toBe('6.4.299');
+describe('pdfjs 6.5 annotation contract', () => {
+  it('runs against the locked pdfjs 6.5.438 build', () => {
+    expect(pdfjs.version).toBe('6.5.438');
   });
 
   it('exposes the annotation modes used by the rendering contract', () => {
