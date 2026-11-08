@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8941. JSDoc symbol count: 152.
+File count: 21. Line count: 7593. JSDoc symbol count: 112.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -94,26 +94,18 @@ Symbols:
 
 ## src/components/DocumentToolbar/ManualOverlayDialog.jsx
 
-Manual overlay that loads simple external HTML fragments from the public help folder.
+Manual overlay: modal dialog chrome \(title bar, reload and close buttons, focus trap, Escape and backdrop handling\) around the shared \{@link ManualView\}, which loads, filters, searches and navigates the manual.
 
 Exports: `ManualOverlayDialog`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/utils/manualSources.js`, `src/utils/standardManual.js`, `src/utils/manualContentsTree.js`, `src/generated/standard-manual/manual.sv.js`, `src/generated/standard-manual/manual.en.js`
+Local imports: `src/components/Manual/ManualView.jsx`
 
 Symbols:
 
-- `absoluteManualUrl` (function) - No description.
-- `copyManualConfig` (function) - Copy only settings used by the selected source.
-- `loadStandardManual` (function) - Load the preferred generated standard manual.
-- `loadAutoManual` (function) - Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.
-- `isRewritableRelativeUrl` (function) - No description.
-- `rewriteManualSrcset` (function) - Rewrite the URL in each srcset candidate while retaining its width or density descriptor.
-- `sanitizeManualHtml` (function) - No description.
-- `rewriteManualHtml` (function) - No description.
-- `appendManualRefreshToken` (function) - No description.
-- `removeManualRefreshToken` (function) - No description.
-- `MANUAL_SEARCH_MIN_LENGTH` (constant) - Minimum query length before the manual search runs.
-- `MANUAL_SEARCH_DEBOUNCE_MS` (constant) - Debounce delay before a typed query is applied to the rendered manual text.
+- `MANUAL_TITLE_ID` (constant) - Id of the dialog title.
+- `MANUAL_DIALOG_IDS` (constant) - Ids the dialog renders around the manual view.
+- `module.exports` (function) - No description.
+- `ManualOverlayDialog~handleManualTabTrap` (function) - Keep forward and reverse Tab navigation inside the open modal dialog.
 
 ## src/components/DocumentToolbar/OcrSearchBar.jsx
 

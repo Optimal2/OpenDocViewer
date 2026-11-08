@@ -231,50 +231,10 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:66</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:93</code> |  |
 | <code>resolveLanguageLabel</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:28</code> |  |
-| <code>absoluteManualUrl</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:44</code> |  |
-| <code>appendManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:273</code> |  |
-| <code>applyCustomHighlight</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:471</code> | Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all. |
-| <code>applyMarkFallback</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:525</code> | Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &amp;lt;mark&amp;gt; carrying its hit index. |
-| <code>canUseCustomHighlight</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:451</code> |  |
-| <code>captureScrollPositions</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:733</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
-| <code>collectManualTextMatches</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:408</code> | Find every non-overlapping occurrence of the query in the rendered manual text. |
-| <code>copyManualConfig</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:60</code> | Copy only settings used by the selected source. |
-| <code>createManualSearchFolder</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:338</code> | Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units. |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:778</code> |  |
-| <code>findManualElementById</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:692</code> |  |
-| <code>foldManualSearchText</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:377</code> | Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from. |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:982</code> |  |
-| <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:1260</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
-| <code>isHiddenInManual</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:715</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
-| <code>isRewritableRelativeUrl</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:145</code> |  |
-| <code>loadAutoManual</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:121</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
-| <code>loadStandardManual</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:85</code> | Load the preferred generated standard manual. |
-| <code>MANUAL_CONTENTS_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:672</code> | Id of the contents tree; the narrow-window toggle points at it with aria-controls. |
-| <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:684</code> | Ids the dialog renders around the manual. |
-| <code>MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:320</code> | Name of the CSS Custom Highlight covering only the current manual search hit. |
-| <code>MANUAL_SEARCH_DEBOUNCE_MS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:310</code> | Debounce delay before a typed query is applied to the rendered manual text. |
-| <code>MANUAL_SEARCH_HIGHLIGHT_NAME</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:315</code> | Name of the shared CSS Custom Highlight covering every manual search hit. |
-| <code>MANUAL_SEARCH_INPUT_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:675</code> | Id of the manual search field. |
-| <code>MANUAL_SEARCH_MARK_ATTRIBUTE</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:327</code> | Attribute marking fallback &amp;lt;mark&amp;gt; wrappers with their hit index. |
-| <code>MANUAL_SEARCH_MIN_LENGTH</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:305</code> | Minimum query length before the manual search runs. |
-| <code>MANUAL_SECTION_ACTIVE_LINE</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:636</code> | Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read. |
-| <code>MANUAL_SECTION_SCROLL_GAP</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:639</code> | Gap in pixels kept above a heading when the content pane scrolls to it. |
-| <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:678</code> | Id of the dialog title. |
-| <code>ManualOverlayDialog~navigateToManualTarget</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:883</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
-| <code>openDetailsAncestors</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:647</code> | Open collapsed &amp;lt;details&amp;gt; ancestors so a target inside them can be shown. |
-| <code>ManualOverlayDialog~pinSectionFor</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:837</code> | Make the section holding target current and keep it current until the reader scrolls. |
-| <code>removeManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:289</code> |  |
-| <code>removeMarkFallback</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:586</code> | Unwrap fallback marks and merge the split text nodes back together. |
-| <code>ManualOverlayDialog~renderContentsLink</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:1349</code> |  |
-| <code>replaceUrlFragment</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:761</code> | Replace the URL fragment without adding a history entry. |
-| <code>ManualOverlayDialog~restoreViewerFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:862</code> | Put back the URL fragment the viewer had before the manual set one. |
-| <code>revealManualMatch</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:608</code> | Open collapsed &amp;lt;details&amp;gt; ancestors of the hit and scroll it into the dialog scroll container. |
-| <code>rewriteManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:227</code> |  |
-| <code>rewriteManualSrcset</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:164</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
-| <code>sanitizeManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:213</code> |  |
-| <code>scrollPaneToTarget</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:664</code> | Scroll only the given pane so the target sits at its top. |
-| <code>setCurrentMark</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:567</code> |  |
-| <code>ManualOverlayDialog~setManualFragment</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:851</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the dialog or the page behind... |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:36</code> |  |
+| <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:67</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
+| <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:26</code> | Ids the dialog renders around the manual view. |
+| <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:20</code> | Id of the dialog title. |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:59</code> |  |
 | <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:239</code> |  |
 | <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:276</code> |  |
@@ -521,6 +481,50 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
+| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:33</code> |  |
+| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:262</code> |  |
+| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:49</code> | Copy only settings used by the selected source. |
+| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:134</code> |  |
+| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:110</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
+| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:306</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
+| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:74</code> | Load the preferred generated standard manual. |
+| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:278</code> |  |
+| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:216</code> |  |
+| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:153</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
+| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:202</code> |  |
+| <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:92</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
+| <code>findManualElementById</code> | function | <code>src/components/Manual/manualNavigation.js:51</code> |  |
+| <code>isHiddenInManual</code> | function | <code>src/components/Manual/manualNavigation.js:74</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
+| <code>MANUAL_SECTION_ACTIVE_LINE</code> | constant | <code>src/components/Manual/manualNavigation.js:10</code> | Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read. |
+| <code>MANUAL_SECTION_SCROLL_GAP</code> | constant | <code>src/components/Manual/manualNavigation.js:13</code> | Gap in pixels kept above a heading when the content pane scrolls to it. |
+| <code>openDetailsAncestors</code> | function | <code>src/components/Manual/manualNavigation.js:21</code> | Open collapsed &amp;lt;details&amp;gt; ancestors so a target inside them can be shown. |
+| <code>replaceUrlFragment</code> | function | <code>src/components/Manual/manualNavigation.js:120</code> | Replace the URL fragment without adding a history entry. |
+| <code>scrollPaneToTarget</code> | function | <code>src/components/Manual/manualNavigation.js:38</code> | Scroll only the given pane so the target sits at its top. |
+| <code>applyCustomHighlight</code> | function | <code>src/components/Manual/manualSearch.js:177</code> | Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all. |
+| <code>applyMarkFallback</code> | function | <code>src/components/Manual/manualSearch.js:231</code> | Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &amp;lt;mark&amp;gt; carrying its hit index. |
+| <code>canUseCustomHighlight</code> | function | <code>src/components/Manual/manualSearch.js:157</code> |  |
+| <code>collectManualTextMatches</code> | function | <code>src/components/Manual/manualSearch.js:114</code> | Find every non-overlapping occurrence of the query in the rendered manual text. |
+| <code>createManualSearchFolder</code> | function | <code>src/components/Manual/manualSearch.js:44</code> | Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units. |
+| <code>foldManualSearchText</code> | function | <code>src/components/Manual/manualSearch.js:83</code> | Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from. |
+| <code>MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME</code> | constant | <code>src/components/Manual/manualSearch.js:26</code> | Name of the CSS Custom Highlight covering only the current manual search hit. |
+| <code>MANUAL_SEARCH_DEBOUNCE_MS</code> | constant | <code>src/components/Manual/manualSearch.js:16</code> | Debounce delay before a typed query is applied to the rendered manual text. |
+| <code>MANUAL_SEARCH_HIGHLIGHT_NAME</code> | constant | <code>src/components/Manual/manualSearch.js:21</code> | Name of the shared CSS Custom Highlight covering every manual search hit. |
+| <code>MANUAL_SEARCH_MARK_ATTRIBUTE</code> | constant | <code>src/components/Manual/manualSearch.js:33</code> | Attribute marking fallback &amp;lt;mark&amp;gt; wrappers with their hit index. |
+| <code>MANUAL_SEARCH_MIN_LENGTH</code> | constant | <code>src/components/Manual/manualSearch.js:11</code> | Minimum query length before the manual search runs. |
+| <code>removeMarkFallback</code> | function | <code>src/components/Manual/manualSearch.js:292</code> | Unwrap fallback marks and merge the split text nodes back together. |
+| <code>revealManualMatch</code> | function | <code>src/components/Manual/manualSearch.js:314</code> | Open collapsed &amp;lt;details&amp;gt; ancestors of the hit and scroll it into the dialog scroll container. |
+| <code>setCurrentMark</code> | function | <code>src/components/Manual/manualSearch.js:273</code> |  |
+| <code>module.exports</code> | function | <code>src/components/Manual/ManualView.jsx:96</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/Manual/ManualView.jsx:288</code> |  |
+| <code>MANUAL_CONTENTS_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:51</code> | Id of the contents tree; the narrow-window toggle points at it with aria-controls. |
+| <code>MANUAL_SEARCH_INPUT_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:54</code> | Id of the manual search field. |
+| <code>ManualDocumentState</code> | typedef | <code>src/components/Manual/ManualView.jsx:56</code> | State of the loaded manual document as reported to the host. |
+| <code>ManualView~navigateToManualTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:212</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
+| <code>normalizeSectionId</code> | function | <code>src/components/Manual/ManualView.jsx:70</code> |  |
+| <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:166</code> | Make the section holding target current and keep it current until the reader scrolls. |
+| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:571</code> |  |
+| <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:191</code> | Put back the URL fragment the page had before the manual set one. |
+| <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:180</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |
 | <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:40</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:38</code> | Class of a word inside a match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:36</code> | Class of a word that the current selection touches. |

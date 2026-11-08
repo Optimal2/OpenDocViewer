@@ -829,6 +829,10 @@
     "contentsLabel": "Contents of this page",
     "contentsToggle": "Contents",
     "contentsHits": ", matches in this section: {count}",
+    "openInNewTab": "Open in new tab",
+    "openInNewTabTitle": "Open the manual in a new browser tab",
+    "standalonePageTitle": "OpenDocViewer – Manual",
+    "manualDisabled": "The manual is not available in this installation.",
     "menu": {
       "manual": "Manual",
       "about": "About OpenDocViewer"

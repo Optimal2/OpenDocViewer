@@ -6275,267 +6275,13 @@
     "examples": 0
   },
   {
-    "id": "absoluteManualUrl",
-    "name": "absoluteManualUrl",
-    "longname": "absoluteManualUrl",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 44,
-    "description": "",
-    "params": [
-      {
-        "name": "candidate",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": "Absolute URL used to resolve manual-relative images and other assets."
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "appendManualRefreshToken",
-    "name": "appendManualRefreshToken",
-    "longname": "appendManualRefreshToken",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 273,
-    "description": "",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "refreshToken",
-        "type": "number",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "applyCustomHighlight",
-    "name": "applyCustomHighlight",
-    "longname": "applyCustomHighlight",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 471,
-    "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
-    "params": [
-      {
-        "name": "matches",
-        "type": "Array.<{node: Text, start: number, end: number}>",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "currentIndex",
-        "type": "number",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "applyMarkFallback",
-    "name": "applyMarkFallback",
-    "longname": "applyMarkFallback",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 525,
-    "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
-    "params": [
-      {
-        "name": "container",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      },
-      {
-        "name": "matches",
-        "type": "Array.<{node: Text, start: number, end: number}>",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "canUseCustomHighlight",
-    "name": "canUseCustomHighlight",
-    "longname": "canUseCustomHighlight",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 451,
-    "description": "",
-    "params": [],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": "True when the CSS Custom Highlight API can be used."
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "captureScrollPositions",
-    "name": "captureScrollPositions",
-    "longname": "captureScrollPositions",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 733,
-    "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
-    "params": [
-      {
-        "name": "from",
-        "type": "Element|null",
-        "optional": false,
-        "description": "Innermost element whose scroll containers are recorded."
-      }
-    ],
-    "returns": [
-      {
-        "type": "function",
-        "description": "Restores the recorded positions."
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "collectManualTextMatches",
-    "name": "collectManualTextMatches",
-    "longname": "collectManualTextMatches",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 408,
-    "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
-    "params": [
-      {
-        "name": "root",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      },
-      {
-        "name": "query",
-        "type": "string",
-        "optional": false,
-        "description": "Already trimmed search text."
-      },
-      {
-        "name": "language",
-        "type": "string",
-        "optional": false,
-        "description": "BCP-47 language tag used for case folding."
-      }
-    ],
-    "returns": [
-      {
-        "type": "Array.<{node: Text, start: number, end: number}>",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "copyManualConfig",
-    "name": "copyManualConfig",
-    "longname": "copyManualConfig",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 60,
-    "description": "Copy only settings used by the selected source.",
-    "params": [
-      {
-        "name": "manualConfig",
-        "type": "Object",
-        "optional": true,
-        "description": "Runtime config help.manual block."
-      },
-      {
-        "name": "sourceMode",
-        "type": "'auto'|'standard'",
-        "optional": false,
-        "description": "Resolved source mode."
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object",
-        "description": "Safe internal configuration."
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "createManualSearchFolder",
-    "name": "createManualSearchFolder",
-    "longname": "createManualSearchFolder",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 338,
-    "description": "Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.",
-    "params": [
-      {
-        "name": "language",
-        "type": "string",
-        "optional": false,
-        "description": "BCP-47 language tag, e.g. sv ."
-      }
-    ],
-    "returns": [
-      {
-        "type": "function",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "module.exports",
     "name": "exports",
     "longname": "module.exports",
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 778,
+    "line": 36,
     "description": "",
     "params": [
       {
@@ -6572,251 +6318,14 @@
     "examples": 0
   },
   {
-    "id": "findManualElementById",
-    "name": "findManualElementById",
-    "longname": "findManualElementById",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 692,
-    "description": "",
-    "params": [
-      {
-        "name": "container",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      },
-      {
-        "name": "id",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Element|null",
-        "description": "Element in the manual with that id. Scoped to the manual, so an id the viewer page also uses still resolves to the manual's own element."
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "foldManualSearchText",
-    "name": "foldManualSearchText",
-    "longname": "foldManualSearchText",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 377,
-    "description": "Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from.",
-    "params": [
-      {
-        "name": "text",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "fold",
-        "type": "function",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object",
-        "description": "sourceStart / sourceEnd are indexed by folded code unit; foldedStartAt is indexed by original character-start offset (and text.length )."
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "<anonymous>~handleEscape",
-    "name": "handleEscape",
-    "longname": "<anonymous>~handleEscape",
-    "kind": "function",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 982,
-    "description": "",
-    "params": [
-      {
-        "name": "event",
-        "type": "KeyboardEvent",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "ManualOverlayDialog~handleManualTabTrap",
     "name": "handleManualTabTrap",
     "longname": "ManualOverlayDialog~handleManualTabTrap",
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 1260,
+    "line": 67,
     "description": "Keep forward and reverse Tab navigation inside the open modal dialog.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "isHiddenInManual",
-    "name": "isHiddenInManual",
-    "longname": "isHiddenInManual",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 715,
-    "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
-    "params": [
-      {
-        "name": "target",
-        "type": "Element",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "container",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "isRewritableRelativeUrl",
-    "name": "isRewritableRelativeUrl",
-    "longname": "isRewritableRelativeUrl",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 145,
-    "description": "",
-    "params": [
-      {
-        "name": "value",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "loadAutoManual",
-    "name": "loadAutoManual",
-    "longname": "loadAutoManual",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 121,
-    "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
-    "params": [
-      {
-        "name": "options",
-        "type": "Object",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "options.language",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "options.manualConfig",
-        "type": "Object",
-        "optional": true,
-        "description": ""
-      },
-      {
-        "name": "options.fetchCandidate",
-        "type": "function",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Promise.<({candidate: string, url: string, html: string, sourceType: string}|null)>",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "loadStandardManual",
-    "name": "loadStandardManual",
-    "longname": "loadStandardManual",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 85,
-    "description": "Load the preferred generated standard manual.",
-    "params": [
-      {
-        "name": "options",
-        "type": "Object",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "options.language",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "options.manualConfig",
-        "type": "Object",
-        "optional": true,
-        "description": ""
-      },
-      {
-        "name": "options.fetchCandidate",
-        "type": "function",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Promise.<({candidate: string, url: string, html: string, sourceType: string}|null)>",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_CONTENTS_ID",
-    "name": "MANUAL_CONTENTS_ID",
-    "longname": "MANUAL_CONTENTS_ID",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 672,
-    "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -6828,112 +6337,8 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 684,
-    "description": "Ids the dialog renders around the manual.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
-    "name": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
-    "longname": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 320,
-    "description": "Name of the CSS Custom Highlight covering only the current manual search hit.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SEARCH_DEBOUNCE_MS",
-    "name": "MANUAL_SEARCH_DEBOUNCE_MS",
-    "longname": "MANUAL_SEARCH_DEBOUNCE_MS",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 310,
-    "description": "Debounce delay before a typed query is applied to the rendered manual text.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SEARCH_HIGHLIGHT_NAME",
-    "name": "MANUAL_SEARCH_HIGHLIGHT_NAME",
-    "longname": "MANUAL_SEARCH_HIGHLIGHT_NAME",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 315,
-    "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SEARCH_INPUT_ID",
-    "name": "MANUAL_SEARCH_INPUT_ID",
-    "longname": "MANUAL_SEARCH_INPUT_ID",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 675,
-    "description": "Id of the manual search field.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SEARCH_MARK_ATTRIBUTE",
-    "name": "MANUAL_SEARCH_MARK_ATTRIBUTE",
-    "longname": "MANUAL_SEARCH_MARK_ATTRIBUTE",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 327,
-    "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SEARCH_MIN_LENGTH",
-    "name": "MANUAL_SEARCH_MIN_LENGTH",
-    "longname": "MANUAL_SEARCH_MIN_LENGTH",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 305,
-    "description": "Minimum query length before the manual search runs.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SECTION_ACTIVE_LINE",
-    "name": "MANUAL_SECTION_ACTIVE_LINE",
-    "longname": "MANUAL_SECTION_ACTIVE_LINE",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 636,
-    "description": "Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "MANUAL_SECTION_SCROLL_GAP",
-    "name": "MANUAL_SECTION_SCROLL_GAP",
-    "longname": "MANUAL_SECTION_SCROLL_GAP",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 639,
-    "description": "Gap in pixels kept above a heading when the content pane scrolls to it.",
+    "line": 26,
+    "description": "Ids the dialog renders around the manual view.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -6945,387 +6350,9 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 678,
+    "line": 20,
     "description": "Id of the dialog title.",
     "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "ManualOverlayDialog~navigateToManualTarget",
-    "name": "navigateToManualTarget",
-    "longname": "ManualOverlayDialog~navigateToManualTarget",
-    "kind": "constant",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 883,
-    "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
-    "params": [
-      {
-        "name": "id",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "openDetailsAncestors",
-    "name": "openDetailsAncestors",
-    "longname": "openDetailsAncestors",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 647,
-    "description": "Open collapsed &lt;details&gt; ancestors so a target inside them can be shown.",
-    "params": [
-      {
-        "name": "target",
-        "type": "Element",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "container",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "ManualOverlayDialog~pinSectionFor",
-    "name": "pinSectionFor",
-    "longname": "ManualOverlayDialog~pinSectionFor",
-    "kind": "constant",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 837,
-    "description": "Make the section holding target current and keep it current until the reader scrolls.",
-    "params": [
-      {
-        "name": "target",
-        "type": "Node|null|undefined",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "removeManualRefreshToken",
-    "name": "removeManualRefreshToken",
-    "longname": "removeManualRefreshToken",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 289,
-    "description": "",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "removeMarkFallback",
-    "name": "removeMarkFallback",
-    "longname": "removeMarkFallback",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 586,
-    "description": "Unwrap fallback marks and merge the split text nodes back together.",
-    "params": [
-      {
-        "name": "marks",
-        "type": "Array.<Element>",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "container",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "ManualOverlayDialog~renderContentsLink",
-    "name": "renderContentsLink",
-    "longname": "ManualOverlayDialog~renderContentsLink",
-    "kind": "function",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 1349,
-    "description": "",
-    "params": [
-      {
-        "name": "entry",
-        "type": "Object",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "level",
-        "type": "number",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "React.ReactElement",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "replaceUrlFragment",
-    "name": "replaceUrlFragment",
-    "longname": "replaceUrlFragment",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 761,
-    "description": "Replace the URL fragment without adding a history entry.",
-    "params": [
-      {
-        "name": "fragment",
-        "type": "string",
-        "optional": false,
-        "description": "Fragment without # ; empty leaves a bare # ."
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "ManualOverlayDialog~restoreViewerFragment",
-    "name": "restoreViewerFragment",
-    "longname": "ManualOverlayDialog~restoreViewerFragment",
-    "kind": "constant",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 862,
-    "description": "Put back the URL fragment the viewer had before the manual set one.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "revealManualMatch",
-    "name": "revealManualMatch",
-    "longname": "revealManualMatch",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 608,
-    "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
-    "params": [
-      {
-        "name": "container",
-        "type": "Element",
-        "optional": false,
-        "description": "Rendered manual container."
-      },
-      {
-        "name": "match",
-        "type": "Object|null",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "index",
-        "type": "number",
-        "optional": false,
-        "description": "Hit index to reveal."
-      },
-      {
-        "name": "session",
-        "type": "Object|null",
-        "optional": false,
-        "description": "Active highlight session."
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "rewriteManualHtml",
-    "name": "rewriteManualHtml",
-    "longname": "rewriteManualHtml",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 227,
-    "description": "",
-    "params": [
-      {
-        "name": "html",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "resolvedUrl",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "rewriteManualSrcset",
-    "name": "rewriteManualSrcset",
-    "longname": "rewriteManualSrcset",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 164,
-    "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
-    "params": [
-      {
-        "name": "value",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "resolvedUrl",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "sanitizeManualHtml",
-    "name": "sanitizeManualHtml",
-    "longname": "sanitizeManualHtml",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 213,
-    "description": "",
-    "params": [
-      {
-        "name": "html",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "scrollPaneToTarget",
-    "name": "scrollPaneToTarget",
-    "longname": "scrollPaneToTarget",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 664,
-    "description": "Scroll only the given pane so the target sits at its top.",
-    "params": [
-      {
-        "name": "pane",
-        "type": "HTMLElement",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "target",
-        "type": "Element",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "setCurrentMark",
-    "name": "setCurrentMark",
-    "longname": "setCurrentMark",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 567,
-    "description": "",
-    "params": [
-      {
-        "name": "marks",
-        "type": "Array.<Element>",
-        "optional": false,
-        "description": "Search marks in hit-index order."
-      },
-      {
-        "name": "index",
-        "type": "number",
-        "optional": false,
-        "description": "Hit index shown as current."
-      }
-    ],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "ManualOverlayDialog~setManualFragment",
-    "name": "setManualFragment",
-    "longname": "ManualOverlayDialog~setManualFragment",
-    "kind": "constant",
-    "scope": "inner",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 851,
-    "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
-    "params": [
-      {
-        "name": "id",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
     "returns": [],
     "examples": 0
   },
@@ -14116,6 +13143,1127 @@
     "line": 33,
     "description": "Inline “visually hidden” style for screen-reader-only text (no CSS dependency).",
     "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "absoluteManualUrl",
+    "name": "absoluteManualUrl",
+    "longname": "absoluteManualUrl",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 33,
+    "description": "",
+    "params": [
+      {
+        "name": "candidate",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "Absolute URL used to resolve manual-relative images and other assets."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "appendManualRefreshToken",
+    "name": "appendManualRefreshToken",
+    "longname": "appendManualRefreshToken",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 262,
+    "description": "",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "refreshToken",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "copyManualConfig",
+    "name": "copyManualConfig",
+    "longname": "copyManualConfig",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 49,
+    "description": "Copy only settings used by the selected source.",
+    "params": [
+      {
+        "name": "manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config help.manual block."
+      },
+      {
+        "name": "sourceMode",
+        "type": "'auto'|'standard'",
+        "optional": false,
+        "description": "Resolved source mode."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "Safe internal configuration."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isRewritableRelativeUrl",
+    "name": "isRewritableRelativeUrl",
+    "longname": "isRewritableRelativeUrl",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 134,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "loadAutoManual",
+    "name": "loadAutoManual",
+    "longname": "loadAutoManual",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 110,
+    "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.language",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.fetchCandidate",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<({candidate: string, url: string, html: string, sourceType: string}|null)>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "loadManualDocument",
+    "name": "loadManualDocument",
+    "longname": "loadManualDocument",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 306,
+    "description": "Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.language",
+        "type": "string",
+        "optional": false,
+        "description": "Base UI language, e.g. sv ."
+      },
+      {
+        "name": "options.runtimeConfig",
+        "type": "Object",
+        "optional": true,
+        "description": "Effective runtime configuration ( help.manual and the feature switches the standard manual filter reads)."
+      },
+      {
+        "name": "options.refreshToken",
+        "type": "number",
+        "optional": true,
+        "description": "Non-zero to bypass caches (the &quot;reload manual&quot; action)."
+      },
+      {
+        "name": "options.signal",
+        "type": "AbortSignal",
+        "optional": true,
+        "description": "Aborts outstanding requests."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<({html: string, resolvedUrl: string}|null)>",
+        "description": "Null when no source exists for the language. Rejects on unexpected failures (and on abort)."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "loadStandardManual",
+    "name": "loadStandardManual",
+    "longname": "loadStandardManual",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 74,
+    "description": "Load the preferred generated standard manual.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.language",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.fetchCandidate",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<({candidate: string, url: string, html: string, sourceType: string}|null)>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "removeManualRefreshToken",
+    "name": "removeManualRefreshToken",
+    "longname": "removeManualRefreshToken",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 278,
+    "description": "",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "rewriteManualHtml",
+    "name": "rewriteManualHtml",
+    "longname": "rewriteManualHtml",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 216,
+    "description": "",
+    "params": [
+      {
+        "name": "html",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "resolvedUrl",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "rewriteManualSrcset",
+    "name": "rewriteManualSrcset",
+    "longname": "rewriteManualSrcset",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 153,
+    "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
+    "params": [
+      {
+        "name": "value",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "resolvedUrl",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "sanitizeManualHtml",
+    "name": "sanitizeManualHtml",
+    "longname": "sanitizeManualHtml",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 202,
+    "description": "",
+    "params": [
+      {
+        "name": "html",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "captureScrollPositions",
+    "name": "captureScrollPositions",
+    "longname": "captureScrollPositions",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 92,
+    "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
+    "params": [
+      {
+        "name": "from",
+        "type": "Element|null",
+        "optional": false,
+        "description": "Innermost element whose scroll containers are recorded."
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": "Restores the recorded positions."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "findManualElementById",
+    "name": "findManualElementById",
+    "longname": "findManualElementById",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 51,
+    "description": "",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Element|null",
+        "description": "Element in the manual with that id. Scoped to the manual, so an id the viewer page also uses still resolves to the manual's own element."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isHiddenInManual",
+    "name": "isHiddenInManual",
+    "longname": "isHiddenInManual",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 74,
+    "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
+    "params": [
+      {
+        "name": "target",
+        "type": "Element",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SECTION_ACTIVE_LINE",
+    "name": "MANUAL_SECTION_ACTIVE_LINE",
+    "longname": "MANUAL_SECTION_ACTIVE_LINE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 10,
+    "description": "Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SECTION_SCROLL_GAP",
+    "name": "MANUAL_SECTION_SCROLL_GAP",
+    "longname": "MANUAL_SECTION_SCROLL_GAP",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 13,
+    "description": "Gap in pixels kept above a heading when the content pane scrolls to it.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "openDetailsAncestors",
+    "name": "openDetailsAncestors",
+    "longname": "openDetailsAncestors",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 21,
+    "description": "Open collapsed &lt;details&gt; ancestors so a target inside them can be shown.",
+    "params": [
+      {
+        "name": "target",
+        "type": "Element",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "replaceUrlFragment",
+    "name": "replaceUrlFragment",
+    "longname": "replaceUrlFragment",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 120,
+    "description": "Replace the URL fragment without adding a history entry.",
+    "params": [
+      {
+        "name": "fragment",
+        "type": "string",
+        "optional": false,
+        "description": "Fragment without # ; empty leaves a bare # ."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "scrollPaneToTarget",
+    "name": "scrollPaneToTarget",
+    "longname": "scrollPaneToTarget",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 38,
+    "description": "Scroll only the given pane so the target sits at its top.",
+    "params": [
+      {
+        "name": "pane",
+        "type": "HTMLElement",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "target",
+        "type": "Element",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "applyCustomHighlight",
+    "name": "applyCustomHighlight",
+    "longname": "applyCustomHighlight",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 177,
+    "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
+    "params": [
+      {
+        "name": "matches",
+        "type": "Array.<{node: Text, start: number, end: number}>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "currentIndex",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "applyMarkFallback",
+    "name": "applyMarkFallback",
+    "longname": "applyMarkFallback",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 231,
+    "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "matches",
+        "type": "Array.<{node: Text, start: number, end: number}>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "canUseCustomHighlight",
+    "name": "canUseCustomHighlight",
+    "longname": "canUseCustomHighlight",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 157,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "True when the CSS Custom Highlight API can be used."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "collectManualTextMatches",
+    "name": "collectManualTextMatches",
+    "longname": "collectManualTextMatches",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 114,
+    "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
+    "params": [
+      {
+        "name": "root",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "query",
+        "type": "string",
+        "optional": false,
+        "description": "Already trimmed search text."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "BCP-47 language tag used for case folding."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<{node: Text, start: number, end: number}>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "createManualSearchFolder",
+    "name": "createManualSearchFolder",
+    "longname": "createManualSearchFolder",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 44,
+    "description": "Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.",
+    "params": [
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "BCP-47 language tag, e.g. sv ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "foldManualSearchText",
+    "name": "foldManualSearchText",
+    "longname": "foldManualSearchText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 83,
+    "description": "Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from.",
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fold",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "sourceStart / sourceEnd are indexed by folded code unit; foldedStartAt is indexed by original character-start offset (and text.length )."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
+    "name": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
+    "longname": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 26,
+    "description": "Name of the CSS Custom Highlight covering only the current manual search hit.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_DEBOUNCE_MS",
+    "name": "MANUAL_SEARCH_DEBOUNCE_MS",
+    "longname": "MANUAL_SEARCH_DEBOUNCE_MS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 16,
+    "description": "Debounce delay before a typed query is applied to the rendered manual text.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_HIGHLIGHT_NAME",
+    "name": "MANUAL_SEARCH_HIGHLIGHT_NAME",
+    "longname": "MANUAL_SEARCH_HIGHLIGHT_NAME",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 21,
+    "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_MARK_ATTRIBUTE",
+    "name": "MANUAL_SEARCH_MARK_ATTRIBUTE",
+    "longname": "MANUAL_SEARCH_MARK_ATTRIBUTE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 33,
+    "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_MIN_LENGTH",
+    "name": "MANUAL_SEARCH_MIN_LENGTH",
+    "longname": "MANUAL_SEARCH_MIN_LENGTH",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 11,
+    "description": "Minimum query length before the manual search runs.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "removeMarkFallback",
+    "name": "removeMarkFallback",
+    "longname": "removeMarkFallback",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 292,
+    "description": "Unwrap fallback marks and merge the split text nodes back together.",
+    "params": [
+      {
+        "name": "marks",
+        "type": "Array.<Element>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "revealManualMatch",
+    "name": "revealManualMatch",
+    "longname": "revealManualMatch",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 314,
+    "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "match",
+        "type": "Object|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "index",
+        "type": "number",
+        "optional": false,
+        "description": "Hit index to reveal."
+      },
+      {
+        "name": "session",
+        "type": "Object|null",
+        "optional": false,
+        "description": "Active highlight session."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "setCurrentMark",
+    "name": "setCurrentMark",
+    "longname": "setCurrentMark",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualSearch.js",
+    "line": 273,
+    "description": "",
+    "params": [
+      {
+        "name": "marks",
+        "type": "Array.<Element>",
+        "optional": false,
+        "description": "Search marks in hit-index order."
+      },
+      {
+        "name": "index",
+        "type": "number",
+        "optional": false,
+        "description": "Hit index shown as current."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 96,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.refreshToken",
+        "type": "number",
+        "optional": true,
+        "description": "Non-zero value that changes to reload the manual from the server, bypassing caches. Zero loads normally."
+      },
+      {
+        "name": "props.onDocumentStateChange",
+        "type": "function",
+        "optional": true,
+        "description": "Called whenever the loading state, error or resolved source URL changes (e.g. for a &quot;Loaded from&quot; subtitle or to disable a reload..."
+      },
+      {
+        "name": "props.onEscape",
+        "type": "function",
+        "optional": true,
+        "description": "Called for Escape when neither the open narrow-window contents list nor an active search query consumes it. A modal host passes its close a..."
+      },
+      {
+        "name": "props.reservedIds",
+        "type": "Array.<string>",
+        "optional": true,
+        "description": "Additional ids the host renders around the view (e.g. its title id). Generated heading ids avoid them. Read when a manual is loaded."
+      },
+      {
+        "name": "props.initialSectionId",
+        "type": "string",
+        "optional": true,
+        "description": "Element id (a leading # and URL encoding are accepted, so location.hash can be passed as is) to scroll to once the manual has loaded. Appli..."
+      },
+      {
+        "name": "props.onActiveSectionChange",
+        "type": "function",
+        "optional": true,
+        "description": "Reports the id of the section the reader is currently in (the contents entry marked current), or an empty string when the manual has no con..."
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "<anonymous>~handleEscape",
+    "name": "handleEscape",
+    "longname": "<anonymous>~handleEscape",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 288,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "KeyboardEvent",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_CONTENTS_ID",
+    "name": "MANUAL_CONTENTS_ID",
+    "longname": "MANUAL_CONTENTS_ID",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 51,
+    "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_INPUT_ID",
+    "name": "MANUAL_SEARCH_INPUT_ID",
+    "longname": "MANUAL_SEARCH_INPUT_ID",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 54,
+    "description": "Id of the manual search field.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualDocumentState",
+    "name": "ManualDocumentState",
+    "longname": "ManualDocumentState",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 56,
+    "description": "State of the loaded manual document as reported to the host.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualView~navigateToManualTarget",
+    "name": "navigateToManualTarget",
+    "longname": "ManualView~navigateToManualTarget",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 212,
+    "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "normalizeSectionId",
+    "name": "normalizeSectionId",
+    "longname": "normalizeSectionId",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 70,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "string|null|undefined",
+        "optional": false,
+        "description": "Section id, optionally with a leading # and URL-encoded (as in location.hash )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "Plain element id, or an empty string."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "ManualView~pinSectionFor",
+    "name": "pinSectionFor",
+    "longname": "ManualView~pinSectionFor",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 166,
+    "description": "Make the section holding target current and keep it current until the reader scrolls.",
+    "params": [
+      {
+        "name": "target",
+        "type": "Node|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualView~renderContentsLink",
+    "name": "renderContentsLink",
+    "longname": "ManualView~renderContentsLink",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 571,
+    "description": "",
+    "params": [
+      {
+        "name": "entry",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "level",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "ManualView~restoreViewerFragment",
+    "name": "restoreViewerFragment",
+    "longname": "ManualView~restoreViewerFragment",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 191,
+    "description": "Put back the URL fragment the page had before the manual set one.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualView~setManualFragment",
+    "name": "setManualFragment",
+    "longname": "ManualView~setManualFragment",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 180,
+    "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the host or the page behind i...",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
     "returns": [],
     "examples": 0
   },
