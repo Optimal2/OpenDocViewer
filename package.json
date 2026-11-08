@@ -121,6 +121,7 @@
     "fast-levenshtein": "^3.0.0",
     "fast-png": "^8.0.0",
     "flatted": "^3.4.2",
+    "hashery": "^3.0.5",
     "hermes-estree": "^0.37.0",
     "hermes-parser": "^0.37.0",
     "ignore": "^7.0.14",
