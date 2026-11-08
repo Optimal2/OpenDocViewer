@@ -12,6 +12,7 @@ import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import OcrTextLayer, { OCR_WORD_CURRENT_MATCH_CLASS, OCR_WORD_MATCH_CLASS, OCR_WORD_SELECTED_CLASS } from '../OcrTextLayer.jsx';
 import { countCharacters, isOcrLayerSelection, layoutOcrLines, measureWordWidth, ocrReadingOrder, ocrSelectionText, OCR_WORD_JOINER } from '../../utils/ocrTextLayout.js';
+import { canonicalTransformOrigin } from './cssValueSerialization.js';
 
 const WORDS = [
   { text: 'Hej', confidence: 95, bbox: { x0: 100, y0: 200, x1: 400, y1: 300 } },
@@ -246,7 +247,7 @@ describe('OcrTextLayer', () => {
     expect(layer.style.width).toBe('1000px');
     expect(layer.style.height).toBe('1500px');
     expect(layer.style.transform).toBe('scale(1.5)');
-    expect(layer.style.transformOrigin).toBe('top left');
+    expect(layer.style.transformOrigin).toBe(canonicalTransformOrigin('top left'));
 
     const frame = layer.querySelector('.ocr-text-layer-frame');
     expect(frame.style.left).toBe('0px');

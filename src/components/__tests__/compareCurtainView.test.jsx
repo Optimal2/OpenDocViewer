@@ -16,6 +16,7 @@ import CompareCurtainButton from '../DocumentViewer/CompareCurtainButton.jsx';
 import buttonSource from '../DocumentViewer/CompareCurtainButton.jsx?raw';
 import { elementAttributeBlock, elementAttributeValue } from './toolbarAttributeBlock.js';
 import { INITIAL_COMPARE_OVERLAY_STATE } from '../../utils/compareOverlay.js';
+import { canonicalClipPath } from './cssValueSerialization.js';
 import en from '../../../public/locales/en/common.json';
 import sv from '../../../public/locales/sv/common.json';
 import curtainSource from '../DocumentViewer/CompareCurtainView.jsx?raw';
@@ -129,7 +130,7 @@ describe('CompareCurtainView', () => {
     expect(layerA.querySelector('.mock-render').getAttribute('data-transform')).toBe('scale(1.5) translate(0px, 0px) rotate(0deg)');
     expect(layerB(container).querySelector('.mock-render').getAttribute('data-transform')).toBe('scale(1) translate(4px, 0px) rotate(0.5deg)');
     expect(Number(layerB(container).style.zIndex)).toBeGreaterThan(Number(layerA.style.zIndex));
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 50%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 50%)'));
     expect(handle(container).style.left).toBe('50%');
     await cleanup();
   });
@@ -155,22 +156,22 @@ describe('CompareCurtainView', () => {
   it('horizontal mode: horizontal line, B below it; each mode remembers its own position', async () => {
     const { container, cleanup } = await renderCurtain();
     await press(handle(container), 'ArrowLeft', { shiftKey: true });
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 40%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 40%)'));
 
     await act(() => modeButton(container, 'Horizontal').click());
     expect(modeButton(container, 'Horizontal').getAttribute('aria-pressed')).toBe('true');
     expect(container.querySelector('.compare-curtain-stage').classList.contains('is-horizontal')).toBe(true);
-    expect(layerB(container).style.clipPath).toBe('inset(50% 0% 0% 0%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(50% 0% 0% 0%)'));
     expect(handle(container).style.top).toBe('50%');
     expect(handle(container).getAttribute('aria-orientation')).toBe('vertical');
     await press(handle(container), 'ArrowDown');
-    expect(layerB(container).style.clipPath).toBe('inset(51% 0% 0% 0%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(51% 0% 0% 0%)'));
 
     await act(() => modeButton(container, 'Vertical').click());
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 40%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 40%)'));
     expect(handle(container).getAttribute('aria-orientation')).toBe('horizontal');
     await act(() => modeButton(container, 'Horizontal').click());
-    expect(layerB(container).style.clipPath).toBe('inset(51% 0% 0% 0%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(51% 0% 0% 0%)'));
     await cleanup();
   });
 
@@ -185,10 +186,10 @@ describe('CompareCurtainView', () => {
     expect(border.getAttribute('aria-valuenow')).toBe('41');
     for (let i = 0; i < 6; i += 1) await press(border, 'ArrowRight', { shiftKey: true });
     expect(border.getAttribute('aria-valuenow')).toBe('100');
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 100%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 100%)'));
     for (let i = 0; i < 11; i += 1) await press(border, 'ArrowUp', { shiftKey: true });
     expect(border.getAttribute('aria-valuenow')).toBe('0');
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 0%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 0%)'));
     expect((await press(border, 'Enter')).defaultPrevented).toBe(false);
     await cleanup();
   });
@@ -202,15 +203,15 @@ describe('CompareCurtainView', () => {
 
     await pointer(border, 'pointerdown', { clientX: 300, clientY: 10 });
     await pointer(border, 'pointermove', { clientX: 200, clientY: 10 });
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 25%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 25%)'));
     expect(border.style.left).toBe('25%');
     await pointer(border, 'pointermove', { clientX: 900, clientY: 10 });
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 100%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 100%)'));
     expect(renders.count).toBe(before);
 
     await pointer(border, 'pointerup', { clientX: 140, clientY: 10 });
     expect(border.getAttribute('aria-valuenow')).toBe('10');
-    expect(layerB(container).style.clipPath).toBe('inset(0% 0% 0% 10%)');
+    expect(layerB(container).style.clipPath).toBe(canonicalClipPath('inset(0% 0% 0% 10%)'));
     expect(renders.count).toBe(before);
     await cleanup();
   });
