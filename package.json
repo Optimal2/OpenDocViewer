@@ -106,6 +106,7 @@
   "overrides": {
     "@keyv/bigmap": "^6.1.0",
     "@oxc-project/types": "^0.157.0",
+    "@types/jsesc": "^3.0.3",
     "ansi-styles": "^7.0.0",
     "argparse": "^3.0.4",
     "asynckit": "^0.5.0",
