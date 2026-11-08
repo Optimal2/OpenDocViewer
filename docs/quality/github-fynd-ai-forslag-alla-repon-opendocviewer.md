@@ -103,12 +103,18 @@ against the real browser engine.
 
 What the native evidence does **not** cover, and what is therefore not claimed:
 
-- **Other browser engines.** Only Chromium was measured. The product's declared target is
-  Chromium-based desktop browsers (`docs-src/deploy-ops.md`), and no Firefox or Safari run was
-  made. The degradation path on a non-Chromium engine (the browser's default Tab from the
-  temporary starting point does not reach the media host) is self-healing: focus falls to the
-  body and the next Tab is caught by the dialog's outside branch, which prevents the default and
-  moves focus back inside. No document leak was observed in any measured case.
+- **Other browser engines and focus already on `body`.** Only Chromium was measured. The
+  product's declared target is Chromium-based desktop browsers (`docs-src/deploy-ops.md`), and no
+  Firefox or Safari run was made. A temporary, uncommitted Vitest/jsdom probe against the
+  unchanged component rendered the open dialog, focused `body`, and dispatched a bubbling,
+  cancelable Tab keydown with `body` as its target. It observed `defaultPrevented: false`, the
+  active element still `BODY`, and `focusInsideDialog: false` (one passing test; the other 36
+  tests were skipped by the name filter). The outside branch cannot catch that event: React's
+  `onKeyDown` is attached only to the dialog element
+  (`src/components/DocumentToolbar/ManualOverlayDialog.jsx:1403`), while the document/window
+  listeners handle only Escape (`:981-1017`). Once focus is on `body`, the next Tab is therefore
+  not recaptured by this trap; no self-healing return or universal no-document-leak guarantee is
+  claimed. jsdom has no native Tab destination, and non-Chromium engines remain unmeasured.
 - **Screen readers and visual acceptance.** Not tested.
 - **A positive tabindex outside the dialog.** The measured trap hands the media's focus scope to
   the browser when a media host is adjacent to another media host in the eligible sequence. That
