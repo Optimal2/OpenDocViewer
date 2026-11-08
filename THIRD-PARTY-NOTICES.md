@@ -16,10 +16,9 @@ list with licence identifiers is in `package.json` / `package-lock.json`.
 
 All five ship their licence text inside their npm packages
 (`node_modules/pkijs/LICENSE`, `node_modules/asn1js/LICENSE`,
-`node_modules/@noble/hashes/LICENSE`, `node_modules/pkijs/node_modules/@peculiar/utils/LICENSE`,
-`node_modules/bytestreamjs/LICENSE`). The bundled `@peculiar/utils` 4.1.0 is installed under
-`pkijs` and `asn1js`; the top-level `node_modules/@peculiar/utils` is an older,
-development-only copy.
+`node_modules/@noble/hashes/LICENSE`, `node_modules/@peculiar/utils/LICENSE`,
+`node_modules/bytestreamjs/LICENSE`). The bundled `@peculiar/utils` 4.1.0 is installed once
+at the top level and shared by `pkijs` and `asn1js`.
 
 Redistribution notice for BSD-3-Clause components: these licences require retention of the
 copyright notice, this list of conditions and the following disclaimer in redistributions.
@@ -50,5 +49,5 @@ the embedded `idb-keyval` never runs.
 | Component | Licence | Used for |
 | --- | --- | --- |
 | `@peculiar/x509` | MIT | Fixture generator and tests only: creating throwaway test CA/signer certificates. Never imported from application code and never bundled. |
-| `reflect-metadata` | Apache-2.0 | Polyfill required by `@peculiar/x509` v2 (via `tsyringe`); loaded once at the top of the fixture generator. Never imported from application code and never bundled. |
+| `reflect-metadata` | Apache-2.0 | Polyfill required by `@peculiar/x509` v3 (via `tsyringe`); loaded once at the top of the fixture generator. Never imported from application code and never bundled. |
 | `@playwright/test` | Apache-2.0 | Browser UI tests (`npm run test:ui`, `tests/ui/`) only. Never imported from application code and never bundled. |

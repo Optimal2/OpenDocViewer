@@ -11,7 +11,7 @@
 // Third-party: pkijs + asn1js (BSD-3-Clause, runtime deps reused here) and
 // @peculiar/x509 (MIT, devDependency) for certificate creation. Licences recorded
 // in THIRD-PARTY-NOTICES.md.
-// @peculiar/x509 v2 uses tsyringe, which requires the reflect-metadata polyfill
+// @peculiar/x509 v3 uses tsyringe, which requires the reflect-metadata polyfill
 // to be loaded before the x509 module is evaluated.
 import 'reflect-metadata';
 

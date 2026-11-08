@@ -44,7 +44,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>@babel/plugin-transform-runtime</code> | <code>^8.0.6</code> | 0 |
 | <code>@babel/runtime</code> | <code>^8.1.0</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
-| <code>@peculiar/x509</code> | <code>^2.2.0</code> | 0 |
+| <code>@peculiar/x509</code> | <code>^3.1.0</code> | 0 |
 | <code>@playwright/test</code> | <code>1.65.0</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.3.0</code> | 0 |
 | <code>@tesseract.js-data/eng</code> | <code>1.0.0</code> | 0 |
