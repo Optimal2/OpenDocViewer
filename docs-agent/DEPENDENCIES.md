@@ -19,7 +19,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>express-rate-limit</code> | <code>^8.7.3</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>file-type</code> | <code>^22.3.0</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>i18next</code> | <code>^26.7.2</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
+| <code>i18next</code> | <code>^27.0.1</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>i18next-http-backend</code> | <code>^4.0.10</code> | 1 | <code>src/i18n.js</code> |
 | <code>i18next-icu</code> | <code>^2.7.0</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 2 (dynamic) | <code>src/utils/printPdf.js</code><br><code>src/workers/pdfWorker.js</code> |
@@ -31,7 +31,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>prop-types</code> | <code>^15.8.1</code> | 47 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+42 more, 47 files total) |
 | <code>react</code> | <code>^19.3.1</code> | 78 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+73 more, 78 files total) |
 | <code>react-dom</code> | <code>^19.3.1</code> | 2 | <code>src/components/KeyTips.jsx</code><br><code>src/index.jsx</code> |
-| <code>react-i18next</code> | <code>^17.1.13</code> | 46 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+41 more, 46 files total) |
+| <code>react-i18next</code> | <code>^18.0.0</code> | 46 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+41 more, 46 files total) |
 | <code>tesseract.js</code> | <code>7.0.0</code> | 2 | <code>src/ocr/engine.js</code><br><code>src/ocr/languages.js</code> |
 | <code>tesseract.js-core</code> | <code>7.0.0</code> | 0 | — |
 | <code>utif2</code> | <code>^4.1.0</code> | 4 (1 dynamic) | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/imageWorker.js</code> |

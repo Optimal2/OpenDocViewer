@@ -40,7 +40,7 @@
       "express-rate-limit": "^8.7.3",
       "file-type": "^22.3.0",
       "helmet": "^8.3.0",
-      "i18next": "^26.7.2",
+      "i18next": "^27.0.1",
       "i18next-http-backend": "^4.0.10",
       "i18next-icu": "^2.7.0",
       "jspdf": "^4.2.1",
@@ -52,7 +52,7 @@
       "prop-types": "^15.8.1",
       "react": "^19.3.1",
       "react-dom": "^19.3.1",
-      "react-i18next": "^17.1.13",
+      "react-i18next": "^18.0.0",
       "tesseract.js": "7.0.0",
       "tesseract.js-core": "7.0.0",
       "utif2": "^4.1.0"
@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 188,
-    "sourceLineCount": 69211,
+    "sourceLineCount": 69216,
     "docletCount": 1989,
     "documentedFileCount": 185,
     "lowConfidenceSummaryCount": 2,
@@ -1524,13 +1524,13 @@
     {
       "name": "src/i18n.js",
       "fileCount": 1,
-      "lineCount": 562,
+      "lineCount": 567,
       "docletCount": 21,
       "importantFiles": [
         {
           "path": "src/i18n.js",
           "score": 49,
-          "lines": 562,
+          "lines": 567,
           "incomingLocalImports": 2,
           "doclets": 21,
           "summary": "i18n bootstrap for OpenDocViewer.",
@@ -36112,7 +36112,7 @@
     },
     {
       "path": "src/i18n.js",
-      "lines": 562,
+      "lines": 567,
       "extension": ".js",
       "jsdocBlockCount": 22,
       "sourceSummary": "i18n bootstrap for OpenDocViewer.",
@@ -36171,7 +36171,7 @@
         {
           "name": "i18next",
           "kind": "default",
-          "line": 561
+          "line": 566
         }
       ],
       "declarations": [

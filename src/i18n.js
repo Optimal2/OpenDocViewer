@@ -530,6 +530,11 @@ i18next
     ns: ['common'],
     defaultNS: 'common',
     interpolation: { escapeValue: false },
+    // i18next 27 flipped this default to false: an empty translation would then fall
+    // back like a missing value and render the key itself. The locale files use "" on
+    // purpose (for example printDialog.reason.extra.suffix), so an empty string must
+    // stay an empty string.
+    returnEmptyString: true,
     backend: {
       loadPath: (lngs, namespaces) => resolveLoadPath(lngs, namespaces),
       requestOptions: I18N_BACKEND_REQUEST_OPTIONS

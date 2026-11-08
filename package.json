@@ -60,7 +60,7 @@
     "express-rate-limit": "^8.7.3",
     "file-type": "^22.3.0",
     "helmet": "^8.3.0",
-    "i18next": "^26.7.2",
+    "i18next": "^27.0.1",
     "i18next-http-backend": "^4.0.10",
     "i18next-icu": "^2.7.0",
     "jspdf": "^4.2.1",
@@ -72,7 +72,7 @@
     "prop-types": "^15.8.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-i18next": "^17.1.13",
+    "react-i18next": "^18.0.0",
     "tesseract.js": "7.0.0",
     "tesseract.js-core": "7.0.0",
     "utif2": "^4.1.0"

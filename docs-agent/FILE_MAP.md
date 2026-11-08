@@ -95,7 +95,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |
 | <code>src/hooks/useReadAloud.js</code> | 242 | 1 | 5 | high | Read the selected recognised text aloud: the state behind the page&#39;s context menu entry and the toolbar&#39;s &quot;Reading language&quot; section \(contexts/readAloudContext.js\). |
-| <code>src/i18n.js</code> | 562 | 2 | 21 | high | i18n bootstrap for OpenDocViewer. |
+| <code>src/i18n.js</code> | 567 | 2 | 21 | high | i18n bootstrap for OpenDocViewer. |
 | <code>src/index.jsx</code> | 67 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
 | <code>src/integrations/bootstrapRuntime.js</code> | 457 | 1 | 12 | high | Startup mode detection and host-integration entry point. |
 | <code>src/integrations/normalizePortableBundle.js</code> | 833 | 1 | 9 | high | Normalizes multiple host payload shapes into the project&#39;s neutral portable bundle shape. |
