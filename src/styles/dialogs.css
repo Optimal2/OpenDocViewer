@@ -539,6 +539,11 @@
   padding: 0;
 }
 
+/* The manual dialog's open-in-new-tab control is a link styled as an icon button. */
+a.odv-help-close-icon {
+  text-decoration: none;
+}
+
 .odv-help-close-button {
   min-height: 40px;
   padding: 0 16px;

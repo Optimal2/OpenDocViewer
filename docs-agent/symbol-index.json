@@ -6008,7 +6008,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-    "line": 30,
+    "line": 34,
     "description": "",
     "params": [
       {
@@ -6028,7 +6028,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-    "line": 22,
+    "line": 26,
     "description": "",
     "params": [
       {
@@ -6294,7 +6294,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 36,
+    "line": 37,
     "description": "",
     "params": [
       {
@@ -6337,7 +6337,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 67,
+    "line": 69,
     "description": "Keep forward and reverse Tab navigation inside the open modal dialog.",
     "params": [],
     "returns": [],
@@ -6350,7 +6350,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 26,
+    "line": 27,
     "description": "Ids the dialog renders around the manual view.",
     "params": [],
     "returns": [],
@@ -6363,7 +6363,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 20,
+    "line": 21,
     "description": "Id of the dialog title.",
     "params": [],
     "returns": [],

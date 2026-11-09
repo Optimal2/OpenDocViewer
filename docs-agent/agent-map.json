@@ -94,14 +94,14 @@
   },
   "stats": {
     "fileCount": 196,
-    "sourceLineCount": 69682,
+    "sourceLineCount": 69705,
     "docletCount": 2001,
     "documentedFileCount": 192,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 6839
+    "estimatedSourceTokens": 6841
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -526,7 +526,7 @@
       "path": "src/utils/runtimeConfig.js",
       "score": 122,
       "lines": 963,
-      "incomingLocalImports": 32,
+      "incomingLocalImports": 33,
       "doclets": 70,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
@@ -1197,7 +1197,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7593,
+      "lineCount": 7616,
       "docletCount": 112,
       "importantFiles": [
         {
@@ -1899,7 +1899,7 @@
           "path": "src/utils/runtimeConfig.js",
           "score": 122,
           "lines": 963,
-          "incomingLocalImports": 32,
+          "incomingLocalImports": 33,
           "doclets": 70,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
@@ -12662,7 +12662,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-      "lines": 110,
+      "lines": 116,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "Toolbar help menu with entries for the manual and About dialog.",
@@ -12676,7 +12676,7 @@
             "useRef",
             "useState"
           ],
-          "line": 6,
+          "line": 7,
           "kind": "static"
         },
         {
@@ -12684,7 +12684,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7,
+          "line": 8,
           "kind": "static"
         },
         {
@@ -12692,7 +12692,15 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8,
+          "line": 9,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig"
+          ],
+          "line": 10,
           "kind": "static"
         },
         {
@@ -12700,7 +12708,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 9,
+          "line": 11,
           "kind": "static"
         }
       ],
@@ -12708,34 +12716,34 @@
         {
           "name": "HelpMenuButton",
           "kind": "default",
-          "line": 109
+          "line": 115
         }
       ],
       "declarations": [
         {
           "name": "HelpMenuButton",
           "kind": "component",
-          "line": 11
+          "line": 13
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 22
+          "line": 26
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 30
+          "line": 34
         },
         {
           "name": "handleOpenManual",
           "kind": "function",
-          "line": 45
+          "line": 49
         },
         {
           "name": "handleOpenAbout",
           "kind": "function",
-          "line": 51
+          "line": 55
         }
       ],
       "parseError": null,
@@ -12751,7 +12759,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-          "line": 22,
+          "line": 26,
           "description": "",
           "params": [
             {
@@ -12771,7 +12779,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-          "line": 30,
+          "line": 34,
           "description": "",
           "params": [
             {
@@ -12788,11 +12796,20 @@
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [
         {
+          "source": "../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig"
+          ],
+          "line": 10,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
           "source": "../common/StatusLed.jsx",
           "specifiers": [
             "StatusLed"
           ],
-          "line": 9,
+          "line": 11,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         }
@@ -12807,7 +12824,7 @@
             "useRef",
             "useState"
           ],
-          "line": 6,
+          "line": 7,
           "kind": "static"
         },
         {
@@ -12815,7 +12832,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7,
+          "line": 8,
           "kind": "static"
         },
         {
@@ -12823,7 +12840,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8,
+          "line": 9,
           "kind": "static"
         }
       ],
@@ -13436,10 +13453,10 @@
     },
     {
       "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "lines": 241,
+      "lines": 258,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
-      "sourceSummary": "Manual overlay: modal dialog chrome (title bar, reload and close buttons, focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads, filters, searches and navigates the manual.",
+      "sourceSummary": "Manual overlay: modal dialog chrome (title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads, filters, searches and navigates the",
       "imports": [
         {
           "source": "react",
@@ -13450,7 +13467,7 @@
             "useRef",
             "useState"
           ],
-          "line": 11,
+          "line": 12,
           "kind": "static"
         },
         {
@@ -13458,7 +13475,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 12,
+          "line": 13,
           "kind": "static"
         },
         {
@@ -13466,7 +13483,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 13,
+          "line": 14,
           "kind": "static"
         },
         {
@@ -13474,7 +13491,7 @@
           "specifiers": [
             "ManualView"
           ],
-          "line": 14,
+          "line": 15,
           "kind": "static"
         }
       ],
@@ -13482,19 +13499,19 @@
         {
           "name": "ManualOverlayDialog",
           "kind": "default",
-          "line": 36
+          "line": 37
         }
       ],
       "declarations": [
         {
           "name": "ManualOverlayDialog",
           "kind": "component",
-          "line": 36
+          "line": 37
         },
         {
           "name": "handleManualTabTrap",
           "kind": "function",
-          "line": 67
+          "line": 69
         }
       ],
       "parseError": null,
@@ -13510,7 +13527,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 20,
+          "line": 21,
           "description": "Id of the dialog title.",
           "params": [],
           "returns": [],
@@ -13523,7 +13540,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 26,
+          "line": 27,
           "description": "Ids the dialog renders around the manual view.",
           "params": [],
           "returns": [],
@@ -13536,7 +13553,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 36,
+          "line": 37,
           "description": "",
           "params": [
             {
@@ -13579,7 +13596,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 67,
+          "line": 69,
           "description": "Keep forward and reverse Tab navigation inside the open modal dialog.",
           "params": [],
           "returns": [],
@@ -13593,7 +13610,7 @@
           "specifiers": [
             "ManualView"
           ],
-          "line": 14,
+          "line": 15,
           "kind": "static",
           "resolved": "src/components/Manual/ManualView.jsx"
         }
@@ -13608,7 +13625,7 @@
             "useRef",
             "useState"
           ],
-          "line": 11,
+          "line": 12,
           "kind": "static"
         },
         {
@@ -13616,7 +13633,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 12,
+          "line": 13,
           "kind": "static"
         },
         {
@@ -13624,13 +13641,13 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 13,
+          "line": 14,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
       "importanceScore": 27,
-      "summary": "Manual overlay: modal dialog chrome (title bar, reload and close buttons, focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads, filters, searches and navigates the manual.",
+      "summary": "Manual overlay: modal dialog chrome (title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads, filters, searches and navigates the",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -77053,7 +77070,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 32,
+      "incomingLocalImports": 33,
       "importanceScore": 122,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -89202,7 +89219,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-      "line": 30,
+      "line": 34,
       "description": "",
       "params": [
         {
@@ -89222,7 +89239,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/HelpMenuButton.jsx",
-      "line": 22,
+      "line": 26,
       "description": "",
       "params": [
         {
@@ -89488,7 +89505,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 36,
+      "line": 37,
       "description": "",
       "params": [
         {
@@ -89531,7 +89548,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 67,
+      "line": 69,
       "description": "Keep forward and reverse Tab navigation inside the open modal dialog.",
       "params": [],
       "returns": [],
@@ -89544,7 +89561,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 26,
+      "line": 27,
       "description": "Ids the dialog renders around the manual view.",
       "params": [],
       "returns": [],
@@ -89557,7 +89574,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 20,
+      "line": 21,
       "description": "Id of the dialog title.",
       "params": [],
       "returns": [],
