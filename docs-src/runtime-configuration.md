@@ -1106,6 +1106,7 @@ Configuration surface:
 ```js
 help: {
   manual: {
+    enabled: true, // optional: only the boolean literal false disables the manual
     source: 'auto', // exact primitive string: "auto" (default) or "standard"
     sitePathTemplate: 'help/site/manual.{{lng}}.html',
     fallbackPathTemplate: 'help/default/manual.{{lng}}.html',
@@ -1117,6 +1118,16 @@ help: {
   }
 }
 ```
+
+Manual on/off switch:
+
+- `help.manual.enabled` removes the manual from the UI. Only the boolean literal `false` disables
+  it: a missing key, `true`, and any non-boolean value keep the default behaviour.
+- when disabled, the help menu hides its Manual entry and the stand-alone manual page
+  (`<ODV base>/manual/`) reports that the manual is not available (`help.manualDisabled`) instead
+  of loading content. See `docs-src/help-manuals.md` for the stand-alone page.
+- source modes, templates and the fallback language are unchanged by the switch: they apply
+  whenever the manual is enabled.
 
 Source selection:
 

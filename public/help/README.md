@@ -13,3 +13,7 @@
   contents/search/lightbox processing; a chunk failure uses `fallbackPathTemplate` with the same
   filtering. Images resolve from `default/img/`, and the complete PDFs are not filtered. The
   JavaScript modules are generated at build/test time and are not committed manual sources.
+- The same manuals are also readable as a page of their own at `<ODV base>/manual/` (with the
+  section as the `#<section>` fragment). The page follows the same `help.manual` configuration;
+  `help.manual.enabled: false` hides the help menu's Manual entry and makes the page report that
+  the manual is not available. See `docs-src/help-manuals.md`.

@@ -1,8 +1,9 @@
 // File: src/components/DocumentToolbar/ManualOverlayDialog.jsx
 /**
- * Manual overlay: modal dialog chrome (title bar, reload and close buttons, focus trap, Escape and
- * backdrop handling) around the shared {@link ManualView}, which loads, filters, searches and
- * navigates the manual.
+ * Manual overlay: modal dialog chrome (title bar, reload, open-in-new-tab and close buttons,
+ * focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads,
+ * filters, searches and navigates the manual. The open-in-new-tab link points at the stand-alone
+ * manual page (`manual/` next to the viewer bundle) with the current section as the fragment.
  *
  * Manual text and linked assets stay out of the compiled React bundle (site HTML under help/site/)
  * or in lazily loaded generated chunks (the standard manual).
@@ -40,6 +41,7 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
   const wasOpenRef = useRef(false);
   const [documentState, setDocumentState] = useState({ loading: false, error: '', resolvedUrl: '' });
   const [refreshToken, setRefreshToken] = useState(0);
+  const [activeSectionId, setActiveSectionId] = useState('');
 
   const handleRefresh = useCallback(() => {
     setRefreshToken(Date.now());
@@ -145,6 +147,10 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     }
   };
 
+  // Stand-alone manual page served next to the viewer bundle. Relative so deployments under a
+  // subpath (e.g. /OpenDocViewer/) keep working; the current section rides along as the fragment.
+  const manualHref = activeSectionId ? `manual/#${encodeURIComponent(activeSectionId)}` : 'manual/';
+
   if (!isOpen) return null;
 
   return (
@@ -204,6 +210,16 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
             >
               <span className="material-icons" aria-hidden="true">refresh</span>
             </button>
+            <a
+              className="odv-help-close-icon"
+              href={manualHref}
+              target="_blank"
+              rel="noopener"
+              aria-label={t('help.openInNewTab', { defaultValue: 'Open in new tab' })}
+              title={t('help.openInNewTabTitle', { defaultValue: 'Open the manual in a new browser tab' })}
+            >
+              <span className="material-icons" aria-hidden="true">open_in_new</span>
+            </a>
             <button
               type="button"
               className="odv-help-close-icon"
@@ -221,6 +237,7 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
           onDocumentStateChange={setDocumentState}
           onEscape={onClose}
           reservedIds={MANUAL_DIALOG_IDS}
+          onActiveSectionChange={setActiveSectionId}
         />
 
         <div className="odv-help-footer">

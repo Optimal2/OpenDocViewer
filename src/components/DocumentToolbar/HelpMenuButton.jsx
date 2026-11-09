@@ -1,11 +1,13 @@
 // File: src/components/DocumentToolbar/HelpMenuButton.jsx
 /**
- * Toolbar help menu with entries for the manual and About dialog.
+ * Toolbar help menu with entries for the manual and About dialog. The manual entry is hidden when
+ * the runtime config sets `help.manual.enabled` to `false`; any other value keeps the default.
  */
 
 import React, { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import StatusLed from '../common/StatusLed.jsx';
 
 const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedState = 'off', statusLedTitle = '' }) => {
@@ -14,6 +16,8 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedSt
   const menuRef = useRef(null);
   const menuId = useId();
   const [open, setOpen] = useState(false);
+  // Only an explicit `false` removes the manual entry; a missing key or any other value keeps it.
+  const manualEnabled = getRuntimeConfig()?.help?.manual?.enabled !== false;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -72,16 +76,18 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedSt
 
       {open ? (
         <div ref={menuRef} id={menuId} className="toolbar-popup-menu" role="menu">
-          <button
-            type="button"
-            className="toolbar-popup-menu-item"
-            role="menuitem"
-            onClick={handleOpenManual}
-            title={t('help.menu.manual', { defaultValue: 'Manual' })}
-          >
-            <span className="toolbar-popup-menu-check material-icons" aria-hidden="true">menu_book</span>
-            <span>{t('help.menu.manual', { defaultValue: 'Manual' })}</span>
-          </button>
+          {manualEnabled ? (
+            <button
+              type="button"
+              className="toolbar-popup-menu-item"
+              role="menuitem"
+              onClick={handleOpenManual}
+              title={t('help.menu.manual', { defaultValue: 'Manual' })}
+            >
+              <span className="toolbar-popup-menu-check material-icons" aria-hidden="true">menu_book</span>
+              <span>{t('help.menu.manual', { defaultValue: 'Manual' })}</span>
+            </button>
+          ) : null}
           <button
             type="button"
             className="toolbar-popup-menu-item"

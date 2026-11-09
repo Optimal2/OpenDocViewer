@@ -77,6 +77,29 @@ resolve under `help/default/img/`. The complete PDF copies are not filtered and 
 printing or reading every guide regardless of the interactive feature switches. Site-owned HTML in
 `auto` mode is never filtered.
 
+## Stand-alone manual page
+
+The same manual is readable as a page of its own at `<ODV base>/manual/` (a second build entry
+next to the viewer). The manual overlay's **Open in new tab** title-bar control links there, with
+the section being read as the URL fragment (`manual/#<section>`); opening such a link scrolls
+straight to the section once the manual has loaded.
+
+The page renders the shared manual view, so contents tree, search, section filtering and source
+resolution behave exactly as in the overlay, including the `help.manual` source modes, templates
+and fallback language (`docs-src/runtime-configuration.md`). When `help.manual.enabled` is
+`false` the page reports that the manual is not available (`help.manualDisabled`) instead of
+loading content.
+
+IIS serving (`public/web.config`, proven by `scripts/web-config-manual.test.mjs`):
+
+- `/manual` redirects to `/manual/` through the generic AddTrailingSlash rule.
+- `/manual/` answers with `manual/index.html` through the explicit `index.html` default document.
+- the SPA fallback rewrite only fires for requests that map to neither an existing file nor an
+  existing directory, so real `manual/` assets and the `manual/` directory itself are never
+  rewritten to the viewer shell.
+- `manual/index.html` is unhashed entry HTML and is excluded from the global one-year immutable
+  cache, like the viewer entry and the runtime config.
+
 ## Rules for this repository
 
 - **Never hand-edit `public/help/default/*.html`, `*.pdf` or `img/`.** A fix made here is
