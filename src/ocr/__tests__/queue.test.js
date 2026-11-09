@@ -1,6 +1,7 @@
 // File: src/ocr/__tests__/queue.test.js
 /**
- * The OCR page queue: one page at a time in window order; outcomes land in the cache; a PDF
+ * The OCR page queue: one page at a time in window order (or `concurrency` pages on a pool, each
+ * abortable on its own); outcomes land in the cache; a PDF
  * page with a usable text layer is skipped without recognition; replacing the window drops the
  * pages that have not started while the page in flight finishes; a document that leaves the
  * viewer takes its outcomes with it and aborts its in-flight page; pausing starts nothing new;
@@ -75,7 +76,7 @@ describe('createOcrQueue', () => {
     await flush();
 
     expect(engine.recognize).toHaveBeenCalledTimes(1);
-    expect(engine.recognize).toHaveBeenCalledWith(`blob:${a.key}`);
+    expect(engine.recognize).toHaveBeenCalledWith(`blob:${a.key}`, expect.any(Object));
     expect(latest().pages[a.key]).toEqual({ status: OCR_PAGE_STATUS.RECOGNIZING });
     expect(latest().pages[b.key]).toEqual({ status: OCR_PAGE_STATUS.QUEUED });
     expect(latest().busy).toBe(true);
@@ -122,7 +123,7 @@ describe('createOcrQueue', () => {
     expect(snapshots.some((snapshot) => snapshot.pages[text.key]?.status === OCR_PAGE_STATUS.RECOGNIZING)).toBe(false);
     // The engine ran once: for the scanned page only.
     expect(engine.recognize).toHaveBeenCalledTimes(1);
-    expect(engine.recognize).toHaveBeenCalledWith(`blob:${scan.key}`);
+    expect(engine.recognize).toHaveBeenCalledWith(`blob:${scan.key}`, expect.any(Object));
     engine.pending[0].resolve(result('skannad'));
     await flush();
     expect(cache.get(scan.key)).toMatchObject({ status: OCR_PAGE_STATUS.DONE, source: OCR_OUTCOME_SOURCE.RECOGNITION });
@@ -217,7 +218,7 @@ describe('createOcrQueue', () => {
     await flush();
     expect(cache.get(a.key).text).toBe('klar');
     expect(engine.recognize).toHaveBeenCalledTimes(2);
-    expect(engine.recognize).toHaveBeenLastCalledWith(`blob:${c.key}`);
+    expect(engine.recognize).toHaveBeenLastCalledWith(`blob:${c.key}`, expect.any(Object));
     expect(engine.terminate).not.toHaveBeenCalled();
   });
 
@@ -240,7 +241,7 @@ describe('createOcrQueue', () => {
     queue.setWindow([next]);
     await flush();
     expect(engine.recognize).toHaveBeenCalledTimes(2);
-    expect(engine.recognize).toHaveBeenLastCalledWith(`blob:${next.key}`);
+    expect(engine.recognize).toHaveBeenLastCalledWith(`blob:${next.key}`, expect.any(Object));
   });
 
   it('drops cached outcomes of documents that are not retained', async () => {
@@ -393,5 +394,140 @@ describe('createOcrQueue', () => {
     expect(snapshots.length).toBe(count);
     expect(engine.recognize).toHaveBeenCalledTimes(1);
     await expect(queue.releaseEngineIfIdle()).resolves.toBe(false);
+  });
+
+  describe('with a pool and concurrency above one', () => {
+    /** A pool-shaped engine: `size`, and `recognize(image, control)` sets `control.abort` per job. */
+    function makePool(size) {
+      const pending = [];
+      const aborted = [];
+      let failure = null;
+      return {
+        size,
+        pending,
+        aborted,
+        setFailure(kind) { failure = { kind, error: new Error(`OCR engine could not start (${kind})`) }; },
+        recognize: vi.fn((image, control) => {
+          const job = deferred();
+          job.image = image;
+          pending.push(job);
+          control.abort = () => { aborted.push(image); job.reject(new Error('OCR engine was terminated')); };
+          return job.promise.finally(() => { control.abort = null; });
+        }),
+        terminate: vi.fn(async () => {}),
+        getFailure: () => failure,
+      };
+    }
+
+    it('keeps as many pages in flight as the concurrency allows and refills as each finishes', async () => {
+      const engine = makePool(2);
+      const { queue, cache, events, latest } = makeQueue({ engine, concurrency: 2 });
+      const [a, b, c] = [candidate('doc', 0), candidate('doc', 1), candidate('doc', 2)];
+      queue.setWindow([a, b, c]);
+      await flush();
+
+      expect(engine.recognize).toHaveBeenCalledTimes(2);
+      expect(engine.pending.map((job) => job.image)).toEqual([`blob:${a.key}`, `blob:${b.key}`]);
+      expect(latest().pages[a.key]).toEqual({ status: OCR_PAGE_STATUS.RECOGNIZING });
+      expect(latest().pages[b.key]).toEqual({ status: OCR_PAGE_STATUS.RECOGNIZING });
+      expect(latest().pages[c.key]).toEqual({ status: OCR_PAGE_STATUS.QUEUED });
+      expect(queue.isBusy()).toBe(true);
+      expect(events).toEqual(['busy', 'busy']);
+
+      // The second page finishes first: the third starts while the first is still running.
+      engine.pending[1].resolve(result('andra'));
+      await flush();
+      expect(cache.get(b.key).text).toBe('andra');
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+      expect(engine.pending[2].image).toBe(`blob:${c.key}`);
+      expect(latest().busy).toBe(true);
+      expect(events).toEqual(['busy', 'busy', 'busy']);
+
+      engine.pending[0].resolve(result('första'));
+      engine.pending[2].resolve(result('tredje'));
+      await flush();
+      expect([a, b, c].map((entry) => cache.get(entry.key).text)).toEqual(['första', 'andra', 'tredje']);
+      expect(latest().busy).toBe(false);
+      expect(events[events.length - 1]).toBe('idle');
+      expect(events.filter((event) => event === 'idle')).toHaveLength(1);
+    });
+
+    it('aborts only the pages of a document that left, through their own controls, and never the pool', async () => {
+      const engine = makePool(2);
+      const { queue, cache, latest } = makeQueue({ engine, concurrency: 2 });
+      const [old, kept] = [candidate('old', 0), candidate('kept', 0)];
+      queue.setWindow([old, kept]);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(2);
+
+      queue.retainSources(new Set(['kept']));
+      await flush();
+      expect(engine.aborted).toEqual([`blob:${old.key}`]);
+      expect(engine.terminate).not.toHaveBeenCalled();
+      expect(latest().pages[old.key]).toBeUndefined();
+      expect(cache.has(old.key)).toBe(false);
+
+      // The kept page is untouched and finishes normally.
+      engine.pending[1].resolve(result('kvar'));
+      await flush();
+      expect(cache.get(kept.key).text).toBe('kvar');
+    });
+
+    it('drops only the worker whose recognition never answers', async () => {
+      vi.useFakeTimers();
+      try {
+        const engine = makePool(2);
+        const { queue, cache } = makeQueue({ engine, concurrency: 2, timeouts: { probe: 50, image: 50, recognize: 100 } });
+        const [slow, quick, next] = [candidate('doc', 0), candidate('doc', 1), candidate('doc', 2)];
+        queue.setWindow([slow, quick, next]);
+        await flush();
+        // The quick page finishes after 60 ms; the next page starts then, 60 ms behind the slow one.
+        await vi.advanceTimersByTimeAsync(60);
+        engine.pending[1].resolve(result('snabb'));
+        await flush();
+        expect(engine.recognize).toHaveBeenCalledTimes(3);
+
+        await vi.advanceTimersByTimeAsync(40);
+        await flush();
+        expect(cache.get(slow.key)).toEqual({ status: OCR_PAGE_STATUS.FAILED, reason: 'OCR recognition exceeded 100 ms' });
+        expect(engine.aborted).toEqual([`blob:${slow.key}`]);
+        expect(engine.terminate).not.toHaveBeenCalled();
+        engine.pending[2].resolve(result('nästa'));
+        await flush();
+        expect(cache.get(next.key).status).toBe(OCR_PAGE_STATUS.DONE);
+        expect(cache.get(quick.key).status).toBe(OCR_PAGE_STATUS.DONE);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('stops every page after the pool reports it cannot start, and reports idle once all are down', async () => {
+      const engine = makePool(2);
+      const { queue, latest, events } = makeQueue({ engine, concurrency: 2 });
+      const [a, b, c] = [candidate('doc', 0), candidate('doc', 1), candidate('doc', 2)];
+      queue.setWindow([a, b, c]);
+      await flush();
+      engine.setFailure('csp');
+      engine.pending[0].reject(new Error('OCR engine could not start (csp)'));
+      await flush();
+      expect(latest().engineFailure).toBe('csp');
+      expect(latest().pages[a.key]).toEqual({ status: OCR_PAGE_STATUS.FAILED, reason: 'engine:csp' });
+      // The other page in flight was still running: nothing new started in its place.
+      expect(engine.recognize).toHaveBeenCalledTimes(2);
+      expect(events).not.toContain('idle');
+      engine.pending[1].reject(new Error('OCR engine could not start (csp)'));
+      await flush();
+      expect(latest().pages[b.key]).toEqual({ status: OCR_PAGE_STATUS.FAILED, reason: 'engine:csp' });
+      expect(latest().pages[c.key]).toEqual({ status: OCR_PAGE_STATUS.QUEUED });
+      expect(events[events.length - 1]).toBe('idle');
+    });
+
+    it('runs one page at a time without a concurrency, whatever the pool size', async () => {
+      const engine = makePool(3);
+      const { queue } = makeQueue({ engine });
+      queue.setWindow([candidate('doc', 0), candidate('doc', 1)]);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(1);
+    });
   });
 });

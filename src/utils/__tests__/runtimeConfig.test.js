@@ -23,7 +23,12 @@ import {
   PDF_SIGNATURE_UNCHECKED_SEVERITIES,
   getPdfSignatureUncheckedSeverity,
   DEFAULT_OCR_LANGUAGES,
+  DEFAULT_OCR_WORKER_COUNT,
+  MAX_AUTO_OCR_WORKER_COUNT,
+  MAX_OCR_WORKER_COUNT,
   OCR_ASSET_BASE_URL_REJECTIONS,
+  describeOcrWorkerCount,
+  resolveOcrWorkerCount,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
   isOcrWholeDocumentEnabled,
@@ -330,6 +335,47 @@ describe('runtimeConfig', () => {
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 'false' } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 0 } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: null } })).toBe(true);
+    });
+  });
+
+  describe('describeOcrWorkerCount / resolveOcrWorkerCount', () => {
+    it('defaults to one worker when the section or key is missing', () => {
+      expect(DEFAULT_OCR_WORKER_COUNT).toBe(1);
+      expect(describeOcrWorkerCount({})).toEqual({ value: 1, configured: false, clamped: false });
+      expect(describeOcrWorkerCount({ ocr: {} })).toEqual({ value: 1, configured: false, clamped: false });
+      expect(describeOcrWorkerCount(null)).toEqual({ value: 1, configured: false, clamped: false });
+      expect(resolveOcrWorkerCount({}, { cores: 16 })).toBe(1);
+    });
+
+    it('takes an integer literal from 1 up to the maximum and clamps above it', () => {
+      expect(describeOcrWorkerCount({ ocr: { workerCount: 1 } })).toEqual({ value: 1, configured: true, clamped: false });
+      expect(describeOcrWorkerCount({ ocr: { workerCount: 3 } })).toEqual({ value: 3, configured: true, clamped: false });
+      expect(describeOcrWorkerCount({ ocr: { workerCount: MAX_OCR_WORKER_COUNT } })).toEqual({ value: MAX_OCR_WORKER_COUNT, configured: true, clamped: false });
+      expect(describeOcrWorkerCount({ ocr: { workerCount: MAX_OCR_WORKER_COUNT + 1 } })).toEqual({ value: MAX_OCR_WORKER_COUNT, configured: true, clamped: true });
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 3 } }, { cores: 2 })).toBe(3);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 100 } })).toBe(MAX_OCR_WORKER_COUNT);
+    });
+
+    it('rejects anything but an integer literal and reports the value', () => {
+      for (const value of ['2', 2.5, -1, true, null, undefined, NaN, Infinity, [2], { count: 2 }]) {
+        const described = describeOcrWorkerCount({ ocr: { workerCount: value } });
+        expect(described).toMatchObject({ value: 1, configured: true, clamped: false });
+        expect(described).toHaveProperty('rejected');
+        expect(resolveOcrWorkerCount({ ocr: { workerCount: value } }, { cores: 16 })).toBe(1);
+      }
+    });
+
+    it('chooses from the cores for 0: one left for the page, at least one, at most the automatic maximum', () => {
+      expect(describeOcrWorkerCount({ ocr: { workerCount: 0 } })).toEqual({ value: 'auto', configured: true, clamped: false });
+      expect(MAX_AUTO_OCR_WORKER_COUNT).toBe(4);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 0 })).toBe(1);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, {})).toBe(1);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 1 })).toBe(1);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 2 })).toBe(1);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 4 })).toBe(3);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 5 })).toBe(4);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 24 })).toBe(MAX_AUTO_OCR_WORKER_COUNT);
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: '8' })).toBe(4);
     });
   });
 

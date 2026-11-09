@@ -28,7 +28,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/hooks/useKeyTipsHeld.js` (67 lines) - Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs.
 - `src/hooks/usePageNavigation.js` (182 lines) - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/components/DocumentViewer/hooks/useCompareTransforms.js` (101 lines) - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
-- `src/hooks/useOcrTextLayers.js` (210 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
+- `src/hooks/useOcrTextLayers.js` (214 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 
 ### Workers
 

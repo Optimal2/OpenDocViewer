@@ -138,10 +138,15 @@
       // and dotted lines are left as they are.
       removeRulingLines: true,
       // Work through the whole document in the background: after the shown page and its
-      // neighbours, the remaining pages in reading order, one at a time, so the search covers
-      // every page in time. false (default) recognises only the shown page and its neighbours;
+      // neighbours, the remaining pages in reading order, so the search covers every page in
+      // time. false (default) recognises only the shown page and its neighbours;
       // only the literal true turns the rest on. Costs CPU in the background on long documents.
       recognizeWholeDocument: false,
+      // Pages recognised at the same time, each in its own worker with its own copy of the
+      // engine and the language models (so each extra worker costs memory as well as a core).
+      // 1 (default) is one worker; an integer 2 to 8 runs that many; 0 picks automatically
+      // from the client's cores (one is left for the page, at most 4). Anything else is 1.
+      workerCount: 1,
       // Tesseract language codes, tried together on every text line (best match wins). Each
       // extra language adds some recognition time per page. An array in odv.site.config.js
       // replaces this default completely. The viewer's own ocr/ folder holds the Swedish and

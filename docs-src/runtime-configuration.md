@@ -275,6 +275,7 @@ ocr: {
   enabled: false,              // only the literal true turns OCR on
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   recognizeWholeDocument: false, // true: after the shown page's neighbours, the rest of the document
+  workerCount: 1,              // pages recognised at the same time; 0: automatic from the client's cores
   languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
   search: {
     enabled: true,             // the toolbar's search in the text layers; false leaves a status-only indicator
@@ -303,8 +304,8 @@ ocr: {
   background. `false` by default: only the shown page and its neighbours are recognised (see
   "Which pages are recognised" below), and a page further away waits until the user reaches it,
   so the search covers only the pages that have been near the user. With the boolean literal
-  `true`, the window keeps its priority and the remaining pages follow it, one at a time, in
-  reading order from the shown page to the end and then from the start of the document, while
+  `true`, the window keeps its priority and the remaining pages follow it (`ocr.workerCount` at
+  a time) in reading order from the shown page to the end and then from the start of the document, while
   the viewer is open; a page the viewer has not rendered is rendered for the purpose and dropped
   again as soon as its bytes are read (so a long document does not pile up page renders; a page
   the user has reached meanwhile is left to the viewer), the outcome cache grows to the page
@@ -312,6 +313,18 @@ ocr: {
   pauses for printing and under memory pressure. On a long document this costs CPU in the
   background for as long as it takes (a few seconds per page), also while the tab is in the
   background, which is why it is off by default. The key means nothing while OCR is off.
+- `ocr.workerCount`: how many pages are recognised at the same time, each in its own
+  tesseract.js worker. `1` by default. Only an integer literal counts: `2` to `8` runs that many
+  workers (a larger integer is lowered to 8), `0` chooses automatically from the client's logical
+  cores (`navigator.hardwareConcurrency` minus one, which is left for the page itself, never
+  fewer than one and never more than 4), and anything else (a string such as `"2"`, a fraction,
+  a negative number, a boolean) gives one worker with a console warning. Every worker holds its
+  own copy of the engine and of every language model, so each extra worker costs memory as well
+  as a core; measure before raising it on a site, and keep it at one where clients are weak. The
+  first worker starts alone (a failure is found once, the others then take the engine and models
+  from the browser's cache) and the others follow once it runs. The pages in flight share the
+  queue's order: with the window's pages first, the whole document (when asked for) then goes
+  through that many pages at a time. The key means nothing while OCR is off.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
   non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
   (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
@@ -422,9 +435,10 @@ Which pages are recognised, and when:
 - When the user moves to another page, the pages that have not started are dropped and the new
   window is queued; the page being recognised finishes (a Tesseract worker cannot be interrupted
   without discarding its loaded models) and its outcome is kept. Switching document drops that
-  document's outcomes and aborts its page in flight.
+  document's outcomes and aborts its pages in flight (with several workers, only the workers
+  holding those pages are dropped).
 - The queue pauses while a print flow holds page images or a print PDF is assembled, and under
-  hard memory pressure; the page in flight finishes, nothing new starts until the pause ends.
+  hard memory pressure; the pages in flight finish, nothing new starts until the pause ends.
 - Outcomes (text, word boxes, a skip or a failure) are cached per page for the session, at most
   200 pages, least recently used first. A page that failed is not retried in the same session.
   Each step is bounded (30 s for the text-layer probe and the page image, 180 s for recognition),

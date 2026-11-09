@@ -11,19 +11,25 @@
  */
 import {
   DEFAULT_OCR_LANGUAGES,
+  DEFAULT_OCR_WORKER_COUNT,
+  MAX_OCR_WORKER_COUNT,
   describeOcrAssetBaseUrl,
   describeOcrLanguages,
+  describeOcrWorkerCount,
   getRuntimeConfig,
+  resolveOcrWorkerCount,
 } from '../utils/runtimeConfig.js';
 import logger from '../logging/systemLogger.js';
 import { readOcrAssetManifest, resolveOcrAssetUrls } from './assetUrls.js';
 import { createOcrEngine } from './engine.js';
+import { createOcrEnginePool } from './enginePool.js';
 import { partitionOcrLanguages } from './languages.js';
 
 /**
  * @typedef {Object} OcrSetup
  * @property {Array<string>} languages  The codes the engine will load.
  * @property {Object} assetUrls  Absolute `workerPath`, `corePath`, `langPath` and `base` (see assetUrls.js).
+ * @property {number} workerCount  Engines to run at the same time (`ocr.workerCount`, resolved).
  * @property {Array<string>} warnings  Human-readable configuration problems (also logged).
  */
 
@@ -37,6 +43,8 @@ import { partitionOcrLanguages } from './languages.js';
  * @param {string=} options.moduleUrl  Caller location (defaults to this module's `import.meta.url`).
  * @param {string=} options.documentBaseUrl  Base for a relative assetBaseUrl (defaults to `document.baseURI`).
  * @param {boolean=} options.dev  Dev-server mode (defaults to `import.meta.env.DEV`).
+ * @param {number=} options.cores  Logical cores for `ocr.workerCount: 0` (defaults to
+ *   `navigator.hardwareConcurrency`).
  * @returns {OcrSetup}
  */
 export function describeOcrSetup(cfg = getRuntimeConfig(), {
@@ -45,8 +53,17 @@ export function describeOcrSetup(cfg = getRuntimeConfig(), {
   moduleUrl = import.meta.url,
   documentBaseUrl = typeof document !== 'undefined' ? document.baseURI : undefined,
   dev = Boolean(import.meta.env?.DEV),
+  cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 0,
 } = {}) {
   const warnings = [];
+
+  const workerConfig = describeOcrWorkerCount(cfg);
+  if (Object.prototype.hasOwnProperty.call(workerConfig, 'rejected')) {
+    warnings.push(`ocr.workerCount must be an integer (0 for automatic), not ${JSON.stringify(workerConfig.rejected)}; using ${DEFAULT_OCR_WORKER_COUNT}`);
+  } else if (workerConfig.clamped) {
+    warnings.push(`ocr.workerCount is limited to ${MAX_OCR_WORKER_COUNT}; using ${MAX_OCR_WORKER_COUNT}`);
+  }
+  const workerCount = resolveOcrWorkerCount(cfg, { cores });
 
   const languageConfig = describeOcrLanguages(cfg);
   if (languageConfig.notArray) {
@@ -77,23 +94,31 @@ export function describeOcrSetup(cfg = getRuntimeConfig(), {
   const assetUrls = resolveOcrAssetUrls(manifest, { assetBaseUrl: baseConfig.url, moduleUrl, documentBaseUrl, dev });
 
   for (const warning of warnings) log.warn(`OCR configuration: ${warning}`);
-  return { languages, assetUrls, warnings };
+  return { languages, assetUrls, workerCount, warnings };
 }
 
 /**
- * Create an engine for the configured languages and asset location.
+ * Create an engine for the configured languages and asset location: one engine (engine.js)
+ * for a worker count of one, otherwise a pool of that many (enginePool.js) behind the same
+ * interface, which the queue uses with the matching concurrency.
  *
  * @param {Object=} cfg
- * @param {Object=} options  Passed to describeOcrSetup, plus `createWorker` for createOcrEngine.
- * @returns {{ engine: Object, setup: OcrSetup }}  `engine` is an OcrEngine (see engine.js).
+ * @param {Object=} options  Passed to describeOcrSetup, plus `createWorker` for createOcrEngine
+ *   and `workerCount` to override the configured count (the benchmark compares counts).
+ * @returns {{ engine: Object, setup: OcrSetup, workerCount: number }}  `engine` is an OcrEngine
+ *   or an OcrEnginePool; `workerCount` is how many pages it recognises at a time.
  */
-export function createConfiguredOcrEngine(cfg = getRuntimeConfig(), { createWorker, ...setupOptions } = {}) {
+export function createConfiguredOcrEngine(cfg = getRuntimeConfig(), { createWorker, workerCount, ...setupOptions } = {}) {
   const setup = describeOcrSetup(cfg, setupOptions);
-  const engine = createOcrEngine({
+  const count = Number.isInteger(workerCount) && workerCount > 0
+    ? Math.min(MAX_OCR_WORKER_COUNT, workerCount)
+    : setup.workerCount;
+  const createEngine = () => createOcrEngine({
     languages: setup.languages,
     assetUrls: setup.assetUrls,
     ...(createWorker ? { createWorker } : {}),
     ...(setupOptions.log ? { log: setupOptions.log } : {}),
   });
-  return { engine, setup };
+  const engine = count > 1 ? createOcrEnginePool({ size: count, createEngine }) : createEngine();
+  return { engine, setup, workerCount: count };
 }

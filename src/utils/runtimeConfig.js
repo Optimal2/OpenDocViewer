@@ -336,8 +336,8 @@ export function isOcrLineRemovalEnabled(cfg = getRuntimeConfig()) {
 /**
  * Resolve whether the OCR queue works through the whole document in the background
  * (`ocr.recognizeWholeDocument`): after the window around the shown page, the remaining pages
- * in reading order, one at a time, while the viewer is open, so the search covers every page in
- * time. Off by default (only the window is recognised); only the boolean literal `true` turns it
+ * in reading order (as many at a time as `ocr.workerCount` allows), while the viewer is open, so
+ * the search covers every page in time. Off by default (only the window is recognised); only the boolean literal `true` turns it
  * on. Means nothing while OCR is off.
  *
  * @param {RuntimeConfig} [cfg]
@@ -345,6 +345,69 @@ export function isOcrLineRemovalEnabled(cfg = getRuntimeConfig()) {
  */
 export function isOcrWholeDocumentEnabled(cfg = getRuntimeConfig()) {
   return cfg?.ocr?.recognizeWholeDocument === true;
+}
+
+/** Default number of OCR workers: one tesseract.js worker, one page at a time. */
+export const DEFAULT_OCR_WORKER_COUNT = 1;
+/** Most workers a site may ask for with an explicit `ocr.workerCount`; larger values are clamped. */
+export const MAX_OCR_WORKER_COUNT = 8;
+/**
+ * Most workers `ocr.workerCount: 0` (automatic) picks however many cores the client reports:
+ * every worker holds its own copy of the engine and the language models, so the automatic
+ * choice stays modest on memory.
+ */
+export const MAX_AUTO_OCR_WORKER_COUNT = 4;
+
+/**
+ * @typedef {Object} OcrWorkerCountConfig
+ * @property {(number|'auto')} value  The count to use, or 'auto' for the integer literal 0.
+ * @property {boolean} configured  True when the key is present.
+ * @property {boolean} clamped  True when an integer above MAX_OCR_WORKER_COUNT was lowered to it.
+ * @property {*} rejected  The configured value when it was not an integer literal 0 or above
+ *   (a string, a fraction, a negative number, a boolean); the default is used then. Absent otherwise.
+ */
+
+/**
+ * Describe `ocr.workerCount` (how many tesseract.js workers recognise pages at the same time)
+ * without resolving the automatic choice, so the caller can report a rejected or clamped value.
+ * Only an integer literal counts: 1 to MAX_OCR_WORKER_COUNT is taken as it is, a larger integer
+ * is clamped, 0 means automatic, and anything else (a missing key, a string such as `"2"`, a
+ * fraction, a negative number, a boolean) gives the default of one worker. Means nothing while
+ * OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {OcrWorkerCountConfig}
+ */
+export function describeOcrWorkerCount(cfg = getRuntimeConfig()) {
+  const section = cfg?.ocr;
+  const configured = Boolean(section) && typeof section === 'object' && Object.prototype.hasOwnProperty.call(section, 'workerCount');
+  const raw = configured ? section.workerCount : undefined;
+  if (!configured) return { value: DEFAULT_OCR_WORKER_COUNT, configured: false, clamped: false };
+  if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < 0) {
+    return { value: DEFAULT_OCR_WORKER_COUNT, configured: true, clamped: false, rejected: raw };
+  }
+  if (raw === 0) return { value: 'auto', configured: true, clamped: false };
+  if (raw > MAX_OCR_WORKER_COUNT) return { value: MAX_OCR_WORKER_COUNT, configured: true, clamped: true };
+  return { value: raw, configured: true, clamped: false };
+}
+
+/**
+ * Resolve how many OCR workers to run: `describeOcrWorkerCount`, with the automatic choice
+ * made from the client's core count: one core is left for the page, and the result is bounded
+ * by MAX_AUTO_OCR_WORKER_COUNT and never below one. An unknown core count (0, missing) gives one
+ * worker. Means nothing while OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @param {Object} [options]
+ * @param {number} [options.cores]  Logical cores (`navigator.hardwareConcurrency`); the caller
+ *   reads it, so this stays free of globals.
+ * @returns {number}
+ */
+export function resolveOcrWorkerCount(cfg = getRuntimeConfig(), { cores = 0 } = {}) {
+  const { value } = describeOcrWorkerCount(cfg);
+  if (value !== 'auto') return value;
+  const reported = Math.max(0, Math.floor(Number(cores) || 0));
+  return Math.max(1, Math.min(MAX_AUTO_OCR_WORKER_COUNT, reported - 1));
 }
 
 /**

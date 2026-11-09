@@ -99,6 +99,10 @@
       // Recognise the whole document in the background (after the shown page and its
       // neighbours), so the search covers every page in time. Only the literal true turns it on.
       // recognizeWholeDocument: false,
+      // Pages recognised at the same time, one worker each (each worker holds its own copy of the
+      // engine and the language models). 1 (default), an integer up to 8, or 0 for an automatic
+      // choice from the client's cores (one left for the page, at most 4).
+      // workerCount: 1,
       // Tesseract language codes tried together on every text line. Arrays replace the default
       // completely, so list every language the site needs. Each extra language adds some
       // recognition time per page. The viewer ships the Swedish and English models; another

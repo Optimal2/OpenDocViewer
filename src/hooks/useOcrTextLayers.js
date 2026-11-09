@@ -4,7 +4,8 @@
  *
  * The hook is inert until the OCR module has arrived (useOcrModule.js hands it over only when
  * `ocr.enabled` is the literal true), so on the default code path it holds an empty map and
- * creates nothing. With the module it builds one engine, one in-memory result cache, one PDF
+ * creates nothing. With the module it builds one engine (or a pool of `ocr.workerCount` engines,
+ * which recognise that many pages at a time), one in-memory result cache, one PDF
  * text prober and one page queue for the session; feeds the queue the window around the focus
  * pages (src/ocr/window.js) every time the pages or the focus change; pauses it while the viewer
  * says so (print PDF preparation, hard memory pressure); drops a document's outcomes when the
@@ -89,7 +90,9 @@ export default function useOcrTextLayers({
     if (!ocrModule) return undefined;
     let active = true;
     const cache = ocrModule.createOcrResultCache();
-    const { engine } = ocrModule.createConfiguredOcrEngine();
+    // One engine, or a pool of `ocr.workerCount` engines behind the same interface; the queue
+    // runs as many pages at a time as the pool has engines.
+    const { engine, workerCount } = ocrModule.createConfiguredOcrEngine();
     const prober = ocrModule.createPdfTextProber({
       readSourceArrayBuffer: (sourceKey) => readSourceRef.current(sourceKey),
     });
@@ -124,6 +127,7 @@ export default function useOcrTextLayers({
       : null;
     const queue = ocrModule.createOcrQueue({
       engine,
+      concurrency: Math.max(1, Math.floor(Number(workerCount)) || 1),
       cache,
       probeTextLayer: (sourceKey, pageIndex) => prober.probe(sourceKey, pageIndex),
       getPageImage,

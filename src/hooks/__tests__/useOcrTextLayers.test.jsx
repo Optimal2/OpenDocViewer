@@ -158,6 +158,31 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(4);
   });
 
+  it('runs as many pages at a time as the configured engine reports workers for', async () => {
+    const engine = makeEngine();
+    engine.size = 2;
+    const ocrModule = makeModule(engine, makeProber());
+    ocrModule.createConfiguredOcrEngine = function createPool() {
+      this.created += 1;
+      return { engine, setup: { languages: ['swe', 'eng'], assetUrls: {}, warnings: [], workerCount: 2 }, workerCount: 2 };
+    };
+    const allPages = [page('doc', 0), page('doc', 1), page('doc', 2), page('doc', 3)];
+    const props = baseProps({ ocrModule, allPages, focusPageIndexes: [0] });
+    await render(props);
+    await flush();
+
+    expect(engine.recognize).toHaveBeenCalledTimes(2);
+    expect(fetchCalls).toEqual(['/pages/doc-0.png', '/pages/doc-1.png']);
+    expect(latest.ocrPages[makeOcrPageKey('doc', 0)]).toEqual({ status: 'recognizing' });
+    expect(latest.ocrPages[makeOcrPageKey('doc', 1)]).toEqual({ status: 'recognizing' });
+    expect(latest.ocrPages[makeOcrPageKey('doc', 2)]).toEqual({ status: 'queued' });
+
+    engine.pending[0].resolve(result('första'));
+    await flush();
+    expect(engine.recognize).toHaveBeenCalledTimes(3);
+    expect(latest.ocrPages[makeOcrPageKey('doc', 2)]).toEqual({ status: 'recognizing' });
+  });
+
   it('hands the fetched image to prepareOcrImage with the page entry as size fallback and keeps the measured size', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());

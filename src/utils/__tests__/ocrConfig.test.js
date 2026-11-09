@@ -21,12 +21,14 @@ import {
   isOcrSearchCtrlFOverrideEnabled,
   isReadAloudEnabled,
   isSpeechLanguageAutoDetectEnabled,
+  resolveOcrWorkerCount,
 } from '../runtimeConfig.js';
 
 const SHIPPED_OCR_DEFAULTS = Object.freeze({
   enabled: false,
   removeRulingLines: true,
   recognizeWholeDocument: false,
+  workerCount: 1,
   languages: ['swe', 'eng'],
   search: { enabled: true, overridesCtrlF: false },
   speech: { enabled: true, autoDetectLanguage: true },
@@ -60,6 +62,7 @@ function readOcrConfig({ siteConfig, useSampleSiteFile = false } = {}) {
       autoDetect: isSpeechLanguageAutoDetectEnabled(),
       languages: getOcrLanguages(),
       assetBaseUrl: getOcrAssetBaseUrl(),
+      workerCount: resolveOcrWorkerCount(undefined, { cores: 8 }),
     };
   } finally {
     dom.window.close();
@@ -79,7 +82,17 @@ describe('shipped OCR configuration', () => {
     expect(shipped.autoDetect).toBe(true);
     expect(shipped.languages).toEqual(['swe', 'eng']);
     expect(shipped.assetBaseUrl).toBeNull();
+    expect(shipped.workerCount).toBe(1);
     expect(shipped.siteKeys).toEqual([]);
+  });
+
+  it('runs more workers only for a site file with an integer literal, and picks from the cores for 0', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } }).workerCount).toBe(1);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 3 } } }).workerCount).toBe(3);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 0 } } }).workerCount).toBe(4);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: '3' } } }).workerCount).toBe(1);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 2.5 } } }).workerCount).toBe(1);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 99 } } }).workerCount).toBe(8);
   });
 
   it('offers the search and read-aloud unless a site file sets the literal false, each on its own', () => {

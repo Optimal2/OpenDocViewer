@@ -130,4 +130,55 @@ describe('createConfiguredOcrEngine', () => {
     await engine.terminate();
     expect(worker.terminate).toHaveBeenCalledTimes(1);
   });
+
+  it('gives one plain engine for the default worker count and reports the count', () => {
+    const { engine, setup, workerCount } = createConfiguredOcrEngine({ ocr: { enabled: true } }, options({ createWorker: vi.fn() }));
+    expect(workerCount).toBe(1);
+    expect(setup.workerCount).toBe(1);
+    expect(engine).not.toHaveProperty('size');
+  });
+
+  it('builds a pool of the configured size whose engines each start their own worker', async () => {
+    const createWorker = vi.fn(async () => ({ recognize: vi.fn(async () => ({ data: { text: '', blocks: [] } })), terminate: vi.fn(async () => {}) }));
+    const { engine, workerCount } = createConfiguredOcrEngine(
+      { ocr: { enabled: true, workerCount: 2 } },
+      options({ createWorker }),
+    );
+    expect(workerCount).toBe(2);
+    expect(engine.size).toBe(2);
+    await Promise.all([engine.recognize('a', {}), engine.recognize('b', {})]);
+    expect(createWorker).toHaveBeenCalledTimes(2);
+    await engine.terminate();
+  });
+
+  it('lets the caller override the worker count (the benchmark compares counts), within the maximum', () => {
+    const opts = options({ createWorker: vi.fn() });
+    expect(createConfiguredOcrEngine({ ocr: { enabled: true, workerCount: 1 } }, { ...opts, workerCount: 3 }).engine.size).toBe(3);
+    expect(createConfiguredOcrEngine({ ocr: { enabled: true, workerCount: 4 } }, { ...opts, workerCount: 1 }).workerCount).toBe(1);
+    expect(createConfiguredOcrEngine({ ocr: { enabled: true } }, { ...opts, workerCount: 99 }).workerCount).toBe(8);
+    expect(createConfiguredOcrEngine({ ocr: { enabled: true, workerCount: 2 } }, { ...opts, workerCount: 0 }).workerCount).toBe(2);
+  });
+});
+
+describe('describeOcrSetup worker count', () => {
+  it('resolves the automatic count from the given cores without a warning', () => {
+    const opts = options();
+    const setup = describeOcrSetup({ ocr: { enabled: true, workerCount: 0 } }, { ...opts, cores: 8 });
+    expect(setup.workerCount).toBe(4);
+    expect(setup.warnings).toEqual([]);
+    expect(describeOcrSetup({ ocr: { enabled: true, workerCount: 0 } }, { ...opts, cores: 2 }).workerCount).toBe(1);
+  });
+
+  it('warns once for a rejected value and once for a clamped one', () => {
+    const rejected = options();
+    const setup = describeOcrSetup({ ocr: { enabled: true, workerCount: '3' } }, rejected);
+    expect(setup.workerCount).toBe(1);
+    expect(setup.warnings).toEqual(['ocr.workerCount must be an integer (0 for automatic), not "3"; using 1']);
+    expect(rejected.log.warn).toHaveBeenCalledTimes(1);
+
+    const clamped = options();
+    const high = describeOcrSetup({ ocr: { enabled: true, workerCount: 12 } }, clamped);
+    expect(high.workerCount).toBe(8);
+    expect(high.warnings).toEqual(['ocr.workerCount is limited to 8; using 8']);
+  });
 });

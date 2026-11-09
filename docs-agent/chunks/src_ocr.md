@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 14. Line count: 2116. JSDoc symbol count: 101.
+File count: 15. Line count: 2317. JSDoc symbol count: 107.
 
 ## src/ocr/assetUrls.js
 
@@ -76,11 +76,25 @@ Symbols:
 - `flattenOcrWords` (function) - Flatten tesseract.js' block tree into one word list with page\-pixel boxes.
 - `toError` (function) - No description.
 
+## src/ocr/enginePool.js
+
+A pool of OCR engines \(engine.js\) behind the one\-engine interface the queue \(queue.js\) uses, so that \`ocr.workerCount\` pages can be recognised at the same time.
+
+Exports: `createOcrEnginePool`
+
+Symbols:
+
+- `TERMINATED_MESSAGE` (constant) - Rejection for callers waiting on a free engine when the pool is terminated.
+- `OcrEnginePool` (typedef) - No description.
+- `createOcrEnginePool` (function) - No description.
+- `createOcrEnginePool~takeIdle` (function) - A free entry now, a new one while under the limit, else null.
+- `createOcrEnginePool~drop` (function) - Terminate one engine and forget it; the next acquisition creates a fresh one in its place.
+
 ## src/ocr/index.js
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
 ## src/ocr/languages.js
 
@@ -168,7 +182,7 @@ Symbols:
 
 ## src/ocr/queue.js
 
-The OCR page queue: one page at a time, bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
+The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
 
 Exports: `OCR_STEP_TIMEOUTS_MS`, `OCR_PAGE_STATUS`, `OCR_OUTCOME_SOURCE`, `createOcrQueue`
 
@@ -187,6 +201,7 @@ Symbols:
 - `OcrQueue` (typedef) - No description.
 - `createOcrQueue` (function) - No description.
 - `createOcrQueue~retained` (member) - null until retainSources is called: every source is retained.
+- `createOcrQueue~abortJob` (function) - Abort one job's recognition: its worker on a pool, the engine as a whole otherwise.
 
 ## src/ocr/resultCache.js
 
@@ -206,13 +221,13 @@ Builds an OCR engine from the runtime configuration and reports configuration pr
 
 Exports: `describeOcrSetup`, `createConfiguredOcrEngine`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/logging/systemLogger.js`, `src/ocr/assetUrls.js`, `src/ocr/engine.js`, `src/ocr/languages.js`
+Local imports: `src/utils/runtimeConfig.js`, `src/logging/systemLogger.js`, `src/ocr/assetUrls.js`, `src/ocr/engine.js`, `src/ocr/enginePool.js`, `src/ocr/languages.js`
 
 Symbols:
 
 - `OcrSetup` (typedef) - No description.
 - `describeOcrSetup` (function) - Resolve languages and asset URLs from the configuration, logging each problem once.
-- `createConfiguredOcrEngine` (function) - Create an engine for the configured languages and asset location.
+- `createConfiguredOcrEngine` (function) - Create an engine for the configured languages and asset location: one engine \(engine.js\) for a worker count of one, otherwise a pool of that many \(enginePool.js\) behind the same i...
 
 ## src/ocr/window.js
 

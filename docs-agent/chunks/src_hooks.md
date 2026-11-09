@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 9. Line count: 1332. JSDoc symbol count: 38.
+File count: 9. Line count: 1336. JSDoc symbol count: 38.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 

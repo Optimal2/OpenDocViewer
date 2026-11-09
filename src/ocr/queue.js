@@ -1,20 +1,22 @@
 // File: src/ocr/queue.js
 /**
- * The OCR page queue: one page at a time, bounded by the window (window.js), results in the
- * in-memory cache (resultCache.js).
+ * The OCR page queue: `concurrency` pages at a time (one by default), bounded by the window
+ * (window.js), results in the in-memory cache (resultCache.js).
  *
  * The queue holds the candidates the viewer last handed it (`setWindow`) and works through them in
- * that order on one engine: classify (classify.js), probe a PDF's text layer when it has one,
+ * that order on one engine, or on an engine pool (enginePool.js) when more than one page runs at
+ * a time: classify (classify.js), probe a PDF's text layer when it has one,
  * fetch the rendered page image, recognise. A PDF page whose own text layer is usable is done
  * without the engine: its outcome holds the layer's words (pdfTextProbe.js), marked with the
  * source `pdf-text`, in the same shape as recognised words, so the page is searchable like a
  * recognised one. Replacing the window drops the pages that have not
- * started; the page in flight finishes and its outcome is kept, because a tesseract.js worker
+ * started; the pages in flight finish and their outcomes are kept, because a tesseract.js worker
  * cannot be interrupted short of terminating it (which would also discard the loaded models).
  * When a document leaves the viewer (`retainSources`) its outcomes are dropped and an in-flight
- * page of that document is abandoned by terminating the engine; the next page starts a fresh
- * worker. `setPaused(true)` lets the current page finish and starts nothing new (the viewer
- * pauses OCR while a print PDF is prepared and under hard memory pressure). Part of the lazy OCR
+ * page of that document is abandoned by terminating its worker (on a pool, that worker alone;
+ * a single engine as a whole); the next page starts a fresh one. `setPaused(true)` lets the
+ * pages in flight finish and starts nothing new (the viewer pauses OCR while a print PDF is
+ * prepared and under hard memory pressure). Part of the lazy OCR
  * chunk.
  */
 import { OCR_PAGE_DECISION, OCR_SKIP_REASON, classifyPageSource } from './classify.js';
@@ -83,7 +85,7 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
  * @typedef {Object} OcrQueueSnapshot
  * @property {Object<string, Object>} pages  Outcome or transient state per page key.
  * @property {(string|null)} engineFailure  OCR_STARTUP_FAILURE code once the engine cannot start.
- * @property {boolean} busy  True while a page is being probed or recognised.
+ * @property {boolean} busy  True while at least one page is being probed or recognised.
  */
 
 /**
@@ -99,7 +101,11 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
 
 /**
  * @param {Object} options
- * @param {Object} options.engine  An OcrEngine (engine.js).
+ * @param {Object} options.engine  An OcrEngine (engine.js) or an OcrEnginePool (enginePool.js).
+ *   A pool (recognised by its numeric `size`) takes a control object as the second argument of
+ *   `recognize`, through which the queue aborts that one recognition.
+ * @param {number=} options.concurrency  Pages in flight at most; default 1. More than one is
+ *   only useful with a pool of at least that many engines.
  * @param {Object} options.cache  An OcrResultCache (resultCache.js).
  * @param {function(string, number): Promise<Object>} options.probeTextLayer
  *   `(sourceKey, pageIndex)` to a PdfTextLayerAssessment (pdfTextProbe.js).
@@ -119,6 +125,7 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
  */
 export function createOcrQueue({
   engine,
+  concurrency = 1,
   cache,
   probeTextLayer,
   getPageImage,
@@ -136,8 +143,12 @@ export function createOcrQueue({
   const transient = new Map();
   /** @type {(Set<string>|null)} null until retainSources is called: every source is retained. */
   let retained = null;
-  /** @type {({ key: string, sourceKey: string, abandoned: boolean }|null)} */
-  let inFlight = null;
+  /** @type {Map<string, { key: string, sourceKey: string, abandoned: boolean, control: { abort: (function(): void|null) } }>} */
+  const inFlight = new Map();
+  const limit = Math.max(1, Math.floor(Number(concurrency)) || 1);
+  // A pool aborts one recognition through its control object; a single engine can only be
+  // terminated as a whole (which is what happened before pools existed).
+  const pooled = typeof engine?.size === 'number';
   let paused = false;
   let disposed = false;
   /** @type {(string|null)} */
@@ -149,7 +160,7 @@ export function createOcrQueue({
     const pages = {};
     for (const [key, outcome] of cache.entries()) pages[key] = outcome;
     for (const [key, entry] of transient) pages[key] = { status: entry.status };
-    return { pages, engineFailure, busy: inFlight !== null };
+    return { pages, engineFailure, busy: inFlight.size > 0 };
   }
 
   function notify() {
@@ -166,28 +177,40 @@ export function createOcrQueue({
     notify();
   }
 
-  function pump() {
-    if (disposed || paused || inFlight) return;
-    if (engineFailure) {
-      // Nothing more will run this session; let the owner release the prober and the worker.
-      onIdle?.();
-      return;
-    }
-    const candidate = plan.find((entry) => {
-      if (cache.has(entry.key)) return false;
+  /** Abort one job's recognition: its worker on a pool, the engine as a whole otherwise. */
+  function abortJob(job) {
+    if (typeof job.control.abort === 'function') job.control.abort();
+    else if (!pooled) void engine.terminate();
+  }
+
+  function nextCandidate() {
+    return plan.find((entry) => {
+      if (cache.has(entry.key) || inFlight.has(entry.key)) return false;
       const status = transient.get(entry.key)?.status;
       return status === undefined || status === OCR_PAGE_STATUS.QUEUED;
     });
-    if (!candidate) {
-      onIdle?.();
+  }
+
+  function pump() {
+    if (disposed || paused) return;
+    if (engineFailure) {
+      // Nothing more will run this session; let the owner release the prober and the worker.
+      if (inFlight.size === 0) onIdle?.();
       return;
     }
-    void run(candidate);
+    while (inFlight.size < limit) {
+      const candidate = nextCandidate();
+      if (!candidate) break;
+      // run() is synchronous up to its first await, so the page is in flight (and, unless it is
+      // skipped outright, marked probing or recognizing) before the next candidate is looked for.
+      void run(candidate);
+    }
+    if (inFlight.size === 0 && !nextCandidate()) onIdle?.();
   }
 
   async function run(candidate) {
-    const job = { key: candidate.key, sourceKey: candidate.sourceKey, abandoned: false };
-    inFlight = job;
+    const job = { key: candidate.key, sourceKey: candidate.sourceKey, abandoned: false, control: { abort: null } };
+    inFlight.set(job.key, job);
     onBusy?.();
     let outcome = null;
     try {
@@ -232,7 +255,7 @@ export function createOcrQueue({
         if (!outcome && !job.abandoned) {
           setTransient(job.key, job.sourceKey, OCR_PAGE_STATUS.RECOGNIZING);
           const image = await withTimeout(getPageImage(candidate), timeouts.image, 'page image');
-          const result = await withTimeout(engine.recognize(image.blob), timeouts.recognize, 'recognition');
+          const result = await withTimeout(engine.recognize(image.blob, job.control), timeouts.recognize, 'recognition');
           outcome = {
             status: OCR_PAGE_STATUS.DONE,
             source: OCR_OUTCOME_SOURCE.RECOGNITION,
@@ -259,7 +282,7 @@ export function createOcrQueue({
         outcome = { status: OCR_PAGE_STATUS.FAILED, reason: message };
         if (error?.[TIMEOUT_STEP] === 'recognition') {
           // The worker stopped answering: drop it so the next page starts a fresh one.
-          void engine.terminate();
+          abortJob(job);
         }
       }
     }
@@ -273,7 +296,7 @@ export function createOcrQueue({
         log.warn?.('OCR language guess failed', { sourceKey: job.sourceKey, error: String(error?.message || error) });
       }
     }
-    inFlight = null;
+    inFlight.delete(job.key);
     transient.delete(job.key);
     if (outcome && !job.abandoned && isRetained(job.sourceKey)) cache.set(job.key, job.sourceKey, outcome);
     notify();
@@ -307,19 +330,20 @@ export function createOcrQueue({
         if (!retained.has(entry.sourceKey)) transient.delete(key);
       }
       plan = plan.filter((entry) => retained.has(entry.sourceKey));
-      if (inFlight && !retained.has(inFlight.sourceKey)) {
-        inFlight.abandoned = true;
-        void engine.terminate();
+      for (const job of inFlight.values()) {
+        if (retained.has(job.sourceKey) || job.abandoned) continue;
+        job.abandoned = true;
+        abortJob(job);
       }
       notify();
       pump();
     },
     getSnapshot,
     isBusy() {
-      return inFlight !== null;
+      return inFlight.size > 0;
     },
     async releaseEngineIfIdle() {
-      if (disposed || inFlight) return false;
+      if (disposed || inFlight.size > 0) return false;
       await engine.terminate();
       return true;
     },
@@ -328,7 +352,7 @@ export function createOcrQueue({
       disposed = true;
       plan = [];
       transient.clear();
-      if (inFlight) inFlight.abandoned = true;
+      for (const job of inFlight.values()) job.abandoned = true;
       void engine.terminate();
     },
   };

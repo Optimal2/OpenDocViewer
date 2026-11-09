@@ -1,0 +1,150 @@
+// File: src/ocr/enginePool.js
+/**
+ * A pool of OCR engines (engine.js) behind the one-engine interface the queue (queue.js) uses,
+ * so that `ocr.workerCount` pages can be recognised at the same time.
+ *
+ * Engines are created lazily, one per concurrent recognition up to `size`, and the first one is
+ * started before any other: a start-up failure (a CSP without 'wasm-unsafe-eval', missing files)
+ * is then found once, and the others load the engine core and the language models from the
+ * browser's HTTP cache instead of all fetching them at once. After a failure no further engine
+ * is created and every call rejects with it, as a single engine does. A recognition can be
+ * aborted on its own: `recognize(image, control)` sets `control.abort` to a function that
+ * terminates only the worker holding that page, which the pool replaces lazily, so the other
+ * pages in flight are left alone (a single engine can only be terminated as a whole).
+ * `terminate()` stops every worker; a caller waiting for a free engine is rejected then.
+ *
+ * Part of the lazy OCR chunk.
+ */
+
+/** Rejection for callers waiting on a free engine when the pool is terminated. */
+const TERMINATED_MESSAGE = 'OCR engine was terminated';
+
+/**
+ * @typedef {Object} OcrEnginePool
+ * @property {number} size  Most engines the pool creates.
+ * @property {function(): Promise<void>} ensureStarted  Start the first engine (loads core and models).
+ * @property {function(*, Object=): Promise<{ text: string, confidence: number, words: Array<Object> }>} recognize
+ *   Recognise one page image on a free engine; `control.abort`, when a control object is
+ *   given, terminates that engine alone while the recognition runs.
+ * @property {function(): Promise<void>} terminate  Stop every engine.
+ * @property {function(): ({ kind: string, error: Error }|null)} getFailure  The first engine's
+ *   start-up failure (any engine's), if one occurred.
+ * @property {function(): boolean} isStarted  True while at least one engine runs.
+ * @property {function(): number} engineCount  Engines created so far (for diagnostics and tests).
+ */
+
+/**
+ * @param {Object} options
+ * @param {number} options.size  Engines at most; 1 or less behaves like one engine.
+ * @param {function(): Object} options.createEngine  Makes one OcrEngine (engine.js).
+ * @returns {OcrEnginePool}
+ */
+export function createOcrEnginePool({ size, createEngine }) {
+  if (typeof createEngine !== 'function') throw new Error('OCR engine pool needs an engine factory');
+  const limit = Math.max(1, Math.floor(Number(size)) || 1);
+  /** @type {Array<{ engine: Object, busy: boolean }>} */
+  let entries = [];
+  /** @type {Array<{ resolve: function(Object): void, reject: function(Error): void }>} */
+  let waiters = [];
+  // Bumped by terminate(): an acquisition that began under an older generation is dropped.
+  let generation = 0;
+
+  function firstFailure() {
+    for (const entry of entries) {
+      const failure = typeof entry.engine.getFailure === 'function' ? entry.engine.getFailure() : null;
+      if (failure) return failure;
+    }
+    return null;
+  }
+
+  function createEntry() {
+    const entry = { engine: createEngine(), busy: false };
+    entries.push(entry);
+    return entry;
+  }
+
+  /** A free entry now, a new one while under the limit, else null. */
+  function takeIdle() {
+    const idle = entries.find((entry) => !entry.busy);
+    const entry = idle || (entries.length < limit ? createEntry() : null);
+    if (entry) entry.busy = true;
+    return entry;
+  }
+
+  function acquire() {
+    const failure = firstFailure();
+    if (failure) return Promise.reject(failure.error);
+    const entry = takeIdle();
+    if (entry) return Promise.resolve(entry);
+    return new Promise((resolve, reject) => { waiters.push({ resolve, reject }); });
+  }
+
+  function release(entry) {
+    entry.busy = false;
+    wake();
+  }
+
+  function wake() {
+    while (waiters.length > 0) {
+      const entry = takeIdle();
+      if (!entry) return;
+      const waiter = waiters.shift();
+      waiter.resolve(entry);
+    }
+  }
+
+  /** Terminate one engine and forget it; the next acquisition creates a fresh one in its place. */
+  function drop(entry) {
+    entries = entries.filter((candidate) => candidate !== entry);
+    Promise.resolve(entry.engine.terminate()).catch(() => {});
+    wake();
+  }
+
+  async function ensureStarted() {
+    const failure = firstFailure();
+    if (failure) throw failure.error;
+    const first = entries[0] || createEntry();
+    await first.engine.ensureStarted();
+  }
+
+  return {
+    size: limit,
+    ensureStarted,
+    async recognize(image, control = null) {
+      const callGeneration = generation;
+      const entry = await acquire();
+      if (callGeneration !== generation) throw new Error(TERMINATED_MESSAGE);
+      let dropped = false;
+      if (control && typeof control === 'object') {
+        control.abort = () => {
+          if (dropped) return;
+          dropped = true;
+          drop(entry);
+        };
+      }
+      try {
+        if (entry !== entries[0]) {
+          // The first engine starts alone; the others follow once it runs (or fail with it).
+          await ensureStarted();
+          if (callGeneration !== generation || dropped) throw new Error(TERMINATED_MESSAGE);
+        }
+        return await entry.engine.recognize(image);
+      } finally {
+        if (control && typeof control === 'object') control.abort = null;
+        if (!dropped && callGeneration === generation) release(entry);
+      }
+    },
+    async terminate() {
+      generation += 1;
+      const stopping = entries;
+      entries = [];
+      const waiting = waiters;
+      waiters = [];
+      for (const waiter of waiting) waiter.reject(new Error(TERMINATED_MESSAGE));
+      await Promise.all(stopping.map((entry) => Promise.resolve(entry.engine.terminate()).catch(() => {})));
+    },
+    getFailure: firstFailure,
+    isStarted: () => entries.some((entry) => typeof entry.engine.isStarted === 'function' && entry.engine.isStarted()),
+    engineCount: () => entries.length,
+  };
+}
