@@ -532,6 +532,38 @@ function Update-OpenDocViewerIndexHtmlIntegrity {
     $html = $html.Substring(0, $bootstrapMatch.Index) + $bootstrapTag + $html.Substring($bootstrapMatch.Index + $bootstrapMatch.Length)
     [System.IO.File]::WriteAllText($indexHtmlPath, $html, [System.Text.UTF8Encoding]::new($false))
     Write-Host "Injected runtime config SRI hashes into $indexHtmlPath"
+
+    # The stand-alone manual page (manual/index.html, served as <base>/manual/)
+    # boots through the same bootConfig loader and loads the same runtime
+    # configuration files one level up, so it carries the same SRI hashes.
+    $manualHtmlPath = Join-Path $PayloadPath (Join-Path 'manual' 'index.html')
+    if (-not (Test-Path -LiteralPath $manualHtmlPath -PathType Leaf)) {
+        Write-Warning "OpenDocViewer payload for '$ComponentKey' has no manual/index.html; skipping SRI injection for the stand-alone manual page."
+        return
+    }
+
+    $manualHtml = [System.IO.File]::ReadAllText($manualHtmlPath, [System.Text.UTF8Encoding]::new($false))
+    $manualBootstrapMatch = [Regex]::Match($manualHtml, '<script\s+[^>]*data-odv-bootstrap[^>]*>', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    if (-not $manualBootstrapMatch.Success) {
+        throw "OpenDocViewer payload manual/index.html is missing the data-odv-bootstrap script tag. Ensure vite.config.js preserves the bootConfig entry."
+    }
+    $manualBootstrapTag = $manualBootstrapMatch.Value
+
+    foreach ($attributeName in $attributes.Keys) {
+        $attributeValue = [string]$attributes[$attributeName]
+        $attributePattern = "$attributeName=""[^""]*"""
+        $attributeReplacement = "$attributeName=""$attributeValue"""
+        if ($manualBootstrapTag -match $attributePattern) {
+            $manualBootstrapTag = $manualBootstrapTag -replace $attributePattern, $attributeReplacement
+        }
+        else {
+            $manualBootstrapTag = $manualBootstrapTag -replace '>$', " $attributeReplacement>"
+        }
+    }
+
+    $manualHtml = $manualHtml.Substring(0, $manualBootstrapMatch.Index) + $manualBootstrapTag + $manualHtml.Substring($manualBootstrapMatch.Index + $manualBootstrapMatch.Length)
+    [System.IO.File]::WriteAllText($manualHtmlPath, $manualHtml, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "Injected runtime config SRI hashes into $manualHtmlPath"
 }
 
 function Copy-ExistingArtifactPackage {
