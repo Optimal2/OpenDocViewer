@@ -8,6 +8,10 @@
  */
 export { createOcrEngine, classifyOcrStartupError, flattenOcrWords, OCR_STARTUP_FAILURE } from './engine.js';
 export { createOcrEnginePool } from './enginePool.js';
+export {
+  OCR_BENCHMARK_DEFAULTS, OCR_BENCHMARK_SCHEMA, downscaleOcrImage, expandOcrBenchmarkWorkerCounts, normalizeOcrBenchmarkConfig,
+  planOcrBenchmarkScenarios, runOcrBenchmark, selectOcrBenchmarkPages, startMainThreadLagSampler, summarizeDurations,
+} from './benchmark.js';
 export { readOcrAssetManifest, resolveOcrAssetUrls } from './assetUrls.js';
 export { KNOWN_OCR_LANGUAGES, partitionOcrLanguages } from './languages.js';
 export { createConfiguredOcrEngine, describeOcrSetup } from './setup.js';

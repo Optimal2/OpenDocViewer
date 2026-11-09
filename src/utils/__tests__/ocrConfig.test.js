@@ -32,6 +32,17 @@ const SHIPPED_OCR_DEFAULTS = Object.freeze({
   languages: ['swe', 'eng'],
   search: { enabled: true, overridesCtrlF: false },
   speech: { enabled: true, autoDetectLanguage: true },
+  benchmark: {
+    enabled: false,
+    pageLimit: 40,
+    sampleMode: 'evenly-spaced',
+    workerCounts: [0],
+    languageVariants: ['configured', 'single'],
+    imageScales: [1, 0.75],
+    iterations: 1,
+    pageTimeoutMs: 180000,
+    delayBetweenRunsMs: 500,
+  },
   assetBaseUrl: null,
 });
 

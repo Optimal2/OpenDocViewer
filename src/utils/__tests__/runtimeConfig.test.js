@@ -29,6 +29,7 @@ import {
   OCR_ASSET_BASE_URL_REJECTIONS,
   describeOcrWorkerCount,
   resolveOcrWorkerCount,
+  isOcrBenchmarkEnabled,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
   isOcrWholeDocumentEnabled,
@@ -335,6 +336,18 @@ describe('runtimeConfig', () => {
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 'false' } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: 0 } })).toBe(true);
       expect(isOcrLineRemovalEnabled({ ocr: { removeRulingLines: null } })).toBe(true);
+    });
+  });
+
+  describe('isOcrBenchmarkEnabled', () => {
+    it('is off by default and needs both the OCR switch and the literal true', () => {
+      expect(isOcrBenchmarkEnabled({})).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { enabled: true } })).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { enabled: true, benchmark: {} } })).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { enabled: true, benchmark: { enabled: 'true' } } })).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { enabled: false, benchmark: { enabled: true } } })).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { benchmark: { enabled: true } } })).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { enabled: true, benchmark: { enabled: true } } })).toBe(true);
     });
   });
 

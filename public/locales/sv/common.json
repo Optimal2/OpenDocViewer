@@ -1010,7 +1010,16 @@
       "renderBenchmarkDone": "Render/decode-benchmark slutförd.",
       "renderBenchmarkError": "Render/decode-benchmark misslyckades: {error}",
       "renderBenchmarkSummary": "Bästa render/decode: {ms} ms, {pages} sidor, {scenario}.",
-      "noRenderBenchmark": "Ingen render/decode-benchmark har körts."
+      "noRenderBenchmark": "Ingen render/decode-benchmark har körts.",
+      "runOcrBenchmark": "Kör OCR-benchmark",
+      "ocrBenchmarkRunningShort": "Kör…",
+      "downloadOcrBenchmark": "Ladda ned OCR-benchmark-JSON",
+      "ocrBenchmarkRunning": "Kör OCR-benchmark…",
+      "ocrBenchmarkProgress": "Kör OCR-benchmark {current} av {total}: {scenario} ({pageProgress} sidor)…",
+      "ocrBenchmarkDone": "OCR-benchmark slutförd.",
+      "ocrBenchmarkError": "OCR-benchmark misslyckades: {error}",
+      "ocrBenchmarkSummary": "Bästa OCR-körning: {msPerPage} ms per sida, {pages} sidor, {scenario}.",
+      "noOcrBenchmark": "Ingen OCR-benchmark har körts."
     }
   },
   "metadataMatrix": {

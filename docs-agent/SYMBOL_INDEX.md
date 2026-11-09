@@ -200,27 +200,27 @@
 | <code>shouldWarmAllThumbnails</code> | function | <code>src/components/DocumentThumbnailList.jsx:85</code> |  |
 | <code>ThumbnailRow</code> | constant | <code>src/components/DocumentThumbnailList.jsx:417</code> |  |
 | <code>ThumbnailRowProps</code> | typedef | <code>src/components/DocumentThumbnailList.jsx:39</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:46</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:70</code> |  |
-| <code>resolveAboutInfo</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:17</code> |  |
-| <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:55</code> | Mutable ref-like object used by the toolbar. |
-| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:213</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
-| <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:83</code> | Props for {@link DocumentToolbar}. |
-| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:624</code> | Handle brightness slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:638</code> | Handle contrast slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:660</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:341</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:333</code> |  |
-| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:673</code> |  |
-| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:652</code> |  |
-| <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:61</code> | Editable image state shown by the toolbar. |
-| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:200</code> |  |
-| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:190</code> |  |
-| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:163</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
-| <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:69</code> | React-like numeric page setter used by the toolbar. |
-| <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:161</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
-| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:682</code> |  |
-| <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:76</code> | Zoom display state used by the newer toolbar UX paths. |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:54</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:84</code> |  |
+| <code>resolveAboutInfo</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:23</code> |  |
+| <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:57</code> | Mutable ref-like object used by the toolbar. |
+| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:215</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:85</code> | Props for {@link DocumentToolbar}. |
+| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:626</code> | Handle brightness slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:640</code> | Handle contrast slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:662</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:343</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:335</code> |  |
+| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:675</code> |  |
+| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:654</code> |  |
+| <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:63</code> | Editable image state shown by the toolbar. |
+| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:202</code> |  |
+| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:192</code> |  |
+| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:165</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
+| <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:71</code> | React-like numeric page setter used by the toolbar. |
+| <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:163</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
+| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:684</code> |  |
+| <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:78</code> | Zoom display state used by the newer toolbar UX paths. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:36</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:28</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:19</code> |  |
@@ -604,75 +604,75 @@
 | <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:155</code> |  |
 | <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:78</code> |  |
 | <code>ViewerSourceDescriptor</code> | typedef | <code>src/contexts/viewerContext.js:65</code> |  |
-| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:1063</code> |  |
-| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1389</code> |  |
-| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:1078</code> |  |
-| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1539</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
-| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1105</code> |  |
-| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:578</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
+| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:1065</code> |  |
+| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1391</code> |  |
+| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:1080</code> |  |
+| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1541</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1107</code> |  |
+| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:580</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:219</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2803</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2789</code> |  |
-| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1177</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2805</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2791</code> |  |
+| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1179</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:61</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:55</code> |  |
-| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1637</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2054</code> | Render one PDF page again at twice its effective PDF scale. |
-| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1861</code> |  |
+| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1639</code> |  |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2056</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1863</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:76</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2808</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2810</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:151</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2451</code> |  |
-| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1517</code> |  |
-| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1613</code> |  |
-| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1114</code> |  |
-| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:898</code> |  |
-| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:915</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2453</code> |  |
+| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1519</code> |  |
+| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1615</code> |  |
+| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1116</code> |  |
+| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:900</code> |  |
+| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:917</code> |  |
 | <code>isBlobObjectUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:185</code> |  |
-| <code>ViewerProvider~isPageAssetUrlReferenced</code> | constant | <code>src/contexts/ViewerProvider.jsx:964</code> |  |
+| <code>ViewerProvider~isPageAssetUrlReferenced</code> | constant | <code>src/contexts/ViewerProvider.jsx:966</code> |  |
 | <code>isPageFailedForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:211</code> |  |
 | <code>isPageReadyForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:203</code> |  |
 | <code>isPdfPageEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:122</code> |  |
-| <code>ViewerProvider~isPrintablePageUrlLeased</code> | constant | <code>src/contexts/ViewerProvider.jsx:944</code> |  |
+| <code>ViewerProvider~isPrintablePageUrlLeased</code> | constant | <code>src/contexts/ViewerProvider.jsx:946</code> |  |
 | <code>isReusableAssetUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:193</code> |  |
 | <code>isSameOcrSearch</code> | function | <code>src/contexts/ViewerProvider.jsx:342</code> |  |
-| <code>ViewerProvider~leasePrintablePageUrl</code> | constant | <code>src/contexts/ViewerProvider.jsx:953</code> |  |
+| <code>ViewerProvider~leasePrintablePageUrl</code> | constant | <code>src/contexts/ViewerProvider.jsx:955</code> |  |
 | <code>makeAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:91</code> |  |
 | <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:112</code> |  |
 | <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:101</code> |  |
 | <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:133</code> |  |
-| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1401</code> |  |
+| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1403</code> |  |
 | <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:230</code> |  |
-| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:555</code> | Record that a page now has a reusable full-size asset available. |
-| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:565</code> | Record that a page now has a reusable thumbnail asset available. |
-| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:1013</code> |  |
-| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1448</code> |  |
-| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1591</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2317</code> | Drain background eager-render work without blocking the UI thread. |
-| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1372</code> |  |
-| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1381</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2136</code> |  |
-| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1329</code> |  |
-| <code>ViewerProvider~releaseOcrPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:2745</code> | Drop a page render made only for OCR \(the whole document asked for\) once its bytes are read. |
-| <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:988</code> | Release print leases previously acquired through getPrintablePageUrls . |
-| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1769</code> |  |
-| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:737</code> |  |
+| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:557</code> | Record that a page now has a reusable full-size asset available. |
+| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:567</code> | Record that a page now has a reusable thumbnail asset available. |
+| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:1015</code> |  |
+| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1450</code> |  |
+| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1593</code> |  |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2319</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1374</code> |  |
+| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1383</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2138</code> |  |
+| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1331</code> |  |
+| <code>ViewerProvider~releaseOcrPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:2747</code> | Drop a page render made only for OCR \(the whole document asked for\) once its bytes are read. |
+| <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:990</code> | Release print leases previously acquired through getPrintablePageUrls . |
+| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1771</code> |  |
+| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:739</code> |  |
 | <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:161</code> |  |
-| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1697</code> |  |
-| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:709</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2408</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2798</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
-| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2763</code> |  |
-| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2776</code> |  |
-| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1684</code> |  |
-| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1348</code> |  |
+| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1699</code> |  |
+| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:711</code> |  |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2410</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2800</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2765</code> |  |
+| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2778</code> |  |
+| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1686</code> |  |
+| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1350</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:66</code> |  |
-| <code>ViewerProvider~syncPrintActivity</code> | constant | <code>src/contexts/ViewerProvider.jsx:935</code> | Recompute the OCR pause signal from outstanding leases and print PDF assemblies. |
+| <code>ViewerProvider~syncPrintActivity</code> | constant | <code>src/contexts/ViewerProvider.jsx:937</code> | Recompute the OCR pause signal from outstanding leases and print PDF assemblies. |
 | <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:174</code> |  |
-| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1526</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2158</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1602</code> |  |
-| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:531</code> |  |
+| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1528</code> |  |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2160</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1604</code> |  |
+| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:533</code> |  |
 | <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:358</code> |  |
 | <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:329</code> |  |
 | <code>componentDidCatch</code> | function | <code>src/ErrorBoundary.jsx:152</code> | Log error details for diagnostics. |
@@ -864,6 +864,25 @@
 | <code>OcrAssetUrls</code> | typedef | <code>src/ocr/assetUrls.js:25</code> |  |
 | <code>readOcrAssetManifest</code> | function | <code>src/ocr/assetUrls.js:39</code> | The manifest the build generated, or null when it is unusable. |
 | <code>resolveOcrAssetUrls</code> | function | <code>src/ocr/assetUrls.js:60</code> | Turn the dist-relative manifest paths into absolute URLs. |
+| <code>delay</code> | function | <code>src/ocr/benchmark.js:354</code> |  |
+| <code>downscaleOcrImage</code> | function | <code>src/ocr/benchmark.js:310</code> | Downscale a page image for a scale scenario: decode, draw at the smaller size, encode as PNG. |
+| <code>expandOcrBenchmarkWorkerCounts</code> | function | <code>src/ocr/benchmark.js:136</code> | The worker counts a configured list stands for on this client: explicit counts as they are, 0 as every count from one up to the cores minus one \(bounded by MAX_OCR_WORKER_COUNT, a... |
+| <code>integerIn</code> | function | <code>src/ocr/benchmark.js:81</code> |  |
+| <code>LAG_SAMPLE_MS</code> | constant | <code>src/ocr/benchmark.js:57</code> | Period of the main-thread lag sampler \(ms\): short enough to see a stalled frame, cheap enough to leave the result alone. |
+| <code>LAG_STALL_MS</code> | constant | <code>src/ocr/benchmark.js:59</code> | A lag sample above this counts as a stall the user would notice. |
+| <code>normalizeOcrBenchmarkConfig</code> | function | <code>src/ocr/benchmark.js:93</code> | Read ocr.benchmark with every value bounded; an unusable list falls back to its default. |
+| <code>OCR_BENCHMARK_DEFAULTS</code> | constant | <code>src/ocr/benchmark.js:41</code> | Defaults of ocr.benchmark beyond the switch. |
+| <code>OcrBenchmarkConfig</code> | typedef | <code>src/ocr/benchmark.js:61</code> |  |
+| <code>OcrBenchmarkScenario</code> | typedef | <code>src/ocr/benchmark.js:151</code> |  |
+| <code>planOcrBenchmarkScenarios</code> | function | <code>src/ocr/benchmark.js:171</code> | The scenarios a configuration stands for: the worker counts with the configured languages and the full image, then \(with one worker\) the single-language variant when more than one... |
+| <code>runConcurrently</code> | function | <code>src/ocr/benchmark.js:382</code> | Run worker over items with at most concurrency in flight, in order of start. |
+| <code>runOcrBenchmark</code> | function | <code>src/ocr/benchmark.js:507</code> | Run the OCR benchmark over the loaded document and save the result. |
+| <code>runScenario</code> | function | <code>src/ocr/benchmark.js:410</code> | Recognise the sampled pages once on a fresh engine pool and measure it. |
+| <code>selectOcrBenchmarkPages</code> | function | <code>src/ocr/benchmark.js:198</code> | The pages to recognise: loaded pages the OCR queue would recognise \(not skipped by classifyPageSource\), sampled evenly over the document \(or the first ones\), at most pageLimit . |
+| <code>startMainThreadLagSampler</code> | function | <code>src/ocr/benchmark.js:249</code> | Sample the main thread&#39;s event-loop lag while a scenario runs: a timer asked for every LAG_SAMPLE_MS, and how late each tick came. |
+| <code>summarizeDurations</code> | function | <code>src/ocr/benchmark.js:225</code> | Summary statistics of a list of durations. |
+| <code>usedHeapMiB</code> | function | <code>src/ocr/benchmark.js:297</code> |  |
+| <code>withTimeout</code> | function | <code>src/ocr/benchmark.js:338</code> |  |
 | <code>assessPdfTextLayer</code> | function | <code>src/ocr/classify.js:87</code> | Judge the text pdf.js extracted from one page. |
 | <code>classifyPageSource</code> | function | <code>src/ocr/classify.js:57</code> |  |
 | <code>FAILED_PAGE</code> | member | <code>src/ocr/classify.js:33</code> | The page failed to load; there is no image to recognise. |
@@ -1776,78 +1795,79 @@
 | <code>withTimeout</code> | function | <code>src/utils/renderDecodeBenchmark.js:353</code> |  |
 | <code>clampRenderSurfaceSize</code> | function | <code>src/utils/renderSurfaceBounds.js:25</code> | Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio. |
 | <code>MAX_RENDER_SURFACE_DIMENSION</code> | constant | <code>src/utils/renderSurfaceBounds.js:9</code> | OpenDocViewer — conservative raster surface bounds. |
-| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:637</code> | Clamp a numeric config value to a safe range. |
+| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:650</code> | Clamp a numeric config value to a safe range. |
 | <code>COMPARE_ADJUST_TOOLBAR_MODES</code> | constant | <code>src/utils/runtimeConfig.js:34</code> | Runtime validation values for CompareAdjustToolbarMode; the first one is the default. |
 | <code>CompareAdjustToolbarMode</code> | typedef | <code>src/utils/runtimeConfig.js:12</code> |  |
 | <code>DEFAULT_OCR_LANGUAGES</code> | constant | <code>src/utils/runtimeConfig.js:306</code> | Default OCR languages \(Tesseract language codes\), tried together on every text line. |
-| <code>DEFAULT_OCR_WORKER_COUNT</code> | constant | <code>src/utils/runtimeConfig.js:351</code> | Default number of OCR workers: one tesseract.js worker, one page at a time. |
+| <code>DEFAULT_OCR_WORKER_COUNT</code> | constant | <code>src/utils/runtimeConfig.js:364</code> | Default number of OCR workers: one tesseract.js worker, one page at a time. |
 | <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:50</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
-| <code>describeOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:560</code> | Describe how ocr.assetBaseUrl resolves. |
-| <code>describeOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:486</code> | Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in. |
-| <code>describeOcrWorkerCount</code> | function | <code>src/utils/runtimeConfig.js:381</code> | Describe ocr.workerCount \(how many tesseract.js workers recognise pages at the same time\) without resolving the automatic choice, so the caller can report a rejected or clamped va... |
+| <code>describeOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:573</code> | Describe how ocr.assetBaseUrl resolves. |
+| <code>describeOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:499</code> | Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in. |
+| <code>describeOcrWorkerCount</code> | function | <code>src/utils/runtimeConfig.js:394</code> | Describe ocr.workerCount \(how many tesseract.js workers recognise pages at the same time\) without resolving the automatic choice, so the caller can report a rejected or clamped va... |
 | <code>getCompareAdjustToolbarMode</code> | function | <code>src/utils/runtimeConfig.js:241</code> | Resolve how the main toolbar&#39;s image controls behave in compare mode \( compare.adjust.toolbarMode \). |
 | <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:142</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:585</code> | Resolve where the OCR engine, worker and language files are served from \( ocr.assetBaseUrl \): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v... |
-| <code>getOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:529</code> | Resolve the OCR languages \( ocr.languages \): the languages of describeOcrLanguages. |
-| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:1014</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
+| <code>getOcrAssetBaseUrl</code> | function | <code>src/utils/runtimeConfig.js:598</code> | Resolve where the OCR engine, worker and language files are served from \( ocr.assetBaseUrl \): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v... |
+| <code>getOcrLanguages</code> | function | <code>src/utils/runtimeConfig.js:542</code> | Resolve the OCR languages \( ocr.languages \): the languages of describeOcrLanguages. |
+| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:1027</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
 | <code>getPdfSignatureInspectionStart</code> | function | <code>src/utils/runtimeConfig.js:281</code> | Resolve when PDF signature inspection may start \( pdfSignatures.inspectAfter \): &#39;firstPage&#39; \(default\) starts once the first page is shown, &#39;allPages&#39; waits until every page of the... |
 | <code>getPdfSignatureUncheckedSeverity</code> | function | <code>src/utils/runtimeConfig.js:298</code> | Resolve the symbol severity for a signature the viewer could not check itself \(integrity not-checked-in-viewer : format, algorithm, budget, encryption, worker failure\), from pdfSi... |
-| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:889</code> | Resolve the default print page mode used when the user has not stored an override. |
-| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:914</code> | Resolve the print-selection workspace configuration. |
+| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:902</code> | Resolve the default print page mode used when the user has not stored an override. |
+| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:927</code> | Resolve the print-selection workspace configuration. |
 | <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:119</code> | Read the merged runtime configuration from the browser environment. |
-| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:997</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
-| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:597</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
-| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:865</code> | Resolve the configured custom-size limits. |
-| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:851</code> | Resolve the custom-size width factor percentage. |
-| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:838</code> | Resolve the initial page zoom mode. |
-| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:938</code> | Resolve the optional scroll-at-edge page turn gesture. |
-| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:956</code> | Resolve the configurable viewer-level problem notice. |
-| <code>INVALID_CHARACTERS</code> | member | <code>src/utils/runtimeConfig.js:540</code> | The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme. |
+| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:1010</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
+| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:610</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
+| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:878</code> | Resolve the configured custom-size limits. |
+| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:864</code> | Resolve the custom-size width factor percentage. |
+| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:851</code> | Resolve the initial page zoom mode. |
+| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:951</code> | Resolve the optional scroll-at-edge page turn gesture. |
+| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:969</code> | Resolve the configurable viewer-level problem notice. |
+| <code>INVALID_CHARACTERS</code> | member | <code>src/utils/runtimeConfig.js:553</code> | The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme. |
 | <code>isCompareCurtainEnabled</code> | function | <code>src/utils/runtimeConfig.js:214</code> | Resolve whether the compare curtain view is available \( compare.curtain.enabled \). |
 | <code>isCompareCurtainPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:226</code> | Resolve whether the compare curtain view offers its print action \( compare.curtain.print.enabled \). |
 | <code>isCompareOverlayEnabled</code> | function | <code>src/utils/runtimeConfig.js:190</code> | Resolve whether the compare overlay view is available \( compare.overlay.enabled \). |
 | <code>isCompareOverlayPrintEnabled</code> | function | <code>src/utils/runtimeConfig.js:202</code> | Resolve whether the compare overlay view offers its print action \( compare.overlay.print.enabled \). |
 | <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:155</code> | Resolve whether document metadata UI affordances should be available. |
 | <code>isFineTuneEnabled</code> | function | <code>src/utils/runtimeConfig.js:177</code> | Master capability for page fine tuning and calibration-dependent compare views. |
+| <code>isOcrBenchmarkEnabled</code> | function | <code>src/utils/runtimeConfig.js:359</code> | Resolve whether the opt-in OCR benchmark is offered under About -&amp;gt; Diagnostics \( ocr.benchmark.enabled \). |
 | <code>isOcrEnabled</code> | function | <code>src/utils/runtimeConfig.js:319</code> | Resolve whether in-browser OCR of scanned pages is turned on \( ocr.enabled \). |
 | <code>isOcrLineRemovalEnabled</code> | function | <code>src/utils/runtimeConfig.js:332</code> | Resolve whether the ruling lines of tables and forms are removed from a copy of the page image before recognition \( ocr.removeRulingLines \). |
-| <code>isOcrSearchCtrlFOverrideEnabled</code> | function | <code>src/utils/runtimeConfig.js:448</code> | Resolve whether Ctrl+F \(Cmd+F on a Mac\) opens the toolbar&#39;s search in the text layers instead of the browser&#39;s own find \( ocr.search.overridesCtrlF \). |
-| <code>isOcrSearchEnabled</code> | function | <code>src/utils/runtimeConfig.js:435</code> | Resolve whether the toolbar&#39;s search in the text layers is offered \( ocr.search.enabled \). |
+| <code>isOcrSearchCtrlFOverrideEnabled</code> | function | <code>src/utils/runtimeConfig.js:461</code> | Resolve whether Ctrl+F \(Cmd+F on a Mac\) opens the toolbar&#39;s search in the text layers instead of the browser&#39;s own find \( ocr.search.overridesCtrlF \). |
+| <code>isOcrSearchEnabled</code> | function | <code>src/utils/runtimeConfig.js:448</code> | Resolve whether the toolbar&#39;s search in the text layers is offered \( ocr.search.enabled \). |
 | <code>isOcrWholeDocumentEnabled</code> | function | <code>src/utils/runtimeConfig.js:346</code> | Resolve whether the OCR queue works through the whole document in the background \( ocr.recognizeWholeDocument \): after the window around the shown page, the remaining pages in rea... |
 | <code>isPdfSignatureInspectionEnabled</code> | function | <code>src/utils/runtimeConfig.js:268</code> | Resolve whether PDF signature inspection runs at all \( pdfSignatures.enabled \). |
-| <code>isReadAloudEnabled</code> | function | <code>src/utils/runtimeConfig.js:463</code> | Resolve whether read-aloud is offered \( ocr.speech.enabled \): the entry in the page&#39;s context menu and the &amp;quot;Reading language&amp;quot; section in the language menu. |
+| <code>isReadAloudEnabled</code> | function | <code>src/utils/runtimeConfig.js:476</code> | Resolve whether read-aloud is offered \( ocr.speech.enabled \): the entry in the page&#39;s context menu and the &amp;quot;Reading language&amp;quot; section in the language menu. |
 | <code>isSignatureThumbnailPageBadgeEnabled</code> | function | <code>src/utils/runtimeConfig.js:255</code> | Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol. |
-| <code>isSpeechLanguageAutoDetectEnabled</code> | function | <code>src/utils/runtimeConfig.js:421</code> | Resolve whether the language of a page&#39;s text is guessed among the OCR languages, for the read-aloud language and the text layer&#39;s lang \( ocr.speech.autoDetectLanguage \). |
+| <code>isSpeechLanguageAutoDetectEnabled</code> | function | <code>src/utils/runtimeConfig.js:434</code> | Resolve whether the language of a page&#39;s text is guessed among the OCR languages, for the read-aloud language and the text layer&#39;s lang \( ocr.speech.autoDetectLanguage \). |
 | <code>KEYBOARD_PRINT_SHORTCUT_BEHAVIORS</code> | constant | <code>src/utils/runtimeConfig.js:32</code> | Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. |
 | <code>KeyboardPrintShortcutBehavior</code> | typedef | <code>src/utils/runtimeConfig.js:9</code> |  |
-| <code>MAX_AUTO_OCR_WORKER_COUNT</code> | constant | <code>src/utils/runtimeConfig.js:359</code> | Most workers ocr.workerCount: 0 \(automatic\) picks however many cores the client reports: every worker holds its own copy of the engine and the language models, so the automatic ch... |
-| <code>MAX_OCR_WORKER_COUNT</code> | constant | <code>src/utils/runtimeConfig.js:353</code> | Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped. |
-| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:615</code> | Normalize a runtime flag to a boolean. |
-| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:812</code> | Normalize the optional user custom-size limits. |
-| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:783</code> | Normalize a custom fit-width factor. |
-| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:751</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
-| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:683</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
-| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:662</code> | Normalize an integer config value and clamp it to the supplied range. |
-| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:794</code> | Normalize an optional custom-size limit percentage. |
-| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:766</code> | Normalize a user-facing print default mode. |
-| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:712</code> | Resolve the configured reset-session fallback target. |
-| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:700</code> | Normalize the runtime session-reset target. |
-| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:726</code> | Normalize a user-facing zoom mode string before alias lookup. |
-| <code>OCR_ASSET_BASE_URL_REJECTIONS</code> | constant | <code>src/utils/runtimeConfig.js:534</code> | Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once. |
+| <code>MAX_AUTO_OCR_WORKER_COUNT</code> | constant | <code>src/utils/runtimeConfig.js:372</code> | Most workers ocr.workerCount: 0 \(automatic\) picks however many cores the client reports: every worker holds its own copy of the engine and the language models, so the automatic ch... |
+| <code>MAX_OCR_WORKER_COUNT</code> | constant | <code>src/utils/runtimeConfig.js:366</code> | Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped. |
+| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:628</code> | Normalize a runtime flag to a boolean. |
+| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:825</code> | Normalize the optional user custom-size limits. |
+| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:796</code> | Normalize a custom fit-width factor. |
+| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:764</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
+| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:696</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
+| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:675</code> | Normalize an integer config value and clamp it to the supplied range. |
+| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:807</code> | Normalize an optional custom-size limit percentage. |
+| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:779</code> | Normalize a user-facing print default mode. |
+| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:725</code> | Resolve the configured reset-session fallback target. |
+| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:713</code> | Normalize the runtime session-reset target. |
+| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:739</code> | Normalize a user-facing zoom mode string before alias lookup. |
+| <code>OCR_ASSET_BASE_URL_REJECTIONS</code> | constant | <code>src/utils/runtimeConfig.js:547</code> | Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once. |
 | <code>OCR_LANGUAGE_CODE_PATTERN</code> | constant | <code>src/utils/runtimeConfig.js:308</code> | Tesseract language codes: three lower-case letters, optionally with _suffixes \(chi_sim, aze_cyrl\). |
-| <code>OcrWorkerCountConfig</code> | typedef | <code>src/utils/runtimeConfig.js:361</code> |  |
+| <code>OcrWorkerCountConfig</code> | typedef | <code>src/utils/runtimeConfig.js:374</code> |  |
 | <code>PDF_SIGNATURE_UNCHECKED_SEVERITIES</code> | constant | <code>src/utils/runtimeConfig.js:36</code> | Runtime validation values for PdfSignatureUncheckedSeverity; the first one is the default. |
 | <code>PdfSignatureUncheckedSeverity</code> | typedef | <code>src/utils/runtimeConfig.js:13</code> |  |
 | <code>PRINT_DEFAULT_MODE_ALIASES</code> | constant | <code>src/utils/runtimeConfig.js:40</code> | User-facing print default mode aliases mapped to persisted PrintDefaultMode values. |
 | <code>PrintDefaultMode</code> | typedef | <code>src/utils/runtimeConfig.js:11</code> |  |
 | <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:78</code> |  |
-| <code>QUERY_OR_FRAGMENT</code> | member | <code>src/utils/runtimeConfig.js:536</code> | The value carries ? |
+| <code>QUERY_OR_FRAGMENT</code> | member | <code>src/utils/runtimeConfig.js:549</code> | The value carries ? |
 | <code>readBooleanSwitch</code> | function | <code>src/utils/runtimeConfig.js:167</code> | Read a strict boolean switch: only a real boolean counts, anything else \(missing, strings such as &amp;quot;false&amp;quot;, numbers, null, objects\) falls back to defaultValue . |
 | <code>RESET_SESSION_TARGETS</code> | constant | <code>src/utils/runtimeConfig.js:38</code> | Runtime validation values for ResetSessionTarget; the typedef documents the public contract. |
 | <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:14</code> | Session-reset target for the support/problem notice. |
-| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:737</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
-| <code>resolveOcrWorkerCount</code> | function | <code>src/utils/runtimeConfig.js:406</code> | Resolve how many OCR workers to run: describeOcrWorkerCount , with the automatic choice made from the client&#39;s core count: one core is left for the page, and the result is bounded... |
-| <code>SCHEME</code> | member | <code>src/utils/runtimeConfig.js:538</code> | The value has a scheme other than http or https \(javascript:, data:, blob:, file:, a drive letter\). |
+| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:750</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
+| <code>resolveOcrWorkerCount</code> | function | <code>src/utils/runtimeConfig.js:419</code> | Resolve how many OCR workers to run: describeOcrWorkerCount , with the automatic choice made from the client&#39;s core count: one core is left for the page, and the result is bounded... |
+| <code>SCHEME</code> | member | <code>src/utils/runtimeConfig.js:551</code> | The value has a scheme other than http or https \(javascript:, data:, blob:, file:, a drive letter\). |
 | <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:71</code> |  |
 | <code>ViewerDefaultZoomMode</code> | typedef | <code>src/utils/runtimeConfig.js:10</code> |  |
 | <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:85</code> |  |
@@ -1936,24 +1956,26 @@
 | <code>standardManualRuleIds</code> | constant | <code>src/utils/standardManualRules.js:159</code> | A flat compatibility list of every real element id referenced by the logical manifest. |
 | <code>standardManualSectionRules</code> | constant | <code>src/utils/standardManualRules.js:116</code> | Exact-id heading rules. |
 | <code>standardManualSelectionPartialRules</code> | constant | <code>src/utils/standardManualRules.js:130</code> | Structural cleanup for selection sections that also contain ordinary Delete/printing help. |
-| <code>collectConfigDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:137</code> |  |
-| <code>collectLocationDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:124</code> |  |
-| <code>collectNavigatorDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:107</code> |  |
-| <code>collectSupportDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:308</code> |  |
-| <code>createDefaultDiagnosticsFilename</code> | function | <code>src/utils/supportDiagnostics.js:63</code> |  |
-| <code>downloadJsonFile</code> | function | <code>src/utils/supportDiagnostics.js:342</code> | Download a JSON diagnostics payload in browser environments. |
-| <code>getAppVersionFromWindowGlobals</code> | function | <code>src/utils/supportDiagnostics.js:28</code> |  |
-| <code>hasOwn</code> | function | <code>src/utils/supportDiagnostics.js:54</code> |  |
-| <code>loadLatestBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:251</code> |  |
-| <code>loadLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:267</code> |  |
-| <code>loadLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:287</code> |  |
-| <code>logDiagnosticsDownloadFailure</code> | function | <code>src/utils/supportDiagnostics.js:83</code> |  |
-| <code>normalizeDownloadFilename</code> | function | <code>src/utils/supportDiagnostics.js:74</code> |  |
-| <code>resolveAppVersion</code> | function | <code>src/utils/supportDiagnostics.js:91</code> |  |
-| <code>resolveBuildId</code> | function | <code>src/utils/supportDiagnostics.js:100</code> |  |
-| <code>resolveImportMetaEnvValue</code> | function | <code>src/utils/supportDiagnostics.js:39</code> |  |
-| <code>saveLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:275</code> |  |
-| <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:295</code> |  |
+| <code>collectConfigDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:138</code> |  |
+| <code>collectLocationDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:125</code> |  |
+| <code>collectNavigatorDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:108</code> |  |
+| <code>collectSupportDiagnostics</code> | function | <code>src/utils/supportDiagnostics.js:331</code> |  |
+| <code>createDefaultDiagnosticsFilename</code> | function | <code>src/utils/supportDiagnostics.js:64</code> |  |
+| <code>downloadJsonFile</code> | function | <code>src/utils/supportDiagnostics.js:369</code> | Download a JSON diagnostics payload in browser environments. |
+| <code>getAppVersionFromWindowGlobals</code> | function | <code>src/utils/supportDiagnostics.js:29</code> |  |
+| <code>hasOwn</code> | function | <code>src/utils/supportDiagnostics.js:55</code> |  |
+| <code>loadLatestBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:252</code> |  |
+| <code>loadLatestOcrBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:310</code> | The latest OCR benchmark result \(src/ocr/benchmark.js\), if one was recorded in this browser. |
+| <code>loadLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:268</code> |  |
+| <code>loadLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:288</code> |  |
+| <code>logDiagnosticsDownloadFailure</code> | function | <code>src/utils/supportDiagnostics.js:84</code> |  |
+| <code>normalizeDownloadFilename</code> | function | <code>src/utils/supportDiagnostics.js:75</code> |  |
+| <code>resolveAppVersion</code> | function | <code>src/utils/supportDiagnostics.js:92</code> |  |
+| <code>resolveBuildId</code> | function | <code>src/utils/supportDiagnostics.js:101</code> |  |
+| <code>resolveImportMetaEnvValue</code> | function | <code>src/utils/supportDiagnostics.js:40</code> |  |
+| <code>saveLatestOcrBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:318</code> |  |
+| <code>saveLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:276</code> |  |
+| <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:296</code> |  |
 | <code>applyToolbarDensityToDocument</code> | function | <code>src/utils/toolbarDensity.js:22</code> | Apply the toolbar density to the document root \(SSR-safe\). |
 | <code>toolbarDensityFor</code> | function | <code>src/utils/toolbarDensity.js:12</code> |  |
 | <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:525</code> |  |

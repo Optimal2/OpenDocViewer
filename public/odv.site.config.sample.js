@@ -117,6 +117,10 @@
       // language guess: each page's language among the OCR languages ("Auto" in the menu),
       // carried by the text layer as lang. Only the literal false turns the guess off.
       // speech: { enabled: true, autoDetectLanguage: true },
+      // Support tooling: the OCR benchmark under About -> Diagnostics (only the literal true
+      // offers it). It samples the open document and compares worker counts, one language against
+      // the configured ones and a downscaled page image; see docs-src/runtime-configuration.md.
+      // benchmark: { enabled: false, pageLimit: 40, workerCounts: [0] },
       // Serve the engine, worker and language files from a copy of the viewer's ocr/ folder at
       // the site's own location (same layout; same origin, or CORS-enabled and allowed by the
       // site CSP). No query string or fragment, and only http(s) or relative values.

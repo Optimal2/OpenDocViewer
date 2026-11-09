@@ -36,6 +36,7 @@ import {
   isCompareCurtainEnabled,
   isCompareOverlayEnabled,
   isFineTuneEnabled,
+  isOcrBenchmarkEnabled,
   isOcrEnabled,
 } from '../../utils/runtimeConfig.js';
 import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
@@ -51,6 +52,7 @@ import SignatureOverviewButton from '../SignatureOverviewButton.jsx';
 import CompareCurtainButton from '../DocumentViewer/CompareCurtainButton.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
+import { loadOcrModule } from '../../utils/ocrLoader.js';
 
 /**
  * Mutable ref-like object used by the toolbar.
@@ -798,6 +800,27 @@ const DocumentToolbar = ({
     onProgress,
     signal,
   }), [allPages, viewerContext]);
+  // The OCR benchmark (src/ocr/benchmark.js) is offered only while OCR and `ocr.benchmark.enabled`
+  // are on; it is reached through the lazy OCR module, so nothing of it is loaded otherwise.
+  const ocrBenchmarkEnabled = useMemo(() => isOcrBenchmarkEnabled(getRuntimeConfig()), []);
+  const handleRunOcrBenchmark = useCallback(async ({ onProgress, signal } = {}) => {
+    // The live OCR queue pauses while the benchmark runs, so the two do not compete for cores.
+    viewerContext?.setOcrBenchmarkActive?.(true);
+    try {
+      const ocrModule = await loadOcrModule();
+      if (!ocrModule) throw new Error('OCR is disabled by configuration.');
+      return await ocrModule.runOcrBenchmark({
+        config: getRuntimeConfig(),
+        allPages,
+        ensurePageAsset: viewerContext?.ensurePageAsset,
+        releasePageAsset: viewerContext?.releaseOcrPageAsset || null,
+        onProgress,
+        signal,
+      });
+    } finally {
+      viewerContext?.setOcrBenchmarkActive?.(false);
+    }
+  }, [allPages, viewerContext]);
 
   const printActionTitle = isPdfOutputLocked
     ? t('toolbar.printBusy', { defaultValue: 'A PDF is already being prepared.' })
@@ -1007,6 +1030,8 @@ const DocumentToolbar = ({
           onRunPdfBenchmark={handleRunPdfBenchmark}
           renderBenchmarkEnabled={renderBenchmarkEnabled}
           onRunRenderBenchmark={handleRunRenderBenchmark}
+          ocrBenchmarkEnabled={ocrBenchmarkEnabled}
+          onRunOcrBenchmark={handleRunOcrBenchmark}
         />
       </div>
     );
@@ -1406,6 +1431,8 @@ const DocumentToolbar = ({
         onRunPdfBenchmark={handleRunPdfBenchmark}
         renderBenchmarkEnabled={renderBenchmarkEnabled}
         onRunRenderBenchmark={handleRunRenderBenchmark}
+        ocrBenchmarkEnabled={ocrBenchmarkEnabled}
+        onRunOcrBenchmark={handleRunOcrBenchmark}
       />
 
     </div>

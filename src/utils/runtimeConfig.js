@@ -347,6 +347,19 @@ export function isOcrWholeDocumentEnabled(cfg = getRuntimeConfig()) {
   return cfg?.ocr?.recognizeWholeDocument === true;
 }
 
+/**
+ * Resolve whether the opt-in OCR benchmark is offered under About -> Diagnostics
+ * (`ocr.benchmark.enabled`). Off by default; only the boolean literal `true` turns it on, and
+ * only while OCR itself is on (`ocr.enabled`), since the benchmark lives in the OCR module. The
+ * rest of `ocr.benchmark` is read by the module (src/ocr/benchmark.js).
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isOcrBenchmarkEnabled(cfg = getRuntimeConfig()) {
+  return isOcrEnabled(cfg) && cfg?.ocr?.benchmark?.enabled === true;
+}
+
 /** Default number of OCR workers: one tesseract.js worker, one page at a time. */
 export const DEFAULT_OCR_WORKER_COUNT = 1;
 /** Most workers a site may ask for with an explicit `ocr.workerCount`; larger values are clamped. */

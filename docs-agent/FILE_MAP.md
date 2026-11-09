@@ -25,8 +25,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentRender.jsx</code> | 1211 | 3 | 26 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1604 | 2 | 28 | high | OpenDocViewer — Deterministic thumbnail strip. |
-| <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
-| <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 1563 | 1 | 18 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 571 | 1 | 3 | high | Small About dialog for version/build/support information. |
+| <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 1590 | 1 | 18 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 118 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 233 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 163 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
@@ -86,7 +86,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 2 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | <code>src/contexts/viewerContext.js</code> | 260 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2920 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2927 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/generated/standard-manual/manual.en.js</code> | 2 | 1 | 0 | low | Default export for manual.en. |
 | <code>src/generated/standard-manual/manual.sv.js</code> | 2 | 1 | 0 | low | Default export for manual.sv. |
@@ -109,25 +109,26 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/integrations/sessionUrl.js</code> | 166 | 1 | 4 | high | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
 | <code>src/integrations/urlParams.js</code> | 110 | 1 | 5 | high | OpenDocViewer — URL Parameter Reader \(Browser-only\) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e. |
 | <code>src/integrations/viewerEvents.js</code> | 192 | 0 | 8 | high | OpenDocViewer — Tiny Event Emitter/Listener Utilities \(Browser-only\) Lightweight helpers for broadcasting and listening to app-level DOM events. |
-| <code>src/logging/systemLogger.js</code> | 471 | 42 | 31 | high | src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) - Provide a small, dependency-light logging facade for the browser app. |
+| <code>src/logging/systemLogger.js</code> | 471 | 43 | 31 | high | src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) - Provide a small, dependency-light logging facade for the browser app. |
 | <code>src/logging/userLogger.js</code> | 308 | 2 | 17 | high | UserLogController — client-side controller for **user** print logs \(backend-agnostic\). |
 | <code>src/manual-page/main.jsx</code> | 27 | 0 | 0 | high | Entry of the stand-alone manual page \(manual/index.html\). |
 | <code>src/manual-page/ManualPage.jsx</code> | 111 | 1 | 3 | high | The stand-alone manual page \(served as \`&lt;ODV base&gt;/manual/\`\): a header with the page title and the viewer&#39;s own theme and language menus, and the shared manual view filling the rest. |
 | <code>src/manual-page/mountManualPage.jsx</code> | 40 | 1 | 1 | high | Mount the stand-alone manual page into a container, the way src/index.jsx mounts the viewer: apply the shared theme and toolbar density to the document before the first render, then render the page inside the viewer&#39;s Th |
 | <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
-| <code>src/ocr/classify.js</code> | 106 | 2 | 15 | high | Decides, per page, whether OCR is worth running. |
+| <code>src/ocr/benchmark.js</code> | 592 | 0 | 19 | high | Opt-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document&#39;s pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which |
+| <code>src/ocr/classify.js</code> | 106 | 3 | 15 | high | Decides, per page, whether OCR is worth running. |
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
 | <code>src/ocr/engine.js</code> | 302 | 1 | 14 | high | Thin wrapper around a tesseract.js worker. |
 | <code>src/ocr/enginePool.js</code> | 151 | 1 | 5 | high | A pool of OCR engines \(engine.js\) behind the one-engine interface the queue \(queue.js\) uses, so that \`ocr.workerCount\` pages can be recognised at the same time. |
-| <code>src/ocr/index.js</code> | 23 | 1 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
+| <code>src/ocr/index.js</code> | 27 | 1 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
 | <code>src/ocr/languages.js</code> | 29 | 1 | 2 | high | Membership check for OCR language codes against the models tesseract.js knows. |
 | <code>src/ocr/lineRemoval.js</code> | 292 | 1 | 16 | high | Ruling-line removal before recognition: the pre-processing step for ruled tables and forms. |
 | <code>src/ocr/pdfTextProbe.js</code> | 156 | 0 | 4 | high | Reads a PDF page&#39;s own text layer through pdf.js so classify.js can decide whether OCR is needed at all, and, when the layer is usable, hands it over as words with boxes \(pdfTextWords.js\) so the page gets the same text l |
 | <code>src/ocr/pdfTextWords.js</code> | 229 | 1 | 9 | high | Word boxes from a PDF page&#39;s own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/ |
-| <code>src/ocr/prepareImage.js</code> | 161 | 0 | 8 | high | Turns the viewer&#39;s rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova |
+| <code>src/ocr/prepareImage.js</code> | 161 | 1 | 8 | high | Turns the viewer&#39;s rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova |
 | <code>src/ocr/queue.js</code> | 360 | 0 | 12 | high | The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in-memory cache \(resultCache.js\). |
 | <code>src/ocr/resultCache.js</code> | 96 | 0 | 3 | high | In-memory cache of OCR outcomes, one entry per document page. |
-| <code>src/ocr/setup.js</code> | 125 | 0 | 3 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
+| <code>src/ocr/setup.js</code> | 125 | 1 | 3 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
 | <code>src/ocr/window.js</code> | 73 | 0 | 4 | high | Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours, and, when the site asks for the whole document, the rest after them. |
 | <code>src/PerformanceMonitor.jsx</code> | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | <code>src/schemas/portableBundle.js</code> | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
@@ -150,7 +151,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
 | <code>src/utils/ocrLanguageCodes.js</code> | 31 | 2 | 1 | high | Tesseract language codes \(\`ocr.languages\`\) and the ISO 639-1 language each one reads: what the read-aloud menu offers and the language guess chooses among. |
-| <code>src/utils/ocrLoader.js</code> | 41 | 1 | 3 | high | The only door into the OCR module. |
+| <code>src/utils/ocrLoader.js</code> | 41 | 2 | 3 | high | The only door into the OCR module. |
 | <code>src/utils/ocrPageKey.js</code> | 32 | 3 | 3 | high | Key of one document page in the OCR result map \(\`ocrPages\` on the viewer context\). |
 | <code>src/utils/ocrSearch.js</code> | 143 | 2 | 9 | high | Search in recognised text: the toolbar&#39;s OCR search \(components/DocumentToolbar/OcrSearchBar.jsx\) and the text layer&#39;s match marks \(components/OcrTextLayer.jsx\) both go through these functions, on the same outcomes, so t |
 | <code>src/utils/ocrSearchPlacement.js</code> | 182 | 1 | 12 | high | Where the toolbar&#39;s OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar&#39;s spacer leaves, or, when |
@@ -188,12 +189,12 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 1026 | 34 | 76 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 1039 | 35 | 77 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
 | <code>src/utils/standardManualRules.js</code> | 217 | 1 | 9 | high | Resolve every site switch that can hide standard-manual content. |
-| <code>src/utils/supportDiagnostics.js</code> | 375 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
+| <code>src/utils/supportDiagnostics.js</code> | 402 | 4 | 20 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/toolbarDensity.js</code> | 30 | 3 | 2 | high | Toolbar density on the document root. |
 | <code>src/utils/viewerPreferences.js</code> | 562 | 9 | 39 | high | Lightweight persisted viewer preferences. |
 | <code>src/utils/zoomUtils.js</code> | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |

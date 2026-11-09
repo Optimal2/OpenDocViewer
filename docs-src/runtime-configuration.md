@@ -285,6 +285,7 @@ ocr: {
     enabled: true,             // read-aloud (context menu entry, reading language in the language menu); false leaves it out
     autoDetectLanguage: true   // guess each page's language for read-aloud and the layer's lang
   },
+  benchmark: { enabled: false }, // true: offer the OCR benchmark under About -> Diagnostics (see below)
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
 }
 ```
@@ -507,6 +508,59 @@ needs the `osd` model, which the viewer does not ship. The engine reads the page
 stored (the same raster the viewer draws, before any rotation), so a page scanned sideways or
 upside down is not recognised, and the viewer's rotate buttons do not change what the engine
 sees or start a new recognition. Such a page has to be rotated at the source.
+
+### OCR benchmark (opt-in)
+
+Before a site raises `ocr.workerCount`, trims `ocr.languages` or questions the page resolution,
+it can measure what each would buy on its own clients. With `ocr.benchmark.enabled: true` (and
+OCR on), About -> Diagnostics gains "Run OCR benchmark", which recognises a sample of the open
+document once per scenario and offers the result as a JSON download, like the PDF and
+render/decode benchmarks:
+
+```js
+ocr: {
+  enabled: true,
+  benchmark: {
+    enabled: true,
+    pageLimit: 40,                       // pages sampled from the loaded document
+    sampleMode: 'evenly-spaced',         // or 'first'
+    workerCounts: [0],                   // 0: every count from 1 up to the cores minus one (at most 8)
+    languageVariants: ['configured', 'single'],
+    imageScales: [1, 0.75],
+    iterations: 1,
+    pageTimeoutMs: 180000,
+    delayBetweenRunsMs: 500
+  }
+}
+```
+
+The scenarios are: one per worker count with the configured languages and the page image as
+rendered (`workers-1`, `workers-2`, ...), then, with one worker so they compare with
+`workers-1`, the first configured language alone (`lang-swe`; skipped when one language is
+configured) and each image scale below one (`scale-0.75`, the page image downscaled before
+recognition). Every scenario runs on its own engine pool, terminated after it; the first engine's
+start (core and models) is timed on its own as `startupMs`, before the pages, while with several
+workers the other engines start during the first pages, so that cost is part of the run's time,
+as it is for the viewer. The sampled pages are the same in every scenario:
+loaded pages the OCR queue would recognise, spread evenly over the document. The live OCR queue
+pauses while the benchmark runs (a page already in flight finishes first), so the two do not
+compete for cores; run the benchmark shortly after the document opens, or wait for the status
+LED to settle, for the cleanest numbers.
+
+Each run in the result carries the time per page (`msPerPage`, `pagesPerMinute`), the engine
+start time, median/p90/max of the recognition and of the image preparation, the recognised
+word count and mean confidence (a quality proxy when comparing the language and scale variants
+with `workers-1`: fewer words or a lower confidence at the same pages means the variant lost
+text), the main thread's event-loop lag while the run was going (`lagMaxMs`, `stalls` above
+100 ms, and long tasks where the browser reports them: the image decoding and ruling-line
+removal run on the main thread, more often with more workers) and the page's JS heap where the
+browser exposes it. The WebAssembly memory of the workers is not visible from the page: read the
+tab's memory in the browser's task manager during the run to size `ocr.workerCount`. `best` is
+the run with the lowest time per page and no errors; `baseline` is `workers-1`.
+
+The run costs as much CPU as recognising `pageLimit` pages once per scenario, several minutes
+on a long document with many scenarios, so keep the key off outside support sessions. The
+benchmark lives in the OCR module: with OCR off nothing of it is loaded or shown.
 
 ### CSP for OCR
 

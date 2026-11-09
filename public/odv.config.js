@@ -180,6 +180,29 @@
         // layer its lang for screen readers.
         autoDetectLanguage: true
       },
+      // Opt-in support tooling. When enabled (with OCR on), About -> Diagnostics can run the OCR
+      // benchmark over a sample of the open document: once per worker count, then (with one
+      // worker) with the first language alone and with the page image downscaled, reporting ms
+      // per page, recognised words and confidence, and how the main thread fared. The result is
+      // offered as a JSON download. The live OCR queue pauses while it runs.
+      benchmark: {
+        enabled: false,
+        // Pages sampled from the loaded document (evenly spaced, or 'first'); at most 1000.
+        pageLimit: 40,
+        sampleMode: 'evenly-spaced',
+        // Worker counts to run; 0 stands for every count from 1 up to the client's cores minus
+        // one (at most 8). Explicit counts 1 to 8 are run as they are.
+        workerCounts: [0],
+        // 'configured' runs the configured languages; 'single' adds a run with the first
+        // language alone (skipped when only one is configured).
+        languageVariants: ['configured', 'single'],
+        // 1 is the page image as rendered; a factor below 1 adds a run with the image downscaled.
+        imageScales: [1, 0.75],
+        iterations: 1,
+        // Bound on one page (image, preparation or recognition) and on the engine start.
+        pageTimeoutMs: 180000,
+        delayBetweenRunsMs: 500
+      },
       // Where the OCR engine, worker and language files are served from. null (default) uses the
       // viewer's own ocr/ folder next to the application. A site can point this at a copy of that
       // folder on its own host (same layout; same origin, or CORS-enabled and allowed by the site

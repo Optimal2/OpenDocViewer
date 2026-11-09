@@ -367,6 +367,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const [ocrSearch, setOcrSearchState] = useState(/** @type {(Object|null)} */ (null));
   // True while a print flow holds page URLs or a print PDF is being assembled; OCR pauses meanwhile.
   const [printActivity, setPrintActivity] = useState(false);
+  /** True while the opt-in OCR benchmark runs (src/ocr/benchmark.js): the live OCR queue pauses then. */
+  const [ocrBenchmarkActive, setOcrBenchmarkActive] = useState(false);
   const [error, setError] = useState(/** @type {(string|null)} */ (null));
   const [workerCount, setWorkerCount] = useState(0);
   const [loadingRunActive, setLoadingRunActive] = useState(false);
@@ -2750,7 +2752,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     allPages,
     focusPageIndexes: ocrFocusPageIndexes,
     ready: pageLoadState.readyPages > 0,
-    paused: printActivity || memoryPressureStage === 'hard',
+    paused: printActivity || memoryPressureStage === 'hard' || ocrBenchmarkActive,
     readSourceArrayBuffer,
     ensurePageAsset,
     // A page rendered only for OCR (the whole document asked for) is dropped again once read.
@@ -2855,6 +2857,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     setOcrFocusPageIndexes,
     ocrSearch,
     setOcrSearch,
+    releaseOcrPageAsset,
+    ocrBenchmarkActive,
+    setOcrBenchmarkActive,
     scheduleSourceWarmup,
     compareTransforms,
     getCompareTransform,
@@ -2902,6 +2907,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     setOcrFocusPageIndexes,
     ocrSearch,
     setOcrSearch,
+    releaseOcrPageAsset,
+    ocrBenchmarkActive,
     scheduleSourceWarmup,
     compareTransforms,
     getCompareTransform,

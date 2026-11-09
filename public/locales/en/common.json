@@ -1010,7 +1010,16 @@
       "renderBenchmarkDone": "Render/decode benchmark completed.",
       "renderBenchmarkError": "Render/decode benchmark failed: {error}",
       "renderBenchmarkSummary": "Best render/decode run: {ms} ms, {pages} pages, {scenario}.",
-      "noRenderBenchmark": "No render/decode benchmark result has been recorded."
+      "noRenderBenchmark": "No render/decode benchmark result has been recorded.",
+      "runOcrBenchmark": "Run OCR benchmark",
+      "ocrBenchmarkRunningShort": "Running…",
+      "downloadOcrBenchmark": "Download OCR benchmark JSON",
+      "ocrBenchmarkRunning": "Running OCR benchmark…",
+      "ocrBenchmarkProgress": "Running OCR benchmark {current} of {total}: {scenario} ({pageProgress} pages)…",
+      "ocrBenchmarkDone": "OCR benchmark completed.",
+      "ocrBenchmarkError": "OCR benchmark failed: {error}",
+      "ocrBenchmarkSummary": "Best OCR run: {msPerPage} ms per page, {pages} pages, {scenario}.",
+      "noOcrBenchmark": "No OCR benchmark result has been recorded."
     }
   },
   "metadataMatrix": {

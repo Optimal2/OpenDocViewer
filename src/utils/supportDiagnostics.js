@@ -14,6 +14,7 @@ import { getPdfPrintCacheKeyOptions } from './pdfPrintCacheKey.js';
 // best-effort support data and do not require migration.
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
 const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
+const LATEST_OCR_BENCHMARK_KEY = 'odv.ocrBenchmark.latest.v1';
 const DOWNLOAD_URL_REVOKE_DELAY_MS = 30 * 1000;
 // Diagnostics payloads cap arrays so downloaded files stay readable while still
 // including enough configured values to troubleshoot support cases.
@@ -302,12 +303,35 @@ export function saveLatestRenderDecodeBenchmarkResult(result) {
 }
 
 /**
+ * The latest OCR benchmark result (src/ocr/benchmark.js), if one was recorded in this browser.
+ *
+ * @returns {Object|null}
+ */
+export function loadLatestOcrBenchmarkResult() {
+  return loadLatestBenchmarkResult(LATEST_OCR_BENCHMARK_KEY);
+}
+
+/**
+ * @param {Object} result
+ * @returns {void}
+ */
+export function saveLatestOcrBenchmarkResult(result) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(LATEST_OCR_BENCHMARK_KEY, JSON.stringify(result));
+  } catch {
+    // Diagnostics persistence is best-effort only.
+  }
+}
+
+/**
  * @param {Object=} extra
  * @returns {Object}
  */
 export function collectSupportDiagnostics(extra = {}) {
   const hasLatestPdfBenchmark = hasOwn(extra, 'latestPdfBenchmark');
   const hasLatestRenderDecodeBenchmark = hasOwn(extra, 'latestRenderDecodeBenchmark');
+  const hasLatestOcrBenchmark = hasOwn(extra, 'latestOcrBenchmark');
   return {
     schema: 'opendocviewer.support-diagnostics.v1',
     createdUtc: new Date().toISOString(),
@@ -324,6 +348,9 @@ export function collectSupportDiagnostics(extra = {}) {
     latestRenderDecodeBenchmark: hasLatestRenderDecodeBenchmark
       ? extra.latestRenderDecodeBenchmark
       : loadLatestRenderDecodeBenchmarkResult(),
+    latestOcrBenchmark: hasLatestOcrBenchmark
+      ? extra.latestOcrBenchmark
+      : loadLatestOcrBenchmarkResult(),
     extra: extra.extra || undefined,
   };
 }
