@@ -4,8 +4,9 @@
  *
  * The hook is inert until the OCR module has arrived (useOcrModule.js hands it over only when
  * `ocr.enabled` is the literal true), so on the default code path it holds an empty map and
- * creates nothing. With the module it builds one engine (or a pool of `ocr.workerCount` engines,
- * which recognise that many pages at a time), one in-memory result cache, one PDF
+ * creates nothing. With the module it builds one engine (or a pool sized for the client by
+ * `ocr.workerCount` and `ocr.workerPolicy`, which recognises as many pages at a time as are
+ * pending and the pool allows), one in-memory result cache, one PDF
  * text prober and one page queue for the session; feeds the queue the window around the focus
  * pages (src/ocr/window.js) every time the pages or the focus change; pauses it while the viewer
  * says so (print PDF preparation, hard memory pressure); drops a document's outcomes when the
@@ -90,9 +91,12 @@ export default function useOcrTextLayers({
     if (!ocrModule) return undefined;
     let active = true;
     const cache = ocrModule.createOcrResultCache();
-    // One engine, or a pool of `ocr.workerCount` engines behind the same interface; the queue
-    // runs as many pages at a time as the pool has engines.
-    const { engine, workerCount } = ocrModule.createConfiguredOcrEngine();
+    // One engine, or a pool behind the same interface sized for the client (a manual
+    // `ocr.workerCount`, or the automatic plan's capacity from cores and memory); the queue runs
+    // up to that many pages at a time, lowered to what the pending pages warrant each time the
+    // window is planned (resolveOcrConcurrency), since an engine the queue never reaches is
+    // never started.
+    const { engine, setup, workerCount } = ocrModule.createConfiguredOcrEngine();
     const prober = ocrModule.createPdfTextProber({
       readSourceArrayBuffer: (sourceKey) => readSourceRef.current(sourceKey),
     });
@@ -147,7 +151,7 @@ export default function useOcrTextLayers({
         }, Math.max(0, Number(idleShutdownMs) || 0));
       },
     });
-    runtimeRef.current = { queue, prober, cache };
+    runtimeRef.current = { queue, prober, cache, setup, workerCount };
     return () => {
       active = false;
       clearIdleTimer();
@@ -206,7 +210,15 @@ export default function useOcrTextLayers({
         renderedForOcr: !inWindow && Number(page.fullSizeStatus) !== 1,
       });
     }
-    runtime.queue.setWindow(candidates);
+    // Pages in flight for what is still to do: a short window does not start engines it cannot
+    // feed, the whole document gets the pool's capacity. Set together with the plan, so the
+    // limit never pumps the old plan.
+    let concurrency;
+    if (typeof ocrModule.resolveOcrConcurrency === 'function') {
+      const pending = candidates.filter((entry) => !runtime.cache.has(entry.key)).length;
+      concurrency = ocrModule.resolveOcrConcurrency(pending, runtime.setup);
+    }
+    runtime.queue.setWindow(candidates, { concurrency });
   }, [allPages, focusPageIndexes, ocrModule, ready, wholeDocument]);
 
   return { ocrPages: snapshot.pages, ocrEngineFailure: snapshot.engineFailure };

@@ -25,7 +25,9 @@ import {
   DEFAULT_OCR_LANGUAGES,
   OCR_LANGUAGE_PRESETS,
   DEFAULT_OCR_WORKER_COUNT,
-  MAX_AUTO_OCR_WORKER_COUNT,
+  OCR_WORKER_POLICY_DEFAULTS,
+  normalizeOcrWorkerPolicy,
+  resolveOcrWorkerPlan,
   MAX_OCR_WORKER_COUNT,
   OCR_ASSET_BASE_URL_REJECTIONS,
   describeOcrWorkerCount,
@@ -353,43 +355,118 @@ describe('runtimeConfig', () => {
   });
 
   describe('describeOcrWorkerCount / resolveOcrWorkerCount', () => {
-    it('defaults to one worker when the section or key is missing', () => {
-      expect(DEFAULT_OCR_WORKER_COUNT).toBe(1);
-      expect(describeOcrWorkerCount({})).toEqual({ value: 1, configured: false, clamped: false });
-      expect(describeOcrWorkerCount({ ocr: {} })).toEqual({ value: 1, configured: false, clamped: false });
-      expect(describeOcrWorkerCount(null)).toEqual({ value: 1, configured: false, clamped: false });
-      expect(resolveOcrWorkerCount({}, { cores: 16 })).toBe(1);
+    // A strong client (the cores and memory do not bind below the ceiling).
+    const strong = { cores: 16, deviceMemoryGiB: 8 };
+
+    it('defaults to the automatic choice when the section or key is missing', () => {
+      expect(DEFAULT_OCR_WORKER_COUNT).toBe(0);
+      expect(describeOcrWorkerCount({})).toEqual({ value: 'auto', configured: false, clamped: false });
+      expect(describeOcrWorkerCount({ ocr: {} })).toEqual({ value: 'auto', configured: false, clamped: false });
+      expect(describeOcrWorkerCount(null)).toEqual({ value: 'auto', configured: false, clamped: false });
+      expect(resolveOcrWorkerCount({}, strong)).toBe(OCR_WORKER_POLICY_DEFAULTS.maxWorkerCount);
     });
 
-    it('takes an integer literal from 1 up to the maximum and clamps above it', () => {
+    it('takes an integer literal from 1 up to the maximum as a manual override and clamps above it', () => {
       expect(describeOcrWorkerCount({ ocr: { workerCount: 1 } })).toEqual({ value: 1, configured: true, clamped: false });
       expect(describeOcrWorkerCount({ ocr: { workerCount: 3 } })).toEqual({ value: 3, configured: true, clamped: false });
       expect(describeOcrWorkerCount({ ocr: { workerCount: MAX_OCR_WORKER_COUNT } })).toEqual({ value: MAX_OCR_WORKER_COUNT, configured: true, clamped: false });
       expect(describeOcrWorkerCount({ ocr: { workerCount: MAX_OCR_WORKER_COUNT + 1 } })).toEqual({ value: MAX_OCR_WORKER_COUNT, configured: true, clamped: true });
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 3 } }, { cores: 2 })).toBe(3);
+      // The override ignores the client: two cores, little memory, one page still give three.
+      expect(resolveOcrWorkerCount({ ocr: { workerCount: 3 } }, { cores: 2, deviceMemoryGiB: 0.5, pageCount: 1 })).toBe(3);
       expect(resolveOcrWorkerCount({ ocr: { workerCount: 100 } })).toBe(MAX_OCR_WORKER_COUNT);
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 3 } }, strong)).toMatchObject({ workerCount: 3, automatic: false, caps: null });
     });
 
-    it('rejects anything but an integer literal and reports the value', () => {
+    it('rejects anything but an integer literal, reports the value and falls back to the automatic choice', () => {
       for (const value of ['2', 2.5, -1, true, null, undefined, NaN, Infinity, [2], { count: 2 }]) {
         const described = describeOcrWorkerCount({ ocr: { workerCount: value } });
-        expect(described).toMatchObject({ value: 1, configured: true, clamped: false });
+        expect(described).toMatchObject({ value: 'auto', configured: true, clamped: false });
         expect(described).toHaveProperty('rejected');
-        expect(resolveOcrWorkerCount({ ocr: { workerCount: value } }, { cores: 16 })).toBe(1);
+        expect(resolveOcrWorkerCount({ ocr: { workerCount: value } }, strong)).toBe(OCR_WORKER_POLICY_DEFAULTS.maxWorkerCount);
       }
     });
 
-    it('chooses from the cores for 0: one left for the page, at least one, at most the automatic maximum', () => {
+    it('treats 0 as the automatic choice', () => {
       expect(describeOcrWorkerCount({ ocr: { workerCount: 0 } })).toEqual({ value: 'auto', configured: true, clamped: false });
-      expect(MAX_AUTO_OCR_WORKER_COUNT).toBe(4);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 0 })).toBe(1);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, {})).toBe(1);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 1 })).toBe(1);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 2 })).toBe(1);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 4 })).toBe(3);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 5 })).toBe(4);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: 24 })).toBe(MAX_AUTO_OCR_WORKER_COUNT);
-      expect(resolveOcrWorkerCount({ ocr: { workerCount: 0 } }, { cores: '8' })).toBe(4);
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 0 } }, strong).automatic).toBe(true);
+    });
+  });
+
+  describe('normalizeOcrWorkerPolicy', () => {
+    it('ships the measured defaults and returns them for a missing or unusable section', () => {
+      expect(OCR_WORKER_POLICY_DEFAULTS).toEqual({
+        reservedCores: 1, maxWorkerCount: 4, pagesPerWorker: 2, memoryPerWorkerMiB: 110, memoryPerLanguageMiB: 20, memoryBudgetFraction: 0.25, assumedDeviceMemoryGiB: 4,
+      });
+      expect(Object.isFrozen(OCR_WORKER_POLICY_DEFAULTS)).toBe(true);
+      expect(normalizeOcrWorkerPolicy({})).toEqual(OCR_WORKER_POLICY_DEFAULTS);
+      expect(normalizeOcrWorkerPolicy({ ocr: { workerPolicy: 'fast' } })).toEqual(OCR_WORKER_POLICY_DEFAULTS);
+      expect(normalizeOcrWorkerPolicy(null)).not.toBe(OCR_WORKER_POLICY_DEFAULTS);
+    });
+
+    it('bounds every value, floors the counts and keeps the fractions, and ignores non-numbers', () => {
+      expect(normalizeOcrWorkerPolicy({ ocr: { workerPolicy: {
+        reservedCores: 2.9, maxWorkerCount: 99, pagesPerWorker: 0, memoryPerWorkerMiB: 150.5, memoryPerLanguageMiB: -5, memoryBudgetFraction: 0.5, assumedDeviceMemoryGiB: 2,
+      } } })).toEqual({
+        reservedCores: 2, maxWorkerCount: MAX_OCR_WORKER_COUNT, pagesPerWorker: 1, memoryPerWorkerMiB: 150.5, memoryPerLanguageMiB: 0, memoryBudgetFraction: 0.5, assumedDeviceMemoryGiB: 2,
+      });
+      expect(normalizeOcrWorkerPolicy({ ocr: { workerPolicy: {
+        reservedCores: '2', maxWorkerCount: null, pagesPerWorker: NaN, memoryPerWorkerMiB: Infinity, memoryBudgetFraction: true, assumedDeviceMemoryGiB: [4],
+      } } })).toEqual(OCR_WORKER_POLICY_DEFAULTS);
+      expect(normalizeOcrWorkerPolicy({ ocr: { workerPolicy: { memoryBudgetFraction: 7, assumedDeviceMemoryGiB: 0 } } })).toMatchObject({ memoryBudgetFraction: 1, assumedDeviceMemoryGiB: 0.25 });
+    });
+  });
+
+  describe('resolveOcrWorkerPlan', () => {
+    const auto = { ocr: { workerCount: 0 } };
+
+    it('leaves one core to the page and gives one worker when the cores are unknown', () => {
+      expect(resolveOcrWorkerPlan(auto, { cores: 0, deviceMemoryGiB: 8 })).toMatchObject({ workerCount: 1, automatic: true, caps: { cores: 1 } });
+      expect(resolveOcrWorkerPlan(auto, { deviceMemoryGiB: 8 }).workerCount).toBe(1);
+      expect(resolveOcrWorkerPlan(auto, { cores: 1, deviceMemoryGiB: 8 }).workerCount).toBe(1);
+      expect(resolveOcrWorkerPlan(auto, { cores: 2, deviceMemoryGiB: 8 }).workerCount).toBe(1);
+      // 8 GiB * 0.25 over 110 MiB (one model by default) allows eighteen; the cores bind.
+      expect(resolveOcrWorkerPlan(auto, { cores: 4, deviceMemoryGiB: 8 })).toMatchObject({ workerCount: 3, caps: { cores: 3, memory: 18, pages: null, max: 4 } });
+      expect(resolveOcrWorkerPlan(auto, { cores: 5, deviceMemoryGiB: 8 }).workerCount).toBe(4);
+      expect(resolveOcrWorkerPlan(auto, { cores: '8', deviceMemoryGiB: 8 }).caps.cores).toBe(7);
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 0, workerPolicy: { reservedCores: 0 } } }, { cores: 2, deviceMemoryGiB: 8 }).workerCount).toBe(2);
+    });
+
+    it('stops at the ceiling on a many-core client, and the ceiling is the policy\'s', () => {
+      expect(resolveOcrWorkerPlan(auto, { cores: 24, deviceMemoryGiB: 8 })).toMatchObject({ workerCount: 4, caps: { cores: 23, max: 4 } });
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 0, workerPolicy: { maxWorkerCount: 8 } } }, { cores: 24, deviceMemoryGiB: 8 }).workerCount).toBe(8);
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 0, workerPolicy: { maxWorkerCount: 12 } } }, { cores: 24, deviceMemoryGiB: 8 }).workerCount).toBe(MAX_OCR_WORKER_COUNT);
+    });
+
+    it('bounds the workers by a quarter of the device memory over what one engine takes with its models', () => {
+      // Two models: 130 MiB per engine. 2 GiB * 0.25 = 512 MiB -> 3; 1 GiB -> 1; 0.5 GiB -> 1 (never below one).
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 2, languageCount: 2 })).toMatchObject({ workerCount: 3, caps: { memory: 3 }, inputs: { memoryPerWorkerMiB: 130, deviceMemoryReported: true } });
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 1, languageCount: 2 }).workerCount).toBe(1);
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 0.5, languageCount: 2 }).workerCount).toBe(1);
+      // One model: 110 MiB per engine, so the same 1 GiB device allows one more.
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 1, languageCount: 1 })).toMatchObject({ workerCount: 2, caps: { memory: 2 }, inputs: { memoryPerWorkerMiB: 110 } });
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 1.5, languageCount: 1 }).caps.memory).toBe(3);
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 1.5, languageCount: 2 }).caps.memory).toBe(2);
+      // A browser that reports no memory is taken as the assumed 4 GiB client.
+      expect(resolveOcrWorkerPlan(auto, { cores: 16, deviceMemoryGiB: 0, languageCount: 2 })).toMatchObject({ caps: { memory: 7 }, inputs: { deviceMemoryGiB: 4, deviceMemoryReported: false } });
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 0, workerPolicy: { assumedDeviceMemoryGiB: 1, memoryBudgetFraction: 0.5 } } }, { cores: 16, languageCount: 2 }).caps.memory).toBe(3);
+    });
+
+    it('gives one worker per two pending pages, and the capacity when the page count is unknown', () => {
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 1 })).toMatchObject({ workerCount: 1, caps: { pages: 1 } });
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 2 }).workerCount).toBe(1);
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 3 }).workerCount).toBe(2);
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 4 }).workerCount).toBe(2);
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 7 }).workerCount).toBe(4);
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 300 })).toMatchObject({ workerCount: 4, caps: { pages: 150 } });
+      expect(resolveOcrWorkerPlan(auto, { cores: 8, deviceMemoryGiB: 8, pageCount: 0 })).toMatchObject({ workerCount: 4, caps: { pages: null } });
+      expect(resolveOcrWorkerPlan({ ocr: { workerCount: 0, workerPolicy: { pagesPerWorker: 1 } } }, { cores: 8, deviceMemoryGiB: 8, pageCount: 3 }).workerCount).toBe(3);
+    });
+
+    it('reports its inputs and the policy it used', () => {
+      const plan = resolveOcrWorkerPlan(auto, { cores: 4, deviceMemoryGiB: 16, pageCount: 40, languageCount: 2 });
+      expect(plan.inputs).toEqual({ cores: 4, deviceMemoryGiB: 16, deviceMemoryReported: true, pageCount: 40, languageCount: 2, memoryPerWorkerMiB: 130 });
+      expect(plan.policy).toEqual(OCR_WORKER_POLICY_DEFAULTS);
+      expect(plan.workerCount).toBe(3);
     });
   });
 

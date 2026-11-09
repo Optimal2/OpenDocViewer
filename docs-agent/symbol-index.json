@@ -18473,7 +18473,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 55,
+    "line": 56,
     "description": "",
     "params": [
       {
@@ -18558,7 +18558,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 28,
+    "line": 29,
     "description": "Idle time after which the OCR worker is terminated to free its memory.",
     "params": [],
     "returns": [],
@@ -18571,7 +18571,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 78,
+    "line": 79,
     "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],
@@ -22241,7 +22241,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 554,
+    "line": 559,
     "description": "Run the OCR benchmark over the loaded document and save the result.",
     "params": [
       {
@@ -22290,7 +22290,7 @@
         "name": "args.inject",
         "type": "Object",
         "optional": true,
-        "description": "Test seams: createEngine (default createConfiguredOcrEngine), prepareImage (default prepareOcrImage), fetchBlob , cores , lagSampler , save..."
+        "description": "Test seams: createEngine (default createConfiguredOcrEngine), prepareImage (default prepareOcrImage), fetchBlob , cores , deviceMemoryGiB ,..."
       }
     ],
     "returns": [
@@ -24184,7 +24184,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 181,
+    "line": 186,
     "description": "Abort one job's recognition: its worker on a pool, the engine as a whole otherwise.",
     "params": [],
     "returns": [],
@@ -24197,7 +24197,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 126,
+    "line": 131,
     "description": "",
     "params": [
       {
@@ -24294,7 +24294,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 316,
+    "line": 321,
     "description": "Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped.",
     "params": [],
     "returns": [],
@@ -24398,7 +24398,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 145,
+    "line": 150,
     "description": "null until retainSources is called: every source is retained.",
     "params": [],
     "returns": [],
@@ -24518,7 +24518,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 115,
+    "line": 156,
     "description": "Create an engine for the configured languages and asset location: one engine (engine.js) for a worker count of one, otherwise a pool of that many (enginePool.js) behind the same i...",
     "params": [
       {
@@ -24537,7 +24537,7 @@
     "returns": [
       {
         "type": "Object",
-        "description": "engine is an OcrEngine or an OcrEnginePool; workerCount is how many pages it recognises at a time."
+        "description": "engine is an OcrEngine or an OcrEnginePool; workerCount is how many pages it can recognise at a time."
       }
     ],
     "examples": 0
@@ -24549,8 +24549,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 52,
-    "description": "Resolve languages and asset URLs from the configuration, logging each problem once.",
+    "line": 69,
+    "description": "Resolve languages, asset URLs and the worker count from the configuration, logging each problem once.",
     "params": [
       {
         "name": "cfg",
@@ -24598,7 +24598,19 @@
         "name": "options.cores",
         "type": "number",
         "optional": true,
-        "description": "Logical cores for ocr.workerCount: 0 (defaults to navigator.hardwareConcurrency )."
+        "description": "Logical cores for the automatic worker count (defaults to navigator.hardwareConcurrency )."
+      },
+      {
+        "name": "options.deviceMemoryGiB",
+        "type": "number",
+        "optional": true,
+        "description": "Device memory for the automatic worker count (defaults to navigator.deviceMemory ; 0 when the browser does not report it)."
+      },
+      {
+        "name": "options.pageCount",
+        "type": "number",
+        "optional": true,
+        "description": "Pages pending for the automatic worker count; default 0 (unknown), which plans the client's capacity."
       }
     ],
     "returns": [
@@ -24616,10 +24628,89 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 30,
+    "line": 29,
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "reportedCores",
+    "name": "reportedCores",
+    "longname": "reportedCores",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/setup.js",
+    "line": 41,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "number",
+        "description": "navigator.hardwareConcurrency , or 0 when unknown."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "reportedDeviceMemoryGiB",
+    "name": "reportedDeviceMemoryGiB",
+    "longname": "reportedDeviceMemoryGiB",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/setup.js",
+    "line": 46,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "number",
+        "description": "navigator.deviceMemory in GiB, or 0 when the browser does not report it."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveOcrConcurrency",
+    "name": "resolveOcrConcurrency",
+    "longname": "resolveOcrConcurrency",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/setup.js",
+    "line": 138,
+    "description": "How many pages the queue should keep in flight for pageCount pending pages: the automatic plan for that many pages (one worker per ocr.workerPolicy.pagesPerWorker ), never above t...",
+    "params": [
+      {
+        "name": "pageCount",
+        "type": "number",
+        "optional": false,
+        "description": "Pending pages (planned and not yet recognised); 0 for unknown."
+      },
+      {
+        "name": "setup",
+        "type": "OcrSetup",
+        "optional": false,
+        "description": "The setup the engine was created from."
+      },
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": "cores and deviceMemoryGiB , defaulting to navigator 's."
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -45123,13 +45214,62 @@
     "examples": 0
   },
   {
+    "id": "boundedNumber",
+    "name": "boundedNumber",
+    "longname": "boundedNumber",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 470,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "integer",
+        "type": "boolean",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "clampNumber",
     "name": "clampNumber",
     "longname": "clampNumber",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 670,
+    "line": 798,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -45211,8 +45351,8 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 374,
-    "description": "Default number of OCR workers: one tesseract.js worker, one page at a time.",
+    "line": 377,
+    "description": "ocr.workerCount when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -45237,7 +45377,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 593,
+    "line": 721,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -45262,7 +45402,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 513,
+    "line": 641,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -45287,7 +45427,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 404,
+    "line": 449,
     "description": "Describe ocr.workerCount (how many tesseract.js workers recognise pages at the same time) without resolving the automatic choice, so the caller can report a rejected or clamped va...",
     "params": [
       {
@@ -45362,7 +45502,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 618,
+    "line": 746,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -45387,7 +45527,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 562,
+    "line": 690,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -45412,7 +45552,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1047,
+    "line": 1175,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -45487,7 +45627,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 922,
+    "line": 1050,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -45512,7 +45652,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 947,
+    "line": 1075,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -45555,7 +45695,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1030,
+    "line": 1158,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -45580,7 +45720,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 630,
+    "line": 758,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -45605,7 +45745,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 898,
+    "line": 1026,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -45630,7 +45770,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 884,
+    "line": 1012,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -45655,7 +45795,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 871,
+    "line": 999,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -45680,7 +45820,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 971,
+    "line": 1099,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -45705,7 +45845,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 989,
+    "line": 1117,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -45730,7 +45870,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 573,
+    "line": 701,
     "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
     "params": [],
     "returns": [],
@@ -45968,7 +46108,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 471,
+    "line": 599,
     "description": "Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead of the browser's own find ( ocr.search.overridesCtrlF ).",
     "params": [
       {
@@ -45993,7 +46133,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 458,
+    "line": 586,
     "description": "Resolve whether the toolbar's search in the text layers is offered ( ocr.search.enabled ).",
     "params": [
       {
@@ -46068,7 +46208,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 486,
+    "line": 614,
     "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
     "params": [
       {
@@ -46118,7 +46258,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 444,
+    "line": 572,
     "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
     "params": [
       {
@@ -46163,26 +46303,13 @@
     "examples": 0
   },
   {
-    "id": "MAX_AUTO_OCR_WORKER_COUNT",
-    "name": "MAX_AUTO_OCR_WORKER_COUNT",
-    "longname": "MAX_AUTO_OCR_WORKER_COUNT",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/utils/runtimeConfig.js",
-    "line": 382,
-    "description": "Most workers ocr.workerCount: 0 (automatic) picks however many cores the client reports: every worker holds its own copy of the engine and the language models, so the automatic ch...",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "MAX_OCR_WORKER_COUNT",
     "name": "MAX_OCR_WORKER_COUNT",
     "longname": "MAX_OCR_WORKER_COUNT",
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 376,
+    "line": 379,
     "description": "Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped.",
     "params": [],
     "returns": [],
@@ -46195,7 +46322,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 648,
+    "line": 776,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -46226,7 +46353,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 845,
+    "line": 973,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -46251,7 +46378,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 816,
+    "line": 944,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -46282,7 +46409,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 784,
+    "line": 912,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -46313,7 +46440,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 716,
+    "line": 844,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -46356,7 +46483,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 695,
+    "line": 823,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -46393,13 +46520,38 @@
     "examples": 0
   },
   {
+    "id": "normalizeOcrWorkerPolicy",
+    "name": "normalizeOcrWorkerPolicy",
+    "longname": "normalizeOcrWorkerPolicy",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 485,
+    "description": "Read ocr.workerPolicy : a number out of range is clamped to the nearest bound, and whatever is missing or not a finite number (a numeric string included) gets the default.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "RuntimeConfig",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrWorkerPolicy",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "normalizeOptionalCustomFitFactorPercent",
     "name": "normalizeOptionalCustomFitFactorPercent",
     "longname": "normalizeOptionalCustomFitFactorPercent",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 827,
+    "line": 955,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -46430,7 +46582,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 799,
+    "line": 927,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -46461,7 +46613,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 745,
+    "line": 873,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -46486,7 +46638,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 733,
+    "line": 861,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -46517,7 +46669,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 759,
+    "line": 887,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -46542,7 +46694,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 567,
+    "line": 695,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -46575,14 +46727,53 @@
     "examples": 0
   },
   {
+    "id": "OCR_WORKER_POLICY_DEFAULTS",
+    "name": "OCR_WORKER_POLICY_DEFAULTS",
+    "longname": "OCR_WORKER_POLICY_DEFAULTS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 419,
+    "description": "Defaults of ocr.workerPolicy , set from the OCR benchmark (About -&gt; Diagnostics) on a 4-core, 16 GB client (Chromium, 2026-11-10): 40 evenly spaced pages of a 300-page scanned...",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "OcrWorkerCountConfig",
     "name": "OcrWorkerCountConfig",
     "longname": "OcrWorkerCountConfig",
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 384,
+    "line": 429,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrWorkerPlan",
+    "name": "OcrWorkerPlan",
+    "longname": "OcrWorkerPlan",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 499,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrWorkerPolicy",
+    "name": "OcrWorkerPolicy",
+    "longname": "OcrWorkerPolicy",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 381,
+    "description": "The thresholds the automatic worker count is made from ( ocr.workerPolicy ).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -46659,7 +46850,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 569,
+    "line": 697,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -46729,7 +46920,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 770,
+    "line": 898,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -46754,8 +46945,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 429,
-    "description": "Resolve how many OCR workers to run: describeOcrWorkerCount , with the automatic choice made from the client's core count: one core is left for the page, and the result is bounded...",
+    "line": 560,
+    "description": "The workerCount of resolveOcrWorkerPlan.",
     "params": [
       {
         "name": "cfg",
@@ -46767,18 +46958,67 @@
         "name": "options",
         "type": "Object",
         "optional": true,
-        "description": ""
-      },
-      {
-        "name": "options.cores",
-        "type": "number",
-        "optional": true,
-        "description": "Logical cores ( navigator.hardwareConcurrency ); the caller reads it, so this stays free of globals."
+        "description": "See resolveOcrWorkerPlan."
       }
     ],
     "returns": [
       {
         "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveOcrWorkerPlan",
+    "name": "resolveOcrWorkerPlan",
+    "longname": "resolveOcrWorkerPlan",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 533,
+    "description": "Resolve how many OCR workers to run.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "RuntimeConfig",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": "The caller reads these from navigator , so this stays free of globals."
+      },
+      {
+        "name": "options.cores",
+        "type": "number",
+        "optional": true,
+        "description": "navigator.hardwareConcurrency ."
+      },
+      {
+        "name": "options.deviceMemoryGiB",
+        "type": "number",
+        "optional": true,
+        "description": "navigator.deviceMemory (Chromium reports at most 8)."
+      },
+      {
+        "name": "options.pageCount",
+        "type": "number",
+        "optional": true,
+        "description": "Pages waiting for recognition; 0 for unknown."
+      },
+      {
+        "name": "options.languageCount",
+        "type": "number",
+        "optional": true,
+        "description": "Models each engine loads; default 1."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrWorkerPlan",
         "description": ""
       }
     ],
@@ -46791,7 +47031,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 571,
+    "line": 699,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],

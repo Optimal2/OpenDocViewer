@@ -100,9 +100,13 @@
       // neighbours), so the search covers every page in time. Only the literal true turns it on.
       // recognizeWholeDocument: false,
       // Pages recognised at the same time, one worker each (each worker holds its own copy of the
-      // engine and the language models). 1 (default), an integer up to 8, or 0 for an automatic
-      // choice from the client's cores (one left for the page, at most 4).
-      // workerCount: 1,
+      // engine and the language models). 0 (default) chooses from the pages waiting, the cores
+      // and the memory with the thresholds in workerPolicy; an integer 1 to 8 runs that many.
+      // workerCount: 0,
+      // Thresholds of the automatic choice; the defaults are measured (see
+      // docs-src/runtime-configuration.md). Raise maxWorkerCount only after the OCR benchmark
+      // on the site's own clients shows that more workers do not make page browsing stutter.
+      // workerPolicy: { reservedCores: 1, maxWorkerCount: 4, pagesPerWorker: 2, memoryPerWorkerMiB: 110, memoryPerLanguageMiB: 20, memoryBudgetFraction: 0.25, assumedDeviceMemoryGiB: 4 },
       // 'auto' (default): Swedish and English tried together on every text line; 'swedish' or
       // 'english': that model alone, the other is never downloaded. An array of Tesseract
       // language codes still works and replaces the default completely, so list every language

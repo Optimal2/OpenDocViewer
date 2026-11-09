@@ -1,7 +1,7 @@
 // File: src/ocr/enginePool.js
 /**
  * A pool of OCR engines (engine.js) behind the one-engine interface the queue (queue.js) uses,
- * so that `ocr.workerCount` pages can be recognised at the same time.
+ * so that several pages (the worker count, see setup.js) can be recognised at the same time.
  *
  * Engines are created lazily, one per concurrent recognition up to `size`, and the first one is
  * started before any other: a start-up failure (a CSP without 'wasm-unsafe-eval', missing files)

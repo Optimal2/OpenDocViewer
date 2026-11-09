@@ -15,7 +15,7 @@ export {
 } from './benchmark.js';
 export { readOcrAssetManifest, resolveOcrAssetUrls } from './assetUrls.js';
 export { KNOWN_OCR_LANGUAGES, partitionOcrLanguages } from './languages.js';
-export { createConfiguredOcrEngine, describeOcrSetup } from './setup.js';
+export { createConfiguredOcrEngine, describeOcrSetup, resolveOcrConcurrency } from './setup.js';
 export { OCR_PAGE_DECISION, OCR_SKIP_REASON, PDF_TEXT_LAYER_THRESHOLDS, assessPdfTextLayer, classifyPageSource } from './classify.js';
 export { DEFAULT_OPEN_PDF_DOCUMENTS, createPdfTextProber } from './pdfTextProbe.js';
 export { PDF_TEXT_DEFAULT_ASCENT, PDF_TEXT_DEFAULT_DESCENT, pdfTextLayerWords } from './pdfTextWords.js';

@@ -28,7 +28,16 @@ const SHIPPED_OCR_DEFAULTS = Object.freeze({
   enabled: false,
   removeRulingLines: true,
   recognizeWholeDocument: false,
-  workerCount: 1,
+  workerCount: 0,
+  workerPolicy: {
+    reservedCores: 1,
+    maxWorkerCount: 4,
+    pagesPerWorker: 2,
+    memoryPerWorkerMiB: 110,
+    memoryPerLanguageMiB: 20,
+    memoryBudgetFraction: 0.25,
+    assumedDeviceMemoryGiB: 4,
+  },
   languages: 'auto',
   search: { enabled: true, overridesCtrlF: false },
   speech: { enabled: true, autoDetectLanguage: true },
@@ -73,7 +82,10 @@ function readOcrConfig({ siteConfig, useSampleSiteFile = false } = {}) {
       autoDetect: isSpeechLanguageAutoDetectEnabled(),
       languages: getOcrLanguages(),
       assetBaseUrl: getOcrAssetBaseUrl(),
-      workerCount: resolveOcrWorkerCount(undefined, { cores: 8 }),
+      // An 8-core, 8 GB client: the automatic choice reaches the shipped ceiling of four.
+      workerCount: resolveOcrWorkerCount(undefined, { cores: 8, deviceMemoryGiB: 8 }),
+      // A 2-core, 2 GB client with the whole document pending.
+      smallClientWorkerCount: resolveOcrWorkerCount(undefined, { cores: 2, deviceMemoryGiB: 2, pageCount: 300 }),
     };
   } finally {
     dom.window.close();
@@ -93,17 +105,24 @@ describe('shipped OCR configuration', () => {
     expect(shipped.autoDetect).toBe(true);
     expect(shipped.languages).toEqual(['swe', 'eng']);
     expect(shipped.assetBaseUrl).toBeNull();
-    expect(shipped.workerCount).toBe(1);
+    // The shipped worker count is automatic: four on a strong client, one on a two-core one.
+    expect(shipped.workerCount).toBe(4);
+    expect(shipped.smallClientWorkerCount).toBe(1);
     expect(shipped.siteKeys).toEqual([]);
   });
 
-  it('runs more workers only for a site file with an integer literal, and picks from the cores for 0', () => {
-    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } }).workerCount).toBe(1);
-    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 3 } } }).workerCount).toBe(3);
+  it('chooses the worker count automatically unless a site file gives an integer literal from 1 to 8', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true } } }).workerCount).toBe(4);
     expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 0 } } }).workerCount).toBe(4);
-    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: '3' } } }).workerCount).toBe(1);
-    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 2.5 } } }).workerCount).toBe(1);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 3 } } })).toMatchObject({ workerCount: 3, smallClientWorkerCount: 3 });
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 1 } } })).toMatchObject({ workerCount: 1, smallClientWorkerCount: 1 });
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: '3' } } }).workerCount).toBe(4);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 2.5 } } }).workerCount).toBe(4);
     expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, workerCount: 99 } } }).workerCount).toBe(8);
+    // The policy deep-merges: a site that raises the ceiling keeps the other thresholds.
+    const raised = readOcrConfig({ siteConfig: { ocr: { enabled: true, workerPolicy: { maxWorkerCount: 8 } } } });
+    expect(raised.workerCount).toBe(7);
+    expect(raised.ocr.workerPolicy).toEqual({ ...SHIPPED_OCR_DEFAULTS.workerPolicy, maxWorkerCount: 8 });
   });
 
   it('offers the search and read-aloud unless a site file sets the literal false, each on its own', () => {

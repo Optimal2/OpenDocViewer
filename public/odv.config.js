@@ -144,9 +144,25 @@
       recognizeWholeDocument: false,
       // Pages recognised at the same time, each in its own worker with its own copy of the
       // engine and the language models (so each extra worker costs memory as well as a core).
-      // 1 (default) is one worker; an integer 2 to 8 runs that many; 0 picks automatically
-      // from the client's cores (one is left for the page, at most 4). Anything else is 1.
-      workerCount: 1,
+      // 0 (default) chooses automatically from the pages waiting, the client's cores and its
+      // memory, with the thresholds in workerPolicy below; an integer 1 to 8 runs exactly that
+      // many instead. Anything else is the automatic choice.
+      workerCount: 0,
+      // Thresholds of the automatic choice. The defaults come from the OCR benchmark (About ->
+      // Diagnostics) on a 4-core, 16 GB client; run it on the site's own clients before changing
+      // them. The count is the smallest of: cores minus reservedCores; memoryBudgetFraction of
+      // the device memory (navigator.deviceMemory, else assumedDeviceMemoryGiB) divided by what
+      // one worker takes (memoryPerWorkerMiB plus memoryPerLanguageMiB per model beyond the
+      // first); one worker per pagesPerWorker pages waiting; and maxWorkerCount.
+      workerPolicy: {
+        reservedCores: 1,
+        maxWorkerCount: 4,
+        pagesPerWorker: 2,
+        memoryPerWorkerMiB: 110,
+        memoryPerLanguageMiB: 20,
+        memoryBudgetFraction: 0.25,
+        assumedDeviceMemoryGiB: 4
+      },
       // The languages recognised: 'auto' (default) tries Swedish and English together on every
       // text line (best match wins), 'swedish' loads the Swedish model alone and 'english' the
       // English one, so the other model is never downloaded. An array of Tesseract language

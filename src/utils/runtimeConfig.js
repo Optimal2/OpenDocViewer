@@ -346,7 +346,7 @@ export function isOcrLineRemovalEnabled(cfg = getRuntimeConfig()) {
 /**
  * Resolve whether the OCR queue works through the whole document in the background
  * (`ocr.recognizeWholeDocument`): after the window around the shown page, the remaining pages
- * in reading order (as many at a time as `ocr.workerCount` allows), while the viewer is open, so
+ * in reading order (as many at a time as the worker count allows), while the viewer is open, so
  * the search covers every page in time. Off by default (only the window is recognised); only the boolean literal `true` turns it
  * on. Means nothing while OCR is off.
  *
@@ -370,33 +370,78 @@ export function isOcrBenchmarkEnabled(cfg = getRuntimeConfig()) {
   return isOcrEnabled(cfg) && cfg?.ocr?.benchmark?.enabled === true;
 }
 
-/** Default number of OCR workers: one tesseract.js worker, one page at a time. */
-export const DEFAULT_OCR_WORKER_COUNT = 1;
+/**
+ * `ocr.workerCount` when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.
+ * (Up to 2.4.311 the default was one worker.)
+ */
+export const DEFAULT_OCR_WORKER_COUNT = 0;
 /** Most workers a site may ask for with an explicit `ocr.workerCount`; larger values are clamped. */
 export const MAX_OCR_WORKER_COUNT = 8;
+
 /**
- * Most workers `ocr.workerCount: 0` (automatic) picks however many cores the client reports:
- * every worker holds its own copy of the engine and the language models, so the automatic
- * choice stays modest on memory.
+ * @typedef {Object} OcrWorkerPolicy  The thresholds the automatic worker count is made from (`ocr.workerPolicy`).
+ * @property {number} reservedCores  Logical cores left to the page itself; the rest may each run a worker.
+ * @property {number} maxWorkerCount  Ceiling of the automatic choice (a manual `ocr.workerCount` may exceed it).
+ * @property {number} pagesPerWorker  Pending pages a worker needs to pay for its start.
+ * @property {number} memoryPerWorkerMiB  Memory one engine with its first language model takes.
+ * @property {number} memoryPerLanguageMiB  Memory each further language model adds per engine.
+ * @property {number} memoryBudgetFraction  Share of the device memory the workers together may take.
+ * @property {number} assumedDeviceMemoryGiB  Device memory assumed when the browser reports none.
  */
-export const MAX_AUTO_OCR_WORKER_COUNT = 4;
+
+/**
+ * Defaults of `ocr.workerPolicy`, set from the OCR benchmark (About -> Diagnostics) on a 4-core,
+ * 16 GB client (Chromium, 2026-11-10): 40 evenly spaced pages of a 300-page scanned document at
+ * 1654x2339, Swedish and English models. Each line says what was measured and what is a margin
+ * or an assumption on top of it.
+ * - Throughput grew with every worker up to the cores minus one (2.0x with two, 2.8x with three
+ *   workers on four cores), so one core is reserved for the page and each other core may run a
+ *   worker (`reservedCores`).
+ * - An engine took 0.4 to 0.65 s to start against 2.4 s to recognise a page, about a quarter
+ *   of a page, so one pending page would already pay for a worker's start; `pagesPerWorker: 2`
+ *   doubles that as a margin, since the extra engines start while the first page is being
+ *   recognised and compete with it for the cores. A margin on a measurement, not a measurement.
+ * - The renderer process grew by about 130 MiB per engine holding two models (private bytes 469
+ *   MiB without an engine, 596, 769 and 856 MiB with one, two and three: steps of 127, 173 and
+ *   87 MiB), read from the process since a page cannot see its workers' WebAssembly heaps. The
+ *   second model's share is within that noise and is taken as 20 MiB (`memoryPerWorkerMiB` 110
+ *   for the engine with one model, `memoryPerLanguageMiB` 20 for each further one). A quarter of
+ *   the device memory is left to the workers (`memoryBudgetFraction`, a chosen margin), which on
+ *   an 8 GB client allows more workers than the cores do and binds only on small devices; a
+ *   browser that does not report the memory (Firefox, Safari) is taken as a 4 GB client
+ *   (`assumedDeviceMemoryGiB`, an assumption).
+ * - The page image's preparation runs on the main thread (0.37 s per page on average, 1.6 s at
+ *   p90 on ruled table pages, against 2.4 s of recognition), so three workers keep the main
+ *   thread about half busy: no long task, stalls up to 136 ms. More workers than four are
+ *   unmeasured for stutter, hence `maxWorkerCount: 4` until a run on a client with more cores
+ *   says otherwise.
+ */
+export const OCR_WORKER_POLICY_DEFAULTS = Object.freeze(/** @type {OcrWorkerPolicy} */ ({
+  reservedCores: 1,
+  maxWorkerCount: 4,
+  pagesPerWorker: 2,
+  memoryPerWorkerMiB: 110,
+  memoryPerLanguageMiB: 20,
+  memoryBudgetFraction: 0.25,
+  assumedDeviceMemoryGiB: 4,
+}));
 
 /**
  * @typedef {Object} OcrWorkerCountConfig
- * @property {(number|'auto')} value  The count to use, or 'auto' for the integer literal 0.
+ * @property {(number|'auto')} value  The count to use, or 'auto' for the integer literal 0 and for the default.
  * @property {boolean} configured  True when the key is present.
  * @property {boolean} clamped  True when an integer above MAX_OCR_WORKER_COUNT was lowered to it.
  * @property {*} rejected  The configured value when it was not an integer literal 0 or above
- *   (a string, a fraction, a negative number, a boolean); the default is used then. Absent otherwise.
+ *   (a string, a fraction, a negative number, a boolean); the automatic choice is used then. Absent otherwise.
  */
 
 /**
  * Describe `ocr.workerCount` (how many tesseract.js workers recognise pages at the same time)
  * without resolving the automatic choice, so the caller can report a rejected or clamped value.
- * Only an integer literal counts: 1 to MAX_OCR_WORKER_COUNT is taken as it is, a larger integer
- * is clamped, 0 means automatic, and anything else (a missing key, a string such as `"2"`, a
- * fraction, a negative number, a boolean) gives the default of one worker. Means nothing while
- * OCR is off.
+ * Only an integer literal counts: 1 to MAX_OCR_WORKER_COUNT is taken as it is (a manual
+ * override of the automatic choice), a larger integer is clamped, 0 means automatic, and
+ * anything else (a missing key, a string such as `"2"`, a fraction, a negative number, a
+ * boolean) gives the default, which is the automatic choice too. Means nothing while OCR is off.
  *
  * @param {RuntimeConfig} [cfg]
  * @returns {OcrWorkerCountConfig}
@@ -405,9 +450,9 @@ export function describeOcrWorkerCount(cfg = getRuntimeConfig()) {
   const section = cfg?.ocr;
   const configured = Boolean(section) && typeof section === 'object' && Object.prototype.hasOwnProperty.call(section, 'workerCount');
   const raw = configured ? section.workerCount : undefined;
-  if (!configured) return { value: DEFAULT_OCR_WORKER_COUNT, configured: false, clamped: false };
+  if (!configured) return { value: 'auto', configured: false, clamped: false };
   if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < 0) {
-    return { value: DEFAULT_OCR_WORKER_COUNT, configured: true, clamped: false, rejected: raw };
+    return { value: 'auto', configured: true, clamped: false, rejected: raw };
   }
   if (raw === 0) return { value: 'auto', configured: true, clamped: false };
   if (raw > MAX_OCR_WORKER_COUNT) return { value: MAX_OCR_WORKER_COUNT, configured: true, clamped: true };
@@ -415,22 +460,105 @@ export function describeOcrWorkerCount(cfg = getRuntimeConfig()) {
 }
 
 /**
- * Resolve how many OCR workers to run: `describeOcrWorkerCount`, with the automatic choice
- * made from the client's core count: one core is left for the page, and the result is bounded
- * by MAX_AUTO_OCR_WORKER_COUNT and never below one. An unknown core count (0, missing) gives one
- * worker. Means nothing while OCR is off.
- *
- * @param {RuntimeConfig} [cfg]
- * @param {Object} [options]
- * @param {number} [options.cores]  Logical cores (`navigator.hardwareConcurrency`); the caller
- *   reads it, so this stays free of globals.
+ * @param {*} value
+ * @param {number} fallback
+ * @param {number} min
+ * @param {number} max
+ * @param {boolean=} integer
  * @returns {number}
  */
-export function resolveOcrWorkerCount(cfg = getRuntimeConfig(), { cores = 0 } = {}) {
+function boundedNumber(value, fallback, min, max, integer = true) {
+  const numeric = Number(value);
+  if (typeof value !== 'number' || !Number.isFinite(numeric)) return fallback;
+  const bounded = Math.max(min, Math.min(max, numeric));
+  return integer ? Math.floor(bounded) : bounded;
+}
+
+/**
+ * Read `ocr.workerPolicy`: a number out of range is clamped to the nearest bound, and whatever
+ * is missing or not a finite number (a numeric string included) gets the default. Means nothing
+ * while OCR is off or with a manual `ocr.workerCount`.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {OcrWorkerPolicy}
+ */
+export function normalizeOcrWorkerPolicy(cfg = getRuntimeConfig()) {
+  const raw = cfg?.ocr?.workerPolicy && typeof cfg.ocr.workerPolicy === 'object' ? cfg.ocr.workerPolicy : {};
+  const base = OCR_WORKER_POLICY_DEFAULTS;
+  return {
+    reservedCores: boundedNumber(raw.reservedCores, base.reservedCores, 0, 64),
+    maxWorkerCount: boundedNumber(raw.maxWorkerCount, base.maxWorkerCount, 1, MAX_OCR_WORKER_COUNT),
+    pagesPerWorker: boundedNumber(raw.pagesPerWorker, base.pagesPerWorker, 1, 100000),
+    memoryPerWorkerMiB: boundedNumber(raw.memoryPerWorkerMiB, base.memoryPerWorkerMiB, 1, 65536, false),
+    memoryPerLanguageMiB: boundedNumber(raw.memoryPerLanguageMiB, base.memoryPerLanguageMiB, 0, 65536, false),
+    memoryBudgetFraction: boundedNumber(raw.memoryBudgetFraction, base.memoryBudgetFraction, 0.01, 1, false),
+    assumedDeviceMemoryGiB: boundedNumber(raw.assumedDeviceMemoryGiB, base.assumedDeviceMemoryGiB, 0.25, 4096, false),
+  };
+}
+
+/**
+ * @typedef {Object} OcrWorkerPlan
+ * @property {number} workerCount  Workers to run: the manual count, or the automatic choice.
+ * @property {boolean} automatic  False when `ocr.workerCount` gave an explicit count.
+ * @property {OcrWorkerPolicy} policy  The thresholds used.
+ * @property {({ cores: number, memory: number, pages: (number|null), max: number }|null)} caps
+ *   The bound each input gave (`pages` null when the page count was unknown); null for a manual count.
+ * @property {{ cores: number, deviceMemoryGiB: number, deviceMemoryReported: boolean, pageCount: number, languageCount: number, memoryPerWorkerMiB: number }} inputs
+ *   What the plan was made from, for diagnostics.
+ */
+
+/**
+ * Resolve how many OCR workers to run. A manual `ocr.workerCount` (1 to MAX_OCR_WORKER_COUNT)
+ * is taken as it is. Otherwise the count is the smallest of four bounds from `ocr.workerPolicy`
+ * (the same shape as the PDF worker policy in documentLoadingConfig.js: thresholds fed by the
+ * page count and the client's capacity):
+ * - the cores: the reported logical cores less `reservedCores`, so the page keeps a core; an
+ *   unknown core count (0, missing) gives one worker;
+ * - the memory: `memoryBudgetFraction` of the device memory (reported, else
+ *   `assumedDeviceMemoryGiB`) over what one engine takes with the loaded models
+ *   (`memoryPerWorkerMiB` plus `memoryPerLanguageMiB` per model beyond the first);
+ * - the pages: one worker per `pagesPerWorker` pending pages, so a short window does not start
+ *   engines it cannot feed; a page count of 0 (unknown, or "the capacity") leaves this out;
+ * - `maxWorkerCount`.
+ * Never below one. Means nothing while OCR is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @param {Object} [options]  The caller reads these from `navigator`, so this stays free of globals.
+ * @param {number} [options.cores]  `navigator.hardwareConcurrency`.
+ * @param {number} [options.deviceMemoryGiB]  `navigator.deviceMemory` (Chromium reports at most 8).
+ * @param {number} [options.pageCount]  Pages waiting for recognition; 0 for unknown.
+ * @param {number} [options.languageCount]  Models each engine loads; default 1.
+ * @returns {OcrWorkerPlan}
+ */
+export function resolveOcrWorkerPlan(cfg = getRuntimeConfig(), { cores = 0, deviceMemoryGiB = 0, pageCount = 0, languageCount = 1 } = {}) {
+  const policy = normalizeOcrWorkerPolicy(cfg);
+  const reportedCores = Math.max(0, Math.floor(Number(cores) || 0));
+  const reportedMemory = Math.max(0, Number(deviceMemoryGiB) || 0);
+  const pending = Math.max(0, Math.floor(Number(pageCount) || 0));
+  const models = Math.max(1, Math.floor(Number(languageCount) || 1));
+  const memoryPerWorkerMiB = policy.memoryPerWorkerMiB + (models - 1) * policy.memoryPerLanguageMiB;
+  const memoryGiB = reportedMemory > 0 ? reportedMemory : policy.assumedDeviceMemoryGiB;
+  const inputs = { cores: reportedCores, deviceMemoryGiB: memoryGiB, deviceMemoryReported: reportedMemory > 0, pageCount: pending, languageCount: models, memoryPerWorkerMiB };
+
   const { value } = describeOcrWorkerCount(cfg);
-  if (value !== 'auto') return value;
-  const reported = Math.max(0, Math.floor(Number(cores) || 0));
-  return Math.max(1, Math.min(MAX_AUTO_OCR_WORKER_COUNT, reported - 1));
+  if (value !== 'auto') return { workerCount: value, automatic: false, policy, caps: null, inputs };
+
+  const coreCap = reportedCores > 0 ? Math.max(1, reportedCores - policy.reservedCores) : 1;
+  const memoryCap = Math.max(1, Math.floor((memoryGiB * 1024 * policy.memoryBudgetFraction) / memoryPerWorkerMiB));
+  const pageCap = pending > 0 ? Math.max(1, Math.ceil(pending / policy.pagesPerWorker)) : null;
+  const workerCount = Math.max(1, Math.min(policy.maxWorkerCount, coreCap, memoryCap, pageCap ?? Infinity));
+  return { workerCount, automatic: true, policy, caps: { cores: coreCap, memory: memoryCap, pages: pageCap, max: policy.maxWorkerCount }, inputs };
+}
+
+/**
+ * The `workerCount` of resolveOcrWorkerPlan.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @param {Object} [options]  See resolveOcrWorkerPlan.
+ * @returns {number}
+ */
+export function resolveOcrWorkerCount(cfg = getRuntimeConfig(), options = {}) {
+  return resolveOcrWorkerPlan(cfg, options).workerCount;
 }
 
 /**

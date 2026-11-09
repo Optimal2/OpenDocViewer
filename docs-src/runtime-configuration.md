@@ -276,7 +276,11 @@ ocr: {
   enabled: false,              // only the literal true turns OCR on
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   recognizeWholeDocument: false, // true: after the shown page's neighbours, the rest of the document
-  workerCount: 1,              // pages recognised at the same time; 0: automatic from the client's cores
+  workerCount: 0,              // pages recognised at the same time; 0: automatic (see workerPolicy)
+  workerPolicy: {              // thresholds of the automatic choice, measured defaults
+    reservedCores: 1, maxWorkerCount: 4, pagesPerWorker: 2,
+    memoryPerWorkerMiB: 110, memoryPerLanguageMiB: 20, memoryBudgetFraction: 0.25, assumedDeviceMemoryGiB: 4
+  },
   languages: 'auto',           // 'auto' (swe+eng), 'swedish', 'english', or an array of Tesseract codes
   search: {
     enabled: true,             // the toolbar's search in the text layers; false leaves a status-only indicator
@@ -306,8 +310,9 @@ ocr: {
   background. `false` by default: only the shown page and its neighbours are recognised (see
   "Which pages are recognised" below), and a page further away waits until the user reaches it,
   so the search covers only the pages that have been near the user. With the boolean literal
-  `true`, the window keeps its priority and the remaining pages follow it (`ocr.workerCount` at
-  a time) in reading order from the shown page to the end and then from the start of the document, while
+  `true`, the window keeps its priority and the remaining pages follow it (as many at a time as
+  the worker count allows, see `ocr.workerCount` and `ocr.workerPolicy`) in reading order from
+  the shown page to the end and then from the start of the document, while
   the viewer is open; a page the viewer has not rendered is rendered for the purpose and dropped
   again as soon as its bytes are read (so a long document does not pile up page renders; a page
   the user has reached meanwhile is left to the viewer), the outcome cache grows to the page
@@ -316,19 +321,57 @@ ocr: {
   background for as long as it takes (a few seconds per page), also while the tab is in the
   background, which is why it is off by default. The key means nothing while OCR is off.
 - `ocr.workerCount`: how many pages are recognised at the same time, each in its own
-  tesseract.js worker. `1` by default. Only an integer literal counts: `2` to `8` runs that many
-  workers (a larger integer is lowered to 8), `0` chooses automatically from the client's logical
-  cores (`navigator.hardwareConcurrency` minus one, which is left for the page itself, never
-  fewer than one and never more than 4), and anything else (a string such as `"2"`, a fraction,
-  a negative number, a boolean) gives one worker with a console warning. Every worker holds its
-  own copy of the engine and of every language model, so each extra worker costs memory as well
-  as a core; measure before raising it on a site, and keep it at one where clients are weak. The
-  first worker starts alone (a failure is found once; the others can then take the engine and
-  models from the browser's HTTP cache, which the shipped web.config allows by serving the `ocr/`
-  folder as immutable, while a host serving it no-store pays the download per worker) and the
-  others follow once it runs. The pages in flight share the
-  queue's order: with the window's pages first, the whole document (when asked for) then goes
-  through that many pages at a time. The key means nothing while OCR is off.
+  tesseract.js worker. `0` (the default) chooses automatically with `ocr.workerPolicy` below.
+  Only an integer literal overrides it: `1` to `8` runs exactly that many workers (a larger
+  integer is lowered to 8), whatever the client; anything else (a string such as `"2"`, a
+  fraction, a negative number, a boolean) is the automatic choice with a console warning. Every
+  worker holds its own copy of the engine and of every language model, so each extra worker
+  costs memory as well as a core. The first worker starts alone (a failure is found once; the
+  others can then take the engine and models from the browser's HTTP cache, which the shipped
+  web.config allows by serving the `ocr/` folder as immutable, while a host serving it no-store
+  pays the download per worker) and the others follow once it runs, each only when the queue
+  reaches it. The pages in flight share the queue's order: with the window's pages first, the
+  whole document (when asked for) then goes through that many pages at a time. The key means
+  nothing while OCR is off.
+- `ocr.workerPolicy`: the thresholds the automatic worker count is made from, in the same
+  shape as the PDF worker policy (`documentLoading.render.pdfWorkerPagePolicy`): an algorithm
+  fed by the pages waiting and the client's capacity. The count is the smallest of four bounds,
+  never below one:
+  - the cores: `navigator.hardwareConcurrency` less `reservedCores` (`1`, so the page keeps a
+    core); a browser that reports no core count gets one worker;
+  - the memory: `memoryBudgetFraction` (`0.25`) of the device memory, taken from
+    `navigator.deviceMemory` (Chromium reports at most 8 GB) or, where the browser does not
+    report it (Firefox, Safari), `assumedDeviceMemoryGiB` (`4`), divided by what one worker
+    takes: `memoryPerWorkerMiB` (`110`, the engine with its first model) plus
+    `memoryPerLanguageMiB` (`20`) for each further model, so `'swedish'` or `'english'` alone
+    allows a few more workers than `'auto'` on a small device;
+  - the pages: one worker per `pagesPerWorker` (`2`) pages still to be recognised, so the
+    window around the shown page (four pages) gets two workers and the whole document the
+    client's capacity; the pool holds the capacity and the queue lowers the pages in flight to
+    this bound every time the window is planned, and an engine the queue never reaches is never
+    started;
+  - `maxWorkerCount` (`4`).
+  The defaults rest on the OCR benchmark on a 4-core, 16 GB client (Chromium, 2026-11-10; 40
+  evenly spaced pages of a 300-page scanned document at 1654x2339, Swedish and English), each
+  with its margin or assumption named: throughput grew with every worker up to the cores minus
+  one (2.0x with two, 2.8x with three workers), which is `reservedCores: 1`; an engine took 0.4
+  to 0.65 s to start against 2.4 s per page, about a quarter of a page, so one page would already
+  pay for a worker's start, and `pagesPerWorker: 2` doubles that as a margin because the extra
+  engines start while the first page is recognised and compete with it for the cores; the
+  renderer process grew by about 130 MiB per engine holding both models (private bytes 469 MiB
+  without an engine, 596, 769 and 856 MiB with one, two and three, so 127, 173 and 87 MiB per
+  step, read from the process since the page cannot see its workers' WebAssembly heaps), which
+  is `memoryPerWorkerMiB: 110` plus `memoryPerLanguageMiB: 20` with the second model's share
+  taken as 20 MiB since it was within that noise; `memoryBudgetFraction: 0.25` and
+  `assumedDeviceMemoryGiB: 4` are a chosen margin and an assumption, not measurements; and with
+  three workers the main thread, which prepares every page image (0.37 s per page on average,
+  1.6 s at p90 on ruled table pages), was about half busy with no long task and stalls up to
+  136 ms. More than four workers are unmeasured for stutter on a strong client, which is what
+  `maxWorkerCount: 4` guards; a site with many-core clients should run the benchmark there (its
+  `automaticPlan` says what the viewer would choose, next to the measured counts) and raise the
+  ceiling on evidence. A number out of range is clamped to the nearest bound; a value that is
+  not a finite number (a numeric string included) gets the default. The key means nothing while
+  OCR is off or with a manual `ocr.workerCount`.
 - `ocr.languages`: one of three names, or an array of Tesseract language codes. `'auto'` (the
   default) recognises with the Swedish and English models together, the same as
   `['swe', 'eng']`; `'swedish'` loads the Swedish model alone and `'english'` the English one,
@@ -522,8 +565,8 @@ sees or start a new recognition. Such a page has to be rotated at the source.
 
 ### OCR benchmark (opt-in)
 
-Before a site raises `ocr.workerCount`, trims `ocr.languages` or questions the page resolution,
-it can measure what each would buy on its own clients. With `ocr.benchmark.enabled: true` (and
+Before a site changes `ocr.workerPolicy` or `ocr.workerCount`, trims `ocr.languages` or
+questions the page resolution, it can measure what each would buy on its own clients. With `ocr.benchmark.enabled: true` (and
 OCR on), About -> Diagnostics gains "Run OCR benchmark", which recognises a sample of the open
 document once per scenario and offers the result as a JSON download, like the PDF and
 render/decode benchmarks:
@@ -555,7 +598,7 @@ start (core and models) is timed on its own as `startupMs`, before the pages, wh
 workers the other engines start during the first pages, so that cost is part of the run's time,
 as it is for the viewer. The sampled pages are the same in every scenario:
 loaded pages the OCR queue would recognise, spread evenly over the document. The live OCR queue
-pauses while the benchmark runs (pages already in flight, up to `ocr.workerCount`, finish
+pauses while the benchmark runs (pages already in flight, up to the worker count, finish
 first), so the two do not compete for cores; run the benchmark shortly after the document
 opens, or wait for the status LED to settle, for the cleanest numbers. A render the benchmark
 makes for a page the user has reached meanwhile (the shown page and two on either side) is left
@@ -575,8 +618,14 @@ Ticks taken while the tab was hidden are counted as `hiddenSamples` and left out
 figures, because a browser throttles a hidden tab's timers; a run with hidden samples has lag
 figures for part of the run only, so keep the tab in front for them. The WebAssembly memory of
 the workers is not visible from the page: read the tab's memory in the browser's task manager
-during the run to size `ocr.workerCount`. `best` is the fastest run (the lowest `msPerPage`)
-without errors, not the one with the best text; `baseline` is `workers-1`.
+(or the renderer process's private bytes in the operating system) during the run, and match it
+to the scenarios by each run's `startedUtc` and `endedUtc`; the difference between two worker
+counts is one engine's memory, the difference between `workers-1` and `lang-<code>` one model's.
+`best` is the fastest run (the lowest `msPerPage`) without errors, not the one with the best
+text; `baseline` is `workers-1`. `automaticPlan` is what the viewer would run on this client
+under `ocr.workerPolicy` with the whole document pending (as `ocr.recognizeWholeDocument`
+has it; the default window of a few pages gets fewer), with the bound each input gave (`caps`:
+cores, memory, pages, the ceiling), so the measured counts can be read against it.
 
 The run costs as much CPU as recognising `pageLimit` pages once per scenario, several minutes
 on a long document with many scenarios, so keep the key off outside support sessions. The

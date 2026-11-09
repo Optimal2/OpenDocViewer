@@ -183,6 +183,74 @@ describe('useOcrTextLayers', () => {
     expect(latest.ocrPages[makeOcrPageKey('doc', 2)]).toEqual({ status: 'recognizing' });
   });
 
+  it('keeps only as many pages in flight as the pending pages warrant, through the module\'s resolveOcrConcurrency', async () => {
+    const engine = makeEngine();
+    engine.size = 4;
+    const ocrModule = makeModule(engine, makeProber());
+    const setup = { languages: ['swe', 'eng'], assetUrls: {}, warnings: [], workerCount: 4 };
+    ocrModule.createConfiguredOcrEngine = function createPool() {
+      this.created += 1;
+      return { engine, setup, workerCount: 4 };
+    };
+    // The real one (setup.js) plans one worker per two pending pages, never above the pool.
+    const asked = [];
+    ocrModule.resolveOcrConcurrency = (pending, givenSetup) => {
+      asked.push([pending, givenSetup]);
+      return Math.max(1, Math.min(givenSetup.workerCount, Math.ceil(pending / 2)));
+    };
+    const allPages = [page('doc', 0), page('doc', 1), page('doc', 2), page('doc', 3), page('doc', 4), page('doc', 5)];
+    const props = baseProps({ ocrModule, allPages, focusPageIndexes: [0] });
+    await render(props);
+    await flush();
+
+    // The window of page 0 holds pages 0, 1 and 2 (nothing behind it): three pending -> two in flight.
+    expect(asked[0]).toEqual([3, setup]);
+    expect(engine.recognize).toHaveBeenCalledTimes(2);
+    expect(latest.ocrPages[makeOcrPageKey('doc', 2)]).toEqual({ status: 'queued' });
+
+    engine.pending[0].resolve(result('ett'));
+    engine.pending[1].resolve(result('två'));
+    await flush();
+    engine.pending[2].resolve(result('tre'));
+    await flush();
+    expect(engine.recognize).toHaveBeenCalledTimes(3);
+
+    // Moving on one page leaves one new page in the window (page 3): one pending -> one in flight.
+    await render({ ...props, focusPageIndexes: [1] });
+    await flush();
+    expect(asked[asked.length - 1]).toEqual([1, setup]);
+    expect(engine.recognize).toHaveBeenCalledTimes(4);
+    expect(fetchCalls[3]).toBe('/pages/doc-3.png');
+  });
+
+  it('raises the concurrency together with the new window, so no page of the old window starts on the way', async () => {
+    const engine = makeEngine();
+    engine.size = 2;
+    const ocrModule = makeModule(engine, makeProber());
+    const setup = { languages: ['swe', 'eng'], assetUrls: {}, warnings: [], workerCount: 2 };
+    ocrModule.createConfiguredOcrEngine = function createPool() {
+      this.created += 1;
+      return { engine, setup, workerCount: 2 };
+    };
+    ocrModule.resolveOcrConcurrency = (pending, givenSetup) => Math.max(1, Math.min(givenSetup.workerCount, Math.ceil(pending / 2)));
+    const allPages = Array.from({ length: 10 }, (_, index) => page('doc', index));
+    // The last page: its window is pages 9 and 8 (nothing ahead), two pending -> one in flight.
+    const props = baseProps({ ocrModule, allPages, focusPageIndexes: [9] });
+    await render(props);
+    await flush();
+    expect(fetchCalls).toEqual(['/pages/doc-9.png']);
+    expect(latest.ocrPages[makeOcrPageKey('doc', 8)]).toEqual({ status: 'queued' });
+
+    // A jump to page 3: four pending -> two in flight. The second slot must go to the new
+    // window (page 3), never to page 8 of the old one, which is no longer planned.
+    await render({ ...props, focusPageIndexes: [3] });
+    await flush();
+    expect(engine.recognize).toHaveBeenCalledTimes(2);
+    expect(fetchCalls).toEqual(['/pages/doc-9.png', '/pages/doc-3.png']);
+    expect(latest.ocrPages[makeOcrPageKey('doc', 8)]).toBeUndefined();
+    expect(latest.ocrPages[makeOcrPageKey('doc', 4)]).toEqual({ status: 'queued' });
+  });
+
   it('hands the fetched image to prepareOcrImage with the page entry as size fallback and keeps the measured size', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());

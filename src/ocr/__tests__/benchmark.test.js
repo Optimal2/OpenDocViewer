@@ -204,7 +204,7 @@ describe('runOcrBenchmark', () => {
       ensurePageAsset,
       releasePageAsset,
       onProgress: (event) => progress.push(event),
-      inject: { createEngine, prepareImage, fetchBlob, cores: 4, lagSampler, save },
+      inject: { createEngine, prepareImage, fetchBlob, cores: 4, deviceMemoryGiB: 8, lagSampler, save },
     });
     await vi.runAllTimersAsync();
     const result = await run;
@@ -216,6 +216,9 @@ describe('runOcrBenchmark', () => {
 
     expect(result.schema).toBe(OCR_BENCHMARK_SCHEMA);
     expect(result.hardwareConcurrency).toBe(4);
+    expect(result.deviceMemoryGiB).toBe(8);
+    // What the viewer would run here for the six-page document: three (the cores), with the bounds.
+    expect(result.automaticPlan).toMatchObject({ workerCount: 3, automatic: true, caps: { cores: 3, memory: 15, pages: 3, max: 4 }, inputs: { pageCount: 6, languageCount: 2 } });
     expect(result.languages).toEqual(['swe', 'eng']);
     expect(result.configuredLanguages).toEqual(['swe', 'eng']);
     expect(result.pageCount).toBe(4);
@@ -226,6 +229,8 @@ describe('runOcrBenchmark', () => {
     const [one, two, single] = result.runs;
     expect(one).toMatchObject({ label: 'workers-1', workerCount: 1, pageCount: 4, recognizedPages: 4, errorCount: 0, startupError: null, words: 8, meanConfidence: 90, iteration: 1 });
     expect(one.startupMs).toBeGreaterThanOrEqual(10);
+    expect(Date.parse(one.startedUtc)).toBeLessThanOrEqual(Date.parse(one.endedUtc));
+    expect(Date.parse(two.startedUtc)).toBeGreaterThanOrEqual(Date.parse(one.endedUtc));
     // Four pages of 100 ms: one worker takes about 400 ms, two workers about 200 ms.
     expect(one.durationMs).toBeGreaterThanOrEqual(400);
     expect(one.msPerPage).toBeGreaterThanOrEqual(100);

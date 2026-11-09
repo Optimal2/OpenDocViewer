@@ -90,8 +90,13 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
 
 /**
  * @typedef {Object} OcrQueue
- * @property {function(Array<OcrQueueCandidate>): void} setWindow
+ * @property {function(Array<OcrQueueCandidate>, { concurrency: (number|undefined) }=): void} setWindow
+ *   Replace the plan; with `concurrency`, the pages in flight at most from now on as well, so
+ *   the new limit and the new plan apply together.
  * @property {function(boolean): void} setPaused
+ * @property {function(number): void} setConcurrency  Pages in flight at most from now on (at
+ *   least one); pages already running finish. Pumps the current plan, so when the plan changes
+ *   too, pass the count to setWindow instead.
  * @property {function(Set<string>): void} retainSources
  * @property {function(): OcrQueueSnapshot} getSnapshot
  * @property {function(): boolean} isBusy
@@ -145,7 +150,7 @@ export function createOcrQueue({
   let retained = null;
   /** @type {Map<string, { key: string, sourceKey: string, abandoned: boolean, control: { abort: (function(): void|null) } }>} */
   const inFlight = new Map();
-  const limit = Math.max(1, Math.floor(Number(concurrency)) || 1);
+  let limit = Math.max(1, Math.floor(Number(concurrency)) || 1);
   // A pool aborts one recognition through its control object; a single engine can only be
   // terminated as a whole (which is what happened before pools existed).
   const pooled = typeof engine?.size === 'number';
@@ -322,8 +327,11 @@ export function createOcrQueue({
   }
 
   return {
-    setWindow(candidates) {
+    setWindow(candidates, { concurrency: nextConcurrency } = {}) {
       if (disposed) return;
+      // The new limit takes effect with the new plan: set apart and first, the pump that
+      // setConcurrency runs could start a page of the old plan that the new one leaves out.
+      if (nextConcurrency !== undefined) limit = Math.max(1, Math.floor(Number(nextConcurrency)) || 1);
       plan = (Array.isArray(candidates) ? candidates : []).filter((entry) => entry?.key && isRetained(entry.sourceKey));
       const keys = new Set(plan.map((entry) => entry.key));
       for (const [key, entry] of transient) {
@@ -340,6 +348,11 @@ export function createOcrQueue({
     setPaused(flag) {
       paused = Boolean(flag);
       if (!paused) pump();
+    },
+    setConcurrency(count) {
+      limit = Math.max(1, Math.floor(Number(count)) || 1);
+      // A lower limit lets the pages in flight finish; only no further page starts above it.
+      pump();
     },
     retainSources(sourceKeys) {
       retained = new Set(sourceKeys);

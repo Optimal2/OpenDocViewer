@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 198
-- Source lines: 71049
-- JSDoc symbols: 2042
+- Source lines: 71261
+- JSDoc symbols: 2050
 - Files without JSDoc doclets: 4
 - Low-confidence summaries: 2
 - Parse errors: 0
@@ -41,8 +41,8 @@
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
 - `src/components/DocumentRender.jsx`: 1211 lines
+- `src/utils/runtimeConfig.js`: 1187 lines
 - `src/utils/documentLoadingConfig.js`: 1099 lines
-- `src/utils/runtimeConfig.js`: 1059 lines
 - `src/utils/printCore.js`: 1058 lines
 
 ## Next Iteration Signals

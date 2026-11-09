@@ -468,6 +468,67 @@ describe('createOcrQueue', () => {
       expect(events.filter((event) => event === 'idle')).toHaveLength(1);
     });
 
+    it('follows a changed concurrency: a lower one lets the pages in flight finish and starts no further page above it, a higher one refills', async () => {
+      const engine = makePool(3);
+      const { queue, cache } = makeQueue({ engine, concurrency: 3 });
+      const [a, b, c, d, e] = [candidate('doc', 0), candidate('doc', 1), candidate('doc', 2), candidate('doc', 3), candidate('doc', 4)];
+      queue.setWindow([a, b, c, d, e]);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+
+      // Down to one: the three running pages finish, but the next page waits for all of them.
+      queue.setConcurrency(1);
+      engine.pending[0].resolve(result('a'));
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+      engine.pending[1].resolve(result('b'));
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+      engine.pending[2].resolve(result('c'));
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(4);
+      expect(engine.pending[3].image).toBe(`blob:${d.key}`);
+
+      // Up to two: the remaining page starts at once beside the running one.
+      queue.setConcurrency(2);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(5);
+      expect(engine.pending[4].image).toBe(`blob:${e.key}`);
+      // Below one is one.
+      queue.setConcurrency(0);
+      engine.pending[3].resolve(result('d'));
+      engine.pending[4].resolve(result('e'));
+      await flush();
+      expect([a, b, c, d, e].every((entry) => cache.has(entry.key))).toBe(true);
+    });
+
+    it('applies a concurrency given with the window to the new plan, never pumping the old one', async () => {
+      const engine = makePool(2);
+      const { queue } = makeQueue({ engine, concurrency: 1 });
+      // The old window at the end of the document, one page in flight.
+      queue.setWindow([candidate('doc', 9), candidate('doc', 8)]);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(1);
+      expect(engine.pending[0].image).toBe(`blob:${candidate('doc', 9).key}`);
+
+      // The user jumps to page 3: the new window with a higher limit. Page 8 of the old plan
+      // must not start; the second slot goes to the new window.
+      queue.setWindow([candidate('doc', 3), candidate('doc', 4), candidate('doc', 5), candidate('doc', 2)], { concurrency: 2 });
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(2);
+      expect(engine.pending[1].image).toBe(`blob:${candidate('doc', 3).key}`);
+      engine.pending[0].resolve(result('nio'));
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+      expect(engine.pending[2].image).toBe(`blob:${candidate('doc', 4).key}`);
+      // Without the option the limit stays as it is.
+      queue.setWindow([candidate('doc', 3), candidate('doc', 4), candidate('doc', 5), candidate('doc', 6)]);
+      engine.pending[1].resolve(result('tre'));
+      engine.pending[2].resolve(result('fyra'));
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(5);
+    });
+
     it('aborts only the pages of a document that left, through their own controls, and never the pool', async () => {
       const engine = makePool(2);
       const { queue, cache, latest } = makeQueue({ engine, concurrency: 2 });

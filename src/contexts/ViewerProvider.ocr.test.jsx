@@ -41,8 +41,11 @@ vi.mock('../ocr/index.js', async () => {
         getFailure: () => null,
       };
       ocrModule.engines.push(engine);
-      return { engine, setup: { languages: ['swe', 'eng'], assetUrls: {}, warnings: [] } };
+      return { engine, setup: { languages: ['swe', 'eng'], assetUrls: {}, warnings: [], workerCount: 1 }, workerCount: 1 };
     },
+    // One engine here: the pages in flight stay one whatever is pending (the real planning is
+    // tested in setup.test.js and useOcrTextLayers.test.jsx).
+    resolveOcrConcurrency: () => 1,
     createPdfTextProber: () => ({
       probe: async () => ({ usable: false, verdict: 'empty' }),
       retainSources: async () => {},

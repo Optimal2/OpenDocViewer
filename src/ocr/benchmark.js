@@ -29,7 +29,7 @@
  * switches are on.
  */
 import logger from '../logging/systemLogger.js';
-import { DEFAULT_OCR_LANGUAGES, MAX_OCR_WORKER_COUNT, getOcrLanguages, getRuntimeConfig } from '../utils/runtimeConfig.js';
+import { DEFAULT_OCR_LANGUAGES, MAX_OCR_WORKER_COUNT, getOcrLanguages, getRuntimeConfig, resolveOcrWorkerPlan } from '../utils/runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestOcrBenchmarkResult } from '../utils/supportDiagnostics.js';
 import { OCR_PAGE_DECISION, classifyPageSource } from './classify.js';
 import { partitionOcrLanguages } from './languages.js';
@@ -448,6 +448,9 @@ async function runScenario({ scenario, pages, cfg, loadPageImage, prepareImage, 
   const heapBefore = usedHeapMiB();
   const sampler = lagSampler();
   const results = [];
+  // Wall-clock bounds of the run, so a memory log kept outside the page (the browser's task
+  // manager, the operating system) can be matched to the scenario.
+  const startedUtc = new Date().toISOString();
   let startupMs;
   let durationMs = 0;
   let startupError = null;
@@ -516,6 +519,8 @@ async function runScenario({ scenario, pages, cfg, loadPageImage, prepareImage, 
     recognizedPages: recognized,
     errorCount,
     startupError,
+    startedUtc,
+    endedUtc: new Date().toISOString(),
     startupMs,
     durationMs,
     // Throughput: wall time of the page loop (the extra workers' starts included) per recognised
@@ -548,7 +553,7 @@ async function runScenario({ scenario, pages, cfg, loadPageImage, prepareImage, 
  * @param {function(Object): void=} args.onProgress  `{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount }`.
  * @param {AbortSignal=} args.signal
  * @param {Object=} args.inject  Test seams: `createEngine` (default createConfiguredOcrEngine),
- *   `prepareImage` (default prepareOcrImage), `fetchBlob`, `cores`, `lagSampler`, `save`.
+ *   `prepareImage` (default prepareOcrImage), `fetchBlob`, `cores`, `deviceMemoryGiB`, `lagSampler`, `save`.
  * @returns {Promise<Object>} The result (also saved for the About dialog).
  */
 export async function runOcrBenchmark({ config, allPages, ensurePageAsset, releasePageAsset = null, onProgress, signal, inject = {} }) {
@@ -560,9 +565,14 @@ export async function runOcrBenchmark({ config, allPages, ensurePageAsset, relea
   if (!pages.length) throw new Error('No loaded page is available for the OCR benchmark.');
 
   const cores = Math.max(0, Math.floor(Number(inject.cores ?? globalThis.navigator?.hardwareConcurrency) || 0));
+  const deviceMemoryGiB = Number(inject.deviceMemoryGiB ?? globalThis.navigator?.deviceMemory) || 0;
   const configuredLanguages = getOcrLanguages(cfg);
   const languages = resolveOcrBenchmarkLanguages(cfg);
   const scenarios = planOcrBenchmarkScenarios(benchmark, { cores, languages });
+  // What the viewer itself would run on this client for this document (the whole document
+  // pending), so the result shows where the automatic choice sits among the measured counts.
+  const sourcePageCount = Array.isArray(allPages) ? allPages.length : 0;
+  const automaticPlan = resolveOcrWorkerPlan(cfg, { cores, deviceMemoryGiB, pageCount: sourcePageCount, languageCount: languages.length });
   const createEngine = inject.createEngine || ((scenarioCfg, options) => createConfiguredOcrEngine(scenarioCfg, options));
   const prepareImage = inject.prepareImage || ((blob, options) => prepareOcrImage(blob, options));
   const fetchBlob = inject.fetchBlob || (async (url) => {
@@ -610,13 +620,21 @@ export async function runOcrBenchmark({ config, allPages, ensurePageAsset, relea
     schema: OCR_BENCHMARK_SCHEMA,
     createdUtc: new Date().toISOString(),
     hardwareConcurrency: cores,
-    deviceMemoryGiB: Number(globalThis.navigator?.deviceMemory) || 0,
+    deviceMemoryGiB,
     // The languages the engines loaded; `configuredLanguages` is the site file's list before
     // the codes without a model were dropped.
     languages,
     configuredLanguages,
+    // The worker count the viewer would choose here, with the bounds that made it.
+    automaticPlan: {
+      workerCount: automaticPlan.workerCount,
+      automatic: automaticPlan.automatic,
+      caps: automaticPlan.caps,
+      inputs: automaticPlan.inputs,
+      policy: automaticPlan.policy,
+    },
     pageCount: pages.length,
-    sourcePageCount: Array.isArray(allPages) ? allPages.length : 0,
+    sourcePageCount,
     sampledViewerIndexes: pages.map((entry) => entry.viewerIndex),
     pageLimit: benchmark.pageLimit,
     sampleMode: benchmark.sampleMode,
