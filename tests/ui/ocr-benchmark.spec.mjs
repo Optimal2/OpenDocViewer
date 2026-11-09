@@ -107,7 +107,7 @@ test('ocr benchmark: the About dialog runs it over the page and saves a result w
   await page.reload();
   await expect(page.locator('.document-render-container img').first()).toBeVisible();
   const afterReload = await openAboutDialog(page);
-  await expect(afterReload.locator('[data-odv-ocr="benchmark-status"]')).toHaveText(/Best OCR run|Bästa OCR-körning/);
+  await expect(afterReload.locator('[data-odv-ocr="benchmark-status"]')).toHaveText(/Fastest OCR run|Snabbaste OCR-körning/);
   await expect(afterReload.locator('[data-odv-ocr="benchmark-download"]')).toBeVisible();
 });
 

@@ -191,21 +191,31 @@ export function createOcrQueue({
     });
   }
 
+  // True while pump() runs its loop: a pump() called from inside it (a page skipped outright
+  // finishes synchronously and pumps again) returns at once and leaves the next candidate to the
+  // running loop, so a run of skipped pages neither recurses nor reports idle more than once.
+  let pumping = false;
+
   function pump() {
-    if (disposed || paused) return;
-    if (engineFailure) {
-      // Nothing more will run this session; let the owner release the prober and the worker.
-      if (inFlight.size === 0) onIdle?.();
-      return;
+    if (disposed || paused || pumping) return;
+    pumping = true;
+    try {
+      if (engineFailure) {
+        // Nothing more will run this session; let the owner release the prober and the worker.
+        if (inFlight.size === 0) onIdle?.();
+        return;
+      }
+      while (inFlight.size < limit) {
+        const candidate = nextCandidate();
+        if (!candidate) break;
+        // run() is synchronous up to its first await, so the page is in flight (and, unless it is
+        // skipped outright, marked probing or recognizing) before the next candidate is looked for.
+        void run(candidate);
+      }
+      if (inFlight.size === 0 && !nextCandidate()) onIdle?.();
+    } finally {
+      pumping = false;
     }
-    while (inFlight.size < limit) {
-      const candidate = nextCandidate();
-      if (!candidate) break;
-      // run() is synchronous up to its first await, so the page is in flight (and, unless it is
-      // skipped outright, marked probing or recognizing) before the next candidate is looked for.
-      void run(candidate);
-    }
-    if (inFlight.size === 0 && !nextCandidate()) onIdle?.();
   }
 
   async function run(candidate) {
@@ -255,6 +265,9 @@ export function createOcrQueue({
         if (!outcome && !job.abandoned) {
           setTransient(job.key, job.sourceKey, OCR_PAGE_STATUS.RECOGNIZING);
           const image = await withTimeout(getPageImage(candidate), timeouts.image, 'page image');
+          // Abandoned (its document left, or the queue was disposed) while the image was fetched:
+          // no worker has the page yet, so nothing is recognised and no engine is started for it.
+          if (job.abandoned || disposed) return finish(job, null);
           const result = await withTimeout(engine.recognize(image.blob, job.control), timeouts.recognize, 'recognition');
           outcome = {
             status: OCR_PAGE_STATUS.DONE,
@@ -296,6 +309,11 @@ export function createOcrQueue({
         log.warn?.('OCR language guess failed', { sourceKey: job.sourceKey, error: String(error?.message || error) });
       }
     }
+    finish(job, outcome);
+  }
+
+  /** Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped. */
+  function finish(job, outcome) {
     inFlight.delete(job.key);
     transient.delete(job.key);
     if (outcome && !job.abandoned && isRetained(job.sourceKey)) cache.set(job.key, job.sourceKey, outcome);

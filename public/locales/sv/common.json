@@ -1018,7 +1018,7 @@
       "ocrBenchmarkProgress": "Kör OCR-benchmark {current} av {total}: {scenario} ({pageProgress} sidor)…",
       "ocrBenchmarkDone": "OCR-benchmark slutförd.",
       "ocrBenchmarkError": "OCR-benchmark misslyckades: {error}",
-      "ocrBenchmarkSummary": "Bästa OCR-körning: {msPerPage} ms per sida, {pages} sidor, {scenario}.",
+      "ocrBenchmarkSummary": "Snabbaste OCR-körning: {msPerPage} ms per sida, {pages} sidor, {scenario}.",
       "noOcrBenchmark": "Ingen OCR-benchmark har körts."
     }
   },

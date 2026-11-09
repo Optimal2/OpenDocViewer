@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 7757. JSDoc symbol count: 112.
+File count: 21. Line count: 7771. JSDoc symbol count: 113.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -160,7 +160,7 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 16. Line count: 2913. JSDoc symbol count: 126.
+File count: 16. Line count: 2997. JSDoc symbol count: 128.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 7757. JSDoc symbol count: 112.
+File count: 21. Line count: 7771. JSDoc symbol count: 113.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -32,12 +32,12 @@ Symbols:
 - `ZoomState` (typedef) - Zoom display state used by the newer toolbar UX paths.
 - `DocumentToolbarProps` (typedef) - Props for \{@link DocumentToolbar\}.
 - `SLIDER_CENTER_RANGE` (constant) - Range \(±\) around 100% where sliders snap back to the neutral value.
+- `OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE` (constant) - Pages on either side of the shown page whose renders the OCR benchmark leaves to the viewer.
 - `ONE_TO_ONE_EPS` (constant) - Epsilon for considering zoom ≈ 100% \(0.5%\).
 - `makePdfResolutionPageKey` (function) - No description.
 - `isPdfPage` (function) - No description.
 - `DocumentToolbar` (function) - Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
 - `<anonymous>~handlePointerDown` (function) - No description.
-- `<anonymous>~handleEscape` (function) - No description.
 
 ## src/components/DocumentToolbar/HelpMenuButton.jsx
 

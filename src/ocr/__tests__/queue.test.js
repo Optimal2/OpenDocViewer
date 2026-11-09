@@ -187,6 +187,22 @@ describe('createOcrQueue', () => {
     expect(engine.recognize).not.toHaveBeenCalled();
   });
 
+  it('reports idle once for a run of skipped pages, however long, without recursing', async () => {
+    // Within the cache's default limit: a window larger than the cache would evict pages that are
+    // still planned and recognise them again without end, which is why the hook raises the
+    // limit to the page count for a whole document.
+    const { queue, engine, events, cache } = makeQueue({ onChange: () => {} });
+    const skipped = Array.from({ length: 150 }, (_, index) => candidate('doc', index, { fileExtension: 'txt' }));
+    queue.setWindow(skipped);
+    await flush();
+    expect(cache.has(skipped[149].key)).toBe(true);
+    expect(engine.recognize).not.toHaveBeenCalled();
+    expect(events.filter((event) => event === 'idle')).toHaveLength(1);
+    // An empty window reports idle again, as before.
+    queue.setWindow([]);
+    expect(events.filter((event) => event === 'idle')).toHaveLength(2);
+  });
+
   it('does not recognise a cached page again', async () => {
     const { queue, engine } = makeQueue();
     const a = candidate('doc', 0);
@@ -520,6 +536,33 @@ describe('createOcrQueue', () => {
       expect(latest().pages[b.key]).toEqual({ status: OCR_PAGE_STATUS.FAILED, reason: 'engine:csp' });
       expect(latest().pages[c.key]).toEqual({ status: OCR_PAGE_STATUS.QUEUED });
       expect(events[events.length - 1]).toBe('idle');
+    });
+
+    it('does not hand an abandoned page to the pool when its image arrives after the document left or the queue was disposed', async () => {
+      const engine = makePool(2);
+      const images = [deferred(), deferred()];
+      let calls = 0;
+      const getPageImage = vi.fn(() => images[calls++].promise);
+      const { queue, cache, latest } = makeQueue({ engine, concurrency: 2, getPageImage });
+      const [old, kept] = [candidate('old', 0), candidate('kept', 0)];
+      queue.setWindow([old, kept]);
+      await flush();
+      expect(engine.recognize).not.toHaveBeenCalled();
+
+      // The old document leaves while its image is still loading: the image arrives, no worker runs.
+      queue.retainSources(new Set(['kept']));
+      images[0].resolve({ blob: `blob:${old.key}`, width: 10, height: 10 });
+      await flush();
+      expect(engine.recognize).not.toHaveBeenCalled();
+      expect(cache.has(old.key)).toBe(false);
+      expect(latest().pages[old.key]).toBeUndefined();
+
+      // Disposed while the kept page's image loads: nothing starts after the terminate.
+      queue.dispose();
+      images[1].resolve({ blob: `blob:${kept.key}`, width: 10, height: 10 });
+      await flush();
+      expect(engine.recognize).not.toHaveBeenCalled();
+      expect(engine.terminate).toHaveBeenCalledTimes(1);
     });
 
     it('runs one page at a time without a concurrency, whatever the pool size', async () => {

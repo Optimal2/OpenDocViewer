@@ -5659,7 +5659,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 215,
+    "line": 217,
     "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
     "params": [
       {
@@ -5697,7 +5697,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 626,
+    "line": 628,
     "description": "Handle brightness slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5722,7 +5722,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 640,
+    "line": 642,
     "description": "Handle contrast slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5747,7 +5747,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 662,
+    "line": 664,
     "description": "",
     "params": [
       {
@@ -5772,7 +5772,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 343,
+    "line": 345,
     "description": "",
     "params": [
       {
@@ -5792,7 +5792,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 335,
+    "line": 337,
     "description": "",
     "params": [
       {
@@ -5812,7 +5812,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 675,
+    "line": 677,
     "description": "",
     "params": [
       {
@@ -5837,7 +5837,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 654,
+    "line": 656,
     "description": "",
     "params": [
       {
@@ -5881,7 +5881,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 202,
+    "line": 204,
     "description": "",
     "params": [
       {
@@ -5906,7 +5906,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 192,
+    "line": 194,
     "description": "",
     "params": [
       {
@@ -5925,13 +5925,26 @@
     "examples": 0
   },
   {
+    "id": "OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE",
+    "name": "OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE",
+    "longname": "OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
+    "line": 165,
+    "description": "Pages on either side of the shown page whose renders the OCR benchmark leaves to the viewer.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ONE_TO_ONE_EPS",
     "name": "ONE_TO_ONE_EPS",
     "longname": "ONE_TO_ONE_EPS",
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 165,
+    "line": 167,
     "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
     "params": [],
     "returns": [],
@@ -5982,7 +5995,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 684,
+    "line": 686,
     "description": "",
     "params": [
       {
@@ -21897,7 +21910,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 354,
+    "line": 389,
     "description": "",
     "params": [
       {
@@ -21928,7 +21941,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 310,
+    "line": 345,
     "description": "Downscale a page image for a scale scenario: decode, draw at the smaller size, encode as PNG.",
     "params": [
       {
@@ -21959,7 +21972,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 136,
+    "line": 137,
     "description": "The worker counts a configured list stands for on this client: explicit counts as they are, 0 as every count from one up to the cores minus one (bounded by MAX_OCR_WORKER_COUNT, a...",
     "params": [
       {
@@ -21990,7 +22003,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 81,
+    "line": 82,
     "description": "",
     "params": [
       {
@@ -22033,7 +22046,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 57,
+    "line": 58,
     "description": "Period of the main-thread lag sampler (ms): short enough to see a stalled frame, cheap enough to leave the result alone.",
     "params": [],
     "returns": [],
@@ -22046,7 +22059,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 59,
+    "line": 60,
     "description": "A lag sample above this counts as a stall the user would notice.",
     "params": [],
     "returns": [],
@@ -22059,7 +22072,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 93,
+    "line": 94,
     "description": "Read ocr.benchmark with every value bounded; an unusable list falls back to its default.",
     "params": [
       {
@@ -22084,7 +22097,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 41,
+    "line": 42,
     "description": "Defaults of ocr.benchmark beyond the switch.",
     "params": [],
     "returns": [],
@@ -22097,7 +22110,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 61,
+    "line": 62,
     "description": "",
     "params": [],
     "returns": [],
@@ -22110,7 +22123,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 151,
+    "line": 166,
     "description": "",
     "params": [],
     "returns": [],
@@ -22123,8 +22136,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 171,
-    "description": "The scenarios a configuration stands for: the worker counts with the configured languages and the full image, then (with one worker) the single-language variant when more than one...",
+    "line": 188,
+    "description": "The scenarios a configuration stands for: the worker counts with the languages the engine loads and the full image, then (with one worker) the single-language variant when more th...",
     "params": [
       {
         "name": "config",
@@ -22148,12 +22161,37 @@
         "name": "context.languages",
         "type": "Array.<string>",
         "optional": false,
-        "description": "The configured OCR languages (setup order)."
+        "description": "The languages the engine loads (resolveOcrBenchmarkLanguages)."
       }
     ],
     "returns": [
       {
         "type": "Array.<OcrBenchmarkScenario>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveOcrBenchmarkLanguages",
+    "name": "resolveOcrBenchmarkLanguages",
+    "longname": "resolveOcrBenchmarkLanguages",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/benchmark.js",
+    "line": 161,
+    "description": "The languages the engine will load for a configuration: the configured codes (form checked by getOcrLanguages) less the ones with no model, as setup.js resolves them, and the defa...",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
         "description": ""
       }
     ],
@@ -22166,7 +22204,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 382,
+    "line": 417,
     "description": "Run worker over items with at most concurrency in flight, in order of start.",
     "params": [
       {
@@ -22203,7 +22241,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 507,
+    "line": 554,
     "description": "Run the OCR benchmark over the loaded document and save the result.",
     "params": [
       {
@@ -22234,7 +22272,7 @@
         "name": "args.releasePageAsset",
         "type": "function|null",
         "optional": true,
-        "description": "Drop a render made only for the benchmark."
+        "description": "Drop a render made only for the benchmark (a page not rendered when the run started). The caller may decline for a page the user is looking..."
       },
       {
         "name": "args.onProgress",
@@ -22270,7 +22308,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 410,
+    "line": 445,
     "description": "Recognise the sampled pages once on a fresh engine pool and measure it.",
     "params": [
       {
@@ -22355,7 +22393,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 198,
+    "line": 215,
     "description": "The pages to recognise: loaded pages the OCR queue would recognise (not skipped by classifyPageSource), sampled evenly over the document (or the first ones), at most pageLimit .",
     "params": [
       {
@@ -22398,14 +22436,14 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 249,
+    "line": 269,
     "description": "Sample the main thread's event-loop lag while a scenario runs: a timer asked for every LAG_SAMPLE_MS, and how late each tick came.",
     "params": [
       {
         "name": "options",
         "type": "Object",
         "optional": true,
-        "description": "Injectable timers for tests."
+        "description": "Injectable timers and visibility for tests."
       }
     ],
     "returns": [
@@ -22423,7 +22461,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 225,
+    "line": 242,
     "description": "Summary statistics of a list of durations.",
     "params": [
       {
@@ -22448,7 +22486,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 297,
+    "line": 332,
     "description": "",
     "params": [],
     "returns": [
@@ -22466,7 +22504,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/benchmark.js",
-    "line": 338,
+    "line": 373,
     "description": "",
     "params": [
       {
@@ -23117,7 +23155,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/enginePool.js",
-    "line": 42,
+    "line": 45,
     "description": "",
     "params": [
       {
@@ -23154,7 +23192,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/enginePool.js",
-    "line": 97,
+    "line": 100,
     "description": "Terminate one engine and forget it; the next acquisition creates a fresh one in its place.",
     "params": [],
     "returns": [],
@@ -23167,7 +23205,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/enginePool.js",
-    "line": 22,
+    "line": 25,
     "description": "",
     "params": [],
     "returns": [],
@@ -23180,7 +23218,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/enginePool.js",
-    "line": 67,
+    "line": 70,
     "description": "A free entry now, a new one while under the limit, else null.",
     "params": [],
     "returns": [],
@@ -23193,7 +23231,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/enginePool.js",
-    "line": 20,
+    "line": 23,
     "description": "Rejection for callers waiting on a free engine when the pool is terminated.",
     "params": [],
     "returns": [],
@@ -24247,6 +24285,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "createOcrQueue~finish",
+    "name": "finish",
+    "longname": "createOcrQueue~finish",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/ocr/queue.js",
+    "line": 316,
+    "description": "Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {

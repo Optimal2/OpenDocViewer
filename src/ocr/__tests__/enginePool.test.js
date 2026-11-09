@@ -131,6 +131,27 @@ describe('createOcrEnginePool', () => {
     expect(controlB.abort).toBeNull();
   });
 
+  it('lets a page waiting for the first engine wait for the next one when the first is dropped while starting', async () => {
+    const { pool, engines } = makePool(2);
+    const controlA = {};
+    const a = pool.recognize('a', controlA);
+    const b = pool.recognize('b');
+    await flush();
+    expect(engines).toHaveLength(2);
+    // A's engine (the first) is aborted before it has started; B was waiting for that start.
+    controlA.abort();
+    engines[0].start.reject(new Error('OCR engine was terminated during start'));
+    await expect(a).rejects.toThrow(/terminated/);
+    await flush();
+    expect(pool.getFailure()).toBeNull();
+    // B's engine is the first now and starts; B is recognised on it instead of failing.
+    expect(engines[1].ensureStarted).toHaveBeenCalled();
+    engines[1].start.resolve();
+    await flush();
+    engines[1].jobs[0].resolve({ text: 'b', confidence: 90, words: [] });
+    await expect(b).resolves.toMatchObject({ text: 'b' });
+  });
+
   it('takes the first engine\'s start-up failure as its own, rejects everything with it and starts no further engine', async () => {
     const { pool, engines, createEngine } = makePool(3);
     const a = pool.recognize('a');

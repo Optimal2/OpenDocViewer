@@ -29,9 +29,10 @@
  * switches are on.
  */
 import logger from '../logging/systemLogger.js';
-import { MAX_OCR_WORKER_COUNT, getOcrLanguages, getRuntimeConfig } from '../utils/runtimeConfig.js';
+import { DEFAULT_OCR_LANGUAGES, MAX_OCR_WORKER_COUNT, getOcrLanguages, getRuntimeConfig } from '../utils/runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestOcrBenchmarkResult } from '../utils/supportDiagnostics.js';
 import { OCR_PAGE_DECISION, classifyPageSource } from './classify.js';
+import { partitionOcrLanguages } from './languages.js';
 import { prepareOcrImage } from './prepareImage.js';
 import { createConfiguredOcrEngine } from './setup.js';
 
@@ -149,6 +150,20 @@ export function expandOcrBenchmarkWorkerCounts(workerCounts, cores) {
 }
 
 /**
+ * The languages the engine will load for a configuration: the configured codes (form checked
+ * by getOcrLanguages) less the ones with no model, as setup.js resolves them, and the default
+ * when none is left. The scenarios are planned from these, not from the raw configuration, so
+ * `lang-<code>` names a model that exists and the result's `languages` is what ran.
+ *
+ * @param {Object=} cfg
+ * @returns {Array<string>}
+ */
+export function resolveOcrBenchmarkLanguages(cfg = getRuntimeConfig()) {
+  const { known } = partitionOcrLanguages(getOcrLanguages(cfg));
+  return known.length ? known : [...DEFAULT_OCR_LANGUAGES];
+}
+
+/**
  * @typedef {Object} OcrBenchmarkScenario
  * @property {string} label  e.g. `workers-2`, `lang-swe`, `scale-0.75`.
  * @property {string} kind  'workers', 'language' or 'scale'.
@@ -158,30 +173,32 @@ export function expandOcrBenchmarkWorkerCounts(workerCounts, cores) {
  */
 
 /**
- * The scenarios a configuration stands for: the worker counts with the configured languages
- * and the full image, then (with one worker) the single-language variant when more than one
- * language is configured, then each image scale below one.
+ * The scenarios a configuration stands for: the worker counts with the languages the engine
+ * loads and the full image, then (with one worker) the single-language variant when more than
+ * one language is loaded, then each image scale below one. When a variant is planned,
+ * `workers-1` is always among the scenarios (added when the counts leave it out), since the
+ * variants are read against it.
  *
  * @param {OcrBenchmarkConfig} config
  * @param {Object} context
  * @param {number} context.cores
- * @param {Array<string>} context.languages  The configured OCR languages (setup order).
+ * @param {Array<string>} context.languages  The languages the engine loads (resolveOcrBenchmarkLanguages).
  * @returns {Array<OcrBenchmarkScenario>}
  */
 export function planOcrBenchmarkScenarios(config, { cores, languages }) {
-  const configured = Array.isArray(languages) && languages.length ? [...languages] : ['eng'];
-  const scenarios = [];
-  for (const workerCount of expandOcrBenchmarkWorkerCounts(config.workerCounts, cores)) {
-    scenarios.push({ label: `workers-${workerCount}`, kind: 'workers', workerCount, languages: configured, imageScale: 1 });
-  }
-  if (config.languageVariants.includes('single') && configured.length > 1) {
-    scenarios.push({ label: `lang-${configured[0]}`, kind: 'language', workerCount: 1, languages: [configured[0]], imageScale: 1 });
+  const loaded = Array.isArray(languages) && languages.length ? [...languages] : [...DEFAULT_OCR_LANGUAGES];
+  const counts = expandOcrBenchmarkWorkerCounts(config.workerCounts, cores);
+  const variants = [];
+  if (config.languageVariants.includes('single') && loaded.length > 1) {
+    variants.push({ label: `lang-${loaded[0]}`, kind: 'language', workerCount: 1, languages: [loaded[0]], imageScale: 1 });
   }
   for (const scale of config.imageScales) {
     if (scale >= 1) continue;
-    scenarios.push({ label: `scale-${scale}`, kind: 'scale', workerCount: 1, languages: configured, imageScale: scale });
+    variants.push({ label: `scale-${scale}`, kind: 'scale', workerCount: 1, languages: loaded, imageScale: scale });
   }
-  return scenarios;
+  if (variants.length && !counts.includes(1)) counts.unshift(1);
+  const scenarios = counts.map((workerCount) => ({ label: `workers-${workerCount}`, kind: 'workers', workerCount, languages: loaded, imageScale: 1 }));
+  return [...scenarios, ...variants];
 }
 
 /**
@@ -241,27 +258,44 @@ export function summarizeDurations(values) {
  * LAG_SAMPLE_MS, and how late each tick came. A long task on the main thread (decoding a page
  * image, removing its ruling lines, the React commit of a hundred text layers) shows as a late
  * tick. Where the browser reports long tasks (`PerformanceObserver` with `longtask`), those are
- * counted too.
+ * counted too. A browser throttles timers in a hidden tab (to one tick a second, later a
+ * minute), which would look like one stall after another: ticks taken while the document is
+ * hidden are therefore counted apart (`hiddenSamples`) and left out of the lag figures, so a
+ * run with hidden samples says that its lag figures cover only part of the run.
  *
- * @param {Object=} options  Injectable timers for tests.
- * @returns {{ stop: function(): { samples: number, lagMeanMs: number, lagMaxMs: number, stalls: number, longTasks: number, longTaskMs: number } }}
+ * @param {Object=} options  Injectable timers and visibility for tests.
+ * @returns {{ stop: function(): { samples: number, hiddenSamples: number, lagMeanMs: number, lagMaxMs: number, stalls: number, longTasks: number, longTaskMs: number } }}
  */
-export function startMainThreadLagSampler({ setInterval: schedule = globalThis.setInterval, clearInterval: cancel = globalThis.clearInterval, now = () => performance.now() } = {}) {
+export function startMainThreadLagSampler({ setInterval: schedule = globalThis.setInterval, clearInterval: cancel = globalThis.clearInterval, now = () => performance.now(), isHidden = () => typeof document !== 'undefined' && document.visibilityState === 'hidden' } = {}) {
   let samples = 0;
+  let hiddenSamples = 0;
   let lagSum = 0;
   let lagMax = 0;
   let stalls = 0;
   let longTasks = 0;
   let longTaskMs = 0;
   let expected = now() + LAG_SAMPLE_MS;
+  // True after a hidden tick: the first visible tick after it only re-anchors the clock, since
+  // its lag would still hold the throttled interval it was scheduled across.
+  let reanchor = false;
   const timer = schedule(() => {
     const current = now();
     const lag = Math.max(0, current - expected);
+    expected = current + LAG_SAMPLE_MS;
+    if (isHidden()) {
+      // A throttled tick says nothing about the main thread.
+      hiddenSamples += 1;
+      reanchor = true;
+      return;
+    }
+    if (reanchor) {
+      reanchor = false;
+      return;
+    }
     samples += 1;
     lagSum += lag;
     if (lag > lagMax) lagMax = lag;
     if (lag > LAG_STALL_MS) stalls += 1;
-    expected = current + LAG_SAMPLE_MS;
   }, LAG_SAMPLE_MS);
   let observer = null;
   try {
@@ -283,6 +317,7 @@ export function startMainThreadLagSampler({ setInterval: schedule = globalThis.s
       try { observer?.disconnect(); } catch { /* nothing to release */ }
       return {
         samples,
+        hiddenSamples,
         lagMeanMs: samples ? Math.round(lagSum / samples) : 0,
         lagMaxMs: Math.round(lagMax),
         stalls,
@@ -428,18 +463,24 @@ async function runScenario({ scenario, pages, cfg, loadPageImage, prepareImage, 
       const loopStart = performance.now();
       await runConcurrently(pages, scenario.workerCount, async (entry) => {
         throwIfAborted(signal);
-        const record = { viewerIndex: entry.viewerIndex, prepareMs: 0, recognizeMs: 0, words: 0, confidence: 0, chars: 0, width: 0, height: 0, error: null };
+        const record = { viewerIndex: entry.viewerIndex, imageMs: 0, prepareMs: 0, recognizeMs: 0, words: 0, confidence: 0, chars: 0, width: 0, height: 0, scaled: false, error: null };
         const pageStart = performance.now();
         try {
+          // The page image as the viewer has it (rendered now when it was not), then the
+          // preparation the queue does (measure, ruling lines) and, for a scale scenario, the
+          // downscaling; each step bounded, so a hang fails the page and not the run.
           const blob = await withTimeout(loadPageImage(entry.viewerIndex), pageTimeoutMs, 'page image');
-          let prepared = await prepareImage(blob, {});
+          const prepareStart = performance.now();
+          record.imageMs = Math.round(prepareStart - pageStart);
+          let prepared = await withTimeout(prepareImage(blob, {}), pageTimeoutMs, 'image preparation');
           if (scenario.imageScale < 1) {
-            const scaled = await downscaleOcrImage(prepared.blob, scenario.imageScale);
+            const scaled = await withTimeout(downscaleOcrImage(prepared.blob, scenario.imageScale), pageTimeoutMs, 'image downscaling');
             if (scaled.scaled) prepared = { ...prepared, blob: scaled.blob, width: scaled.width, height: scaled.height };
+            record.scaled = scaled.scaled;
           }
           record.width = prepared.width;
           record.height = prepared.height;
-          record.prepareMs = Math.round(performance.now() - pageStart);
+          record.prepareMs = Math.round(performance.now() - prepareStart);
           const control = {};
           const recognizeStart = performance.now();
           const result = await withTimeout(engine.recognize(prepared.blob, control), pageTimeoutMs, 'recognition', () => control.abort?.());
@@ -477,10 +518,14 @@ async function runScenario({ scenario, pages, cfg, loadPageImage, prepareImage, 
     startupError,
     startupMs,
     durationMs,
+    // Throughput: wall time of the page loop (the extra workers' starts included) per recognised
+    // page; the latency of one page is recognizeMs below.
     msPerPage: recognized > 0 ? Math.round(durationMs / recognized) : 0,
     pagesPerMinute: durationMs > 0 ? Math.round((recognized * 60000) / durationMs * 10) / 10 : 0,
     recognizeMs: summarizeDurations(done.map((record) => record.recognizeMs)),
+    imageMs: summarizeDurations(done.map((record) => record.imageMs)),
     prepareMs: summarizeDurations(done.map((record) => record.prepareMs)),
+    scaledPages: done.filter((record) => record.scaled).length,
     words: done.reduce((total, record) => total + record.words, 0),
     chars: done.reduce((total, record) => total + record.chars, 0),
     meanConfidence: recognized > 0 ? Math.round(confidenceSum / recognized) : 0,
@@ -497,7 +542,9 @@ async function runScenario({ scenario, pages, cfg, loadPageImage, prepareImage, 
  * @param {Object=} args.config  Runtime config (defaults to the viewer's); must have the switch on.
  * @param {Array<Object>} args.allPages  The viewer's pages.
  * @param {function(number, string): Promise<(string|null)>} args.ensurePageAsset  `(viewerIndex, 'full')` to the page image URL.
- * @param {(function(number, string): void|null)=} args.releasePageAsset  Drop a render made only for the benchmark.
+ * @param {(function(number, string): void|null)=} args.releasePageAsset  Drop a render made only
+ *   for the benchmark (a page not rendered when the run started). The caller may decline for a
+ *   page the user is looking at meanwhile: the toolbar keeps the pages around the shown one.
  * @param {function(Object): void=} args.onProgress  `{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount }`.
  * @param {AbortSignal=} args.signal
  * @param {Object=} args.inject  Test seams: `createEngine` (default createConfiguredOcrEngine),
@@ -513,7 +560,8 @@ export async function runOcrBenchmark({ config, allPages, ensurePageAsset, relea
   if (!pages.length) throw new Error('No loaded page is available for the OCR benchmark.');
 
   const cores = Math.max(0, Math.floor(Number(inject.cores ?? globalThis.navigator?.hardwareConcurrency) || 0));
-  const languages = getOcrLanguages(cfg);
+  const configuredLanguages = getOcrLanguages(cfg);
+  const languages = resolveOcrBenchmarkLanguages(cfg);
   const scenarios = planOcrBenchmarkScenarios(benchmark, { cores, languages });
   const createEngine = inject.createEngine || ((scenarioCfg, options) => createConfiguredOcrEngine(scenarioCfg, options));
   const prepareImage = inject.prepareImage || ((blob, options) => prepareOcrImage(blob, options));
@@ -563,7 +611,10 @@ export async function runOcrBenchmark({ config, allPages, ensurePageAsset, relea
     createdUtc: new Date().toISOString(),
     hardwareConcurrency: cores,
     deviceMemoryGiB: Number(globalThis.navigator?.deviceMemory) || 0,
+    // The languages the engines loaded; `configuredLanguages` is the site file's list before
+    // the codes without a model were dropped.
     languages,
+    configuredLanguages,
     pageCount: pages.length,
     sourcePageCount: Array.isArray(allPages) ? allPages.length : 0,
     sampledViewerIndexes: pages.map((entry) => entry.viewerIndex),

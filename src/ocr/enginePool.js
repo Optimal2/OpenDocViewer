@@ -5,8 +5,11 @@
  *
  * Engines are created lazily, one per concurrent recognition up to `size`, and the first one is
  * started before any other: a start-up failure (a CSP without 'wasm-unsafe-eval', missing files)
- * is then found once, and the others load the engine core and the language models from the
- * browser's HTTP cache instead of all fetching them at once. After a failure no further engine
+ * is then found once, and the others can take the engine core and the language models from the
+ * browser's HTTP cache instead of all fetching them at once (the shipped web.config serves the
+ * ocr/ folder as immutable; a host that serves it no-store pays the download per worker). If the
+ * first engine is dropped while it starts (its page was aborted), a page waiting for it waits for
+ * the next first engine instead of failing. After a failure no further engine
  * is created and every call rejects with it, as a single engine does. A recognition can be
  * aborted on its own: `recognize(image, control)` sets `control.abort` to a function that
  * terminates only the worker holding that page, which the pool replaces lazily, so the other
@@ -125,7 +128,18 @@ export function createOcrEnginePool({ size, createEngine }) {
       try {
         if (entry !== entries[0]) {
           // The first engine starts alone; the others follow once it runs (or fail with it).
-          await ensureStarted();
+          for (let attempt = 0; ; attempt += 1) {
+            try {
+              await ensureStarted();
+              break;
+            } catch (error) {
+              // The first engine was dropped while starting (its page was aborted): that is not
+              // a start-up failure, so the next first engine starts in its place and this page
+              // waits for it instead of failing. A classified failure, a terminate or a drop of
+              // this entry ends the wait; so does a third miss, which would mean something else.
+              if (callGeneration !== generation || dropped || firstFailure() || attempt >= 2) throw error;
+            }
+          }
           if (callGeneration !== generation || dropped) throw new Error(TERMINATED_MESSAGE);
         }
         return await entry.engine.recognize(image);

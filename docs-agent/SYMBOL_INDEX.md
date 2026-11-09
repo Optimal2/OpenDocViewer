@@ -204,22 +204,23 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:84</code> |  |
 | <code>resolveAboutInfo</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:23</code> |  |
 | <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:57</code> | Mutable ref-like object used by the toolbar. |
-| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:215</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:217</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:85</code> | Props for {@link DocumentToolbar}. |
-| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:626</code> | Handle brightness slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:640</code> | Handle contrast slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:662</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:343</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:335</code> |  |
-| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:675</code> |  |
-| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:654</code> |  |
+| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:628</code> | Handle brightness slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:642</code> | Handle contrast slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:664</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:345</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:337</code> |  |
+| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:677</code> |  |
+| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:656</code> |  |
 | <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:63</code> | Editable image state shown by the toolbar. |
-| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:202</code> |  |
-| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:192</code> |  |
-| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:165</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
+| <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:204</code> |  |
+| <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:194</code> |  |
+| <code>OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:165</code> | Pages on either side of the shown page whose renders the OCR benchmark leaves to the viewer. |
+| <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:167</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:71</code> | React-like numeric page setter used by the toolbar. |
 | <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:163</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
-| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:684</code> |  |
+| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:686</code> |  |
 | <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:78</code> | Zoom display state used by the newer toolbar UX paths. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:36</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:28</code> |  |
@@ -864,25 +865,26 @@
 | <code>OcrAssetUrls</code> | typedef | <code>src/ocr/assetUrls.js:25</code> |  |
 | <code>readOcrAssetManifest</code> | function | <code>src/ocr/assetUrls.js:39</code> | The manifest the build generated, or null when it is unusable. |
 | <code>resolveOcrAssetUrls</code> | function | <code>src/ocr/assetUrls.js:60</code> | Turn the dist-relative manifest paths into absolute URLs. |
-| <code>delay</code> | function | <code>src/ocr/benchmark.js:354</code> |  |
-| <code>downscaleOcrImage</code> | function | <code>src/ocr/benchmark.js:310</code> | Downscale a page image for a scale scenario: decode, draw at the smaller size, encode as PNG. |
-| <code>expandOcrBenchmarkWorkerCounts</code> | function | <code>src/ocr/benchmark.js:136</code> | The worker counts a configured list stands for on this client: explicit counts as they are, 0 as every count from one up to the cores minus one \(bounded by MAX_OCR_WORKER_COUNT, a... |
-| <code>integerIn</code> | function | <code>src/ocr/benchmark.js:81</code> |  |
-| <code>LAG_SAMPLE_MS</code> | constant | <code>src/ocr/benchmark.js:57</code> | Period of the main-thread lag sampler \(ms\): short enough to see a stalled frame, cheap enough to leave the result alone. |
-| <code>LAG_STALL_MS</code> | constant | <code>src/ocr/benchmark.js:59</code> | A lag sample above this counts as a stall the user would notice. |
-| <code>normalizeOcrBenchmarkConfig</code> | function | <code>src/ocr/benchmark.js:93</code> | Read ocr.benchmark with every value bounded; an unusable list falls back to its default. |
-| <code>OCR_BENCHMARK_DEFAULTS</code> | constant | <code>src/ocr/benchmark.js:41</code> | Defaults of ocr.benchmark beyond the switch. |
-| <code>OcrBenchmarkConfig</code> | typedef | <code>src/ocr/benchmark.js:61</code> |  |
-| <code>OcrBenchmarkScenario</code> | typedef | <code>src/ocr/benchmark.js:151</code> |  |
-| <code>planOcrBenchmarkScenarios</code> | function | <code>src/ocr/benchmark.js:171</code> | The scenarios a configuration stands for: the worker counts with the configured languages and the full image, then \(with one worker\) the single-language variant when more than one... |
-| <code>runConcurrently</code> | function | <code>src/ocr/benchmark.js:382</code> | Run worker over items with at most concurrency in flight, in order of start. |
-| <code>runOcrBenchmark</code> | function | <code>src/ocr/benchmark.js:507</code> | Run the OCR benchmark over the loaded document and save the result. |
-| <code>runScenario</code> | function | <code>src/ocr/benchmark.js:410</code> | Recognise the sampled pages once on a fresh engine pool and measure it. |
-| <code>selectOcrBenchmarkPages</code> | function | <code>src/ocr/benchmark.js:198</code> | The pages to recognise: loaded pages the OCR queue would recognise \(not skipped by classifyPageSource\), sampled evenly over the document \(or the first ones\), at most pageLimit . |
-| <code>startMainThreadLagSampler</code> | function | <code>src/ocr/benchmark.js:249</code> | Sample the main thread&#39;s event-loop lag while a scenario runs: a timer asked for every LAG_SAMPLE_MS, and how late each tick came. |
-| <code>summarizeDurations</code> | function | <code>src/ocr/benchmark.js:225</code> | Summary statistics of a list of durations. |
-| <code>usedHeapMiB</code> | function | <code>src/ocr/benchmark.js:297</code> |  |
-| <code>withTimeout</code> | function | <code>src/ocr/benchmark.js:338</code> |  |
+| <code>delay</code> | function | <code>src/ocr/benchmark.js:389</code> |  |
+| <code>downscaleOcrImage</code> | function | <code>src/ocr/benchmark.js:345</code> | Downscale a page image for a scale scenario: decode, draw at the smaller size, encode as PNG. |
+| <code>expandOcrBenchmarkWorkerCounts</code> | function | <code>src/ocr/benchmark.js:137</code> | The worker counts a configured list stands for on this client: explicit counts as they are, 0 as every count from one up to the cores minus one \(bounded by MAX_OCR_WORKER_COUNT, a... |
+| <code>integerIn</code> | function | <code>src/ocr/benchmark.js:82</code> |  |
+| <code>LAG_SAMPLE_MS</code> | constant | <code>src/ocr/benchmark.js:58</code> | Period of the main-thread lag sampler \(ms\): short enough to see a stalled frame, cheap enough to leave the result alone. |
+| <code>LAG_STALL_MS</code> | constant | <code>src/ocr/benchmark.js:60</code> | A lag sample above this counts as a stall the user would notice. |
+| <code>normalizeOcrBenchmarkConfig</code> | function | <code>src/ocr/benchmark.js:94</code> | Read ocr.benchmark with every value bounded; an unusable list falls back to its default. |
+| <code>OCR_BENCHMARK_DEFAULTS</code> | constant | <code>src/ocr/benchmark.js:42</code> | Defaults of ocr.benchmark beyond the switch. |
+| <code>OcrBenchmarkConfig</code> | typedef | <code>src/ocr/benchmark.js:62</code> |  |
+| <code>OcrBenchmarkScenario</code> | typedef | <code>src/ocr/benchmark.js:166</code> |  |
+| <code>planOcrBenchmarkScenarios</code> | function | <code>src/ocr/benchmark.js:188</code> | The scenarios a configuration stands for: the worker counts with the languages the engine loads and the full image, then \(with one worker\) the single-language variant when more th... |
+| <code>resolveOcrBenchmarkLanguages</code> | function | <code>src/ocr/benchmark.js:161</code> | The languages the engine will load for a configuration: the configured codes \(form checked by getOcrLanguages\) less the ones with no model, as setup.js resolves them, and the defa... |
+| <code>runConcurrently</code> | function | <code>src/ocr/benchmark.js:417</code> | Run worker over items with at most concurrency in flight, in order of start. |
+| <code>runOcrBenchmark</code> | function | <code>src/ocr/benchmark.js:554</code> | Run the OCR benchmark over the loaded document and save the result. |
+| <code>runScenario</code> | function | <code>src/ocr/benchmark.js:445</code> | Recognise the sampled pages once on a fresh engine pool and measure it. |
+| <code>selectOcrBenchmarkPages</code> | function | <code>src/ocr/benchmark.js:215</code> | The pages to recognise: loaded pages the OCR queue would recognise \(not skipped by classifyPageSource\), sampled evenly over the document \(or the first ones\), at most pageLimit . |
+| <code>startMainThreadLagSampler</code> | function | <code>src/ocr/benchmark.js:269</code> | Sample the main thread&#39;s event-loop lag while a scenario runs: a timer asked for every LAG_SAMPLE_MS, and how late each tick came. |
+| <code>summarizeDurations</code> | function | <code>src/ocr/benchmark.js:242</code> | Summary statistics of a list of durations. |
+| <code>usedHeapMiB</code> | function | <code>src/ocr/benchmark.js:332</code> |  |
+| <code>withTimeout</code> | function | <code>src/ocr/benchmark.js:373</code> |  |
 | <code>assessPdfTextLayer</code> | function | <code>src/ocr/classify.js:87</code> | Judge the text pdf.js extracted from one page. |
 | <code>classifyPageSource</code> | function | <code>src/ocr/classify.js:57</code> |  |
 | <code>FAILED_PAGE</code> | member | <code>src/ocr/classify.js:33</code> | The page failed to load; there is no image to recognise. |
@@ -920,11 +922,11 @@
 | <code>TIMEOUT</code> | member | <code>src/ocr/engine.js:43</code> | The worker gave no answer within the start timeout. |
 | <code>toError</code> | function | <code>src/ocr/engine.js:120</code> |  |
 | <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:45</code> | Anything else. |
-| <code>createOcrEnginePool</code> | function | <code>src/ocr/enginePool.js:42</code> |  |
-| <code>createOcrEnginePool~drop</code> | function | <code>src/ocr/enginePool.js:97</code> | Terminate one engine and forget it; the next acquisition creates a fresh one in its place. |
-| <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:22</code> |  |
-| <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:67</code> | A free entry now, a new one while under the limit, else null. |
-| <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:20</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
+| <code>createOcrEnginePool</code> | function | <code>src/ocr/enginePool.js:45</code> |  |
+| <code>createOcrEnginePool~drop</code> | function | <code>src/ocr/enginePool.js:100</code> | Terminate one engine and forget it; the next acquisition creates a fresh one in its place. |
+| <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:25</code> |  |
+| <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:70</code> | A free entry now, a new one while under the limit, else null. |
+| <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:23</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
 | <code>createEventLoopYield</code> | function | <code>src/ocr/lineRemoval.js:248</code> | Build the function that hands control back to the event loop between bands. |
@@ -966,6 +968,7 @@
 | <code>releaseCanvas</code> | function | <code>src/ocr/prepareImage.js:62</code> | Free the canvas backing store. |
 | <code>createOcrQueue~abortJob</code> | function | <code>src/ocr/queue.js:181</code> | Abort one job&#39;s recognition: its worker on a pool, the engine as a whole otherwise. |
 | <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:126</code> |  |
+| <code>createOcrQueue~finish</code> | function | <code>src/ocr/queue.js:316</code> | Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped. |
 | <code>OCR_OUTCOME_SOURCE</code> | constant | <code>src/ocr/queue.js:68</code> | Where a done outcome&#39;s words come from \( source \). |
 | <code>OCR_STEP_TIMEOUTS_MS</code> | constant | <code>src/ocr/queue.js:30</code> | Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo... |
 | <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:91</code> |  |

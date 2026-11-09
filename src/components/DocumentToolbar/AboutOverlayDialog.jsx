@@ -326,7 +326,7 @@ export default function AboutOverlayDialog({
         msPerPage: latestOcrBenchmark.best.msPerPage,
         pages: latestOcrBenchmark.pageCount,
         scenario: latestOcrBenchmark.best.label,
-        defaultValue: `Best OCR run: ${latestOcrBenchmark.best.msPerPage} ms per page, ${latestOcrBenchmark.pageCount} pages, ${latestOcrBenchmark.best.label}.`,
+        defaultValue: `Fastest OCR run: ${latestOcrBenchmark.best.msPerPage} ms per page, ${latestOcrBenchmark.pageCount} pages, ${latestOcrBenchmark.best.label}.`,
       })
     : t('about.diagnostics.noOcrBenchmark', { defaultValue: 'No OCR benchmark result has been recorded.' });
 

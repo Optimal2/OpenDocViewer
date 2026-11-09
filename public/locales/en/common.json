@@ -1018,7 +1018,7 @@
       "ocrBenchmarkProgress": "Running OCR benchmark {current} of {total}: {scenario} ({pageProgress} pages)…",
       "ocrBenchmarkDone": "OCR benchmark completed.",
       "ocrBenchmarkError": "OCR benchmark failed: {error}",
-      "ocrBenchmarkSummary": "Best OCR run: {msPerPage} ms per page, {pages} pages, {scenario}.",
+      "ocrBenchmarkSummary": "Fastest OCR run: {msPerPage} ms per page, {pages} pages, {scenario}.",
       "noOcrBenchmark": "No OCR benchmark result has been recorded."
     }
   },

@@ -322,8 +322,10 @@ ocr: {
   a negative number, a boolean) gives one worker with a console warning. Every worker holds its
   own copy of the engine and of every language model, so each extra worker costs memory as well
   as a core; measure before raising it on a site, and keep it at one where clients are weak. The
-  first worker starts alone (a failure is found once, the others then take the engine and models
-  from the browser's cache) and the others follow once it runs. The pages in flight share the
+  first worker starts alone (a failure is found once; the others can then take the engine and
+  models from the browser's HTTP cache, which the shipped web.config allows by serving the `ocr/`
+  folder as immutable, while a host serving it no-store pays the download per worker) and the
+  others follow once it runs. The pages in flight share the
   queue's order: with the window's pages first, the whole document (when asked for) then goes
   through that many pages at a time. The key means nothing while OCR is off.
 - `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
@@ -534,29 +536,38 @@ ocr: {
 }
 ```
 
-The scenarios are: one per worker count with the configured languages and the page image as
-rendered (`workers-1`, `workers-2`, ...), then, with one worker so they compare with
-`workers-1`, the first configured language alone (`lang-swe`; skipped when one language is
-configured) and each image scale below one (`scale-0.75`, the page image downscaled before
-recognition). Every scenario runs on its own engine pool, terminated after it; the first engine's
+The scenarios are: one per worker count with the languages the engine loads (the configured
+list less codes without a model) and the page image as rendered (`workers-1`, `workers-2`,
+...), then, with one worker so they compare with `workers-1` (added to the counts when they
+leave it out), the first loaded language alone (`lang-swe`; skipped when one language is left)
+and each image scale below one (`scale-0.75`, the page image downscaled before recognition;
+each page record says whether it was, since a browser without a canvas recognises it as it is). Every scenario runs on its own engine pool, terminated after it; the first engine's
 start (core and models) is timed on its own as `startupMs`, before the pages, while with several
 workers the other engines start during the first pages, so that cost is part of the run's time,
 as it is for the viewer. The sampled pages are the same in every scenario:
 loaded pages the OCR queue would recognise, spread evenly over the document. The live OCR queue
-pauses while the benchmark runs (a page already in flight finishes first), so the two do not
-compete for cores; run the benchmark shortly after the document opens, or wait for the status
-LED to settle, for the cleanest numbers.
+pauses while the benchmark runs (pages already in flight, up to `ocr.workerCount`, finish
+first), so the two do not compete for cores; run the benchmark shortly after the document
+opens, or wait for the status LED to settle, for the cleanest numbers. A render the benchmark
+makes for a page the user has reached meanwhile (the shown page and two on either side) is left
+to the viewer rather than dropped.
 
-Each run in the result carries the time per page (`msPerPage`, `pagesPerMinute`), the engine
-start time, median/p90/max of the recognition and of the image preparation, the recognised
-word count and mean confidence (a quality proxy when comparing the language and scale variants
-with `workers-1`: fewer words or a lower confidence at the same pages means the variant lost
-text), the main thread's event-loop lag while the run was going (`lagMaxMs`, `stalls` above
-100 ms, and long tasks where the browser reports them: the image decoding and ruling-line
-removal run on the main thread, more often with more workers) and the page's JS heap where the
-browser exposes it. The WebAssembly memory of the workers is not visible from the page: read the
-tab's memory in the browser's task manager during the run to size `ocr.workerCount`. `best` is
-the run with the lowest time per page and no errors; `baseline` is `workers-1`.
+Each run in the result carries the throughput (`msPerPage`: the wall time of the run over its
+recognised pages, the extra workers' starts included, and `pagesPerMinute`), the first engine's
+start time, median/p90/max of one page's recognition (`recognizeMs`, the latency), of getting
+its image from the viewer (`imageMs`, a render when the page had none) and of its preparation
+(`prepareMs`: measuring, ruling lines, downscaling), the recognised word count and mean
+confidence (a quality proxy when comparing the language and scale variants with `workers-1`:
+fewer words or a lower confidence at the same pages means the variant lost text), the main
+thread's event-loop lag while the run was going (`lagMaxMs`, `stalls` above 100 ms, and long
+tasks where the browser reports them: the image decoding and ruling-line removal run on the
+main thread, more often with more workers) and the page's JS heap where the browser exposes it.
+Ticks taken while the tab was hidden are counted as `hiddenSamples` and left out of the lag
+figures, because a browser throttles a hidden tab's timers; a run with hidden samples has lag
+figures for part of the run only, so keep the tab in front for them. The WebAssembly memory of
+the workers is not visible from the page: read the tab's memory in the browser's task manager
+during the run to size `ocr.workerCount`. `best` is the fastest run (the lowest `msPerPage`)
+without errors, not the one with the best text; `baseline` is `workers-1`.
 
 The run costs as much CPU as recognising `pageLimit` pages once per scenario, several minutes
 on a long document with many scenarios, so keep the key off outside support sessions. The

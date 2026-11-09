@@ -14,6 +14,7 @@ import {
   expandOcrBenchmarkWorkerCounts,
   normalizeOcrBenchmarkConfig,
   planOcrBenchmarkScenarios,
+  resolveOcrBenchmarkLanguages,
   runOcrBenchmark,
   selectOcrBenchmarkPages,
   startMainThreadLagSampler,
@@ -73,6 +74,23 @@ describe('planOcrBenchmarkScenarios', () => {
     const plan = planOcrBenchmarkScenarios(normalizeOcrBenchmarkConfig(enabled({ imageScales: [1], workerCounts: [2] })), { cores: 8, languages: ['eng'] });
     expect(plan.map((scenario) => scenario.label)).toEqual(['workers-2']);
   });
+
+  it('adds workers-1 when a variant is planned and the counts leave it out, so the variants have their baseline', () => {
+    const plan = planOcrBenchmarkScenarios(normalizeOcrBenchmarkConfig(enabled({ workerCounts: [4] })), { cores: 8, languages: ['swe', 'eng'] });
+    expect(plan.map((scenario) => scenario.label)).toEqual(['workers-1', 'workers-4', 'lang-swe', 'scale-0.75']);
+  });
+});
+
+describe('resolveOcrBenchmarkLanguages', () => {
+  it('plans from the languages the engine loads: codes without a model are dropped, none left gives the default', () => {
+    expect(resolveOcrBenchmarkLanguages({ ocr: { languages: ['sve', 'swe'] } })).toEqual(['swe']);
+    expect(resolveOcrBenchmarkLanguages({ ocr: { languages: ['eng', 'swe'] } })).toEqual(['eng', 'swe']);
+    expect(resolveOcrBenchmarkLanguages({ ocr: { languages: ['xxx'] } })).toEqual(['swe', 'eng']);
+    expect(resolveOcrBenchmarkLanguages({ ocr: {} })).toEqual(['swe', 'eng']);
+    // So the single-language variant names a model that exists, and is skipped when one is left.
+    const plan = planOcrBenchmarkScenarios(normalizeOcrBenchmarkConfig(enabled({ imageScales: [1], workerCounts: [1] })), { cores: 2, languages: resolveOcrBenchmarkLanguages({ ocr: { languages: ['sve', 'swe'] } }) });
+    expect(plan.map((scenario) => scenario.label)).toEqual(['workers-1']);
+  });
 });
 
 describe('selectOcrBenchmarkPages', () => {
@@ -113,7 +131,22 @@ describe('startMainThreadLagSampler', () => {
     clock = 100; tick();     // on time
     clock = 300; tick();     // 150 ms late: a stall
     clock = 360; tick();     // 10 ms late
-    expect(sampler.stop()).toEqual({ samples: 4, lagMeanMs: 40, lagMaxMs: 150, stalls: 1, longTasks: 0, longTaskMs: 0 });
+    expect(sampler.stop()).toEqual({ samples: 4, hiddenSamples: 0, lagMeanMs: 40, lagMaxMs: 150, stalls: 1, longTasks: 0, longTaskMs: 0 });
+  });
+
+  it('counts ticks taken while the document is hidden apart and keeps them out of the lag figures', () => {
+    let clock = 0;
+    let tick = null;
+    let hidden = false;
+    const sampler = startMainThreadLagSampler({ setInterval: (fn) => { tick = fn; return 1; }, clearInterval: () => {}, now: () => clock, isHidden: () => hidden });
+    clock = 50; tick();
+    hidden = true;
+    clock = 1100; tick();    // throttled to a second: not a stall of the main thread
+    clock = 2100; tick();
+    hidden = false;
+    clock = 62100; tick();   // the first visible tick was scheduled across the hidden minute: it only re-anchors
+    clock = 62160; tick();   // 10 ms late: measured again
+    expect(sampler.stop()).toEqual({ samples: 2, hiddenSamples: 2, lagMeanMs: 5, lagMaxMs: 10, stalls: 0, longTasks: 0, longTaskMs: 0 });
   });
 });
 
@@ -148,7 +181,7 @@ describe('runOcrBenchmark', () => {
   }
 
   const pages = Array.from({ length: 6 }, (_, index) => ({ sourceKey: 'doc', pageIndex: index, fileExtension: 'png', status: 1, fullSizeStatus: index < 2 ? 1 : 0 }));
-  const lagSampler = () => ({ stop: () => ({ samples: 0, lagMeanMs: 0, lagMaxMs: 0, stalls: 0, longTasks: 0, longTaskMs: 0 }) });
+  const lagSampler = () => ({ stop: () => ({ samples: 0, hiddenSamples: 0, lagMeanMs: 0, lagMaxMs: 0, stalls: 0, longTasks: 0, longTaskMs: 0 }) });
 
   it('refuses to run while the switch is off or without a page provider', async () => {
     await expect(runOcrBenchmark({ config: { ocr: { enabled: true } }, allPages: pages, ensurePageAsset: async () => 'u' })).rejects.toThrow(/disabled/);
@@ -184,6 +217,7 @@ describe('runOcrBenchmark', () => {
     expect(result.schema).toBe(OCR_BENCHMARK_SCHEMA);
     expect(result.hardwareConcurrency).toBe(4);
     expect(result.languages).toEqual(['swe', 'eng']);
+    expect(result.configuredLanguages).toEqual(['swe', 'eng']);
     expect(result.pageCount).toBe(4);
     expect(result.sourcePageCount).toBe(6);
     expect(result.sampledViewerIndexes).toEqual([0, 2, 3, 5]);
@@ -199,7 +233,9 @@ describe('runOcrBenchmark', () => {
     expect(two.recognizeMs.median).toBeGreaterThanOrEqual(100);
     expect(single.languages).toEqual(['swe']);
     expect(one.pages).toHaveLength(4);
-    expect(one.pages[0]).toMatchObject({ viewerIndex: 0, words: 2, confidence: 90, chars: 10, width: 1000, height: 1400, error: null });
+    expect(one.pages[0]).toMatchObject({ viewerIndex: 0, words: 2, confidence: 90, chars: 10, width: 1000, height: 1400, scaled: false, error: null });
+    expect(one.imageMs.count).toBe(4);
+    expect(one.scaledPages).toBe(0);
     expect(result.best.label).toBe('workers-2');
     expect(result.baseline.label).toBe('workers-1');
     expect(save).toHaveBeenCalledWith(result);

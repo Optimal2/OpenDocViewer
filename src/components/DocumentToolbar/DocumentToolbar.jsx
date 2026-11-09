@@ -161,6 +161,8 @@ import { loadOcrModule } from '../../utils/ocrLoader.js';
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
 const SLIDER_CENTER_RANGE = 20;
+/** Pages on either side of the shown page whose renders the OCR benchmark leaves to the viewer. */
+const OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE = 2;
 /** Epsilon for considering zoom ≈ 100% (0.5%). */
 const ONE_TO_ONE_EPS = 0.005;
 const PRINT_SELECTION_THUMBNAIL_SLIDER_MIN = -100;
@@ -803,17 +805,29 @@ const DocumentToolbar = ({
   // The OCR benchmark (src/ocr/benchmark.js) is offered only while OCR and `ocr.benchmark.enabled`
   // are on; it is reached through the lazy OCR module, so nothing of it is loaded otherwise.
   const ocrBenchmarkEnabled = useMemo(() => isOcrBenchmarkEnabled(getRuntimeConfig()), []);
+  // The shown page while a benchmark runs (minutes): a render the benchmark made for a page the
+  // user has reached meanwhile is left to the viewer instead of being dropped under them. The
+  // original page number (1-based index into allPages, which the benchmark's viewerIndex is
+  // too), not the visible one, which a selection mask or print sequence renumbers.
+  const ocrBenchmarkPageNumberRef = useRef(pageNumberDisplay);
+  ocrBenchmarkPageNumberRef.current = pageNumberDisplay;
   const handleRunOcrBenchmark = useCallback(async ({ onProgress, signal } = {}) => {
     // The live OCR queue pauses while the benchmark runs, so the two do not compete for cores.
     viewerContext?.setOcrBenchmarkActive?.(true);
     try {
       const ocrModule = await loadOcrModule();
       if (!ocrModule) throw new Error('OCR is disabled by configuration.');
+      const release = viewerContext?.releaseOcrPageAsset;
       return await ocrModule.runOcrBenchmark({
         config: getRuntimeConfig(),
         allPages,
         ensurePageAsset: viewerContext?.ensurePageAsset,
-        releasePageAsset: viewerContext?.releaseOcrPageAsset || null,
+        releasePageAsset: typeof release === 'function'
+          ? (viewerIndex, url) => {
+              if (Math.abs(viewerIndex - (Number(ocrBenchmarkPageNumberRef.current) - 1)) <= OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE) return;
+              release(viewerIndex, url);
+            }
+          : null,
         onProgress,
         signal,
       });
