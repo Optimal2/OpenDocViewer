@@ -29,7 +29,7 @@ const SHIPPED_OCR_DEFAULTS = Object.freeze({
   removeRulingLines: true,
   recognizeWholeDocument: false,
   workerCount: 1,
-  languages: ['swe', 'eng'],
+  languages: 'auto',
   search: { enabled: true, overridesCtrlF: false },
   speech: { enabled: true, autoDetectLanguage: true },
   benchmark: {
@@ -155,6 +155,15 @@ describe('shipped OCR configuration', () => {
     expect(site.enabled).toBe(true);
     expect(site.languages).toEqual(['swe']);
     expect(site.assetBaseUrl).toBeNull();
+  });
+
+  it('maps the language names a site file may use, and keeps an array as it is', () => {
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: 'swedish' } } }).languages).toEqual(['swe']);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: 'english' } } }).languages).toEqual(['eng']);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: 'auto' } } }).languages).toEqual(['swe', 'eng']);
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: ['eng', 'swe'] } } }).languages).toEqual(['eng', 'swe']);
+    // An unknown name falls back to the default, like any other unusable value.
+    expect(readOcrConfig({ siteConfig: { ocr: { enabled: true, languages: 'german' } } }).languages).toEqual(['swe', 'eng']);
   });
 
   it.each([

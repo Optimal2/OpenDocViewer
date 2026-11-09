@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 65. Line count: 24142. JSDoc symbol count: 998.
+File count: 65. Line count: 24162. JSDoc symbol count: 999.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -992,7 +992,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `isOcrWholeDocumentEnabled`, `isOcrBenchmarkEnabled`, `DEFAULT_OCR_WORKER_COUNT`, `MAX_OCR_WORKER_COUNT`, `MAX_AUTO_OCR_WORKER_COUNT`, `describeOcrWorkerCount`, `resolveOcrWorkerCount`, `isSpeechLanguageAutoDetectEnabled`, `isOcrSearchEnabled`, `isOcrSearchCtrlFOverrideEnabled`, `isReadAloudEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `OCR_LANGUAGE_PRESETS`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `isOcrWholeDocumentEnabled`, `isOcrBenchmarkEnabled`, `DEFAULT_OCR_WORKER_COUNT`, `MAX_OCR_WORKER_COUNT`, `MAX_AUTO_OCR_WORKER_COUNT`, `describeOcrWorkerCount`, `resolveOcrWorkerCount`, `isSpeechLanguageAutoDetectEnabled`, `isOcrSearchEnabled`, `isOcrSearchCtrlFOverrideEnabled`, `isReadAloudEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 

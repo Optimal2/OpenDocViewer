@@ -103,11 +103,13 @@
       // engine and the language models). 1 (default), an integer up to 8, or 0 for an automatic
       // choice from the client's cores (one left for the page, at most 4).
       // workerCount: 1,
-      // Tesseract language codes tried together on every text line. Arrays replace the default
-      // completely, so list every language the site needs. Each extra language adds some
-      // recognition time per page. The viewer ships the Swedish and English models; another
-      // language needs assetBaseUrl pointing at a folder that has its <lang>.traineddata.gz.
-      // languages: ['swe', 'eng'],
+      // 'auto' (default): Swedish and English tried together on every text line; 'swedish' or
+      // 'english': that model alone, the other is never downloaded. An array of Tesseract
+      // language codes still works and replaces the default completely, so list every language
+      // the site needs. Each extra language adds some recognition time per page. The viewer
+      // ships the Swedish and English models; another language needs assetBaseUrl pointing at
+      // a folder that has its <lang>.traineddata.gz.
+      // languages: 'auto',
       // The toolbar's search in the text layers. Only the literal false turns it off; the button's
       // place then keeps a status-only indicator of the page's recognition. overridesCtrlF: true
       // lets Ctrl+F open this search instead of the browser's find (off by default).

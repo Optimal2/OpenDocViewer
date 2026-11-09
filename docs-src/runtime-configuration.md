@@ -261,7 +261,8 @@ errors. Unknown values fall back to `'ok'`. See "Status model" in `docs-src/pdf-
 
 ## OCR (in-browser, off by default)
 
-Enable OCR with `ocr: { enabled: true, languages: ['swe', 'eng'] }` in the site configuration.
+Enable OCR with `ocr: { enabled: true }` in the site configuration (`languages: 'auto'`, Swedish
+and English, is the default; `'swedish'` or `'english'` loads one model alone).
 The shipped HTML meta and IIS policies already allow its WebAssembly engine; no application
 file needs editing. A custom server or gateway policy must permit it too (see "CSP for OCR").
 
@@ -276,7 +277,7 @@ ocr: {
   removeRulingLines: true,     // remove table/form lines from a copy of the page before recognition
   recognizeWholeDocument: false, // true: after the shown page's neighbours, the rest of the document
   workerCount: 1,              // pages recognised at the same time; 0: automatic from the client's cores
-  languages: ['swe', 'eng'],   // Tesseract language codes, tried together on every text line
+  languages: 'auto',           // 'auto' (swe+eng), 'swedish', 'english', or an array of Tesseract codes
   search: {
     enabled: true,             // the toolbar's search in the text layers; false leaves a status-only indicator
     overridesCtrlF: false      // true: Ctrl+F opens this search instead of the browser's find
@@ -328,16 +329,24 @@ ocr: {
   others follow once it runs. The pages in flight share the
   queue's order: with the window's pages first, the whole document (when asked for) then goes
   through that many pages at a time. The key means nothing while OCR is off.
-- `ocr.languages`: an array of Tesseract language codes. Entries are trimmed and lower-cased;
-  non-strings, malformed codes and duplicates are dropped, and an array without any valid entry
-  (including `[]`) falls back to `['swe', 'eng']`. Only the form of a code is checked when the
-  configuration is read; when OCR starts, codes that name no Tesseract model (a typo such as
-  `sve`) are dropped as well, and every dropped or repeated entry, a value that is not an array
-  and every fallback is reported once as a console warning, so a mistake is never silent. The `ocr/` folder that ships with the viewer
-  contains the Swedish and English models; another language needs `ocr.assetBaseUrl` pointing at
-  a folder that has its model (`<lang>.traineddata.gz`). Every listed model runs on every text
-  line and the best match wins, so each extra language adds some recognition time per page. As
-  with every array in the site file, an override replaces the default completely.
+- `ocr.languages`: one of three names, or an array of Tesseract language codes. `'auto'` (the
+  default) recognises with the Swedish and English models together, the same as
+  `['swe', 'eng']`; `'swedish'` loads the Swedish model alone and `'english'` the English one,
+  and the other model is then never requested, so the engine starts faster and each worker holds
+  one model less. The names are trimmed and matched in any case. An array keeps working: entries
+  are trimmed and lower-cased; non-strings, malformed codes and duplicates are dropped, and an
+  array without any valid entry (including `[]`) falls back to `['swe', 'eng']`. Only the form of
+  a code is checked when the configuration is read; when OCR starts, codes that name no Tesseract
+  model (a typo such as `sve`) are dropped as well, and every dropped or repeated entry, a value
+  that is neither a name nor an array (a bare code such as `'swe'`, an ISO code such as `'sv'`,
+  or a misspelt name) and every fallback is reported once as a console warning, so a mistake is
+  never silent. The `ocr/` folder that ships with the viewer contains the Swedish and English
+  models; another language needs an array and `ocr.assetBaseUrl` pointing at a folder that has
+  its model (`<lang>.traineddata.gz`). Every listed model runs on every text line and the best
+  match wins, so each extra language adds some recognition time per page; how much is for the
+  OCR benchmark's single-language scenario to show on the site's own documents (on a 4-core
+  client with scanned Swedish text it was within the run-to-run noise). As with every array in
+  the site file, an array override replaces the default completely.
 - `ocr.search.enabled`: whether the toolbar offers the search in the text layers (the button that
   also shows the page's recognition status, see "What the user sees" below). `true` by default;
   only the boolean literal `false` turns it off. With it off, the button's place keeps a

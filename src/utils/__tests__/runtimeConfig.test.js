@@ -23,6 +23,7 @@ import {
   PDF_SIGNATURE_UNCHECKED_SEVERITIES,
   getPdfSignatureUncheckedSeverity,
   DEFAULT_OCR_LANGUAGES,
+  OCR_LANGUAGE_PRESETS,
   DEFAULT_OCR_WORKER_COUNT,
   MAX_AUTO_OCR_WORKER_COUNT,
   MAX_OCR_WORKER_COUNT,
@@ -503,6 +504,33 @@ describe('runtimeConfig', () => {
     it('accepts a single language', () => {
       expect(getOcrLanguages({ ocr: { languages: ['swe'] } })).toEqual(['swe']);
     });
+
+    it.each([
+      ['auto', ['swe', 'eng']],
+      ['swedish', ['swe']],
+      ['english', ['eng']],
+      [' Swedish ', ['swe']],
+      ['ENGLISH', ['eng']],
+    ])('maps the preset name %j to its codes', (value, expected) => {
+      expect(getOcrLanguages({ ocr: { languages: value } })).toEqual(expected);
+    });
+
+    it.each([
+      ['a bare code', 'swe'],
+      ['an ISO code', 'sv'],
+      ['a plus-joined pair', 'swe+eng'],
+      ['a near miss', 'swedish-x'],
+    ])('falls back to the default for %s as a string, since only the three names are presets', (_label, value) => {
+      expect(getOcrLanguages({ ocr: { languages: value } })).toEqual(['swe', 'eng']);
+    });
+
+    it('exposes the presets frozen, the auto preset being the default pair', () => {
+      expect(OCR_LANGUAGE_PRESETS).toEqual({ auto: ['swe', 'eng'], swedish: ['swe'], english: ['eng'] });
+      expect(OCR_LANGUAGE_PRESETS.auto).toBe(DEFAULT_OCR_LANGUAGES);
+      expect(Object.isFrozen(OCR_LANGUAGE_PRESETS)).toBe(true);
+      expect(Object.isFrozen(OCR_LANGUAGE_PRESETS.swedish)).toBe(true);
+      expect(getOcrLanguages({ ocr: { languages: 'swedish' } })).not.toBe(OCR_LANGUAGE_PRESETS.swedish);
+    });
   });
 
   describe('getOcrAssetBaseUrl', () => {
@@ -559,12 +587,22 @@ describe('runtimeConfig', () => {
     });
 
     it.each([
-      ['a string', 'swe'],
+      ['a string that is no preset name', 'swe'],
       ['null', null],
       ['a number', 1],
       ['an object', { swe: true }],
     ])('reports %s as configured but not an array', (_label, value) => {
       expect(describeOcrLanguages({ ocr: { languages: value } })).toEqual({ ...silentDefault, configured: true, notArray: true });
+    });
+
+    it('reports a preset name as configured, with its codes and the name it matched', () => {
+      expect(describeOcrLanguages({ ocr: { languages: 'swedish' } })).toEqual({
+        languages: ['swe'], configured: true, notArray: false, fallback: false, dropped: [], duplicates: [], preset: 'swedish',
+      });
+      expect(describeOcrLanguages({ ocr: { languages: ' AUTO ' } })).toEqual({
+        languages: ['swe', 'eng'], configured: true, notArray: false, fallback: false, dropped: [], duplicates: [], preset: 'auto',
+      });
+      expect(describeOcrLanguages({ ocr: { languages: ['swe'] } })).not.toHaveProperty('preset');
     });
 
     it('reports an explicit empty array as a configured fallback', () => {

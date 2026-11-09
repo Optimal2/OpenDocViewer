@@ -64,14 +64,29 @@ describe('describeOcrSetup', () => {
     expect(opts.log.warn).toHaveBeenCalledTimes(2);
   });
 
-  it('warns when languages is not an array and when a code is repeated', () => {
+  it('warns when languages is neither a preset name nor an array, naming the names, and when a code is repeated', () => {
     const notArray = describeOcrSetup({ ocr: { enabled: true, languages: 'swe' } }, options());
     expect(notArray.languages).toEqual(['swe', 'eng']);
-    expect(notArray.warnings).toEqual([expect.stringMatching(/must be an array of language codes, not string; using the default/)]);
+    expect(notArray.warnings).toEqual(['ocr.languages must be one of "auto", "swedish", "english" or an array of language codes, not "swe"; using the default ["swe","eng"]']);
+    const notString = describeOcrSetup({ ocr: { enabled: true, languages: 7 } }, options());
+    expect(notString.warnings).toEqual([expect.stringMatching(/or an array of language codes, not number; using the default/)]);
 
     const repeated = describeOcrSetup({ ocr: { enabled: true, languages: ['swe', 'eng', 'swe'] } }, options());
     expect(repeated.languages).toEqual(['swe', 'eng']);
     expect(repeated.warnings).toEqual([expect.stringMatching(/repeats \["swe"\]; each code is loaded once/)]);
+  });
+
+  it.each([
+    ['swedish', ['swe']],
+    ['english', ['eng']],
+    ['auto', ['swe', 'eng']],
+    [' English ', ['eng']],
+  ])('loads exactly the models the name %j stands for, silently', (value, expected) => {
+    const opts = options();
+    const setup = describeOcrSetup({ ocr: { enabled: true, languages: value } }, opts);
+    expect(setup.languages).toEqual(expected);
+    expect(setup.warnings).toEqual([]);
+    expect(opts.log.warn).not.toHaveBeenCalled();
   });
 
   it('falls back to the default when every configured code is unknown', () => {

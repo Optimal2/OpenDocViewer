@@ -147,11 +147,14 @@
       // 1 (default) is one worker; an integer 2 to 8 runs that many; 0 picks automatically
       // from the client's cores (one is left for the page, at most 4). Anything else is 1.
       workerCount: 1,
-      // Tesseract language codes, tried together on every text line (best match wins). Each
-      // extra language adds some recognition time per page. An array in odv.site.config.js
-      // replaces this default completely. The viewer's own ocr/ folder holds the Swedish and
-      // English models; a code with no model is dropped with a console warning when OCR starts.
-      languages: ['swe', 'eng'],
+      // The languages recognised: 'auto' (default) tries Swedish and English together on every
+      // text line (best match wins), 'swedish' loads the Swedish model alone and 'english' the
+      // English one, so the other model is never downloaded. An array of Tesseract language
+      // codes (['swe', 'eng'], ['deu']) still works and replaces the default completely. Each
+      // extra language adds some recognition time per page. The viewer's own ocr/ folder holds
+      // the Swedish and English models; a code with no model is dropped with a console warning
+      // when OCR starts.
+      languages: 'auto',
       search: {
         // The toolbar's search in the text layers (the button that also shows the page's
         // recognition status). true (default) offers it; only the literal false turns it off,

@@ -304,6 +304,16 @@ export function getPdfSignatureUncheckedSeverity(cfg = getRuntimeConfig()) {
 
 /** Default OCR languages (Tesseract language codes), tried together on every text line. */
 export const DEFAULT_OCR_LANGUAGES = Object.freeze(['swe', 'eng']);
+/**
+ * Named forms of `ocr.languages`: a string a site writes instead of an array of codes. `auto`
+ * is the default pair (Swedish and English tried together), `swedish` and `english` load that
+ * one model alone, so the other model is never requested.
+ */
+export const OCR_LANGUAGE_PRESETS = Object.freeze({
+  auto: DEFAULT_OCR_LANGUAGES,
+  swedish: Object.freeze(['swe']),
+  english: Object.freeze(['eng']),
+});
 /** Tesseract language codes: three lower-case letters, optionally with _suffixes (chi_sim, aze_cyrl). */
 const OCR_LANGUAGE_CODE_PATTERN = /^[a-z]{3}(?:_[a-z]+)*$/;
 
@@ -483,21 +493,31 @@ export function isReadAloudEnabled(cfg = getRuntimeConfig()) {
  * side-effect free like every accessor here; the OCR module (src/ocr/setup.js) logs the outcome
  * once when it starts, so a site sees a typo instead of a silent fallback.
  *
- * Entries are trimmed and lower-cased; non-strings, malformed codes and duplicates are dropped.
- * Only the form of a code is checked (three letters plus optional `_suffix`); whether a model
- * with that code exists is known to the OCR module, which checks it against tesseract.js' list.
- * `configured` is true when the key is present at all (`undefined` means unconfigured);
- * `notArray` is true when it is present but not an array. `fallback` is true when the value is
- * missing, not an array, or an array without a usable entry (including `[]`): `languages` is
- * then a copy of DEFAULT_OCR_LANGUAGES, since an empty list could never recognize anything.
- * `duplicates` lists repeated codes (kept once). The order of valid codes is kept because
- * Tesseract reports it as the model order.
+ * The value is either one of the OCR_LANGUAGE_PRESETS names (`'auto'`, `'swedish'`,
+ * `'english'`; trimmed, any case), which stands for its array and is reported as `preset`, or
+ * an array of codes. Entries are trimmed and lower-cased; non-strings, malformed codes and
+ * duplicates are dropped. Only the form of a code is checked (three letters plus optional
+ * `_suffix`); whether a model with that code exists is known to the OCR module, which checks it
+ * against tesseract.js' list. `configured` is true when the key is present at all (`undefined`
+ * means unconfigured); `notArray` is true when it is present but neither an array nor a preset
+ * name. `fallback` is true when the value is missing, neither an array nor a preset, or an
+ * array without a usable entry (including `[]`): `languages` is then a copy of
+ * DEFAULT_OCR_LANGUAGES, since an empty list could never recognize anything. `duplicates` lists
+ * repeated codes (kept once). The order of valid codes is kept because Tesseract reports it as
+ * the model order.
  *
  * @param {Object=} cfg
- * @returns {{ languages: Array<string>, configured: boolean, notArray: boolean, fallback: boolean, dropped: Array<*>, duplicates: Array<string> }}
+ * @returns {{ languages: Array<string>, configured: boolean, notArray: boolean, fallback: boolean, dropped: Array<*>, duplicates: Array<string>, preset: (string|undefined) }}
+ *   `preset` is present only when a name matched.
  */
 export function describeOcrLanguages(cfg = getRuntimeConfig()) {
   const raw = cfg?.ocr?.languages;
+  if (typeof raw === 'string') {
+    const preset = raw.trim().toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(OCR_LANGUAGE_PRESETS, preset)) {
+      return { languages: [...OCR_LANGUAGE_PRESETS[preset]], configured: true, notArray: false, fallback: false, dropped: [], duplicates: [], preset };
+    }
+  }
   if (!Array.isArray(raw)) {
     return {
       languages: [...DEFAULT_OCR_LANGUAGES],

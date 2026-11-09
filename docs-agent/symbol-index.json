@@ -24518,7 +24518,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 111,
+    "line": 115,
     "description": "Create an engine for the configured languages and asset location: one engine (engine.js) for a worker count of one, otherwise a pool of that many (enginePool.js) behind the same i...",
     "params": [
       {
@@ -24549,7 +24549,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 50,
+    "line": 52,
     "description": "Resolve languages and asset URLs from the configuration, logging each problem once.",
     "params": [
       {
@@ -24616,7 +24616,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/setup.js",
-    "line": 28,
+    "line": 30,
     "description": "",
     "params": [],
     "returns": [],
@@ -45129,7 +45129,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 650,
+    "line": 670,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -45211,7 +45211,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 364,
+    "line": 374,
     "description": "Default number of OCR workers: one tesseract.js worker, one page at a time.",
     "params": [],
     "returns": [],
@@ -45237,7 +45237,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 573,
+    "line": 593,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -45262,7 +45262,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 499,
+    "line": 513,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -45275,7 +45275,7 @@
     "returns": [
       {
         "type": "Object",
-        "description": ""
+        "description": "preset is present only when a name matched."
       }
     ],
     "examples": 0
@@ -45287,7 +45287,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 394,
+    "line": 404,
     "description": "Describe ocr.workerCount (how many tesseract.js workers recognise pages at the same time) without resolving the automatic choice, so the caller can report a rejected or clamped va...",
     "params": [
       {
@@ -45362,7 +45362,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 598,
+    "line": 618,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -45387,7 +45387,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 542,
+    "line": 562,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -45412,7 +45412,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1027,
+    "line": 1047,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -45487,7 +45487,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 902,
+    "line": 922,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -45512,7 +45512,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 927,
+    "line": 947,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -45555,7 +45555,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1010,
+    "line": 1030,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -45580,7 +45580,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 610,
+    "line": 630,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -45605,7 +45605,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 878,
+    "line": 898,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -45630,7 +45630,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 864,
+    "line": 884,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -45655,7 +45655,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 851,
+    "line": 871,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -45680,7 +45680,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 951,
+    "line": 971,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -45705,7 +45705,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 969,
+    "line": 989,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -45730,7 +45730,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 553,
+    "line": 573,
     "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
     "params": [],
     "returns": [],
@@ -45893,7 +45893,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 359,
+    "line": 369,
     "description": "Resolve whether the opt-in OCR benchmark is offered under About -&gt; Diagnostics ( ocr.benchmark.enabled ).",
     "params": [
       {
@@ -45918,7 +45918,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 319,
+    "line": 329,
     "description": "Resolve whether in-browser OCR of scanned pages is turned on ( ocr.enabled ).",
     "params": [
       {
@@ -45943,7 +45943,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 332,
+    "line": 342,
     "description": "Resolve whether the ruling lines of tables and forms are removed from a copy of the page image before recognition ( ocr.removeRulingLines ).",
     "params": [
       {
@@ -45968,7 +45968,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 461,
+    "line": 471,
     "description": "Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead of the browser's own find ( ocr.search.overridesCtrlF ).",
     "params": [
       {
@@ -45993,7 +45993,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 448,
+    "line": 458,
     "description": "Resolve whether the toolbar's search in the text layers is offered ( ocr.search.enabled ).",
     "params": [
       {
@@ -46018,7 +46018,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 346,
+    "line": 356,
     "description": "Resolve whether the OCR queue works through the whole document in the background ( ocr.recognizeWholeDocument ): after the window around the shown page, the remaining pages in rea...",
     "params": [
       {
@@ -46068,7 +46068,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 476,
+    "line": 486,
     "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
     "params": [
       {
@@ -46118,7 +46118,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 434,
+    "line": 444,
     "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
     "params": [
       {
@@ -46169,7 +46169,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 372,
+    "line": 382,
     "description": "Most workers ocr.workerCount: 0 (automatic) picks however many cores the client reports: every worker holds its own copy of the engine and the language models, so the automatic ch...",
     "params": [],
     "returns": [],
@@ -46182,7 +46182,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 366,
+    "line": 376,
     "description": "Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped.",
     "params": [],
     "returns": [],
@@ -46195,7 +46195,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 628,
+    "line": 648,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -46226,7 +46226,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 825,
+    "line": 845,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -46251,7 +46251,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 796,
+    "line": 816,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -46282,7 +46282,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 764,
+    "line": 784,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -46313,7 +46313,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 696,
+    "line": 716,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -46356,7 +46356,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 675,
+    "line": 695,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -46399,7 +46399,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 807,
+    "line": 827,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -46430,7 +46430,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 779,
+    "line": 799,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -46461,7 +46461,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 725,
+    "line": 745,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -46486,7 +46486,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 713,
+    "line": 733,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -46517,7 +46517,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 739,
+    "line": 759,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -46542,7 +46542,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 547,
+    "line": 567,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -46555,8 +46555,21 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 308,
+    "line": 318,
     "description": "Tesseract language codes: three lower-case letters, optionally with _suffixes (chi_sim, aze_cyrl).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OCR_LANGUAGE_PRESETS",
+    "name": "OCR_LANGUAGE_PRESETS",
+    "longname": "OCR_LANGUAGE_PRESETS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 312,
+    "description": "Named forms of ocr.languages : a string a site writes instead of an array of codes.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -46568,7 +46581,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 374,
+    "line": 384,
     "description": "",
     "params": [],
     "returns": [],
@@ -46646,7 +46659,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 549,
+    "line": 569,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -46716,7 +46729,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 750,
+    "line": 770,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -46741,7 +46754,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 419,
+    "line": 429,
     "description": "Resolve how many OCR workers to run: describeOcrWorkerCount , with the automatic choice made from the client's core count: one core is left for the page, and the result is bounded...",
     "params": [
       {
@@ -46778,7 +46791,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 551,
+    "line": 571,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],

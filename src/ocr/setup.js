@@ -3,8 +3,9 @@
  * Builds an OCR engine from the runtime configuration and reports configuration problems once.
  *
  * The runtimeConfig accessors are side-effect free, so this is where their diagnostics become
- * log lines: a `languages` array that fell back to the default, codes that were dropped (bad form
- * or no known model) and an `assetBaseUrl` that was rejected. Nothing is logged while OCR is off,
+ * log lines: a `languages` value that fell back to the default (neither a preset name nor an
+ * array, or an array without a usable code), codes that were dropped (bad form or no known
+ * model) and an `assetBaseUrl` that was rejected. Nothing is logged while OCR is off,
  * because this module is only imported when the switch is on.
  *
  * Part of the lazy OCR chunk.
@@ -13,6 +14,7 @@ import {
   DEFAULT_OCR_LANGUAGES,
   DEFAULT_OCR_WORKER_COUNT,
   MAX_OCR_WORKER_COUNT,
+  OCR_LANGUAGE_PRESETS,
   describeOcrAssetBaseUrl,
   describeOcrLanguages,
   describeOcrWorkerCount,
@@ -67,7 +69,9 @@ export function describeOcrSetup(cfg = getRuntimeConfig(), {
 
   const languageConfig = describeOcrLanguages(cfg);
   if (languageConfig.notArray) {
-    warnings.push(`ocr.languages must be an array of language codes, not ${typeof cfg?.ocr?.languages}; using the default ${JSON.stringify([...DEFAULT_OCR_LANGUAGES])}`);
+    const rawLanguages = cfg?.ocr?.languages;
+    const given = typeof rawLanguages === 'string' ? JSON.stringify(rawLanguages) : typeof rawLanguages;
+    warnings.push(`ocr.languages must be one of ${Object.keys(OCR_LANGUAGE_PRESETS).map((name) => JSON.stringify(name)).join(', ')} or an array of language codes, not ${given}; using the default ${JSON.stringify([...DEFAULT_OCR_LANGUAGES])}`);
   } else if (languageConfig.configured && languageConfig.fallback) {
     warnings.push(`ocr.languages has no usable entry; using the default ${JSON.stringify([...DEFAULT_OCR_LANGUAGES])}`);
   }

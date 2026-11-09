@@ -128,7 +128,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/ocr/prepareImage.js</code> | 161 | 1 | 8 | high | Turns the viewer&#39;s rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova |
 | <code>src/ocr/queue.js</code> | 378 | 0 | 13 | high | The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in-memory cache \(resultCache.js\). |
 | <code>src/ocr/resultCache.js</code> | 96 | 0 | 3 | high | In-memory cache of OCR outcomes, one entry per document page. |
-| <code>src/ocr/setup.js</code> | 125 | 1 | 3 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
+| <code>src/ocr/setup.js</code> | 129 | 1 | 3 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
 | <code>src/ocr/window.js</code> | 73 | 0 | 4 | high | Which pages are queued for OCR: the visible page\(s\) and a fixed number of neighbours, and, when the site asks for the whole document, the rest after them. |
 | <code>src/PerformanceMonitor.jsx</code> | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | <code>src/schemas/portableBundle.js</code> | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
@@ -189,7 +189,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 1039 | 35 | 77 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 1059 | 35 | 78 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
