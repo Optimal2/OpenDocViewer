@@ -100,11 +100,14 @@ try {
     # 1. Strict + no reachable platform root => exit 1 with the Check 15 error.
     $result = Invoke-Validator -OmpPlatformRoot $missingRoot -OpenModulePlatformRoot '' -Arguments @{ Strict = $true }
     Assert-True ($result.ExitCode -eq 1) 'strict without platform root exits 1' "(exit $($result.ExitCode))"
-    Assert-True ($result.Output -match 'Check 15: canonical script not found') 'strict without platform root names Check 15'
+    Assert-True ($result.Output -match 'Check 15: the platform root .* named by OMP_PLATFORM_ROOT does not contain .scripts/omp/validate-shared-scripts\.ps1') 'strict without platform root names Check 15'
 
-    # 2. Non-strict + no root => warning only (ad-hoc and single-repo CI runs).
+    # 2. Non-strict + a named but missing root => still exit 1: a named root
+    # that cannot be used is a configuration error. NOT VERIFIED only applies
+    # when no root was named at all (sibling fallback + exception env).
     $result = Invoke-Validator -OmpPlatformRoot $missingRoot -OpenModulePlatformRoot '' -Arguments @{}
-    Assert-True ($result.Output -match 'Check 15: NOT VERIFIED') 'non-strict without platform root warns NOT VERIFIED'
+    Assert-True ($result.ExitCode -eq 1) 'non-strict with a named but missing root exits 1' "(exit $($result.ExitCode))"
+    Assert-True ($result.Output -match 'Check 15: the platform root .* named by OMP_PLATFORM_ROOT does not contain .scripts/omp/validate-shared-scripts\.ps1') 'non-strict with a named but missing root names Check 15'
 
     # 3. OMP_PLATFORM_ROOT is honoured and forwarded together with Strict.
     $result = Invoke-Validator -OmpPlatformRoot $passingStub -OpenModulePlatformRoot $missingRoot -Arguments @{ Strict = $true }

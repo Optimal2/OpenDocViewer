@@ -186,3 +186,47 @@ jobs:
           if ($null -eq $LASTEXITCODE) {
             throw "Lockstep validator did not report an exit code: $validator - an empty or no-op validator must not read as passing."
           }
+          if ($LASTEXITCODE -ne 0) {
+            throw "Lockstep validator failed with exit code $LASTEXITCODE."
+          }
+
+  omp-pwsh-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenDocViewer
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # Runs the portable OMP PowerShell tests: the runtime-config SRI
+      # injection test (self-contained, fake repo + stub OMP root) and the
+      # Check 15 wiring test (stub platform roots; the real-checkout case
+      # skips itself when no OpenModulePlatform checkout is present, which is
+      # always the case here - see the lockstep job comment on why no
+      # platform checkout is added). test-runtime-configuration-guard.ps1
+      # stays local-only: its parity section hard-requires the sibling
+      # OpenModulePlatform checkout. test-cmd-wrappers.ps1 stays
+      # local-only: it is Windows-only (cmd.exe/taskkill.exe) and runs full
+      # universal-package builds per repository. See scripts/omp/README.md.
+      - name: Run portable OMP PowerShell tests
+        shell: pwsh
+        run: |
+          $tests = @(
+            'scripts/omp/test-index-html-integrity.ps1',
+            'scripts/omp/test-check15-strict.ps1'
+          )
+          foreach ($test in $tests) {
+            if (-not (Test-Path -LiteralPath $test -PathType Leaf)) {
+              throw "OMP test not found: $test - a gate that cannot run must not read as passing, so this step fails instead of exiting 0 without the test having run."
+            }
+            Write-Host "--- Running $test ---"
+            $global:LASTEXITCODE = $null
+            & $test
+            if ($null -eq $LASTEXITCODE) {
+              throw "OMP test did not report an exit code: $test - an empty or no-op test must not read as passing."
+            }
+            if ($LASTEXITCODE -ne 0) {
+              throw "OMP test failed with exit code ${LASTEXITCODE}: $test"
+            }
+          }

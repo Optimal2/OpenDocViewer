@@ -208,6 +208,15 @@ repositories that contain both `omp-components.json` and
 `scripts\omp\build-universal-package.cmd`. The default output and log folders
 are below the current user's temp directory.
 
+## PowerShell test coverage
+
+| Test | Runs in CI (`omp-pwsh-tests`, ubuntu-latest) | Local / manual run | Why |
+| --- | --- | --- | --- |
+| `test-index-html-integrity.ps1` | Yes | `pwsh -File scripts/omp/test-index-html-integrity.ps1` | Self-contained: fake repo plus stub OMP root, temp dirs only. |
+| `test-check15-strict.ps1` | Yes | `pwsh -File scripts/omp/test-check15-strict.ps1` | Stub platform roots; the real-checkout case skips itself when no OpenModulePlatform checkout is present. |
+| `test-runtime-configuration-guard.ps1` | No | `pwsh -File scripts/omp/test-runtime-configuration-guard.ps1` (needs a sibling OpenModulePlatform checkout) | The parity section hard-requires the sibling checkout, which CI deliberately does not provide (same decision as Check 15 reporting NOT VERIFIED in the lockstep job). |
+| `test-cmd-wrappers.ps1` | No | `pwsh -File scripts/omp/test-cmd-wrappers.ps1 -RepositoryName <name>` (Windows) | Windows-only by design (`cmd.exe`/`taskkill.exe`); runs a full universal-package build per repository (60-3600 s each). |
+
 ## Comparing Package Generation Paths
 
 > Note: the comparison/validation helpers in this section
