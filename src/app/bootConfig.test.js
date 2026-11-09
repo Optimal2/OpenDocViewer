@@ -74,5 +74,7 @@ describe('site config bootstrap diagnostics', () => {
     await context.bootResult;
     expect(loaded).toEqual(['/OpenDocViewer/odv.site.config.js', '/OpenDocViewer/odv.config.js']);
     expect(context.started).toBe('manual');
+    // The derived ODV base is published for the manual loader (its fallback without `baseHref`).
+    expect(window.__ODV_APP_BASE__).toBe('/OpenDocViewer/');
   });
 });

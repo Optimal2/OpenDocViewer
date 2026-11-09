@@ -38,7 +38,7 @@
 ## Import Hubs
 
 - `src/logging/systemLogger.js`: 42 incoming local imports
-- `src/utils/runtimeConfig.js`: 33 incoming local imports
+- `src/utils/runtimeConfig.js`: 34 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 13 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports

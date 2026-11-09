@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 7616. JSDoc symbol count: 112.
+File count: 21. Line count: 7622. JSDoc symbol count: 112.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -45,7 +45,7 @@ Toolbar help menu with entries for the manual and About dialog.
 
 Exports: `HelpMenuButton`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/components/common/StatusLed.jsx`
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/manualEnabled.js`, `src/components/common/StatusLed.jsx`
 
 Symbols:
 
@@ -98,7 +98,7 @@ Manual overlay: modal dialog chrome \(title bar, reload, open\-in\-new\-tab and 
 
 Exports: `ManualOverlayDialog`
 
-Local imports: `src/components/Manual/ManualView.jsx`
+Local imports: `src/components/Manual/ManualView.jsx`, `src/components/Manual/manualDocument.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 

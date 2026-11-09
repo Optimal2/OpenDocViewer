@@ -7,7 +7,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>server/system-log-server.js</code> | 237 | 0 | 5 | high | System Log Server — standalone Express endpoint for structured system logs. |
 | <code>server/user-log-server.js</code> | 271 | 0 | 2 | high | User Action Log Server — standalone Express endpoint for print/user-action audit events. |
 | <code>src/app/AppBootstrap.jsx</code> | 432 | 1 | 10 | high | Application bootstrap React component. |
-| <code>src/app/bootConfig.js</code> | 189 | 0 | 6 | high | Runtime boot loader that resolves configuration scripts before React starts. |
+| <code>src/app/bootConfig.js</code> | 193 | 0 | 6 | high | Runtime boot loader that resolves configuration scripts before React starts. |
 | <code>src/app/OpenDocViewer.jsx</code> | 193 | 1 | 5 | high | src/app/OpenDocViewer.jsx Main application shell for the viewer. |
 | <code>src/components/CanvasRenderer.jsx</code> | 98 | 1 | 1 | high | OpenDocViewer — Absolute-positioned Canvas Renderer Render a &lt;canvas&gt; element for a single page at a specified zoom factor. |
 | <code>src/components/common/StatusLed.jsx</code> | 36 | 3 | 1 | high | Small reusable LED-style status indicator. |
@@ -27,11 +27,11 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1604 | 2 | 28 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
 | <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 1563 | 1 | 18 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
-| <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 116 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
+| <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 118 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 233 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 163 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 219 | 2 | 5 | high | Compact language selector for the toolbar. |
-| <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 258 | 1 | 4 | high | Manual overlay: modal dialog chrome \(title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling\) around the shared {@link ManualView}, which loads, filters, searches and navigates the |
+| <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 262 | 1 | 4 | high | Manual overlay: modal dialog chrome \(title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling\) around the shared {@link ManualView}, which loads, filters, searches and navigates the |
 | <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 464 | 1 | 6 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live |
 | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx</code> | 52 | 1 | 1 | high | The toolbar&#39;s OCR group, right after the image-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: - \`ocr.search.enabled\` \(default true; only the literal false |
 | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 333 | 1 | 1 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
@@ -67,10 +67,10 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/KeyTips.jsx</code> | 103 | 1 | 5 | high | Key tips: hold \`?\` and every toolbar button shows its name in a small label under it, so the icons can be learnt without hovering them one by one; release the key and the labels go. |
 | <code>src/components/LoadingMessage.jsx</code> | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
-| <code>src/components/Manual/manualDocument.js</code> | 370 | 1 | 13 | high | Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full-page view\). |
+| <code>src/components/Manual/manualDocument.js</code> | 394 | 2 | 14 | high | Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full-page view\). |
 | <code>src/components/Manual/manualNavigation.js</code> | 128 | 1 | 8 | high | Scrolling, focus and URL-fragment helpers for navigating inside a rendered manual. |
 | <code>src/components/Manual/manualSearch.js</code> | 337 | 1 | 14 | high | In-manual text search: locale-aware case folding, match collection over the rendered manual and highlighting through the CSS Custom Highlight API with a \`&lt;mark&gt;\` fallback. |
-| <code>src/components/Manual/ManualView.jsx</code> | 750 | 2 | 11 | high | Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in-manual search with highlig |
+| <code>src/components/Manual/ManualView.jsx</code> | 790 | 2 | 11 | high | Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in-manual search with highlig |
 | <code>src/components/OcrTextLayer.jsx</code> | 264 | 1 | 4 | high | Selectable, invisible text over a recognised page image. |
 | <code>src/components/PrintSelectionWorkspace.jsx</code> | 2504 | 1 | 5 | high | Full-window print-selection workspace. |
 | <code>src/components/ReadAloudMenuItem.jsx</code> | 57 | 1 | 1 | high | The page context menu&#39;s read-aloud entry \(DocumentViewer/DocumentViewerRender.jsx\): &quot;Read the selection aloud&quot; while nothing is being read, greyed with the reason in its tooltip when nothing can be read \(no selection in |
@@ -112,7 +112,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/logging/systemLogger.js</code> | 471 | 42 | 31 | high | src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) - Provide a small, dependency-light logging facade for the browser app. |
 | <code>src/logging/userLogger.js</code> | 308 | 2 | 17 | high | UserLogController — client-side controller for **user** print logs \(backend-agnostic\). |
 | <code>src/manual-page/main.jsx</code> | 27 | 0 | 0 | high | Entry of the stand-alone manual page \(manual/index.html\). |
-| <code>src/manual-page/ManualPage.jsx</code> | 106 | 1 | 3 | high | The stand-alone manual page \(served as \`&lt;ODV base&gt;/manual/\`\): a header with the page title and the viewer&#39;s own theme and language menus, and the shared manual view filling the rest. |
+| <code>src/manual-page/ManualPage.jsx</code> | 108 | 1 | 3 | high | The stand-alone manual page \(served as \`&lt;ODV base&gt;/manual/\`\): a header with the page title and the viewer&#39;s own theme and language menus, and the shared manual view filling the rest. |
 | <code>src/manual-page/mountManualPage.jsx</code> | 40 | 1 | 1 | high | Mount the stand-alone manual page into a container, the way src/index.jsx mounts the viewer: apply the shared theme and toolbar density to the document before the first render, then render the page inside the viewer&#39;s Th |
 | <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
 | <code>src/ocr/classify.js</code> | 106 | 2 | 15 | high | Decides, per page, whether OCR is worth running. |
@@ -143,7 +143,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/keyTipLayout.js</code> | 65 | 1 | 6 | high | Where the key tips go \(components/KeyTips.jsx\): one label under each toolbar button, centred on the button, packed into rows so that the labels of neighbouring buttons do not cover each other. |
 | <code>src/utils/localizedValue.js</code> | 113 | 8 | 6 | high | Localized string resolver for admin-supplied config values. |
 | <code>src/utils/manualContentsTree.js</code> | 194 | 1 | 10 | high | Runtime contents tree for the manual overlay. |
-| <code>src/utils/manualEnabled.js</code> | 24 | 1 | 1 | high | The single switch that turns the user manual off for an installation. |
+| <code>src/utils/manualEnabled.js</code> | 24 | 2 | 1 | high | The single switch that turns the user manual off for an installation. |
 | <code>src/utils/manualSources.js</code> | 172 | 1 | 10 | high | Resolves which manual HTML file the help dialog shows. |
 | <code>src/utils/memoryProfile.js</code> | 75 | 2 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
@@ -187,7 +187,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 963 | 33 | 70 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 963 | 34 | 70 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |

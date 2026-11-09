@@ -1,18 +1,19 @@
 # OpenDocViewer / src/components/Manual
 
-File count: 4. Line count: 1585. JSDoc symbol count: 46.
+File count: 4. Line count: 1649. JSDoc symbol count: 47.
 
 ## src/components/Manual/manualDocument.js
 
 Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
 
-Exports: `loadManualDocument`
+Exports: `resolveOdvBaseUrl`, `resolveManualPageUrl`, `loadManualDocument`
 
 Local imports: `src/utils/manualSources.js`, `src/utils/standardManual.js`, `src/generated/standard-manual/manual.sv.js`, `src/generated/standard-manual/manual.en.js`
 
 Symbols:
 
-- `resolveOdvBaseUrl` (function) - The ODV base URL relative manual paths belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the page's folder.
+- `resolveOdvBaseUrl` (function) - The ODV base URL relative manual paths \(and the stand\-alone manual page\) belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the base src/app/boo...
+- `resolveManualPageUrl` (function) - Absolute URL of the stand\-alone manual page \( &lt;ODV base&gt;/manual/ \), optionally opened at a section.
 - `absoluteManualUrl` (function) - No description.
 - `candidateFromOdvBase` (function) - A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base.
 - `copyManualConfig` (function) - Copy only settings used by the selected source.
@@ -23,7 +24,6 @@ Symbols:
 - `sanitizeManualHtml` (function) - No description.
 - `rewriteManualHtml` (function) - No description.
 - `appendManualRefreshToken` (function) - No description.
-- `removeManualRefreshToken` (function) - No description.
 
 ## src/components/Manual/manualNavigation.js
 

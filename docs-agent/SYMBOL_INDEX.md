@@ -221,8 +221,8 @@
 | <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:161</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
 | <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:682</code> |  |
 | <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:76</code> | Zoom display state used by the newer toolbar UX paths. |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:34</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:26</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:36</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:28</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:19</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:29</code> |  |
 | <code>module:usePrintRangeConfig</code> | module | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:2</code> | Runtime-configuration derivation for PrintRangeDialog. |
@@ -232,10 +232,10 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:66</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:93</code> |  |
 | <code>resolveLanguageLabel</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:28</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:37</code> |  |
-| <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:69</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
-| <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:27</code> | Ids the dialog renders around the manual view. |
-| <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:21</code> | Id of the dialog title. |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:39</code> |  |
+| <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:71</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
+| <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:29</code> | Ids the dialog renders around the manual view. |
+| <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:23</code> | Id of the dialog title. |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:59</code> |  |
 | <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:239</code> |  |
 | <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:276</code> |  |
@@ -482,19 +482,20 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:51</code> |  |
-| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:301</code> |  |
-| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:68</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
-| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:85</code> | Copy only settings used by the selected source. |
-| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:173</code> |  |
-| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:148</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
-| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:345</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
-| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:111</code> | Load the preferred generated standard manual. |
-| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:317</code> |  |
-| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:37</code> | The ODV base URL relative manual paths belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the page&#39;s folder. |
-| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:255</code> |  |
-| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:192</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
-| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:241</code> |  |
+| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:77</code> |  |
+| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:327</code> |  |
+| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:94</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
+| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:111</code> | Copy only settings used by the selected source. |
+| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:199</code> |  |
+| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:174</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
+| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:371</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
+| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:137</code> | Load the preferred generated standard manual. |
+| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:343</code> |  |
+| <code>resolveManualPageUrl</code> | function | <code>src/components/Manual/manualDocument.js:62</code> | Absolute URL of the stand-alone manual page \( &amp;lt;ODV base&amp;gt;/manual/ \), optionally opened at a section. |
+| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:39</code> | The ODV base URL relative manual paths \(and the stand-alone manual page\) belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the base src/app/boo... |
+| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:281</code> |  |
+| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:218</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
+| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:267</code> |  |
 | <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:92</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
 | <code>findManualElementById</code> | function | <code>src/components/Manual/manualNavigation.js:51</code> |  |
 | <code>isHiddenInManual</code> | function | <code>src/components/Manual/manualNavigation.js:74</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
@@ -517,17 +518,17 @@
 | <code>removeMarkFallback</code> | function | <code>src/components/Manual/manualSearch.js:292</code> | Unwrap fallback marks and merge the split text nodes back together. |
 | <code>revealManualMatch</code> | function | <code>src/components/Manual/manualSearch.js:314</code> | Open collapsed &amp;lt;details&amp;gt; ancestors of the hit and scroll it into the dialog scroll container. |
 | <code>setCurrentMark</code> | function | <code>src/components/Manual/manualSearch.js:273</code> |  |
-| <code>module.exports</code> | function | <code>src/components/Manual/ManualView.jsx:96</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/Manual/ManualView.jsx:288</code> |  |
+| <code>module.exports</code> | function | <code>src/components/Manual/ManualView.jsx:100</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/Manual/ManualView.jsx:305</code> |  |
 | <code>MANUAL_CONTENTS_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:51</code> | Id of the contents tree; the narrow-window toggle points at it with aria-controls. |
 | <code>MANUAL_SEARCH_INPUT_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:54</code> | Id of the manual search field. |
 | <code>ManualDocumentState</code> | typedef | <code>src/components/Manual/ManualView.jsx:56</code> | State of the loaded manual document as reported to the host. |
-| <code>ManualView~navigateToManualTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:212</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
+| <code>ManualView~navigateToManualTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:227</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
 | <code>normalizeSectionId</code> | function | <code>src/components/Manual/ManualView.jsx:70</code> |  |
-| <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:166</code> | Make the section holding target current and keep it current until the reader scrolls. |
-| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:582</code> |  |
-| <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:191</code> | Put back the URL fragment the page had before the manual set one. |
-| <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:180</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |
+| <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:179</code> | Make the section holding target current and keep it current until the reader scrolls. |
+| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:622</code> |  |
+| <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:205</code> | Put back the URL fragment the page had before the manual set one. |
+| <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:194</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |
 | <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:40</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:38</code> | Class of a word inside a match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:36</code> | Class of a word that the current selection touches. |
@@ -853,9 +854,9 @@
 | <code>tzOffset</code> | function | <code>src/logging/userLogger.js:100</code> | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
 | <code>UserIdentity</code> | typedef | <code>src/logging/userLogger.js:31</code> |  |
 | <code>userLog</code> | constant | <code>src/logging/userLogger.js:306</code> | Export singleton instance. |
-| <code>module.exports</code> | function | <code>src/manual-page/ManualPage.jsx:62</code> |  |
-| <code>readUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:30</code> |  |
-| <code>syncUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:45</code> | Put the section being read into the URL fragment without adding a history entry. |
+| <code>module.exports</code> | function | <code>src/manual-page/ManualPage.jsx:64</code> |  |
+| <code>readUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:32</code> |  |
+| <code>syncUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:47</code> | Put the section being read into the URL fragment without adding a history entry. |
 | <code>mountManualPage</code> | function | <code>src/manual-page/mountManualPage.jsx:21</code> |  |
 | <code>OcrAssetManifest</code> | typedef | <code>src/ocr/assetUrls.js:16</code> |  |
 | <code>OcrAssetUrls</code> | typedef | <code>src/ocr/assetUrls.js:25</code> |  |

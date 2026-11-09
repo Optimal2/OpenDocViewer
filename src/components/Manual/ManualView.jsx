@@ -87,10 +87,14 @@ function normalizeSectionId(value) {
  *   its title id). Generated heading ids avoid them. Read when a manual is loaded.
  * @param {string} [props.initialSectionId] Element id (a leading `#` and URL encoding are accepted,
  *   so `location.hash` can be passed as is) to scroll to once the manual has loaded. Applied once
- *   per loaded manual; ids of elements hidden until targeted (lightbox images) are ignored.
+ *   per distinct manual (a new language applies it again); ids of elements hidden until targeted
+ *   (lightbox images) are ignored. A reload that yields the same manual content keeps the reader
+ *   at the section they were in (the initial one, or the one navigated or scrolled to since).
  * @param {function(string): void} [props.onActiveSectionChange] Reports the id of the section the
  *   reader is currently in (the contents entry marked current), or an empty string when the manual
- *   has no contents tree. Usable for building a "#<section>" link.
+ *   has no contents tree. Usable for building a "#<section>" link. Not called while a manual image
+ *   lightbox holds the URL fragment (so mirroring the section into the fragment cannot close it);
+ *   the current section is reported again when the lightbox closes.
  * @returns {React.ReactElement}
  */
 export default function ManualView({
@@ -123,9 +127,16 @@ export default function ManualView({
   const onDocumentStateChangeRef = useRef(onDocumentStateChange);
   const onActiveSectionChangeRef = useRef(onActiveSectionChange);
   const reservedIdsRef = useRef(reservedIds);
-  // Loaded manual HTML the initial section was already applied to.
-  const initialSectionHtmlRef = useRef('');
-  const [manualState, setManualState] = useState({ loading: false, error: '', html: '', resolvedUrl: '' });
+  // Section navigation per completed load: the load it was last applied to, the manual HTML of
+  // that load, and the section the reader is in (set by navigation and by scrolling; empty while
+  // the reader is still at the top of the manual).
+  const loadSequenceRef = useRef(0);
+  const appliedLoadRef = useRef(0);
+  const appliedHtmlRef = useRef('');
+  const currentSectionRef = useRef('');
+  // `failed` is a flag, not a translated text: the localised message is derived while rendering,
+  // so locale resources settling later never have to re-run (and reload) the manual.
+  const [manualState, setManualState] = useState({ loading: false, failed: false, html: '', resolvedUrl: '', load: 0 });
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [searchMatchCount, setSearchMatchCount] = useState(0);
@@ -134,6 +145,8 @@ export default function ManualView({
   const [activeSectionId, setActiveSectionId] = useState('');
   const [sectionHitCounts, setSectionHitCounts] = useState(/** @type {Map<string, number>} */ (new Map()));
   const [contentsOpen, setContentsOpen] = useState(false);
+  // True while a manual link has put a `:target` element (the image lightbox) into the URL fragment.
+  const [fragmentTargetOpen, setFragmentTargetOpen] = useState(false);
 
   onEscapeRef.current = onEscape;
   onDocumentStateChangeRef.current = onDocumentStateChange;
@@ -169,6 +182,7 @@ export default function ManualView({
     if (!pane || !target || entries.length === 0) return;
     const id = findManualSectionId(entries, target) || entries[0].id;
     pinnedSectionRef.current = { id, scrollTop: pane.scrollTop };
+    currentSectionRef.current = id;
     setActiveSectionId(id);
   }, []);
 
@@ -192,6 +206,7 @@ export default function ManualView({
     const original = viewerFragmentRef.current;
     if (original === null || typeof window === 'undefined') return;
     viewerFragmentRef.current = null;
+    setFragmentTargetOpen(false);
     const restoreScroll = captureScrollPositions(scrollPaneRef.current);
     let fragment = original;
     try { fragment = decodeURIComponent(original); } catch { /* keep the raw fragment */ }
@@ -250,6 +265,8 @@ export default function ManualView({
     const target = findManualElementById(container, id);
     if (!target || isHiddenInManual(target, container)) {
       setManualFragment(id);
+      // A hidden target opens (the lightbox image); a missing one is the lightbox's close link.
+      setFragmentTargetOpen(Boolean(target));
       return;
     }
     navigateToManualTarget(id);
@@ -325,19 +342,18 @@ export default function ManualView({
     };
   }, []);
 
+  // Reloads only for a new language or an explicit refresh. `t` is deliberately not a dependency:
+  // its identity changes when the locale resources settle, which can happen after the manual has
+  // loaded, and a reload then would throw away the section the reader was taken to.
   useEffect(() => {
     let cancelled = false;
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    setManualState({ loading: true, error: '', html: '', resolvedUrl: '' });
+    setManualState({ loading: true, failed: false, html: '', resolvedUrl: '', load: 0 });
 
     const showManualNotAvailable = () => {
       if (cancelled) return;
-      setManualState({
-        loading: false,
-        error: t('help.manualNotAvailable', { defaultValue: 'No manual file could be loaded for this language.' }),
-        html: '',
-        resolvedUrl: '',
-      });
+      loadSequenceRef.current += 1;
+      setManualState({ loading: false, failed: true, html: '', resolvedUrl: '', load: loadSequenceRef.current });
     };
 
     const load = async () => {
@@ -355,7 +371,14 @@ export default function ManualView({
         });
         if (cancelled) return;
         if (loaded) {
-          setManualState({ loading: false, error: '', html: loaded.html, resolvedUrl: loaded.resolvedUrl });
+          loadSequenceRef.current += 1;
+          setManualState({
+            loading: false,
+            failed: false,
+            html: loaded.html,
+            resolvedUrl: loaded.resolvedUrl,
+            load: loadSequenceRef.current,
+          });
           return;
         }
         showManualNotAvailable();
@@ -372,15 +395,19 @@ export default function ManualView({
       cancelled = true;
       controller?.abort?.();
     };
-  }, [language, refreshToken, t]);
+  }, [language, refreshToken]);
+
+  const manualErrorText = manualState.failed
+    ? t('help.manualNotAvailable', { defaultValue: 'No manual file could be loaded for this language.' })
+    : '';
 
   useEffect(() => {
     onDocumentStateChangeRef.current?.({
       loading: manualState.loading,
-      error: manualState.error,
+      error: manualErrorText,
       resolvedUrl: manualState.resolvedUrl,
     });
-  }, [manualState.loading, manualState.error, manualState.resolvedUrl]);
+  }, [manualState.loading, manualErrorText, manualState.resolvedUrl]);
 
   // Build the contents tree from the mounted, sanitised manual before the browser paints, so the
   // column appears together with the text. A manual without h2/h3 gets no column at all.
@@ -397,22 +424,33 @@ export default function ManualView({
     if (tree.entries.length === 0) setContentsOpen(false);
   }, [manualState.html]);
 
-  // Scroll to the requested section once per loaded manual (after the tree assigned heading ids).
+  // After each completed load (and after the tree assigned heading ids): a new manual opens at the
+  // requested initial section; a reload with the same content (an explicit refresh, a host
+  // re-running the load) returns to the section the reader was in, because the reload replaced
+  // the content element, its focus and the pane's scroll position.
   useEffect(() => {
     const html = manualState.html;
-    if (!html || initialSectionHtmlRef.current === html) return;
-    initialSectionHtmlRef.current = html;
-    const id = normalizeSectionId(initialSectionId);
+    const load = manualState.load;
+    if (!html || appliedLoadRef.current === load) return;
+    appliedLoadRef.current = load;
+    const sameContent = appliedHtmlRef.current === html;
+    appliedHtmlRef.current = html;
+    if (!sameContent) currentSectionRef.current = '';
+    const id = sameContent ? currentSectionRef.current : normalizeSectionId(initialSectionId);
     const container = contentRef.current;
     if (!id || !container) return;
     const target = findManualElementById(container, id);
     if (!target || isHiddenInManual(target, container)) return;
     navigateToManualTarget(id);
-  }, [manualState.html, initialSectionId, navigateToManualTarget]);
+  }, [manualState.html, manualState.load, initialSectionId, navigateToManualTarget]);
 
+  // Held back while a lightbox owns the URL fragment: a host that mirrors the section into the
+  // fragment would otherwise replace it (images loading late shift the layout and move the current
+  // section) and close the lightbox. The section is reported again once the lightbox closes.
   useEffect(() => {
+    if (fragmentTargetOpen) return;
     onActiveSectionChangeRef.current?.(activeSectionId);
-  }, [activeSectionId]);
+  }, [activeSectionId, fragmentTargetOpen]);
 
   // The search field's own clear button fires the native `search` event (React has no prop for
   // it); follow it like an input change. The field exists only while a manual is shown.
@@ -451,6 +489,8 @@ export default function ManualView({
         if (box.top > line) break;
         active = entry.id;
       }
+      // At the top of the manual there is nothing to return to after a same-content reload.
+      currentSectionRef.current = pane.scrollTop < 2 ? '' : active;
       setActiveSectionId(active);
     };
     const schedule = () => {
@@ -718,9 +758,9 @@ export default function ManualView({
             <p className="odv-help-placeholder">
               {t('help.loading', { defaultValue: 'Loading manual…' })}
             </p>
-          ) : manualState.error ? (
+          ) : manualErrorText ? (
             <div className="odv-help-placeholder is-error">
-              <p>{manualState.error}</p>
+              <p>{manualErrorText}</p>
               <p>{t('help.manualPathsHint', {
                 defaultValue: 'Place a site-local HTML file under help/site/ or rely on the bundled fallback under help/default/.',
               })}</p>

@@ -8,6 +8,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { isManualEnabled } from '../../utils/manualEnabled.js';
 import StatusLed from '../common/StatusLed.jsx';
 
 const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedState = 'off', statusLedTitle = '' }) => {
@@ -17,7 +18,8 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedSt
   const menuId = useId();
   const [open, setOpen] = useState(false);
   // Only an explicit `false` removes the manual entry; a missing key or any other value keeps it.
-  const manualEnabled = getRuntimeConfig()?.help?.manual?.enabled !== false;
+  // The same switch as the stand-alone manual page, including its tolerance for throwing getters.
+  const manualEnabled = isManualEnabled(getRuntimeConfig());
 
   useEffect(() => {
     if (!open) return undefined;

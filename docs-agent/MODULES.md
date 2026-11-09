@@ -9,7 +9,7 @@ File count: 2. Line count: 508. JSDoc symbol count: 7.
 
 ## src/app
 
-File count: 3. Line count: 814. JSDoc symbol count: 21.
+File count: 3. Line count: 818. JSDoc symbol count: 21.
 
 - `src/app/AppBootstrap.jsx` - Application bootstrap React component.
 - `src/app/OpenDocViewer.jsx` - src/app/OpenDocViewer.jsx Main application shell for the viewer.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 7616. JSDoc symbol count: 112.
+File count: 21. Line count: 7622. JSDoc symbol count: 112.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -75,7 +75,7 @@ File count: 17. Line count: 7787. JSDoc symbol count: 157.
 
 ## src/components/Manual
 
-File count: 4. Line count: 1585. JSDoc symbol count: 46.
+File count: 4. Line count: 1649. JSDoc symbol count: 47.
 
 - `src/components/Manual/manualSearch.js` - In\-manual text search: locale\-aware case folding, match collection over the rendered manual and highlighting through the CSS Custom Highlight API with a \`&lt;mark&gt;\` fallback.
 - `src/components/Manual/manualNavigation.js` - Scrolling, focus and URL\-fragment helpers for navigating inside a rendered manual.
@@ -152,7 +152,7 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 
 ## src/manual\-page
 
-File count: 3. Line count: 173. JSDoc symbol count: 4.
+File count: 3. Line count: 175. JSDoc symbol count: 4.
 
 - `src/manual-page/main.jsx` - Entry of the stand\-alone manual page \(manual/index.html\).
 - `src/manual-page/ManualPage.jsx` - The stand\-alone manual page \(served as \`&lt;ODV base&gt;/manual/\`\): a header with the page title and the viewer's own theme and language menus, and the shared manual view filling the rest.

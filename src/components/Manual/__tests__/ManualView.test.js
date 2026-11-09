@@ -10,13 +10,19 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockTranslate, mockI18n } = vi.hoisted(() => ({
-  mockTranslate: (key, options) => options?.defaultValue ?? key,
-  mockI18n: { language: 'sv', resolvedLanguage: 'sv' },
-}));
+const { mockTranslate, mockI18n, mockTranslation } = vi.hoisted(() => {
+  const translate = (key, options) => options?.defaultValue ?? key;
+  return {
+    mockTranslate: translate,
+    mockI18n: { language: 'sv', resolvedLanguage: 'sv' },
+    // The `t` the hook returns; a test replaces it to mimic react-i18next handing out a new `t`
+    // when the locale resources settle.
+    mockTranslation: { t: translate },
+  };
+});
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: mockTranslate, i18n: mockI18n }),
+  useTranslation: () => ({ t: mockTranslation.t, i18n: mockI18n }),
 }));
 
 import ManualView from '../ManualView.jsx';
@@ -57,6 +63,7 @@ describe('ManualView outside a dialog', () => {
       root.unmount();
     });
     container.remove();
+    mockTranslation.t = mockTranslate;
     delete window.__ODV_GET_CONFIG__;
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
@@ -145,6 +152,70 @@ describe('ManualView outside a dialog', () => {
     expect(activeSections.at(-1)).toBe('zoom');
     const current = container.querySelector('a.odv-manual-toc-link[aria-current="true"]');
     expect(current.getAttribute('href')).toBe('#zoom');
+  });
+
+  it('keeps the initial section when the locale resources settle after the manual (new t, no reload)', async () => {
+    const documentStates = [];
+    const activeSections = [];
+    const props = {
+      initialSectionId: '#zoom',
+      onDocumentStateChange: (state) => documentStates.push(state),
+      onActiveSectionChange: (id) => activeSections.push(id),
+    };
+    await renderView(props);
+    const loadedContent = content();
+    const heading = loadedContent.querySelector('h2#zoom');
+    expect(document.activeElement).toBe(heading);
+    const loadingStates = documentStates.filter((state) => state.loading).length;
+
+    // react-i18next hands out a new `t` once the locale resources have loaded.
+    mockTranslation.t = (key, options) => mockTranslate(key, options);
+    act(() => {
+      root.render(h(ManualView, props));
+    });
+    await flush(50);
+
+    expect(content()).toBe(loadedContent);
+    expect(documentStates.filter((state) => state.loading)).toHaveLength(loadingStates);
+    expect(document.activeElement).toBe(heading);
+    expect(activeSections.at(-1)).toBe('zoom');
+    expect(container.querySelector('a.odv-manual-toc-link[aria-current="true"]').getAttribute('href')).toBe('#zoom');
+  });
+
+  it('returns to the initial section after a reload with the same content', async () => {
+    const activeSections = [];
+    const props = { initialSectionId: '#zoom', onActiveSectionChange: (id) => activeSections.push(id) };
+    await renderView(props);
+    const before = content();
+    expect(document.activeElement).toBe(before.querySelector('h2#zoom'));
+
+    act(() => {
+      root.render(h(ManualView, { ...props, refreshToken: 1 }));
+    });
+    await flush(50);
+
+    expect(content()).not.toBe(before);
+    expect(document.activeElement).toBe(content().querySelector('h2#zoom'));
+    expect(activeSections.at(-1)).toBe('zoom');
+    expect(container.querySelector('a.odv-manual-toc-link[aria-current="true"]').getAttribute('href')).toBe('#zoom');
+  });
+
+  it('returns to the section the reader navigated to, not the initial one, after a same-content reload', async () => {
+    const activeSections = [];
+    const props = { initialSectionId: '#zoom', onActiveSectionChange: (id) => activeSections.push(id) };
+    await renderView(props);
+    const other = contentsLinks().find((link) => !['#zoom', '#utseende'].includes(link.getAttribute('href')));
+    const otherId = other.getAttribute('href').slice(1);
+    act(() => { other.click(); });
+    expect(activeSections.at(-1)).toBe(otherId);
+
+    act(() => {
+      root.render(h(ManualView, { ...props, refreshToken: 1 }));
+    });
+    await flush(50);
+
+    expect(document.activeElement?.id).toBe(otherId);
+    expect(activeSections.at(-1)).toBe(otherId);
   });
 
   it('clears the search on Escape and leaves other Escape presses to the page without onEscape', async () => {

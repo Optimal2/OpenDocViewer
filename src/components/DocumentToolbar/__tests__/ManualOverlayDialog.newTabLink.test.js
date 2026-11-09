@@ -2,9 +2,10 @@
 // File: src/components/DocumentToolbar/__tests__/ManualOverlayDialog.newTabLink.test.js
 //
 // The manual dialog's title bar offers an "Open in new tab" link next to the reload and close
-// buttons. The link points at the stand-alone manual page (`manual/` relative to the viewer
-// bundle, so deployments under a subpath keep working) and carries the section being read as the
-// fragment once the shared manual view reports one. Plain createElement: the repo's ESLint setup
+// buttons. The link points at the stand-alone manual page (`<ODV base>/manual/`, built from the
+// runtime config `baseHref`, so it is right under a subpath and from a page outside the ODV
+// folder) and carries the section being read as the fragment once the shared manual view reports
+// one. Plain createElement: the repo's ESLint setup
 // does not parse JSX in tests.
 import React from 'react';
 import { act } from 'react';
@@ -69,6 +70,8 @@ describe('ManualOverlayDialog open-in-new-tab link', () => {
     });
     container.remove();
     delete window.__ODV_GET_CONFIG__;
+    delete window.__ODV_APP_BASE__;
+    window.history.replaceState(null, '', '/');
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     vi.resetModules();
@@ -103,16 +106,31 @@ describe('ManualOverlayDialog open-in-new-tab link', () => {
 
   it('points at the stand-alone page without a fragment when the manual has no current section', async () => {
     await openManual('<h1>Manual</h1><p>Plain text, no sections.</p>');
-    expect(newTabLink().getAttribute('href')).toBe('manual/');
+    expect(newTabLink().getAttribute('href')).toBe(`${window.location.origin}/manual/`);
   });
 
   it('carries the reported section as the fragment', async () => {
     await openManual('<h1>Manual</h1><h2 id="start">Start</h2><p>Text.</p><h2>Next</h2><p>More.</p>');
-    expect(newTabLink().getAttribute('href')).toBe('manual/#start');
+    expect(newTabLink().getAttribute('href')).toBe(`${window.location.origin}/manual/#start`);
   });
 
   it('URL-encodes the section fragment', async () => {
     await openManual('<h1>Manual</h1><h2 id="avsnitt 1">Start</h2><p>Text.</p>');
-    expect(newTabLink().getAttribute('href')).toBe('manual/#avsnitt%201');
+    expect(newTabLink().getAttribute('href')).toBe(`${window.location.origin}/manual/#avsnitt%201`);
+  });
+
+  it('builds the link from the runtime config baseHref, not the viewer page URL', async () => {
+    window.history.replaceState(null, '', '/portal/case/42/view');
+    window.__ODV_GET_CONFIG__ = () => ({ baseHref: '/OpenDocViewer/' });
+    await openManual('<h1>Manual</h1><h2 id="start">Start</h2><p>Text.</p>');
+    expect(newTabLink().getAttribute('href')).toBe(`${window.location.origin}/OpenDocViewer/manual/#start`);
+    expect(newTabLink().getAttribute('rel')).toBe('noopener');
+  });
+
+  it('falls back to the base bootConfig derived when the runtime config has no baseHref', async () => {
+    window.history.replaceState(null, '', '/portal/case/42/view');
+    window.__ODV_APP_BASE__ = '/OpenDocViewer/';
+    await openManual('<h1>Manual</h1><h2 id="start">Start</h2><p>Text.</p>');
+    expect(newTabLink().getAttribute('href')).toBe(`${window.location.origin}/OpenDocViewer/manual/#start`);
   });
 });

@@ -80,6 +80,15 @@ describe('HelpMenuButton manual entry', () => {
     expect(manualItem()).not.toBeUndefined();
   });
 
+  it('keeps Manual (and does not crash) when reading help.manual throws', () => {
+    runtimeConfig = {
+      get help() { throw new Error('host config getter failed'); },
+    };
+    openMenu();
+    expect(manualItem()).not.toBeUndefined();
+    expect(aboutItem()).not.toBeUndefined();
+  });
+
   it('hides only the Manual entry when help.manual.enabled is false', () => {
     runtimeConfig = { help: { manual: { enabled: false } } };
     openMenu();

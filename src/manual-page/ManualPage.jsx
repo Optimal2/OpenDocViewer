@@ -9,7 +9,9 @@
  * - `help.manual.enabled: false` (src/utils/manualEnabled.js) shows a "not available" notice
  *   instead of the manual.
  * - The URL fragment selects the initial section (`manual/#zoom`) and follows the section being
- *   read (history.replaceState, so reading does not add history entries).
+ *   read (history.replaceState, so reading does not add history entries). While a manual image
+ *   lightbox holds the fragment (`#<lightbox-id>` + `:target`) the view reports no section, so the
+ *   fragment is left alone and the lightbox stays open.
  * - The language and theme menus are the viewer's components and store the choice through the
  *   same shared preferences, so a choice made here applies in the viewer and the other way round.
  */

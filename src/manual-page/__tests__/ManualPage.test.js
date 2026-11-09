@@ -66,6 +66,7 @@ describe('stand-alone manual page', () => {
     });
     container.remove();
     delete window.__ODV_GET_CONFIG__;
+    delete window.__ODV_APP_BASE__;
     window.history.replaceState(null, '', initialUrl);
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
@@ -121,6 +122,48 @@ describe('stand-alone manual page', () => {
     expect(window.location.hash).toBe(other.getAttribute('href'));
   });
 
+  it('leaves an open image lightbox fragment alone when the current section changes', async () => {
+    // The bundled manuals' script-free lightbox: `.lb` is shown only as the fragment target, and
+    // "#lb-stang" (no element) closes it.
+    const lightboxHtml = [
+      '<p>Intro</p><style>.lb { display: none; } .lb:target { display: block; }</style>',
+      '<h2 id="start">1. Start</h2><p><a href="#lb-bild"><img alt="thumb"></a></p>',
+      '<h2 id="later">2. Later</h2><p>needle text</p>',
+      '<div class="lb" id="lb-bild"><a href="#lb-stang"><img alt=""></a></div>',
+    ].join('');
+    runtimeConfig = { help: { manual: { source: 'auto', sitePathTemplate: 'help/site/manual.{{lng}}.html' } } };
+    vi.stubGlobal('fetch', async (url) => {
+      requestedUrls.push(String(url));
+      return { ok: true, status: 200, url: String(url), text: async () => lightboxHtml };
+    });
+    window.history.replaceState(null, '', '/manual/');
+    await renderPage();
+    const content = container.querySelector('.odv-manual-content');
+    expect(content.querySelector('#lb-bild')).not.toBeNull();
+    expect(window.location.hash).toBe('#start');
+
+    act(() => { content.querySelector('a[href="#lb-bild"]').click(); });
+    expect(window.location.hash).toBe('#lb-bild');
+
+    // A search jump moves the current section while the lightbox is open (as a late layout
+    // shift would); the fragment, and with it the lightbox, must stay.
+    act(() => {
+      const input = container.querySelector('[data-odv-manual-search="input"]');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(input, 'needle');
+      input.dispatchEvent(new window.Event('input', { bubbles: true }));
+    });
+    await flush(260);
+    expect(container.querySelector('a.odv-manual-toc-link[aria-current="true"]').getAttribute('href')).toBe('#later');
+    expect(window.location.hash).toBe('#lb-bild');
+    expect(content.querySelector('#lb-bild').matches(':target')).toBe(true);
+
+    // Closing the lightbox hands the fragment back to the section being read.
+    act(() => { content.querySelector('a[href="#lb-stang"]').click(); });
+    await flush(20);
+    expect(window.location.hash).toBe('#later');
+  });
+
   it('resolves manual files and images against the ODV base, not the manual/ folder', async () => {
     window.history.replaceState(null, '', '/odv/manual/');
     runtimeConfig = { baseHref: '/odv/', help: { manual: { source: 'auto' } } };
@@ -128,6 +171,19 @@ describe('stand-alone manual page', () => {
 
     const origin = window.location.origin;
     // The default (relative) site template is fetched from the base; the generated manual follows.
+    expect(requestedUrls[0]).toBe(`${origin}/odv/help/site/manual.sv.html`);
+    const image = container.querySelector('.odv-manual-content img[src]');
+    expect(image.getAttribute('src').startsWith(`${origin}/odv/help/default/`)).toBe(true);
+  });
+
+  it('falls back to the ODV base bootConfig derived (not manual/) when the config has no baseHref', async () => {
+    window.history.replaceState(null, '', '/odv/manual/');
+    // Published by src/app/bootConfig.js from the page's `odv-app-base` meta tag.
+    window.__ODV_APP_BASE__ = '/odv/';
+    runtimeConfig = { help: { manual: { source: 'auto' } } };
+    await renderPage();
+
+    const origin = window.location.origin;
     expect(requestedUrls[0]).toBe(`${origin}/odv/help/site/manual.sv.html`);
     const image = container.querySelector('.odv-manual-content img[src]');
     expect(image.getAttribute('src').startsWith(`${origin}/odv/help/default/`)).toBe(true);

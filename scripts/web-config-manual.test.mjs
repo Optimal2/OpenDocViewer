@@ -2,7 +2,9 @@
 /**
  * public/web.config must serve the stand-alone manual page (`manual/index.html`) under IIS:
  *
- * - the request `/manual` becomes `/manual/` through the generic AddTrailingSlash redirect,
+ * - the request `/manual` becomes `/manual/` through IIS itself: `manual/` is a real directory, so
+ *   the generic AddTrailingSlash rule skips it (its IsFile/IsDirectory conditions are negated) and
+ *   the directory courtesy redirect of IIS (with the default document below) adds the slash,
  * - the `/manual/` directory answers with its `index.html` through an explicit default document
  *   (independent of the server-level list),
  * - the SPA fallback rewrite only applies when the request maps to neither an existing file nor
@@ -110,7 +112,7 @@ describe('web.config stand-alone manual page', () => {
     expect(adds[0].getAttribute('value')).toBe('index.html');
   });
 
-  it('redirects /manual to /manual/ through the generic AddTrailingSlash rule', () => {
+  it('keeps the generic AddTrailingSlash rule off real files and directories such as manual/', () => {
     const document = parseWebConfig();
     const rule = findRule(document, 'AddTrailingSlash');
     const action = rule.getElementsByTagName('action')[0];
@@ -121,8 +123,9 @@ describe('web.config stand-alone manual page', () => {
         && condition.getAttribute('matchType') === matchType
         && condition.getAttribute('negate') === 'true',
     );
-    // A directory request such as /manual is neither a file nor (yet, without the trailing slash)
-    // a matched directory entry, and carries no file extension and no trailing slash.
+    // The rule only redirects extensionless paths without a trailing slash that are neither a file
+    // nor a directory. /manual maps to the real manual/ directory, so the rule skips it; IIS's own
+    // directory courtesy redirect turns it into /manual/ and the default document serves index.html.
     expect(has('{REQUEST_FILENAME}', 'IsFile')).toBe(true);
     expect(has('{REQUEST_FILENAME}', 'IsDirectory')).toBe(true);
     expect(conditions.some((condition) => condition.getAttribute('input') === '{REQUEST_URI}'

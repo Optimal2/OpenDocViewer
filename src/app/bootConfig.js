@@ -157,6 +157,10 @@ async function loadFromCandidates(name, candidates, { optional = false, nonce = 
 
 (async function boot() {
   const base = getAppBase(); // e.g., "/OpenDocViewer/" in IIS, or "/" in dev
+  // Published for code that needs the ODV base when the runtime config sets no `baseHref`: the
+  // manual loader and the overlay's link to the stand-alone page (src/components/Manual/
+  // manualDocument.js), which otherwise could only fall back to the current page's folder.
+  window.__ODV_APP_BASE__ = base;
   const bust = () => Date.now();
   const nonce = getBootstrapScriptNonce();
   const siteConfigIntegrity = getBootstrapScriptIntegrityValue('odvSiteConfigIntegrity');

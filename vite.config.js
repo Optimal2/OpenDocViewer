@@ -148,9 +148,11 @@ function ocrAssetsPlugin() {
 }
 
 /**
- * Dev and preview servers: redirect `/manual` to `/manual/`, as the IIS AddTrailingSlash rule does
- * in production. Without the slash the SPA fallback would serve the viewer, and the manual page's
- * relative URLs would resolve one folder too high.
+ * Dev and preview servers: redirect `/manual` to `/manual/`, as IIS does in production. There
+ * `manual/` is a real directory, so the web.config AddTrailingSlash rule skips it (its negated
+ * IsFile/IsDirectory conditions) and IIS's directory courtesy redirect plus the default document
+ * serve manual/index.html. Without the slash the SPA fallback would serve the viewer, and the
+ * manual page's relative URLs would resolve one folder too high.
  */
 function manualPageTrailingSlashPlugin() {
   const redirect = (req, res, next) => {

@@ -27,19 +27,45 @@ const STANDARD_MANUAL_LOADERS = Object.freeze({
 });
 
 /**
- * The ODV base URL relative manual paths belong to: runtime config `baseHref` (set by
- * odv.config.js from its own location), else the page's folder. Both are the same in the viewer;
- * they differ on the stand-alone manual page, which lives one folder below the base.
+ * The ODV base URL relative manual paths (and the stand-alone manual page) belong to: runtime
+ * config `baseHref` (set by odv.config.js from its own location), else the base src/app/bootConfig.js
+ * derived at start-up (`window.__ODV_APP_BASE__`, which honours the stand-alone page's
+ * `odv-app-base` meta tag), else the page's folder. In the viewer all three agree; on the
+ * stand-alone manual page, one folder below the base, the page's folder is wrong.
  *
- * @param {(string|undefined)} baseHref Runtime config `baseHref`.
+ * @param {Object=} runtimeConfig Runtime configuration (reads `baseHref`).
  * @returns {(string|undefined)} Absolute base URL, or undefined outside a browser.
  */
-function resolveOdvBaseUrl(baseHref) {
+export function resolveOdvBaseUrl(runtimeConfig) {
   if (typeof window === 'undefined') return undefined;
+  let baseHref;
+  try { baseHref = runtimeConfig?.baseHref; } catch { baseHref = undefined; }
+  let bootBase;
+  try { bootBase = window.__ODV_APP_BASE__; } catch { bootBase = undefined; }
+  const configured = typeof baseHref === 'string' ? baseHref.trim() : '';
+  const derived = typeof bootBase === 'string' ? bootBase.trim() : '';
   try {
-    return new URL(typeof baseHref === 'string' && baseHref.trim() ? baseHref.trim() : './', window.location.href).toString();
+    return new URL(configured || derived || './', window.location.href).toString();
   } catch {
     return window.location.href;
+  }
+}
+
+/**
+ * Absolute URL of the stand-alone manual page (`<ODV base>/manual/`), optionally opened at a
+ * section. Built from the ODV base, so it is right whatever page the viewer runs on.
+ *
+ * @param {Object=} runtimeConfig Runtime configuration (reads `baseHref`).
+ * @param {string=} sectionId Element id for the fragment; empty for none.
+ * @returns {string}
+ */
+export function resolveManualPageUrl(runtimeConfig, sectionId = '') {
+  const path = sectionId ? `manual/#${encodeURIComponent(sectionId)}` : 'manual/';
+  const baseUrl = resolveOdvBaseUrl(runtimeConfig);
+  try {
+    return baseUrl ? new URL(path, baseUrl).toString() : path;
+  } catch {
+    return path;
   }
 }
 
@@ -345,9 +371,7 @@ function removeManualRefreshToken(url) {
 export async function loadManualDocument({ language, runtimeConfig, refreshToken = 0, signal = undefined }) {
   const manualConfig = runtimeConfig?.help?.manual;
   const sourceMode = resolveManualSourceMode(manualConfig);
-  let baseHref;
-  try { baseHref = runtimeConfig?.baseHref; } catch { baseHref = undefined; }
-  const baseUrl = resolveOdvBaseUrl(baseHref);
+  const baseUrl = resolveOdvBaseUrl(runtimeConfig);
   const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidateFromOdvBase(candidate, baseUrl), refreshToken), {
     cache: refreshToken ? 'reload' : 'no-store',
     credentials: 'same-origin',

@@ -13,6 +13,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import ManualView from '../Manual/ManualView.jsx';
+import { resolveManualPageUrl } from '../Manual/manualDocument.js';
+import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 
 const MANUAL_MEDIA_SELECTOR = 'audio[controls], video[controls]';
 const MANUAL_FOCUSABLE_SELECTOR = `button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), ${MANUAL_MEDIA_SELECTOR}`;
@@ -147,9 +149,11 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     }
   };
 
-  // Stand-alone manual page served next to the viewer bundle. Relative so deployments under a
-  // subpath (e.g. /OpenDocViewer/) keep working; the current section rides along as the fragment.
-  const manualHref = activeSectionId ? `manual/#${encodeURIComponent(activeSectionId)}` : 'manual/';
+  // Stand-alone manual page at <ODV base>/manual/, built from the ODV base (runtime config
+  // `baseHref`, as the manual loader resolves it), so it is right under a subpath such as
+  // /OpenDocViewer/ and when the viewer page is not the ODV folder itself. The current section
+  // rides along as the fragment.
+  const manualHref = resolveManualPageUrl(getRuntimeConfig(), activeSectionId);
 
   if (!isOpen) return null;
 

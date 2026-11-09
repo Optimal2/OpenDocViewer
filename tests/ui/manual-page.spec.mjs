@@ -35,31 +35,6 @@ async function routeSiteConfig(page, siteConfig) {
   );
 }
 
-/**
- * Delay the generated standard-manual chunk (real bytes, served late) so the locale resources
- * always settle before the manual loads.
- *
- * Determinism gate, not a sleep: ManualView applies the initial section once per loaded manual
- * and skips re-navigation when a same-content reload follows. When the locale settles after the
- * manual chunk, that reload drops focus, scroll and the current-section mark (measured:
- * focusin on the section followed by focusout 1-3 ms later, scroll reset to 0, current section
- * back to the first entry). Gating the chunk behind the locale makes the measured load navigate
- * exactly once; the section assertions below still wait on locators. The underlying re-navigation
- * gap is WP2-owned (ManualView.jsx) and tracked as a follow-up.
- * @param {import('@playwright/test').Page} page
- */
-async function delayStandardManualChunk(page) {
-  // NOTE: matched with a glob on the context (so popups inherit it) — RegExp and function
-  // predicates provably miss this __vitePreload-issued chunk request while the identical
-  // URL matches a glob.
-  await page.context().route('**/assets/manual.*.js', async (route) => {
-    const response = await route.fetch();
-    setTimeout(() => {
-      route.fulfill({ response }).catch(() => {});
-    }, 1500);
-  });
-}
-
 /** Serve the viewer session and its PDF fixtures from memory under the subpath. */
 async function routeSession(page) {
   const fixtures = await getFixtures();
@@ -278,7 +253,6 @@ test('contents entry scrolls its section into view', async ({ page }) => {
 });
 
 test('a #<section> fragment opens the page at that section', async ({ page }) => {
-  await delayStandardManualChunk(page);
   const failures = await openManualPage(page, { siteConfig: STANDARD_SITE_CONFIG, fragment: '#loading' });
   await expect(page.locator('.odv-manual-content #loading')).toBeFocused();
   await expect(page.locator('nav.odv-manual-toc a[href="#loading"]')).toHaveAttribute('aria-current', 'true');
@@ -287,14 +261,18 @@ test('a #<section> fragment opens the page at that section', async ({ page }) =>
 });
 
 test('overlay open-in-new-tab link lands on the current section', async ({ page, context }) => {
-  await delayStandardManualChunk(page);
   const failures = trackSubpathAssetErrors(page, { servedSiteConfig: true });
   const viewerFailures = await openViewer(page, { siteConfig: STANDARD_SITE_CONFIG, query: 'lng=en' });
   await openOverlay(page);
   const dialog = page.locator('.odv-manual-dialog');
   await dialog.locator('nav.odv-manual-toc a[href="#jmf-curtain"]').click();
   const link = dialog.getByRole('link', { name: 'Open in new tab' });
-  await expect(link).toHaveAttribute('href', 'manual/#jmf-curtain');
+  // Built from the ODV base (runtime config baseHref), so it does not depend on the viewer URL.
+  await expect(link).toHaveAttribute('href', /\/manual\/#jmf-curtain$/);
+  const href = new URL(String(await link.getAttribute('href')));
+  expect(href.origin).toBe(new URL(page.url()).origin);
+  expect(href.pathname).toBe(`${BASE}/manual/`);
+  expect(href.hash).toBe('#jmf-curtain');
   await expect(link).toHaveAttribute('target', '_blank');
   expect(await link.getAttribute('rel')).toContain('noopener');
 

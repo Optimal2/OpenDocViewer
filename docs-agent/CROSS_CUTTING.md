@@ -47,12 +47,12 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 React raw HTML rendering.
 
-- `src/components/Manual/ManualView.jsx` lines 733 - Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in\-manual search with highlig
+- `src/components/Manual/ManualView.jsx` lines 773 - Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in\-manual search with highlig
 
 ### innerHTML
 
 Direct DOM HTML assignment or access.
 
-- `src/components/Manual/manualDocument.js` lines 290, 291, 292 - Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
+- `src/components/Manual/manualDocument.js` lines 316, 317, 318 - Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
 - `src/utils/printDom.js` lines 264 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\).
 - `src/utils/standardManual.js` lines 566 - Filter and sanitize the bundled standard manual for a supplied runtime config.
