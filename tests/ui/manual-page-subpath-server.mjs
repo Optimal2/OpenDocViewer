@@ -8,12 +8,13 @@
  *   the viewer (`/OpenDocViewer/`) and the stand-alone manual page (`/OpenDocViewer/manual/`)
  *   boot from the built entries.
  * - A directory requested without its trailing slash is redirected to the slash form, the way
- *   the IIS AddTrailingSlash rule does it in production.
+ *   the IIS directory courtesy redirect does it in production (the AddTrailingSlash rule skips
+ *   real directories: its IsFile/IsDirectory conditions are negated).
  * - Both GET and HEAD are served (the boot loader probes `odv.site.config.js` and
  *   `odv.config.js` with HEAD before loading them), with production-plausible content types.
  * - Anything outside the prefix, a missing file, or a path escaping `dist/` answers 404.
  * - `/OpenDocViewer/manual` (no trailing slash) behaviour beyond the generic directory redirect
- *   is intentionally not special-cased: IIS owns that rule in production (WP3 proved web.config).
+ *   is intentionally not special-cased: IIS owns that redirect in production (WP3 proved web.config).
  */
 
 import http from 'node:http';

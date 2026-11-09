@@ -92,7 +92,9 @@ loading content.
 
 IIS serving (`public/web.config`, proven by `scripts/web-config-manual.test.mjs`):
 
-- `/manual` redirects to `/manual/` through the generic AddTrailingSlash rule.
+- `/manual` becomes `/manual/` through IIS itself: `manual/` is a real directory, so the
+  generic AddTrailingSlash rule skips it (its IsFile/IsDirectory conditions are negated) and
+  the directory courtesy redirect of IIS (with the default document below) adds the slash.
 - `/manual/` answers with `manual/index.html` through the explicit `index.html` default document.
 - the SPA fallback rewrite only fires for requests that map to neither an existing file nor an
   existing directory, so real `manual/` assets and the `manual/` directory itself are never
