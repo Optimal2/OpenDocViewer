@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/Manual
 
-File count: 4. Line count: 1649. JSDoc symbol count: 47.
+File count: 4. Line count: 1723. JSDoc symbol count: 49.
 
 ## src/components/Manual/manualDocument.js
 
@@ -82,5 +82,6 @@ Symbols:
 - `ManualView~setManualFragment` (constant) - Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals' image lightbox\), without moving the content pane, the host or the page behind i...
 - `ManualView~restoreViewerFragment` (constant) - Put back the URL fragment the page had before the manual set one.
 - `ManualView~navigateToManualTarget` (constant) - Scroll the content pane \(never the tree\) to an element in the manual and focus it.
+- `ManualView~openFragmentTarget` (constant) - Show a manual element that is hidden until it is the URL fragment target \(the bundled manuals' :target image lightbox\) by making it the fragment target.
+- `ManualView~revalidateFragmentTarget` (constant) - After new manual content has been rendered: a fragment the manual set is kept only while it still opens a lightbox in the new content; otherwise the page's own fragment is put bac...
 - `<anonymous>~handleEscape` (function) - No description.
-- `ManualView~renderContentsLink` (function) - No description.

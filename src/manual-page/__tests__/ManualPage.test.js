@@ -164,6 +164,42 @@ describe('stand-alone manual page', () => {
     expect(window.location.hash).toBe('#later');
   });
 
+  describe('loaded with a lightbox id as the fragment (a reload while one was open)', () => {
+    const lightboxHtml = [
+      '<p>Intro</p><style>.lb { display: none; } .lb:target { display: block; }</style>',
+      '<h2 id="start">1. Start</h2><p><a href="#lb-bild"><img alt="thumb"></a></p>',
+      '<h2 id="later">2. Later</h2><p>text</p>',
+      '<div class="lb" id="lb-bild"><a href="#lb-stang"><img alt=""></a></div>',
+    ].join('');
+
+    beforeEach(() => {
+      runtimeConfig = { help: { manual: { source: 'auto', sitePathTemplate: 'help/site/manual.{{lng}}.html' } } };
+      vi.stubGlobal('fetch', async (url) => {
+        requestedUrls.push(String(url));
+        return { ok: true, status: 200, url: String(url), text: async () => lightboxHtml };
+      });
+    });
+
+    it('opens the lightbox and hands the fragment to the section once it is closed', async () => {
+      window.history.replaceState(null, '', '/manual/#lb-bild');
+      await renderPage();
+      const content = container.querySelector('.odv-manual-content');
+
+      expect(window.location.hash).toBe('#lb-bild');
+      expect(content.querySelector('#lb-bild').matches(':target')).toBe(true);
+
+      act(() => { content.querySelector('a[href="#lb-stang"]').click(); });
+      await flush(20);
+      expect(window.location.hash).toBe('#start');
+    });
+
+    it('opens at the top when the fragment names no element of the loaded manual', async () => {
+      window.history.replaceState(null, '', '/manual/#lb-saknas');
+      await renderPage();
+      expect(window.location.hash).toBe('#start');
+    });
+  });
+
   it('resolves manual files and images against the ODV base, not the manual/ folder', async () => {
     window.history.replaceState(null, '', '/odv/manual/');
     runtimeConfig = { baseHref: '/odv/', help: { manual: { source: 'auto' } } };
@@ -174,6 +210,13 @@ describe('stand-alone manual page', () => {
     expect(requestedUrls[0]).toBe(`${origin}/odv/help/site/manual.sv.html`);
     const image = container.querySelector('.odv-manual-content img[src]');
     expect(image.getAttribute('src').startsWith(`${origin}/odv/help/default/`)).toBe(true);
+  });
+
+  it('fetches manual files inside a configured baseHref that lacks its trailing slash', async () => {
+    window.history.replaceState(null, '', '/odv/manual/');
+    runtimeConfig = { baseHref: '/odv', help: { manual: { source: 'auto' } } };
+    await renderPage();
+    expect(requestedUrls[0]).toBe(`${window.location.origin}/odv/help/site/manual.sv.html`);
   });
 
   it('falls back to the ODV base bootConfig derived (not manual/) when the config has no baseHref', async () => {

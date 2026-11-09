@@ -33,8 +33,14 @@ const STANDARD_MANUAL_LOADERS = Object.freeze({
  * `odv-app-base` meta tag), else the page's folder. In the viewer all three agree; on the
  * stand-alone manual page, one folder below the base, the page's folder is wrong.
  *
+ * The base is a folder: a hierarchical result whose path lacks the trailing slash (`baseHref:
+ * '/OpenDocViewer'`) gets one, so `manual/` and `help/...` resolve inside that folder instead of
+ * next to it. A base that is not an http(s) or file URL (a `javascript:` or `data:` value) is no
+ * base at all: callers then use the bare relative path, so such a value never reaches an href.
+ *
  * @param {Object=} runtimeConfig Runtime configuration (reads `baseHref`).
- * @returns {(string|undefined)} Absolute base URL, or undefined outside a browser.
+ * @returns {(string|undefined)} Absolute base URL, or undefined outside a browser or when no
+ *   usable base resolves.
  */
 export function resolveOdvBaseUrl(runtimeConfig) {
   if (typeof window === 'undefined') return undefined;
@@ -45,9 +51,12 @@ export function resolveOdvBaseUrl(runtimeConfig) {
   const configured = typeof baseHref === 'string' ? baseHref.trim() : '';
   const derived = typeof bootBase === 'string' ? bootBase.trim() : '';
   try {
-    return new URL(configured || derived || './', window.location.href).toString();
+    const url = new URL(configured || derived || './', window.location.href);
+    if (!['http:', 'https:', 'file:'].includes(url.protocol)) return undefined;
+    if (!url.pathname.endsWith('/')) url.pathname = `${url.pathname}/`;
+    return url.toString();
   } catch {
-    return window.location.href;
+    return undefined;
   }
 }
 

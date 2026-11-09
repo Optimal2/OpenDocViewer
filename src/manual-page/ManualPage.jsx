@@ -11,7 +11,10 @@
  * - The URL fragment selects the initial section (`manual/#zoom`) and follows the section being
  *   read (history.replaceState, so reading does not add history entries). While a manual image
  *   lightbox holds the fragment (`#<lightbox-id>` + `:target`) the view reports no section, so the
- *   fragment is left alone and the lightbox stays open.
+ *   fragment is left alone and the lightbox stays open. A page loaded (or reloaded) with a lightbox
+ *   id as the fragment opens that lightbox over the top of the manual; closing it hands the
+ *   fragment back to the section being read. A fragment naming no element, or an element that the
+ *   fragment does not show, opens the manual at the top, and the first section report replaces it.
  * - The language and theme menus are the viewer's components and store the choice through the
  *   same shared preferences, so a choice made here applies in the viewer and the other way round.
  */

@@ -261,6 +261,109 @@ describe('ManualView outside a dialog', () => {
     expect(container.querySelector('.odv-manual-searchbar-clear')).toBeNull();
   });
 
+  describe('image lightbox fragment', () => {
+    let initialUrl;
+    let siteHtml;
+
+    // The bundled manuals' script-free lightbox: `.lb` is shown only as the fragment target, and
+    // "#lb-stang" (no element) closes it.
+    const lightboxStyle = '<style>.lb { display: none; } .lb:target { display: block; }</style>';
+    const lightboxHtml = [
+      `<p>Intro</p>${lightboxStyle}`,
+      '<h2 id="start">1. Start</h2><p><a href="#lb-bild"><img alt="thumb"></a> <a href="#dold">hidden</a></p>',
+      '<p id="dold" style="display: none">Hidden, not a lightbox</p>',
+      '<h2 id="later">2. Later</h2><p>needle text</p>',
+      '<div class="lb" id="lb-bild"><a href="#lb-stang"><img alt=""></a></div>',
+    ].join('');
+
+    beforeEach(() => {
+      initialUrl = window.location.href;
+      window.history.replaceState(null, '', '/manual/');
+      siteHtml = lightboxHtml;
+      runtimeConfig = { help: { manual: { source: 'auto', sitePathTemplate: 'help/site/manual.{{lng}}.html' } } };
+      vi.stubGlobal('fetch', async (url) => {
+        requestedUrls.push(String(url));
+        return { ok: true, status: 200, url: String(url), text: async () => siteHtml };
+      });
+    });
+
+    afterEach(() => {
+      window.history.replaceState(null, '', initialUrl);
+    });
+
+    function searchFor(value) {
+      typeSearch(value);
+      return flush(260);
+    }
+
+    it('releases the held-back section reports when a reload drops the open lightbox', async () => {
+      const activeSections = [];
+      const props = { onActiveSectionChange: (id) => activeSections.push(id) };
+      await renderView(props);
+      act(() => { content().querySelector('a[href="#lb-bild"]').click(); });
+      expect(window.location.hash).toBe('#lb-bild');
+      await searchFor('needle');
+      expect(activeSections.at(-1)).toBe('start');
+
+      // The site file changed: the refreshed manual has other sections and no lightbox.
+      siteHtml = '<h2 id="ny">1. New</h2><p>text</p><h2 id="ny2">2. More</h2>';
+      act(() => {
+        root.render(h(ManualView, { ...props, refreshToken: 1 }));
+      });
+      await flush(50);
+
+      expect(content().querySelector('#lb-bild')).toBeNull();
+      expect(window.location.hash).toBe('');
+      expect(window.location.href.endsWith('#')).toBe(false);
+      expect(activeSections.at(-1)).toBe('ny');
+    });
+
+    it('keeps a lightbox open across a reload whose content still has it', async () => {
+      const activeSections = [];
+      const props = { onActiveSectionChange: (id) => activeSections.push(id) };
+      await renderView(props);
+      act(() => { content().querySelector('a[href="#lb-bild"]').click(); });
+      const reported = activeSections.length;
+
+      act(() => {
+        root.render(h(ManualView, { ...props, refreshToken: 1 }));
+      });
+      await flush(50);
+
+      expect(window.location.hash).toBe('#lb-bild');
+      expect(content().querySelector('#lb-bild').matches(':target')).toBe(true);
+      expect(activeSections.slice(reported).filter(Boolean)).toEqual([]);
+
+      act(() => { content().querySelector('a[href="#lb-stang"]').click(); });
+      await flush(20);
+      expect(activeSections.at(-1)).toBe('start');
+    });
+
+    it('does not hold back section reports for a link to a hidden element that is not a lightbox', async () => {
+      const activeSections = [];
+      await renderView({ onActiveSectionChange: (id) => activeSections.push(id) });
+      act(() => { content().querySelector('a[href="#dold"]').click(); });
+      expect(window.location.hash).toBe('');
+
+      await searchFor('needle');
+      expect(activeSections.at(-1)).toBe('later');
+    });
+
+    it('opens a lightbox named by the initial section while the URL fragment still names it', async () => {
+      window.history.replaceState(null, '', '/manual/#lb-bild');
+      const activeSections = [];
+      await renderView({ initialSectionId: '#lb-bild', onActiveSectionChange: (id) => activeSections.push(id) });
+
+      expect(window.location.hash).toBe('#lb-bild');
+      expect(content().querySelector('#lb-bild').matches(':target')).toBe(true);
+      expect(activeSections.filter(Boolean)).toEqual([]);
+
+      act(() => { content().querySelector('a[href="#lb-stang"]').click(); });
+      await flush(20);
+      expect(activeSections.at(-1)).toBe('start');
+    });
+  });
+
   it('calls onEscape when nothing in the view consumes Escape', async () => {
     const onEscape = vi.fn();
     await renderView({ onEscape });

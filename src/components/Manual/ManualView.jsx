@@ -87,8 +87,10 @@ function normalizeSectionId(value) {
  *   its title id). Generated heading ids avoid them. Read when a manual is loaded.
  * @param {string} [props.initialSectionId] Element id (a leading `#` and URL encoding are accepted,
  *   so `location.hash` can be passed as is) to scroll to once the manual has loaded. Applied once
- *   per distinct manual (a new language applies it again); ids of elements hidden until targeted
- *   (lightbox images) are ignored. A reload that yields the same manual content keeps the reader
+ *   per distinct manual (a new language applies it again). The id of an element hidden until it is
+ *   the fragment target (a lightbox image) opens that lightbox while the URL fragment still names
+ *   it, as a click on its thumbnail would; otherwise such an id is ignored and the manual opens at
+ *   the top. A reload that yields the same manual content keeps the reader
  *   at the section they were in (the initial one, or the one navigated or scrolled to since).
  * @param {function(string): void} [props.onActiveSectionChange] Reports the id of the section the
  *   reader is currently in (the contents entry marked current), or an empty string when the manual
@@ -244,14 +246,51 @@ export default function ManualView({
     }
   }, [pinSectionFor, restoreViewerFragment]);
 
+  /**
+   * Show a manual element that is hidden until it is the URL fragment target (the bundled manuals'
+   * `:target` image lightbox) by making it the fragment target. Only when that actually shows it is
+   * it treated as an open lightbox (section reports are held back); otherwise the fragment is put
+   * back as it was.
+   *
+   * @param {string} id
+   * @returns {boolean} True when the element is now shown as the fragment target.
+   */
+  const openFragmentTarget = useCallback((id) => {
+    const container = contentRef.current;
+    const target = findManualElementById(container, id);
+    if (!container || !target || !isHiddenInManual(target, container)) return false;
+    setManualFragment(id);
+    if (isHiddenInManual(target, container)) {
+      restoreViewerFragment();
+      return false;
+    }
+    setFragmentTargetOpen(true);
+    return true;
+  }, [restoreViewerFragment, setManualFragment]);
+
+  /**
+   * After new manual content has been rendered: a fragment the manual set is kept only while it
+   * still opens a lightbox in the new content; otherwise the page's own fragment is put back and
+   * section reports resume. The new content replaced the element the fragment pointed at, so the
+   * fragment is applied again to make the new element the target.
+   */
+  const revalidateFragmentTarget = useCallback(() => {
+    if (viewerFragmentRef.current === null || typeof window === 'undefined') return;
+    const id = normalizeSectionId(window.location.hash);
+    if (id && openFragmentTarget(id)) return;
+    restoreViewerFragment();
+  }, [openFragmentTarget, restoreViewerFragment]);
+
   const handleContentsLinkClick = useCallback((event, id) => {
     event.preventDefault();
     navigateToManualTarget(id);
   }, [navigateToManualTarget]);
 
   // In-text links to "#id": a rendered target (a heading, a paragraph) is scrolled to inside the
-  // content pane. A target hidden until it is the URL fragment target, or no target at all (the
-  // lightbox's "#lb-stang" close link), sets the fragment so the manual's :target CSS applies.
+  // content pane. A target hidden until it is the URL fragment target (the lightbox image) is
+  // opened through the fragment; one that stays hidden is navigated to like a rendered one. No
+  // target at all (the lightbox's "#lb-stang" close link) sets the fragment, which closes the
+  // lightbox through the manual's :target CSS.
   const handleManualContentClick = useCallback((event) => {
     const container = contentRef.current;
     const link = event?.target?.closest?.('a[href]');
@@ -263,14 +302,14 @@ export default function ManualView({
     try { id = decodeURIComponent(id); } catch { /* keep the raw fragment */ }
     if (!id) return;
     const target = findManualElementById(container, id);
-    if (!target || isHiddenInManual(target, container)) {
+    if (!target) {
       setManualFragment(id);
-      // A hidden target opens (the lightbox image); a missing one is the lightbox's close link.
-      setFragmentTargetOpen(Boolean(target));
+      setFragmentTargetOpen(false);
       return;
     }
+    if (isHiddenInManual(target, container) && openFragmentTarget(id)) return;
     navigateToManualTarget(id);
-  }, [navigateToManualTarget, setManualFragment]);
+  }, [navigateToManualTarget, openFragmentTarget, setManualFragment]);
 
   const goToSearchMatch = useCallback((delta) => {
     setCurrentSearchMatch((previous) => {
@@ -427,22 +466,48 @@ export default function ManualView({
   // After each completed load (and after the tree assigned heading ids): a new manual opens at the
   // requested initial section; a reload with the same content (an explicit refresh, a host
   // re-running the load) returns to the section the reader was in, because the reload replaced
-  // the content element, its focus and the pane's scroll position.
+  // the content element, its focus and the pane's scroll position. An initial id that names a
+  // lightbox opens it, as a click on its thumbnail would. A lightbox that was open before the load
+  // stays open only when its fragment still opens one in the loaded content; otherwise (no such
+  // element, a failed load, a section navigated to) the page's own fragment is put back, so the
+  // held-back section reports never stay muted with no lightbox on screen.
   useEffect(() => {
     const html = manualState.html;
     const load = manualState.load;
-    if (!html || appliedLoadRef.current === load) return;
+    if (!load || appliedLoadRef.current === load) return;
     appliedLoadRef.current = load;
+    const container = contentRef.current;
+    if (!html || !container) {
+      restoreViewerFragment();
+      return;
+    }
     const sameContent = appliedHtmlRef.current === html;
     appliedHtmlRef.current = html;
     if (!sameContent) currentSectionRef.current = '';
     const id = sameContent ? currentSectionRef.current : normalizeSectionId(initialSectionId);
-    const container = contentRef.current;
-    if (!id || !container) return;
-    const target = findManualElementById(container, id);
-    if (!target || isHiddenInManual(target, container)) return;
-    navigateToManualTarget(id);
-  }, [manualState.html, manualState.load, initialSectionId, navigateToManualTarget]);
+    const target = id ? findManualElementById(container, id) : null;
+    if (target && !isHiddenInManual(target, container)) {
+      navigateToManualTarget(id);
+      return;
+    }
+    if (target && !sameContent && typeof window !== 'undefined'
+      && normalizeSectionId(window.location.hash) === id) {
+      // Opened at a lightbox that still owns the URL fragment (a reload of the stand-alone page
+      // while one was open). There is no earlier fragment to hand back when it closes; a lightbox
+      // the reader has closed since (the fragment moved on) is not opened again.
+      if (viewerFragmentRef.current === null) viewerFragmentRef.current = '';
+      if (openFragmentTarget(id)) return;
+    }
+    revalidateFragmentTarget();
+  }, [
+    manualState.html,
+    manualState.load,
+    initialSectionId,
+    navigateToManualTarget,
+    openFragmentTarget,
+    restoreViewerFragment,
+    revalidateFragmentTarget,
+  ]);
 
   // Held back while a lightbox owns the URL fragment: a host that mirrors the section into the
   // fragment would otherwise replace it (images loading late shift the layout and move the current

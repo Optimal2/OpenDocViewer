@@ -13166,7 +13166,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 77,
+    "line": 86,
     "description": "",
     "params": [
       {
@@ -13197,7 +13197,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 327,
+    "line": 336,
     "description": "",
     "params": [
       {
@@ -13228,7 +13228,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 94,
+    "line": 103,
     "description": "A relative candidate path (a default template, or a relative configured one) is fetched from the ODV base.",
     "params": [
       {
@@ -13259,7 +13259,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 111,
+    "line": 120,
     "description": "Copy only settings used by the selected source.",
     "params": [
       {
@@ -13290,7 +13290,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 199,
+    "line": 208,
     "description": "",
     "params": [
       {
@@ -13315,7 +13315,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 174,
+    "line": 183,
     "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
     "params": [
       {
@@ -13364,7 +13364,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 371,
+    "line": 380,
     "description": "Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.",
     "params": [
       {
@@ -13413,7 +13413,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 137,
+    "line": 146,
     "description": "Load the preferred generated standard manual.",
     "params": [
       {
@@ -13462,7 +13462,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 343,
+    "line": 352,
     "description": "",
     "params": [
       {
@@ -13487,7 +13487,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 62,
+    "line": 71,
     "description": "Absolute URL of the stand-alone manual page ( &lt;ODV base&gt;/manual/ ), optionally opened at a section.",
     "params": [
       {
@@ -13518,7 +13518,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 39,
+    "line": 45,
     "description": "The ODV base URL relative manual paths (and the stand-alone manual page) belong to: runtime config baseHref (set by odv.config.js from its own location), else the base src/app/boo...",
     "params": [
       {
@@ -13531,7 +13531,7 @@
     "returns": [
       {
         "type": "string|undefined",
-        "description": "Absolute base URL, or undefined outside a browser."
+        "description": "Absolute base URL, or undefined outside a browser or when no usable base resolves."
       }
     ],
     "examples": 0
@@ -13543,7 +13543,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 281,
+    "line": 290,
     "description": "",
     "params": [
       {
@@ -13574,7 +13574,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 218,
+    "line": 227,
     "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
     "params": [
       {
@@ -13605,7 +13605,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 267,
+    "line": 276,
     "description": "",
     "params": [
       {
@@ -14143,7 +14143,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 100,
+    "line": 102,
     "description": "",
     "params": [
       {
@@ -14204,7 +14204,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 305,
+    "line": 344,
     "description": "",
     "params": [
       {
@@ -14263,7 +14263,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 227,
+    "line": 229,
     "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
     "params": [
       {
@@ -14302,13 +14302,38 @@
     "examples": 0
   },
   {
+    "id": "ManualView~openFragmentTarget",
+    "name": "openFragmentTarget",
+    "longname": "ManualView~openFragmentTarget",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 258,
+    "description": "Show a manual element that is hidden until it is the URL fragment target (the bundled manuals' :target image lightbox) by making it the fragment target.",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "True when the element is now shown as the fragment target."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "ManualView~pinSectionFor",
     "name": "pinSectionFor",
     "longname": "ManualView~pinSectionFor",
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 179,
+    "line": 181,
     "description": "Make the section holding target current and keep it current until the reader scrolls.",
     "params": [
       {
@@ -14328,7 +14353,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 622,
+    "line": 687,
     "description": "",
     "params": [
       {
@@ -14359,8 +14384,21 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 205,
+    "line": 207,
     "description": "Put back the URL fragment the page had before the manual set one.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualView~revalidateFragmentTarget",
+    "name": "revalidateFragmentTarget",
+    "longname": "ManualView~revalidateFragmentTarget",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/Manual/ManualView.jsx",
+    "line": 277,
+    "description": "After new manual content has been rendered: a fragment the manual set is kept only while it still opens a lightbox in the new content; otherwise the page's own fragment is put bac...",
     "params": [],
     "returns": [],
     "examples": 0
@@ -14372,7 +14410,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 194,
+    "line": 196,
     "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the host or the page behind i...",
     "params": [
       {
@@ -21649,7 +21687,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/manual-page/ManualPage.jsx",
-    "line": 64,
+    "line": 67,
     "description": "",
     "params": [
       {
@@ -21680,7 +21718,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/manual-page/ManualPage.jsx",
-    "line": 32,
+    "line": 35,
     "description": "",
     "params": [],
     "returns": [
@@ -21698,7 +21736,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/manual-page/ManualPage.jsx",
-    "line": 47,
+    "line": 50,
     "description": "Put the section being read into the URL fragment without adding a history entry.",
     "params": [
       {
