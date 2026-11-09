@@ -2,15 +2,16 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.11.0** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.12.0** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.10.0 and earlier are superseded by v2.11.0 and are no longer supported for production deployments. v2.11.0 keeps the complete v2.10.0 security baseline and adds PDF signature reading: signatures are parsed in a worker from bytes the viewer already holds (pdf-lib, pkijs, asn1js), the signed digest and the signature over the ByteRange bytes are verified, bytes appended after a signature are reported as modified after signing unless a later signature that itself verifies covers them, parse failures are reported as unreadable instead of breaking rendering, the inspection queue and worker recovery are bounded, and gateway trust verdicts are accepted only from the viewer's own origin. Runtime config `pdfSignatures.enabled: false` turns the feature off entirely. The shared OMP theme preference (a new host-wide `OMP_THEME_PREFERENCE` cookie with a localStorage mirror) validates its revisions, and the cross-origin theme bridge is opt-in, off by default and limited to the exact origins in `theme.bridge.allowedOrigins`. v2.11.0 also raises the body-parser override to 2.4.0 for CVE-2026-111181 (GHSA-27r3-jxmh-p828) in the optional log servers, resolves the DOMPurify (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr, GHSA-c6gr-qvv4-5v3f), follow-redirects (CVE-2026-111755, CVE-2026-111756) and ip-address (CVE-2026-111997) advisories published after v2.10.0, none of them reachable with the viewer's own use, attaches a CycloneDX SBOM of the runtime dependencies to each release (see EU Cyber Resilience Act below), adds page fine tuning and the overlay and curtain compare views, whose adjustments are held in memory for the session only and which a site can switch off with `fineTune.enabled: false`, sets a site default theme (`theme.defaultMode`) that applies only while no browser choice is stored (a System choice saved by v2.10.0 counts as none), moves to pdfjs-dist 6.4.299 with annotation and signature rendering locked by regression tests, and reports no `npm audit` advisories. v2.10.0 kept the complete v2.9.0 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes, the corrected Content-Security-Policy `connect-src` directive, memory-capped PDF rasterization, visible site-configuration load status, subnet-grouped IPv6 rate limiting in the optional log servers, the print fallback and the help fallback - and adds a search field in the help dialog. The manual HTML is still sanitized with the same DOMPurify configuration; the search is part of the dialog's own code and highlights matches without adding markup to the sanitized manual (CSS Custom Highlight API, with a `<mark>` fallback that is removed again). Operators should upgrade to v2.11.0 before opening new support or security issues.
+OpenDocViewer v2.11.0 and earlier are superseded by v2.12.0 and are no longer supported for production deployments. v2.12.0 keeps the complete v2.11.0 security baseline. PDF signature inspection is now fully self-contained: it uses only the document bytes the viewer already holds, makes no network request and no longer asks ODVGateway for a trust verdict; it also verifies signing times and RFC 3161 timestamps, treats hidden or out-of-range linearization dictionaries, shadowed signed objects and structural streams filling signed references as changes after signing, and reports what it cannot check as "not checked in the viewer" instead of guessing. In-browser OCR (self-hosted Tesseract; no external service) is off by default (`ocr.enabled`); the shipped HTML meta and IIS Content-Security-Policy add `'wasm-unsafe-eval'` to `script-src` for it and for pdf.js WebAssembly decoders, which does not allow JavaScript `eval` or `new Function` and adds no script origin. Read-aloud uses local voices only. The stand-alone manual page at `manual/` ships its own IIS security headers and no-cache rule, and the session URL also accepts same-origin `blob:` URLs through the same timeout and size cap as http(s). v2.12.0 resolves follow-redirects CVE-2026-116689 (not reachable from the viewer bundle) and the development-only minimatch CVE-2026-118764, and reports no `npm audit` advisories. Operators should upgrade to v2.12.0 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.11.0  | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.12.0  | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.11.0  | :x: | Superseded by v2.12.0 (self-contained signature inspection with timestamp checks and hardened revision analysis, OCR off by default with a `wasm-unsafe-eval` CSP, follow-redirects and minimatch advisory fixes); upgrade required |
 | 2.10.0  | :x: | Superseded by v2.11.0 (PDF signature reading with bounded worker inspection, origin-restricted gateway trust, validated shared theme preference with an opt-in origin-restricted bridge, body-parser fix for CVE-2026-111181 in the optional log servers, DOMPurify, follow-redirects and ip-address advisory fixes); upgrade required |
 | 2.9.0   | :x: | Superseded by v2.10.0 (help-dialog search on the v2.9.0 baseline); upgrade required |
 | 2.8.0   | :x: | Superseded by v2.9.0 rate-limit, print-fallback and dependency fixes; upgrade required |
@@ -18,35 +19,18 @@ Earlier releases are retained for historical reference only and are **not suppor
 | 2.7.0   | :x: | Superseded by v2.7.1 advisory fixes and the CSP `connect-src` correction; upgrade required |
 | <= 2.6.6 | :x: | Superseded by v2.7.0 framing, log-token, dependency, and CI/OMP-build hardening; upgrade required |
 
-## Unreleased installation policy update (2026-11-03)
-
-The shipped HTML meta and IIS Content-Security-Policy now allow `'wasm-unsafe-eval'` in
-`script-src` so site configuration can enable the self-hosted OCR engine. The same permission
-allows pdf.js WebAssembly decoders. It does not enable JavaScript `eval` or `new Function`,
-add script origins, or remove the existing inline-script hash. OCR is still disabled by
-default. Custom server/gateway policies can continue to prohibit WebAssembly, but must allow
-it when OCR is enabled; all header and meta policies are enforced together. See
-[runtime configuration](docs-src/runtime-configuration.md#csp-for-ocr).
-This is an OMP artifact update, not a new official release.
-
-## Unreleased dependency baseline update (2026-11-08)
-
-The development baseline moves every npm package that was behind by a patch or minor gap
-to the latest release on its own line, and raises the transitive `overrides` floors for
-asynckit, body-parser, catharsis, flatted, linkify-it, lodash, mdn-data, mime-db,
-minimatch, ms, path-to-regexp, picomatch, regenerator-runtime, safe-buffer,
-shell-quote, why-is-node-running and yargs. The pinned PDF.js line moves from 6.4.299 to
-6.5.438, with annotation and signature rendering still locked by the Vitest and
-Chromium regression tests, and pkijs moves from 4.0.0 to 4.0.1. pkijs 4.0.1 encodes the
-signed CMS attributes as a DER SET OF and sorts them (RFC 5652 section 5.4); the viewer
-is unchanged and still uses the first `signingTime` attribute in the order the signer
-encoded, and the signature fixtures now encode the attribute set themselves so the
-pinned order is the signer's own and not a canonical one. `npm audit` reports no
-advisories. This is an OMP artifact update, not a new official release.
-
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.11.0 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.12.0 is supported.
+
+### OpenDocViewer v2.12.0
+Changes since v2.11.0:
+
+- PDF signature inspection is self-contained: it uses only the bytes the viewer already holds, makes no network request and no longer requests a trust verdict from ODVGateway. Signing times and RFC 3161 signature and document timestamps are verified. Hidden or out-of-range linearization dictionaries, shadowed signed objects and structural streams that fill signed references are treated as changes after signing, cross-checked against pdf.js in a differential test suite. What the viewer cannot check is reported as "not checked in the viewer" (information, or a warning with `pdfSignatures.uncheckedSeverity: 'warning'`); an unknown ECDSA curve is no longer guessed and an unreadable source no longer falls back to "no signatures".
+- OCR of scanned pages runs in the browser with a self-hosted Tesseract engine and language files served from the viewer's own `ocr/` folder; no page image leaves the browser. It is off by default (`ocr.enabled`). The shipped HTML meta and IIS Content-Security-Policy allow `'wasm-unsafe-eval'` in `script-src`, which OCR and pdf.js WebAssembly decoders need; it does not enable JavaScript `eval` or `new Function` and adds no script origin. Custom server or gateway policies may keep prohibiting WebAssembly where OCR stays off. Read-aloud uses only voices installed on the computer, never an online voice.
+- The stand-alone manual page (`manual/index.html`) is served with its own Content-Security-Policy (the viewer's, without an inline-script hash because the page has no inline script), the same security headers and a no-cache rule; the runtime-config SRI is injected into it. The manual HTML is sanitized as before, and `help.manual.enabled: false` hides the page's content as well as the Manual entry.
+- `?sessionurl=` and `?bundleUrl=` accept same-origin `blob:` URLs; only the protocol allow-list changed, and blob URLs go through the same fetch path, 180-second timeout and 256 MB size cap as http(s).
+- follow-redirects 1.16.3 resolves CVE-2026-116689 (axios's Node.js adapter, not used by the viewer bundle); the development-only minimatch override moves to `^11.0.4` for CVE-2026-118764. pdfjs-dist moves from 6.4.299 to 6.5.438, pinned exactly, with annotation and signature rendering still locked by Vitest and Chromium regression tests; pkijs 4.0.1 encodes signed CMS attributes as a sorted DER SET OF, and the viewer still uses the first `signingTime` in the signer's own order. Every dependency behind by a patch or minor release moved to the latest on its line and the transitive `overrides` floors were raised. `npm audit` reports no advisories. Default checkout line endings are pinned so the dist archive and the OMP artifact are reproducible; the CycloneDX SBOM is still attached to each release.
 
 ### OpenDocViewer v2.11.0
 Changes since v2.10.0:
