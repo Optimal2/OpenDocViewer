@@ -1,6 +1,6 @@
 # OpenDocViewer / src/app
 
-File count: 3. Line count: 782. JSDoc symbol count: 20.
+File count: 3. Line count: 814. JSDoc symbol count: 21.
 
 ## src/app/AppBootstrap.jsx
 
@@ -29,6 +29,7 @@ Runtime boot loader that resolves configuration scripts before React starts.
 
 Symbols:
 
+- `getPageMeta` (function) - Read a &lt;meta name\=&quot;...&quot; content\=&quot;...&quot;&gt; value from the page.
 - `getAppBase` (function) - Return the application base path \(always with a trailing slash\) derived from the current page URL.
 - `isJsContentType` (function) - Heuristic: does a content\-type look like JavaScript?
 - `probeScriptUrl` (function) - Probe a candidate script URL and only accept it when the response looks like JavaScript.

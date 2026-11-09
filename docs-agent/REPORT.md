@@ -2,23 +2,23 @@
 
 ## Coverage
 
-- Files: 192
-- Source lines: 69401
-- JSDoc symbols: 1993
-- Files without JSDoc doclets: 3
+- Files: 196
+- Source lines: 69682
+- JSDoc symbols: 2001
+- Files without JSDoc doclets: 4
 - Low-confidence summaries: 2
 - Parse errors: 0
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 41 incoming local imports
-- `src/utils/runtimeConfig.js`: 31 incoming local imports
+- `src/logging/systemLogger.js`: 42 incoming local imports
+- `src/utils/runtimeConfig.js`: 32 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 13 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
 - `src/utils/imageAdjustments.js`: 9 incoming local imports
+- `src/utils/viewerPreferences.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
-- `src/utils/viewerPreferences.js`: 8 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 6 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
@@ -52,6 +52,7 @@
 Files without JSDoc doclets:
 - `src/generated/standard-manual/manual.en.js`
 - `src/generated/standard-manual/manual.sv.js`
+- `src/manual-page/main.jsx`
 - `src/ocr/index.js`
 
 - Low-confidence summaries are generated from source shape rather than primary JSDoc.

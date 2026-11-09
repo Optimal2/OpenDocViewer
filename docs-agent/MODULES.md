@@ -9,7 +9,7 @@ File count: 2. Line count: 508. JSDoc symbol count: 7.
 
 ## src/app
 
-File count: 3. Line count: 782. JSDoc symbol count: 20.
+File count: 3. Line count: 814. JSDoc symbol count: 21.
 
 - `src/app/AppBootstrap.jsx` - Application bootstrap React component.
 - `src/app/OpenDocViewer.jsx` - src/app/OpenDocViewer.jsx Main application shell for the viewer.
@@ -55,10 +55,10 @@ File count: 21. Line count: 7593. JSDoc symbol count: 112.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
-- `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
-- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live
 - `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
-- `src/components/DocumentToolbar/PrintPipelineDialogs.jsx` - The dialogs of the ONE print pipeline \(usePrintPipeline.js\): the print dialog and the generated\-PDF progress \(modal, or a dock while working in the background\).
+- `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
+- `src/components/DocumentToolbar/LanguageMenuButton.jsx` - Compact language selector for the toolbar.
+- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live
 
 ## src/components/DocumentViewer
 
@@ -75,7 +75,7 @@ File count: 17. Line count: 7787. JSDoc symbol count: 157.
 
 ## src/components/Manual
 
-File count: 4. Line count: 1533. JSDoc symbol count: 44.
+File count: 4. Line count: 1585. JSDoc symbol count: 46.
 
 - `src/components/Manual/manualSearch.js` - In\-manual text search: locale\-aware case folding, match collection over the rendered manual and highlighting through the CSS Custom Highlight API with a \`&lt;mark&gt;\` fallback.
 - `src/components/Manual/manualNavigation.js` - Scrolling, focus and URL\-fragment helpers for navigating inside a rendered manual.
@@ -88,8 +88,8 @@ File count: 5. Line count: 3605. JSDoc symbol count: 101.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
-- `src/contexts/readAloudContext.js` - The read\-aloud state shared by the page's context menu \("Read the selection aloud" / "Stop reading aloud", components/ReadAloudMenuItem.jsx\) and the toolbar's language menu \(the "Reading language" section, DocumentToolba
 - `src/contexts/ThemeProvider.jsx` - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
+- `src/contexts/readAloudContext.js` - The read\-aloud state shared by the page's context menu \("Read the selection aloud" / "Stop reading aloud", components/ReadAloudMenuItem.jsx\) and the toolbar's language menu \(the "Reading language" section, DocumentToolba
 - `src/contexts/themeContext.js` - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 
 ## src/ErrorBoundary.jsx
@@ -150,6 +150,14 @@ File count: 2. Line count: 779. JSDoc symbol count: 48.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/logging/userLogger.js` - UserLogController — client\-side controller for \*\*user\*\* print logs \(backend\-agnostic\).
 
+## src/manual\-page
+
+File count: 3. Line count: 173. JSDoc symbol count: 4.
+
+- `src/manual-page/main.jsx` - Entry of the stand\-alone manual page \(manual/index.html\).
+- `src/manual-page/ManualPage.jsx` - The stand\-alone manual page \(served as \`&lt;ODV base&gt;/manual/\`\): a header with the page title and the viewer's own theme and language menus, and the shared manual view filling the rest.
+- `src/manual-page/mountManualPage.jsx` - Mount the stand\-alone manual page into a container, the way src/index.jsx mounts the viewer: apply the shared theme and toolbar density to the document before the first render, then render the page inside the viewer's Th
+
 ## src/ocr
 
 File count: 14. Line count: 2116. JSDoc symbol count: 101.
@@ -183,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 64. Line count: 24015. JSDoc symbol count: 988.
+File count: 65. Line count: 24039. JSDoc symbol count: 989.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

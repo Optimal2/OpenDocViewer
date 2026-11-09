@@ -414,6 +414,17 @@ export default function ManualView({
     onActiveSectionChangeRef.current?.(activeSectionId);
   }, [activeSectionId]);
 
+  // The search field's own clear button fires the native `search` event (React has no prop for
+  // it); follow it like an input change. The field exists only while a manual is shown.
+  const hasManualHtml = Boolean(manualState.html);
+  useEffect(() => {
+    const input = searchInputRef.current;
+    if (!hasManualHtml || !input) return undefined;
+    const handleNativeSearch = (event) => setSearchQuery(event?.target?.value ?? '');
+    input.addEventListener('search', handleNativeSearch);
+    return () => input.removeEventListener('search', handleNativeSearch);
+  }, [hasManualHtml]);
+
   // Track the section being read: the last heading above the active line of the content pane.
   // The observer only signals that a heading crossed that line; the position check reads layout
   // once per animation frame and never writes to it.
@@ -629,7 +640,6 @@ export default function ManualView({
               aria-label={t('help.searchManualLabel', { defaultValue: 'Search the manual' })}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event?.target?.value ?? '')}
-              onSearch={(event) => setSearchQuery(event?.target?.value ?? '')}
               onKeyDown={handleSearchKeyDown}
             />
             {searchQuery ? (

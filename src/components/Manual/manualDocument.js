@@ -27,15 +27,51 @@ const STANDARD_MANUAL_LOADERS = Object.freeze({
 });
 
 /**
+ * The ODV base URL relative manual paths belong to: runtime config `baseHref` (set by
+ * odv.config.js from its own location), else the page's folder. Both are the same in the viewer;
+ * they differ on the stand-alone manual page, which lives one folder below the base.
+ *
+ * @param {(string|undefined)} baseHref Runtime config `baseHref`.
+ * @returns {(string|undefined)} Absolute base URL, or undefined outside a browser.
+ */
+function resolveOdvBaseUrl(baseHref) {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    return new URL(typeof baseHref === 'string' && baseHref.trim() ? baseHref.trim() : './', window.location.href).toString();
+  } catch {
+    return window.location.href;
+  }
+}
+
+/**
  * @param {string} candidate
+ * @param {(string|undefined)} baseUrl ODV base URL (resolveOdvBaseUrl).
  * @returns {string} Absolute URL used to resolve manual-relative images and other assets.
  */
-function absoluteManualUrl(candidate) {
+function absoluteManualUrl(candidate, baseUrl) {
   try {
-    const base = typeof window !== 'undefined' ? window.location.href : undefined;
+    const base = baseUrl || (typeof window !== 'undefined' ? window.location.href : undefined);
     return new URL(String(candidate || ''), base).toString();
   } catch {
     return String(candidate || '');
+  }
+}
+
+/**
+ * A relative candidate path (a default template, or a relative configured one) is fetched from the
+ * ODV base. Where the base is the page's own folder (the viewer) the path is passed on unchanged.
+ *
+ * @param {string} candidate
+ * @param {(string|undefined)} baseUrl ODV base URL (resolveOdvBaseUrl).
+ * @returns {string}
+ */
+function candidateFromOdvBase(candidate, baseUrl) {
+  if (!baseUrl || !isRewritableRelativeUrl(candidate)) return candidate;
+  try {
+    if (new URL('./', window.location.href).toString() === baseUrl) return candidate;
+    return new URL(String(candidate), baseUrl).toString();
+  } catch {
+    return candidate;
   }
 }
 
@@ -69,9 +105,10 @@ function copyManualConfig(manualConfig, sourceMode) {
  * @param {string} options.language
  * @param {Object=} options.manualConfig
  * @param {function(string): Promise<Object>} options.fetchCandidate
+ * @param {(string|undefined)} options.baseUrl ODV base URL the generated manual's assets live under.
  * @returns {Promise<({candidate: string, url: string, html: string, sourceType: string}|null)>}
  */
-async function loadStandardManual({ language, manualConfig, fetchCandidate }) {
+async function loadStandardManual({ language, manualConfig, fetchCandidate, baseUrl }) {
   const standardConfig = copyManualConfig(manualConfig, 'standard');
   // Preserve configuration failure settlement even when a healthy generated module needs no fetch.
   const fallbackCandidates = buildManualCandidates(language, standardConfig);
@@ -85,7 +122,7 @@ async function loadStandardManual({ language, manualConfig, fetchCandidate }) {
       const candidate = interpolateManualTemplate(DEFAULT_FALLBACK_MANUAL_TEMPLATE, preferredLanguage);
       return {
         candidate,
-        url: absoluteManualUrl(candidate),
+        url: absoluteManualUrl(candidate, baseUrl),
         html: module.default,
         sourceType: 'standard',
       };
@@ -105,9 +142,10 @@ async function loadStandardManual({ language, manualConfig, fetchCandidate }) {
  * @param {string} options.language
  * @param {Object=} options.manualConfig
  * @param {function(string): Promise<Object>} options.fetchCandidate
+ * @param {(string|undefined)} options.baseUrl ODV base URL (passed on to loadStandardManual).
  * @returns {Promise<({candidate: string, url: string, html: string, sourceType: string}|null)>}
  */
-async function loadAutoManual({ language, manualConfig, fetchCandidate }) {
+async function loadAutoManual({ language, manualConfig, fetchCandidate, baseUrl }) {
   const autoConfig = copyManualConfig(manualConfig, 'auto');
   const languages = buildManualLanguageCandidates(language, autoConfig);
   for (const candidateLanguage of languages) {
@@ -121,6 +159,7 @@ async function loadAutoManual({ language, manualConfig, fetchCandidate }) {
       language: candidateLanguage,
       manualConfig: languageConfig,
       fetchCandidate,
+      baseUrl,
     });
     if (standardSource) return standardSource;
   }
@@ -306,7 +345,10 @@ function removeManualRefreshToken(url) {
 export async function loadManualDocument({ language, runtimeConfig, refreshToken = 0, signal = undefined }) {
   const manualConfig = runtimeConfig?.help?.manual;
   const sourceMode = resolveManualSourceMode(manualConfig);
-  const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidate, refreshToken), {
+  let baseHref;
+  try { baseHref = runtimeConfig?.baseHref; } catch { baseHref = undefined; }
+  const baseUrl = resolveOdvBaseUrl(baseHref);
+  const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidateFromOdvBase(candidate, baseUrl), refreshToken), {
     cache: refreshToken ? 'reload' : 'no-store',
     credentials: 'same-origin',
     signal,
@@ -314,8 +356,8 @@ export async function loadManualDocument({ language, runtimeConfig, refreshToken
   });
 
   const source = await (sourceMode === 'standard'
-    ? loadStandardManual({ language, manualConfig, fetchCandidate })
-    : loadAutoManual({ language, manualConfig, fetchCandidate })
+    ? loadStandardManual({ language, manualConfig, fetchCandidate, baseUrl })
+    : loadAutoManual({ language, manualConfig, fetchCandidate, baseUrl })
   );
   if (!source) return null;
 

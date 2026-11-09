@@ -173,6 +173,23 @@ describe('ManualView outside a dialog', () => {
     expect(content().querySelector('h2#utseende')).not.toBeNull();
   });
 
+  it('follows the native search event of the field clear button', async () => {
+    await renderView();
+    typeSearch('zooma');
+    await flush(260);
+    expect(content().querySelectorAll('mark[data-odv-manual-mark]').length).toBeGreaterThan(0);
+
+    act(() => {
+      const input = searchInput();
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(input, '');
+      input.dispatchEvent(new window.Event('search'));
+    });
+    await flush(260);
+    expect(content().querySelectorAll('mark[data-odv-manual-mark]').length).toBe(0);
+    expect(container.querySelector('.odv-manual-searchbar-clear')).toBeNull();
+  });
+
   it('calls onEscape when nothing in the view consumes Escape', async () => {
     const onEscape = vi.fn();
     await renderView({ onEscape });

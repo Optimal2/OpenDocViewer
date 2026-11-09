@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/Manual
 
-File count: 4. Line count: 1533. JSDoc symbol count: 44.
+File count: 4. Line count: 1585. JSDoc symbol count: 46.
 
 ## src/components/Manual/manualDocument.js
 
@@ -12,7 +12,9 @@ Local imports: `src/utils/manualSources.js`, `src/utils/standardManual.js`, `src
 
 Symbols:
 
+- `resolveOdvBaseUrl` (function) - The ODV base URL relative manual paths belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the page's folder.
 - `absoluteManualUrl` (function) - No description.
+- `candidateFromOdvBase` (function) - A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base.
 - `copyManualConfig` (function) - Copy only settings used by the selected source.
 - `loadStandardManual` (function) - Load the preferred generated standard manual.
 - `loadAutoManual` (function) - Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.
@@ -22,7 +24,6 @@ Symbols:
 - `rewriteManualHtml` (function) - No description.
 - `appendManualRefreshToken` (function) - No description.
 - `removeManualRefreshToken` (function) - No description.
-- `loadManualDocument` (function) - Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.
 
 ## src/components/Manual/manualNavigation.js
 

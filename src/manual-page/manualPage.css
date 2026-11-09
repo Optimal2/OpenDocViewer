@@ -1,0 +1,45 @@
+/* File: src/manual-page/manualPage.css
+   Layout of the stand-alone manual page (manual/index.html). The header reuses the viewer's
+   toolbar look (.toolbar, .odv-btn, the popup menus); the body hosts the shared manual view,
+   which needs a flex column and the `odv-manual` size container (see ManualView.jsx). */
+
+.odv-manual-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  background: var(--odv-surface, #ffffff);
+  color: var(--text-color, #1b1f24);
+}
+
+.toolbar.odv-manual-page-header {
+  border-radius: 0;
+}
+
+.odv-manual-page-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0 8px;
+  overflow: hidden;
+  color: var(--text-color-strong, #111111);
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.odv-manual-page-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  container: odv-manual / inline-size;
+}
+
+.odv-manual-page-disabled {
+  margin: 0;
+  padding: 24px 22px;
+  font-size: 15px;
+  line-height: 1.5;
+}

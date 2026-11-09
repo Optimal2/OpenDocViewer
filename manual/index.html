@@ -1,0 +1,52 @@
+<!-- File: manual/index.html -->
+<!--
+  OpenDocViewer — stand-alone manual page (served as <ODV base>/manual/).
+
+  A second Vite build entry next to index.html. It shares the viewer's boot loader
+  (src/app/bootConfig.js): the meta tags below make it load odv.site.config.js and odv.config.js
+  from the ODV base one level up, in the same order as the viewer, and then start
+  src/manual-page/main.jsx instead of the viewer. Production builds use base './', so Vite
+  writes this page's asset URLs relative to manual/ ("../assets/...").
+-->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Keep this fallback CSP aligned with public/web.config (this page has no inline script). -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: http: https:; font-src 'self' data:; connect-src 'self' blob: http: https: ws: wss:; worker-src 'self' blob:; frame-src 'self' blob:; form-action 'self';" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Read by src/app/bootConfig.js: the ODV base relative to this page, and the entry to start. -->
+    <meta name="odv-app-base" content="../" />
+    <meta name="odv-page" content="manual" />
+
+    <link rel="icon" href="../favicon.ico" />
+
+    <!-- Replaced by the localised help.standalonePageTitle once the page has started. -->
+    <title>OpenDocViewer – Manual</title>
+
+    <style>
+      html, body { height: 100%; }
+      body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+      #root { height: 100vh; width: 100vw; display: flex; flex-direction: column; }
+      .noscript-wrap { text-align: center; margin-top: 16vh; padding: 0 16px; }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div class="noscript-wrap" role="alert">
+        <p lang="en">You need to enable JavaScript to read the manual.</p>
+        <p lang="sv">Du måste aktivera JavaScript för att läsa manualen.</p>
+      </div>
+    </noscript>
+
+    <div id="root"></div>
+
+    <!-- Deployments that pin runtime-config hashes may add data-odv-site-config-integrity and
+         data-odv-config-integrity here, as on the viewer's index.html. -->
+    <script type="module" data-odv-bootstrap src="../src/app/bootConfig.js"></script>
+  </body>
+</html>

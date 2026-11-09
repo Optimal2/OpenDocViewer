@@ -256,8 +256,21 @@
     "kind": "function",
     "scope": "global",
     "file": "src/app/bootConfig.js",
-    "line": 16,
+    "line": 35,
     "description": "Return the application base path (always with a trailing slash) derived from the current page URL.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "getPageMeta",
+    "name": "getPageMeta",
+    "longname": "getPageMeta",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/app/bootConfig.js",
+    "line": 21,
+    "description": "Read a &lt;meta name=&quot;...&quot; content=&quot;...&quot;&gt; value from the page.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -269,7 +282,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/app/bootConfig.js",
-    "line": 29,
+    "line": 55,
     "description": "Heuristic: does a content-type look like JavaScript?",
     "params": [],
     "returns": [],
@@ -282,7 +295,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/app/bootConfig.js",
-    "line": 58,
+    "line": 84,
     "description": "Load a classic script and resolve when it executes (or errors).",
     "params": [],
     "returns": [],
@@ -295,7 +308,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/app/bootConfig.js",
-    "line": 109,
+    "line": 135,
     "description": "Try multiple candidate URLs (in order) until one probes as JS, then load it.",
     "params": [],
     "returns": [],
@@ -308,7 +321,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/app/bootConfig.js",
-    "line": 42,
+    "line": 68,
     "description": "Probe a candidate script URL and only accept it when the response looks like JavaScript.",
     "params": [],
     "returns": [],
@@ -13153,7 +13166,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 33,
+    "line": 51,
     "description": "",
     "params": [
       {
@@ -13161,6 +13174,12 @@
         "type": "string",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "baseUrl",
+        "type": "string|undefined",
+        "optional": false,
+        "description": "ODV base URL (resolveOdvBaseUrl)."
       }
     ],
     "returns": [
@@ -13178,7 +13197,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 262,
+    "line": 301,
     "description": "",
     "params": [
       {
@@ -13203,13 +13222,44 @@
     "examples": 0
   },
   {
+    "id": "candidateFromOdvBase",
+    "name": "candidateFromOdvBase",
+    "longname": "candidateFromOdvBase",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 68,
+    "description": "A relative candidate path (a default template, or a relative configured one) is fetched from the ODV base.",
+    "params": [
+      {
+        "name": "candidate",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "baseUrl",
+        "type": "string|undefined",
+        "optional": false,
+        "description": "ODV base URL (resolveOdvBaseUrl)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "copyManualConfig",
     "name": "copyManualConfig",
     "longname": "copyManualConfig",
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 49,
+    "line": 85,
     "description": "Copy only settings used by the selected source.",
     "params": [
       {
@@ -13240,7 +13290,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 134,
+    "line": 173,
     "description": "",
     "params": [
       {
@@ -13265,7 +13315,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 110,
+    "line": 148,
     "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
     "params": [
       {
@@ -13291,6 +13341,12 @@
         "type": "function",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "options.baseUrl",
+        "type": "string|undefined",
+        "optional": false,
+        "description": "ODV base URL (passed on to loadStandardManual)."
       }
     ],
     "returns": [
@@ -13308,7 +13364,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 306,
+    "line": 345,
     "description": "Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.",
     "params": [
       {
@@ -13357,7 +13413,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 74,
+    "line": 111,
     "description": "Load the preferred generated standard manual.",
     "params": [
       {
@@ -13383,6 +13439,12 @@
         "type": "function",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "options.baseUrl",
+        "type": "string|undefined",
+        "optional": false,
+        "description": "ODV base URL the generated manual's assets live under."
       }
     ],
     "returns": [
@@ -13400,7 +13462,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 278,
+    "line": 317,
     "description": "",
     "params": [
       {
@@ -13419,13 +13481,38 @@
     "examples": 0
   },
   {
+    "id": "resolveOdvBaseUrl",
+    "name": "resolveOdvBaseUrl",
+    "longname": "resolveOdvBaseUrl",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualDocument.js",
+    "line": 37,
+    "description": "The ODV base URL relative manual paths belong to: runtime config baseHref (set by odv.config.js from its own location), else the page's folder.",
+    "params": [
+      {
+        "name": "baseHref",
+        "type": "string|undefined",
+        "optional": false,
+        "description": "Runtime config baseHref ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string|undefined",
+        "description": "Absolute base URL, or undefined outside a browser."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "rewriteManualHtml",
     "name": "rewriteManualHtml",
     "longname": "rewriteManualHtml",
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 216,
+    "line": 255,
     "description": "",
     "params": [
       {
@@ -13456,7 +13543,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 153,
+    "line": 192,
     "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
     "params": [
       {
@@ -13487,7 +13574,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 202,
+    "line": 241,
     "description": "",
     "params": [
       {
@@ -14210,7 +14297,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 571,
+    "line": 582,
     "description": "",
     "params": [
       {
@@ -21525,6 +21612,105 @@
     "examples": 0
   },
   {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/manual-page/ManualPage.jsx",
+    "line": 62,
+    "description": "",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.config",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime configuration; defaults to the loaded viewer configuration."
+      }
+    ],
+    "returns": [
+      {
+        "type": "React.ReactElement",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "readUrlFragment",
+    "name": "readUrlFragment",
+    "longname": "readUrlFragment",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/manual-page/ManualPage.jsx",
+    "line": 30,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "string",
+        "description": "The current URL fragment without # (still URL-encoded)."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "syncUrlFragment",
+    "name": "syncUrlFragment",
+    "longname": "syncUrlFragment",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/manual-page/ManualPage.jsx",
+    "line": 45,
+    "description": "Put the section being read into the URL fragment without adding a history entry.",
+    "params": [
+      {
+        "name": "sectionId",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "mountManualPage",
+    "name": "mountManualPage",
+    "longname": "mountManualPage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/manual-page/mountManualPage.jsx",
+    "line": 21,
+    "description": "",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element|null",
+        "optional": false,
+        "description": "Element to render into ( #root )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": "The React root ( createRoot ), or null without a container."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "OcrAssetManifest",
     "name": "OcrAssetManifest",
     "longname": "OcrAssetManifest",
@@ -28105,6 +28291,31 @@
       {
         "type": "string",
         "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isManualEnabled",
+    "name": "isManualEnabled",
+    "longname": "isManualEnabled",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualEnabled.js",
+    "line": 15,
+    "description": "",
+    "params": [
+      {
+        "name": "config",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": "Runtime configuration (e.g. getRuntimeConfig() )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "False only when config.help.manual.enabled is exactly false ."
       }
     ],
     "examples": 0

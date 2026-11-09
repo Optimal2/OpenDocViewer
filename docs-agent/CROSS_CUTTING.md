@@ -8,8 +8,8 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 - `src/contexts/viewerContext.js` (260 lines) - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` (2920 lines) - OpenDocViewer — Viewer state provider.
-- `src/contexts/readAloudContext.js` (41 lines) - The read\-aloud state shared by the page's context menu \("Read the selection aloud" / "Stop reading aloud", components/ReadAloudMenuItem.jsx\) and the toolbar's language menu \(the "Reading language" section, DocumentToolba
 - `src/contexts/ThemeProvider.jsx` (343 lines) - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
+- `src/contexts/readAloudContext.js` (41 lines) - The read\-aloud state shared by the page's context menu \("Read the selection aloud" / "Stop reading aloud", components/ReadAloudMenuItem.jsx\) and the toolbar's language menu \(the "Reading language" section, DocumentToolba
 - `src/contexts/themeContext.js` (41 lines) - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 
 ### Hooks
@@ -47,12 +47,12 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 React raw HTML rendering.
 
-- `src/components/Manual/ManualView.jsx` lines 723 - Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in\-manual search with highlig
+- `src/components/Manual/ManualView.jsx` lines 733 - Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in\-manual search with highlig
 
 ### innerHTML
 
 Direct DOM HTML assignment or access.
 
-- `src/components/Manual/manualDocument.js` lines 251, 252, 253 - Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
+- `src/components/Manual/manualDocument.js` lines 290, 291, 292 - Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
 - `src/utils/printDom.js` lines 264 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\).
 - `src/utils/standardManual.js` lines 566 - Filter and sanitize the bundled standard manual for a supplied runtime config.

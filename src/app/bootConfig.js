@@ -3,7 +3,8 @@
  * Runtime boot loader that resolves configuration scripts before React starts.
  *
  * High-level flow:
- * - derive the application base path from the current URL
+ * - derive the application base path from the current URL (or from the page's `odv-app-base`
+ *   meta tag, used by the stand-alone manual page one folder below the base)
  * - probe and load optional `odv.site.config.js`
  * - probe and load required `odv.config.js`
  * - import `src/index.jsx` only after the runtime configuration surface is available
@@ -12,8 +13,33 @@
  * the wrong MIME type as if it were JavaScript.
  */
 
-/** Return the application base path (always with a trailing slash) derived from the current page URL. */
+/**
+ * Read a `<meta name="..." content="...">` value from the page. Pages other than the viewer's own
+ * index.html (the stand-alone manual under `manual/`) declare where the ODV base is and which entry
+ * to start this way; `<meta>` tags survive the Vite build unchanged, unlike script attributes.
+ */
+function getPageMeta(name) {
+  try {
+    const value = document.querySelector(`meta[name="${name}"]`)?.getAttribute('content');
+    return typeof value === 'string' ? value.trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Return the application base path (always with a trailing slash) derived from the current page URL.
+ * A page in a subfolder sets `<meta name="odv-app-base" content="../">` so the runtime configuration
+ * is loaded from the ODV base (one level up), exactly as the viewer loads it.
+ */
 function getAppBase() {
+  const relativeBase = getPageMeta('odv-app-base');
+  if (relativeBase) {
+    try {
+      const p = new URL(relativeBase, document.baseURI || window.location.href).pathname || '/';
+      return p.endsWith('/') ? p : p + '/';
+    } catch { /* fall back to the page's own folder */ }
+  }
   try {
     const u = new URL(document.baseURI || window.location.href);
     let p = u.pathname || '/';
@@ -151,6 +177,12 @@ async function loadFromCandidates(name, candidates, { optional = false, nonce = 
   );
   if (!mainCfg.ok) return; // cannot run without defaults
 
-  // 3) Start the React application only after runtime configuration has been loaded.
+  // 3) Start the React application only after runtime configuration has been loaded. The
+  //    stand-alone manual page (manual/index.html, `<meta name="odv-page" content="manual">`)
+  //    starts its own small entry instead of the viewer; both are lazy chunks of this module.
+  if (getPageMeta('odv-page') === 'manual') {
+    await import('/src/manual-page/main.jsx');
+    return;
+  }
   await import('/src/index.jsx');
 })();

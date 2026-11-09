@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 64. Line count: 24015. JSDoc symbol count: 988.
+File count: 65. Line count: 24039. JSDoc symbol count: 989.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -212,6 +212,16 @@ Symbols:
 - `headingStartsAtOrBefore` (function) - No description.
 - `findManualSectionId` (function) - Id of the section that contains the node: the last listed heading at or before it in document order, or '' when the node comes before the first heading.
 - `countManualMatchesPerSection` (function) - Count search hits per section in a single merge pass.
+
+## src/utils/manualEnabled.js
+
+The single switch that turns the user manual off for an installation.
+
+Exports: `isManualEnabled`, `isManualEnabled`
+
+Symbols:
+
+- `isManualEnabled` (function) - No description.
 
 ## src/utils/manualSources.js
 

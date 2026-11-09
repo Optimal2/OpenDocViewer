@@ -31,18 +31,19 @@
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
+- `src/manual-page/main.jsx` - Entry of the stand\-alone manual page \(manual/index.html\).
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 41 incoming local imports
-- `src/utils/runtimeConfig.js`: 31 incoming local imports
+- `src/logging/systemLogger.js`: 42 incoming local imports
+- `src/utils/runtimeConfig.js`: 32 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 13 incoming local imports
 - `src/utils/compareTransform.js`: 13 incoming local imports
 - `src/utils/imageAdjustments.js`: 9 incoming local imports
+- `src/utils/viewerPreferences.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
-- `src/utils/viewerPreferences.js`: 8 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 6 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
@@ -52,6 +53,6 @@
 - `src/components/DocumentViewer/hooks/useViewerEffects.js`: 4 incoming local imports
 - `src/contexts/readAloudContext.js`: 4 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
+- `src/utils/ompThemePreference.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
 - `src/utils/printSanitize.js`: 4 incoming local imports
-- `src/components/common/StatusLed.jsx`: 3 incoming local imports

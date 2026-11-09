@@ -19,11 +19,12 @@
 | <code>PortableDocumentBundle</code> | typedef | <code>src/app/AppBootstrap.jsx:47</code> | Portable document bundle shape. |
 | <code>SessionShape</code> | typedef | <code>src/app/AppBootstrap.jsx:31</code> | Session metadata for a bundle. |
 | <code>UrlConfig</code> | typedef | <code>src/app/AppBootstrap.jsx:54</code> | URL parameter config \(pattern mode\). |
-| <code>getAppBase</code> | function | <code>src/app/bootConfig.js:16</code> | Return the application base path \(always with a trailing slash\) derived from the current page URL. |
-| <code>isJsContentType</code> | function | <code>src/app/bootConfig.js:29</code> | Heuristic: does a content-type look like JavaScript? |
-| <code>loadClassicScript</code> | function | <code>src/app/bootConfig.js:58</code> | Load a classic script and resolve when it executes \(or errors\). |
-| <code>loadFromCandidates</code> | function | <code>src/app/bootConfig.js:109</code> | Try multiple candidate URLs \(in order\) until one probes as JS, then load it. |
-| <code>probeScriptUrl</code> | function | <code>src/app/bootConfig.js:42</code> | Probe a candidate script URL and only accept it when the response looks like JavaScript. |
+| <code>getAppBase</code> | function | <code>src/app/bootConfig.js:35</code> | Return the application base path \(always with a trailing slash\) derived from the current page URL. |
+| <code>getPageMeta</code> | function | <code>src/app/bootConfig.js:21</code> | Read a &amp;lt;meta name=&amp;quot;...&amp;quot; content=&amp;quot;...&amp;quot;&amp;gt; value from the page. |
+| <code>isJsContentType</code> | function | <code>src/app/bootConfig.js:55</code> | Heuristic: does a content-type look like JavaScript? |
+| <code>loadClassicScript</code> | function | <code>src/app/bootConfig.js:84</code> | Load a classic script and resolve when it executes \(or errors\). |
+| <code>loadFromCandidates</code> | function | <code>src/app/bootConfig.js:135</code> | Try multiple candidate URLs \(in order\) until one probes as JS, then load it. |
+| <code>probeScriptUrl</code> | function | <code>src/app/bootConfig.js:68</code> | Probe a candidate script URL and only accept it when the response looks like JavaScript. |
 | <code>BootstrapDebugInfo</code> | typedef | <code>src/app/OpenDocViewer.jsx:33</code> | Diagnostics-only startup details surfaced through the performance overlay. |
 | <code>OpenDocViewer</code> | function | <code>src/app/OpenDocViewer.jsx:67</code> | OpenDocViewer — Top-level component. |
 | <code>OpenDocViewer~resizeRaf</code> | constant | <code>src/app/OpenDocViewer.jsx:93</code> | rAF-throttled resize handler: Avoids re-render spam during window drags. |
@@ -481,17 +482,19 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:33</code> |  |
-| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:262</code> |  |
-| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:49</code> | Copy only settings used by the selected source. |
-| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:134</code> |  |
-| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:110</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
-| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:306</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
-| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:74</code> | Load the preferred generated standard manual. |
-| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:278</code> |  |
-| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:216</code> |  |
-| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:153</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
-| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:202</code> |  |
+| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:51</code> |  |
+| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:301</code> |  |
+| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:68</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
+| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:85</code> | Copy only settings used by the selected source. |
+| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:173</code> |  |
+| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:148</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
+| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:345</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
+| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:111</code> | Load the preferred generated standard manual. |
+| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:317</code> |  |
+| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:37</code> | The ODV base URL relative manual paths belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the page&#39;s folder. |
+| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:255</code> |  |
+| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:192</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
+| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:241</code> |  |
 | <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:92</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
 | <code>findManualElementById</code> | function | <code>src/components/Manual/manualNavigation.js:51</code> |  |
 | <code>isHiddenInManual</code> | function | <code>src/components/Manual/manualNavigation.js:74</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
@@ -522,7 +525,7 @@
 | <code>ManualView~navigateToManualTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:212</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
 | <code>normalizeSectionId</code> | function | <code>src/components/Manual/ManualView.jsx:70</code> |  |
 | <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:166</code> | Make the section holding target current and keep it current until the reader scrolls. |
-| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:571</code> |  |
+| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:582</code> |  |
 | <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:191</code> | Put back the URL fragment the page had before the manual set one. |
 | <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:180</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |
 | <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:40</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
@@ -850,6 +853,10 @@
 | <code>tzOffset</code> | function | <code>src/logging/userLogger.js:100</code> | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
 | <code>UserIdentity</code> | typedef | <code>src/logging/userLogger.js:31</code> |  |
 | <code>userLog</code> | constant | <code>src/logging/userLogger.js:306</code> | Export singleton instance. |
+| <code>module.exports</code> | function | <code>src/manual-page/ManualPage.jsx:62</code> |  |
+| <code>readUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:30</code> |  |
+| <code>syncUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:45</code> | Put the section being read into the URL fragment without adding a history entry. |
+| <code>mountManualPage</code> | function | <code>src/manual-page/mountManualPage.jsx:21</code> |  |
 | <code>OcrAssetManifest</code> | typedef | <code>src/ocr/assetUrls.js:16</code> |  |
 | <code>OcrAssetUrls</code> | typedef | <code>src/ocr/assetUrls.js:25</code> |  |
 | <code>readOcrAssetManifest</code> | function | <code>src/ocr/assetUrls.js:39</code> | The manifest the build generated, or null when it is unusable. |
@@ -1142,6 +1149,7 @@
 | <code>ManualContentsGroup</code> | typedef | <code>src/utils/manualContentsTree.js:21</code> |  |
 | <code>POSITION_FOLLOWING</code> | constant | <code>src/utils/manualContentsTree.js:33</code> | Node.compareDocumentPosition flags \(numeric so this also runs without a global Node\). |
 | <code>slugifyManualHeading</code> | function | <code>src/utils/manualContentsTree.js:51</code> | Derive a heading id from its text. |
+| <code>isManualEnabled</code> | function | <code>src/utils/manualEnabled.js:15</code> |  |
 | <code>buildManualCandidates</code> | function | <code>src/utils/manualSources.js:113</code> | Candidate manual URLs in priority order: UI language before fallback language. |
 | <code>buildManualLanguageCandidates</code> | function | <code>src/utils/manualSources.js:94</code> | Language preference shared by fetched and generated manuals. |
 | <code>DEFAULT_SITE_MANUAL_TEMPLATE</code> | constant | <code>src/utils/manualSources.js:14</code> | Resolves which manual HTML file the help dialog shows. |

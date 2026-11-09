@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 const source = readFileSync('src/app/bootConfig.js', 'utf8')
   .replace('(async function boot()', 'globalThis.bootResult = (async function boot()')
+  .replace("await import('/src/manual-page/main.jsx')", "globalThis.started = 'manual'")
   .replace("await import('/src/index.jsx')", 'globalThis.started = true');
 
 describe('site config bootstrap diagnostics', () => {
@@ -46,5 +47,32 @@ describe('site config bootstrap diagnostics', () => {
       expect(warn).toHaveBeenCalledWith(expect.stringContaining(reason), expect.any(String));
     } else expect(warn).not.toHaveBeenCalled();
     expect(context.fetch.mock.calls.every(([, options]) => options.cache === 'no-store')).toBe(true);
+  });
+
+  it('loads the configs from the ODV base and starts the manual entry on the stand-alone manual page', async () => {
+    const meta = { 'odv-app-base': '../', 'odv-page': 'manual' };
+    const window = {
+      location: { href: 'http://host/OpenDocViewer/manual/', pathname: '/OpenDocViewer/manual/' },
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+    const loaded = [];
+    const context = {
+      window, URL, console: { warn: vi.fn(), error: vi.fn() },
+      fetch: vi.fn(async () => ({ ok: true, headers: { get: () => 'application/javascript' } })),
+      document: {
+        baseURI: 'http://host/OpenDocViewer/manual/',
+        querySelector: (selector) => {
+          const name = /meta\[name="([^"]+)"\]/.exec(selector)?.[1];
+          return name && meta[name] ? { getAttribute: () => meta[name] } : null;
+        },
+        createElement: () => ({}),
+        head: { appendChild: (script) => { loaded.push(script.src.split('?')[0]); script.onload(); } },
+      },
+    };
+    runInNewContext(source, context);
+    await context.bootResult;
+    expect(loaded).toEqual(['/OpenDocViewer/odv.site.config.js', '/OpenDocViewer/odv.config.js']);
+    expect(context.started).toBe('manual');
   });
 });

@@ -147,6 +147,36 @@ function ocrAssetsPlugin() {
   };
 }
 
+/**
+ * Dev and preview servers: redirect `/manual` to `/manual/`, as the IIS AddTrailingSlash rule does
+ * in production. Without the slash the SPA fallback would serve the viewer, and the manual page's
+ * relative URLs would resolve one folder too high.
+ */
+function manualPageTrailingSlashPlugin() {
+  const redirect = (req, res, next) => {
+    const [pathname, query = ''] = String(req.url || '').split('?');
+    if (!/\/manual$/.test(pathname)) {
+      next();
+      return;
+    }
+    res.statusCode = 301;
+    res.setHeader('Location', `${pathname}/${query ? `?${query}` : ''}`);
+    res.end();
+  };
+  return {
+    name: 'odv-manual-page-trailing-slash',
+    configureServer(server) {
+      server.middlewares.use(redirect);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(redirect);
+    },
+  };
+}
+
+// HTML entries (relative to the build output) whose module script is the bootConfig loader.
+const BOOTSTRAP_HTML_ENTRIES = ['index.html', 'manual/index.html'];
+
 function preserveBootstrapDataAttributePlugin() {
   /** @type {import('vite').ResolvedConfig | null} */
   let resolvedConfig = null;
@@ -162,23 +192,36 @@ function preserveBootstrapDataAttributePlugin() {
         return;
       }
 
-      const indexHtmlPath = resolve(resolvedConfig.root, resolvedConfig.build.outDir, 'index.html');
-      if (!existsSync(indexHtmlPath)) {
-        return;
-      }
-
-      const html = readFileSync(indexHtmlPath, 'utf8');
       const scriptPattern = new RegExp(
         '(<script\\b[^>]*\\btype=["\']module["\'][^>]*\\bsrc=["\'][^"\']+["\'][^>]*)(>)',
         'i'
       );
+      // With two HTML entries the build loads the bootConfig chunk directly and puts Vite's
+      // modulepreload polyfill in a script of its own before it. The marker belongs on the
+      // bootConfig script (its nonce and integrity data attributes are read from that tag);
+      // the first module script is the fallback when no script is named after bootConfig.
+      const bootConfigScriptPattern = new RegExp(
+        '(<script\\b[^>]*\\btype=["\']module["\'][^>]*\\bsrc=["\'][^"\']*/bootConfig-[^"\']+["\'][^>]*)(>)',
+        'i'
+      );
 
-      const updatedHtml = html.replace(scriptPattern, (match, attrs, close) => (
-        attrs.includes('data-odv-bootstrap') ? match : `${attrs} data-odv-bootstrap${close}`
-      ));
+      // Both HTML entries start through bootConfig: the viewer and the stand-alone manual page.
+      for (const htmlFile of BOOTSTRAP_HTML_ENTRIES) {
+        const htmlPath = resolve(resolvedConfig.root, resolvedConfig.build.outDir, htmlFile);
+        if (!existsSync(htmlPath)) {
+          continue;
+        }
 
-      if (updatedHtml !== html) {
-        writeFileSync(indexHtmlPath, updatedHtml, 'utf8');
+        const html = readFileSync(htmlPath, 'utf8');
+        if (/<script\b[^>]*\bdata-odv-bootstrap\b/i.test(html)) {
+          continue;
+        }
+        const pattern = bootConfigScriptPattern.test(html) ? bootConfigScriptPattern : scriptPattern;
+        const updatedHtml = html.replace(pattern, (match, attrs, close) => `${attrs} data-odv-bootstrap${close}`);
+
+        if (updatedHtml !== html) {
+          writeFileSync(htmlPath, updatedHtml, 'utf8');
+        }
       }
     },
   };
@@ -248,6 +291,9 @@ export default defineConfig(({ mode }) => {
       // bootstrap data marker on that emitted script so runtime config SRI
       // attributes survive in dist/index.html.
       preserveBootstrapDataAttributePlugin(),
+
+      // `/manual` -> `/manual/` in dev and preview (the stand-alone manual page).
+      manualPageTrailingSlashPlugin(),
     ],
 
     /**
@@ -282,6 +328,11 @@ export default defineConfig(({ mode }) => {
         input: {
           main: fileURLToPath(new URL('./index.html', import.meta.url)),
           bootConfig: fileURLToPath(new URL('./src/app/bootConfig.js', import.meta.url)),
+          // Stand-alone manual page, served as <ODV base>/manual/ (not /help/: that is the static
+          // manual folder the IIS SPA fallback deliberately excludes). Emitted as
+          // dist/manual/index.html; under the production base './' its asset URLs are relative
+          // to that folder, one level up.
+          manualPage: fileURLToPath(new URL('./manual/index.html', import.meta.url)),
         },
         output: {
           manualChunks(id) {

@@ -542,6 +542,9 @@
     // ---- HELP / ABOUT ---------------------------------------------------------
     help: {
       manual: {
+        // Set to false to turn the manual off for this installation. Absent or any other value
+        // keeps it on. The stand-alone manual page (manual/) then shows a "not available" notice.
+        enabled: true,
         // "auto" (default) prefers an existing site-local HTML file. "standard" always uses the
         // bundled manual, applies its capability filters and never loads site HTML. Unknown values
         // produce a console warning and behave as "auto".
