@@ -339,6 +339,30 @@ describe('ManualView outside a dialog', () => {
       expect(activeSections.at(-1)).toBe('start');
     });
 
+    it('keeps a lightbox open across a same-content reload while the reader is in a section', async () => {
+      const activeSections = [];
+      const props = { onActiveSectionChange: (id) => activeSections.push(id) };
+      await renderView(props);
+      // Prime a current section the component's own way (jsdom has no IntersectionObserver):
+      // navigating through the contents tree pins the section until the reader scrolls.
+      const later = contentsLinks().find((link) => link.getAttribute('href') === '#later');
+      act(() => { later.click(); });
+      expect(activeSections.at(-1)).toBe('later');
+
+      act(() => { content().querySelector('a[href="#lb-bild"]').click(); });
+      expect(window.location.hash).toBe('#lb-bild');
+      const reported = activeSections.length;
+
+      act(() => {
+        root.render(h(ManualView, { ...props, refreshToken: 1 }));
+      });
+      await flush(50);
+
+      expect(window.location.hash).toBe('#lb-bild');
+      expect(content().querySelector('#lb-bild').matches(':target')).toBe(true);
+      expect(activeSections.slice(reported).filter(Boolean)).toEqual([]);
+    });
+
     it('does not hold back section reports for a link to a hidden element that is not a lightbox', async () => {
       const activeSections = [];
       await renderView({ onActiveSectionChange: (id) => activeSections.push(id) });

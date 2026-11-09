@@ -465,8 +465,10 @@ export default function ManualView({
 
   // After each completed load (and after the tree assigned heading ids): a new manual opens at the
   // requested initial section; a reload with the same content (an explicit refresh, a host
-  // re-running the load) returns to the section the reader was in, because the reload replaced
-  // the content element, its focus and the pane's scroll position. An initial id that names a
+  // re-running the load) first revalidates an open lightbox — which stays open while its
+  // fragment still opens one in the loaded content — and otherwise returns to the section the
+  // reader was in, because the reload replaced the content element, its focus and the pane's
+  // scroll position. An initial id that names a
   // lightbox opens it, as a click on its thumbnail would. A lightbox that was open before the load
   // stays open only when its fragment still opens one in the loaded content; otherwise (no such
   // element, a failed load, a section navigated to) the page's own fragment is put back, so the
@@ -484,7 +486,21 @@ export default function ManualView({
     const sameContent = appliedHtmlRef.current === html;
     appliedHtmlRef.current = html;
     if (!sameContent) currentSectionRef.current = '';
-    const id = sameContent ? currentSectionRef.current : normalizeSectionId(initialSectionId);
+    if (sameContent) {
+      // A reload with the same content (an explicit refresh, a host re-running the load) must
+      // not close a lightbox the reader has open: the open fragment is revalidated first and
+      // stays open while it still opens one in the loaded content. Only when no lightbox stays
+      // open is the reader returned to the section they were in.
+      revalidateFragmentTarget();
+      if (viewerFragmentRef.current !== null) return;
+      const currentId = currentSectionRef.current;
+      const currentTarget = currentId ? findManualElementById(container, currentId) : null;
+      if (currentTarget && !isHiddenInManual(currentTarget, container)) {
+        navigateToManualTarget(currentId);
+      }
+      return;
+    }
+    const id = normalizeSectionId(initialSectionId);
     const target = id ? findManualElementById(container, id) : null;
     if (target && !isHiddenInManual(target, container)) {
       navigateToManualTarget(id);

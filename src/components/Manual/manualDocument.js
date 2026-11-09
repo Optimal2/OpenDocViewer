@@ -35,8 +35,10 @@ const STANDARD_MANUAL_LOADERS = Object.freeze({
  *
  * The base is a folder: a hierarchical result whose path lacks the trailing slash (`baseHref:
  * '/OpenDocViewer'`) gets one, so `manual/` and `help/...` resolve inside that folder instead of
- * next to it. A base that is not an http(s) or file URL (a `javascript:` or `data:` value) is no
- * base at all: callers then use the bare relative path, so such a value never reaches an href.
+ * next to it. Candidates are tried in order and the first one that parses to an http(s) or file
+ * URL wins: a configured `baseHref` with a rejected scheme (`javascript:`, `data:`) or one that
+ * fails to parse falls through to the boot base, then to the page's folder, so such a value never
+ * reaches an href and never resolves under `/manual/`.
  *
  * @param {Object=} runtimeConfig Runtime configuration (reads `baseHref`).
  * @returns {(string|undefined)} Absolute base URL, or undefined outside a browser or when no
@@ -50,14 +52,18 @@ export function resolveOdvBaseUrl(runtimeConfig) {
   try { bootBase = window.__ODV_APP_BASE__; } catch { bootBase = undefined; }
   const configured = typeof baseHref === 'string' ? baseHref.trim() : '';
   const derived = typeof bootBase === 'string' ? bootBase.trim() : '';
-  try {
-    const url = new URL(configured || derived || './', window.location.href);
-    if (!['http:', 'https:', 'file:'].includes(url.protocol)) return undefined;
-    if (!url.pathname.endsWith('/')) url.pathname = `${url.pathname}/`;
-    return url.toString();
-  } catch {
-    return undefined;
+  for (const candidate of [configured, derived, './']) {
+    if (!candidate) continue;
+    try {
+      const url = new URL(candidate, window.location.href);
+      if (!['http:', 'https:', 'file:'].includes(url.protocol)) continue;
+      if (!url.pathname.endsWith('/')) url.pathname = `${url.pathname}/`;
+      return url.toString();
+    } catch {
+      continue;
+    }
   }
+  return undefined;
 }
 
 /**

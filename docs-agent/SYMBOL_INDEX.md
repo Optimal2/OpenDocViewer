@@ -482,20 +482,20 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:86</code> |  |
-| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:336</code> |  |
-| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:103</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
-| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:120</code> | Copy only settings used by the selected source. |
-| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:208</code> |  |
-| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:183</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
-| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:380</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
-| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:146</code> | Load the preferred generated standard manual. |
-| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:352</code> |  |
-| <code>resolveManualPageUrl</code> | function | <code>src/components/Manual/manualDocument.js:71</code> | Absolute URL of the stand-alone manual page \( &amp;lt;ODV base&amp;gt;/manual/ \), optionally opened at a section. |
-| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:45</code> | The ODV base URL relative manual paths \(and the stand-alone manual page\) belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the base src/app/boo... |
-| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:290</code> |  |
-| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:227</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
-| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:276</code> |  |
+| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:92</code> |  |
+| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:342</code> |  |
+| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:109</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
+| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:126</code> | Copy only settings used by the selected source. |
+| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:214</code> |  |
+| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:189</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
+| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:386</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
+| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:152</code> | Load the preferred generated standard manual. |
+| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:358</code> |  |
+| <code>resolveManualPageUrl</code> | function | <code>src/components/Manual/manualDocument.js:77</code> | Absolute URL of the stand-alone manual page \( &amp;lt;ODV base&amp;gt;/manual/ \), optionally opened at a section. |
+| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:47</code> | The ODV base URL relative manual paths \(and the stand-alone manual page\) belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the base src/app/boo... |
+| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:296</code> |  |
+| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:233</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
+| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:282</code> |  |
 | <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:92</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
 | <code>findManualElementById</code> | function | <code>src/components/Manual/manualNavigation.js:51</code> |  |
 | <code>isHiddenInManual</code> | function | <code>src/components/Manual/manualNavigation.js:74</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
@@ -527,7 +527,7 @@
 | <code>normalizeSectionId</code> | function | <code>src/components/Manual/ManualView.jsx:70</code> |  |
 | <code>ManualView~openFragmentTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:258</code> | Show a manual element that is hidden until it is the URL fragment target \(the bundled manuals&#39; :target image lightbox\) by making it the fragment target. |
 | <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:181</code> | Make the section holding target current and keep it current until the reader scrolls. |
-| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:687</code> |  |
+| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:703</code> |  |
 | <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:207</code> | Put back the URL fragment the page had before the manual set one. |
 | <code>ManualView~revalidateFragmentTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:277</code> | After new manual content has been rendered: a fragment the manual set is kept only while it still opens a lightbox in the new content; otherwise the page&#39;s own fragment is put bac... |
 | <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:196</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |

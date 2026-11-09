@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/Manual
 
-File count: 4. Line count: 1723. JSDoc symbol count: 49.
+File count: 4. Line count: 1745. JSDoc symbol count: 49.
 
 ## src/components/Manual/manualDocument.js
 

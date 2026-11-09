@@ -13166,7 +13166,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 86,
+    "line": 92,
     "description": "",
     "params": [
       {
@@ -13197,7 +13197,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 336,
+    "line": 342,
     "description": "",
     "params": [
       {
@@ -13228,7 +13228,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 103,
+    "line": 109,
     "description": "A relative candidate path (a default template, or a relative configured one) is fetched from the ODV base.",
     "params": [
       {
@@ -13259,7 +13259,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 120,
+    "line": 126,
     "description": "Copy only settings used by the selected source.",
     "params": [
       {
@@ -13290,7 +13290,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 208,
+    "line": 214,
     "description": "",
     "params": [
       {
@@ -13315,7 +13315,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 183,
+    "line": 189,
     "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
     "params": [
       {
@@ -13364,7 +13364,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 380,
+    "line": 386,
     "description": "Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.",
     "params": [
       {
@@ -13413,7 +13413,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 146,
+    "line": 152,
     "description": "Load the preferred generated standard manual.",
     "params": [
       {
@@ -13462,7 +13462,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 352,
+    "line": 358,
     "description": "",
     "params": [
       {
@@ -13487,7 +13487,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 71,
+    "line": 77,
     "description": "Absolute URL of the stand-alone manual page ( &lt;ODV base&gt;/manual/ ), optionally opened at a section.",
     "params": [
       {
@@ -13518,7 +13518,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 45,
+    "line": 47,
     "description": "The ODV base URL relative manual paths (and the stand-alone manual page) belong to: runtime config baseHref (set by odv.config.js from its own location), else the base src/app/boo...",
     "params": [
       {
@@ -13543,7 +13543,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 290,
+    "line": 296,
     "description": "",
     "params": [
       {
@@ -13574,7 +13574,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 227,
+    "line": 233,
     "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
     "params": [
       {
@@ -13605,7 +13605,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualDocument.js",
-    "line": 276,
+    "line": 282,
     "description": "",
     "params": [
       {
@@ -14353,7 +14353,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 687,
+    "line": 703,
     "description": "",
     "params": [
       {

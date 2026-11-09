@@ -40,11 +40,30 @@ describe('ODV base and manual page URL', () => {
   });
 
   it.each(['javascript:alert(1)', 'data:text/html,<p>x</p>'])(
-    'falls back to the relative manual path for a %s base',
+    'falls through a rejected-scheme %s base to the page folder',
     (baseHref) => {
-      expect(resolveOdvBaseUrl({ baseHref })).toBeUndefined();
-      expect(resolveManualPageUrl({ baseHref })).toBe('manual/');
-      expect(resolveManualPageUrl({ baseHref }, 'zoom')).toBe('manual/#zoom');
+      expect(resolveOdvBaseUrl({ baseHref })).toBe(`${origin}/OpenDocViewer/`);
+      expect(resolveManualPageUrl({ baseHref })).toBe(`${origin}/OpenDocViewer/manual/`);
+      expect(resolveManualPageUrl({ baseHref }, 'zoom')).toBe(`${origin}/OpenDocViewer/manual/#zoom`);
     },
   );
+
+  it('falls through a rejected-scheme configured baseHref to the boot base', () => {
+    window.__ODV_APP_BASE__ = 'https://viewer.example/odv/';
+    expect(resolveOdvBaseUrl({ baseHref: 'javascript:alert(1)' })).toBe('https://viewer.example/odv/');
+    expect(resolveManualPageUrl({ baseHref: 'javascript:alert(1)' })).toBe('https://viewer.example/odv/manual/');
+  });
+
+  it('falls through an unparseable configured baseHref to the boot base', () => {
+    window.__ODV_APP_BASE__ = '/OpenDocViewer/';
+    expect(resolveOdvBaseUrl({ baseHref: 'http://[' })).toBe(`${origin}/OpenDocViewer/`);
+    expect(resolveManualPageUrl({ baseHref: 'http://[' })).toBe(`${origin}/OpenDocViewer/manual/`);
+  });
+
+  it('falls through two bad candidates to the page folder', () => {
+    window.__ODV_APP_BASE__ = 'data:text/html,<p>x</p>';
+    expect(resolveOdvBaseUrl({ baseHref: 'javascript:alert(1)' })).toBe(`${origin}/OpenDocViewer/`);
+    expect(resolveManualPageUrl({ baseHref: 'javascript:alert(1)' }, 'zoom'))
+      .toBe(`${origin}/OpenDocViewer/manual/#zoom`);
+  });
 });
