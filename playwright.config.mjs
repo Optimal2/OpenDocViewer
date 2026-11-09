@@ -10,6 +10,9 @@ const PORT = Number(process.env.ODV_UI_TEST_PORT || 5179);
 
 export default defineConfig({
   testDir: 'tests/ui',
+  // WP4's manual-page proof needs the production build served under /OpenDocViewer/
+  // (see tests/ui/manual-page.playwright.config.mjs); it times out under this dev server.
+  testIgnore: ['manual-page.spec.mjs'],
   timeout: 90_000,
   expect: { timeout: 30_000 },
   fullyParallel: false,

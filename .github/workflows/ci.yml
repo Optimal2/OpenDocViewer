@@ -82,6 +82,10 @@ jobs:
         timeout-minutes: 10
         run: npm run test:ui
 
+      - name: Manual page proof (Playwright, own config)
+        timeout-minutes: 10
+        run: npx playwright test -c tests/ui/manual-page.playwright.config.mjs
+
       - name: Build docs
         run: npm run doc
 

@@ -36,6 +36,7 @@
     "test": "npm run build:standard-manual && vitest run",
     "test:watch": "npm run build:standard-manual && vitest",
     "test:ui": "npm run build:standard-manual && playwright test",
+    "test:ui:manual-page": "playwright test -c tests/ui/manual-page.playwright.config.mjs",
     "doc": "jsdoc -c jsdoc.json",
     "doc:agent": "npm run build:standard-manual && node scripts/generate-agent-docs.mjs",
     "start:system-log": "node server/system-log-server.js",
