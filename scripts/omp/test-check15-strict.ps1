@@ -76,13 +76,21 @@ function Invoke-Validator {
     param(
         [string]$OmpPlatformRoot,
         [string]$OpenModulePlatformRoot,
-        [hashtable]$Arguments
+        [hashtable]$Arguments,
+        [string]$AllowMissingPlatform = $null
     )
     $savedOmp = $env:OMP_PLATFORM_ROOT
     $savedLegacy = $env:OpenModulePlatformRoot
+    $savedAllowMissing = $env:OMP_ALLOW_MISSING_PLATFORM
     try {
         $env:OMP_PLATFORM_ROOT = $OmpPlatformRoot
         $env:OpenModulePlatformRoot = $OpenModulePlatformRoot
+        if ($null -eq $AllowMissingPlatform) {
+            Remove-Item Env:\OMP_ALLOW_MISSING_PLATFORM -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:OMP_ALLOW_MISSING_PLATFORM = $AllowMissingPlatform
+        }
         $global:LASTEXITCODE = 0
         $output = & $validator -BaseCommit '' @Arguments *>&1 | Out-String
         return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $output }
@@ -90,6 +98,12 @@ function Invoke-Validator {
     finally {
         $env:OMP_PLATFORM_ROOT = $savedOmp
         $env:OpenModulePlatformRoot = $savedLegacy
+        if ($null -eq $savedAllowMissing) {
+            Remove-Item Env:\OMP_ALLOW_MISSING_PLATFORM -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:OMP_ALLOW_MISSING_PLATFORM = $savedAllowMissing
+        }
     }
 }
 
@@ -149,7 +163,24 @@ try {
         Assert-True ($callText -match '-PlatformRepositoryRoot \$PlatformRepositoryRoot') 'local-ci.ps1 forwards -PlatformRepositoryRoot' "($callText)"
     }
 
-    # 8. Optional end-to-end case against a real OpenModulePlatform checkout.
+    # 8. CI lockstep path: no root named anywhere and no sibling checkout, with
+    # OMP_ALLOW_MISSING_PLATFORM=1, warns NOT VERIFIED and exits 0. This is the
+    # exact path the CI lockstep job depends on (single checkout, no platform
+    # repository, exception env set, -Strict). Skipped where the sibling
+    # fallback would find a real checkout instead of the allow-missing branch.
+    $siblingRoot = Join-Path (Join-Path $repositoryRoot '..') 'OpenModulePlatform'
+    $siblingGuard = Join-Path $siblingRoot (Join-Path 'scripts' (Join-Path 'omp' 'validate-shared-scripts.ps1'))
+    if (Test-Path -LiteralPath $siblingGuard -PathType Leaf) {
+        Write-Host 'SKIP: NOT VERIFIED case (a real sibling OpenModulePlatform checkout is present; the sibling fallback would run the real guard instead of the allow-missing branch)' -ForegroundColor Yellow
+    }
+    else {
+        $result = Invoke-Validator -OmpPlatformRoot '' -OpenModulePlatformRoot '' -AllowMissingPlatform '1' -Arguments @{ Strict = $true }
+        Assert-True ($result.ExitCode -eq 0) 'allow-missing without any platform root exits 0' "(exit $($result.ExitCode))"
+        Assert-True ($result.Output -match 'Check 15: NOT VERIFIED') 'allow-missing without any platform root warns NOT VERIFIED'
+        Assert-True ($result.Output -match 'OMP_ALLOW_MISSING_PLATFORM') 'NOT VERIFIED warning names the exception env'
+    }
+
+    # 9. Optional end-to-end case against a real OpenModulePlatform checkout.
     $realRoot = $OmpRepositoryRoot
     if ([string]::IsNullOrWhiteSpace($realRoot)) { $realRoot = $env:OMP_PLATFORM_ROOT }
     if ([string]::IsNullOrWhiteSpace($realRoot)) { $realRoot = Join-Path (Join-Path $repositoryRoot '..') 'OpenModulePlatform' }

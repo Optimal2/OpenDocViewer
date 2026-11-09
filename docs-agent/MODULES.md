@@ -75,7 +75,7 @@ File count: 17. Line count: 7787. JSDoc symbol count: 157.
 
 ## src/components/Manual
 
-File count: 4. Line count: 1745. JSDoc symbol count: 49.
+File count: 4. Line count: 1746. JSDoc symbol count: 49.
 
 - `src/components/Manual/manualSearch.js` - In\-manual text search: locale\-aware case folding, match collection over the rendered manual and highlighting through the CSS Custom Highlight API with a \`&lt;mark&gt;\` fallback.
 - `src/components/Manual/manualNavigation.js` - Scrolling, focus and URL\-fragment helpers for navigating inside a rendered manual.

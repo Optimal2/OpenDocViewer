@@ -53,6 +53,6 @@ React raw HTML rendering.
 
 Direct DOM HTML assignment or access.
 
-- `src/components/Manual/manualDocument.js` lines 331, 332, 333 - Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
+- `src/components/Manual/manualDocument.js` lines 332, 333, 334 - Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full\-page view\).
 - `src/utils/printDom.js` lines 264 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\).
 - `src/utils/standardManual.js` lines 566 - Filter and sanitize the bundled standard manual for a supplied runtime config.

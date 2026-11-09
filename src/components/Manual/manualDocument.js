@@ -37,7 +37,8 @@ const STANDARD_MANUAL_LOADERS = Object.freeze({
  * '/OpenDocViewer'`) gets one, so `manual/` and `help/...` resolve inside that folder instead of
  * next to it. Candidates are tried in order and the first one that parses to an http(s) or file
  * URL wins: a configured `baseHref` with a rejected scheme (`javascript:`, `data:`) or one that
- * fails to parse falls through to the boot base, then to the page's folder, so such a value never
+ * fails to parse falls through to the boot base (on the stand-alone page, the app base its
+ * `odv-app-base` meta names), then to the page's folder, so such a value never
  * reaches an href and never resolves under `/manual/`.
  *
  * @param {Object=} runtimeConfig Runtime configuration (reads `baseHref`).
