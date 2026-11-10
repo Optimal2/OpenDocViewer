@@ -74,7 +74,12 @@ describe('ManualView outside a dialog', () => {
     act(() => {
       root.render(h(ManualView, props));
     });
-    await flush(50);
+    // The manual is imported asynchronously. A fixed wait is not enough when the whole suite runs
+    // in parallel (measured 2026-11-10: 50 ms was too short under the pre-push gate while the file
+    // passed alone), so wait for the content itself, up to a generous limit.
+    for (let waited = 0; waited < 5000 && !container.querySelector('.odv-manual-content'); waited += 25) {
+      await flush(25);
+    }
     expect(container.querySelector('.odv-manual-content')).not.toBeNull();
   }
 
