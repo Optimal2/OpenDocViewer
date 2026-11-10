@@ -893,7 +893,7 @@
 | <code>createBoostEnginePool</code> | function | <code>src/ocr/boostBenchmark.js:342</code> | A pool of OCR engines for one boost scenario: every engine created and started up front, in parallel, one lane of the page loop per engine. |
 | <code>delay</code> | function | <code>src/ocr/boostBenchmark.js:318</code> |  |
 | <code>describeOcrBoostCapacity</code> | function | <code>src/ocr/boostBenchmark.js:221</code> | What this client can hold, as the skip rules read it. |
-| <code>engineRecognize</code> | function | <code>src/ocr/boostBenchmark.js:562</code> | Recognise on a lane&#39;s engine. |
+| <code>engineRecognize</code> | function | <code>src/ocr/boostBenchmark.js:569</code> | Recognise on a lane&#39;s engine. |
 | <code>fractionIn</code> | function | <code>src/ocr/boostBenchmark.js:165</code> |  |
 | <code>HEAP_ABORT_FRACTION</code> | constant | <code>src/ocr/boostBenchmark.js:119</code> | A used JS heap above this share of jsHeapSizeLimit ends the scenario before the page heap does. |
 | <code>integerIn</code> | function | <code>src/ocr/boostBenchmark.js:152</code> |  |
@@ -907,7 +907,7 @@
 | <code>readJsHeap</code> | function | <code>src/ocr/boostBenchmark.js:272</code> | The page&#39;s JS heap where the browser exposes it \( performance.memory , Chromium only\). |
 | <code>runBoostScenario</code> | function | <code>src/ocr/boostBenchmark.js:420</code> | Recognise the sampled pages once on a fresh pool of scenario.workerCount engines and measure it. |
 | <code>runInLanes</code> | function | <code>src/ocr/boostBenchmark.js:388</code> | Run worker over items , one lane per engine, each lane pulling the next item from a shared cursor. |
-| <code>runOcrBoostBenchmark</code> | function | <code>src/ocr/boostBenchmark.js:588</code> | Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold... |
+| <code>runOcrBoostBenchmark</code> | function | <code>src/ocr/boostBenchmark.js:595</code> | Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold... |
 | <code>startAll</code> | function | <code>src/ocr/boostBenchmark.js:353</code> | Start every engine at once and time it. |
 | <code>terminateAll</code> | function | <code>src/ocr/boostBenchmark.js:369</code> | Stop every engine; returns how many were asked to stop. |
 | <code>withTimeout</code> | function | <code>src/ocr/boostBenchmark.js:292</code> |  |

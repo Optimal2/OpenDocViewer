@@ -22735,7 +22735,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/boostBenchmark.js",
-    "line": 562,
+    "line": 569,
     "description": "Recognise on a lane's engine.",
     "params": [
       {
@@ -23161,7 +23161,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/boostBenchmark.js",
-    "line": 588,
+    "line": 595,
     "description": "Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold...",
     "params": [
       {

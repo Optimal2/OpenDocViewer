@@ -431,16 +431,23 @@ async function runBoostScenario({
   const sampler = lagSampler();
   const results = [];
   const startedUtc = new Date().toISOString();
-  let startupMs = 0;
-  let engineStartupMs = summarizeDurations([]);
+  // Assigned before anything reads them (the first two from the pool's start, the last two in
+  // the finally), so they carry no initial value: a dead initialiser is a lint error here.
+  /** @type {number} */
+  let startupMs;
+  /** @type {Object} */
+  let engineStartupMs;
+  /** @type {number} */
+  let terminatedEngines;
+  /** @type {Object} Filled in the finally, so an abort stops the sampler too. */
+  let mainThread;
+  // These do keep their initial value: a scenario whose engines never started reports no
+  // duration and no abort detail beyond the start-up error.
   let durationMs = 0;
   let startupError = null;
   let abortReason = null;
   let abortDetail = null;
   let heapAtAbort = null;
-  let terminatedEngines = 0;
-  /** @type {(Object|null)} Filled in the finally, so an abort stops the sampler too. */
-  let mainThread = null;
   try {
     const start = await pool.startAll(pageTimeoutMs);
     startupMs = start.startupMs;

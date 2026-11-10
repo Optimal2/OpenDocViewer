@@ -116,7 +116,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/manual-page/mountManualPage.jsx</code> | 40 | 1 | 1 | high | Mount the stand-alone manual page into a container, the way src/index.jsx mounts the viewer: apply the shared theme and toolbar density to the document before the first render, then render the page inside the viewer&#39;s Th |
 | <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
 | <code>src/ocr/benchmark.js</code> | 661 | 0 | 20 | high | Opt-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document&#39;s pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which |
-| <code>src/ocr/boostBenchmark.js</code> | 737 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run. |
+| <code>src/ocr/boostBenchmark.js</code> | 744 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run. |
 | <code>src/ocr/classify.js</code> | 106 | 3 | 15 | high | Decides, per page, whether OCR is worth running. |
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
 | <code>src/ocr/engine.js</code> | 302 | 1 | 14 | high | Thin wrapper around a tesseract.js worker. |

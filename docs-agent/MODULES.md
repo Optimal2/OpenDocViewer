@@ -160,7 +160,7 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 17. Line count: 3813. JSDoc symbol count: 157.
+File count: 17. Line count: 3820. JSDoc symbol count: 157.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.

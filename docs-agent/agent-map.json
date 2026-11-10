@@ -95,7 +95,7 @@
   },
   "stats": {
     "fileCount": 199,
-    "sourceLineCount": 72201,
+    "sourceLineCount": 72208,
     "docletCount": 2079,
     "documentedFileCount": 195,
     "lowConfidenceSummaryCount": 2,
@@ -1753,7 +1753,7 @@
     {
       "name": "src/ocr",
       "fileCount": 17,
-      "lineCount": 3813,
+      "lineCount": 3820,
       "docletCount": 157,
       "importantFiles": [
         {
@@ -1777,7 +1777,7 @@
         {
           "path": "src/ocr/boostBenchmark.js",
           "score": 68,
-          "lines": 737,
+          "lines": 744,
           "incomingLocalImports": 1,
           "doclets": 26,
           "summary": "Opt-in OCR *boost* benchmark (`ocr.boostBenchmark.enabled`): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.",
@@ -43143,9 +43143,9 @@
     },
     {
       "path": "src/ocr/boostBenchmark.js",
-      "lines": 737,
+      "lines": 744,
       "extension": ".js",
-      "jsdocBlockCount": 27,
+      "jsdocBlockCount": 30,
       "sourceSummary": "Opt-in OCR *boost* benchmark (`ocr.boostBenchmark.enabled`): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.",
       "imports": [
         {
@@ -43241,7 +43241,7 @@
         {
           "name": "runOcrBoostBenchmark",
           "kind": "function",
-          "line": 588
+          "line": 595
         }
       ],
       "declarations": [
@@ -43328,37 +43328,37 @@
         {
           "name": "shouldStop",
           "kind": "function",
-          "line": 454
+          "line": 461
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 457
+          "line": 464
         },
         {
           "name": "engineRecognize",
           "kind": "function",
-          "line": 562
+          "line": 569
         },
         {
           "name": "runOcrBoostBenchmark",
           "kind": "function",
-          "line": 588
+          "line": 595
         },
         {
           "name": "loadPageImage",
           "kind": "function",
-          "line": 624
+          "line": 631
         },
         {
           "name": "progress",
           "kind": "function",
-          "line": 646
+          "line": 653
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 683
+          "line": 690
         }
       ],
       "parseError": null,
@@ -44014,7 +44014,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 562,
+          "line": 569,
           "description": "Recognise on a lane's engine.",
           "params": [
             {
@@ -44045,7 +44045,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 588,
+          "line": 595,
           "description": "Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold...",
           "params": [
             {
@@ -109144,7 +109144,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 562,
+      "line": 569,
       "description": "Recognise on a lane's engine.",
       "params": [
         {
@@ -109570,7 +109570,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 588,
+      "line": 595,
       "description": "Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold...",
       "params": [
         {
