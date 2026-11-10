@@ -126,7 +126,29 @@ describe('AboutOverlayDialog OCR boost benchmark', () => {
     expect(download).not.toBeNull();
   });
 
-  it('reports a skipped scenario with its reason while the run continues', async () => {
+  /**
+   * The skip event exactly as src/ocr/boostBenchmark.js emits it: `skipReason` is the raw enum,
+   * the English sentence is `skipDetail`, and the numbers behind it are `skipFacts`. A test that
+   * put the sentence in `skipReason` would assert a contract the viewer never sends.
+   *
+   * @param {Object} overrides
+   * @returns {Object}
+   */
+  function skipEvent(overrides) {
+    return {
+      phase: 'running',
+      completedRuns: 4,
+      totalRuns: 6,
+      scenarioLabel: 'boost-workers-24',
+      completedPages: 0,
+      pageCount: 2,
+      workerCount: 24,
+      skipped: true,
+      ...overrides,
+    };
+  }
+
+  it('explains a scenario skipped on the memory budget in words, not as the raw enum', async () => {
     const { onRun, captured } = deferredRun();
     renderDialog({ ocrBoostBenchmarkEnabled: true, onRunOcrBoostBenchmark: onRun });
     const run = container.querySelector('[data-odv-ocr="boost-benchmark-run"]');
@@ -136,23 +158,63 @@ describe('AboutOverlayDialog OCR boost benchmark', () => {
     });
     // A skipped scenario reports its reason while the run continues.
     await act(async () => {
-      captured.options.onProgress({
-        phase: 'running',
-        completedRuns: 4,
-        totalRuns: 6,
-        scenarioLabel: 'workers-24',
-        completedPages: 0,
-        pageCount: 2,
-        workerCount: 24,
-        skipped: true,
-        skipReason: '24 workers need 3120 MiB, over the 2048 MiB budget',
-      });
+      captured.options.onProgress(skipEvent({
+        skipReason: 'memory',
+        skipDetail: '24 workers need about 3120 MiB, above the 2048 MiB budget (0.5 of 4 GiB)',
+        skipFacts: { workerCount: 24, neededMiB: 3120, budgetMiB: 2048, deviceMemoryGiB: 4, deviceMemoryAssumed: false },
+      }));
     });
     expect(boostStatus().getAttribute('data-odv-ocr-boost-benchmark-state')).toBe('running');
-    expect(boostStatus().textContent).toContain('24 workers need 3120 MiB');
+    const text = boostStatus().textContent;
+    expect(text).toContain('Skipped boost-workers-24: 24 workers need about 3120 MiB, above the 2048 MiB budget.');
+    // The raw enum must never be what the operator reads: "Skipped boost-workers-24: memory."
+    // is the regression this asserts away.
+    expect(text).not.toContain(': memory.');
+    expect(text).not.toMatch(/\bmemory\b/);
+
     await act(async () => {
       captured.release([]);
     });
     expect(boostStatus().getAttribute('data-odv-ocr-boost-benchmark-state')).toBe('done');
+  });
+
+  it('explains a scenario skipped on the core count the same way', async () => {
+    const { onRun, captured } = deferredRun();
+    renderDialog({ ocrBoostBenchmarkEnabled: true, onRunOcrBoostBenchmark: onRun });
+    const run = container.querySelector('[data-odv-ocr="boost-benchmark-run"]');
+    await act(async () => {
+      run.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    });
+    await act(async () => {
+      captured.options.onProgress(skipEvent({
+        skipReason: 'cores',
+        skipDetail: '24 workers exceed the 16 logical cores this client reports',
+        skipFacts: { workerCount: 24, cores: 16 },
+      }));
+    });
+    const text = boostStatus().textContent;
+    expect(text).toContain('24 workers exceed the 16 logical cores of this client');
+    expect(text).not.toContain(': cores.');
+    expect(text).not.toMatch(/\bcores\b\./);
+    await act(async () => { captured.release([]); });
+  });
+
+  it('falls back to the English detail for a skip reason this build does not know', async () => {
+    const { onRun, captured } = deferredRun();
+    renderDialog({ ocrBoostBenchmarkEnabled: true, onRunOcrBoostBenchmark: onRun });
+    const run = container.querySelector('[data-odv-ocr="boost-benchmark-run"]');
+    await act(async () => {
+      run.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    });
+    // A newer boost module could add a reason; the sentence it ships with is better than the enum.
+    await act(async () => {
+      captured.options.onProgress(skipEvent({
+        skipReason: 'thermal',
+        skipDetail: '24 workers were refused because the client reported a thermal limit',
+      }));
+    });
+    expect(boostStatus().textContent).toContain('24 workers were refused because the client reported a thermal limit');
+    expect(boostStatus().textContent).not.toContain(': thermal.');
+    await act(async () => { captured.release([]); });
   });
 });

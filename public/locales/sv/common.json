@@ -1026,6 +1026,8 @@
       "ocrBoostBenchmarkRunning": "Kör OCR-boostbenchmark…",
       "ocrBoostBenchmarkProgress": "Kör OCR-boostbenchmark {current} av {total}: {scenario} ({pageProgress} sidor, {workerCount} arbetare)…",
       "ocrBoostBenchmarkSkipped": "Överhoppad {scenario}: {skipReason}.",
+      "ocrBoostBenchmarkSkipCores": "{workerCount} arbetare överskrider klientens {cores} logiska kärnor",
+      "ocrBoostBenchmarkSkipMemory": "{workerCount} arbetare behöver omkring {neededMiB} MiB, över budgeten på {budgetMiB} MiB",
       "ocrBoostBenchmarkDone": "OCR-boostbenchmark slutförd.",
       "ocrBoostBenchmarkError": "OCR-boostbenchmark misslyckades: {error}",
       "ocrBoostBenchmarkSummary": "Snabbaste OCR-boostkörning: {msPerPage} ms per sida, {pages} sidor, {scenario}.",

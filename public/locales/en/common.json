@@ -1026,6 +1026,8 @@
       "ocrBoostBenchmarkRunning": "Running OCR boost benchmark…",
       "ocrBoostBenchmarkProgress": "Running OCR boost benchmark {current} of {total}: {scenario} ({pageProgress} pages, {workerCount} workers)…",
       "ocrBoostBenchmarkSkipped": "Skipped {scenario}: {skipReason}.",
+      "ocrBoostBenchmarkSkipCores": "{workerCount} workers exceed the {cores} logical cores of this client",
+      "ocrBoostBenchmarkSkipMemory": "{workerCount} workers need about {neededMiB} MiB, above the {budgetMiB} MiB budget",
       "ocrBoostBenchmarkDone": "OCR boost benchmark completed.",
       "ocrBoostBenchmarkError": "OCR boost benchmark failed: {error}",
       "ocrBoostBenchmarkSummary": "Fastest OCR boost run: {msPerPage} ms per page, {pages} pages, {scenario}.",

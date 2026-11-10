@@ -335,14 +335,38 @@ export default function AboutOverlayDialog({
           const workerCount = Math.max(0, Number(event?.workerCount || 0));
           const scenario = String(event?.scenarioLabel || '').trim();
           if (event?.skipped) {
+            // `skipReason` is the raw enum ('cores'/'memory'), which is not a sentence in any
+            // language: the localized explanation is built from `skipFacts`, and the English
+            // `skipDetail` is the fallback for a reason this build does not know.
             const skipReason = String(event?.skipReason || '').trim();
+            const skipDetail = String(event?.skipDetail || '').trim();
+            const facts = event?.skipFacts && typeof event.skipFacts === 'object' ? event.skipFacts : {};
+            const skipWorkers = Math.max(0, Number(facts.workerCount || workerCount || 0));
+            const cores = Math.max(0, Number(facts.cores || 0));
+            const neededMiB = Math.max(0, Number(facts.neededMiB || 0));
+            const budgetMiB = Math.max(0, Number(facts.budgetMiB || 0));
+            let reason = skipDetail;
+            if (skipReason === 'cores' && skipWorkers > 0 && cores > 0) {
+              reason = t('about.diagnostics.ocrBoostBenchmarkSkipCores', {
+                workerCount: skipWorkers,
+                cores,
+                defaultValue: `${skipWorkers} workers exceed the ${cores} logical cores of this client`,
+              });
+            } else if (skipReason === 'memory' && skipWorkers > 0 && neededMiB > 0 && budgetMiB > 0) {
+              reason = t('about.diagnostics.ocrBoostBenchmarkSkipMemory', {
+                workerCount: skipWorkers,
+                neededMiB,
+                budgetMiB,
+                defaultValue: `${skipWorkers} workers need about ${neededMiB} MiB, above the ${budgetMiB} MiB budget`,
+              });
+            }
             setOcrBoostBenchmarkState({
               status: 'running',
               message: t('about.diagnostics.ocrBoostBenchmarkSkipped', {
                 scenario,
-                skipReason,
-                defaultValue: skipReason
-                  ? `Skipped ${scenario}: ${skipReason}.`
+                skipReason: reason,
+                defaultValue: reason
+                  ? `Skipped ${scenario}: ${reason}.`
                   : `Skipped ${scenario}.`,
               }),
             });

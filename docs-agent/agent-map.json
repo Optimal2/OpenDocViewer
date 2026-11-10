@@ -95,7 +95,7 @@
   },
   "stats": {
     "fileCount": 199,
-    "sourceLineCount": 72208,
+    "sourceLineCount": 72298,
     "docletCount": 2079,
     "documentedFileCount": 195,
     "lowConfidenceSummaryCount": 2,
@@ -1198,7 +1198,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7930,
+      "lineCount": 7954,
       "docletCount": 113,
       "importantFiles": [
         {
@@ -1753,7 +1753,7 @@
     {
       "name": "src/ocr",
       "fileCount": 17,
-      "lineCount": 3820,
+      "lineCount": 3886,
       "docletCount": 157,
       "importantFiles": [
         {
@@ -1777,7 +1777,7 @@
         {
           "path": "src/ocr/boostBenchmark.js",
           "score": 68,
-          "lines": 744,
+          "lines": 810,
           "incomingLocalImports": 1,
           "doclets": 26,
           "summary": "Opt-in OCR *boost* benchmark (`ocr.boostBenchmark.enabled`): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.",
@@ -11496,7 +11496,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-      "lines": 693,
+      "lines": 717,
       "extension": ".jsx",
       "jsdocBlockCount": 10,
       "sourceSummary": "Small About dialog for version/build/support information.",
@@ -43143,7 +43143,7 @@
     },
     {
       "path": "src/ocr/boostBenchmark.js",
-      "lines": 744,
+      "lines": 810,
       "extension": ".js",
       "jsdocBlockCount": 30,
       "sourceSummary": "Opt-in OCR *boost* benchmark (`ocr.boostBenchmark.enabled`): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.",
@@ -43226,22 +43226,22 @@
         {
           "name": "judgeOcrBoostScenario",
           "kind": "function",
-          "line": 246
+          "line": 250
         },
         {
           "name": "readJsHeap",
           "kind": "function",
-          "line": 272
+          "line": 284
         },
         {
           "name": "createBoostEnginePool",
           "kind": "function",
-          "line": 342
+          "line": 360
         },
         {
           "name": "runOcrBoostBenchmark",
           "kind": "function",
-          "line": 595
+          "line": 653
         }
       ],
       "declarations": [
@@ -43273,92 +43273,92 @@
         {
           "name": "judgeOcrBoostScenario",
           "kind": "function",
-          "line": 246
+          "line": 250
         },
         {
           "name": "readJsHeap",
           "kind": "function",
-          "line": 272
+          "line": 284
         },
         {
           "name": "withTimeout",
           "kind": "function",
-          "line": 292
+          "line": 304
         },
         {
           "name": "abortError",
           "kind": "function",
-          "line": 303
+          "line": 315
         },
         {
           "name": "throwIfAborted",
           "kind": "function",
-          "line": 309
+          "line": 321
         },
         {
           "name": "delay",
           "kind": "function",
-          "line": 318
+          "line": 330
         },
         {
           "name": "onAbort",
           "kind": "function",
-          "line": 322
+          "line": 334
         },
         {
           "name": "createBoostEnginePool",
           "kind": "function",
-          "line": 342
+          "line": 360
         },
         {
           "name": "runInLanes",
           "kind": "function",
-          "line": 388
+          "line": 442
         },
         {
           "name": "runBoostScenario",
           "kind": "function",
-          "line": 420
+          "line": 474
         },
         {
           "name": "scenarioCfg",
           "kind": "object",
-          "line": 425
+          "line": 479
         },
         {
           "name": "shouldStop",
           "kind": "function",
-          "line": 461
+          "line": 515
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 464
+          "line": 518
         },
         {
           "name": "engineRecognize",
           "kind": "function",
-          "line": 569
+          "line": 625
         },
         {
           "name": "runOcrBoostBenchmark",
           "kind": "function",
-          "line": 595
+          "line": 653
         },
         {
           "name": "loadPageImage",
           "kind": "function",
-          "line": 631
+          "line": 689
         },
         {
           "name": "progress",
           "kind": "function",
-          "line": 653
+          "line": 711
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 690
+          "line": 756
         }
       ],
       "parseError": null,
@@ -43663,7 +43663,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 246,
+          "line": 250,
           "description": "Whether a worker count may run on this client, and why not when it may not.",
           "params": [
             {
@@ -43700,7 +43700,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 272,
+          "line": 284,
           "description": "The page's JS heap where the browser exposes it ( performance.memory , Chromium only).",
           "params": [],
           "returns": [
@@ -43718,7 +43718,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 292,
+          "line": 304,
           "description": "",
           "params": [
             {
@@ -43761,7 +43761,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 318,
+          "line": 330,
           "description": "",
           "params": [
             {
@@ -43792,7 +43792,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 342,
+          "line": 360,
           "description": "A pool of OCR engines for one boost scenario: every engine created and started up front, in parallel, one lane of the page loop per engine.",
           "params": [
             {
@@ -43829,7 +43829,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 353,
+          "line": 407,
           "description": "Start every engine at once and time it.",
           "params": [],
           "returns": [],
@@ -43842,7 +43842,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 369,
+          "line": 423,
           "description": "Stop every engine; returns how many were asked to stop.",
           "params": [],
           "returns": [],
@@ -43855,7 +43855,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 388,
+          "line": 442,
           "description": "Run worker over items , one lane per engine, each lane pulling the next item from a shared cursor.",
           "params": [
             {
@@ -43898,7 +43898,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 420,
+          "line": 474,
           "description": "Recognise the sampled pages once on a fresh pool of scenario.workerCount engines and measure it.",
           "params": [
             {
@@ -44001,7 +44001,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 443,
+          "line": 497,
           "description": "Filled in the finally, so an abort stops the sampler too.",
           "params": [],
           "returns": [],
@@ -44014,7 +44014,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 569,
+          "line": 625,
           "description": "Recognise on a lane's engine.",
           "params": [
             {
@@ -44045,7 +44045,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boostBenchmark.js",
-          "line": 595,
+          "line": 653,
           "description": "Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold...",
           "params": [
             {
@@ -44082,7 +44082,7 @@
               "name": "args.onProgress",
               "type": "function",
               "optional": false,
-              "description": "{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount, workerCount } , plus skipped and skipReason for a skipped coun..."
+              "description": "{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount, workerCount } , plus skipped , skipReason (the enum), skipDeta..."
             },
             {
               "name": "args.signal",
@@ -109033,7 +109033,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 342,
+      "line": 360,
       "description": "A pool of OCR engines for one boost scenario: every engine created and started up front, in parallel, one lane of the page loop per engine.",
       "params": [
         {
@@ -109070,7 +109070,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 318,
+      "line": 330,
       "description": "",
       "params": [
         {
@@ -109144,7 +109144,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 569,
+      "line": 625,
       "description": "Recognise on a lane's engine.",
       "params": [
         {
@@ -109274,7 +109274,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 246,
+      "line": 250,
       "description": "Whether a worker count may run on this client, and why not when it may not.",
       "params": [
         {
@@ -109329,7 +109329,7 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 443,
+      "line": 497,
       "description": "Filled in the finally, so an abort stops the sampler too.",
       "params": [],
       "returns": [],
@@ -109406,7 +109406,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 272,
+      "line": 284,
       "description": "The page's JS heap where the browser exposes it ( performance.memory , Chromium only).",
       "params": [],
       "returns": [
@@ -109424,7 +109424,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 420,
+      "line": 474,
       "description": "Recognise the sampled pages once on a fresh pool of scenario.workerCount engines and measure it.",
       "params": [
         {
@@ -109527,7 +109527,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 388,
+      "line": 442,
       "description": "Run worker over items , one lane per engine, each lane pulling the next item from a shared cursor.",
       "params": [
         {
@@ -109570,7 +109570,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 595,
+      "line": 653,
       "description": "Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold...",
       "params": [
         {
@@ -109607,7 +109607,7 @@
           "name": "args.onProgress",
           "type": "function",
           "optional": false,
-          "description": "{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount, workerCount } , plus skipped and skipReason for a skipped coun..."
+          "description": "{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount, workerCount } , plus skipped , skipReason (the enum), skipDeta..."
         },
         {
           "name": "args.signal",
@@ -109637,7 +109637,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 353,
+      "line": 407,
       "description": "Start every engine at once and time it.",
       "params": [],
       "returns": [],
@@ -109650,7 +109650,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 369,
+      "line": 423,
       "description": "Stop every engine; returns how many were asked to stop.",
       "params": [],
       "returns": [],
@@ -109663,7 +109663,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boostBenchmark.js",
-      "line": 292,
+      "line": 304,
       "description": "",
       "params": [
         {

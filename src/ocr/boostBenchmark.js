@@ -238,10 +238,14 @@ export function describeOcrBoostCapacity({ cores, deviceMemoryGiB, config }) {
  * does not report its cores leaves the core rule out (it cannot be read, and skipping every
  * count would measure nothing); the memory rule still applies, on the assumed memory.
  *
+ * `skipDetail` is the English sentence for the JSON; `skipFacts` carries the same numbers as
+ * fields, so a UI can build its own localized sentence instead of showing either the English
+ * text or the bare enum. Both are additive: `skipped`/`skipReason` keep their old meaning.
+ *
  * @param {number} workerCount
  * @param {OcrBoostCapacity} capacity
  * @param {OcrBoostBenchmarkConfig} config
- * @returns {{ skipped: boolean, skipReason: (string|null), skipDetail: (string|null) }}
+ * @returns {{ skipped: boolean, skipReason: (string|null), skipDetail: (string|null), skipFacts: (Object|null) }}
  */
 export function judgeOcrBoostScenario(workerCount, capacity, config) {
   if (capacity.coresReported && workerCount > capacity.cores) {
@@ -249,6 +253,7 @@ export function judgeOcrBoostScenario(workerCount, capacity, config) {
       skipped: true,
       skipReason: BOOST_SKIP_REASON.CORES,
       skipDetail: `${workerCount} workers exceed the ${capacity.cores} logical cores this client reports`,
+      skipFacts: { workerCount, cores: capacity.cores },
     };
   }
   const neededMiB = workerCount * config.memoryPerWorkerMiB;
@@ -259,9 +264,16 @@ export function judgeOcrBoostScenario(workerCount, capacity, config) {
       skipReason: BOOST_SKIP_REASON.MEMORY,
       skipDetail: `${workerCount} workers need about ${Math.round(neededMiB)} MiB, above the ${capacity.memoryBudgetMiB} MiB budget `
         + `(${config.memoryBudgetFraction} of ${capacity.deviceMemoryGiB} GiB${assumed})`,
+      skipFacts: {
+        workerCount,
+        neededMiB: Math.round(neededMiB),
+        budgetMiB: capacity.memoryBudgetMiB,
+        deviceMemoryGiB: capacity.deviceMemoryGiB,
+        deviceMemoryAssumed: !capacity.deviceMemoryReported,
+      },
     };
   }
-  return { skipped: false, skipReason: null, skipDetail: null };
+  return { skipped: false, skipReason: null, skipDetail: null, skipFacts: null };
 }
 
 /**
@@ -334,17 +346,59 @@ function delay(ms, signal) {
  * leaves a hung worker) is marked dead and stops pulling pages; the remaining pages are taken
  * by the lanes that still work, so one bad worker costs pages, not the scenario.
  *
+ * Construction itself can fail: `createEngine` is the factory of a live engine, and engine
+ * number k may throw where the first k-1 were made. Nothing is thrown onwards for that — the
+ * engines already created are terminated at once, no lane is handed out, and the pool reports
+ * the failure from `startAll` as the engine-start error it is, so the scenario is recorded as
+ * aborted and the run goes on with the next worker count instead of dying with a leak behind it.
+ *
  * @param {Object} args
  * @param {number} args.size  Engines to create and start.
  * @param {function(number): Object} args.createEngine  Makes engine number `index` (0-based).
- * @returns {{ lanes: Array<{ index: number, engine: Object, dead: boolean }>, startAll: function(number): Promise<{ startupMs: number, perEngineMs: Array<number>, error: (string|null) }>, terminateAll: function(): Promise<number> }}
+ * @returns {{ lanes: Array<{ index: number, engine: Object, dead: boolean }>, creationError: (string|null), enginesCreated: number, startAll: function(number): Promise<{ startupMs: number, perEngineMs: Array<number>, error: (string|null) }>, terminateAll: function(): Promise<number> }}
  */
 export function createBoostEnginePool({ size, createEngine }) {
   if (typeof createEngine !== 'function') throw new Error('OCR boost benchmark needs an engine factory');
   const count = Math.max(1, Math.min(BOOST_MAX_WORKER_COUNT, Math.floor(Number(size)) || 1));
-  const lanes = Array.from({ length: count }, (_, index) => ({ index, engine: createEngine(index), dead: false }));
+  const lanes = [];
+  let creationError = null;
+  for (let index = 0; index < count; index += 1) {
+    try {
+      lanes.push({ index, engine: createEngine(index), dead: false });
+    } catch (reason) {
+      creationError = `OCR boost benchmark engine ${index + 1} of ${count} could not be created: ${String(reason?.message || reason)}`;
+      break;
+    }
+  }
+  if (creationError) {
+    // The engines of a pool that never came together must not outlive it: stop them now, and
+    // keep the promise so terminateAll() can be awaited exactly as on the working path.
+    const created = lanes.length;
+    const cleanup = Promise.all(lanes.map(async (lane) => {
+      // Best effort, and a terminate() that throws synchronously must not escape either: the
+      // engine that could not be made is the failure being reported, not this one.
+      try { await lane.engine.terminate(); } catch { /* nothing better to do here */ }
+    }));
+    // No lane is offered, so neither the page loop nor startAll can touch a terminated engine.
+    lanes.length = 0;
+    return {
+      lanes,
+      creationError,
+      enginesCreated: created,
+      async startAll() {
+        await cleanup;
+        return { startupMs: 0, perEngineMs: [], error: creationError };
+      },
+      async terminateAll() {
+        await cleanup;
+        return created;
+      },
+    };
+  }
   return {
     lanes,
+    creationError: null,
+    enginesCreated: count,
     /**
      * Start every engine at once and time it. The wall time until the last one is ready is the
      * scenario's `startupMs`; the per-engine times show whether they serialised on the network
@@ -521,6 +575,8 @@ async function runBoostScenario({
     workerCount: scenario.workerCount,
     skipped: false,
     skipReason: null,
+    skipDetail: null,
+    skipFacts: null,
     languages: scenario.languages,
     pageCount: pages.length,
     recognizedPages: recognized,
@@ -531,7 +587,7 @@ async function runBoostScenario({
     abortError: abortDetail,
     heapAtAbort,
     deadLanes: pool.lanes.filter((lane) => lane.dead).length,
-    enginesCreated: pool.lanes.length,
+    enginesCreated: pool.enginesCreated,
     enginesTerminated: terminatedEngines,
     startedUtc,
     endedUtc: new Date().toISOString(),
@@ -584,7 +640,9 @@ function engineRecognize(lane, image) {
  * @param {(function(number, string): void|null)=} args.releasePageAsset  Drop a render made only
  *   for the benchmark, as runOcrBenchmark does.
  * @param {function(Object): void=} args.onProgress  `{ phase, completedRuns, totalRuns, scenarioLabel,
- *   completedPages, pageCount, workerCount }`, plus `skipped` and `skipReason` for a skipped count.
+ *   completedPages, pageCount, workerCount }`, plus `skipped`, `skipReason` (the enum),
+ *   `skipDetail` (the English sentence) and `skipFacts` (the same numbers as fields, for a
+ *   caller that builds its own localized sentence) for a skipped count.
  * @param {AbortSignal=} args.signal
  * @param {Object=} args.inject  Test seams: `createEngine` (`(cfg, { workerCount, engineIndex })`
  *   -> `{ engine }`; default one createOcrEngine per engine from describeOcrSetup), `prepareImage`,
@@ -661,13 +719,21 @@ export async function runOcrBoostBenchmark({ config, allPages, ensurePageAsset, 
       ...extra,
     });
     if (scenario.skipped) {
-      progress({ skipped: true, skipReason: scenario.skipReason });
+      // The enum alone would leave a caller with "memory" to show; the sentence and the numbers
+      // travel with it, so a UI can say which numbers made the count impossible, in its language.
+      progress({
+        skipped: true,
+        skipReason: scenario.skipReason,
+        skipDetail: scenario.skipDetail,
+        skipFacts: scenario.skipFacts,
+      });
       runs.push({
         label: scenario.label,
         workerCount: scenario.workerCount,
         skipped: true,
         skipReason: scenario.skipReason,
         skipDetail: scenario.skipDetail,
+        skipFacts: scenario.skipFacts,
         languages,
         pageCount: 0,
         recognizedPages: 0,
@@ -722,9 +788,9 @@ export async function runOcrBoostBenchmark({ config, allPages, ensurePageAsset, 
     workerCounts: benchmark.workerCounts,
     pageTimeoutMs: benchmark.pageTimeoutMs,
     delayBetweenRunsMs: benchmark.delayBetweenRunsMs,
-    scenarios: scenarios.map(({ label, workerCount, skipped, skipReason, skipDetail }) => ({ label, workerCount, skipped, skipReason, skipDetail })),
+    scenarios: scenarios.map(({ label, workerCount, skipped, skipReason, skipDetail, skipFacts }) => ({ label, workerCount, skipped, skipReason, skipDetail, skipFacts })),
     runs,
-    skippedCounts: scenarios.filter((scenario) => scenario.skipped).map((scenario) => ({ workerCount: scenario.workerCount, skipReason: scenario.skipReason, skipDetail: scenario.skipDetail })),
+    skippedCounts: scenarios.filter((scenario) => scenario.skipped).map((scenario) => ({ workerCount: scenario.workerCount, skipReason: scenario.skipReason, skipDetail: scenario.skipDetail, skipFacts: scenario.skipFacts })),
     best: best ? { label: best.label, workerCount: best.workerCount, msPerPage: best.msPerPage, pagesPerMinute: best.pagesPerMinute, secondsPer100Pages: best.secondsPer100Pages, wholeDocumentSeconds: best.wholeDocumentSeconds } : null,
     baseline: baseline ? { label: baseline.label, workerCount: baseline.workerCount, msPerPage: baseline.msPerPage, pagesPerMinute: baseline.pagesPerMinute } : null,
     diagnostics: (inject.diagnostics || collectSupportDiagnostics)({ latestPdfBenchmark: null, latestRenderDecodeBenchmark: null, latestOcrBenchmark: null }),

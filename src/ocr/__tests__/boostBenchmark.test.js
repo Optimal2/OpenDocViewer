@@ -18,6 +18,7 @@ import {
   BOOST_SKIP_REASON,
   OCR_BOOST_BENCHMARK_DEFAULTS,
   OCR_BOOST_BENCHMARK_SCHEMA,
+  createBoostEnginePool,
   describeOcrBoostCapacity,
   judgeOcrBoostScenario,
   normalizeOcrBoostBenchmarkConfig,
@@ -108,6 +109,23 @@ describe('describeOcrBoostCapacity and judgeOcrBoostScenario', () => {
     expect(judgeOcrBoostScenario(24, assumedMemory, config).skipDetail).toMatch(/3120 MiB.*2048 MiB.*assumed/);
   });
 
+  it('states the numbers behind a skip as fields, so a UI can say it in its own language', () => {
+    // The enum alone ('cores'/'memory') is not a sentence; `skipFacts` is what a localized
+    // explanation is built from, and the English `skipDetail` stays for the JSON.
+    const narrow = describeOcrBoostCapacity({ cores: 16, deviceMemoryGiB: 64, config });
+    expect(judgeOcrBoostScenario(24, narrow, config).skipFacts).toEqual({ workerCount: 24, cores: 16 });
+
+    const small = describeOcrBoostCapacity({ cores: 32, deviceMemoryGiB: 4, config });
+    expect(judgeOcrBoostScenario(24, small, config).skipFacts).toEqual({
+      workerCount: 24, neededMiB: 3120, budgetMiB: 2048, deviceMemoryGiB: 4, deviceMemoryAssumed: false,
+    });
+    const assumed = describeOcrBoostCapacity({ cores: 32, deviceMemoryGiB: 0, config });
+    expect(judgeOcrBoostScenario(24, assumed, config).skipFacts.deviceMemoryAssumed).toBe(true);
+
+    // A count that runs carries no facts at all.
+    expect(judgeOcrBoostScenario(8, narrow, config).skipFacts).toBeNull();
+  });
+
   it('leaves the core rule out when the browser does not report its cores, keeping the memory rule', () => {
     const unknown = describeOcrBoostCapacity({ cores: 0, deviceMemoryGiB: 64, config });
     expect(judgeOcrBoostScenario(24, unknown, config).skipped).toBe(false);
@@ -133,6 +151,42 @@ describe('readJsHeap', () => {
     } finally {
       delete globalThis.performance.memory;
     }
+  });
+});
+
+describe('createBoostEnginePool', () => {
+  it('terminates the engines already made when the factory throws part-way, and hands out no lane', async () => {
+    const made = [];
+    const createEngine = vi.fn((index) => {
+      // The third engine cannot be made; the first two already exist and must not be left running.
+      if (index === 2) throw new Error('Worker could not be created (blocked)');
+      const engine = { index, terminated: 0, ensureStarted: vi.fn(async () => {}), recognize: vi.fn(), terminate: vi.fn(async () => { engine.terminated += 1; }) };
+      made.push(engine);
+      return engine;
+    });
+    const pool = createBoostEnginePool({ size: 5, createEngine });
+
+    expect(createEngine).toHaveBeenCalledTimes(3);
+    expect(made).toHaveLength(2);
+    expect(pool.creationError).toMatch(/engine 3 of 5 could not be created.*blocked/);
+    // No lane is offered, so neither the page loop nor the start can touch a terminated engine.
+    expect(pool.lanes).toEqual([]);
+    expect(pool.enginesCreated).toBe(2);
+
+    // The start reports the failure as the engine-start error it is, rather than throwing on.
+    expect(await pool.startAll(1000)).toEqual({ startupMs: 0, perEngineMs: [], error: pool.creationError });
+    expect(await pool.terminateAll()).toBe(2);
+    expect(made.every((engine) => engine.terminated === 1)).toBe(true);
+    expect(made.every((engine) => engine.ensureStarted.mock.calls.length === 0)).toBe(true);
+  });
+
+  it('survives an engine whose terminate() also fails on that path', async () => {
+    const createEngine = (index) => {
+      if (index === 1) throw new Error('nope');
+      return { ensureStarted: async () => {}, recognize: () => {}, terminate: () => { throw new Error('terminate failed'); } };
+    };
+    const pool = createBoostEnginePool({ size: 3, createEngine });
+    expect(await pool.terminateAll()).toBe(1);
   });
 });
 
@@ -285,7 +339,12 @@ describe('runOcrBoostBenchmark', () => {
     // Twelve engines were never created: that is the whole point of the skip.
     expect(created).toHaveLength(12);
     expect(createEngine.mock.calls.every(([, options]) => options.workerCount <= 8)).toBe(true);
-    expect(progress.filter((event) => event.skipped === true).map((event) => event.workerCount)).toEqual([12, 24]);
+    const skipEvents = progress.filter((event) => event.skipped === true);
+    expect(skipEvents.map((event) => event.workerCount)).toEqual([12, 24]);
+    // The skip event carries the sentence and the numbers, not only the enum: a UI that showed
+    // `skipReason` alone would say "Skipped boost-workers-12: cores." and explain nothing.
+    expect(skipEvents[0]).toMatchObject({ skipReason: BOOST_SKIP_REASON.CORES, skipFacts: { workerCount: 12, cores: 8 } });
+    expect(skipEvents[0].skipDetail).toMatch(/8 logical cores/);
     // Two pages are fewer than either count's workers, so both scenarios take one page's time:
     // on a tie the lower count wins, which is the answer an operator wants anyway.
     expect(result.runs[0].msPerPage).toBe(result.runs[1].msPerPage);
@@ -295,10 +354,12 @@ describe('runOcrBoostBenchmark', () => {
   it('skips on the memory budget when the cores would allow the count', async () => {
     vi.useFakeTimers();
     const { createEngine } = makeEngineFactory();
+    const progress = [];
     const run = runOcrBoostBenchmark({
       config: enabled({ workerCounts: [4, 24], pageLimit: 2, delayBetweenRunsMs: 0 }),
       allPages: pages,
       ensurePageAsset: async (index) => `/pages/${index}.png`,
+      onProgress: (event) => progress.push(event),
       // 32 cores but 4 GiB: 24 x 130 MiB = 3120 MiB over the 2048 MiB budget.
       inject: { ...baseInject, createEngine, cores: 32, deviceMemoryGiB: 4 },
     });
@@ -306,6 +367,53 @@ describe('runOcrBoostBenchmark', () => {
     const result = await run;
     expect(result.runs.map((entry) => entry.skipReason)).toEqual([null, BOOST_SKIP_REASON.MEMORY]);
     expect(result.skippedCounts[0].skipDetail).toMatch(/3120 MiB/);
+    expect(result.skippedCounts[0].skipFacts).toEqual({
+      workerCount: 24, neededMiB: 3120, budgetMiB: 2048, deviceMemoryGiB: 4, deviceMemoryAssumed: false,
+    });
+    expect(result.runs[1].skipFacts).toEqual(result.skippedCounts[0].skipFacts);
+    expect(result.scenarios[1].skipFacts).toEqual(result.skippedCounts[0].skipFacts);
+    // The same numbers reach the progress listener, which is where the status line is written.
+    const [skipEvent] = progress.filter((event) => event.skipped === true);
+    expect(skipEvent.skipFacts).toEqual(result.skippedCounts[0].skipFacts);
+    expect(skipEvent.skipDetail).toMatch(/3120 MiB/);
+  });
+
+  it('terminates the engines already created when the factory throws part-way, and goes on with the next count', async () => {
+    vi.useFakeTimers();
+    const aborted = makeEngineFactory({ msPerPage: 10 });
+    const working = makeEngineFactory({ msPerPage: 10 });
+    const createEngine = vi.fn((cfg, options) => {
+      if (options.workerCount !== 4) return working.createEngine(cfg, options);
+      // The third engine of the four-worker scenario cannot be made (a blocked worker URL, a
+      // CSP, an out-of-memory renderer); the first two already exist.
+      if (options.engineIndex === 2) throw new Error('Worker could not be created (blocked)');
+      return aborted.createEngine(cfg, options);
+    });
+    const run = runOcrBoostBenchmark({
+      config: enabled({ workerCounts: [4, 8], pageLimit: 3, delayBetweenRunsMs: 0 }),
+      allPages: pages,
+      ensurePageAsset: async (index) => `/pages/${index}.png`,
+      inject: { ...baseInject, createEngine, cores: 24, deviceMemoryGiB: 16 },
+    });
+    await vi.runAllTimersAsync();
+    const result = await run;
+
+    // Only the two engines before the failing one were made, and neither was left running: the
+    // factory throwing is not a licence to leak a worker, and it does not end the whole run.
+    expect(aborted.created).toHaveLength(2);
+    expect(aborted.created.every((engine) => engine.terminated === 1)).toBe(true);
+    expect(aborted.created.every((engine) => engine.started === 0)).toBe(true);
+    expect(result.runs[0]).toMatchObject({
+      workerCount: 4, skipped: false, aborted: true, abortReason: BOOST_ABORT_REASON.ENGINE_START,
+      recognizedPages: 0, errorCount: 3, durationMs: 0, msPerPage: 0, deadLanes: 0,
+      enginesCreated: 2, enginesTerminated: 2,
+    });
+    expect(result.runs[0].startupError).toMatch(/engine 3 of 4 could not be created.*blocked/);
+    // The next worker count is measured as if nothing had happened.
+    expect(result.runs[1]).toMatchObject({ workerCount: 8, aborted: false, recognizedPages: 3, errorCount: 0, enginesCreated: 8, enginesTerminated: 8 });
+    expect(working.created).toHaveLength(8);
+    expect(working.created.every((engine) => engine.terminated === 1)).toBe(true);
+    expect(result.best.workerCount).toBe(8);
   });
 
   it('aborts a scenario whose engines cannot start, terminates them, and goes on with the next count', async () => {
