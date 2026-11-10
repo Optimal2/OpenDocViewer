@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 7971. JSDoc symbol count: 113.
+File count: 21. Line count: 7973. JSDoc symbol count: 113.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -69,7 +69,7 @@ Runtime\-configuration derivation for PrintRangeDialog.
 
 Exports: `usePrintRangeConfig`
 
-Local imports: `src/utils/localizedValue.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/components/DocumentToolbar/printRangeDialogHelpers.js`
+Local imports: `src/utils/localizedValue.js`, `src/utils/runtimeConfig.js`, `src/integrations/integrationSettings.js`, `src/utils/viewerPreferences.js`, `src/components/DocumentToolbar/printRangeDialogHelpers.js`
 
 Symbols:
 

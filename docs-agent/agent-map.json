@@ -94,15 +94,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 199,
-    "sourceLineCount": 72317,
-    "docletCount": 2079,
-    "documentedFileCount": 195,
+    "fileCount": 200,
+    "sourceLineCount": 72558,
+    "docletCount": 2091,
+    "documentedFileCount": 196,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 7007
+    "estimatedSourceTokens": 7033
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -581,7 +581,7 @@
       "path": "src/logging/systemLogger.js",
       "score": 102,
       "lines": 471,
-      "incomingLocalImports": 44,
+      "incomingLocalImports": 45,
       "doclets": 31,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high"
@@ -846,7 +846,7 @@
           {
             "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
             "score": 20,
-            "lines": 163,
+            "lines": 165,
             "summary": "Runtime-configuration derivation for PrintRangeDialog."
           },
           {
@@ -986,13 +986,13 @@
     {
       "name": "src/app",
       "fileCount": 3,
-      "lineCount": 818,
+      "lineCount": 822,
       "docletCount": 21,
       "importantFiles": [
         {
           "path": "src/app/AppBootstrap.jsx",
           "score": 40,
-          "lines": 432,
+          "lines": 436,
           "incomingLocalImports": 1,
           "doclets": 10,
           "summary": "Application bootstrap React component.",
@@ -1198,7 +1198,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7971,
+      "lineCount": 7973,
       "docletCount": 113,
       "importantFiles": [
         {
@@ -1611,10 +1611,19 @@
     },
     {
       "name": "src/integrations",
-      "fileCount": 8,
-      "lineCount": 2285,
-      "docletCount": 60,
+      "fileCount": 9,
+      "lineCount": 2517,
+      "docletCount": 72,
       "importantFiles": [
+        {
+          "path": "src/integrations/integrationSettings.js",
+          "score": 79,
+          "lines": 232,
+          "incomingLocalImports": 3,
+          "doclets": 12,
+          "summary": "Per-integration settings carried by a Portable Document Bundle.",
+          "summaryConfidence": "high"
+        },
         {
           "path": "src/integrations/ompThemeBridge.js",
           "score": 60,
@@ -1677,29 +1686,20 @@
           "doclets": 4,
           "summary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
           "summaryConfidence": "high"
-        },
-        {
-          "path": "src/integrations/urlParams.js",
-          "score": 33,
-          "lines": 110,
-          "incomingLocalImports": 1,
-          "doclets": 5,
-          "summary": "OpenDocViewer — URL Parameter Reader (Browser-only) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e.",
-          "summaryConfidence": "high"
         }
       ]
     },
     {
       "name": "src/logging",
       "fileCount": 2,
-      "lineCount": 779,
+      "lineCount": 782,
       "docletCount": 48,
       "importantFiles": [
         {
           "path": "src/logging/systemLogger.js",
           "score": 102,
           "lines": 471,
-          "incomingLocalImports": 44,
+          "incomingLocalImports": 45,
           "doclets": 31,
           "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
           "summaryConfidence": "high"
@@ -1707,7 +1707,7 @@
         {
           "path": "src/logging/userLogger.js",
           "score": 47,
-          "lines": 308,
+          "lines": 311,
           "incomingLocalImports": 2,
           "doclets": 17,
           "summary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
@@ -2594,7 +2594,7 @@
     },
     {
       "path": "src/app/AppBootstrap.jsx",
-      "lines": 432,
+      "lines": 436,
       "extension": ".jsx",
       "jsdocBlockCount": 15,
       "sourceSummary": "Application bootstrap React component.",
@@ -2659,11 +2659,19 @@
           "kind": "static"
         },
         {
+          "source": "../integrations/integrationSettings.js",
+          "specifiers": [
+            "applyIntegrationSettings"
+          ],
+          "line": 28,
+          "kind": "static"
+        },
+        {
           "source": "../components/DocumentLoader/sources/explicitListSource.js",
           "specifiers": [
             "makeExplicitSource"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -2671,7 +2679,7 @@
           "specifiers": [
             "isPerformanceOverlayEnabled"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         }
       ],
@@ -2679,39 +2687,39 @@
         {
           "name": "AppBootstrap",
           "kind": "default",
-          "line": 249
+          "line": 250
         }
       ],
       "declarations": [
         {
           "name": "readPositiveIntegerQueryParam",
           "kind": "function",
-          "line": 95
+          "line": 96
         },
         {
           "name": "readBootstrapSummaryFromUrl",
           "kind": "function",
-          "line": 100
+          "line": 101
         },
         {
           "name": "BootstrapLoading",
           "kind": "component",
-          "line": 116
+          "line": 117
         },
         {
           "name": "makeReloadCacheSeedFromBundle",
           "kind": "function",
-          "line": 209
+          "line": 210
         },
         {
           "name": "buildDemoSourceList",
           "kind": "function",
-          "line": 227
+          "line": 228
         },
         {
           "name": "AppBootstrap",
           "kind": "component",
-          "line": 249
+          "line": 250
         }
       ],
       "parseError": null,
@@ -2727,7 +2735,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 31,
+          "line": 32,
           "description": "Session metadata for a bundle.",
           "params": [],
           "returns": [],
@@ -2740,7 +2748,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 39,
+          "line": 40,
           "description": "Explicit item (URL list).",
           "params": [],
           "returns": [],
@@ -2753,7 +2761,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 47,
+          "line": 48,
           "description": "Portable document bundle shape.",
           "params": [],
           "returns": [],
@@ -2766,7 +2774,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 54,
+          "line": 55,
           "description": "URL parameter config (pattern mode).",
           "params": [],
           "returns": [],
@@ -2779,7 +2787,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 62,
+          "line": 63,
           "description": "Diagnostics-only bootstrap metadata.",
           "params": [],
           "returns": [],
@@ -2792,7 +2800,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 71,
+          "line": 72,
           "description": "Options for building a demo source list.",
           "params": [],
           "returns": [],
@@ -2805,7 +2813,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 79,
+          "line": 80,
           "description": "One entry in the demo source list.",
           "params": [],
           "returns": [],
@@ -2818,7 +2826,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 209,
+          "line": 210,
           "description": "Build a stable reload-cache scope from host/user identity without including short-lived source URLs/tickets, session ids, or the current document selection.",
           "params": [
             {
@@ -2843,7 +2851,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 227,
+          "line": 228,
           "description": "Build a demo source list from the /public sample files.",
           "params": [
             {
@@ -2868,7 +2876,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/app/AppBootstrap.jsx",
-          "line": 249,
+          "line": 250,
           "description": "Top-level bootstrapper component.",
           "params": [],
           "returns": [
@@ -2927,11 +2935,20 @@
           "resolved": "src/integrations/bootstrapRuntime.js"
         },
         {
+          "source": "../integrations/integrationSettings.js",
+          "specifiers": [
+            "applyIntegrationSettings"
+          ],
+          "line": 28,
+          "kind": "static",
+          "resolved": "src/integrations/integrationSettings.js"
+        },
+        {
           "source": "../components/DocumentLoader/sources/explicitListSource.js",
           "specifiers": [
             "makeExplicitSource"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static",
           "resolved": "src/components/DocumentLoader/sources/explicitListSource.js"
         },
@@ -2940,7 +2957,7 @@
           "specifiers": [
             "isPerformanceOverlayEnabled"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/performanceOverlayFlag.js"
         }
@@ -13085,7 +13102,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
-      "lines": 163,
+      "lines": 165,
       "extension": ".js",
       "jsdocBlockCount": 2,
       "sourceSummary": "Runtime-configuration derivation for PrintRangeDialog.",
@@ -13107,11 +13124,19 @@
           "kind": "static"
         },
         {
+          "source": "../../../integrations/integrationSettings.js",
+          "specifiers": [
+            "getEffectiveUserLogConfig"
+          ],
+          "line": 10,
+          "kind": "static"
+        },
+        {
           "source": "../../../utils/viewerPreferences.js",
           "specifiers": [
             "getPrintDefaultModePreference"
           ],
-          "line": 10,
+          "line": 11,
           "kind": "static"
         },
         {
@@ -13123,7 +13148,7 @@
             "resolvePrintAction",
             "safeRegex"
           ],
-          "line": 11,
+          "line": 12,
           "kind": "static"
         }
       ],
@@ -13131,14 +13156,14 @@
         {
           "name": "usePrintRangeConfig",
           "kind": "function",
-          "line": 30
+          "line": 31
         }
       ],
       "declarations": [
         {
           "name": "usePrintRangeConfig",
           "kind": "function",
-          "line": 30
+          "line": 31
         }
       ],
       "parseError": null,
@@ -13169,7 +13194,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
-          "line": 30,
+          "line": 31,
           "description": "",
           "params": [
             {
@@ -13251,11 +13276,20 @@
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
+          "source": "../../../integrations/integrationSettings.js",
+          "specifiers": [
+            "getEffectiveUserLogConfig"
+          ],
+          "line": 10,
+          "kind": "static",
+          "resolved": "src/integrations/integrationSettings.js"
+        },
+        {
           "source": "../../../utils/viewerPreferences.js",
           "specifiers": [
             "getPrintDefaultModePreference"
           ],
-          "line": 10,
+          "line": 11,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
@@ -13268,7 +13302,7 @@
             "resolvePrintAction",
             "safeRegex"
           ],
-          "line": 11,
+          "line": 12,
           "kind": "static",
           "resolved": "src/components/DocumentToolbar/printRangeDialogHelpers.js"
         }
@@ -38406,6 +38440,409 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/integrations/integrationSettings.js",
+      "lines": 232,
+      "extension": ".js",
+      "jsdocBlockCount": 17,
+      "sourceSummary": "Per-integration settings carried by a Portable Document Bundle.",
+      "imports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 33,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "resolveSameOriginEndpoint",
+          "kind": "function",
+          "line": 93
+        },
+        {
+          "name": "readSettingsPolicy",
+          "kind": "function",
+          "line": 114
+        },
+        {
+          "name": "sanitizeIntegrationSettings",
+          "kind": "function",
+          "line": 134
+        },
+        {
+          "name": "applyIntegrationSettings",
+          "kind": "function",
+          "line": 196
+        },
+        {
+          "name": "resetIntegrationSettings",
+          "kind": "function",
+          "line": 210
+        },
+        {
+          "name": "getIntegrationSettings",
+          "kind": "function",
+          "line": 215
+        },
+        {
+          "name": "getEffectiveUserLogConfig",
+          "kind": "function",
+          "line": 226
+        }
+      ],
+      "declarations": [
+        {
+          "name": "current",
+          "kind": "object",
+          "line": 60
+        },
+        {
+          "name": "isPlainObject",
+          "kind": "function",
+          "line": 62
+        },
+        {
+          "name": "readRuntimeConfig",
+          "kind": "function",
+          "line": 67
+        },
+        {
+          "name": "documentBase",
+          "kind": "function",
+          "line": 77
+        },
+        {
+          "name": "resolveSameOriginEndpoint",
+          "kind": "function",
+          "line": 93
+        },
+        {
+          "name": "readSettingsPolicy",
+          "kind": "function",
+          "line": 114
+        },
+        {
+          "name": "sanitizeIntegrationSettings",
+          "kind": "function",
+          "line": 134
+        },
+        {
+          "name": "settings",
+          "kind": "object",
+          "line": 151
+        },
+        {
+          "name": "userLog",
+          "kind": "object",
+          "line": 158
+        },
+        {
+          "name": "applyIntegrationSettings",
+          "kind": "function",
+          "line": 196
+        },
+        {
+          "name": "resetIntegrationSettings",
+          "kind": "function",
+          "line": 210
+        },
+        {
+          "name": "getIntegrationSettings",
+          "kind": "function",
+          "line": 215
+        },
+        {
+          "name": "getEffectiveUserLogConfig",
+          "kind": "function",
+          "line": 226
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "TRUSTED_MODES",
+          "name": "TRUSTED_MODES",
+          "longname": "TRUSTED_MODES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 36,
+          "description": "Bootstrap modes whose bundle came from the viewer's own origin.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "KNOWN_GROUPS",
+          "name": "KNOWN_GROUPS",
+          "longname": "KNOWN_GROUPS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 39,
+          "description": "Setting groups this module knows how to read.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "UserLogOverride",
+          "name": "UserLogOverride",
+          "longname": "UserLogOverride",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 43,
+          "description": "The print-log values an integration may set.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "IntegrationSettings",
+          "name": "IntegrationSettings",
+          "longname": "IntegrationSettings",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 52,
+          "description": "The settings in effect for the current session.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "readRuntimeConfig",
+          "name": "readRuntimeConfig",
+          "longname": "readRuntimeConfig",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 67,
+          "description": "Safely read the runtime configuration from the page.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "resolveSameOriginEndpoint",
+          "name": "resolveSameOriginEndpoint",
+          "longname": "resolveSameOriginEndpoint",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 93,
+          "description": "Resolve an endpoint against the document and return it only when it stays on the document's own origin.",
+          "params": [
+            {
+              "name": "endpoint",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "base",
+              "type": "string",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "readSettingsPolicy",
+          "name": "readSettingsPolicy",
+          "longname": "readSettingsPolicy",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 114,
+          "description": "Site policy for bundle-carried settings.",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": "runtime configuration"
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "sanitizeIntegrationSettings",
+          "name": "sanitizeIntegrationSettings",
+          "longname": "sanitizeIntegrationSettings",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 134,
+          "description": "Reduce a bundle's integration.settings to the values the site allows and this module understands.",
+          "params": [
+            {
+              "name": "bundle",
+              "type": "*",
+              "optional": false,
+              "description": "normalized Portable Document Bundle"
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options.mode",
+              "type": "string",
+              "optional": false,
+              "description": "bootstrap mode the bundle arrived through"
+            },
+            {
+              "name": "options.policy",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options.base",
+              "type": "string",
+              "optional": true,
+              "description": "document base used for the origin check"
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "applyIntegrationSettings",
+          "name": "applyIntegrationSettings",
+          "longname": "applyIntegrationSettings",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 196,
+          "description": "Read the settings of a newly loaded bundle and make them the current overlay.",
+          "params": [
+            {
+              "name": "bundle",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "mode",
+              "type": "string",
+              "optional": false,
+              "description": "bootstrap mode"
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": "the overlay now in effect"
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "resetIntegrationSettings",
+          "name": "resetIntegrationSettings",
+          "longname": "resetIntegrationSettings",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 210,
+          "description": "Forget any overlay.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "getIntegrationSettings",
+          "name": "getIntegrationSettings",
+          "longname": "getIntegrationSettings",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 215,
+          "description": "",
+          "params": [],
+          "returns": [
+            {
+              "type": "Object",
+              "description": "the overlay in effect"
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "getEffectiveUserLogConfig",
+          "name": "getEffectiveUserLogConfig",
+          "longname": "getEffectiveUserLogConfig",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/integrations/integrationSettings.js",
+          "line": 226,
+          "description": "The print-log configuration to use: the site configuration with the current integration's values on top.",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": "runtime configuration"
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/integrations",
+      "localImports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 33,
+          "kind": "static",
+          "resolved": "src/logging/systemLogger.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 3,
+      "importanceScore": 79,
+      "summary": "Per-integration settings carried by a Portable Document Bundle.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/integrations/normalizePortableBundle.js",
       "lines": 833,
       "extension": ".js",
@@ -41087,7 +41524,7 @@
           "kind": "static"
         }
       ],
-      "incomingLocalImports": 44,
+      "incomingLocalImports": 45,
       "importanceScore": 102,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high",
@@ -41095,63 +41532,72 @@
     },
     {
       "path": "src/logging/userLogger.js",
-      "lines": 308,
+      "lines": 311,
       "extension": ".js",
       "jsdocBlockCount": 21,
       "sourceSummary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
-      "imports": [],
+      "imports": [
+        {
+          "source": "../integrations/integrationSettings.js",
+          "specifiers": [
+            "getEffectiveUserLogConfig"
+          ],
+          "line": 58,
+          "kind": "static"
+        }
+      ],
       "exports": [
         {
           "name": "userLog",
           "kind": "default",
-          "line": 307
+          "line": 310
         }
       ],
       "declarations": [
         {
           "name": "debug",
           "kind": "function",
-          "line": 62
+          "line": 64
         },
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 71
+          "line": 73
         },
         {
           "name": "toAbsoluteUrl",
           "kind": "function",
-          "line": 82
+          "line": 84
         },
         {
           "name": "isSameOrigin",
           "kind": "function",
-          "line": 91
+          "line": 93
         },
         {
           "name": "tzOffset",
           "kind": "function",
-          "line": 100
+          "line": 102
         },
         {
           "name": "abToBase64",
           "kind": "function",
-          "line": 110
+          "line": 112
         },
         {
           "name": "sha256Base64",
           "kind": "function",
-          "line": 120
+          "line": 122
         },
         {
           "name": "UserLogController",
           "kind": "class",
-          "line": 129
+          "line": 131
         },
         {
           "name": "bodyObj",
           "kind": "object",
-          "line": 240
+          "line": 243
         }
       ],
       "parseError": null,
@@ -41206,7 +41652,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 59,
+          "line": 61,
           "description": "True when running in dev (for debug logging only).",
           "params": [],
           "returns": [],
@@ -41219,7 +41665,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 62,
+          "line": 64,
           "description": "Dev-only logger.",
           "params": [],
           "returns": [],
@@ -41232,7 +41678,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 71,
+          "line": 73,
           "description": "Safely read runtime config from window.",
           "params": [],
           "returns": [],
@@ -41245,7 +41691,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 82,
+          "line": 84,
           "description": "Make absolute using document.baseURI when available.",
           "params": [],
           "returns": [],
@@ -41258,7 +41704,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 91,
+          "line": 93,
           "description": "Determine if the target URL is same-origin with current document.",
           "params": [],
           "returns": [],
@@ -41271,7 +41717,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 100,
+          "line": 102,
           "description": "Return timezone offset as &quot;+HH:MM&quot; or &quot;-HH:MM&quot;.",
           "params": [],
           "returns": [],
@@ -41284,7 +41730,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 110,
+          "line": 112,
           "description": "Base64 from ArrayBuffer (for cookie fingerprint).",
           "params": [],
           "returns": [],
@@ -41297,7 +41743,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 120,
+          "line": 122,
           "description": "Async SHA-256 of a string → &quot;sha256- &quot; (or null).",
           "params": [],
           "returns": [],
@@ -41310,7 +41756,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/logging/userLogger.js",
-          "line": 142,
+          "line": 144,
           "description": "Optional identity resolver supplied by host app.",
           "params": [
             {
@@ -41330,7 +41776,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/logging/userLogger.js",
-          "line": 150,
+          "line": 152,
           "description": "Optional viewer version to add in meta.viewerVersion.",
           "params": [
             {
@@ -41350,7 +41796,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/logging/userLogger.js",
-          "line": 160,
+          "line": 162,
           "description": "Initialize context near iframe/viewer creation.",
           "params": [
             {
@@ -41375,7 +41821,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/logging/userLogger.js",
-          "line": 168,
+          "line": 170,
           "description": "Internal: hash document.cookie once (non-blocking).",
           "params": [],
           "returns": [],
@@ -41388,7 +41834,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/logging/userLogger.js",
-          "line": 189,
+          "line": 191,
           "description": "Submit a &quot;print&quot; user-log event.",
           "params": [
             {
@@ -41408,7 +41854,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/logging/userLogger.js",
-          "line": 306,
+          "line": 309,
           "description": "Export singleton instance.",
           "params": [],
           "returns": [],
@@ -41416,7 +41862,17 @@
         }
       ],
       "moduleKey": "src/logging",
-      "localImports": [],
+      "localImports": [
+        {
+          "source": "../integrations/integrationSettings.js",
+          "specifiers": [
+            "getEffectiveUserLogConfig"
+          ],
+          "line": 58,
+          "kind": "static",
+          "resolved": "src/integrations/integrationSettings.js"
+        }
+      ],
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 47,
@@ -86506,7 +86962,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 62,
+      "line": 63,
       "description": "Diagnostics-only bootstrap metadata.",
       "params": [],
       "returns": [],
@@ -86519,7 +86975,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 227,
+      "line": 228,
       "description": "Build a demo source list from the /public sample files.",
       "params": [
         {
@@ -86544,7 +87000,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 71,
+      "line": 72,
       "description": "Options for building a demo source list.",
       "params": [],
       "returns": [],
@@ -86557,7 +87013,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 79,
+      "line": 80,
       "description": "One entry in the demo source list.",
       "params": [],
       "returns": [],
@@ -86570,7 +87026,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 39,
+      "line": 40,
       "description": "Explicit item (URL list).",
       "params": [],
       "returns": [],
@@ -86583,7 +87039,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 249,
+      "line": 250,
       "description": "Top-level bootstrapper component.",
       "params": [],
       "returns": [
@@ -86601,7 +87057,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 209,
+      "line": 210,
       "description": "Build a stable reload-cache scope from host/user identity without including short-lived source URLs/tickets, session ids, or the current document selection.",
       "params": [
         {
@@ -86626,7 +87082,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 47,
+      "line": 48,
       "description": "Portable document bundle shape.",
       "params": [],
       "returns": [],
@@ -86639,7 +87095,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 31,
+      "line": 32,
       "description": "Session metadata for a bundle.",
       "params": [],
       "returns": [],
@@ -86652,7 +87108,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/app/AppBootstrap.jsx",
-      "line": 54,
+      "line": 55,
       "description": "URL parameter config (pattern mode).",
       "params": [],
       "returns": [],
@@ -92564,7 +93020,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
-      "line": 30,
+      "line": 31,
       "description": "",
       "params": [
         {
@@ -106152,6 +106608,263 @@
       "examples": 0
     },
     {
+      "id": "applyIntegrationSettings",
+      "name": "applyIntegrationSettings",
+      "longname": "applyIntegrationSettings",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 196,
+      "description": "Read the settings of a newly loaded bundle and make them the current overlay.",
+      "params": [
+        {
+          "name": "bundle",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "optional": false,
+          "description": "bootstrap mode"
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": "the overlay now in effect"
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "getEffectiveUserLogConfig",
+      "name": "getEffectiveUserLogConfig",
+      "longname": "getEffectiveUserLogConfig",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 226,
+      "description": "The print-log configuration to use: the site configuration with the current integration's values on top.",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": "runtime configuration"
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "getIntegrationSettings",
+      "name": "getIntegrationSettings",
+      "longname": "getIntegrationSettings",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 215,
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "type": "Object",
+          "description": "the overlay in effect"
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "IntegrationSettings",
+      "name": "IntegrationSettings",
+      "longname": "IntegrationSettings",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 52,
+      "description": "The settings in effect for the current session.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "KNOWN_GROUPS",
+      "name": "KNOWN_GROUPS",
+      "longname": "KNOWN_GROUPS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 39,
+      "description": "Setting groups this module knows how to read.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "readRuntimeConfig",
+      "name": "readRuntimeConfig",
+      "longname": "readRuntimeConfig",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 67,
+      "description": "Safely read the runtime configuration from the page.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "readSettingsPolicy",
+      "name": "readSettingsPolicy",
+      "longname": "readSettingsPolicy",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 114,
+      "description": "Site policy for bundle-carried settings.",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": "runtime configuration"
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "resetIntegrationSettings",
+      "name": "resetIntegrationSettings",
+      "longname": "resetIntegrationSettings",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 210,
+      "description": "Forget any overlay.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "resolveSameOriginEndpoint",
+      "name": "resolveSameOriginEndpoint",
+      "longname": "resolveSameOriginEndpoint",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 93,
+      "description": "Resolve an endpoint against the document and return it only when it stays on the document's own origin.",
+      "params": [
+        {
+          "name": "endpoint",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "base",
+          "type": "string",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "sanitizeIntegrationSettings",
+      "name": "sanitizeIntegrationSettings",
+      "longname": "sanitizeIntegrationSettings",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 134,
+      "description": "Reduce a bundle's integration.settings to the values the site allows and this module understands.",
+      "params": [
+        {
+          "name": "bundle",
+          "type": "*",
+          "optional": false,
+          "description": "normalized Portable Document Bundle"
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options.mode",
+          "type": "string",
+          "optional": false,
+          "description": "bootstrap mode the bundle arrived through"
+        },
+        {
+          "name": "options.policy",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options.base",
+          "type": "string",
+          "optional": true,
+          "description": "document base used for the origin check"
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "TRUSTED_MODES",
+      "name": "TRUSTED_MODES",
+      "longname": "TRUSTED_MODES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 36,
+      "description": "Bootstrap modes whose bundle came from the viewer's own origin.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "UserLogOverride",
+      "name": "UserLogOverride",
+      "longname": "UserLogOverride",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/integrations/integrationSettings.js",
+      "line": 43,
+      "description": "The print-log values an integration may set.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "normalizeToPortableBundle",
       "name": "normalizeToPortableBundle",
       "longname": "normalizeToPortableBundle",
@@ -107879,7 +108592,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 59,
+      "line": 61,
       "description": "True when running in dev (for debug logging only).",
       "params": [],
       "returns": [],
@@ -107892,7 +108605,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/logging/userLogger.js",
-      "line": 168,
+      "line": 170,
       "description": "Internal: hash document.cookie once (non-blocking).",
       "params": [],
       "returns": [],
@@ -107905,7 +108618,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 110,
+      "line": 112,
       "description": "Base64 from ArrayBuffer (for cookie fingerprint).",
       "params": [],
       "returns": [],
@@ -107931,7 +108644,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 62,
+      "line": 64,
       "description": "Dev-only logger.",
       "params": [],
       "returns": [],
@@ -107944,7 +108657,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 71,
+      "line": 73,
       "description": "Safely read runtime config from window.",
       "params": [],
       "returns": [],
@@ -107957,7 +108670,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/logging/userLogger.js",
-      "line": 160,
+      "line": 162,
       "description": "Initialize context near iframe/viewer creation.",
       "params": [
         {
@@ -107982,7 +108695,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 91,
+      "line": 93,
       "description": "Determine if the target URL is same-origin with current document.",
       "params": [],
       "returns": [],
@@ -108008,7 +108721,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/logging/userLogger.js",
-      "line": 142,
+      "line": 144,
       "description": "Optional identity resolver supplied by host app.",
       "params": [
         {
@@ -108028,7 +108741,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/logging/userLogger.js",
-      "line": 150,
+      "line": 152,
       "description": "Optional viewer version to add in meta.viewerVersion.",
       "params": [
         {
@@ -108048,7 +108761,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 120,
+      "line": 122,
       "description": "Async SHA-256 of a string → &quot;sha256- &quot; (or null).",
       "params": [],
       "returns": [],
@@ -108061,7 +108774,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/logging/userLogger.js",
-      "line": 189,
+      "line": 191,
       "description": "Submit a &quot;print&quot; user-log event.",
       "params": [
         {
@@ -108081,7 +108794,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 82,
+      "line": 84,
       "description": "Make absolute using document.baseURI when available.",
       "params": [],
       "returns": [],
@@ -108094,7 +108807,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 100,
+      "line": 102,
       "description": "Return timezone offset as &quot;+HH:MM&quot; or &quot;-HH:MM&quot;.",
       "params": [],
       "returns": [],
@@ -108120,7 +108833,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/logging/userLogger.js",
-      "line": 306,
+      "line": 309,
       "description": "Export singleton instance.",
       "params": [],
       "returns": [],

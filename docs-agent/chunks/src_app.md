@@ -1,6 +1,6 @@
 # OpenDocViewer / src/app
 
-File count: 3. Line count: 818. JSDoc symbol count: 21.
+File count: 3. Line count: 822. JSDoc symbol count: 21.
 
 ## src/app/AppBootstrap.jsx
 
@@ -8,7 +8,7 @@ Application bootstrap React component.
 
 Exports: `AppBootstrap`
 
-Local imports: `src/i18n.js`, `src/logging/systemLogger.js`, `src/ErrorBoundary.jsx`, `src/app/OpenDocViewer.jsx`, `src/integrations/bootstrapRuntime.js`, `src/components/DocumentLoader/sources/explicitListSource.js`, `src/utils/performanceOverlayFlag.js`
+Local imports: `src/i18n.js`, `src/logging/systemLogger.js`, `src/ErrorBoundary.jsx`, `src/app/OpenDocViewer.jsx`, `src/integrations/bootstrapRuntime.js`, `src/integrations/integrationSettings.js`, `src/components/DocumentLoader/sources/explicitListSource.js`, `src/utils/performanceOverlayFlag.js`
 
 Symbols:
 

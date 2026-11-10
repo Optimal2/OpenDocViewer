@@ -1,6 +1,6 @@
 # OpenDocViewer / src/integrations
 
-File count: 8. Line count: 2285. JSDoc symbol count: 60.
+File count: 9. Line count: 2517. JSDoc symbol count: 72.
 
 ## src/integrations/bootstrapRuntime.js
 
@@ -24,6 +24,29 @@ Symbols:
 - `bootstrapDetect~probeParent` (function) - No description.
 - `bootstrapDetect~probeSessionUrl` (function) - No description.
 - `bootstrapDetect~probeSessionToken` (function) - No description.
+
+## src/integrations/integrationSettings.js
+
+Per\-integration settings carried by a Portable Document Bundle.
+
+Exports: `resolveSameOriginEndpoint`, `readSettingsPolicy`, `sanitizeIntegrationSettings`, `applyIntegrationSettings`, `resetIntegrationSettings`, `getIntegrationSettings`, `getEffectiveUserLogConfig`
+
+Local imports: `src/logging/systemLogger.js`
+
+Symbols:
+
+- `TRUSTED_MODES` (constant) - Bootstrap modes whose bundle came from the viewer's own origin.
+- `KNOWN_GROUPS` (constant) - Setting groups this module knows how to read.
+- `UserLogOverride` (typedef) - The print\-log values an integration may set.
+- `IntegrationSettings` (typedef) - The settings in effect for the current session.
+- `readRuntimeConfig` (function) - Safely read the runtime configuration from the page.
+- `resolveSameOriginEndpoint` (function) - Resolve an endpoint against the document and return it only when it stays on the document's own origin.
+- `readSettingsPolicy` (function) - Site policy for bundle\-carried settings.
+- `sanitizeIntegrationSettings` (function) - Reduce a bundle's integration.settings to the values the site allows and this module understands.
+- `applyIntegrationSettings` (function) - Read the settings of a newly loaded bundle and make them the current overlay.
+- `resetIntegrationSettings` (function) - Forget any overlay.
+- `getIntegrationSettings` (function) - No description.
+- `getEffectiveUserLogConfig` (function) - The print\-log configuration to use: the site configuration with the current integration's values on top.
 
 ## src/integrations/normalizePortableBundle.js
 

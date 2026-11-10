@@ -55,6 +55,8 @@
  * @property {?string} [ts]         ISO timestamp
  */
 
+import { getEffectiveUserLogConfig } from '../integrations/integrationSettings.js';
+
 /** True when running in dev (for debug logging only). */
 const __DEV__ = (() => { try { return !!(import.meta && import.meta.env && import.meta.env.DEV); } catch { return false; } })();
 
@@ -188,8 +190,9 @@ class UserLogController {
    */
   submitPrint(payload = {}) {
     try {
+      // The site configuration, with the values of the integration that opened this session on top.
       const cfg = getRuntimeConfig();
-      const ul = (cfg && cfg.userLog) ? cfg.userLog : null;
+      const ul = getEffectiveUserLogConfig(cfg);
       if (!ul || ul.enabled !== true || !ul.endpoint) { debug('userLog disabled or missing endpoint'); return; }
 
       const absUrl = toAbsoluteUrl(ul.endpoint);

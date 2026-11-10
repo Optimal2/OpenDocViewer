@@ -9,16 +9,16 @@
 | <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:128</code> | Trust proxy for accurate req.ip |
 | <code>resolveUser</code> | function | <code>server/user-log-server.js:117</code> | Resolve user identity without cookies. |
 | <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:135</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
-| <code>BootstrapDebugInfo</code> | typedef | <code>src/app/AppBootstrap.jsx:62</code> | Diagnostics-only bootstrap metadata. |
-| <code>buildDemoSourceList</code> | function | <code>src/app/AppBootstrap.jsx:227</code> | Build a demo source list from the /public sample files. |
-| <code>DemoBuildOptions</code> | typedef | <code>src/app/AppBootstrap.jsx:71</code> | Options for building a demo source list. |
-| <code>DemoSourceItem</code> | typedef | <code>src/app/AppBootstrap.jsx:79</code> | One entry in the demo source list. |
-| <code>ExplicitItem</code> | typedef | <code>src/app/AppBootstrap.jsx:39</code> | Explicit item \(URL list\). |
-| <code>module.exports</code> | function | <code>src/app/AppBootstrap.jsx:249</code> | Top-level bootstrapper component. |
-| <code>makeReloadCacheSeedFromBundle</code> | function | <code>src/app/AppBootstrap.jsx:209</code> | Build a stable reload-cache scope from host/user identity without including short-lived source URLs/tickets, session ids, or the current document selection. |
-| <code>PortableDocumentBundle</code> | typedef | <code>src/app/AppBootstrap.jsx:47</code> | Portable document bundle shape. |
-| <code>SessionShape</code> | typedef | <code>src/app/AppBootstrap.jsx:31</code> | Session metadata for a bundle. |
-| <code>UrlConfig</code> | typedef | <code>src/app/AppBootstrap.jsx:54</code> | URL parameter config \(pattern mode\). |
+| <code>BootstrapDebugInfo</code> | typedef | <code>src/app/AppBootstrap.jsx:63</code> | Diagnostics-only bootstrap metadata. |
+| <code>buildDemoSourceList</code> | function | <code>src/app/AppBootstrap.jsx:228</code> | Build a demo source list from the /public sample files. |
+| <code>DemoBuildOptions</code> | typedef | <code>src/app/AppBootstrap.jsx:72</code> | Options for building a demo source list. |
+| <code>DemoSourceItem</code> | typedef | <code>src/app/AppBootstrap.jsx:80</code> | One entry in the demo source list. |
+| <code>ExplicitItem</code> | typedef | <code>src/app/AppBootstrap.jsx:40</code> | Explicit item \(URL list\). |
+| <code>module.exports</code> | function | <code>src/app/AppBootstrap.jsx:250</code> | Top-level bootstrapper component. |
+| <code>makeReloadCacheSeedFromBundle</code> | function | <code>src/app/AppBootstrap.jsx:210</code> | Build a stable reload-cache scope from host/user identity without including short-lived source URLs/tickets, session ids, or the current document selection. |
+| <code>PortableDocumentBundle</code> | typedef | <code>src/app/AppBootstrap.jsx:48</code> | Portable document bundle shape. |
+| <code>SessionShape</code> | typedef | <code>src/app/AppBootstrap.jsx:32</code> | Session metadata for a bundle. |
+| <code>UrlConfig</code> | typedef | <code>src/app/AppBootstrap.jsx:55</code> | URL parameter config \(pattern mode\). |
 | <code>getAppBase</code> | function | <code>src/app/bootConfig.js:35</code> | Return the application base path \(always with a trailing slash\) derived from the current page URL. |
 | <code>getPageMeta</code> | function | <code>src/app/bootConfig.js:21</code> | Read a &amp;lt;meta name=&amp;quot;...&amp;quot; content=&amp;quot;...&amp;quot;&amp;gt; value from the page. |
 | <code>isJsContentType</code> | function | <code>src/app/bootConfig.js:55</code> | Heuristic: does a content-type look like JavaScript? |
@@ -227,7 +227,7 @@
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:19</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:29</code> |  |
 | <code>module:usePrintRangeConfig</code> | module | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:2</code> | Runtime-configuration derivation for PrintRangeDialog. |
-| <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:30</code> |  |
+| <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:31</code> |  |
 | <code>LanguageMenuButton~closeMenu</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:110</code> | Close the menu and give the focus back to the button \(a choice unmounts the focused item\). |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:74</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:66</code> |  |
@@ -761,6 +761,18 @@
 | <code>bootstrapDetect~probeSessionUrl</code> | function | <code>src/integrations/bootstrapRuntime.js:270</code> |  |
 | <code>&lt;anonymous&gt;~api.start</code> | function | <code>src/integrations/bootstrapRuntime.js:81</code> | Queue a start payload to be consumed by bootstrapDetect\(\). |
 | <code>tryNormalizeBundle</code> | function | <code>src/integrations/bootstrapRuntime.js:94</code> | Try to normalize a candidate payload into a bundle with documents. |
+| <code>applyIntegrationSettings</code> | function | <code>src/integrations/integrationSettings.js:196</code> | Read the settings of a newly loaded bundle and make them the current overlay. |
+| <code>getEffectiveUserLogConfig</code> | function | <code>src/integrations/integrationSettings.js:226</code> | The print-log configuration to use: the site configuration with the current integration&#39;s values on top. |
+| <code>getIntegrationSettings</code> | function | <code>src/integrations/integrationSettings.js:215</code> |  |
+| <code>IntegrationSettings</code> | typedef | <code>src/integrations/integrationSettings.js:52</code> | The settings in effect for the current session. |
+| <code>KNOWN_GROUPS</code> | constant | <code>src/integrations/integrationSettings.js:39</code> | Setting groups this module knows how to read. |
+| <code>readRuntimeConfig</code> | function | <code>src/integrations/integrationSettings.js:67</code> | Safely read the runtime configuration from the page. |
+| <code>readSettingsPolicy</code> | function | <code>src/integrations/integrationSettings.js:114</code> | Site policy for bundle-carried settings. |
+| <code>resetIntegrationSettings</code> | function | <code>src/integrations/integrationSettings.js:210</code> | Forget any overlay. |
+| <code>resolveSameOriginEndpoint</code> | function | <code>src/integrations/integrationSettings.js:93</code> | Resolve an endpoint against the document and return it only when it stays on the document&#39;s own origin. |
+| <code>sanitizeIntegrationSettings</code> | function | <code>src/integrations/integrationSettings.js:134</code> | Reduce a bundle&#39;s integration.settings to the values the site allows and this module understands. |
+| <code>TRUSTED_MODES</code> | constant | <code>src/integrations/integrationSettings.js:36</code> | Bootstrap modes whose bundle came from the viewer&#39;s own origin. |
+| <code>UserLogOverride</code> | typedef | <code>src/integrations/integrationSettings.js:43</code> | The print-log values an integration may set. |
 | <code>normalizeToPortableBundle</code> | function | <code>src/integrations/normalizePortableBundle.js:116</code> | Normalize many incoming shapes to a neutral PortableDocumentBundle v1. |
 | <code>PortableBundleMetadataAliasMap</code> | typedef | <code>src/integrations/normalizePortableBundle.js:94</code> | Runtime-configurable mapping between semantic metadata aliases and metadata record identifiers used by a host-specific object-document payload. |
 | <code>PortableDocumentBundle</code> | typedef | <code>src/integrations/normalizePortableBundle.js:85</code> | A portable bundle groups a session and an array of document entries. |
@@ -840,23 +852,23 @@
 | <code>shouldEnableBackendLogging</code> | function | <code>src/logging/systemLogger.js:234</code> | Decide whether backend log forwarding may be enabled. |
 | <code>LogController#shouldLog</code> | member | <code>src/logging/systemLogger.js:363</code> | Internal: should this level be logged at all \(console or backend\)? |
 | <code>LogController#warn</code> | member | <code>src/logging/systemLogger.js:462</code> |  |
-| <code>__DEV__</code> | constant | <code>src/logging/userLogger.js:59</code> | True when running in dev \(for debug logging only\). |
-| <code>UserLogController#_captureCookieFingerprint</code> | function | <code>src/logging/userLogger.js:168</code> | Internal: hash document.cookie once \(non-blocking\). |
-| <code>abToBase64</code> | function | <code>src/logging/userLogger.js:110</code> | Base64 from ArrayBuffer \(for cookie fingerprint\). |
+| <code>__DEV__</code> | constant | <code>src/logging/userLogger.js:61</code> | True when running in dev \(for debug logging only\). |
+| <code>UserLogController#_captureCookieFingerprint</code> | function | <code>src/logging/userLogger.js:170</code> | Internal: hash document.cookie once \(non-blocking\). |
+| <code>abToBase64</code> | function | <code>src/logging/userLogger.js:112</code> | Base64 from ArrayBuffer \(for cookie fingerprint\). |
 | <code>BootContext</code> | typedef | <code>src/logging/userLogger.js:37</code> |  |
-| <code>debug</code> | function | <code>src/logging/userLogger.js:62</code> | Dev-only logger. |
-| <code>getRuntimeConfig</code> | function | <code>src/logging/userLogger.js:71</code> | Safely read runtime config from window. |
-| <code>UserLogController#initContext</code> | function | <code>src/logging/userLogger.js:160</code> | Initialize context near iframe/viewer creation. |
-| <code>isSameOrigin</code> | function | <code>src/logging/userLogger.js:91</code> | Determine if the target URL is same-origin with current document. |
+| <code>debug</code> | function | <code>src/logging/userLogger.js:64</code> | Dev-only logger. |
+| <code>getRuntimeConfig</code> | function | <code>src/logging/userLogger.js:73</code> | Safely read runtime config from window. |
+| <code>UserLogController#initContext</code> | function | <code>src/logging/userLogger.js:162</code> | Initialize context near iframe/viewer creation. |
+| <code>isSameOrigin</code> | function | <code>src/logging/userLogger.js:93</code> | Determine if the target URL is same-origin with current document. |
 | <code>PrintLogPayload</code> | typedef | <code>src/logging/userLogger.js:43</code> |  |
-| <code>UserLogController#setUserResolver</code> | function | <code>src/logging/userLogger.js:142</code> | Optional identity resolver supplied by host app. |
-| <code>UserLogController#setViewerVersion</code> | function | <code>src/logging/userLogger.js:150</code> | Optional viewer version to add in meta.viewerVersion. |
-| <code>sha256Base64</code> | function | <code>src/logging/userLogger.js:120</code> | Async SHA-256 of a string → &amp;quot;sha256- &amp;quot; \(or null\). |
-| <code>UserLogController#submitPrint</code> | function | <code>src/logging/userLogger.js:189</code> | Submit a &amp;quot;print&amp;quot; user-log event. |
-| <code>toAbsoluteUrl</code> | function | <code>src/logging/userLogger.js:82</code> | Make absolute using document.baseURI when available. |
-| <code>tzOffset</code> | function | <code>src/logging/userLogger.js:100</code> | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
+| <code>UserLogController#setUserResolver</code> | function | <code>src/logging/userLogger.js:144</code> | Optional identity resolver supplied by host app. |
+| <code>UserLogController#setViewerVersion</code> | function | <code>src/logging/userLogger.js:152</code> | Optional viewer version to add in meta.viewerVersion. |
+| <code>sha256Base64</code> | function | <code>src/logging/userLogger.js:122</code> | Async SHA-256 of a string → &amp;quot;sha256- &amp;quot; \(or null\). |
+| <code>UserLogController#submitPrint</code> | function | <code>src/logging/userLogger.js:191</code> | Submit a &amp;quot;print&amp;quot; user-log event. |
+| <code>toAbsoluteUrl</code> | function | <code>src/logging/userLogger.js:84</code> | Make absolute using document.baseURI when available. |
+| <code>tzOffset</code> | function | <code>src/logging/userLogger.js:102</code> | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
 | <code>UserIdentity</code> | typedef | <code>src/logging/userLogger.js:31</code> |  |
-| <code>userLog</code> | constant | <code>src/logging/userLogger.js:306</code> | Export singleton instance. |
+| <code>userLog</code> | constant | <code>src/logging/userLogger.js:309</code> | Export singleton instance. |
 | <code>module.exports</code> | function | <code>src/manual-page/ManualPage.jsx:67</code> |  |
 | <code>readUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:35</code> |  |
 | <code>syncUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:50</code> | Put the section being read into the URL fragment without adding a history entry. |

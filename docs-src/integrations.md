@@ -305,6 +305,53 @@ integrations: {
 
 Resolved aliases are stored on `document.metadata` and `document.metadataDetails`. Raw records remain available on `document.meta` and `document.metaById`.
 
+## Per-Integration Settings In The Bundle
+
+One viewer installation can serve several host applications. Most of the site configuration is
+the same for all of them, but a few values belong to the host that opened the session. A host may
+carry those in the bundle, under `integration.settings`:
+
+```json
+{
+  "integration": {
+    "source": "host-app",
+    "settings": {
+      "userLog": { "enabled": true, "endpoint": "/host-app/log-print", "transport": "form" }
+    }
+  }
+}
+```
+
+The feature is off by default. A site turns it on in its site configuration:
+
+```js
+integrations: {
+  portableBundle: {
+    settingsFromBundle: { enabled: true, allow: ['userLog'] }
+  }
+}
+```
+
+| Group | Fields | Effect |
+|---|---|---|
+| `userLog` | `enabled`, `endpoint`, `transport` (`form` or `json`) | Where the print log of this session is posted, and whether it is posted at all. |
+
+Rules the viewer enforces:
+
+- Only groups listed in `allow` are read, and only the fields in the table. Anything else under
+  `integration.settings` is ignored.
+- Settings are only taken from a bundle the viewer fetched from its own origin (`?sessionurl=`) or
+  received from a same-origin parent page. A bundle passed inside the page address
+  (`?sessiondata=`) can be composed by anyone who can make a user follow a link, so its settings
+  are ignored.
+- `userLog.endpoint` must resolve to the viewer's own origin. If it does not, the whole `userLog`
+  group of that bundle is dropped and the site configuration applies unchanged; the viewer never
+  combines a host's flags with the site's default address.
+- The print dialog options (`userLog.ui`) always come from the site configuration.
+- What was refused is written to the system log by rule name, without the refused value.
+
+The implementation is `src/integrations/integrationSettings.js`.
+
 ## Bootstrap Modes
 
 `bootstrapRuntime.js` probes startup sources in this order:

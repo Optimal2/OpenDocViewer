@@ -7,6 +7,7 @@
 
 import { resolveLocalizedValue } from '../../../utils/localizedValue.js';
 import { getPrintDefaultMode } from '../../../utils/runtimeConfig.js';
+import { getEffectiveUserLogConfig } from '../../../integrations/integrationSettings.js';
 import { getPrintDefaultModePreference } from '../../../utils/viewerPreferences.js';
 import {
   getCfg,
@@ -37,7 +38,8 @@ export function usePrintRangeConfig({
   i18n,
 }) {
   const cfg = getCfg();
-  const userLogCfg = cfg?.userLog || {};
+  // Whether the print log is on can depend on the integration that opened the session.
+  const userLogCfg = getEffectiveUserLogConfig(cfg);
   const headerCfg = cfg?.printHeader || {};
   const uiCfg = userLogCfg?.ui || {};
   const fld = uiCfg?.fields || {};

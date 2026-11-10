@@ -25,6 +25,7 @@ import logger from '../logging/systemLogger.js';
 import ErrorBoundary from '../ErrorBoundary.jsx';
 import OpenDocViewer from './OpenDocViewer.jsx';
 import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/bootstrapRuntime.js';
+import { applyIntegrationSettings } from '../integrations/integrationSettings.js';
 import { makeExplicitSource } from '../components/DocumentLoader/sources/explicitListSource.js';
 import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js';
 
@@ -273,6 +274,9 @@ export default function AppBootstrap() {
         if (!mounted) return;
         setMode(res.mode);
         setBootstrapDebugInfo(perfOverlayEnabled ? (res.debugInfo || null) : null);
+        // Before the bundle reaches any component: settings the opening integration is allowed
+        // to carry (see integrationSettings.js). No bundle clears an earlier overlay.
+        applyIntegrationSettings(res.bundle || null, res.mode);
         if (res.bundle) setBundle(res.bundle);
         if (res.urlConfig) setUrlConfig(res.urlConfig);
 

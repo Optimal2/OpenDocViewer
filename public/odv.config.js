@@ -566,6 +566,21 @@
     // ---- INTEGRATION ADAPTERS -------------------------------------------------
     integrations: {
       portableBundle: {
+        // Settings the host application may carry in the bundle it opens the viewer with
+        // (bundle.integration.settings). One viewer installation can then serve several host
+        // applications without a site configuration per host.
+        //
+        // Off by default. When enabled, only the groups listed in `allow` are read:
+        //   - 'userLog': { enabled, endpoint, transport } — where this host's print log is posted.
+        //     The endpoint must be on the viewer's own origin; anything else is ignored.
+        // Settings are only taken from a bundle the viewer fetched from its own origin
+        // (?sessionurl=) or received from a same-origin parent page, never from a bundle passed
+        // inside the page address.
+        settingsFromBundle: {
+          enabled: false,
+          allow: ['userLog']
+        },
+
         // Optional mapping from semantic metadata aliases to metadata-record identifiers used by
         // an embedding host's object-document payload. Supported values per alias:
         //   - string:  one field id

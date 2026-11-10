@@ -1,6 +1,6 @@
 # OpenDocViewer / src/logging
 
-File count: 2. Line count: 779. JSDoc symbol count: 48.
+File count: 2. Line count: 782. JSDoc symbol count: 48.
 
 ## src/logging/systemLogger.js
 
@@ -28,6 +28,8 @@ Symbols:
 UserLogController — client\-side controller for \*\*user\*\* print logs \(backend\-agnostic\).
 
 Exports: `userLog`
+
+Local imports: `src/integrations/integrationSettings.js`
 
 Symbols:
 
