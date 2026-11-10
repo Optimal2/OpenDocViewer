@@ -37,6 +37,7 @@ import {
   isCompareOverlayEnabled,
   isFineTuneEnabled,
   isOcrBenchmarkEnabled,
+  isOcrBoostBenchmarkEnabled,
   isOcrEnabled,
 } from '../../utils/runtimeConfig.js';
 import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
@@ -835,6 +836,38 @@ const DocumentToolbar = ({
       viewerContext?.setOcrBenchmarkActive?.(false);
     }
   }, [allPages, viewerContext]);
+  // The OCR boost benchmark (src/ocr/boostBenchmark.js) is offered only while OCR and
+  // `ocr.boostBenchmark.enabled` are on; like the regular OCR benchmark it is reached through
+  // the lazy OCR module, so nothing of it is loaded otherwise.
+  const ocrBoostBenchmarkEnabled = useMemo(() => isOcrBoostBenchmarkEnabled(getRuntimeConfig()), []);
+  const handleRunOcrBoostBenchmark = useCallback(async ({ onProgress, signal } = {}) => {
+    // The live OCR queue pauses while the boost benchmark runs, so the two do not compete for cores.
+    viewerContext?.setOcrBenchmarkActive?.(true);
+    try {
+      const ocrModule = await loadOcrModule();
+      if (!ocrModule) throw new Error('OCR is disabled by configuration.');
+      const boost = await ocrModule?.loadOcrBoostBenchmark?.();
+      if (!boost || typeof boost.runOcrBoostBenchmark !== 'function') {
+        throw new Error('OCR boost benchmark is not available in this build.');
+      }
+      const release = viewerContext?.releaseOcrPageAsset;
+      return await boost.runOcrBoostBenchmark({
+        config: getRuntimeConfig(),
+        allPages,
+        ensurePageAsset: viewerContext?.ensurePageAsset,
+        releasePageAsset: typeof release === 'function'
+          ? (viewerIndex, url) => {
+              if (Math.abs(viewerIndex - (Number(ocrBenchmarkPageNumberRef.current) - 1)) <= OCR_BENCHMARK_KEEP_AROUND_SHOWN_PAGE) return;
+              release(viewerIndex, url);
+            }
+          : null,
+        onProgress,
+        signal,
+      });
+    } finally {
+      viewerContext?.setOcrBenchmarkActive?.(false);
+    }
+  }, [allPages, viewerContext]);
 
   const printActionTitle = isPdfOutputLocked
     ? t('toolbar.printBusy', { defaultValue: 'A PDF is already being prepared.' })
@@ -1046,6 +1079,8 @@ const DocumentToolbar = ({
           onRunRenderBenchmark={handleRunRenderBenchmark}
           ocrBenchmarkEnabled={ocrBenchmarkEnabled}
           onRunOcrBenchmark={handleRunOcrBenchmark}
+          ocrBoostBenchmarkEnabled={ocrBoostBenchmarkEnabled}
+          onRunOcrBoostBenchmark={handleRunOcrBoostBenchmark}
         />
       </div>
     );
@@ -1447,6 +1482,8 @@ const DocumentToolbar = ({
         onRunRenderBenchmark={handleRunRenderBenchmark}
         ocrBenchmarkEnabled={ocrBenchmarkEnabled}
         onRunOcrBenchmark={handleRunOcrBenchmark}
+        ocrBoostBenchmarkEnabled={ocrBoostBenchmarkEnabled}
+        onRunOcrBoostBenchmark={handleRunOcrBoostBenchmark}
       />
 
     </div>

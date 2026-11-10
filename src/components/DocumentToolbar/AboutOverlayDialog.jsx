@@ -11,6 +11,7 @@ import {
   collectSupportDiagnostics,
   downloadJsonFile,
   loadLatestOcrBenchmarkResult,
+  loadLatestOcrBoostBenchmarkResult,
   loadLatestPdfBenchmarkResult,
   loadLatestRenderDecodeBenchmarkResult,
 } from '../../utils/supportDiagnostics.js';
@@ -49,6 +50,8 @@ function resolveAboutInfo() {
  * @param {function(Object=): Promise<Object>=} props.onRunRenderBenchmark
  * @param {boolean=} props.ocrBenchmarkEnabled  `ocr.benchmark.enabled` with OCR on (src/ocr/benchmark.js).
  * @param {function(Object=): Promise<Object>=} props.onRunOcrBenchmark
+ * @param {boolean=} props.ocrBoostBenchmarkEnabled  `ocr.boostBenchmark.enabled` with OCR on (src/ocr/boostBenchmark.js).
+ * @param {function(Object=): Promise<Object>=} props.onRunOcrBoostBenchmark
  * @returns {(React.ReactElement|null)}
  */
 export default function AboutOverlayDialog({
@@ -60,6 +63,8 @@ export default function AboutOverlayDialog({
   onRunRenderBenchmark,
   ocrBenchmarkEnabled = false,
   onRunOcrBenchmark,
+  ocrBoostBenchmarkEnabled = false,
+  onRunOcrBoostBenchmark,
 }) {
   const { t, i18n } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -70,7 +75,9 @@ export default function AboutOverlayDialog({
   const [renderBenchmarkState, setRenderBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
   const [latestOcrBenchmark, setLatestOcrBenchmark] = useState(() => loadLatestOcrBenchmarkResult());
   const [ocrBenchmarkState, setOcrBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
-  const anyBenchmarkRunning = benchmarkState.status === 'running' || renderBenchmarkState.status === 'running' || ocrBenchmarkState.status === 'running';
+  const [latestOcrBoostBenchmark, setLatestOcrBoostBenchmark] = useState(() => loadLatestOcrBoostBenchmarkResult());
+  const [ocrBoostBenchmarkState, setOcrBoostBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
+  const anyBenchmarkRunning = benchmarkState.status === 'running' || renderBenchmarkState.status === 'running' || ocrBenchmarkState.status === 'running' || ocrBoostBenchmarkState.status === 'running';
   const [resourceReloadState, setResourceReloadState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
 
   useEffect(() => {
@@ -78,6 +85,7 @@ export default function AboutOverlayDialog({
     setLatestBenchmark(loadLatestPdfBenchmarkResult());
     setLatestRenderBenchmark(loadLatestRenderDecodeBenchmarkResult());
     setLatestOcrBenchmark(loadLatestOcrBenchmarkResult());
+    setLatestOcrBoostBenchmark(loadLatestOcrBoostBenchmarkResult());
     dialogRef.current?.focus?.();
 
     /** @param {KeyboardEvent} event */
@@ -100,15 +108,17 @@ export default function AboutOverlayDialog({
     latestPdfBenchmark: latestBenchmark,
     latestRenderDecodeBenchmark: latestRenderBenchmark,
     latestOcrBenchmark,
-  }), [latestBenchmark, latestOcrBenchmark, latestRenderBenchmark]);
+    latestOcrBoostBenchmark,
+  }), [latestBenchmark, latestOcrBenchmark, latestOcrBoostBenchmark, latestRenderBenchmark]);
 
   const downloadDiagnostics = useCallback(() => {
     downloadJsonFile('opendocviewer-diagnostics.json', collectSupportDiagnostics({
       latestPdfBenchmark: latestBenchmark,
       latestRenderDecodeBenchmark: latestRenderBenchmark,
       latestOcrBenchmark,
+      latestOcrBoostBenchmark,
     }));
-  }, [latestBenchmark, latestOcrBenchmark, latestRenderBenchmark]);
+  }, [latestBenchmark, latestOcrBenchmark, latestOcrBoostBenchmark, latestRenderBenchmark]);
 
   const reloadResourceFiles = useCallback(async () => {
     setResourceReloadState({
@@ -166,6 +176,11 @@ export default function AboutOverlayDialog({
     if (!latestOcrBenchmark) return;
     downloadJsonFile('opendocviewer-ocr-benchmark.json', latestOcrBenchmark);
   }, [latestOcrBenchmark]);
+
+  const downloadOcrBoostBenchmark = useCallback(() => {
+    if (!latestOcrBoostBenchmark) return;
+    downloadJsonFile('opendocviewer-ocr-boost-benchmark.json', latestOcrBoostBenchmark);
+  }, [latestOcrBoostBenchmark]);
 
   const runBenchmark = useCallback(async () => {
     if (!benchmarkEnabled || typeof onRunPdfBenchmark !== 'function') return;
@@ -303,6 +318,70 @@ export default function AboutOverlayDialog({
     }
   }, [ocrBenchmarkEnabled, onRunOcrBenchmark, t]);
 
+  const runOcrBoostBenchmark = useCallback(async () => {
+    if (!ocrBoostBenchmarkEnabled || typeof onRunOcrBoostBenchmark !== 'function') return;
+    setOcrBoostBenchmarkState({
+      status: 'running',
+      message: t('about.diagnostics.ocrBoostBenchmarkRunning', { defaultValue: 'Running OCR boost benchmark…' }),
+    });
+    try {
+      const result = await onRunOcrBoostBenchmark({
+        onProgress: (event) => {
+          if (event?.phase !== 'running') return;
+          const completed = Math.max(0, Number(event?.completedRuns || 0));
+          const total = Math.max(1, Number(event?.totalRuns || 1));
+          const completedPages = Math.max(0, Number(event?.completedPages || 0));
+          const pageCount = Math.max(0, Number(event?.pageCount || 0));
+          const workerCount = Math.max(0, Number(event?.workerCount || 0));
+          const scenario = String(event?.scenarioLabel || '').trim();
+          if (event?.skipped) {
+            const skipReason = String(event?.skipReason || '').trim();
+            setOcrBoostBenchmarkState({
+              status: 'running',
+              message: t('about.diagnostics.ocrBoostBenchmarkSkipped', {
+                scenario,
+                skipReason,
+                defaultValue: skipReason
+                  ? `Skipped ${scenario}: ${skipReason}.`
+                  : `Skipped ${scenario}.`,
+              }),
+            });
+            return;
+          }
+          const pageProgress = pageCount > 0 ? `${completedPages}/${pageCount}` : '';
+          setOcrBoostBenchmarkState({
+            status: 'running',
+            message: t('about.diagnostics.ocrBoostBenchmarkProgress', {
+              current: completed + 1,
+              total,
+              scenario,
+              completedPages,
+              pageCount,
+              pageProgress,
+              workerCount,
+              defaultValue: scenario
+                ? `Running OCR boost benchmark ${completed + 1} of ${total}: ${scenario}${pageProgress ? ` (${pageProgress} pages` : ''}${workerCount > 0 ? `${pageProgress ? ', ' : ' ('}${workerCount} workers` : ''}${pageProgress || workerCount > 0 ? ')' : ''}…`
+                : `Running OCR boost benchmark ${completed + 1} of ${total}…`,
+            }),
+          });
+        },
+      });
+      setLatestOcrBoostBenchmark(result);
+      setOcrBoostBenchmarkState({
+        status: 'done',
+        message: t('about.diagnostics.ocrBoostBenchmarkDone', { defaultValue: 'OCR boost benchmark completed.' }),
+      });
+    } catch (error) {
+      setOcrBoostBenchmarkState({
+        status: 'error',
+        message: t('about.diagnostics.ocrBoostBenchmarkError', {
+          error: String(error?.message || error),
+          defaultValue: `OCR boost benchmark failed: ${String(error?.message || error)}`,
+        }),
+      });
+    }
+  }, [ocrBoostBenchmarkEnabled, onRunOcrBoostBenchmark, t]);
+
   const benchmarkSummary = latestBenchmark?.best
     ? t('about.diagnostics.benchmarkSummary', {
         ms: latestBenchmark.best.durationMs,
@@ -329,6 +408,15 @@ export default function AboutOverlayDialog({
         defaultValue: `Fastest OCR run: ${latestOcrBenchmark.best.msPerPage} ms per page, ${latestOcrBenchmark.pageCount} pages, ${latestOcrBenchmark.best.label}.`,
       })
     : t('about.diagnostics.noOcrBenchmark', { defaultValue: 'No OCR benchmark result has been recorded.' });
+
+  const ocrBoostBenchmarkSummary = latestOcrBoostBenchmark?.best
+    ? t('about.diagnostics.ocrBoostBenchmarkSummary', {
+        msPerPage: latestOcrBoostBenchmark.best.msPerPage,
+        pages: latestOcrBoostBenchmark.pageCount,
+        scenario: latestOcrBoostBenchmark.best.label || latestOcrBoostBenchmark.best.scenarioLabel || '',
+        defaultValue: `Fastest OCR boost run: ${latestOcrBoostBenchmark.best.msPerPage} ms per page, ${latestOcrBoostBenchmark.pageCount} pages, ${latestOcrBoostBenchmark.best.label || latestOcrBoostBenchmark.best.scenarioLabel || ''}.`,
+      })
+    : t('about.diagnostics.noOcrBoostBenchmark', { defaultValue: 'No OCR boost benchmark result has been recorded.' });
 
   if (!isOpen) return null;
 
@@ -470,6 +558,24 @@ export default function AboutOverlayDialog({
                   {t('about.diagnostics.downloadOcrBenchmark', { defaultValue: 'Download OCR benchmark JSON' })}
                 </button>
               ) : null}
+              {ocrBoostBenchmarkEnabled ? (
+                <button
+                  type="button"
+                  className="odv-help-close-button"
+                  data-odv-ocr="boost-benchmark-run"
+                  onClick={runOcrBoostBenchmark}
+                  disabled={anyBenchmarkRunning}
+                >
+                  {ocrBoostBenchmarkState.status === 'running'
+                    ? t('about.diagnostics.ocrBoostBenchmarkRunningShort', { defaultValue: 'Running…' })
+                    : t('about.diagnostics.runOcrBoostBenchmark', { defaultValue: 'Run OCR boost benchmark' })}
+                </button>
+              ) : null}
+              {latestOcrBoostBenchmark ? (
+                <button type="button" className="odv-help-close-button" data-odv-ocr="boost-benchmark-download" onClick={downloadOcrBoostBenchmark}>
+                  {t('about.diagnostics.downloadOcrBoostBenchmark', { defaultValue: 'Download OCR boost benchmark JSON' })}
+                </button>
+              ) : null}
             </div>
             {benchmarkEnabled || latestBenchmark ? (
               <p className={`odv-about-diagnostics-status is-${benchmarkState.status}`}>
@@ -484,6 +590,11 @@ export default function AboutOverlayDialog({
             {ocrBenchmarkEnabled || latestOcrBenchmark ? (
               <p className={`odv-about-diagnostics-status is-${ocrBenchmarkState.status}`} data-odv-ocr="benchmark-status" data-odv-ocr-benchmark-state={ocrBenchmarkState.status}>
                 {ocrBenchmarkState.message || ocrBenchmarkSummary}
+              </p>
+            ) : null}
+            {ocrBoostBenchmarkEnabled || latestOcrBoostBenchmark ? (
+              <p className={`odv-about-diagnostics-status is-${ocrBoostBenchmarkState.status}`} data-odv-ocr="boost-benchmark-status" data-odv-ocr-boost-benchmark-state={ocrBoostBenchmarkState.status}>
+                {ocrBoostBenchmarkState.message || ocrBoostBenchmarkSummary}
               </p>
             ) : null}
             {resourceReloadState.message ? (
@@ -526,6 +637,15 @@ export default function AboutOverlayDialog({
                   baseline: latestOcrBenchmark.baseline,
                   best: latestOcrBenchmark.best,
                 } : null,
+                latestOcrBoostBenchmark: latestOcrBoostBenchmark ? {
+                  createdUtc: latestOcrBoostBenchmark.createdUtc,
+                  pageCount: latestOcrBoostBenchmark.pageCount,
+                  hardwareConcurrency: latestOcrBoostBenchmark.hardwareConcurrency,
+                  languages: latestOcrBoostBenchmark.languages,
+                  scenarioCount: Array.isArray(latestOcrBoostBenchmark.scenarios) ? latestOcrBoostBenchmark.scenarios.length : 0,
+                  baseline: latestOcrBoostBenchmark.baseline,
+                  best: latestOcrBoostBenchmark.best,
+                } : null,
               }, null, 2)}
             </pre>
           </details>
@@ -567,4 +687,6 @@ AboutOverlayDialog.propTypes = {
   onRunRenderBenchmark: PropTypes.func,
   ocrBenchmarkEnabled: PropTypes.bool,
   onRunOcrBenchmark: PropTypes.func,
+  ocrBoostBenchmarkEnabled: PropTypes.bool,
+  onRunOcrBoostBenchmark: PropTypes.func,
 };

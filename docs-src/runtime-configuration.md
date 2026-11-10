@@ -291,6 +291,7 @@ ocr: {
     autoDetectLanguage: true   // guess each page's language for read-aloud and the layer's lang
   },
   benchmark: { enabled: false }, // true: offer the OCR benchmark under About -> Diagnostics (see below)
+  boostBenchmark: { enabled: false }, // true: offer the OCR boost benchmark under About -> Diagnostics (see below)
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
 }
 ```
@@ -630,6 +631,46 @@ cores, memory, pages, the ceiling), so the measured counts can be read against i
 The run costs as much CPU as recognising `pageLimit` pages once per scenario, several minutes
 on a long document with many scenarios, so keep the key off outside support sessions. The
 benchmark lives in the OCR module: with OCR off nothing of it is loaded or shown.
+
+### OCR boost benchmark (opt-in)
+
+Where the OCR benchmark above compares languages and image scales at modest worker counts,
+the boost benchmark measures maximum throughput: how recognition scales when the worker count
+grows past the viewer ceiling. With `ocr.boostBenchmark.enabled: true` (and OCR on), About ->
+Diagnostics gains a separate "Run OCR boost benchmark", which recognises a sample of the open
+document once per worker count and offers the result (schema
+`opendocviewer.ocr-boost-benchmark.v1`) as a `opendocviewer-ocr-boost-benchmark.json` download:
+
+```js
+ocr: {
+  enabled: true,
+  boostBenchmark: {
+    enabled: true,
+    pageLimit: 120,                    // pages sampled from the loaded document
+    sampleMode: 'evenly-spaced',      // or 'first'
+    workerCounts: [4, 8, 12, 16, 20, 24],
+    memoryBudgetFraction: 0.5,        // share of the device memory all workers together may take
+    memoryPerWorkerMiB: 130,          // memory one engine with its language models takes
+    pageTimeoutMs: 180000,            // bound on one page (image, preparation or recognition)
+    delayBetweenRunsMs: 500           // pause between scenarios
+  }
+}
+```
+
+The scenarios are one run per configured worker count with the configured languages. A scenario
+is skipped, with its reason recorded on the run, when the count exceeds the client's logical cores
+(`navigator.hardwareConcurrency`), or when the count times `memoryPerWorkerMiB` exceeds
+`memoryBudgetFraction` of the device memory (`navigator.deviceMemory`, else an assumed 4 GiB
+client). The run aborts when an engine fails to start or when the page's JS heap passes 90 % of
+its limit. The boost benchmark has its own ceiling of 32 workers, independent of
+`MAX_OCR_WORKER_COUNT`, which only bounds the viewer's own `ocr.workerCount`.
+
+The sampled pages are the same in every scenario: loaded pages the OCR queue would recognise,
+spread evenly over the document (`evenly-spaced`) or taken from its start (`first`). The live OCR
+queue pauses while the run is going (pages already in flight finish first), so the two do not
+compete for cores. The run measures maximum throughput, so the UI may freeze while it is going:
+keep the tab visible, since a browser throttles a hidden tab's timers. The boost benchmark lives
+in the OCR module: with the key off nothing of it is loaded or shown.
 
 ### CSP for OCR
 

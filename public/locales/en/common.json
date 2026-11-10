@@ -1019,7 +1019,17 @@
       "ocrBenchmarkDone": "OCR benchmark completed.",
       "ocrBenchmarkError": "OCR benchmark failed: {error}",
       "ocrBenchmarkSummary": "Fastest OCR run: {msPerPage} ms per page, {pages} pages, {scenario}.",
-      "noOcrBenchmark": "No OCR benchmark result has been recorded."
+      "noOcrBenchmark": "No OCR benchmark result has been recorded.",
+      "runOcrBoostBenchmark": "Run OCR boost benchmark",
+      "ocrBoostBenchmarkRunningShort": "Running…",
+      "downloadOcrBoostBenchmark": "Download OCR boost benchmark JSON",
+      "ocrBoostBenchmarkRunning": "Running OCR boost benchmark…",
+      "ocrBoostBenchmarkProgress": "Running OCR boost benchmark {current} of {total}: {scenario} ({pageProgress} pages, {workerCount} workers)…",
+      "ocrBoostBenchmarkSkipped": "Skipped {scenario}: {skipReason}.",
+      "ocrBoostBenchmarkDone": "OCR boost benchmark completed.",
+      "ocrBoostBenchmarkError": "OCR boost benchmark failed: {error}",
+      "ocrBoostBenchmarkSummary": "Fastest OCR boost run: {msPerPage} ms per page, {pages} pages, {scenario}.",
+      "noOcrBoostBenchmark": "No OCR boost benchmark result has been recorded."
     }
   },
   "metadataMatrix": {

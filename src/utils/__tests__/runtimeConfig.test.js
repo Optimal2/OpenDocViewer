@@ -33,6 +33,7 @@ import {
   describeOcrWorkerCount,
   resolveOcrWorkerCount,
   isOcrBenchmarkEnabled,
+  isOcrBoostBenchmarkEnabled,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
   isOcrWholeDocumentEnabled,
@@ -351,6 +352,24 @@ describe('runtimeConfig', () => {
       expect(isOcrBenchmarkEnabled({ ocr: { enabled: false, benchmark: { enabled: true } } })).toBe(false);
       expect(isOcrBenchmarkEnabled({ ocr: { benchmark: { enabled: true } } })).toBe(false);
       expect(isOcrBenchmarkEnabled({ ocr: { enabled: true, benchmark: { enabled: true } } })).toBe(true);
+    });
+  });
+
+  describe('isOcrBoostBenchmarkEnabled', () => {
+    it('is off by default and needs both the OCR switch and the literal true', () => {
+      expect(isOcrBoostBenchmarkEnabled({})).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: true } })).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: true, boostBenchmark: {} } })).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: true, boostBenchmark: { enabled: 'true' } } })).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: true, boostBenchmark: { enabled: 1 } } })).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: false, boostBenchmark: { enabled: true } } })).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { boostBenchmark: { enabled: true } } })).toBe(false);
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: true, boostBenchmark: { enabled: true } } })).toBe(true);
+    });
+
+    it('is independent of the regular OCR benchmark switch', () => {
+      expect(isOcrBoostBenchmarkEnabled({ ocr: { enabled: true, benchmark: { enabled: true } } })).toBe(false);
+      expect(isOcrBenchmarkEnabled({ ocr: { enabled: true, boostBenchmark: { enabled: true } } })).toBe(false);
     });
   });
 

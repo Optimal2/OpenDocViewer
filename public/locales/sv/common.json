@@ -1019,7 +1019,17 @@
       "ocrBenchmarkDone": "OCR-benchmark slutförd.",
       "ocrBenchmarkError": "OCR-benchmark misslyckades: {error}",
       "ocrBenchmarkSummary": "Snabbaste OCR-körning: {msPerPage} ms per sida, {pages} sidor, {scenario}.",
-      "noOcrBenchmark": "Ingen OCR-benchmark har körts."
+      "noOcrBenchmark": "Ingen OCR-benchmark har körts.",
+      "runOcrBoostBenchmark": "Kör OCR-boostbenchmark",
+      "ocrBoostBenchmarkRunningShort": "Kör…",
+      "downloadOcrBoostBenchmark": "Ladda ned OCR-boostbenchmark-JSON",
+      "ocrBoostBenchmarkRunning": "Kör OCR-boostbenchmark…",
+      "ocrBoostBenchmarkProgress": "Kör OCR-boostbenchmark {current} av {total}: {scenario} ({pageProgress} sidor, {workerCount} arbetare)…",
+      "ocrBoostBenchmarkSkipped": "Överhoppad {scenario}: {skipReason}.",
+      "ocrBoostBenchmarkDone": "OCR-boostbenchmark slutförd.",
+      "ocrBoostBenchmarkError": "OCR-boostbenchmark misslyckades: {error}",
+      "ocrBoostBenchmarkSummary": "Snabbaste OCR-boostkörning: {msPerPage} ms per sida, {pages} sidor, {scenario}.",
+      "noOcrBoostBenchmark": "Ingen OCR-boostbenchmark har körts."
     }
   },
   "metadataMatrix": {

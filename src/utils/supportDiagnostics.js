@@ -15,6 +15,7 @@ import { getPdfPrintCacheKeyOptions } from './pdfPrintCacheKey.js';
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
 const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
 const LATEST_OCR_BENCHMARK_KEY = 'odv.ocrBenchmark.latest.v1';
+const LATEST_OCR_BOOST_BENCHMARK_KEY = 'odv.ocrBoostBenchmark.latest.v1';
 const DOWNLOAD_URL_REVOKE_DELAY_MS = 30 * 1000;
 // Diagnostics payloads cap arrays so downloaded files stay readable while still
 // including enough configured values to troubleshoot support cases.
@@ -325,6 +326,29 @@ export function saveLatestOcrBenchmarkResult(result) {
 }
 
 /**
+ * The latest OCR boost benchmark result (src/ocr/boostBenchmark.js), if one was recorded in
+ * this browser.
+ *
+ * @returns {Object|null}
+ */
+export function loadLatestOcrBoostBenchmarkResult() {
+  return loadLatestBenchmarkResult(LATEST_OCR_BOOST_BENCHMARK_KEY);
+}
+
+/**
+ * @param {Object} result
+ * @returns {void}
+ */
+export function saveLatestOcrBoostBenchmarkResult(result) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(LATEST_OCR_BOOST_BENCHMARK_KEY, JSON.stringify(result));
+  } catch {
+    // Diagnostics persistence is best-effort only.
+  }
+}
+
+/**
  * @param {Object=} extra
  * @returns {Object}
  */
@@ -332,6 +356,7 @@ export function collectSupportDiagnostics(extra = {}) {
   const hasLatestPdfBenchmark = hasOwn(extra, 'latestPdfBenchmark');
   const hasLatestRenderDecodeBenchmark = hasOwn(extra, 'latestRenderDecodeBenchmark');
   const hasLatestOcrBenchmark = hasOwn(extra, 'latestOcrBenchmark');
+  const hasLatestOcrBoostBenchmark = hasOwn(extra, 'latestOcrBoostBenchmark');
   return {
     schema: 'opendocviewer.support-diagnostics.v1',
     createdUtc: new Date().toISOString(),
@@ -351,6 +376,9 @@ export function collectSupportDiagnostics(extra = {}) {
     latestOcrBenchmark: hasLatestOcrBenchmark
       ? extra.latestOcrBenchmark
       : loadLatestOcrBenchmarkResult(),
+    latestOcrBoostBenchmark: hasLatestOcrBoostBenchmark
+      ? extra.latestOcrBoostBenchmark
+      : loadLatestOcrBoostBenchmarkResult(),
     extra: extra.extra || undefined,
   };
 }

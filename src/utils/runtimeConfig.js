@@ -371,6 +371,19 @@ export function isOcrBenchmarkEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether the opt-in OCR boost benchmark is offered under About -> Diagnostics
+ * (`ocr.boostBenchmark.enabled`). Off by default; only the boolean literal `true` turns it on,
+ * and only while OCR itself is on (`ocr.enabled`), since the boost benchmark lives in the OCR
+ * module. The rest of `ocr.boostBenchmark` is read by the module (src/ocr/boostBenchmark.js).
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isOcrBoostBenchmarkEnabled(cfg = getRuntimeConfig()) {
+  return isOcrEnabled(cfg) && cfg?.ocr?.boostBenchmark?.enabled === true;
+}
+
+/**
  * `ocr.workerCount` when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.
  * (Up to 2.4.311 the default was one worker.)
  */

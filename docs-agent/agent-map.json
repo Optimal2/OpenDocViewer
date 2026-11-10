@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 198,
-    "sourceLineCount": 71261,
-    "docletCount": 2050,
+    "sourceLineCount": 71461,
+    "docletCount": 2053,
     "documentedFileCount": 194,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -515,21 +515,21 @@
   ],
   "importantFiles": [
     {
+      "path": "src/utils/runtimeConfig.js",
+      "score": 124,
+      "lines": 1200,
+      "incomingLocalImports": 35,
+      "doclets": 84,
+      "summary": "Runtime configuration helpers.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/utils/documentLoadingConfig.js",
       "score": 123,
       "lines": 1099,
       "incomingLocalImports": 14,
       "doclets": 34,
       "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/runtimeConfig.js",
-      "score": 123,
-      "lines": 1187,
-      "incomingLocalImports": 35,
-      "doclets": 83,
-      "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
     {
@@ -643,9 +643,9 @@
     {
       "path": "src/utils/supportDiagnostics.js",
       "score": 89,
-      "lines": 402,
+      "lines": 430,
       "incomingLocalImports": 4,
-      "doclets": 20,
+      "doclets": 22,
       "summary": "Support diagnostics helpers for opt-in troubleshooting tools.",
       "summaryConfidence": "high"
     },
@@ -1198,7 +1198,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7771,
+      "lineCount": 7930,
       "docletCount": 113,
       "importantFiles": [
         {
@@ -1231,7 +1231,7 @@
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
           "score": 50,
-          "lines": 1604,
+          "lines": 1641,
           "incomingLocalImports": 1,
           "doclets": 19,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -1884,9 +1884,18 @@
     {
       "name": "src/utils",
       "fileCount": 65,
-      "lineCount": 24290,
-      "docletCount": 1004,
+      "lineCount": 24331,
+      "docletCount": 1007,
       "importantFiles": [
+        {
+          "path": "src/utils/runtimeConfig.js",
+          "score": 124,
+          "lines": 1200,
+          "incomingLocalImports": 35,
+          "doclets": 84,
+          "summary": "Runtime configuration helpers.",
+          "summaryConfidence": "high"
+        },
         {
           "path": "src/utils/documentLoadingConfig.js",
           "score": 123,
@@ -1894,15 +1903,6 @@
           "incomingLocalImports": 14,
           "doclets": 34,
           "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/utils/runtimeConfig.js",
-          "score": 123,
-          "lines": 1187,
-          "incomingLocalImports": 35,
-          "doclets": 83,
-          "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
         {
@@ -11496,9 +11496,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-      "lines": 571,
+      "lines": 693,
       "extension": ".jsx",
-      "jsdocBlockCount": 9,
+      "jsdocBlockCount": 10,
       "sourceSummary": "Small About dialog for version/build/support information.",
       "imports": [
         {
@@ -11544,6 +11544,7 @@
             "collectSupportDiagnostics",
             "downloadJsonFile",
             "loadLatestOcrBenchmarkResult",
+            "loadLatestOcrBoostBenchmarkResult",
             "loadLatestPdfBenchmarkResult",
             "loadLatestRenderDecodeBenchmarkResult"
           ],
@@ -11555,24 +11556,24 @@
         {
           "name": "AboutOverlayDialog",
           "kind": "default",
-          "line": 54
+          "line": 57
         }
       ],
       "declarations": [
         {
           "name": "resolveAboutInfo",
           "kind": "function",
-          "line": 23
+          "line": 24
         },
         {
           "name": "AboutOverlayDialog",
           "kind": "component",
-          "line": 54
+          "line": 57
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 84
+          "line": 92
         }
       ],
       "parseError": null,
@@ -11588,7 +11589,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-          "line": 23,
+          "line": 24,
           "description": "",
           "params": [],
           "returns": [
@@ -11606,7 +11607,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-          "line": 54,
+          "line": 57,
           "description": "",
           "params": [
             {
@@ -11662,6 +11663,18 @@
               "type": "function",
               "optional": false,
               "description": ""
+            },
+            {
+              "name": "props.ocrBoostBenchmarkEnabled",
+              "type": "boolean",
+              "optional": true,
+              "description": "ocr.boostBenchmark.enabled with OCR on (src/ocr/boostBenchmark.js)."
+            },
+            {
+              "name": "props.onRunOcrBoostBenchmark",
+              "type": "function",
+              "optional": false,
+              "description": ""
             }
           ],
           "returns": [
@@ -11679,7 +11692,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-          "line": 84,
+          "line": 92,
           "description": "",
           "params": [
             {
@@ -11710,6 +11723,7 @@
             "collectSupportDiagnostics",
             "downloadJsonFile",
             "loadLatestOcrBenchmarkResult",
+            "loadLatestOcrBoostBenchmarkResult",
             "loadLatestPdfBenchmarkResult",
             "loadLatestRenderDecodeBenchmarkResult"
           ],
@@ -11750,14 +11764,14 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 26,
+      "importanceScore": 27,
       "summary": "Small About dialog for version/build/support information.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 1604,
+      "lines": 1641,
       "extension": ".jsx",
       "jsdocBlockCount": 26,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11905,6 +11919,7 @@
             "isCompareOverlayEnabled",
             "isFineTuneEnabled",
             "isOcrBenchmarkEnabled",
+            "isOcrBoostBenchmarkEnabled",
             "isOcrEnabled"
           ],
           "line": 33,
@@ -11915,7 +11930,7 @@
           "specifiers": [
             "hasImageAdjustment"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -11924,7 +11939,7 @@
             "isIdentityCompareTransform",
             "selectCompareTransform"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static"
         },
         {
@@ -11934,7 +11949,7 @@
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 44,
+          "line": 45,
           "kind": "static"
         },
         {
@@ -11942,7 +11957,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 49,
+          "line": 50,
           "kind": "static"
         },
         {
@@ -11950,7 +11965,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 50,
+          "line": 51,
           "kind": "static"
         },
         {
@@ -11958,7 +11973,7 @@
           "specifiers": [
             "SignatureOverviewButton"
           ],
-          "line": 51,
+          "line": 52,
           "kind": "static"
         },
         {
@@ -11966,7 +11981,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 52,
+          "line": 53,
           "kind": "static"
         },
         {
@@ -11975,7 +11990,7 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 53,
+          "line": 54,
           "kind": "static"
         },
         {
@@ -11984,7 +11999,7 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 54,
+          "line": 55,
           "kind": "static"
         },
         {
@@ -11992,7 +12007,7 @@
           "specifiers": [
             "loadOcrModule"
           ],
-          "line": 55,
+          "line": 56,
           "kind": "static"
         }
       ],
@@ -12000,49 +12015,49 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 1603
+          "line": 1640
         }
       ],
       "declarations": [
         {
           "name": "thumbnailPercentToSliderValue",
           "kind": "function",
-          "line": 172
+          "line": 173
         },
         {
           "name": "thumbnailSliderValueToPercent",
           "kind": "function",
-          "line": 180
+          "line": 181
         },
         {
           "name": "makePdfResolutionPageKey",
           "kind": "function",
-          "line": 194
+          "line": 195
         },
         {
           "name": "isPdfPage",
           "kind": "function",
-          "line": 204
+          "line": 205
         },
         {
           "name": "DocumentToolbar",
           "kind": "component",
-          "line": 217
+          "line": 218
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 337
+          "line": 338
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 345
+          "line": 346
         },
         {
           "name": "detail",
           "kind": "object",
-          "line": 782
+          "line": 783
         }
       ],
       "parseError": null,
@@ -12058,7 +12073,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 57,
+          "line": 58,
           "description": "Mutable ref-like object used by the toolbar.",
           "params": [],
           "returns": [],
@@ -12071,7 +12086,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 63,
+          "line": 64,
           "description": "Editable image state shown by the toolbar.",
           "params": [],
           "returns": [],
@@ -12084,7 +12099,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 71,
+          "line": 72,
           "description": "React-like numeric page setter used by the toolbar.",
           "params": [
             {
@@ -12109,7 +12124,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 78,
+          "line": 79,
           "description": "Zoom display state used by the newer toolbar UX paths.",
           "params": [],
           "returns": [],
@@ -12122,7 +12137,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 85,
+          "line": 86,
           "description": "Props for {@link DocumentToolbar}.",
           "params": [],
           "returns": [],
@@ -12135,7 +12150,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 163,
+          "line": 164,
           "description": "Range (±) around 100% where sliders snap back to the neutral value.",
           "params": [],
           "returns": [],
@@ -12148,7 +12163,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 165,
+          "line": 166,
           "description": "Pages on either side of the shown page whose renders the OCR benchmark leaves to the viewer.",
           "params": [],
           "returns": [],
@@ -12161,7 +12176,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 167,
+          "line": 168,
           "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
           "params": [],
           "returns": [],
@@ -12174,7 +12189,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 194,
+          "line": 195,
           "description": "",
           "params": [
             {
@@ -12199,7 +12214,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 204,
+          "line": 205,
           "description": "",
           "params": [
             {
@@ -12224,7 +12239,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 217,
+          "line": 218,
           "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
           "params": [
             {
@@ -12249,7 +12264,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 337,
+          "line": 338,
           "description": "",
           "params": [
             {
@@ -12269,7 +12284,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 345,
+          "line": 346,
           "description": "",
           "params": [
             {
@@ -12289,7 +12304,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 628,
+          "line": 629,
           "description": "Handle brightness slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -12314,7 +12329,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 642,
+          "line": 643,
           "description": "Handle contrast slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -12339,7 +12354,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 656,
+          "line": 657,
           "description": "",
           "params": [
             {
@@ -12370,7 +12385,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 664,
+          "line": 665,
           "description": "",
           "params": [
             {
@@ -12395,7 +12410,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 677,
+          "line": 678,
           "description": "",
           "params": [
             {
@@ -12420,7 +12435,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 686,
+          "line": 687,
           "description": "",
           "params": [
             {
@@ -12567,6 +12582,7 @@
             "isCompareOverlayEnabled",
             "isFineTuneEnabled",
             "isOcrBenchmarkEnabled",
+            "isOcrBoostBenchmarkEnabled",
             "isOcrEnabled"
           ],
           "line": 33,
@@ -12578,7 +12594,7 @@
           "specifiers": [
             "hasImageAdjustment"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static",
           "resolved": "src/utils/imageAdjustments.js"
         },
@@ -12588,7 +12604,7 @@
             "isIdentityCompareTransform",
             "selectCompareTransform"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static",
           "resolved": "src/utils/compareTransform.js"
         },
@@ -12599,7 +12615,7 @@
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 44,
+          "line": 45,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
@@ -12608,7 +12624,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 49,
+          "line": 50,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -12617,7 +12633,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 50,
+          "line": 51,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -12626,7 +12642,7 @@
           "specifiers": [
             "SignatureOverviewButton"
           ],
-          "line": 51,
+          "line": 52,
           "kind": "static",
           "resolved": "src/components/SignatureOverviewButton.jsx"
         },
@@ -12635,7 +12651,7 @@
           "specifiers": [
             "CompareCurtainButton"
           ],
-          "line": 52,
+          "line": 53,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/CompareCurtainButton.jsx"
         },
@@ -12645,7 +12661,7 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 53,
+          "line": 54,
           "kind": "static",
           "resolved": "src/utils/pdfBenchmark.js"
         },
@@ -12655,7 +12671,7 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 54,
+          "line": 55,
           "kind": "static",
           "resolved": "src/utils/renderDecodeBenchmark.js"
         },
@@ -12664,7 +12680,7 @@
           "specifiers": [
             "loadOcrModule"
           ],
-          "line": 55,
+          "line": 56,
           "kind": "static",
           "resolved": "src/utils/ocrLoader.js"
         }
@@ -76628,9 +76644,9 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 1187,
+      "lines": 1200,
       "extension": ".js",
-      "jsdocBlockCount": 89,
+      "jsdocBlockCount": 90,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
@@ -76740,154 +76756,159 @@
           "line": 369
         },
         {
+          "name": "isOcrBoostBenchmarkEnabled",
+          "kind": "function",
+          "line": 382
+        },
+        {
           "name": "DEFAULT_OCR_WORKER_COUNT",
           "kind": "variable",
-          "line": 377
+          "line": 390
         },
         {
           "name": "MAX_OCR_WORKER_COUNT",
           "kind": "variable",
-          "line": 379
+          "line": 392
         },
         {
           "name": "OCR_WORKER_POLICY_DEFAULTS",
           "kind": "variable",
-          "line": 419
+          "line": 432
         },
         {
           "name": "describeOcrWorkerCount",
           "kind": "function",
-          "line": 449
+          "line": 462
         },
         {
           "name": "normalizeOcrWorkerPolicy",
           "kind": "function",
-          "line": 485
+          "line": 498
         },
         {
           "name": "resolveOcrWorkerPlan",
           "kind": "function",
-          "line": 533
+          "line": 546
         },
         {
           "name": "resolveOcrWorkerCount",
           "kind": "function",
-          "line": 560
+          "line": 573
         },
         {
           "name": "isSpeechLanguageAutoDetectEnabled",
           "kind": "function",
-          "line": 572
+          "line": 585
         },
         {
           "name": "isOcrSearchEnabled",
           "kind": "function",
-          "line": 586
+          "line": 599
         },
         {
           "name": "isOcrSearchCtrlFOverrideEnabled",
           "kind": "function",
-          "line": 599
+          "line": 612
         },
         {
           "name": "isReadAloudEnabled",
           "kind": "function",
-          "line": 614
+          "line": 627
         },
         {
           "name": "describeOcrLanguages",
           "kind": "function",
-          "line": 641
+          "line": 654
         },
         {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 690
+          "line": 703
         },
         {
           "name": "OCR_ASSET_BASE_URL_REJECTIONS",
           "kind": "variable",
-          "line": 695
+          "line": 708
         },
         {
           "name": "describeOcrAssetBaseUrl",
           "kind": "function",
-          "line": 721
+          "line": 734
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 746
+          "line": 759
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 758
+          "line": 771
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 927
+          "line": 940
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 944
+          "line": 957
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 955
+          "line": 968
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 973
+          "line": 986
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 999
+          "line": 1012
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 1012
+          "line": 1025
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 1026
+          "line": 1039
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 1050
+          "line": 1063
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 1075
+          "line": 1088
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 1099
+          "line": 1112
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 1117
+          "line": 1130
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 1158
+          "line": 1171
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 1175
+          "line": 1188
         }
       ],
       "declarations": [
@@ -76982,189 +77003,194 @@
           "line": 369
         },
         {
+          "name": "isOcrBoostBenchmarkEnabled",
+          "kind": "function",
+          "line": 382
+        },
+        {
           "name": "describeOcrWorkerCount",
           "kind": "function",
-          "line": 449
+          "line": 462
         },
         {
           "name": "boundedNumber",
           "kind": "function",
-          "line": 470
+          "line": 483
         },
         {
           "name": "normalizeOcrWorkerPolicy",
           "kind": "function",
-          "line": 485
+          "line": 498
         },
         {
           "name": "resolveOcrWorkerPlan",
           "kind": "function",
-          "line": 533
+          "line": 546
         },
         {
           "name": "inputs",
           "kind": "object",
-          "line": 541
+          "line": 554
         },
         {
           "name": "resolveOcrWorkerCount",
           "kind": "function",
-          "line": 560
+          "line": 573
         },
         {
           "name": "isSpeechLanguageAutoDetectEnabled",
           "kind": "function",
-          "line": 572
+          "line": 585
         },
         {
           "name": "isOcrSearchEnabled",
           "kind": "function",
-          "line": 586
+          "line": 599
         },
         {
           "name": "isOcrSearchCtrlFOverrideEnabled",
           "kind": "function",
-          "line": 599
+          "line": 612
         },
         {
           "name": "isReadAloudEnabled",
           "kind": "function",
-          "line": 614
+          "line": 627
         },
         {
           "name": "describeOcrLanguages",
           "kind": "function",
-          "line": 641
+          "line": 654
         },
         {
           "name": "getOcrLanguages",
           "kind": "function",
-          "line": 690
+          "line": 703
         },
         {
           "name": "describeOcrAssetBaseUrl",
           "kind": "function",
-          "line": 721
+          "line": 734
         },
         {
           "name": "getOcrAssetBaseUrl",
           "kind": "function",
-          "line": 746
+          "line": 759
         },
         {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 758
+          "line": 771
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 776
+          "line": 789
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 798
+          "line": 811
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 823
+          "line": 836
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 844
+          "line": 857
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 861
+          "line": 874
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 873
+          "line": 886
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 887
+          "line": 900
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 898
+          "line": 911
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 912
+          "line": 925
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 927
+          "line": 940
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 944
+          "line": 957
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 955
+          "line": 968
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 973
+          "line": 986
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 999
+          "line": 1012
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 1012
+          "line": 1025
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 1026
+          "line": 1039
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 1050
+          "line": 1063
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 1075
+          "line": 1088
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 1099
+          "line": 1112
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 1117
+          "line": 1130
         },
         {
           "name": "getThemeDefaultMode",
           "kind": "function",
-          "line": 1158
+          "line": 1171
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 1175
+          "line": 1188
         }
       ],
       "parseError": null,
@@ -77870,13 +77896,38 @@
           "examples": 0
         },
         {
+          "id": "isOcrBoostBenchmarkEnabled",
+          "name": "isOcrBoostBenchmarkEnabled",
+          "longname": "isOcrBoostBenchmarkEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 382,
+          "description": "Resolve whether the opt-in OCR boost benchmark is offered under About -&gt; Diagnostics ( ocr.boostBenchmark.enabled ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "RuntimeConfig",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "DEFAULT_OCR_WORKER_COUNT",
           "name": "DEFAULT_OCR_WORKER_COUNT",
           "longname": "DEFAULT_OCR_WORKER_COUNT",
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 377,
+          "line": 390,
           "description": "ocr.workerCount when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.",
           "params": [],
           "returns": [],
@@ -77889,7 +77940,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 379,
+          "line": 392,
           "description": "Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped.",
           "params": [],
           "returns": [],
@@ -77902,7 +77953,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 381,
+          "line": 394,
           "description": "The thresholds the automatic worker count is made from ( ocr.workerPolicy ).",
           "params": [],
           "returns": [],
@@ -77915,7 +77966,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 419,
+          "line": 432,
           "description": "Defaults of ocr.workerPolicy , set from the OCR benchmark (About -&gt; Diagnostics) on a 4-core, 16 GB client (Chromium, 2026-11-10): 40 evenly spaced pages of a 300-page scanned...",
           "params": [],
           "returns": [],
@@ -77928,7 +77979,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 429,
+          "line": 442,
           "description": "",
           "params": [],
           "returns": [],
@@ -77941,7 +77992,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 449,
+          "line": 462,
           "description": "Describe ocr.workerCount (how many tesseract.js workers recognise pages at the same time) without resolving the automatic choice, so the caller can report a rejected or clamped va...",
           "params": [
             {
@@ -77966,7 +78017,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 470,
+          "line": 483,
           "description": "",
           "params": [
             {
@@ -78015,7 +78066,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 485,
+          "line": 498,
           "description": "Read ocr.workerPolicy : a number out of range is clamped to the nearest bound, and whatever is missing or not a finite number (a numeric string included) gets the default.",
           "params": [
             {
@@ -78040,7 +78091,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 499,
+          "line": 512,
           "description": "",
           "params": [],
           "returns": [],
@@ -78053,7 +78104,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 533,
+          "line": 546,
           "description": "Resolve how many OCR workers to run.",
           "params": [
             {
@@ -78108,7 +78159,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 560,
+          "line": 573,
           "description": "The workerCount of resolveOcrWorkerPlan.",
           "params": [
             {
@@ -78139,7 +78190,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 572,
+          "line": 585,
           "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
           "params": [
             {
@@ -78164,7 +78215,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 586,
+          "line": 599,
           "description": "Resolve whether the toolbar's search in the text layers is offered ( ocr.search.enabled ).",
           "params": [
             {
@@ -78189,7 +78240,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 599,
+          "line": 612,
           "description": "Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead of the browser's own find ( ocr.search.overridesCtrlF ).",
           "params": [
             {
@@ -78214,7 +78265,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 614,
+          "line": 627,
           "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
           "params": [
             {
@@ -78239,7 +78290,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 641,
+          "line": 654,
           "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
           "params": [
             {
@@ -78264,7 +78315,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 690,
+          "line": 703,
           "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
           "params": [
             {
@@ -78289,7 +78340,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 695,
+          "line": 708,
           "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
           "params": [],
           "returns": [],
@@ -78302,7 +78353,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 697,
+          "line": 710,
           "description": "The value carries ?",
           "params": [],
           "returns": [],
@@ -78315,7 +78366,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 699,
+          "line": 712,
           "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
           "params": [],
           "returns": [],
@@ -78328,7 +78379,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 701,
+          "line": 714,
           "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
           "params": [],
           "returns": [],
@@ -78341,7 +78392,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 721,
+          "line": 734,
           "description": "Describe how ocr.assetBaseUrl resolves.",
           "params": [
             {
@@ -78366,7 +78417,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 746,
+          "line": 759,
           "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
           "params": [
             {
@@ -78391,7 +78442,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 758,
+          "line": 771,
           "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
           "params": [
             {
@@ -78416,7 +78467,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 776,
+          "line": 789,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -78447,7 +78498,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 798,
+          "line": 811,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -78490,7 +78541,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 823,
+          "line": 836,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -78533,7 +78584,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 844,
+          "line": 857,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -78576,7 +78627,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 861,
+          "line": 874,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -78607,7 +78658,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 873,
+          "line": 886,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -78632,7 +78683,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 887,
+          "line": 900,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -78657,7 +78708,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 898,
+          "line": 911,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -78682,7 +78733,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 912,
+          "line": 925,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -78713,7 +78764,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 927,
+          "line": 940,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -78744,7 +78795,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 944,
+          "line": 957,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -78775,7 +78826,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 955,
+          "line": 968,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -78806,7 +78857,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 973,
+          "line": 986,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -78831,7 +78882,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 999,
+          "line": 1012,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -78856,7 +78907,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1012,
+          "line": 1025,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -78881,7 +78932,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1026,
+          "line": 1039,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -78906,7 +78957,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1050,
+          "line": 1063,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -78931,7 +78982,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1075,
+          "line": 1088,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -78956,7 +79007,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1099,
+          "line": 1112,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -78981,7 +79032,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1117,
+          "line": 1130,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -79006,7 +79057,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1158,
+          "line": 1171,
           "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
           "params": [
             {
@@ -79031,7 +79082,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 1175,
+          "line": 1188,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -79054,7 +79105,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 35,
-      "importanceScore": 123,
+      "importanceScore": 124,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -81858,9 +81909,9 @@
     },
     {
       "path": "src/utils/supportDiagnostics.js",
-      "lines": 402,
+      "lines": 430,
       "extension": ".js",
-      "jsdocBlockCount": 21,
+      "jsdocBlockCount": 23,
       "sourceSummary": "Support diagnostics helpers for opt-in troubleshooting tools.",
       "imports": [
         {
@@ -81908,144 +81959,164 @@
         {
           "name": "loadLatestPdfBenchmarkResult",
           "kind": "function",
-          "line": 268
+          "line": 269
         },
         {
           "name": "saveLatestPdfBenchmarkResult",
           "kind": "function",
-          "line": 276
+          "line": 277
         },
         {
           "name": "loadLatestRenderDecodeBenchmarkResult",
           "kind": "function",
-          "line": 288
+          "line": 289
         },
         {
           "name": "saveLatestRenderDecodeBenchmarkResult",
           "kind": "function",
-          "line": 296
+          "line": 297
         },
         {
           "name": "loadLatestOcrBenchmarkResult",
           "kind": "function",
-          "line": 310
+          "line": 311
         },
         {
           "name": "saveLatestOcrBenchmarkResult",
           "kind": "function",
-          "line": 318
+          "line": 319
+        },
+        {
+          "name": "loadLatestOcrBoostBenchmarkResult",
+          "kind": "function",
+          "line": 334
+        },
+        {
+          "name": "saveLatestOcrBoostBenchmarkResult",
+          "kind": "function",
+          "line": 342
         },
         {
           "name": "collectSupportDiagnostics",
           "kind": "function",
-          "line": 331
+          "line": 355
         },
         {
           "name": "downloadJsonFile",
           "kind": "function",
-          "line": 369
+          "line": 397
         }
       ],
       "declarations": [
         {
           "name": "getAppVersionFromWindowGlobals",
           "kind": "function",
-          "line": 29
+          "line": 30
         },
         {
           "name": "resolveImportMetaEnvValue",
           "kind": "function",
-          "line": 40
+          "line": 41
         },
         {
           "name": "hasOwn",
           "kind": "function",
-          "line": 55
+          "line": 56
         },
         {
           "name": "createDefaultDiagnosticsFilename",
           "kind": "function",
-          "line": 64
+          "line": 65
         },
         {
           "name": "normalizeDownloadFilename",
           "kind": "function",
-          "line": 75
+          "line": 76
         },
         {
           "name": "logDiagnosticsDownloadFailure",
           "kind": "function",
-          "line": 84
+          "line": 85
         },
         {
           "name": "resolveAppVersion",
           "kind": "function",
-          "line": 92
+          "line": 93
         },
         {
           "name": "resolveBuildId",
           "kind": "function",
-          "line": 101
+          "line": 102
         },
         {
           "name": "collectNavigatorDiagnostics",
           "kind": "function",
-          "line": 108
+          "line": 109
         },
         {
           "name": "collectLocationDiagnostics",
           "kind": "function",
-          "line": 125
+          "line": 126
         },
         {
           "name": "collectConfigDiagnostics",
           "kind": "function",
-          "line": 138
+          "line": 139
         },
         {
           "name": "loadLatestBenchmarkResult",
           "kind": "function",
-          "line": 252
+          "line": 253
         },
         {
           "name": "loadLatestPdfBenchmarkResult",
           "kind": "function",
-          "line": 268
+          "line": 269
         },
         {
           "name": "saveLatestPdfBenchmarkResult",
           "kind": "function",
-          "line": 276
+          "line": 277
         },
         {
           "name": "loadLatestRenderDecodeBenchmarkResult",
           "kind": "function",
-          "line": 288
+          "line": 289
         },
         {
           "name": "saveLatestRenderDecodeBenchmarkResult",
           "kind": "function",
-          "line": 296
+          "line": 297
         },
         {
           "name": "loadLatestOcrBenchmarkResult",
           "kind": "function",
-          "line": 310
+          "line": 311
         },
         {
           "name": "saveLatestOcrBenchmarkResult",
           "kind": "function",
-          "line": 318
+          "line": 319
+        },
+        {
+          "name": "loadLatestOcrBoostBenchmarkResult",
+          "kind": "function",
+          "line": 334
+        },
+        {
+          "name": "saveLatestOcrBoostBenchmarkResult",
+          "kind": "function",
+          "line": 342
         },
         {
           "name": "collectSupportDiagnostics",
           "kind": "function",
-          "line": 331
+          "line": 355
         },
         {
           "name": "downloadJsonFile",
           "kind": "function",
-          "line": 369
+          "line": 397
         }
       ],
       "parseError": null,
@@ -82061,7 +82132,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 29,
+          "line": 30,
           "description": "",
           "params": [],
           "returns": [
@@ -82079,7 +82150,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 40,
+          "line": 41,
           "description": "",
           "params": [
             {
@@ -82104,7 +82175,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 55,
+          "line": 56,
           "description": "",
           "params": [
             {
@@ -82135,7 +82206,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 64,
+          "line": 65,
           "description": "",
           "params": [],
           "returns": [
@@ -82153,7 +82224,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 75,
+          "line": 76,
           "description": "",
           "params": [
             {
@@ -82178,7 +82249,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 84,
+          "line": 85,
           "description": "",
           "params": [
             {
@@ -82203,7 +82274,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 92,
+          "line": 93,
           "description": "",
           "params": [],
           "returns": [
@@ -82221,7 +82292,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 101,
+          "line": 102,
           "description": "",
           "params": [],
           "returns": [
@@ -82239,7 +82310,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 108,
+          "line": 109,
           "description": "",
           "params": [],
           "returns": [
@@ -82257,7 +82328,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 125,
+          "line": 126,
           "description": "",
           "params": [],
           "returns": [
@@ -82275,7 +82346,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 138,
+          "line": 139,
           "description": "",
           "params": [],
           "returns": [
@@ -82293,7 +82364,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 252,
+          "line": 253,
           "description": "",
           "params": [
             {
@@ -82318,7 +82389,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 268,
+          "line": 269,
           "description": "",
           "params": [],
           "returns": [
@@ -82336,7 +82407,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 276,
+          "line": 277,
           "description": "",
           "params": [
             {
@@ -82361,7 +82432,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 288,
+          "line": 289,
           "description": "",
           "params": [],
           "returns": [
@@ -82379,7 +82450,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 296,
+          "line": 297,
           "description": "",
           "params": [
             {
@@ -82404,7 +82475,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 310,
+          "line": 311,
           "description": "The latest OCR benchmark result (src/ocr/benchmark.js), if one was recorded in this browser.",
           "params": [],
           "returns": [
@@ -82422,7 +82493,50 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 318,
+          "line": 319,
+          "description": "",
+          "params": [
+            {
+              "name": "result",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "loadLatestOcrBoostBenchmarkResult",
+          "name": "loadLatestOcrBoostBenchmarkResult",
+          "longname": "loadLatestOcrBoostBenchmarkResult",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/supportDiagnostics.js",
+          "line": 334,
+          "description": "The latest OCR boost benchmark result (src/ocr/boostBenchmark.js), if one was recorded in this browser.",
+          "params": [],
+          "returns": [
+            {
+              "type": "Object|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "saveLatestOcrBoostBenchmarkResult",
+          "name": "saveLatestOcrBoostBenchmarkResult",
+          "longname": "saveLatestOcrBoostBenchmarkResult",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/supportDiagnostics.js",
+          "line": 342,
           "description": "",
           "params": [
             {
@@ -82447,7 +82561,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 331,
+          "line": 355,
           "description": "",
           "params": [
             {
@@ -82472,7 +82586,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/supportDiagnostics.js",
-          "line": 369,
+          "line": 397,
           "description": "Download a JSON diagnostics payload in browser environments.",
           "params": [
             {
@@ -90792,7 +90906,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-      "line": 54,
+      "line": 57,
       "description": "",
       "params": [
         {
@@ -90848,6 +90962,18 @@
           "type": "function",
           "optional": false,
           "description": ""
+        },
+        {
+          "name": "props.ocrBoostBenchmarkEnabled",
+          "type": "boolean",
+          "optional": true,
+          "description": "ocr.boostBenchmark.enabled with OCR on (src/ocr/boostBenchmark.js)."
+        },
+        {
+          "name": "props.onRunOcrBoostBenchmark",
+          "type": "function",
+          "optional": false,
+          "description": ""
         }
       ],
       "returns": [
@@ -90865,7 +90991,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-      "line": 84,
+      "line": 92,
       "description": "",
       "params": [
         {
@@ -90885,7 +91011,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-      "line": 23,
+      "line": 24,
       "description": "",
       "params": [],
       "returns": [
@@ -90903,7 +91029,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 57,
+      "line": 58,
       "description": "Mutable ref-like object used by the toolbar.",
       "params": [],
       "returns": [],
@@ -90916,7 +91042,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 217,
+      "line": 218,
       "description": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
       "params": [
         {
@@ -90941,7 +91067,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 85,
+      "line": 86,
       "description": "Props for {@link DocumentToolbar}.",
       "params": [],
       "returns": [],
@@ -90954,7 +91080,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 628,
+      "line": 629,
       "description": "Handle brightness slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -90979,7 +91105,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 642,
+      "line": 643,
       "description": "Handle contrast slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -91004,7 +91130,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 664,
+      "line": 665,
       "description": "",
       "params": [
         {
@@ -91029,7 +91155,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 345,
+      "line": 346,
       "description": "",
       "params": [
         {
@@ -91049,7 +91175,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 337,
+      "line": 338,
       "description": "",
       "params": [
         {
@@ -91069,7 +91195,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 677,
+      "line": 678,
       "description": "",
       "params": [
         {
@@ -91094,7 +91220,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 656,
+      "line": 657,
       "description": "",
       "params": [
         {
@@ -91125,7 +91251,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 63,
+      "line": 64,
       "description": "Editable image state shown by the toolbar.",
       "params": [],
       "returns": [],
@@ -91138,7 +91264,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 204,
+      "line": 205,
       "description": "",
       "params": [
         {
@@ -91163,7 +91289,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 194,
+      "line": 195,
       "description": "",
       "params": [
         {
@@ -91188,7 +91314,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 165,
+      "line": 166,
       "description": "Pages on either side of the shown page whose renders the OCR benchmark leaves to the viewer.",
       "params": [],
       "returns": [],
@@ -91201,7 +91327,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 167,
+      "line": 168,
       "description": "Epsilon for considering zoom ≈ 100% (0.5%).",
       "params": [],
       "returns": [],
@@ -91214,7 +91340,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 71,
+      "line": 72,
       "description": "React-like numeric page setter used by the toolbar.",
       "params": [
         {
@@ -91239,7 +91365,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 163,
+      "line": 164,
       "description": "Range (±) around 100% where sliders snap back to the neutral value.",
       "params": [],
       "returns": [],
@@ -91252,7 +91378,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 686,
+      "line": 687,
       "description": "",
       "params": [
         {
@@ -91277,7 +91403,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 78,
+      "line": 79,
       "description": "Zoom display state used by the newer toolbar UX paths.",
       "params": [],
       "returns": [],
@@ -130477,7 +130603,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 470,
+      "line": 483,
       "description": "",
       "params": [
         {
@@ -130526,7 +130652,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 798,
+      "line": 811,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -130608,7 +130734,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 377,
+      "line": 390,
       "description": "ocr.workerCount when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.",
       "params": [],
       "returns": [],
@@ -130634,7 +130760,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 721,
+      "line": 734,
       "description": "Describe how ocr.assetBaseUrl resolves.",
       "params": [
         {
@@ -130659,7 +130785,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 641,
+      "line": 654,
       "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
       "params": [
         {
@@ -130684,7 +130810,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 449,
+      "line": 462,
       "description": "Describe ocr.workerCount (how many tesseract.js workers recognise pages at the same time) without resolving the automatic choice, so the caller can report a rejected or clamped va...",
       "params": [
         {
@@ -130759,7 +130885,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 746,
+      "line": 759,
       "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
       "params": [
         {
@@ -130784,7 +130910,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 690,
+      "line": 703,
       "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
       "params": [
         {
@@ -130809,7 +130935,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1175,
+      "line": 1188,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -130884,7 +131010,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1050,
+      "line": 1063,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -130909,7 +131035,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1075,
+      "line": 1088,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -130952,7 +131078,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1158,
+      "line": 1171,
       "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
       "params": [
         {
@@ -130977,7 +131103,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 758,
+      "line": 771,
       "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
       "params": [
         {
@@ -131002,7 +131128,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1026,
+      "line": 1039,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -131027,7 +131153,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1012,
+      "line": 1025,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -131052,7 +131178,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 999,
+      "line": 1012,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -131077,7 +131203,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1099,
+      "line": 1112,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -131102,7 +131228,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 1117,
+      "line": 1130,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -131127,7 +131253,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 701,
+      "line": 714,
       "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
       "params": [],
       "returns": [],
@@ -131309,6 +131435,31 @@
       "examples": 0
     },
     {
+      "id": "isOcrBoostBenchmarkEnabled",
+      "name": "isOcrBoostBenchmarkEnabled",
+      "longname": "isOcrBoostBenchmarkEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 382,
+      "description": "Resolve whether the opt-in OCR boost benchmark is offered under About -&gt; Diagnostics ( ocr.boostBenchmark.enabled ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "RuntimeConfig",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "isOcrEnabled",
       "name": "isOcrEnabled",
       "longname": "isOcrEnabled",
@@ -131365,7 +131516,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 599,
+      "line": 612,
       "description": "Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead of the browser's own find ( ocr.search.overridesCtrlF ).",
       "params": [
         {
@@ -131390,7 +131541,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 586,
+      "line": 599,
       "description": "Resolve whether the toolbar's search in the text layers is offered ( ocr.search.enabled ).",
       "params": [
         {
@@ -131465,7 +131616,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 614,
+      "line": 627,
       "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
       "params": [
         {
@@ -131515,7 +131666,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 572,
+      "line": 585,
       "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
       "params": [
         {
@@ -131566,7 +131717,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 379,
+      "line": 392,
       "description": "Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped.",
       "params": [],
       "returns": [],
@@ -131579,7 +131730,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 776,
+      "line": 789,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -131610,7 +131761,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 973,
+      "line": 986,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -131635,7 +131786,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 944,
+      "line": 957,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -131666,7 +131817,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 912,
+      "line": 925,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -131697,7 +131848,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 844,
+      "line": 857,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -131740,7 +131891,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 823,
+      "line": 836,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -131783,7 +131934,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 485,
+      "line": 498,
       "description": "Read ocr.workerPolicy : a number out of range is clamped to the nearest bound, and whatever is missing or not a finite number (a numeric string included) gets the default.",
       "params": [
         {
@@ -131808,7 +131959,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 955,
+      "line": 968,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -131839,7 +131990,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 927,
+      "line": 940,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -131870,7 +132021,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 873,
+      "line": 886,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -131895,7 +132046,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 861,
+      "line": 874,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -131926,7 +132077,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 887,
+      "line": 900,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -131951,7 +132102,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 695,
+      "line": 708,
       "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
       "params": [],
       "returns": [],
@@ -131990,7 +132141,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 419,
+      "line": 432,
       "description": "Defaults of ocr.workerPolicy , set from the OCR benchmark (About -&gt; Diagnostics) on a 4-core, 16 GB client (Chromium, 2026-11-10): 40 evenly spaced pages of a 300-page scanned...",
       "params": [],
       "returns": [],
@@ -132003,7 +132154,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 429,
+      "line": 442,
       "description": "",
       "params": [],
       "returns": [],
@@ -132016,7 +132167,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 499,
+      "line": 512,
       "description": "",
       "params": [],
       "returns": [],
@@ -132029,7 +132180,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 381,
+      "line": 394,
       "description": "The thresholds the automatic worker count is made from ( ocr.workerPolicy ).",
       "params": [],
       "returns": [],
@@ -132107,7 +132258,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 697,
+      "line": 710,
       "description": "The value carries ?",
       "params": [],
       "returns": [],
@@ -132177,7 +132328,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 898,
+      "line": 911,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {
@@ -132202,7 +132353,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 560,
+      "line": 573,
       "description": "The workerCount of resolveOcrWorkerPlan.",
       "params": [
         {
@@ -132233,7 +132384,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 533,
+      "line": 546,
       "description": "Resolve how many OCR workers to run.",
       "params": [
         {
@@ -132288,7 +132439,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 699,
+      "line": 712,
       "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
       "params": [],
       "returns": [],
@@ -134531,7 +134682,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 138,
+      "line": 139,
       "description": "",
       "params": [],
       "returns": [
@@ -134549,7 +134700,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 125,
+      "line": 126,
       "description": "",
       "params": [],
       "returns": [
@@ -134567,7 +134718,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 108,
+      "line": 109,
       "description": "",
       "params": [],
       "returns": [
@@ -134585,7 +134736,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 331,
+      "line": 355,
       "description": "",
       "params": [
         {
@@ -134610,7 +134761,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 64,
+      "line": 65,
       "description": "",
       "params": [],
       "returns": [
@@ -134628,7 +134779,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 369,
+      "line": 397,
       "description": "Download a JSON diagnostics payload in browser environments.",
       "params": [
         {
@@ -134659,7 +134810,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 29,
+      "line": 30,
       "description": "",
       "params": [],
       "returns": [
@@ -134677,7 +134828,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 55,
+      "line": 56,
       "description": "",
       "params": [
         {
@@ -134708,7 +134859,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 252,
+      "line": 253,
       "description": "",
       "params": [
         {
@@ -134733,8 +134884,26 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 310,
+      "line": 311,
       "description": "The latest OCR benchmark result (src/ocr/benchmark.js), if one was recorded in this browser.",
+      "params": [],
+      "returns": [
+        {
+          "type": "Object|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "loadLatestOcrBoostBenchmarkResult",
+      "name": "loadLatestOcrBoostBenchmarkResult",
+      "longname": "loadLatestOcrBoostBenchmarkResult",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/supportDiagnostics.js",
+      "line": 334,
+      "description": "The latest OCR boost benchmark result (src/ocr/boostBenchmark.js), if one was recorded in this browser.",
       "params": [],
       "returns": [
         {
@@ -134751,7 +134920,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 268,
+      "line": 269,
       "description": "",
       "params": [],
       "returns": [
@@ -134769,7 +134938,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 288,
+      "line": 289,
       "description": "",
       "params": [],
       "returns": [
@@ -134787,7 +134956,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 84,
+      "line": 85,
       "description": "",
       "params": [
         {
@@ -134812,7 +134981,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 75,
+      "line": 76,
       "description": "",
       "params": [
         {
@@ -134837,7 +135006,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 92,
+      "line": 93,
       "description": "",
       "params": [],
       "returns": [
@@ -134855,7 +135024,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 101,
+      "line": 102,
       "description": "",
       "params": [],
       "returns": [
@@ -134873,7 +135042,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 40,
+      "line": 41,
       "description": "",
       "params": [
         {
@@ -134898,7 +135067,32 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 318,
+      "line": 319,
+      "description": "",
+      "params": [
+        {
+          "name": "result",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "saveLatestOcrBoostBenchmarkResult",
+      "name": "saveLatestOcrBoostBenchmarkResult",
+      "longname": "saveLatestOcrBoostBenchmarkResult",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/supportDiagnostics.js",
+      "line": 342,
       "description": "",
       "params": [
         {
@@ -134923,7 +135117,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 276,
+      "line": 277,
       "description": "",
       "params": [
         {
@@ -134948,7 +135142,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/supportDiagnostics.js",
-      "line": 296,
+      "line": 297,
       "description": "",
       "params": [
         {

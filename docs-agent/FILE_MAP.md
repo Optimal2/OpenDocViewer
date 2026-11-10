@@ -25,8 +25,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentRender.jsx</code> | 1211 | 3 | 26 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1604 | 2 | 28 | high | OpenDocViewer — Deterministic thumbnail strip. |
-| <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 571 | 1 | 3 | high | Small About dialog for version/build/support information. |
-| <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 1604 | 1 | 19 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 693 | 1 | 3 | high | Small About dialog for version/build/support information. |
+| <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 1641 | 1 | 19 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 118 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 233 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 163 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
@@ -189,12 +189,12 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 1187 | 35 | 83 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 1200 | 35 | 84 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |
 | <code>src/utils/standardManualRules.js</code> | 217 | 1 | 9 | high | Resolve every site switch that can hide standard-manual content. |
-| <code>src/utils/supportDiagnostics.js</code> | 402 | 4 | 20 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
+| <code>src/utils/supportDiagnostics.js</code> | 430 | 4 | 22 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/toolbarDensity.js</code> | 30 | 3 | 2 | high | Toolbar density on the document root. |
 | <code>src/utils/viewerPreferences.js</code> | 562 | 9 | 39 | high | Lightweight persisted viewer preferences. |
 | <code>src/utils/zoomUtils.js</code> | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |

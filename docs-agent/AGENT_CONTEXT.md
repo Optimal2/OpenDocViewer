@@ -24,16 +24,16 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 198
-- Source lines: 71261
-- JSDoc symbols: 2050
+- Source lines: 71461
+- JSDoc symbols: 2053
 - Files with JSDoc: 194
 - Low-confidence summaries: 2
 - Parse errors: 0
 
 ## High-Signal Files
 
-- `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
+- `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/compareTransform.js` - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...

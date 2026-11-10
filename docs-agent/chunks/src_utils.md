@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 65. Line count: 24290. JSDoc symbol count: 1004.
+File count: 65. Line count: 24331. JSDoc symbol count: 1007.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -992,7 +992,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `OCR_LANGUAGE_PRESETS`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `isOcrWholeDocumentEnabled`, `isOcrBenchmarkEnabled`, `DEFAULT_OCR_WORKER_COUNT`, `MAX_OCR_WORKER_COUNT`, `OCR_WORKER_POLICY_DEFAULTS`, `describeOcrWorkerCount`, `normalizeOcrWorkerPolicy`, `resolveOcrWorkerPlan`, `resolveOcrWorkerCount`, `isSpeechLanguageAutoDetectEnabled`, `isOcrSearchEnabled`, `isOcrSearchCtrlFOverrideEnabled`, `isReadAloudEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `OCR_LANGUAGE_PRESETS`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `isOcrWholeDocumentEnabled`, `isOcrBenchmarkEnabled`, `isOcrBoostBenchmarkEnabled`, `DEFAULT_OCR_WORKER_COUNT`, `MAX_OCR_WORKER_COUNT`, `OCR_WORKER_POLICY_DEFAULTS`, `describeOcrWorkerCount`, `normalizeOcrWorkerPolicy`, `resolveOcrWorkerPlan`, `resolveOcrWorkerCount`, `isSpeechLanguageAutoDetectEnabled`, `isOcrSearchEnabled`, `isOcrSearchCtrlFOverrideEnabled`, `isReadAloudEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 
@@ -1098,7 +1098,7 @@ Symbols:
 
 Support diagnostics helpers for opt\-in troubleshooting tools.
 
-Exports: `loadLatestPdfBenchmarkResult`, `saveLatestPdfBenchmarkResult`, `loadLatestRenderDecodeBenchmarkResult`, `saveLatestRenderDecodeBenchmarkResult`, `loadLatestOcrBenchmarkResult`, `saveLatestOcrBenchmarkResult`, `collectSupportDiagnostics`, `downloadJsonFile`
+Exports: `loadLatestPdfBenchmarkResult`, `saveLatestPdfBenchmarkResult`, `loadLatestRenderDecodeBenchmarkResult`, `saveLatestRenderDecodeBenchmarkResult`, `loadLatestOcrBenchmarkResult`, `saveLatestOcrBenchmarkResult`, `loadLatestOcrBoostBenchmarkResult`, `saveLatestOcrBoostBenchmarkResult`, `collectSupportDiagnostics`, `downloadJsonFile`
 
 Local imports: `src/utils/runtimeConfig.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfResolutionRuntime.js`, `src/utils/pdfPrebuildPlan.js`, `src/utils/pdfPrintCacheKey.js`
 

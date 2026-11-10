@@ -127,6 +127,10 @@
       // offers it). It samples the open document and compares worker counts, one language against
       // the configured ones and a downscaled page image; see docs-src/runtime-configuration.md.
       // benchmark: { enabled: false, pageLimit: 40, workerCounts: [0] },
+      // Support tooling: the OCR boost benchmark under About -> Diagnostics (only the literal
+      // true offers it). It samples the open document and measures maximum throughput, one run
+      // per worker count; see docs-src/runtime-configuration.md.
+      // boostBenchmark: { enabled: false, pageLimit: 120, workerCounts: [4, 8, 12, 16, 20, 24] },
       // Serve the engine, worker and language files from a copy of the viewer's ocr/ folder at
       // the site's own location (same layout; same origin, or CORS-enabled and allowed by the
       // site CSP). No query string or fragment, and only http(s) or relative values.
