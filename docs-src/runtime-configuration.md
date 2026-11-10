@@ -661,8 +661,14 @@ The scenarios are one run per configured worker count with the configured langua
 is skipped, with its reason recorded on the run, when the count exceeds the client's logical cores
 (`navigator.hardwareConcurrency`), or when the count times `memoryPerWorkerMiB` exceeds
 `memoryBudgetFraction` of the device memory (`navigator.deviceMemory`, else an assumed 4 GiB
-client). The run aborts when an engine fails to start or when the page's JS heap passes 90 % of
-its limit. The boost benchmark has its own ceiling of 32 workers, independent of
+client). A single *scenario* is aborted, not the whole run, when one of its engines fails to start
+or when the page's JS heap passes 90 % of its limit (checked between pages, never during one): the
+reason is recorded on that run (`aborted`, `abortReason`, `abortError`), its engines are
+terminated, and the benchmark continues with the next worker count. The pages such a scenario
+never reached are counted as errors, so `recognizedPages + errorCount` always covers the sample.
+A page whose recognition passes `pageTimeoutMs` costs its lane rather than the scenario: that
+engine is terminated, the lane is counted in `deadLanes`, and the remaining pages are taken by the
+lanes that still work. The boost benchmark has its own ceiling of 32 workers, independent of
 `MAX_OCR_WORKER_COUNT`, which only bounds the viewer's own `ocr.workerCount`.
 
 The sampled pages are the same in every scenario: loaded pages the OCR queue would recognise,

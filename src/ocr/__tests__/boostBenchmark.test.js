@@ -419,6 +419,54 @@ describe('runOcrBoostBenchmark', () => {
     expect(result.best).toBeNull();
   });
 
+  it('terminates the lane whose page passes the timeout, counts it dead, and lets the other lane finish the rest', async () => {
+    vi.useFakeTimers();
+    const { created, createEngine } = makeEngineFactory({ msPerPage: 10 });
+    // Engine 0 of the scenario hangs on the page it is handed: a recognition that never settles,
+    // which is what a wedged tesseract.js worker looks like from here. A single engine cannot
+    // abort one recognition, so the page timeout has to take the engine with it.
+    const withOneHangingEngine = vi.fn((cfg, options) => {
+      const made = createEngine(cfg, options);
+      if (options.engineIndex === 0) made.engine.recognize = vi.fn(() => new Promise(() => {}));
+      return made;
+    });
+    const run = runOcrBoostBenchmark({
+      config: enabled({ workerCounts: [2], pageLimit: 4, pageTimeoutMs: 1000, delayBetweenRunsMs: 0 }),
+      allPages: pages,
+      ensurePageAsset: async (index) => `/pages/${index}.png`,
+      inject: { ...baseInject, createEngine: withOneHangingEngine, cores: 24, deviceMemoryGiB: 16 },
+    });
+    await vi.runAllTimersAsync();
+    const result = await run;
+
+    const [only] = result.runs;
+    // One bad worker costs its page, not the scenario: the run is not aborted, and the sample is
+    // still fully accounted for.
+    expect(only).toMatchObject({
+      workerCount: 2, skipped: false, aborted: false, abortReason: null, startupError: null,
+      pageCount: 4, recognizedPages: 3, errorCount: 1, deadLanes: 1, enginesCreated: 2, enginesTerminated: 2,
+    });
+    expect(only.recognizedPages + only.errorCount).toBe(only.pageCount);
+
+    // The timed-out page is the one the dead lane held, and it says which engine lost it.
+    const failed = only.pages.filter((entry) => entry.error !== null);
+    expect(failed).toHaveLength(1);
+    expect(failed[0]).toMatchObject({ viewerIndex: 0, engineIndex: 0 });
+    expect(failed[0].error).toMatch(/recognition exceeded 1000 ms/);
+    // The dead lane pulled exactly one page and then stopped; the surviving lane took the rest.
+    expect(created[0].recognize).toHaveBeenCalledTimes(1);
+    expect(only.pages.filter((entry) => entry.error === null).every((entry) => entry.engineIndex === 1)).toBe(true);
+    expect(only.recognizeMs.count).toBe(3);
+
+    // The hung engine is stopped by the timeout handler and again by the pool teardown; engine.js's
+    // terminate() is idempotent (the second call finds no worker pending and returns), so asking
+    // twice is the safe order here. The working engine is stopped once.
+    expect(created[0].terminated).toBe(2);
+    expect(created[1].terminated).toBe(1);
+    // A scenario that lost a page is not offered as the best result.
+    expect(result.best).toBeNull();
+  });
+
   it('terminates every engine of the scenario in flight when the run is cancelled', async () => {
     vi.useFakeTimers();
     const { created, createEngine } = makeEngineFactory({ msPerPage: 10 });
