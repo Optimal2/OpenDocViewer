@@ -95,7 +95,7 @@
   },
   "stats": {
     "fileCount": 199,
-    "sourceLineCount": 72298,
+    "sourceLineCount": 72317,
     "docletCount": 2079,
     "documentedFileCount": 195,
     "lowConfidenceSummaryCount": 2,
@@ -1198,7 +1198,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7954,
+      "lineCount": 7971,
       "docletCount": 113,
       "importantFiles": [
         {
@@ -1266,8 +1266,8 @@
         },
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "score": 34,
-          "lines": 464,
+          "score": 35,
+          "lines": 481,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -1884,7 +1884,7 @@
     {
       "name": "src/utils",
       "fileCount": 65,
-      "lineCount": 24331,
+      "lineCount": 24333,
       "docletCount": 1007,
       "importantFiles": [
         {
@@ -13767,7 +13767,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 464,
+      "lines": 481,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -13888,22 +13888,22 @@
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 216
+          "line": 221
         },
         {
           "name": "within",
           "kind": "function",
-          "line": 221
+          "line": 226
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 276
+          "line": 281
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 284
+          "line": 289
         }
       ],
       "parseError": null,
@@ -13994,7 +13994,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 239,
+          "line": 244,
           "description": "",
           "params": [
             {
@@ -14014,7 +14014,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 260,
+          "line": 265,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14034,7 +14034,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 276,
+          "line": 281,
           "description": "",
           "params": [
             {
@@ -14054,7 +14054,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 284,
+          "line": 289,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14168,7 +14168,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 34,
+      "importanceScore": 35,
       "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -56199,7 +56199,7 @@
     },
     {
       "path": "src/utils/ocrSearchPlacement.js",
-      "lines": 182,
+      "lines": 184,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": "Where the toolbar's OCR search field goes and how wide it is (components/DocumentToolbar/OcrSearchBar.jsx): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when",
@@ -56213,74 +56213,74 @@
         {
           "name": "OCR_SEARCH_PANEL_MIN_INLINE_WIDTH",
           "kind": "variable",
-          "line": 23
+          "line": 25
         },
         {
           "name": "OCR_SEARCH_INPUT_MIN_WIDTH",
           "kind": "variable",
-          "line": 25
+          "line": 27
         },
         {
           "name": "OCR_SEARCH_INPUT_PREFERRED_WIDTH",
           "kind": "variable",
-          "line": 31
+          "line": 33
         },
         {
           "name": "OCR_SEARCH_PANEL_HANG_INSET",
           "kind": "variable",
-          "line": 33
+          "line": 35
         },
         {
           "name": "OCR_SEARCH_PANEL_MARGIN",
           "kind": "variable",
-          "line": 35
+          "line": 37
         },
         {
           "name": "OCR_SEARCH_PANEL_HANG_GAP",
           "kind": "variable",
-          "line": 37
+          "line": 39
         },
         {
           "name": "resolveOcrSearchPlacement",
           "kind": "function",
-          "line": 74
+          "line": 76
         },
         {
           "name": "measureOcrSearchInputMinWidth",
           "kind": "function",
-          "line": 117
+          "line": 119
         },
         {
           "name": "measureOcrSearchContentWidth",
           "kind": "function",
-          "line": 134
+          "line": 136
         },
         {
           "name": "measureOcrSearchPlacement",
           "kind": "function",
-          "line": 159
+          "line": 161
         }
       ],
       "declarations": [
         {
           "name": "resolveOcrSearchPlacement",
           "kind": "function",
-          "line": 74
+          "line": 76
         },
         {
           "name": "measureOcrSearchInputMinWidth",
           "kind": "function",
-          "line": 117
+          "line": 119
         },
         {
           "name": "measureOcrSearchContentWidth",
           "kind": "function",
-          "line": 134
+          "line": 136
         },
         {
           "name": "measureOcrSearchPlacement",
           "kind": "function",
-          "line": 159
+          "line": 161
         }
       ],
       "parseError": null,
@@ -56309,8 +56309,8 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 23,
-          "description": "Below this inline width the field hangs under the toolbar instead: the field's contents (the input at its minimum, an empty status, the four buttons and their gaps) need about 210...",
+          "line": 25,
+          "description": "Below this inline width the field hangs under the toolbar instead.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -56322,7 +56322,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 25,
+          "line": 27,
           "description": "The input's least width (CSS px), as .toolbar-ocr-search-input has it.",
           "params": [],
           "returns": [],
@@ -56335,7 +56335,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 31,
+          "line": 33,
           "description": "The input's width the field asks for (CSS px, laid out) when it has been measured: room for a few words of a term.",
           "params": [],
           "returns": [],
@@ -56348,7 +56348,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 33,
+          "line": 35,
           "description": "Padding and border a hanging field adds around its contents (CSS px, both sides).",
           "params": [],
           "returns": [],
@@ -56361,7 +56361,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 35,
+          "line": 37,
           "description": "Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.",
           "params": [],
           "returns": [],
@@ -56374,7 +56374,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 37,
+          "line": 39,
           "description": "Air between the toolbar's lower edge and a hanging field.",
           "params": [],
           "returns": [],
@@ -56387,7 +56387,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 39,
+          "line": 41,
           "description": "",
           "params": [],
           "returns": [],
@@ -56400,7 +56400,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 74,
+          "line": 76,
           "description": "",
           "params": [
             {
@@ -56485,7 +56485,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 117,
+          "line": 119,
           "description": "The input's least width as laid out (CSS px): its min-width , plus its padding and border when they lie outside it (the input is content-box: 48 px of content and 14 px around it).",
           "params": [
             {
@@ -56510,7 +56510,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 134,
+          "line": 136,
           "description": "CSS px the field's contents need with the input at its minimum: every child but the input at its width (the status is not shrunk, so its width is its text's), the gaps between the...",
           "params": [
             {
@@ -56535,7 +56535,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrSearchPlacement.js",
-          "line": 159,
+          "line": 161,
           "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
           "params": [
             {
@@ -92877,7 +92877,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 239,
+      "line": 244,
       "description": "",
       "params": [
         {
@@ -92897,7 +92897,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 276,
+      "line": 281,
       "description": "",
       "params": [
         {
@@ -92917,7 +92917,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 284,
+      "line": 289,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -92950,7 +92950,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 260,
+      "line": 265,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -117483,7 +117483,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 134,
+      "line": 136,
       "description": "CSS px the field's contents need with the input at its minimum: every child but the input at its width (the status is not shrunk, so its width is its text's), the gaps between the...",
       "params": [
         {
@@ -117508,7 +117508,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 117,
+      "line": 119,
       "description": "The input's least width as laid out (CSS px): its min-width , plus its padding and border when they lie outside it (the input is content-box: 48 px of content and 14 px around it).",
       "params": [
         {
@@ -117533,7 +117533,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 159,
+      "line": 161,
       "description": "Gather the measures for resolveOcrSearchPlacement from the DOM around the search's root.",
       "params": [
         {
@@ -117570,7 +117570,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 25,
+      "line": 27,
       "description": "The input's least width (CSS px), as .toolbar-ocr-search-input has it.",
       "params": [],
       "returns": [],
@@ -117583,7 +117583,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 31,
+      "line": 33,
       "description": "The input's width the field asks for (CSS px, laid out) when it has been measured: room for a few words of a term.",
       "params": [],
       "returns": [],
@@ -117596,7 +117596,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 37,
+      "line": 39,
       "description": "Air between the toolbar's lower edge and a hanging field.",
       "params": [],
       "returns": [],
@@ -117609,7 +117609,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 33,
+      "line": 35,
       "description": "Padding and border a hanging field adds around its contents (CSS px, both sides).",
       "params": [],
       "returns": [],
@@ -117622,7 +117622,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 35,
+      "line": 37,
       "description": "Air kept between the field and the rest of the toolbar; half of it to the viewport edge when hanging.",
       "params": [],
       "returns": [],
@@ -117635,8 +117635,8 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 23,
-      "description": "Below this inline width the field hangs under the toolbar instead: the field's contents (the input at its minimum, an empty status, the four buttons and their gaps) need about 210...",
+      "line": 25,
+      "description": "Below this inline width the field hangs under the toolbar instead.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -117661,7 +117661,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 39,
+      "line": 41,
       "description": "",
       "params": [],
       "returns": [],
@@ -117674,7 +117674,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrSearchPlacement.js",
-      "line": 74,
+      "line": 76,
       "description": "",
       "params": [
         {

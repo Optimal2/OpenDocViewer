@@ -457,7 +457,8 @@
       "none": "Inga träffar",
       "coverage": "{done}/{pages} sidor sökta",
       "coverageSearched": "Sökt i {done} av {pages} sidor",
-      "pageOnly": "Sök bara på den här sidan",
+      "pageOnly": "Sök bara på denna sida",
+      "pageOnlyShort": "Denna sida",
       "previous": "Föregående träff",
       "next": "Nästa träff",
       "close": "Stäng sökningen"

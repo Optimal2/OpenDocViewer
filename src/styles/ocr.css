@@ -295,6 +295,42 @@
   white-space: nowrap;
 }
 
+/* "This page": a checkbox with its short text, named in full by its tooltip and aria-label.
+   Like the status it is never shrunk (the input gives way, utils/ocrSearchPlacement.js). The
+   whole label is the target: as tall as the input, never under the toolbar's 24 px floor
+   (docs-src/runtime-configuration.md, "Touch-target policy"). */
+.toolbar-ocr-search-scope {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  min-height: max(24px, calc(var(--odv-toolbar-button-size) - 4px));
+  padding: 0 4px;
+  color: var(--text-muted-color, rgba(0, 0, 0, 0.68));
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toolbar-ocr-search-scope.is-active {
+  color: var(--text-color, #222);
+}
+
+.toolbar-ocr-search-scope-input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.toolbar-ocr-search-scope-input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color) 78%, var(--text-color, #222) 22%);
+  outline-offset: 2px;
+}
+
 /* Printing and PDF export use the page images only: the layer never prints. */
 @media print {
   .ocr-text-layer,

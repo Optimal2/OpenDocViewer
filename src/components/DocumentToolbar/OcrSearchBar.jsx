@@ -13,7 +13,7 @@
  *
  * The search covers the recognised text of every page that has an outcome, in page order
  * (utils/ocrSearch.js: case-insensitive, a phrase also across a line break), and nothing else
- * on the page; a toggle in the field limits it to the displayed page (the matches follow the
+ * on the page; a checkbox in the field limits it to the displayed page (the matches follow the
  * page as it changes, and the steps never leave it). Typing finds the matches and makes the
  * first one on the displayed page current without leaving the page; Enter and the arrows walk
  * the matches, moving to a match's page when it is another one. The current term, match and
@@ -68,6 +68,11 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const buttonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const rootRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const panelRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  // True from a left-button press on the page checkbox until its change: that change hands the
+  // focus back to the input. A keyboard change leaves the focus on the checkbox, so a key press
+  // clears the flag (a press that never became a change, dragged away or a right click, would
+  // otherwise hand a later keyboard change's focus to the input).
+  const scopeByMouseRef = useRef(false);
   const panelId = useId();
   const coverageId = useId();
   const [placement, setPlacement] = useState({ mode: 'inline', width: OCR_SEARCH_PANEL_WIDTH, offset: 0, top: 0 });
@@ -315,6 +320,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
   const buttonTitle = `${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}`;
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
+  const pageOnlyShort = t('ocr.search.pageOnlyShort', { defaultValue: 'This page' });
   let statusLine = '';
   if (normalizedTerm && pageOnly && !hasSearchableOcrText(displayedEntry)) {
     // Limited to a page without searchable text: its status says why there is nothing.
@@ -403,20 +409,31 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           <span className="toolbar-ocr-search-status-short" aria-hidden="true">{statusLine}</span>
           <span className="sr-only">{statusTitle}</span>
         </span>
-        <button
-          type="button"
-          className={`odv-btn toolbar-ocr-search-scope${pageOnly ? ' is-active' : ''}`}
+        {/* The short text for the eye, the spelt-out one as the checkbox's name and tooltip. */}
+        <label
+          className={`toolbar-ocr-search-scope${pageOnly ? ' is-active' : ''}`}
           // A mouse click leaves the focus in the input, so Enter still steps (a focused
-          // toggle would be toggled back by it); keyboard focus reaches the button as usual.
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => setPageOnly((value) => !value)}
-          aria-pressed={pageOnly}
-          aria-label={pageOnlyLabel}
+          // checkbox would be toggled back by it); keyboard focus reaches the checkbox as usual.
+          onMouseDown={(event) => { event.preventDefault(); scopeByMouseRef.current = event.button === 0; }}
           title={pageOnlyLabel}
-          tabIndex={open ? 0 : -1}
         >
-          <span className="material-icons" aria-hidden="true">pageview</span>
-        </button>
+          <input
+            type="checkbox"
+            className="toolbar-ocr-search-scope-input"
+            checked={pageOnly}
+            onKeyDown={() => { scopeByMouseRef.current = false; }}
+            onChange={(event) => {
+              setPageOnly(event.target.checked);
+              if (scopeByMouseRef.current) {
+                scopeByMouseRef.current = false;
+                inputRef.current?.focus?.({ preventScroll: true });
+              }
+            }}
+            aria-label={pageOnlyLabel}
+            tabIndex={open ? 0 : -1}
+          />
+          <span className="toolbar-ocr-search-scope-text" aria-hidden="true">{pageOnlyShort}</span>
+        </label>
         <button
           type="button"
           className="odv-btn toolbar-ocr-search-step"

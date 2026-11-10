@@ -533,7 +533,7 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const searchStatus = page.locator('.toolbar-ocr-search-status-short');
   await expect(searchStatus).toHaveText(/^1\/1/);
   // The status is never cut short: the field holds all of its contents (nothing scrolls out of
-  // its overflow) and the status ends before the page toggle starts.
+  // its overflow) and the status ends before the page checkbox starts.
   const statusFit = await page.locator('.toolbar-ocr-search-panel').evaluate((panel) => {
     const status = panel.querySelector('.toolbar-ocr-search-status').getBoundingClientRect();
     const scope = panel.querySelector('.toolbar-ocr-search-scope').getBoundingClientRect();
@@ -558,16 +558,19 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(searchStatus).toHaveText(new RegExp(`^2/${matchCount}`));
   await searchField.press('Shift+Enter');
   await expect(searchStatus).toHaveText(new RegExp(`^1/${matchCount}`));
-  // Limited to the displayed page (the only page here): the same matches, the toggle pressed,
-  // the marks still on the page; off again afterwards.
+  // Limited to the displayed page (the only page here): the same matches, the checkbox ticked,
+  // the marks still on the page, the focus still in the field; off again afterwards.
   const scope = page.locator('.toolbar-ocr-search-scope');
-  await expect(scope).toHaveAttribute('aria-pressed', 'false');
+  const scopeCheckbox = scope.locator('input[type="checkbox"]');
+  await expect(scope).toHaveText(/Denna sida|This page/);
+  await expect(scopeCheckbox).not.toBeChecked();
   await scope.click();
-  await expect(scope).toHaveAttribute('aria-pressed', 'true');
+  await expect(scopeCheckbox).toBeChecked();
+  await expect(searchField).toBeFocused();
   await expect(searchStatus).toHaveText(new RegExp(`^1/${matchCount}$`));
   await expect(layer.locator('.ocr-text-layer-word--match-current')).toHaveCount(1);
   await scope.click();
-  await expect(scope).toHaveAttribute('aria-pressed', 'false');
+  await expect(scopeCheckbox).not.toBeChecked();
   await searchField.fill('finnsinte');
   await expect(searchStatus).toHaveText(/No matches|Inga träffar/);
   await searchField.press('Escape');

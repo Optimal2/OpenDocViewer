@@ -458,6 +458,7 @@
       "coverage": "{done}/{pages} pages searched",
       "coverageSearched": "Searched {done} of {pages} pages",
       "pageOnly": "Search only on this page",
+      "pageOnlyShort": "This page",
       "previous": "Previous match",
       "next": "Next match",
       "close": "Close the search"

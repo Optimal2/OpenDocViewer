@@ -277,11 +277,14 @@ describe('OcrSearchBar', () => {
     type('hej');
     expect(status()).toBe('1/5 · 2/3 pages searched');
     const scope = () => container.querySelector('.toolbar-ocr-search-scope');
-    expect(scope().getAttribute('aria-pressed')).toBe('false');
+    const checkbox = () => scope().querySelector('input[type="checkbox"]');
+    expect(checkbox().checked).toBe(false);
     expect(scope().title).toBe('Search only on this page');
+    expect(checkbox().getAttribute('aria-label')).toBe('Search only on this page');
+    expect(scope().textContent).toBe('This page');
 
-    act(() => scope().click());
-    expect(scope().getAttribute('aria-pressed')).toBe('true');
+    act(() => checkbox().click());
+    expect(checkbox().checked).toBe(true);
     expect(scope().classList.contains('is-active')).toBe(true);
     // Only page 1's matches, no coverage line, and the page is published with the term.
     expect(status()).toBe('1/2');
@@ -303,28 +306,61 @@ describe('OcrSearchBar', () => {
     expect(container.querySelector('[aria-label="Next match"]').disabled).toBe(true);
 
     // Off again: the whole document, from the displayed page on.
-    act(() => scope().click());
-    expect(scope().getAttribute('aria-pressed')).toBe('false');
+    act(() => checkbox().click());
+    expect(checkbox().checked).toBe(false);
+    expect(scope().classList.contains('is-active')).toBe(false);
     expect(status()).toBe('3/5 · 2/3 pages searched');
     expect(setOcrSearch).toHaveBeenLastCalledWith({ term: 'hej', current: { pageKey: KEY(2), ordinal: 0 }, onlyPageKey: null });
   });
 
-  it('a mouse click on the page toggle leaves the focus in the input, so Enter still steps', () => {
+  it('a mouse click on the page checkbox leaves the focus in the input, so Enter still steps', () => {
     const pages = { [KEY(0)]: done(['hej', 'hej']) };
     render({ ocrPages: pages });
     act(() => button().click());
     type('hej');
     expect(document.activeElement).toBe(input());
     const scope = container.querySelector('.toolbar-ocr-search-scope');
+    const checkbox = scope.querySelector('input[type="checkbox"]');
     const mouseDown = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
-    act(() => { scope.dispatchEvent(mouseDown); });
+    act(() => { checkbox.dispatchEvent(mouseDown); });
     expect(mouseDown.defaultPrevented).toBe(true);
-    act(() => scope.click());
-    expect(scope.getAttribute('aria-pressed')).toBe('true');
+    // The browser gives the checkbox the focus on activation; the change hands it back.
+    act(() => { checkbox.focus(); checkbox.click(); });
+    expect(checkbox.checked).toBe(true);
     expect(document.activeElement).toBe(input());
     key('Enter');
     expect(status()).toBe('2/2');
-    expect(scope.getAttribute('aria-pressed')).toBe('true');
+    expect(checkbox.checked).toBe(true);
+  });
+
+  it('a keyboard change of the page checkbox leaves the focus on the checkbox', () => {
+    const pages = { [KEY(0)]: done(['hej', 'hej']) };
+    render({ ocrPages: pages });
+    act(() => button().click());
+    type('hej');
+    const checkbox = container.querySelector('.toolbar-ocr-search-scope input[type="checkbox"]');
+    act(() => { checkbox.focus(); checkbox.click(); });
+    expect(checkbox.checked).toBe(true);
+    expect(document.activeElement).toBe(checkbox);
+  });
+
+  it('a right click or a press that never became a change does not hand a later keyboard change\'s focus to the input', () => {
+    const pages = { [KEY(0)]: done(['hej', 'hej']) };
+    render({ ocrPages: pages });
+    act(() => button().click());
+    type('hej');
+    const scope = container.querySelector('.toolbar-ocr-search-scope');
+    const checkbox = scope.querySelector('input[type="checkbox"]');
+    // A right click: no change follows; the flag is never raised.
+    act(() => { scope.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 2 })); });
+    act(() => { checkbox.focus(); checkbox.click(); });
+    expect(checkbox.checked).toBe(true);
+    expect(document.activeElement).toBe(checkbox);
+    // A left press dragged away (no change), then Space: the key press clears the flag.
+    act(() => { scope.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 })); });
+    act(() => { checkbox.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })); checkbox.click(); });
+    expect(checkbox.checked).toBe(false);
+    expect(document.activeElement).toBe(checkbox);
   });
 
   it('Escape closes the field from the step buttons too', () => {
@@ -469,8 +505,8 @@ describe('OcrSearchBar', () => {
     // A hanging field is capped to the viewport (jsdom has none: the test lends it one).
     Object.defineProperty(document.documentElement, 'clientWidth', { configurable: true, value: 1400 });
     render({ ocrPages: { [KEY(0)]: done(['Hej', 'hej']), [KEY(1)]: { status: 'recognizing' } } });
-    // jsdom lays nothing out: the field's four buttons are lent 32 px each, its gap 2 px, its
-    // input the laid-out minimum of 62 px (48 of content, 12 of padding, 2 of border).
+    // jsdom lays nothing out: the field's checkbox and three buttons are lent 32 px each, its
+    // gap 2 px, its input the laid-out minimum of 62 px (48 of content, 12 of padding, 2 of border).
     for (const control of container.querySelectorAll('.toolbar-ocr-search-scope, .toolbar-ocr-search-step, .toolbar-ocr-search-close')) lend(control, 32);
     const computed = window.getComputedStyle.bind(window);
     vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {

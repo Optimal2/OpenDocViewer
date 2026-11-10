@@ -744,12 +744,13 @@ not a toolbar button, see below:
   allows, so that a long status does not leave the input at its minimum. The matches are marked on the
   page over the words, the current match stronger and scrolled into view. Enter and the arrow
   buttons walk the matches (Shift+Enter backwards), moving to the match's page when it is another
-  one; Escape closes the field. A toggle in the field ("Search only on this page") limits the
-  search to the displayed page: the position counts that page's matches, the steps stay on it,
+  one; Escape closes the field. A checkbox in the field ("This page", named in full as "Search
+  only on this page" for its tooltip and assistive technology) limits the search to the displayed
+  page: the position counts that page's matches, the steps stay on it,
   the matches follow the page as it changes, and no other page's layer marks anything; on a page
   without searchable text the field shows the page's status instead of "No matches". Clicking
-  the toggle leaves the keyboard focus in the field, so Enter still walks the matches. The toggle
-  is remembered while the viewer is open, not across reloads. The search follows the primary
+  the checkbox leaves the keyboard focus in the field, so Enter still walks the matches. The
+  choice is remembered while the viewer is open, not across reloads. The search follows the primary
   page (in compare mode the compared page's layer still marks its matches, but the position and
   the status are the primary page's; limited to a page, only that page's layer marks), and a
   match on a page the print selection hides lands on the nearest shown page. The browser's own

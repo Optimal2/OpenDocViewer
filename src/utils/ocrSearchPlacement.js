@@ -16,9 +16,11 @@
 /** Full width of the field (CSS px). */
 export const OCR_SEARCH_PANEL_WIDTH = 340;
 /**
- * Below this inline width the field hangs under the toolbar instead: the field's contents (the
- * input at its minimum, an empty status, the four buttons and their gaps) need about 210 px, and
- * a hanging field spends 10 px more on padding and border.
+ * Below this inline width the field hangs under the toolbar instead. A floor: the field's
+ * contents are measured (`measureOcrSearchContentWidth`) and the measured width governs when it
+ * is larger, as it is with the "This page" checkbox and its text (the input at its minimum, an
+ * empty status, the checkbox, the three buttons and their gaps need about 250 px); a hanging
+ * field spends 10 px more on padding and border.
  */
 export const OCR_SEARCH_PANEL_MIN_INLINE_WIDTH = 220;
 /** The input's least width (CSS px), as `.toolbar-ocr-search-input` has it. */
