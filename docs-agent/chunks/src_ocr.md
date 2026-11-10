@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 16. Line count: 3073. JSDoc symbol count: 131.
+File count: 17. Line count: 3813. JSDoc symbol count: 157.
 
 ## src/ocr/assetUrls.js
 
@@ -37,6 +37,29 @@ Symbols:
 - `planOcrBenchmarkScenarios` (function) - The scenarios a configuration stands for: the worker counts with the languages the engine loads and the full image, then \(with one worker\) the single\-language variant when more th...
 - `selectOcrBenchmarkPages` (function) - The pages to recognise: loaded pages the OCR queue would recognise \(not skipped by classifyPageSource\), sampled evenly over the document \(or the first ones\), at most pageLimit .
 - `summarizeDurations` (function) - Summary statistics of a list of durations.
+
+## src/ocr/boostBenchmark.js
+
+Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.
+
+Exports: `loadOcrBoostDependencies`, `OCR_BOOST_BENCHMARK_SCHEMA`, `BOOST_MAX_WORKER_COUNT`, `OCR_BOOST_BENCHMARK_DEFAULTS`, `BOOST_SKIP_REASON`, `BOOST_ABORT_REASON`, `normalizeOcrBoostBenchmarkConfig`, `describeOcrBoostCapacity`, `judgeOcrBoostScenario`, `readJsHeap`, `createBoostEnginePool`, `runOcrBoostBenchmark`
+
+Local imports: `src/logging/systemLogger.js`, `src/utils/runtimeConfig.js`, `src/utils/supportDiagnostics.js`, `src/ocr/index.js`
+
+Symbols:
+
+- `borrowedModules` (member) - Memoised result of loadOcrBoostDependencies\(\).
+- `loadOcrBoostDependencies` (function) - The measuring helpers of benchmark.js \(reused rather than reimplemented, so both benchmarks report the same statistics the same way\) and the engine pieces a scenario is built from...
+- `BOOST_MAX_WORKER_COUNT` (constant) - Most workers a boost scenario may ask for.
+- `OCR_BOOST_BENCHMARK_DEFAULTS` (constant) - Defaults of ocr.boostBenchmark beyond the switch.
+- `ASSUMED_DEVICE_MEMORY_GIB` (constant) - Device memory assumed for a browser that does not report it \(Firefox, Safari\), in GiB.
+- `HEAP_ABORT_FRACTION` (constant) - A used JS heap above this share of jsHeapSizeLimit ends the scenario before the page heap does.
+- `BOOST_SKIP_REASON` (constant) - Reasons a scenario did not run; kept in the result so the gap in the curve is explained.
+- `BOOST_ABORT_REASON` (constant) - Reasons a scenario stopped part\-way.
+- `OcrBoostBenchmarkConfig` (typedef) - No description.
+- `integerIn` (function) - No description.
+- `fractionIn` (function) - No description.
+- `normalizeOcrBoostBenchmarkConfig` (function) - Read ocr.boostBenchmark with every value bounded, as normalizeOcrBenchmarkConfig does for ocr.benchmark : a non\-numeric or out\-of\-range entry is dropped, and a list left with noth...
 
 ## src/ocr/classify.js
 
@@ -117,7 +140,9 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+
+Local imports: `src/ocr/boostBenchmark.js`
 
 ## src/ocr/languages.js
 

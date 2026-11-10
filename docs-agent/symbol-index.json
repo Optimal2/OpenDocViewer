@@ -22553,6 +22553,744 @@
     "examples": 0
   },
   {
+    "id": "ASSUMED_DEVICE_MEMORY_GIB",
+    "name": "ASSUMED_DEVICE_MEMORY_GIB",
+    "longname": "ASSUMED_DEVICE_MEMORY_GIB",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 117,
+    "description": "Device memory assumed for a browser that does not report it (Firefox, Safari), in GiB.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "BOOST_ABORT_REASON",
+    "name": "BOOST_ABORT_REASON",
+    "longname": "BOOST_ABORT_REASON",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 128,
+    "description": "Reasons a scenario stopped part-way.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "BOOST_MAX_WORKER_COUNT",
+    "name": "BOOST_MAX_WORKER_COUNT",
+    "longname": "BOOST_MAX_WORKER_COUNT",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 96,
+    "description": "Most workers a boost scenario may ask for.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "BOOST_SKIP_REASON",
+    "name": "BOOST_SKIP_REASON",
+    "longname": "BOOST_SKIP_REASON",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 122,
+    "description": "Reasons a scenario did not run; kept in the result so the gap in the curve is explained.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "borrowedModules",
+    "name": "borrowedModules",
+    "longname": "borrowedModules",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 45,
+    "description": "Memoised result of loadOcrBoostDependencies().",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createBoostEnginePool",
+    "name": "createBoostEnginePool",
+    "longname": "createBoostEnginePool",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 342,
+    "description": "A pool of OCR engines for one boost scenario: every engine created and started up front, in parallel, one lane of the page loop per engine.",
+    "params": [
+      {
+        "name": "args",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.size",
+        "type": "number",
+        "optional": false,
+        "description": "Engines to create and start."
+      },
+      {
+        "name": "args.createEngine",
+        "type": "function",
+        "optional": false,
+        "description": "Makes engine number index (0-based)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "delay",
+    "name": "delay",
+    "longname": "delay",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 318,
+    "description": "",
+    "params": [
+      {
+        "name": "ms",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "signal",
+        "type": "AbortSignal",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<void>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "describeOcrBoostCapacity",
+    "name": "describeOcrBoostCapacity",
+    "longname": "describeOcrBoostCapacity",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 221,
+    "description": "What this client can hold, as the skip rules read it.",
+    "params": [
+      {
+        "name": "args",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.cores",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.deviceMemoryGiB",
+        "type": "number",
+        "optional": false,
+        "description": "0 when the browser does not report it."
+      },
+      {
+        "name": "args.config",
+        "type": "OcrBoostBenchmarkConfig",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrBoostCapacity",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "engineRecognize",
+    "name": "engineRecognize",
+    "longname": "engineRecognize",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 562,
+    "description": "Recognise on a lane's engine.",
+    "params": [
+      {
+        "name": "lane",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "image",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<Object>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "fractionIn",
+    "name": "fractionIn",
+    "longname": "fractionIn",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 165,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "HEAP_ABORT_FRACTION",
+    "name": "HEAP_ABORT_FRACTION",
+    "longname": "HEAP_ABORT_FRACTION",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 119,
+    "description": "A used JS heap above this share of jsHeapSizeLimit ends the scenario before the page heap does.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "integerIn",
+    "name": "integerIn",
+    "longname": "integerIn",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 152,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "judgeOcrBoostScenario",
+    "name": "judgeOcrBoostScenario",
+    "longname": "judgeOcrBoostScenario",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 246,
+    "description": "Whether a worker count may run on this client, and why not when it may not.",
+    "params": [
+      {
+        "name": "workerCount",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "capacity",
+        "type": "OcrBoostCapacity",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "config",
+        "type": "OcrBoostBenchmarkConfig",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "loadOcrBoostDependencies",
+    "name": "loadOcrBoostDependencies",
+    "longname": "loadOcrBoostDependencies",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 72,
+    "description": "The measuring helpers of benchmark.js (reused rather than reimplemented, so both benchmarks report the same statistics the same way) and the engine pieces a scenario is built from...",
+    "params": [],
+    "returns": [
+      {
+        "type": "Promise.<{summarizeDurations: function(), startMainThreadLagSampler: function(), selectOcrBenchmarkPages: function(), resolveOcrBenchmarkLanguages: function(), createOcrEngine: function(), prepareOcrImage: function(), describeOcrSetup: function()}>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "runBoostScenario~mainThread",
+    "name": "mainThread",
+    "longname": "runBoostScenario~mainThread",
+    "kind": "member",
+    "scope": "inner",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 443,
+    "description": "Filled in the finally, so an abort stops the sampler too.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "normalizeOcrBoostBenchmarkConfig",
+    "name": "normalizeOcrBoostBenchmarkConfig",
+    "longname": "normalizeOcrBoostBenchmarkConfig",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 180,
+    "description": "Read ocr.boostBenchmark with every value bounded, as normalizeOcrBenchmarkConfig does for ocr.benchmark : a non-numeric or out-of-range entry is dropped, and a list left with noth...",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config (defaults to the viewer's)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrBoostBenchmarkConfig",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_BOOST_BENCHMARK_DEFAULTS",
+    "name": "OCR_BOOST_BENCHMARK_DEFAULTS",
+    "longname": "OCR_BOOST_BENCHMARK_DEFAULTS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 99,
+    "description": "Defaults of ocr.boostBenchmark beyond the switch.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrBoostBenchmarkConfig",
+    "name": "OcrBoostBenchmarkConfig",
+    "longname": "OcrBoostBenchmarkConfig",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 133,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrBoostCapacity",
+    "name": "OcrBoostCapacity",
+    "longname": "OcrBoostCapacity",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 202,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "readJsHeap",
+    "name": "readJsHeap",
+    "longname": "readJsHeap",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 272,
+    "description": "The page's JS heap where the browser exposes it ( performance.memory , Chromium only).",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "runBoostScenario",
+    "name": "runBoostScenario",
+    "longname": "runBoostScenario",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 420,
+    "description": "Recognise the sampled pages once on a fresh pool of scenario.workerCount engines and measure it.",
+    "params": [
+      {
+        "name": "args",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.scenario",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.pages",
+        "type": "Array.<{viewerIndex: number, page: Object}>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.cfg",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.loadPageImage",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.prepareImage",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.createEngine",
+        "type": "function",
+        "optional": false,
+        "description": "(cfg, { workerCount, engineIndex }) ."
+      },
+      {
+        "name": "args.pageTimeoutMs",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.sourcePageCount",
+        "type": "number",
+        "optional": false,
+        "description": "Pages of the loaded document, for wholeDocumentSeconds ."
+      },
+      {
+        "name": "args.helpers",
+        "type": "Object",
+        "optional": false,
+        "description": "loadOcrBoostDependencies()'s result."
+      },
+      {
+        "name": "args.signal",
+        "type": "AbortSignal",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "args.onPage",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.lagSampler",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.readHeap",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<Object>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "runInLanes",
+    "name": "runInLanes",
+    "longname": "runInLanes",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 388,
+    "description": "Run worker over items , one lane per engine, each lane pulling the next item from a shared cursor.",
+    "params": [
+      {
+        "name": "items",
+        "type": "Array.<T>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "lanes",
+        "type": "Array.<{dead: boolean}>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "worker",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "shouldStop",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<void>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "runOcrBoostBenchmark",
+    "name": "runOcrBoostBenchmark",
+    "longname": "runOcrBoostBenchmark",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 588,
+    "description": "Run the OCR boost benchmark over the loaded document: one scenario per configured worker count, each on its own pool of that many engines, with the counts this client cannot hold...",
+    "params": [
+      {
+        "name": "args",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "args.config",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config (defaults to the viewer's); must have the switch on."
+      },
+      {
+        "name": "args.allPages",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "The viewer's pages."
+      },
+      {
+        "name": "args.ensurePageAsset",
+        "type": "function",
+        "optional": false,
+        "description": "(viewerIndex, 'full') to the page image URL."
+      },
+      {
+        "name": "args.releasePageAsset",
+        "type": "function|null",
+        "optional": true,
+        "description": "Drop a render made only for the benchmark, as runOcrBenchmark does."
+      },
+      {
+        "name": "args.onProgress",
+        "type": "function",
+        "optional": false,
+        "description": "{ phase, completedRuns, totalRuns, scenarioLabel, completedPages, pageCount, workerCount } , plus skipped and skipReason for a skipped coun..."
+      },
+      {
+        "name": "args.signal",
+        "type": "AbortSignal",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "args.inject",
+        "type": "Object",
+        "optional": true,
+        "description": "Test seams: createEngine ( (cfg, { workerCount, engineIndex }) -&gt; { engine } ; default one createOcrEngine per engine from describeOcrSe..."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<Object>",
+        "description": "The result."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "startAll",
+    "name": "startAll",
+    "longname": "startAll",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 353,
+    "description": "Start every engine at once and time it.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "terminateAll",
+    "name": "terminateAll",
+    "longname": "terminateAll",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 369,
+    "description": "Stop every engine; returns how many were asked to stop.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "withTimeout",
+    "name": "withTimeout",
+    "longname": "withTimeout",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/boostBenchmark.js",
+    "line": 292,
+    "description": "",
+    "params": [
+      {
+        "name": "promise",
+        "type": "Promise.<*>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "ms",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "what",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "onTimeout",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<*>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "assessPdfTextLayer",
     "name": "assessPdfTextLayer",
     "longname": "assessPdfTextLayer",

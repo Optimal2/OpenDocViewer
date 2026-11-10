@@ -23,18 +23,18 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 198
-- Source lines: 71461
-- JSDoc symbols: 2053
-- Files with JSDoc: 194
+- Source files: 199
+- Source lines: 72201
+- JSDoc symbols: 2079
+- Files with JSDoc: 195
 - Low-confidence summaries: 2
 - Parse errors: 0
 
 ## High-Signal Files
 
+- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
-- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/compareTransform.js` - File: src/utils/compareTransform.js Free per\-page transform for the compare view: stepless scale, free pan and 0.1 degree rotation, one transform per compared page \( primary \= lef...
 - `src/utils/imageAdjustments.js` - File: src/utils/imageAdjustments.js Per\-pane pixel adjustments \(brightness, contrast, grayscale, invert\) and the quarter turn the canvas draws.
@@ -42,8 +42,8 @@ Source commit: not embedded
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
+- `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
 - `src/utils/pdfSignatureDocuments.js` - Per\-document aggregation of PDF signature reports.
-- `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 
 ## Agent Notes
 

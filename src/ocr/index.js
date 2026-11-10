@@ -13,6 +13,9 @@ export {
   planOcrBenchmarkScenarios, resolveOcrBenchmarkLanguages, runOcrBenchmark, selectOcrBenchmarkPages, startMainThreadLagSampler,
   summarizeDurations,
 } from './benchmark.js';
+// The boost benchmark (worker counts above MAX_OCR_WORKER_COUNT, measurement only) is deliberately
+// not re-exported: it stays its own chunk, loaded when About -> Diagnostics asks for it.
+export const loadOcrBoostBenchmark = () => import('./boostBenchmark.js');
 export { readOcrAssetManifest, resolveOcrAssetUrls } from './assetUrls.js';
 export { KNOWN_OCR_LANGUAGES, partitionOcrLanguages } from './languages.js';
 export { createConfiguredOcrEngine, describeOcrSetup, resolveOcrConcurrency } from './setup.js';

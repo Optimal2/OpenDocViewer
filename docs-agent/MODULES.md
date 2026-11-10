@@ -160,16 +160,16 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 16. Line count: 3073. JSDoc symbol count: 131.
+File count: 17. Line count: 3813. JSDoc symbol count: 157.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
+- `src/ocr/boostBenchmark.js` - Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.
 - `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
 - `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
 - `src/ocr/benchmark.js` - Opt\-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document's pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which
 - `src/ocr/pdfTextWords.js` - Word boxes from a PDF page's own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read\-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/
 - `src/ocr/queue.js` - The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
-- `src/ocr/detectLanguage.js` - Guess the language of a page's text among a few candidate languages, from its words alone.
 
 ## src/PerformanceMonitor.jsx
 
