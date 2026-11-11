@@ -159,7 +159,7 @@ describe('createConfiguredOcrEngine', () => {
     // Four cores allow three; a quarter of 1.5 GiB over 130 MiB per two-model engine allows two.
     expect(workerCount).toBe(2);
     expect(engine.size).toBe(2);
-    expect(setup.workerPlan).toMatchObject({ automatic: true, caps: { cores: 3, memory: 2, pages: null, max: 4 }, inputs: { languageCount: 2, memoryPerWorkerMiB: 130 } });
+    expect(setup.workerPlan).toMatchObject({ automatic: true, caps: { cores: 3, memory: 2, pages: null, max: 8 }, inputs: { languageCount: 2, memoryPerWorkerMiB: 130 } });
   });
 
   it('builds a pool of the configured size whose engines each start their own worker', async () => {
@@ -188,9 +188,10 @@ describe('describeOcrSetup worker count', () => {
   it('resolves the automatic count from the given cores and memory without a warning, by default and for 0', () => {
     const opts = options();
     const setup = describeOcrSetup({ ocr: { enabled: true, workerCount: 0 } }, { ...opts, cores: 8, deviceMemoryGiB: 8 });
-    expect(setup.workerCount).toBe(4);
+    // Eight cores, 8 GiB: the cores bind (seven) below the ceiling of eight.
+    expect(setup.workerCount).toBe(7);
     expect(setup.warnings).toEqual([]);
-    expect(describeOcrSetup({ ocr: { enabled: true } }, { ...opts, cores: 8, deviceMemoryGiB: 8 }).workerCount).toBe(4);
+    expect(describeOcrSetup({ ocr: { enabled: true } }, { ...opts, cores: 8, deviceMemoryGiB: 8 }).workerCount).toBe(7);
     expect(describeOcrSetup({ ocr: { enabled: true, workerCount: 0 } }, { ...opts, cores: 2, deviceMemoryGiB: 8 }).workerCount).toBe(1);
     // A page count lowers it: three pending pages on the same client give two.
     expect(describeOcrSetup({ ocr: { enabled: true } }, { ...opts, cores: 8, deviceMemoryGiB: 8, pageCount: 3 }).workerCount).toBe(2);
@@ -199,7 +200,7 @@ describe('describeOcrSetup worker count', () => {
   it('warns once for a rejected value (and chooses automatically) and once for a clamped one', () => {
     const rejected = options();
     const setup = describeOcrSetup({ ocr: { enabled: true, workerCount: '3' } }, { ...rejected, cores: 8, deviceMemoryGiB: 8 });
-    expect(setup.workerCount).toBe(4);
+    expect(setup.workerCount).toBe(7);
     expect(setup.warnings).toEqual(['ocr.workerCount must be an integer (0 for automatic), not "3"; using the automatic choice']);
     expect(rejected.log.warn).toHaveBeenCalledTimes(1);
 
@@ -215,12 +216,12 @@ describe('resolveOcrConcurrency', () => {
 
   it('lowers the pages in flight to what the pending pages warrant, never above the pool', () => {
     const setup = describeOcrSetup({ ocr: { enabled: true } }, { ...options(), ...client });
-    expect(setup.workerCount).toBe(4);
+    expect(setup.workerCount).toBe(7);
     expect(resolveOcrConcurrency(1, setup, { ocr: { enabled: true } }, client)).toBe(1);
     expect(resolveOcrConcurrency(4, setup, { ocr: { enabled: true } }, client)).toBe(2);
     expect(resolveOcrConcurrency(7, setup, { ocr: { enabled: true } }, client)).toBe(4);
-    expect(resolveOcrConcurrency(300, setup, { ocr: { enabled: true } }, client)).toBe(4);
-    expect(resolveOcrConcurrency(0, setup, { ocr: { enabled: true } }, client)).toBe(4);
+    expect(resolveOcrConcurrency(300, setup, { ocr: { enabled: true } }, client)).toBe(7);
+    expect(resolveOcrConcurrency(0, setup, { ocr: { enabled: true } }, client)).toBe(7);
   });
 
   it('returns a manual worker count as it is, whatever is pending', () => {

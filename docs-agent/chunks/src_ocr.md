@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 20. Line count: 4300. JSDoc symbol count: 171.
+File count: 20. Line count: 4310. JSDoc symbol count: 171.
 
 ## src/ocr/assetUrls.js
 
@@ -40,7 +40,7 @@ Symbols:
 
 ## src/ocr/boostBenchmark.js
 
-Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.
+Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but at and above the ceiling of the viewer's own worker policy.
 
 Exports: `loadOcrBoostDependencies`, `OCR_BOOST_BENCHMARK_SCHEMA`, `BOOST_MAX_WORKER_COUNT`, `OCR_BOOST_BENCHMARK_DEFAULTS`, `BOOST_SKIP_REASON`, `BOOST_ABORT_REASON`, `normalizeOcrBoostBenchmarkConfig`, `describeOcrBoostCapacity`, `judgeOcrBoostScenario`, `readJsHeap`, `createBoostEnginePool`, `runOcrBoostBenchmark`
 

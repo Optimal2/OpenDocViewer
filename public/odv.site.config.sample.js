@@ -104,9 +104,9 @@
       // and the memory with the thresholds in workerPolicy; an integer 1 to 8 runs that many.
       // workerCount: 0,
       // Thresholds of the automatic choice; the defaults are measured (see
-      // docs-src/runtime-configuration.md). Raise maxWorkerCount only after the OCR benchmark
-      // on the site's own clients shows that more workers do not make page browsing stutter.
-      // workerPolicy: { reservedCores: 1, maxWorkerCount: 4, pagesPerWorker: 2, memoryPerWorkerMiB: 110, memoryPerLanguageMiB: 20, memoryBudgetFraction: 0.25, assumedDeviceMemoryGiB: 4 },
+      // docs-src/runtime-configuration.md). Lower maxWorkerCount if the OCR benchmark on the
+      // site's own clients shows that eight workers make page browsing stutter there.
+      // workerPolicy: { reservedCores: 1, maxWorkerCount: 8, pagesPerWorker: 2, memoryPerWorkerMiB: 110, memoryPerLanguageMiB: 20, memoryBudgetFraction: 0.25, assumedDeviceMemoryGiB: 4 },
       // 'auto' (default): Swedish and English tried together on every text line; 'swedish' or
       // 'english': that model alone, the other is never downloaded. An array of Tesseract
       // language codes still works and replaces the default completely, so list every language

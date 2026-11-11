@@ -272,7 +272,7 @@ describe('runOcrBoostBenchmark', () => {
     expect(result.skippedCounts).toEqual([]);
     // The viewer's own policy for this document, read-only and unchanged by the boost run.
     expect(result.automaticPlan).toMatchObject({ automatic: true, workerCount: 4, inputs: { pageCount: 8, languageCount: 2 } });
-    expect(result.automaticPlan.policy.maxWorkerCount).toBe(4);
+    expect(result.automaticPlan.policy.maxWorkerCount).toBe(8);
 
     const [two, four] = result.runs;
     expect(two).toMatchObject({ label: 'boost-workers-2', workerCount: 2, skipped: false, aborted: false, abortReason: null, startupError: null, pageCount: 4, recognizedPages: 4, errorCount: 0, words: 8, meanConfidence: 90, enginesCreated: 2, enginesTerminated: 2, deadLanes: 0 });
@@ -605,9 +605,9 @@ describe('the live worker cap', () => {
     const boost = await import('../boostBenchmark.js');
     expect(runtimeConfig.MAX_OCR_WORKER_COUNT).toBe(8);
     expect(boost.BOOST_MAX_WORKER_COUNT).toBe(32);
-    // The viewer's own policy still stops at four workers, whatever the boost run measures.
-    expect(runtimeConfig.OCR_WORKER_POLICY_DEFAULTS.maxWorkerCount).toBe(4);
-    expect(runtimeConfig.resolveOcrWorkerPlan({}, { cores: 24, deviceMemoryGiB: 64, pageCount: 500, languageCount: 2 }).workerCount).toBe(4);
+    // The viewer's own policy stops at eight workers, whatever the boost run measures.
+    expect(runtimeConfig.OCR_WORKER_POLICY_DEFAULTS.maxWorkerCount).toBe(8);
+    expect(runtimeConfig.resolveOcrWorkerPlan({}, { cores: 24, deviceMemoryGiB: 64, pageCount: 500, languageCount: 2 }).workerCount).toBe(8);
   });
 
   it('keeps the boost module out of the OCR entry point, so it stays its own chunk', async () => {

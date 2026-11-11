@@ -149,14 +149,15 @@
       // many instead. Anything else is the automatic choice.
       workerCount: 0,
       // Thresholds of the automatic choice. The defaults come from the OCR benchmark (About ->
-      // Diagnostics) on a 4-core, 16 GB client; run it on the site's own clients before changing
-      // them. The count is the smallest of: cores minus reservedCores; memoryBudgetFraction of
+      // Diagnostics) on a 4-core, 16 GB client and, for maxWorkerCount, from the boost benchmark
+      // on 18- and 24-thread clients; run them on the site's own clients before changing them.
+      // The count is the smallest of: cores minus reservedCores; memoryBudgetFraction of
       // the device memory (navigator.deviceMemory, else assumedDeviceMemoryGiB) divided by what
       // one worker takes (memoryPerWorkerMiB plus memoryPerLanguageMiB per model beyond the
       // first); one worker per pagesPerWorker pages waiting; and maxWorkerCount.
       workerPolicy: {
         reservedCores: 1,
-        maxWorkerCount: 4,
+        maxWorkerCount: 8,
         pagesPerWorker: 2,
         memoryPerWorkerMiB: 110,
         memoryPerLanguageMiB: 20,

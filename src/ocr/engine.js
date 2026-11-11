@@ -7,6 +7,15 @@
  * the site's `ocr.assetBaseUrl`), never from a CDN. `cacheMethod: 'none'` keeps tesseract.js from
  * writing the models to IndexedDB: the only cache is the browser's ordinary HTTP cache.
  *
+ * Every engine loads its own copy of the worker script, the core and the models; nothing is
+ * shared between engines, and little could be. tesseract.js loads the script and the core inside
+ * the worker (`importScripts`), out of the page's reach, and while `createWorker` accepts a model
+ * as bytes (`{ code, data }`) in place of a code, tesseract.js 7.0.0's worker joins `data` rather
+ * than `code` into the language string it initialises with (src/worker-script/index.js of the
+ * package, the same upstream on 2026-11-11), so an engine given bytes never initialises. Until
+ * that is fixed, the engines after the first take the files from the HTTP cache, which the
+ * shipped web.config allows by serving the ocr/ folder as immutable.
+ *
  * Start-up failures need care, because tesseract.js 7.0.0's `createWorker` reports only some of
  * them: a `load` rejection settles its promise, but a missing language model only reaches the
  * optional `errorHandler`, and a WebAssembly compile refused by the site's Content-Security-Policy

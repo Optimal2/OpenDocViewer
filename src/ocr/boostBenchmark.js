@@ -1,10 +1,11 @@
 // File: src/ocr/boostBenchmark.js
 /**
  * Opt-in OCR *boost* benchmark (`ocr.boostBenchmark.enabled`): the same measurement as
- * benchmark.js, but above the worker counts the viewer itself will ever run.
+ * benchmark.js, but at and above the ceiling of the viewer's own worker policy.
  *
  * Why a second module. The viewer's automatic worker policy stops at
- * `ocr.workerPolicy.maxWorkerCount` (4) and runtimeConfig.js hard-caps any worker count at
+ * `ocr.workerPolicy.maxWorkerCount` (4 when this was written, 8 since 2.4.321 on what this
+ * benchmark measured) and runtimeConfig.js hard-caps any worker count at
  * MAX_OCR_WORKER_COUNT (8), which also bounds benchmark.js. On a 24-core client the ordinary
  * benchmark scaled almost linearly up to that cap (34 -> 202 pages/min from one to eight
  * workers) while the main thread's worst lag grew from 86 ms to 549 ms, so the ceiling, not the

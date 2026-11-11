@@ -278,7 +278,7 @@ ocr: {
   recognizeWholeDocument: false, // true: after the shown page's neighbours, the rest of the document
   workerCount: 0,              // pages recognised at the same time; 0: automatic (see workerPolicy)
   workerPolicy: {              // thresholds of the automatic choice, measured defaults
-    reservedCores: 1, maxWorkerCount: 4, pagesPerWorker: 2,
+    reservedCores: 1, maxWorkerCount: 8, pagesPerWorker: 2,
     memoryPerWorkerMiB: 110, memoryPerLanguageMiB: 20, memoryBudgetFraction: 0.25, assumedDeviceMemoryGiB: 4
   },
   languages: 'auto',           // 'auto' (swe+eng), 'swedish', 'english', or an array of Tesseract codes
@@ -351,7 +351,7 @@ ocr: {
     client's capacity; the pool holds the capacity and the queue lowers the pages in flight to
     this bound every time the window is planned, and an engine the queue never reaches is never
     started;
-  - `maxWorkerCount` (`4`).
+  - `maxWorkerCount` (`8`).
   The defaults rest on the OCR benchmark on a 4-core, 16 GB client (Chromium, 2026-11-10; 40
   evenly spaced pages of a 300-page scanned document at 1654x2339, Swedish and English), each
   with its margin or assumption named: throughput grew with every worker up to the cores minus
@@ -366,12 +366,23 @@ ocr: {
   taken as 20 MiB since it was within that noise; `memoryBudgetFraction: 0.25` and
   `assumedDeviceMemoryGiB: 4` are a chosen margin and an assumption, not measurements; and with
   three workers the main thread, which then prepared every page image (0.37 s per page on
-  average, 1.6 s at p90 on ruled table pages; since 2.4.320 the preparation runs in its own
-  worker), was about half busy with no long task and stalls up to
-  136 ms. More than four workers are unmeasured for stutter on a strong client, which is what
-  `maxWorkerCount: 4` guards; a site with many-core clients should run the benchmark there (its
-  `automaticPlan` says what the viewer would choose, next to the measured counts) and raise the
-  ceiling on evidence. A number out of range is clamped to the nearest bound; a value that is
+  average, 1.6 s at p90 on ruled table pages), was about half busy with no long task and stalls
+  up to 136 ms, which is why the ceiling stayed at four workers through 2.4.320. That version
+  moved the preparation to its own worker, and the boost benchmark (below) measured the counts
+  above four on two many-core clients (evenly spaced pages of the same document, 120 and 32 of
+  them, both runs still with the preparation on the main thread): on a 24-thread client with
+  twelve physical cores, eight workers doubled the throughput of four (100 to 199 pages per
+  minute) while the median recognition grew 9 % (1.85 to 2.01 s), and above eight the
+  recognitions slowed markedly as the physical cores ran out (2.57 s at twelve and 3.18 s at 24
+  workers); an 18-core client without SMT went from 286 to 456 pages per minute at eight, with
+  11 % longer recognitions, and kept scaling to 660 at eighteen. So `maxWorkerCount` is `8`
+  since 2.4.321, the same as the hard limit of `ocr.workerCount`, and on small devices the
+  memory bound keeps the count lower. Not measured yet: the main thread's lag at eight workers
+  with the preparation off it, and the counts between four and eight that clients with six to
+  eight logical threads now get (eight threads over four physical cores give seven workers). A
+  site whose clients stutter with eight sets the key lower; the benchmark's `automaticPlan`
+  says what the viewer would choose on a client, next to the measured counts. A
+  number out of range is clamped to the nearest bound; a value that is
   not a finite number (a numeric string included) gets the default. The key means nothing while
   OCR is off or with a manual `ocr.workerCount`.
 - `ocr.languages`: one of three names, or an array of Tesseract language codes. `'auto'` (the

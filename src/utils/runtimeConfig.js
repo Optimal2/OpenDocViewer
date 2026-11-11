@@ -423,15 +423,29 @@ export const MAX_OCR_WORKER_COUNT = 8;
  *   an 8 GB client allows more workers than the cores do and binds only on small devices; a
  *   browser that does not report the memory (Firefox, Safari) is taken as a 4 GB client
  *   (`assumedDeviceMemoryGiB`, an assumption).
- * - The page image's preparation runs on the main thread (0.37 s per page on average, 1.6 s at
- *   p90 on ruled table pages, against 2.4 s of recognition), so three workers keep the main
- *   thread about half busy: no long task, stalls up to 136 ms. More workers than four are
- *   unmeasured for stutter, hence `maxWorkerCount: 4` until a run on a client with more cores
- *   says otherwise.
+ * - The page image's preparation then ran on the main thread (0.37 s per page on average, 1.6 s
+ *   at p90 on ruled table pages, against 2.4 s of recognition), so three workers kept the main
+ *   thread about half busy: no long task, stalls up to 136 ms. That is why `maxWorkerCount`
+ *   stayed at 4 through 2.4.320. That version moved the preparation to its own worker
+ *   (src/ocr/prepareWorker.js), and the OCR boost benchmark (About -> Diagnostics; evenly
+ *   spaced pages of the same document, 120 and 32 of them, 2026-11-10 and -11, both runs still
+ *   with the preparation on the main thread) measured the counts above four: on a 24-thread
+ *   client with twelve physical cores eight workers doubled the throughput of four (100 -> 199
+ *   pages/min) while the median recognition grew 9 % (1.85 -> 2.01 s), and above eight the
+ *   recognitions slowed markedly as the physical cores ran out (2.57 s at twelve, 3.18 s at 24
+ *   workers), so on that client eight is where more workers still buy about what they cost. An
+ *   18-core client without SMT went from 286 to 456 pages/min at eight with 11 % longer
+ *   recognitions and kept scaling to 660 at eighteen, which a later adaptive count is for.
+ *   Hence `maxWorkerCount: 8` since 2.4.321, the hard MAX_OCR_WORKER_COUNT. Two things are not
+ *   measured: the main thread's lag with eight workers now that the preparation is off it (with
+ *   it on, 448 ms at worst against 235 with four on the 24-thread client), and the counts
+ *   between four and eight that clients with six to eight logical threads now get (eight
+ *   threads over four physical cores give seven workers). The memory bound still keeps the
+ *   count lower on small devices.
  */
 export const OCR_WORKER_POLICY_DEFAULTS = Object.freeze(/** @type {OcrWorkerPolicy} */ ({
   reservedCores: 1,
-  maxWorkerCount: 4,
+  maxWorkerCount: 8,
   pagesPerWorker: 2,
   memoryPerWorkerMiB: 110,
   memoryPerLanguageMiB: 20,

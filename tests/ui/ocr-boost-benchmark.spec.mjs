@@ -127,7 +127,7 @@ test('ocr boost benchmark: the About dialog runs it, states the skipped count an
   expect(result.workerCounts).toEqual([1, 2, 4]);
   expect(result.scenarios.map((scenario) => scenario.label)).toEqual(['boost-workers-1', 'boost-workers-2', 'boost-workers-4']);
   // The viewer's own policy is reported read-only; the boost ceiling never becomes the live cap.
-  expect(result.automaticPlan.policy.maxWorkerCount).toBe(4);
+  expect(result.automaticPlan.policy.maxWorkerCount).toBe(8);
   expect(result.diagnostics.schema).toBe('opendocviewer.support-diagnostics.v1');
 
   const [one, two, four] = result.runs;

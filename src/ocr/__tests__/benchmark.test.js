@@ -218,7 +218,7 @@ describe('runOcrBenchmark', () => {
     expect(result.hardwareConcurrency).toBe(4);
     expect(result.deviceMemoryGiB).toBe(8);
     // What the viewer would run here for the six-page document: three (the cores), with the bounds.
-    expect(result.automaticPlan).toMatchObject({ workerCount: 3, automatic: true, caps: { cores: 3, memory: 15, pages: 3, max: 4 }, inputs: { pageCount: 6, languageCount: 2 } });
+    expect(result.automaticPlan).toMatchObject({ workerCount: 3, automatic: true, caps: { cores: 3, memory: 15, pages: 3, max: 8 }, inputs: { pageCount: 6, languageCount: 2 } });
     expect(result.languages).toEqual(['swe', 'eng']);
     expect(result.configuredLanguages).toEqual(['swe', 'eng']);
     expect(result.pageCount).toBe(4);

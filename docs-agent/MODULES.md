@@ -160,13 +160,13 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 20. Line count: 4300. JSDoc symbol count: 171.
+File count: 20. Line count: 4310. JSDoc symbol count: 171.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/prepareImageCore.js` - The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
 - `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
-- `src/ocr/boostBenchmark.js` - Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.
+- `src/ocr/boostBenchmark.js` - Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but at and above the ceiling of the viewer's own worker policy.
 - `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
 - `src/ocr/imagePreparer.js` - Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot.
 - `src/ocr/benchmark.js` - Opt\-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document's pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which
@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 65. Line count: 24333. JSDoc symbol count: 1007.
+File count: 65. Line count: 24347. JSDoc symbol count: 1007.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

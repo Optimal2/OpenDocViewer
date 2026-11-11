@@ -117,10 +117,10 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/manual-page/mountManualPage.jsx</code> | 40 | 1 | 1 | high | Mount the stand-alone manual page into a container, the way src/index.jsx mounts the viewer: apply the shared theme and toolbar density to the document before the first render, then render the page inside the viewer&#39;s Th |
 | <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
 | <code>src/ocr/benchmark.js</code> | 661 | 0 | 20 | high | Opt-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document&#39;s pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which |
-| <code>src/ocr/boostBenchmark.js</code> | 810 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run. |
+| <code>src/ocr/boostBenchmark.js</code> | 811 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but at and above the ceiling of the viewer&#39;s own worker policy. |
 | <code>src/ocr/classify.js</code> | 106 | 3 | 15 | high | Decides, per page, whether OCR is worth running. |
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
-| <code>src/ocr/engine.js</code> | 302 | 1 | 14 | high | Thin wrapper around a tesseract.js worker. |
+| <code>src/ocr/engine.js</code> | 311 | 1 | 14 | high | Thin wrapper around a tesseract.js worker. |
 | <code>src/ocr/enginePool.js</code> | 165 | 1 | 5 | high | A pool of OCR engines \(engine.js\) behind the one-engine interface the queue \(queue.js\) uses, so that several pages \(the worker count, see setup.js\) can be recognised at the same time. |
 | <code>src/ocr/imagePreparer.js</code> | 264 | 1 | 9 | high | Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot. |
 | <code>src/ocr/index.js</code> | 35 | 2 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
@@ -194,7 +194,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 1200 | 36 | 84 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 1214 | 36 | 84 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |

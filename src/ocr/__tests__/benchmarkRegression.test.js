@@ -18,8 +18,8 @@
  * blob 422daf568393c5aa3975eadb0afc5763399e04ff, so the module is byte-identical too; the
  * literals are the behavioural half of the same proof and survive a future edit of the file.)
  *
- * The `ocr.workerPolicy` defaults and MAX_OCR_WORKER_COUNT are asserted against their 50edbfc
- * values for the same reason: the boost module's own ceiling is BOOST_MAX_WORKER_COUNT (32) and
+ * The `ocr.workerPolicy` defaults (the 50edbfc values, with the ceiling raised to eight in
+ * 2.4.321) and MAX_OCR_WORKER_COUNT are asserted for the same reason: the boost module's own ceiling is BOOST_MAX_WORKER_COUNT (32) and
  * may never leak into the viewer's cap of 8.
  */
 import { describe, expect, it } from 'vitest';
@@ -147,10 +147,10 @@ describe('the live OCR worker cap and policy are unchanged by the boost benchmar
     expect(MAX_OCR_WORKER_COUNT).toBe(8);
   });
 
-  it('leaves the ocr.workerPolicy defaults at their 50edbfc values', () => {
+  it('ships the 50edbfc ocr.workerPolicy defaults, with the ceiling raised to eight in 2.4.321 on what the boost runs measured', () => {
     expect({ ...OCR_WORKER_POLICY_DEFAULTS }).toEqual({
       reservedCores: 1,
-      maxWorkerCount: 4,
+      maxWorkerCount: 8,
       pagesPerWorker: 2,
       memoryPerWorkerMiB: 110,
       memoryPerLanguageMiB: 20,
