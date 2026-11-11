@@ -94,15 +94,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 200,
-    "sourceLineCount": 72558,
-    "docletCount": 2091,
-    "documentedFileCount": 196,
+    "fileCount": 203,
+    "sourceLineCount": 72975,
+    "docletCount": 2105,
+    "documentedFileCount": 199,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 7033
+    "estimatedSourceTokens": 7147
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -517,7 +517,7 @@
     {
       "path": "src/ocr/index.js",
       "score": 126,
-      "lines": 31,
+      "lines": 35,
       "incomingLocalImports": 2,
       "doclets": 0,
       "summary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -581,7 +581,7 @@
       "path": "src/logging/systemLogger.js",
       "score": 102,
       "lines": 471,
-      "incomingLocalImports": 45,
+      "incomingLocalImports": 46,
       "doclets": 31,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high"
@@ -822,7 +822,7 @@
           {
             "path": "src/hooks/useOcrTextLayers.js",
             "score": 28,
-            "lines": 226,
+            "lines": 229,
             "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
@@ -883,6 +883,12 @@
             "score": 38,
             "lines": 479,
             "summary": "OpenDocViewer - PDF page-image worker pool."
+          },
+          {
+            "path": "src/ocr/prepareWorker.js",
+            "score": 11,
+            "lines": 76,
+            "summary": "OpenDocViewer — OCR image preparation worker."
           },
           {
             "path": "src/workers/pdfWorker.js",
@@ -1498,7 +1504,7 @@
     {
       "name": "src/hooks",
       "fileCount": 9,
-      "lineCount": 1348,
+      "lineCount": 1351,
       "docletCount": 38,
       "importantFiles": [
         {
@@ -1549,7 +1555,7 @@
         {
           "path": "src/hooks/useOcrTextLayers.js",
           "score": 28,
-          "lines": 226,
+          "lines": 229,
           "incomingLocalImports": 1,
           "doclets": 3,
           "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -1699,7 +1705,7 @@
           "path": "src/logging/systemLogger.js",
           "score": 102,
           "lines": 471,
-          "incomingLocalImports": 45,
+          "incomingLocalImports": 46,
           "doclets": 31,
           "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
           "summaryConfidence": "high"
@@ -1752,17 +1758,26 @@
     },
     {
       "name": "src/ocr",
-      "fileCount": 17,
-      "lineCount": 3886,
-      "docletCount": 157,
+      "fileCount": 20,
+      "lineCount": 4300,
+      "docletCount": 171,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
           "score": 126,
-          "lines": 31,
+          "lines": 35,
           "incomingLocalImports": 2,
           "doclets": 0,
           "summary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/ocr/prepareImageCore.js",
+          "score": 74,
+          "lines": 181,
+          "incomingLocalImports": 3,
+          "doclets": 10,
+          "summary": "The image preparation itself, written for both threads: the dedicated worker (src/ocr/prepareWorker.js) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de",
           "summaryConfidence": "high"
         },
         {
@@ -1772,6 +1787,15 @@
           "incomingLocalImports": 3,
           "doclets": 15,
           "summary": "Decides, per page, whether OCR is worth running.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/ocr/lineRemoval.js",
+          "score": 72,
+          "lines": 292,
+          "incomingLocalImports": 2,
+          "doclets": 16,
+          "summary": "Ruling-line removal before recognition: the pre-processing step for ruled tables and forms.",
           "summaryConfidence": "high"
         },
         {
@@ -1793,12 +1817,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/ocr/lineRemoval.js",
+          "path": "src/ocr/imagePreparer.js",
           "score": 64,
-          "lines": 292,
+          "lines": 264,
           "incomingLocalImports": 1,
-          "doclets": 16,
-          "summary": "Ruling-line removal before recognition: the pre-processing step for ruled tables and forms.",
+          "doclets": 9,
+          "summary": "Hands page images to the preparation worker (src/ocr/prepareWorker.js) and falls back to the main thread where it cannot.",
           "summaryConfidence": "high"
         },
         {
@@ -1808,24 +1832,6 @@
           "incomingLocalImports": 0,
           "doclets": 20,
           "summary": "Opt-in OCR benchmark (`ocr.benchmark.enabled`): recognises a sample of the loaded document's pages once per scenario and reports what each scenario cost, so a site can measure how many workers (`ocr.workerCount`), which",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/ocr/pdfTextWords.js",
-          "score": 58,
-          "lines": 229,
-          "incomingLocalImports": 1,
-          "doclets": 9,
-          "summary": "Word boxes from a PDF page's own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read-aloud as a recognised page (components/OcrTextLayer.jsx, utils/",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/ocr/queue.js",
-          "score": 47,
-          "lines": 391,
-          "incomingLocalImports": 0,
-          "doclets": 13,
-          "summary": "The OCR page queue: `concurrency` pages at a time (one by default), bounded by the window (window.js), results in the in-memory cache (resultCache.js).",
           "summaryConfidence": "high"
         }
       ]
@@ -35875,7 +35881,7 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 226,
+      "lines": 229,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
@@ -35888,7 +35894,7 @@
             "useRef",
             "useState"
           ],
-          "line": 22,
+          "line": 23,
           "kind": "static"
         },
         {
@@ -35896,7 +35902,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 23,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -35904,7 +35910,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 24,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -35914,7 +35920,7 @@
             "isOcrWholeDocumentEnabled",
             "isSpeechLanguageAutoDetectEnabled"
           ],
-          "line": 25,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -35922,7 +35928,7 @@
           "specifiers": [
             "speechLanguagesForOcr"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static"
         }
       ],
@@ -35930,24 +35936,24 @@
         {
           "name": "OCR_IDLE_SHUTDOWN_MS",
           "kind": "variable",
-          "line": 29
+          "line": 30
         },
         {
           "name": "useOcrTextLayers",
           "kind": "default",
-          "line": 56
+          "line": 57
         }
       ],
       "declarations": [
         {
           "name": "useOcrTextLayers",
           "kind": "function",
-          "line": 56
+          "line": 57
         },
         {
           "name": "getPageImage",
           "kind": "function",
-          "line": 103
+          "line": 104
         }
       ],
       "parseError": null,
@@ -35965,7 +35971,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 29,
+          "line": 30,
           "description": "Idle time after which the OCR worker is terminated to free its memory.",
           "params": [],
           "returns": [],
@@ -35978,7 +35984,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 56,
+          "line": 57,
           "description": "",
           "params": [
             {
@@ -36063,7 +36069,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 79,
+          "line": 80,
           "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
           "params": [],
           "returns": [],
@@ -36077,7 +36083,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 23,
+          "line": 24,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -36086,7 +36092,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 24,
+          "line": 25,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -36097,7 +36103,7 @@
             "isOcrWholeDocumentEnabled",
             "isSpeechLanguageAutoDetectEnabled"
           ],
-          "line": 25,
+          "line": 26,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
@@ -36106,7 +36112,7 @@
           "specifiers": [
             "speechLanguagesForOcr"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static",
           "resolved": "src/utils/ocrLanguageCodes.js"
         }
@@ -36120,7 +36126,7 @@
             "useRef",
             "useState"
           ],
-          "line": 22,
+          "line": 23,
           "kind": "static"
         }
       ],
@@ -41524,7 +41530,7 @@
           "kind": "static"
         }
       ],
-      "incomingLocalImports": 45,
+      "incomingLocalImports": 46,
       "importanceScore": 102,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high",
@@ -45671,8 +45677,381 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/ocr/imagePreparer.js",
+      "lines": 264,
+      "extension": ".js",
+      "jsdocBlockCount": 13,
+      "sourceSummary": "Hands page images to the preparation worker (src/ocr/prepareWorker.js) and falls back to the main thread where it cannot.",
+      "imports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 37,
+          "kind": "static"
+        },
+        {
+          "source": "./prepareWorker.js?worker",
+          "specifiers": [
+            "OcrPrepareWorker"
+          ],
+          "line": 38,
+          "kind": "static"
+        },
+        {
+          "source": "./prepareImageCore.js",
+          "specifiers": [
+            "prepareOcrImageCore"
+          ],
+          "line": 39,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "OCR_IMAGE_PREPARER_IDLE_MS",
+          "kind": "variable",
+          "line": 42
+        },
+        {
+          "name": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+          "kind": "variable",
+          "line": 44
+        },
+        {
+          "name": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+          "kind": "variable",
+          "line": 51
+        },
+        {
+          "name": "createOcrImagePreparer",
+          "kind": "function",
+          "line": 74
+        },
+        {
+          "name": "getOcrImagePreparer",
+          "kind": "function",
+          "line": 252
+        },
+        {
+          "name": "disposeOcrImagePreparer",
+          "kind": "function",
+          "line": 258
+        }
+      ],
+      "declarations": [
+        {
+          "name": "createOcrImagePreparer",
+          "kind": "function",
+          "line": 74
+        },
+        {
+          "name": "onMainThread",
+          "kind": "function",
+          "line": 95
+        },
+        {
+          "name": "clearIdle",
+          "kind": "function",
+          "line": 97
+        },
+        {
+          "name": "endWorker",
+          "kind": "function",
+          "line": 104
+        },
+        {
+          "name": "scheduleIdle",
+          "kind": "function",
+          "line": 111
+        },
+        {
+          "name": "takePending",
+          "kind": "function",
+          "line": 121
+        },
+        {
+          "name": "redoPendingOnMainThread",
+          "kind": "function",
+          "line": 130
+        },
+        {
+          "name": "failWorker",
+          "kind": "function",
+          "line": 137
+        },
+        {
+          "name": "details",
+          "kind": "object",
+          "line": 140
+        },
+        {
+          "name": "forwardLog",
+          "kind": "function",
+          "line": 150
+        },
+        {
+          "name": "onReply",
+          "kind": "function",
+          "line": 158
+        },
+        {
+          "name": "ensureWorker",
+          "kind": "function",
+          "line": 188
+        },
+        {
+          "name": "request",
+          "kind": "object",
+          "line": 205
+        },
+        {
+          "name": "entry",
+          "kind": "object",
+          "line": 217
+        },
+        {
+          "name": "getOcrImagePreparer",
+          "kind": "function",
+          "line": 252
+        },
+        {
+          "name": "disposeOcrImagePreparer",
+          "kind": "function",
+          "line": 258
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OCR_IMAGE_PREPARER_IDLE_MS",
+          "name": "OCR_IMAGE_PREPARER_IDLE_MS",
+          "longname": "OCR_IMAGE_PREPARER_IDLE_MS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 42,
+          "description": "Idle time after which the preparation worker is terminated (restarted by the next page).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+          "name": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+          "longname": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 44,
+          "description": "Worker failures after which the session prepares on the main thread only.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+          "name": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+          "longname": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 51,
+          "description": "Longest wait for one reply before the worker counts as failed.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OcrImagePreparer",
+          "name": "OcrImagePreparer",
+          "longname": "OcrImagePreparer",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 53,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrImagePreparer",
+          "name": "createOcrImagePreparer",
+          "longname": "createOcrImagePreparer",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 74,
+          "description": "",
+          "params": [
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": true,
+              "description": "Injectable for tests; the defaults are the real worker and timers."
+            },
+            {
+              "name": "options.createWorker",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options.workersSupported",
+              "type": "boolean",
+              "optional": true,
+              "description": "Default: typeof Worker === 'function' ."
+            },
+            {
+              "name": "options.prepareOnMainThread",
+              "type": "function",
+              "optional": false,
+              "description": "Default prepareOcrImageCore."
+            },
+            {
+              "name": "options.idleMs",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "options.maxFailures",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "options.requestTimeoutMs",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "options.log",
+              "type": "Object",
+              "optional": true,
+              "description": "Logger with debug and warn ."
+            },
+            {
+              "name": "options.setTimer",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options.clearTimer",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "OcrImagePreparer",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "createOcrImagePreparer~takePending",
+          "name": "takePending",
+          "longname": "createOcrImagePreparer~takePending",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 121,
+          "description": "Take a request out of the map, its reply timer with it.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrImagePreparer~redoPendingOnMainThread",
+          "name": "redoPendingOnMainThread",
+          "longname": "createOcrImagePreparer~redoPendingOnMainThread",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 130,
+          "description": "Finish every pending request on the main thread (the worker is gone or going).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "getOcrImagePreparer",
+          "name": "getOcrImagePreparer",
+          "longname": "getOcrImagePreparer",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 252,
+          "description": "The viewer's one preparer, created on first use (prepareImage.js, the benchmarks).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "disposeOcrImagePreparer",
+          "name": "disposeOcrImagePreparer",
+          "longname": "disposeOcrImagePreparer",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/imagePreparer.js",
+          "line": 258,
+          "description": "End the shared preparer's worker (useOcrTextLayers.js on unmount); the next use makes a new one.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/ocr",
+      "localImports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 37,
+          "kind": "static",
+          "resolved": "src/logging/systemLogger.js"
+        },
+        {
+          "source": "./prepareWorker.js?worker",
+          "specifiers": [
+            "OcrPrepareWorker"
+          ],
+          "line": 38,
+          "kind": "static",
+          "resolved": null
+        },
+        {
+          "source": "./prepareImageCore.js",
+          "specifiers": [
+            "prepareOcrImageCore"
+          ],
+          "line": 39,
+          "kind": "static",
+          "resolved": "src/ocr/prepareImageCore.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 64,
+      "summary": "Hands page images to the preparation worker (src/ocr/prepareWorker.js) and falls back to the main thread where it cannot.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/ocr/index.js",
-      "lines": 31,
+      "lines": 35,
       "extension": ".js",
       "jsdocBlockCount": 1,
       "sourceSummary": "Entry point of the OCR module: the one file the viewer imports, and only through `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true.",
@@ -46007,6 +46386,48 @@
           "kind": "named",
           "source": "./prepareImage.js",
           "line": 30
+        },
+        {
+          "name": "canPrepareImagesHere",
+          "kind": "named",
+          "source": "./prepareImageCore.js",
+          "line": 31
+        },
+        {
+          "name": "prepareOcrImageCore",
+          "kind": "named",
+          "source": "./prepareImageCore.js",
+          "line": 31
+        },
+        {
+          "name": "OCR_IMAGE_PREPARER_IDLE_MS",
+          "kind": "named",
+          "source": "./imagePreparer.js",
+          "line": 32
+        },
+        {
+          "name": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+          "kind": "named",
+          "source": "./imagePreparer.js",
+          "line": 32
+        },
+        {
+          "name": "createOcrImagePreparer",
+          "kind": "named",
+          "source": "./imagePreparer.js",
+          "line": 32
+        },
+        {
+          "name": "disposeOcrImagePreparer",
+          "kind": "named",
+          "source": "./imagePreparer.js",
+          "line": 32
+        },
+        {
+          "name": "getOcrImagePreparer",
+          "kind": "named",
+          "source": "./imagePreparer.js",
+          "line": 32
         }
       ],
       "declarations": [
@@ -46668,8 +47089,8 @@
       "moduleKey": "src/ocr",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 64,
+      "incomingLocalImports": 2,
+      "importanceScore": 72,
       "summary": "Ruling-line removal before recognition: the pre-processing step for ruled tables and forms.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -47222,17 +47643,17 @@
     },
     {
       "path": "src/ocr/prepareImage.js",
-      "lines": 161,
+      "lines": 50,
       "extension": ".js",
-      "jsdocBlockCount": 9,
-      "sourceSummary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy (lineRemova",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 30,
+          "line": 13,
           "kind": "static"
         },
         {
@@ -47240,60 +47661,50 @@
           "specifiers": [
             "isOcrLineRemovalEnabled"
           ],
-          "line": 31,
+          "line": 14,
           "kind": "static"
         },
         {
-          "source": "./lineRemoval.js",
+          "source": "./imagePreparer.js",
           "specifiers": [
-            "removeRulingLinesAsync"
+            "getOcrImagePreparer"
           ],
-          "line": 32,
+          "line": 15,
+          "kind": "static"
+        },
+        {
+          "source": "./prepareImageCore.js",
+          "specifiers": [
+            "OCR_LINE_REMOVAL_MAX_PIXELS",
+            "prepareOcrImageCore"
+          ],
+          "line": 16,
           "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
-          "kind": "variable",
-          "line": 37
+          "kind": "named",
+          "source": null,
+          "line": 18
         },
         {
           "name": "prepareOcrImage",
           "kind": "function",
-          "line": 106
+          "line": 34
         }
       ],
       "declarations": [
         {
-          "name": "defaultDecode",
-          "kind": "function",
-          "line": 40
-        },
-        {
-          "name": "defaultCreateCanvas",
-          "kind": "function",
-          "line": 50
-        },
-        {
-          "name": "releaseCanvas",
-          "kind": "function",
-          "line": 62
-        },
-        {
-          "name": "encodeCanvas",
-          "kind": "function",
-          "line": 76
-        },
-        {
           "name": "prepareOcrImage",
           "kind": "function",
-          "line": 106
+          "line": 34
         },
         {
-          "name": "measured",
+          "name": "request",
           "kind": "object",
-          "line": 128
+          "line": 44
         }
       ],
       "parseError": null,
@@ -47303,141 +47714,13 @@
       },
       "doclets": [
         {
-          "id": "CLEANED_IMAGE_TYPE",
-          "name": "CLEANED_IMAGE_TYPE",
-          "longname": "CLEANED_IMAGE_TYPE",
-          "kind": "constant",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 35,
-          "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "OCR_LINE_REMOVAL_MAX_PIXELS",
-          "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
-          "longname": "OCR_LINE_REMOVAL_MAX_PIXELS",
-          "kind": "constant",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 37,
-          "description": "Pages with more pixels than this are recognised as they are (no copy): bounds the peak memory.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "defaultDecode",
-          "name": "defaultDecode",
-          "longname": "defaultDecode",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 40,
-          "description": "",
-          "params": [
-            {
-              "name": "blob",
-              "type": "Blob",
-              "optional": false,
-              "description": "@returns {Promise&lt;(ImageBitmap|null)&gt;} null when the browser cannot decode."
-            }
-          ],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "defaultCreateCanvas",
-          "name": "defaultCreateCanvas",
-          "longname": "defaultCreateCanvas",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 50,
-          "description": "",
-          "params": [
-            {
-              "name": "width",
-              "type": "number",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "height",
-              "type": "number",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "OffscreenCanvas|HTMLCanvasElement|null",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "releaseCanvas",
-          "name": "releaseCanvas",
-          "longname": "releaseCanvas",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 62,
-          "description": "Free the canvas backing store.",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "encodeCanvas",
-          "name": "encodeCanvas",
-          "longname": "encodeCanvas",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 76,
-          "description": "",
-          "params": [
-            {
-              "name": "canvas",
-              "type": "OffscreenCanvas|HTMLCanvasElement",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "Promise.<Blob>",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "PreparedOcrImage",
-          "name": "PreparedOcrImage",
-          "longname": "PreparedOcrImage",
-          "kind": "typedef",
-          "scope": "global",
-          "file": "src/ocr/prepareImage.js",
-          "line": 86,
-          "description": "",
-          "params": [],
-          "returns": [],
-          "examples": 0
-        },
-        {
           "id": "prepareOcrImage",
           "name": "prepareOcrImage",
           "longname": "prepareOcrImage",
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/prepareImage.js",
-          "line": 106,
+          "line": 34,
           "description": "",
           "params": [
             {
@@ -47471,6 +47754,373 @@
               "description": "Default OCR_LINE_REMOVAL_MAX_PIXELS."
             },
             {
+              "name": "options.preparer",
+              "type": "Object|null",
+              "optional": true,
+              "description": "An OcrImagePreparer (imagePreparer.js); default the shared one (getOcrImagePreparer); null runs the core on the main thread."
+            },
+            {
+              "name": "options.decode",
+              "type": "function",
+              "optional": false,
+              "description": "Test seam (main thread)."
+            },
+            {
+              "name": "options.createCanvas",
+              "type": "function",
+              "optional": false,
+              "description": "Test seam (main thread)."
+            },
+            {
+              "name": "options.removeLines",
+              "type": "function",
+              "optional": false,
+              "description": "Test seam (main thread)."
+            },
+            {
+              "name": "options.log",
+              "type": "Object",
+              "optional": true,
+              "description": "Logger with warn and debug for the main-thread path."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<Object>",
+              "description": "A PreparedOcrImage (prepareImageCore.js). Rejects only when the image cannot be decoded."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/ocr",
+      "localImports": [
+        {
+          "source": "../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 13,
+          "kind": "static",
+          "resolved": "src/logging/systemLogger.js"
+        },
+        {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "isOcrLineRemovalEnabled"
+          ],
+          "line": 14,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "./imagePreparer.js",
+          "specifiers": [
+            "getOcrImagePreparer"
+          ],
+          "line": 15,
+          "kind": "static",
+          "resolved": "src/ocr/imagePreparer.js"
+        },
+        {
+          "source": "./prepareImageCore.js",
+          "specifiers": [
+            "OCR_LINE_REMOVAL_MAX_PIXELS",
+            "prepareOcrImageCore"
+          ],
+          "line": 16,
+          "kind": "static",
+          "resolved": "src/ocr/prepareImageCore.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 21,
+      "summary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/ocr/prepareImageCore.js",
+      "lines": 181,
+      "extension": ".js",
+      "jsdocBlockCount": 11,
+      "sourceSummary": "The image preparation itself, written for both threads: the dedicated worker (src/ocr/prepareWorker.js) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de",
+      "imports": [
+        {
+          "source": "./lineRemoval.js",
+          "specifiers": [
+            "removeRulingLinesAsync"
+          ],
+          "line": 37,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
+          "kind": "variable",
+          "line": 42
+        },
+        {
+          "name": "defaultDecode",
+          "kind": "function",
+          "line": 45
+        },
+        {
+          "name": "defaultCreateCanvas",
+          "kind": "function",
+          "line": 58
+        },
+        {
+          "name": "canPrepareImagesHere",
+          "kind": "function",
+          "line": 70
+        },
+        {
+          "name": "prepareOcrImageCore",
+          "kind": "function",
+          "line": 126
+        }
+      ],
+      "declarations": [
+        {
+          "name": "defaultDecode",
+          "kind": "function",
+          "line": 45
+        },
+        {
+          "name": "defaultCreateCanvas",
+          "kind": "function",
+          "line": 58
+        },
+        {
+          "name": "canPrepareImagesHere",
+          "kind": "function",
+          "line": 70
+        },
+        {
+          "name": "releaseCanvas",
+          "kind": "function",
+          "line": 75
+        },
+        {
+          "name": "encodeCanvas",
+          "kind": "function",
+          "line": 89
+        },
+        {
+          "name": "prepareOcrImageCore",
+          "kind": "function",
+          "line": 126
+        },
+        {
+          "name": "measured",
+          "kind": "object",
+          "line": 148
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "CLEANED_IMAGE_TYPE",
+          "name": "CLEANED_IMAGE_TYPE",
+          "longname": "CLEANED_IMAGE_TYPE",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 40,
+          "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_LINE_REMOVAL_MAX_PIXELS",
+          "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
+          "longname": "OCR_LINE_REMOVAL_MAX_PIXELS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 42,
+          "description": "Pages with more pixels than this are recognised as they are (no copy): bounds the peak memory.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "defaultDecode",
+          "name": "defaultDecode",
+          "longname": "defaultDecode",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 45,
+          "description": "",
+          "params": [
+            {
+              "name": "blob",
+              "type": "Blob",
+              "optional": false,
+              "description": "@returns {Promise&lt;(ImageBitmap|null)&gt;} null when the scope cannot decode."
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "defaultCreateCanvas",
+          "name": "defaultCreateCanvas",
+          "longname": "defaultCreateCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 58,
+          "description": "An OffscreenCanvas where the scope has one (every worker that has a canvas at all, and the main thread of current browsers), else a canvas element on the main thread, else nothing.",
+          "params": [
+            {
+              "name": "width",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "height",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "OffscreenCanvas|HTMLCanvasElement|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "canPrepareImagesHere",
+          "name": "canPrepareImagesHere",
+          "longname": "canPrepareImagesHere",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 70,
+          "description": "True when this scope can run the copy step at all (a decoder and a canvas).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "releaseCanvas",
+          "name": "releaseCanvas",
+          "longname": "releaseCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 75,
+          "description": "Free the canvas backing store.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "encodeCanvas",
+          "name": "encodeCanvas",
+          "longname": "encodeCanvas",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 89,
+          "description": "",
+          "params": [
+            {
+              "name": "canvas",
+              "type": "OffscreenCanvas|HTMLCanvasElement",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<Blob>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "PreparedOcrImage",
+          "name": "PreparedOcrImage",
+          "longname": "PreparedOcrImage",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 99,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "PrepareImageLog",
+          "name": "PrepareImageLog",
+          "longname": "PrepareImageLog",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 107,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "prepareOcrImageCore",
+          "name": "prepareOcrImageCore",
+          "longname": "prepareOcrImageCore",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareImageCore.js",
+          "line": 126,
+          "description": "",
+          "params": [
+            {
+              "name": "blob",
+              "type": "Blob",
+              "optional": false,
+              "description": "The rendered page image."
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "options.removeRulingLines",
+              "type": "boolean",
+              "optional": false,
+              "description": "Resolved by the caller ( ocr.removeRulingLines )."
+            },
+            {
+              "name": "options.fallbackSize",
+              "type": "Object",
+              "optional": true,
+              "description": "Used when the scope has no decoder."
+            },
+            {
+              "name": "options.maxPixels",
+              "type": "number",
+              "optional": true,
+              "description": "Default OCR_LINE_REMOVAL_MAX_PIXELS."
+            },
+            {
               "name": "options.decode",
               "type": "function",
               "optional": false,
@@ -47486,13 +48136,13 @@
               "name": "options.removeLines",
               "type": "function",
               "optional": false,
-              "description": "Injectable for tests (default removeRulingLinesAsync)."
+              "description": "Default removeRulingLinesAsync; the worker passes the synchronous removal, since it has nothing to keep responsive."
             },
             {
               "name": "options.log",
-              "type": "Object",
+              "type": "PrepareImageLog",
               "optional": true,
-              "description": "Logger with warn and debug ."
+              "description": "Where debug lines and the one warning go."
             }
           ],
           "returns": [
@@ -47507,37 +48157,139 @@
       "moduleKey": "src/ocr",
       "localImports": [
         {
-          "source": "../logging/systemLogger.js",
-          "specifiers": [
-            "logger"
-          ],
-          "line": 30,
-          "kind": "static",
-          "resolved": "src/logging/systemLogger.js"
-        },
-        {
-          "source": "../utils/runtimeConfig.js",
-          "specifiers": [
-            "isOcrLineRemovalEnabled"
-          ],
-          "line": 31,
-          "kind": "static",
-          "resolved": "src/utils/runtimeConfig.js"
-        },
-        {
           "source": "./lineRemoval.js",
           "specifiers": [
             "removeRulingLinesAsync"
           ],
-          "line": 32,
+          "line": 37,
           "kind": "static",
           "resolved": "src/ocr/lineRemoval.js"
         }
       ],
       "packageImports": [],
-      "incomingLocalImports": 1,
-      "importanceScore": 43,
-      "summary": "Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when `ocr.removeRulingLines` is on (the default), removes the ruling lines of tables and forms on a private copy (lineRemova",
+      "incomingLocalImports": 3,
+      "importanceScore": 74,
+      "summary": "The image preparation itself, written for both threads: the dedicated worker (src/ocr/prepareWorker.js) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/ocr/prepareWorker.js",
+      "lines": 76,
+      "extension": ".js",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "OpenDocViewer — OCR image preparation worker.",
+      "imports": [
+        {
+          "source": "./lineRemoval.js",
+          "specifiers": [
+            "removeRulingLines"
+          ],
+          "line": 27,
+          "kind": "static"
+        },
+        {
+          "source": "./prepareImageCore.js",
+          "specifiers": [
+            "canPrepareImagesHere",
+            "prepareOcrImageCore"
+          ],
+          "line": 28,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "handlePrepareRequest",
+          "kind": "function",
+          "line": 47
+        }
+      ],
+      "declarations": [
+        {
+          "name": "createLogCollector",
+          "kind": "function",
+          "line": 34
+        },
+        {
+          "name": "handlePrepareRequest",
+          "kind": "function",
+          "line": 47
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "createLogCollector",
+          "name": "createLogCollector",
+          "longname": "createLogCollector",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareWorker.js",
+          "line": 34,
+          "description": "Collects the core's log lines for the reply.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "handlePrepareRequest",
+          "name": "handlePrepareRequest",
+          "longname": "handlePrepareRequest",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/prepareWorker.js",
+          "line": 47,
+          "description": "",
+          "params": [
+            {
+              "name": "request",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<Object>",
+              "description": "The reply, never a rejection."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/ocr",
+      "localImports": [
+        {
+          "source": "./lineRemoval.js",
+          "specifiers": [
+            "removeRulingLines"
+          ],
+          "line": 27,
+          "kind": "static",
+          "resolved": "src/ocr/lineRemoval.js"
+        },
+        {
+          "source": "./prepareImageCore.js",
+          "specifiers": [
+            "canPrepareImagesHere",
+            "prepareOcrImageCore"
+          ],
+          "line": 28,
+          "kind": "static",
+          "resolved": "src/ocr/prepareImageCore.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 0,
+      "importanceScore": 11,
+      "summary": "OpenDocViewer — OCR image preparation worker.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -105350,7 +106102,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 56,
+      "line": 57,
       "description": "",
       "params": [
         {
@@ -105435,7 +106187,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 29,
+      "line": 30,
       "description": "Idle time after which the OCR worker is terminated to free its memory.",
       "params": [],
       "returns": [],
@@ -105448,7 +106200,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 79,
+      "line": 80,
       "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
       "params": [],
       "returns": [],
@@ -111110,6 +111862,189 @@
       "examples": 0
     },
     {
+      "id": "createOcrImagePreparer",
+      "name": "createOcrImagePreparer",
+      "longname": "createOcrImagePreparer",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 74,
+      "description": "",
+      "params": [
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": true,
+          "description": "Injectable for tests; the defaults are the real worker and timers."
+        },
+        {
+          "name": "options.createWorker",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options.workersSupported",
+          "type": "boolean",
+          "optional": true,
+          "description": "Default: typeof Worker === 'function' ."
+        },
+        {
+          "name": "options.prepareOnMainThread",
+          "type": "function",
+          "optional": false,
+          "description": "Default prepareOcrImageCore."
+        },
+        {
+          "name": "options.idleMs",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "options.maxFailures",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "options.requestTimeoutMs",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "options.log",
+          "type": "Object",
+          "optional": true,
+          "description": "Logger with debug and warn ."
+        },
+        {
+          "name": "options.setTimer",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options.clearTimer",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "OcrImagePreparer",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "disposeOcrImagePreparer",
+      "name": "disposeOcrImagePreparer",
+      "longname": "disposeOcrImagePreparer",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 258,
+      "description": "End the shared preparer's worker (useOcrTextLayers.js on unmount); the next use makes a new one.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "getOcrImagePreparer",
+      "name": "getOcrImagePreparer",
+      "longname": "getOcrImagePreparer",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 252,
+      "description": "The viewer's one preparer, created on first use (prepareImage.js, the benchmarks).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_IMAGE_PREPARER_IDLE_MS",
+      "name": "OCR_IMAGE_PREPARER_IDLE_MS",
+      "longname": "OCR_IMAGE_PREPARER_IDLE_MS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 42,
+      "description": "Idle time after which the preparation worker is terminated (restarted by the next page).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+      "name": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+      "longname": "OCR_IMAGE_PREPARER_MAX_FAILURES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 44,
+      "description": "Worker failures after which the session prepares on the main thread only.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+      "name": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+      "longname": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 51,
+      "description": "Longest wait for one reply before the worker counts as failed.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OcrImagePreparer",
+      "name": "OcrImagePreparer",
+      "longname": "OcrImagePreparer",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 53,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createOcrImagePreparer~redoPendingOnMainThread",
+      "name": "redoPendingOnMainThread",
+      "longname": "createOcrImagePreparer~redoPendingOnMainThread",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 130,
+      "description": "Finish every pending request on the main thread (the worker is gone or going).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createOcrImagePreparer~takePending",
+      "name": "takePending",
+      "longname": "createOcrImagePreparer~takePending",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/ocr/imagePreparer.js",
+      "line": 121,
+      "description": "Take a request out of the map, its reply timer with it.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "KNOWN_OCR_LANGUAGES",
       "name": "KNOWN_OCR_LANGUAGES",
       "longname": "KNOWN_OCR_LANGUAGES",
@@ -111849,128 +112784,13 @@
       "examples": 0
     },
     {
-      "id": "CLEANED_IMAGE_TYPE",
-      "name": "CLEANED_IMAGE_TYPE",
-      "longname": "CLEANED_IMAGE_TYPE",
-      "kind": "constant",
-      "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 35,
-      "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "defaultCreateCanvas",
-      "name": "defaultCreateCanvas",
-      "longname": "defaultCreateCanvas",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 50,
-      "description": "",
-      "params": [
-        {
-          "name": "width",
-          "type": "number",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "height",
-          "type": "number",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "OffscreenCanvas|HTMLCanvasElement|null",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "defaultDecode",
-      "name": "defaultDecode",
-      "longname": "defaultDecode",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 40,
-      "description": "",
-      "params": [
-        {
-          "name": "blob",
-          "type": "Blob",
-          "optional": false,
-          "description": "@returns {Promise&lt;(ImageBitmap|null)&gt;} null when the browser cannot decode."
-        }
-      ],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "encodeCanvas",
-      "name": "encodeCanvas",
-      "longname": "encodeCanvas",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 76,
-      "description": "",
-      "params": [
-        {
-          "name": "canvas",
-          "type": "OffscreenCanvas|HTMLCanvasElement",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "Promise.<Blob>",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "OCR_LINE_REMOVAL_MAX_PIXELS",
-      "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
-      "longname": "OCR_LINE_REMOVAL_MAX_PIXELS",
-      "kind": "constant",
-      "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 37,
-      "description": "Pages with more pixels than this are recognised as they are (no copy): bounds the peak memory.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "PreparedOcrImage",
-      "name": "PreparedOcrImage",
-      "longname": "PreparedOcrImage",
-      "kind": "typedef",
-      "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 86,
-      "description": "",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
       "id": "prepareOcrImage",
       "name": "prepareOcrImage",
       "longname": "prepareOcrImage",
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/prepareImage.js",
-      "line": 106,
+      "line": 34,
       "description": "",
       "params": [
         {
@@ -112004,6 +112824,226 @@
           "description": "Default OCR_LINE_REMOVAL_MAX_PIXELS."
         },
         {
+          "name": "options.preparer",
+          "type": "Object|null",
+          "optional": true,
+          "description": "An OcrImagePreparer (imagePreparer.js); default the shared one (getOcrImagePreparer); null runs the core on the main thread."
+        },
+        {
+          "name": "options.decode",
+          "type": "function",
+          "optional": false,
+          "description": "Test seam (main thread)."
+        },
+        {
+          "name": "options.createCanvas",
+          "type": "function",
+          "optional": false,
+          "description": "Test seam (main thread)."
+        },
+        {
+          "name": "options.removeLines",
+          "type": "function",
+          "optional": false,
+          "description": "Test seam (main thread)."
+        },
+        {
+          "name": "options.log",
+          "type": "Object",
+          "optional": true,
+          "description": "Logger with warn and debug for the main-thread path."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<Object>",
+          "description": "A PreparedOcrImage (prepareImageCore.js). Rejects only when the image cannot be decoded."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "canPrepareImagesHere",
+      "name": "canPrepareImagesHere",
+      "longname": "canPrepareImagesHere",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 70,
+      "description": "True when this scope can run the copy step at all (a decoder and a canvas).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "CLEANED_IMAGE_TYPE",
+      "name": "CLEANED_IMAGE_TYPE",
+      "longname": "CLEANED_IMAGE_TYPE",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 40,
+      "description": "The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "defaultCreateCanvas",
+      "name": "defaultCreateCanvas",
+      "longname": "defaultCreateCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 58,
+      "description": "An OffscreenCanvas where the scope has one (every worker that has a canvas at all, and the main thread of current browsers), else a canvas element on the main thread, else nothing.",
+      "params": [
+        {
+          "name": "width",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "OffscreenCanvas|HTMLCanvasElement|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "defaultDecode",
+      "name": "defaultDecode",
+      "longname": "defaultDecode",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 45,
+      "description": "",
+      "params": [
+        {
+          "name": "blob",
+          "type": "Blob",
+          "optional": false,
+          "description": "@returns {Promise&lt;(ImageBitmap|null)&gt;} null when the scope cannot decode."
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "encodeCanvas",
+      "name": "encodeCanvas",
+      "longname": "encodeCanvas",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 89,
+      "description": "",
+      "params": [
+        {
+          "name": "canvas",
+          "type": "OffscreenCanvas|HTMLCanvasElement",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<Blob>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "OCR_LINE_REMOVAL_MAX_PIXELS",
+      "name": "OCR_LINE_REMOVAL_MAX_PIXELS",
+      "longname": "OCR_LINE_REMOVAL_MAX_PIXELS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 42,
+      "description": "Pages with more pixels than this are recognised as they are (no copy): bounds the peak memory.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "PreparedOcrImage",
+      "name": "PreparedOcrImage",
+      "longname": "PreparedOcrImage",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 99,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "PrepareImageLog",
+      "name": "PrepareImageLog",
+      "longname": "PrepareImageLog",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 107,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "prepareOcrImageCore",
+      "name": "prepareOcrImageCore",
+      "longname": "prepareOcrImageCore",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 126,
+      "description": "",
+      "params": [
+        {
+          "name": "blob",
+          "type": "Blob",
+          "optional": false,
+          "description": "The rendered page image."
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "options.removeRulingLines",
+          "type": "boolean",
+          "optional": false,
+          "description": "Resolved by the caller ( ocr.removeRulingLines )."
+        },
+        {
+          "name": "options.fallbackSize",
+          "type": "Object",
+          "optional": true,
+          "description": "Used when the scope has no decoder."
+        },
+        {
+          "name": "options.maxPixels",
+          "type": "number",
+          "optional": true,
+          "description": "Default OCR_LINE_REMOVAL_MAX_PIXELS."
+        },
+        {
           "name": "options.decode",
           "type": "function",
           "optional": false,
@@ -112019,13 +113059,13 @@
           "name": "options.removeLines",
           "type": "function",
           "optional": false,
-          "description": "Injectable for tests (default removeRulingLinesAsync)."
+          "description": "Default removeRulingLinesAsync; the worker passes the synchronous removal, since it has nothing to keep responsive."
         },
         {
           "name": "options.log",
-          "type": "Object",
+          "type": "PrepareImageLog",
           "optional": true,
-          "description": "Logger with warn and debug ."
+          "description": "Where debug lines and the one warning go."
         }
       ],
       "returns": [
@@ -112042,11 +113082,49 @@
       "longname": "releaseCanvas",
       "kind": "function",
       "scope": "global",
-      "file": "src/ocr/prepareImage.js",
-      "line": 62,
+      "file": "src/ocr/prepareImageCore.js",
+      "line": 75,
       "description": "Free the canvas backing store.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createLogCollector",
+      "name": "createLogCollector",
+      "longname": "createLogCollector",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareWorker.js",
+      "line": 34,
+      "description": "Collects the core's log lines for the reply.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "handlePrepareRequest",
+      "name": "handlePrepareRequest",
+      "longname": "handlePrepareRequest",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/prepareWorker.js",
+      "line": 47,
+      "description": "",
+      "params": [
+        {
+          "name": "request",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<Object>",
+          "description": "The reply, never a rejection."
+        }
+      ],
       "examples": 0
     },
     {

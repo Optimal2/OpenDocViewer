@@ -14,7 +14,8 @@
  * memory is released (the next page starts it again). Recognition input is the page image the
  * viewer already rendered (`ensurePageAsset`), so no page is rasterised twice; the module's
  * prepareOcrImage measures it and removes ruling lines on a private copy that is released right
- * after (the displayed image and printing are never touched). With `ocr.speech.autoDetectLanguage`
+ * after (the displayed image and printing are never touched), in the module's preparation
+ * worker, which the hook ends on unmount (src/ocr/imagePreparer.js). With `ocr.speech.autoDetectLanguage`
  * on (the default) each finished page's text is given a language guess among the viewer's OCR
  * languages (src/ocr/detectLanguage.js), which read-aloud and the text layer's
  * `lang` use; the guess is one pass over the page's words.
@@ -158,6 +159,8 @@ export default function useOcrTextLayers({
       runtimeRef.current = null;
       queue.dispose();
       void prober.releaseAll();
+      // The preparation worker is shared by the module; nothing uses it once the queue is gone.
+      ocrModule.disposeOcrImagePreparer?.();
       setSnapshot({ pages: EMPTY_PAGES, engineFailure: null });
     };
   }, [clearIdleTimer, idleShutdownMs, ocrModule]);

@@ -365,8 +365,9 @@ ocr: {
   is `memoryPerWorkerMiB: 110` plus `memoryPerLanguageMiB: 20` with the second model's share
   taken as 20 MiB since it was within that noise; `memoryBudgetFraction: 0.25` and
   `assumedDeviceMemoryGiB: 4` are a chosen margin and an assumption, not measurements; and with
-  three workers the main thread, which prepares every page image (0.37 s per page on average,
-  1.6 s at p90 on ruled table pages), was about half busy with no long task and stalls up to
+  three workers the main thread, which then prepared every page image (0.37 s per page on
+  average, 1.6 s at p90 on ruled table pages; since 2.4.320 the preparation runs in its own
+  worker), was about half busy with no long task and stalls up to
   136 ms. More than four workers are unmeasured for stutter on a strong client, which is what
   `maxWorkerCount: 4` guards; a site with many-core clients should run the benchmark there (its
   `automaticPlan` says what the viewer would choose, next to the measured counts) and raise the
@@ -519,10 +520,20 @@ copy costs about 13 bytes per pixel at its peak (bitmap, canvas, pixel data and 
 mask), so around 110 MB for an A4 page at 300 dpi; a page above 20 million pixels (about A3 at
 300 dpi, or a raster scan at 460 dpi and more) is not copied at all and is recognised as it is,
 which bounds the peak whatever the source's resolution. A page without lines passes through
-untouched, with nothing re-encoded. The step runs on the main thread in bands of rows that hand
-control back to the event loop between them (through `scheduler.yield` or a message task, not a
-timer, so a hidden tab's timer throttling does not stretch it; in a hidden tab it runs straight
-through); it costs a few hundred milliseconds per page at 300 dpi. Limits, stated rather than
+untouched, with nothing re-encoded. The step runs in a dedicated worker of the viewer's origin
+(`src/ocr/prepareWorker.js`), started with the first page and ended after 20 seconds
+without work, so the main thread only hands the image over and receives the copy; the image
+crosses by reference, no pixels are copied on the way. Until 2.4.320 the step ran on the main
+thread, where every engine's request for its next page competed with scrolling, and the
+viewer's worst event-loop lag grew with the number of engines (159 to 385 ms from two to four
+workers on a four-core client, 235 to 1581 ms from four to 24 workers on a 24-thread client,
+measured with the benchmarks below on 2026-11-10). Where the worker scope has no image decoder
+or canvas, or the worker fails twice in a session (a worker that gives no reply within 25
+seconds counts as failed), the step runs on the main thread instead, in
+bands of rows that hand control back to the event loop between them (through `scheduler.yield`
+or a message task, not a timer, so a hidden tab's timer throttling does not stretch it; in a
+hidden tab it runs straight through). It costs a few hundred milliseconds per page at 300 dpi
+on either thread. Limits, stated rather than
 hidden: only solid dark lines are removed; light grey lines and dotted or dashed lines are left
 as they are, and such a page is recognised as it is. The rule cannot tell a long thin stroke of
 real ink from a line: the baseline of connected or cursive handwriting, the stems of a very
@@ -613,8 +624,10 @@ its image from the viewer (`imageMs`, a render when the page had none) and of it
 confidence (a quality proxy when comparing the language and scale variants with `workers-1`:
 fewer words or a lower confidence at the same pages means the variant lost text), the main
 thread's event-loop lag while the run was going (`lagMaxMs`, `stalls` above 100 ms, and long
-tasks where the browser reports them: the image decoding and ruling-line removal run on the
-main thread, more often with more workers) and the page's JS heap where the browser exposes it.
+tasks where the browser reports them: until 2.4.320 the image decoding and ruling-line removal
+ran on the main thread, more often with more workers, which is why older results show the lag
+growing with the worker count; since then they run in the preparation worker) and the page's
+JS heap where the browser exposes it.
 Ticks taken while the tab was hidden are counted as `hiddenSamples` and left out of the lag
 figures, because a browser throttles a hidden tab's timers; a run with hidden samples has lag
 figures for part of the run only, so keep the tab in front for them. The WebAssembly memory of

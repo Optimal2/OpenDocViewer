@@ -31,6 +31,8 @@ vi.mock('../ocr/index.js', async () => {
     createOcrQueue,
     detectTextLanguage,
     prepareOcrImage: async (blob, options) => ({ blob, width: options?.fallbackSize?.width || 0, height: options?.fallbackSize?.height || 0, rulingLinePixels: 0 }),
+    // The hook ends the shared preparation worker on unmount (imagePreparer.test.js has the real one).
+    disposeOcrImagePreparer: () => {},
     createConfiguredOcrEngine: () => {
       const engine = {
         recognize: async (image) => {

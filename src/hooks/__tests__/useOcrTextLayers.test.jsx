@@ -37,6 +37,8 @@ function makeModule(engine, prober) {
     createOcrResultCache,
     planOcrWindow,
     createOcrQueue,
+    // The shared preparation worker (imagePreparer.test.js); the hook only ends it on unmount.
+    disposeOcrImagePreparer: vi.fn(),
     // The language guess the hook wires in for the OCR languages (the real one is in
     // detectLanguage.test.js); here every finished page is Swedish.
     detectTextLanguage: (words, candidates) => ({ language: candidates.includes('sv') ? 'sv' : null, scores: {}, words: words.length }),
@@ -426,15 +428,17 @@ describe('useOcrTextLayers', () => {
     expect(engine.terminate).not.toHaveBeenCalled();
   });
 
-  it('disposes the queue on unmount', async () => {
+  it('disposes the queue and ends the preparation worker on unmount', async () => {
     const engine = makeEngine();
     const prober = makeProber();
     const ocrModule = makeModule(engine, prober);
     await render(baseProps({ ocrModule, allPages: [page('doc', 0)], focusPageIndexes: [0] }));
     await flush();
+    expect(ocrModule.disposeOcrImagePreparer).not.toHaveBeenCalled();
     await act(async () => { root.unmount(); });
     expect(engine.terminate).toHaveBeenCalledTimes(1);
     expect(prober.releaseAll).toHaveBeenCalled();
+    expect(ocrModule.disposeOcrImagePreparer).toHaveBeenCalledTimes(1);
     root = createRoot(container);
   });
 });

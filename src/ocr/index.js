@@ -28,3 +28,7 @@ export { OCR_OUTCOME_SOURCE, OCR_PAGE_STATUS, createOcrQueue } from './queue.js'
 export { DETECTABLE_LANGUAGES, MIN_HITS, RUNNER_UP_RATIO, detectTextLanguage } from './detectLanguage.js';
 export { RULING_LINE_DILATE_PX, createEventLoopYield, removeRulingLines, removeRulingLinesAsync, rulingLineMinRunPx } from './lineRemoval.js';
 export { OCR_LINE_REMOVAL_MAX_PIXELS, prepareOcrImage } from './prepareImage.js';
+export { canPrepareImagesHere, prepareOcrImageCore } from './prepareImageCore.js';
+export {
+  OCR_IMAGE_PREPARER_IDLE_MS, OCR_IMAGE_PREPARER_MAX_FAILURES, createOcrImagePreparer, disposeOcrImagePreparer, getOcrImagePreparer,
+} from './imagePreparer.js';

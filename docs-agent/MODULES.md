@@ -107,7 +107,7 @@ File count: 2. Line count: 4. JSDoc symbol count: 0.
 
 ## src/hooks
 
-File count: 9. Line count: 1348. JSDoc symbol count: 38.
+File count: 9. Line count: 1351. JSDoc symbol count: 38.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
@@ -160,16 +160,16 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 17. Line count: 3886. JSDoc symbol count: 157.
+File count: 20. Line count: 4300. JSDoc symbol count: 171.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+- `src/ocr/prepareImageCore.js` - The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
+- `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
 - `src/ocr/boostBenchmark.js` - Opt\-in OCR \*boost\* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but above the worker counts the viewer itself will ever run.
 - `src/ocr/engine.js` - Thin wrapper around a tesseract.js worker.
-- `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
+- `src/ocr/imagePreparer.js` - Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot.
 - `src/ocr/benchmark.js` - Opt\-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document's pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which
-- `src/ocr/pdfTextWords.js` - Word boxes from a PDF page's own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read\-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/
-- `src/ocr/queue.js` - The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in\-memory cache \(resultCache.js\).
 
 ## src/PerformanceMonitor.jsx
 

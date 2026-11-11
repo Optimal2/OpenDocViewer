@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 17. Line count: 3886. JSDoc symbol count: 157.
+File count: 20. Line count: 4300. JSDoc symbol count: 171.
 
 ## src/ocr/assetUrls.js
 
@@ -136,11 +136,31 @@ Symbols:
 - `createOcrEnginePool~takeIdle` (function) - A free entry now, a new one while under the limit, else null.
 - `createOcrEnginePool~drop` (function) - Terminate one engine and forget it; the next acquisition creates a fresh one in its place.
 
+## src/ocr/imagePreparer.js
+
+Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot.
+
+Exports: `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS`, `createOcrImagePreparer`, `getOcrImagePreparer`, `disposeOcrImagePreparer`
+
+Local imports: `src/logging/systemLogger.js`, `./prepareWorker.js?worker`, `src/ocr/prepareImageCore.js`
+
+Symbols:
+
+- `OCR_IMAGE_PREPARER_IDLE_MS` (constant) - Idle time after which the preparation worker is terminated \(restarted by the next page\).
+- `OCR_IMAGE_PREPARER_MAX_FAILURES` (constant) - Worker failures after which the session prepares on the main thread only.
+- `OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS` (constant) - Longest wait for one reply before the worker counts as failed.
+- `OcrImagePreparer` (typedef) - No description.
+- `createOcrImagePreparer` (function) - No description.
+- `createOcrImagePreparer~takePending` (function) - Take a request out of the map, its reply timer with it.
+- `createOcrImagePreparer~redoPendingOnMainThread` (function) - Finish every pending request on the main thread \(the worker is gone or going\).
+- `getOcrImagePreparer` (function) - The viewer's one preparer, created on first use \(prepareImage.js, the benchmarks\).
+- `disposeOcrImagePreparer` (function) - End the shared preparer's worker \(useOcrTextLayers.js on unmount\); the next use makes a new one.
+
 ## src/ocr/index.js
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`
 
 Local imports: `src/ocr/boostBenchmark.js`
 
@@ -211,22 +231,49 @@ Symbols:
 
 ## src/ocr/prepareImage.js
 
-Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy \(lineRemova
+Turns the viewer's rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy.
 
 Exports: `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`
 
-Local imports: `src/logging/systemLogger.js`, `src/utils/runtimeConfig.js`, `src/ocr/lineRemoval.js`
+Local imports: `src/logging/systemLogger.js`, `src/utils/runtimeConfig.js`, `src/ocr/imagePreparer.js`, `src/ocr/prepareImageCore.js`
+
+Symbols:
+
+- `prepareOcrImage` (function) - No description.
+
+## src/ocr/prepareImageCore.js
+
+The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de
+
+Exports: `OCR_LINE_REMOVAL_MAX_PIXELS`, `defaultDecode`, `defaultCreateCanvas`, `canPrepareImagesHere`, `prepareOcrImageCore`
+
+Local imports: `src/ocr/lineRemoval.js`
 
 Symbols:
 
 - `CLEANED_IMAGE_TYPE` (constant) - The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts.
 - `OCR_LINE_REMOVAL_MAX_PIXELS` (constant) - Pages with more pixels than this are recognised as they are \(no copy\): bounds the peak memory.
 - `defaultDecode` (function) - No description.
-- `defaultCreateCanvas` (function) - No description.
+- `defaultCreateCanvas` (function) - An OffscreenCanvas where the scope has one \(every worker that has a canvas at all, and the main thread of current browsers\), else a canvas element on the main thread, else nothing.
+- `canPrepareImagesHere` (function) - True when this scope can run the copy step at all \(a decoder and a canvas\).
 - `releaseCanvas` (function) - Free the canvas backing store.
 - `encodeCanvas` (function) - No description.
 - `PreparedOcrImage` (typedef) - No description.
-- `prepareOcrImage` (function) - No description.
+- `PrepareImageLog` (typedef) - No description.
+- `prepareOcrImageCore` (function) - No description.
+
+## src/ocr/prepareWorker.js
+
+OpenDocViewer — OCR image preparation worker.
+
+Exports: `handlePrepareRequest`
+
+Local imports: `src/ocr/lineRemoval.js`, `src/ocr/prepareImageCore.js`
+
+Symbols:
+
+- `createLogCollector` (function) - Collects the core's log lines for the reply.
+- `handlePrepareRequest` (function) - No description.
 
 ## src/ocr/queue.js
 

@@ -28,7 +28,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/hooks/useKeyTipsHeld.js` (67 lines) - Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs.
 - `src/hooks/usePageNavigation.js` (182 lines) - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/components/DocumentViewer/hooks/useCompareTransforms.js` (101 lines) - File: src/components/DocumentViewer/hooks/useCompareTransforms.js Viewer\-side access to the free per\-page compare transform kept in the viewer context \(utils/compareTransform.js,...
-- `src/hooks/useOcrTextLayers.js` (226 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
+- `src/hooks/useOcrTextLayers.js` (229 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 
 ### Workers
 
@@ -36,6 +36,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/utils/pageAssetWorkerPool.js` (320 lines) - OpenDocViewer — Page\-asset worker pool.
 - `src/components/DocumentLoader/workerHandler.js` (301 lines) - OpenDocViewer — Worker orchestration & message handling \- Create image workers for off\-main\-thread rasterization/conversion.
 - `src/utils/pdfPageWorkerPool.js` (479 lines) - OpenDocViewer \- PDF page\-image worker pool.
+- `src/ocr/prepareWorker.js` (76 lines) - OpenDocViewer — OCR image preparation worker.
 - `src/workers/pdfWorker.js` (628 lines) - OpenDocViewer \- generated PDF worker.
 - `src/workers/imageWorker.js` (500 lines) - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` (441 lines) - OpenDocViewer \- PDF page image worker.

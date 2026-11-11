@@ -209,4 +209,37 @@ describe('prepareOcrImage', () => {
     expect(prepared.rulingLinePixels).toBe(7);
     expect(prepared.blob).not.toBe(original);
   });
+
+  it('hands the image to the preparer (the worker) with the configuration switch, the fallback size and the pixel bound', async () => {
+    const answer = { blob: original, width: 3, height: 4, rulingLinePixels: 0 };
+    const preparer = { prepare: vi.fn(async () => answer) };
+    const fallbackSize = { width: 10, height: 20 };
+    await expect(prepareOcrImage(original, { preparer, fallbackSize })).resolves.toBe(answer);
+    expect(preparer.prepare).toHaveBeenCalledWith(original, { removeRulingLines: true, fallbackSize, maxPixels: OCR_LINE_REMOVAL_MAX_PIXELS });
+    config.removeRulingLines = false;
+    await prepareOcrImage(original, { preparer, maxPixels: 99 });
+    expect(preparer.prepare).toHaveBeenLastCalledWith(original, { removeRulingLines: false, fallbackSize: null, maxPixels: 99 });
+  });
+
+  it('runs the core on the main thread instead when a seam is injected or the preparer is null', async () => {
+    const preparer = { prepare: vi.fn() };
+    const h = harness({ line: true });
+    const prepared = await prepareOcrImage(original, { preparer, decode: h.decode, createCanvas: h.createCanvas, log: h.log });
+    expect(prepared.rulingLinePixels).toBe(90);
+    expect(preparer.prepare).not.toHaveBeenCalled();
+    // `preparer: null` without seams: the real decoder, which this test environment lacks.
+    const plain = await prepareOcrImage(original, { preparer: null, fallbackSize: { width: 5, height: 6 } });
+    expect(plain).toEqual({ blob: original, width: 5, height: 6, rulingLinePixels: 0 });
+  });
+
+  it('takes the default path, through the shared preparer, to the main thread in a browser without workers', async () => {
+    // jsdom has neither Worker nor createImageBitmap: the shared preparer must choose the main
+    // thread without a worker, and the core must answer with the caller's size.
+    expect(typeof Worker).toBe('undefined');
+    const prepared = await prepareOcrImage(original, { fallbackSize: { width: 11, height: 12 } });
+    expect(prepared).toEqual({ blob: original, width: 11, height: 12, rulingLinePixels: 0 });
+    const { getOcrImagePreparer, disposeOcrImagePreparer } = await import('../imagePreparer.js');
+    expect(getOcrImagePreparer().inspect()).toEqual({ mode: 'main', workerAlive: false, pending: 0, failures: 0 });
+    disposeOcrImagePreparer();
+  });
 });

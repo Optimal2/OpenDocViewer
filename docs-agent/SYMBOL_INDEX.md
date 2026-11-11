@@ -701,9 +701,9 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
-| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:56</code> |  |
-| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:29</code> | Idle time after which the OCR worker is terminated to free its memory. |
-| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:79</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:57</code> |  |
+| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:30</code> | Idle time after which the OCR worker is terminated to free its memory. |
+| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:80</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |
@@ -965,6 +965,15 @@
 | <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:25</code> |  |
 | <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:70</code> | A free entry now, a new one while under the limit, else null. |
 | <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:23</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
+| <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:74</code> |  |
+| <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:258</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
+| <code>getOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:252</code> | The viewer&#39;s one preparer, created on first use \(prepareImage.js, the benchmarks\). |
+| <code>OCR_IMAGE_PREPARER_IDLE_MS</code> | constant | <code>src/ocr/imagePreparer.js:42</code> | Idle time after which the preparation worker is terminated \(restarted by the next page\). |
+| <code>OCR_IMAGE_PREPARER_MAX_FAILURES</code> | constant | <code>src/ocr/imagePreparer.js:44</code> | Worker failures after which the session prepares on the main thread only. |
+| <code>OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS</code> | constant | <code>src/ocr/imagePreparer.js:51</code> | Longest wait for one reply before the worker counts as failed. |
+| <code>OcrImagePreparer</code> | typedef | <code>src/ocr/imagePreparer.js:53</code> |  |
+| <code>createOcrImagePreparer~redoPendingOnMainThread</code> | function | <code>src/ocr/imagePreparer.js:130</code> | Finish every pending request on the main thread \(the worker is gone or going\). |
+| <code>createOcrImagePreparer~takePending</code> | function | <code>src/ocr/imagePreparer.js:121</code> | Take a request out of the map, its reply timer with it. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
 | <code>createEventLoopYield</code> | function | <code>src/ocr/lineRemoval.js:248</code> | Build the function that hands control back to the event loop between bands. |
@@ -996,14 +1005,19 @@
 | <code>pdfTextLayerWords~previous</code> | member | <code>src/ocr/pdfTextWords.js:133</code> | The last placed item&#39;s end, for the seam test. |
 | <code>SEAM_GAP_EM</code> | constant | <code>src/ocr/pdfTextWords.js:51</code> | An item continues the previous one&#39;s word when it starts within this share of the font height after the previous item&#39;s end \(pdf.js writes a space into the string, or a separate s... |
 | <code>UPRIGHT_TOLERANCE</code> | constant | <code>src/ocr/pdfTextWords.js:44</code> | Baselines turned by more than this \(radians\) from the viewport&#39;s x axis get no boxes. |
-| <code>CLEANED_IMAGE_TYPE</code> | constant | <code>src/ocr/prepareImage.js:35</code> | The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts. |
-| <code>defaultCreateCanvas</code> | function | <code>src/ocr/prepareImage.js:50</code> |  |
-| <code>defaultDecode</code> | function | <code>src/ocr/prepareImage.js:40</code> |  |
-| <code>encodeCanvas</code> | function | <code>src/ocr/prepareImage.js:76</code> |  |
-| <code>OCR_LINE_REMOVAL_MAX_PIXELS</code> | constant | <code>src/ocr/prepareImage.js:37</code> | Pages with more pixels than this are recognised as they are \(no copy\): bounds the peak memory. |
-| <code>PreparedOcrImage</code> | typedef | <code>src/ocr/prepareImage.js:86</code> |  |
-| <code>prepareOcrImage</code> | function | <code>src/ocr/prepareImage.js:106</code> |  |
-| <code>releaseCanvas</code> | function | <code>src/ocr/prepareImage.js:62</code> | Free the canvas backing store. |
+| <code>prepareOcrImage</code> | function | <code>src/ocr/prepareImage.js:34</code> |  |
+| <code>canPrepareImagesHere</code> | function | <code>src/ocr/prepareImageCore.js:70</code> | True when this scope can run the copy step at all \(a decoder and a canvas\). |
+| <code>CLEANED_IMAGE_TYPE</code> | constant | <code>src/ocr/prepareImageCore.js:40</code> | The cleaned copy is encoded losslessly: a JPEG round trip would add its own artefacts. |
+| <code>defaultCreateCanvas</code> | function | <code>src/ocr/prepareImageCore.js:58</code> | An OffscreenCanvas where the scope has one \(every worker that has a canvas at all, and the main thread of current browsers\), else a canvas element on the main thread, else nothing. |
+| <code>defaultDecode</code> | function | <code>src/ocr/prepareImageCore.js:45</code> |  |
+| <code>encodeCanvas</code> | function | <code>src/ocr/prepareImageCore.js:89</code> |  |
+| <code>OCR_LINE_REMOVAL_MAX_PIXELS</code> | constant | <code>src/ocr/prepareImageCore.js:42</code> | Pages with more pixels than this are recognised as they are \(no copy\): bounds the peak memory. |
+| <code>PreparedOcrImage</code> | typedef | <code>src/ocr/prepareImageCore.js:99</code> |  |
+| <code>PrepareImageLog</code> | typedef | <code>src/ocr/prepareImageCore.js:107</code> |  |
+| <code>prepareOcrImageCore</code> | function | <code>src/ocr/prepareImageCore.js:126</code> |  |
+| <code>releaseCanvas</code> | function | <code>src/ocr/prepareImageCore.js:75</code> | Free the canvas backing store. |
+| <code>createLogCollector</code> | function | <code>src/ocr/prepareWorker.js:34</code> | Collects the core&#39;s log lines for the reply. |
+| <code>handlePrepareRequest</code> | function | <code>src/ocr/prepareWorker.js:47</code> |  |
 | <code>createOcrQueue~abortJob</code> | function | <code>src/ocr/queue.js:186</code> | Abort one job&#39;s recognition: its worker on a pool, the engine as a whole otherwise. |
 | <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:131</code> |  |
 | <code>createOcrQueue~finish</code> | function | <code>src/ocr/queue.js:321</code> | Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped. |
