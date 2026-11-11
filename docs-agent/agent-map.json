@@ -95,7 +95,7 @@
   },
   "stats": {
     "fileCount": 203,
-    "sourceLineCount": 72999,
+    "sourceLineCount": 73008,
     "docletCount": 2105,
     "documentedFileCount": 199,
     "lowConfidenceSummaryCount": 2,
@@ -887,7 +887,7 @@
           {
             "path": "src/ocr/prepareWorker.js",
             "score": 11,
-            "lines": 76,
+            "lines": 85,
             "summary": "OpenDocViewer — OCR image preparation worker."
           },
           {
@@ -1759,7 +1759,7 @@
     {
       "name": "src/ocr",
       "fileCount": 20,
-      "lineCount": 4310,
+      "lineCount": 4319,
       "docletCount": 171,
       "importantFiles": [
         {
@@ -48175,7 +48175,7 @@
     },
     {
       "path": "src/ocr/prepareWorker.js",
-      "lines": 76,
+      "lines": 85,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "OpenDocViewer — OCR image preparation worker.",
@@ -48185,7 +48185,7 @@
           "specifiers": [
             "removeRulingLines"
           ],
-          "line": 27,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -48194,7 +48194,7 @@
             "canPrepareImagesHere",
             "prepareOcrImageCore"
           ],
-          "line": 28,
+          "line": 33,
           "kind": "static"
         }
       ],
@@ -48202,19 +48202,19 @@
         {
           "name": "handlePrepareRequest",
           "kind": "function",
-          "line": 47
+          "line": 52
         }
       ],
       "declarations": [
         {
           "name": "createLogCollector",
           "kind": "function",
-          "line": 34
+          "line": 39
         },
         {
           "name": "handlePrepareRequest",
           "kind": "function",
-          "line": 47
+          "line": 52
         }
       ],
       "parseError": null,
@@ -48232,7 +48232,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/prepareWorker.js",
-          "line": 34,
+          "line": 39,
           "description": "Collects the core's log lines for the reply.",
           "params": [],
           "returns": [],
@@ -48245,7 +48245,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/prepareWorker.js",
-          "line": 47,
+          "line": 52,
           "description": "",
           "params": [
             {
@@ -48271,7 +48271,7 @@
           "specifiers": [
             "removeRulingLines"
           ],
-          "line": 27,
+          "line": 32,
           "kind": "static",
           "resolved": "src/ocr/lineRemoval.js"
         },
@@ -48281,7 +48281,7 @@
             "canPrepareImagesHere",
             "prepareOcrImageCore"
           ],
-          "line": 28,
+          "line": 33,
           "kind": "static",
           "resolved": "src/ocr/prepareImageCore.js"
         }
@@ -113096,7 +113096,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/prepareWorker.js",
-      "line": 34,
+      "line": 39,
       "description": "Collects the core's log lines for the reply.",
       "params": [],
       "returns": [],
@@ -113109,7 +113109,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/prepareWorker.js",
-      "line": 47,
+      "line": 52,
       "description": "",
       "params": [
         {

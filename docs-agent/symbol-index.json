@@ -25479,7 +25479,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareWorker.js",
-    "line": 34,
+    "line": 39,
     "description": "Collects the core's log lines for the reply.",
     "params": [],
     "returns": [],
@@ -25492,7 +25492,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/prepareWorker.js",
-    "line": 47,
+    "line": 52,
     "description": "",
     "params": [
       {

@@ -3,7 +3,8 @@
  * The preparation worker in a window-less scope: a request is answered by id with the clean copy
  * and the core's log lines; a page without lines comes back as the original; a scope without a
  * decoder answers `unsupported` (the main thread takes over); an image that cannot be decoded
- * answers with the error (the page fails, as it always did); other messages are ignored.
+ * answers with the error (the page fails, as it always did); other messages are ignored; and the
+ * requests are handled one at a time, so a page is decoded only once the one before it is done.
  */
 import { afterEach, expect, it, vi } from 'vitest';
 
@@ -37,11 +38,19 @@ function pixels(line) {
   return data;
 }
 
-/** A scope with a decoder and an OffscreenCanvas whose pixels are the page described. */
-function stubScope({ line, decodeError = null }) {
+/**
+ * A scope with a decoder and an OffscreenCanvas whose pixels are the page described. With
+ * `gate`, every decode waits for the test to release it (`gate.release()`), and `gate.started`
+ * counts the decodes begun.
+ */
+function stubScope({ line, decodeError = null, gate = null }) {
   const scope = { postMessage: vi.fn() };
   vi.stubGlobal('self', scope);
   vi.stubGlobal('createImageBitmap', async (blob) => {
+    if (gate) {
+      gate.started += 1;
+      await new Promise((resolve) => { gate.waiting.push(resolve); });
+    }
     if (decodeError) throw decodeError;
     return { width: WIDTH, height: HEIGHT, source: blob, close() {} };
   });
@@ -104,6 +113,28 @@ it('answers unsupported where the scope has no decoder, so the main thread takes
   await import('../prepareWorker.js');
   await scope.onmessage({ data: { type: 'prepare', id: 3, blob: new Blob(['scan']), removeRulingLines: true } });
   expect(scope.postMessage.mock.calls[0][0]).toEqual({ type: 'prepared', id: 3, ok: false, unsupported: true });
+});
+
+it('handles the requests one at a time: the second page is decoded only after the first reply is posted', async () => {
+  const gate = { started: 0, waiting: [], release() { const next = this.waiting.shift(); if (next) next(); } };
+  const scope = stubScope({ line: false, gate });
+  await import('../prepareWorker.js');
+  const first = scope.onmessage({ data: { type: 'prepare', id: 1, blob: new Blob(['a']), removeRulingLines: true } });
+  const second = scope.onmessage({ data: { type: 'prepare', id: 2, blob: new Blob(['b']), removeRulingLines: true } });
+  for (let round = 0; round < 10; round += 1) await Promise.resolve();
+  // Both requests are in, one decode has begun, nothing is answered.
+  expect(gate.started).toBe(1);
+  expect(scope.postMessage).not.toHaveBeenCalled();
+  gate.release();
+  await first;
+  expect(scope.postMessage).toHaveBeenCalledTimes(1);
+  expect(scope.postMessage.mock.calls[0][0]).toMatchObject({ id: 1, ok: true });
+  // Only now does the second page start.
+  for (let round = 0; round < 10; round += 1) await Promise.resolve();
+  expect(gate.started).toBe(2);
+  gate.release();
+  await second;
+  expect(scope.postMessage.mock.calls.map(([reply]) => reply.id)).toEqual([1, 2]);
 });
 
 it('answers with the error when the image cannot be decoded, and ignores other messages', async () => {

@@ -10,7 +10,12 @@
  * of OCR engines. Here nothing waits for it, so the line removal runs straight through without
  * yielding.
  *
- * One request per message; several may be in flight, each answered by its `id`. The worker is
+ * One request per message, each answered by its `id`. The requests are handled one at a time,
+ * in the order they arrive: a decoded page, its canvas copy and its ImageData come to about
+ * 110 MB at the peak for an A4 page at 300 dpi (prepareImageCore.js), and the engine pool may
+ * ask for eight pages at once, so serial handling bounds this worker to one such peak instead
+ * of eight. The engines are not kept waiting by it: a preparation takes about a tenth of a
+ * second against two seconds of recognition per engine. The worker is
  * created by imagePreparer.js only, from the lazy OCR chunk, so with `ocr.enabled` off this
  * file is never fetched. It lives in src/ocr/ rather than src/workers/ because it imports from
  * this folder, and nothing outside the folder may (src/utils/__tests__/ocrLoader.test.js checks). It is a dedicated worker of the viewer's own origin: the image
@@ -68,8 +73,12 @@ export async function handlePrepareRequest(request) {
   }
 }
 
-workerScope.onmessage = async (event) => {
+// The requests queue behind one another; handlePrepareRequest never rejects, so the chain never
+// breaks. The promise is returned for tests, which await one message's reply.
+let chain = Promise.resolve();
+workerScope.onmessage = (event) => {
   const request = event?.data;
-  if (!request || request.type !== 'prepare') return;
-  workerScope.postMessage(await handlePrepareRequest(request));
+  if (!request || request.type !== 'prepare') return undefined;
+  chain = chain.then(() => handlePrepareRequest(request)).then((reply) => { workerScope.postMessage(reply); });
+  return chain;
 };

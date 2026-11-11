@@ -1016,8 +1016,8 @@
 | <code>PrepareImageLog</code> | typedef | <code>src/ocr/prepareImageCore.js:107</code> |  |
 | <code>prepareOcrImageCore</code> | function | <code>src/ocr/prepareImageCore.js:126</code> |  |
 | <code>releaseCanvas</code> | function | <code>src/ocr/prepareImageCore.js:75</code> | Free the canvas backing store. |
-| <code>createLogCollector</code> | function | <code>src/ocr/prepareWorker.js:34</code> | Collects the core&#39;s log lines for the reply. |
-| <code>handlePrepareRequest</code> | function | <code>src/ocr/prepareWorker.js:47</code> |  |
+| <code>createLogCollector</code> | function | <code>src/ocr/prepareWorker.js:39</code> | Collects the core&#39;s log lines for the reply. |
+| <code>handlePrepareRequest</code> | function | <code>src/ocr/prepareWorker.js:52</code> |  |
 | <code>createOcrQueue~abortJob</code> | function | <code>src/ocr/queue.js:186</code> | Abort one job&#39;s recognition: its worker on a pool, the engine as a whole otherwise. |
 | <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:131</code> |  |
 | <code>createOcrQueue~finish</code> | function | <code>src/ocr/queue.js:321</code> | Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped. |

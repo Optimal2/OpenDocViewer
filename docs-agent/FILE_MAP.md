@@ -130,7 +130,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/ocr/pdfTextWords.js</code> | 229 | 1 | 9 | high | Word boxes from a PDF page&#39;s own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/ |
 | <code>src/ocr/prepareImage.js</code> | 50 | 1 | 1 | high | Turns the viewer&#39;s rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy. |
 | <code>src/ocr/prepareImageCore.js</code> | 181 | 3 | 10 | high | The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de |
-| <code>src/ocr/prepareWorker.js</code> | 76 | 0 | 2 | high | OpenDocViewer — OCR image preparation worker. |
+| <code>src/ocr/prepareWorker.js</code> | 85 | 0 | 2 | high | OpenDocViewer — OCR image preparation worker. |
 | <code>src/ocr/queue.js</code> | 391 | 0 | 13 | high | The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in-memory cache \(resultCache.js\). |
 | <code>src/ocr/resultCache.js</code> | 96 | 0 | 3 | high | In-memory cache of OCR outcomes, one entry per document page. |
 | <code>src/ocr/setup.js</code> | 170 | 1 | 6 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
