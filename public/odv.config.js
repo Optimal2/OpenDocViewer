@@ -223,6 +223,21 @@
         pageTimeoutMs: 180000,
         delayBetweenRunsMs: 500
       },
+      // More workers while the user is idle. With OCR on and only the literal true here, the
+      // viewer waits idleAfterMs without input (or for a hidden tab, or for a search over the
+      // whole document that is waiting for pages), then climbs in three steps from the larger of
+      // the cautious count and half the threads towards maxWorkerCount (bounded by the threads
+      // and the memory budget of workerPolicy), recognising a small reference page after each
+      // step: where that takes more than slowdownFraction longer than at the cautious count, the
+      // step before is kept. The first input brings the cautious count back at once; engines
+      // above it finish their page and are released. Each trigger can be closed with false.
+      boost: {
+        enabled: false,
+        idleAfterMs: 4000,
+        maxWorkerCount: 32,
+        slowdownFraction: 0.25,
+        triggers: { idle: true, hidden: true, search: true }
+      },
       // Where the OCR engine, worker and language files are served from. null (default) uses the
       // viewer's own ocr/ folder next to the application. A site can point this at a copy of that
       // folder on its own host (same layout; same origin, or CORS-enabled and allowed by the site

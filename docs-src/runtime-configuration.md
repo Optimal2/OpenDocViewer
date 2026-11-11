@@ -292,6 +292,13 @@ ocr: {
   },
   benchmark: { enabled: false }, // true: offer the OCR benchmark under About -> Diagnostics (see below)
   boostBenchmark: { enabled: false }, // true: offer the OCR boost benchmark under About -> Diagnostics (see below)
+  boost: {                     // more workers while the user is idle (see "OCR boost" below)
+    enabled: false,            // only the literal true turns the boost on
+    idleAfterMs: 4000,         // input-free time before the boost may start
+    maxWorkerCount: 32,        // ceiling of the boost; the threads and the memory budget bound it further
+    slowdownFraction: 0.25,    // how much longer the reference page may take before the climb stops
+    triggers: { idle: true, hidden: true, search: true } // the ways in; false closes one
+  },
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
 }
 ```
@@ -445,6 +452,21 @@ ocr: {
   titles) is guessed by its majority. `true` by default; only the boolean literal
   `false` turns the guess off, and the read-aloud language then follows the UI language unless
   the user picks one. The key means nothing while OCR is off.
+- `ocr.boost`: more workers while the user is idle; see "OCR boost (opt-in)" below for the
+  model and the measurements behind it. `enabled` is `false` by default and only the boolean
+  literal `true` turns it on, and only while OCR itself is on. `idleAfterMs` (`4000`, 500 to
+  600000) is how long the window must see no pointer, key, wheel or touch input before the
+  boost may start; `maxWorkerCount` (`32`, 1 to 32) is its ceiling, which the client's logical
+  threads and the memory budget of `ocr.workerPolicy` bound further; `slowdownFraction`
+  (`0.25`, 0.05 to 2) is how much longer the reference page may take to recognise than at the
+  cautious count before the climb stops; and `triggers` opens or closes the three ways in
+  (`idle`: the input-free time; `hidden`: the tab going into the background; `search`: the
+  toolbar's search over the whole document waiting for pages), each open unless it is the
+  literal `false`. A number out of range is clamped to the nearest bound; a value that is not a
+  finite number gets the default. The boost needs the automatic worker count: with a manual
+  `ocr.workerCount` it stays off, as it does on a client with no room above the cautious count
+  (the memory budget binds first on a browser that reports no device memory). The key means
+  nothing while OCR is off.
 - `ocr.assetBaseUrl`: where the engine, worker and language files are served from. `null`
   (default) uses the viewer's own `ocr/` folder next to the application. A site can point this at
   a copy of that folder on its own host (same layout, see `docs-src/deploy-ops.md`) to keep the
@@ -701,6 +723,53 @@ queue pauses while the run is going (pages already in flight finish first), so t
 compete for cores. The run measures maximum throughput, so the UI may freeze while it is going:
 keep the tab visible, since a browser throttles a hidden tab's timers. The boost benchmark lives
 in the OCR module: with the key off nothing of it is loaded or shown.
+
+### OCR boost (opt-in)
+
+OCR runs in one mode with two states. While the user interacts, the *cautious* state applies:
+the automatic worker count of `ocr.workerPolicy`, the cores less one and at most eight, which
+keeps the page responsive. With `ocr.boost.enabled` the viewer may use more of the machine while
+nothing is happening, and it decides how much by measuring rather than by counting threads: a
+browser reports logical threads only, and the boost benchmark showed that physical cores govern
+(a 24-thread client with twelve cores stopped paying off between eight and twelve workers, an
+18-core client without SMT scaled to eighteen).
+
+The ways in are the configured `triggers`: no input on the window for `idleAfterMs`, the tab
+going into the background, or the toolbar's search over the whole document waiting for pages.
+Each applies only while more pages are pending than the cautious count can take at once, so a
+short window never boosts and neither does a document that is done. The first pointer, key,
+wheel or touch input ends the boosted state at once: the ceiling goes back to the cautious
+count, the engines above it finish the page they hold and are released, and a measurement still
+under way is ignored. The end of the work ends it too.
+
+The climb: from the cautious count, the viewer first goes to the larger of that count and half
+the logical threads, then to the maximum in three steps of equal size (the distance divided by
+three, rounded up, the last step clipped to the maximum). The maximum is the thread count,
+bounded by the memory budget of `ocr.workerPolicy` (`memoryBudgetFraction` of the device
+memory over what one engine takes) and by `ocr.boost.maxWorkerCount`. On a 24-thread client
+with a cautious count of eight that is 12, 16, 20 and 24; on a four-core client with a cautious
+count of three it is a single step to four; on a dual-core client, from one to two.
+
+The yardstick: a small synthetic reference page (two lines of text on white, drawn on a canvas
+once per session; no page of the document is kept for it) is recognised once at the cautious
+count while the engines work, and once more after every step, on whichever engine is free. The
+recognition's own time, without the wait for the engine or the engine's start, rises when the
+engines share cores. When it rises by more than `slowdownFraction` over the first measurement,
+the level before is restored and the climb ends there. More workers would still raise the total
+throughput for a while (on the 24-thread client to 16, on the 18-core client to 18), but each
+would bring less (25 pages per minute per worker at eight, 17 at sixteen on the 24-thread
+client) and cost the same memory. A later idle period starts at the level found and confirms it
+with one probe; a level that has become too slow falls back one step. Against the measurements
+the climb settles at about twelve on the 24-thread client, eighteen on the 18-core client and
+three (no boost) on the four-core one.
+
+With the boost on, the engine is always a pool (src/ocr/enginePool.js), even for a cautious
+count of one, so it can grow; the control itself is src/ocr/boost.js, the reference page
+src/ocr/referencePage.js, and the triggers live in the hook that owns the OCR queue
+(src/hooks/useOcrTextLayers.js). With the key off none of it listens to anything, and the
+cautious count applies throughout. The state (cautious, rising, boosted; the level; the probes)
+is logged at debug level and exposed by the hook as `ocrBoost`; a visible indicator and a
+button to ask for the boost by hand are planned, not shipped.
 
 ### CSP for OCR
 

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 9. Line count: 1351. JSDoc symbol count: 38.
+File count: 9. Line count: 1526. JSDoc symbol count: 45.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -61,15 +61,22 @@ Symbols:
 
 Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 
-Exports: `OCR_IDLE_SHUTDOWN_MS`, `useOcrTextLayers`
+Exports: `OCR_IDLE_SHUTDOWN_MS`, `OCR_BOOST_ACTIVITY_EVENTS`, `useOcrTextLayers`
 
 Local imports: `src/logging/systemLogger.js`, `src/utils/ocrPageKey.js`, `src/utils/runtimeConfig.js`, `src/utils/ocrLanguageCodes.js`
 
 Symbols:
 
 - `OCR_IDLE_SHUTDOWN_MS` (constant) - Idle time after which the OCR worker is terminated to free its memory.
+- `OCR_BOOST_ACTIVITY_EVENTS` (constant) - Window events that count as input for the boost: they end the boosted state and restart the idle clock.
+- `readBoostConfig` (function) - No description.
+- `reportedThreads` (function) - No description.
 - `module.exports` (function) - No description.
+- `useOcrTextLayers~boostRef` (constant) - The boost control and its triggers while the boost is on: \{ controller, onPlanned, detach \} .
+- `useOcrTextLayers~planRef` (constant) - What the last window plan decided, for the boost to read and to restore.
 - `useOcrTextLayers~windowIndexesRef` (constant) - Viewer indexes of the current window \(focus pages and neighbours\): never released.
+- `attachBoost` (function) - Create the boost control and its triggers for one runtime.
+- `onPlanned` (function) - After a window plan \(or a search opening\): the search's way in, while it waits for pages.
 
 ## src/hooks/usePageNavigation.js
 

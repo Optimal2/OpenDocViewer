@@ -5,8 +5,11 @@
  * engine and queue per session fed the window around the focus pages from the pages whose
  * render exists, outcomes exposed per page key, pages dropped with their document, no new work
  * while paused or before the first page is shown, and the worker released after a minute idle.
- * The module is the real cache/window/queue with a fake engine and prober; page images come
- * from a stubbed fetch.
+ * With `ocr.boost` on, the hook owns the boost's triggers: a pool is asked for, idleness, a
+ * hidden tab and the open search engage the boost control while more pages are pending than the
+ * cautious count, input ends it, and the cases without a boost (off, manual count, no room, no
+ * reference page) listen to nothing. The module is the real cache/window/queue/boost control with
+ * a fake engine and prober; page images come from a stubbed fetch.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
@@ -15,6 +18,7 @@ import useOcrTextLayers, { OCR_IDLE_SHUTDOWN_MS } from '../useOcrTextLayers.js';
 import { createOcrResultCache } from '../../ocr/resultCache.js';
 import { createOcrQueue } from '../../ocr/queue.js';
 import { planOcrWindow } from '../../ocr/window.js';
+import { createOcrBoostController, planOcrBoostLevels } from '../../ocr/boost.js';
 import { makeOcrPageKey } from '../../utils/ocrPageKey.js';
 
 vi.mock('../../logging/systemLogger.js', () => ({ default: { warn: vi.fn(), debug: vi.fn(), info: vi.fn(), error: vi.fn() } }));
@@ -23,20 +27,40 @@ function makeEngine() {
   const pending = [];
   return {
     pending,
-    recognize: vi.fn(() => new Promise((resolve, reject) => { pending.push({ resolve, reject }); })),
+    recognize: vi.fn((image) => new Promise((resolve, reject) => { pending.push({ resolve, reject, image }); })),
     terminate: vi.fn(async () => {}),
     getFailure: () => null,
   };
 }
 
+/** A fake pool: the engine above with the shape the boost control resizes. */
+function makePool() {
+  const pool = makeEngine();
+  pool.size = 1;
+  pool.resize = vi.fn((size) => { pool.size = size; });
+  return pool;
+}
+
+/** The pending recognitions of the reference page (the boost's probes) and of pages. */
+const probesOf = (engine) => engine.pending.filter((entry) => entry.image?.type === 'image/ref');
+const pagesOf = (engine) => engine.pending.filter((entry) => entry.image?.type !== 'image/ref');
+
 function makeModule(engine, prober) {
   return {
     created: 0,
+    createOptions: [],
     prepared: [],
     measured: null,
+    // What createConfiguredOcrEngine reports as the setup (overridden by boost tests).
+    workerCount: undefined,
+    workerPlan: undefined,
+    referencePage: new Blob(['reference'], { type: 'image/ref' }),
     createOcrResultCache,
     planOcrWindow,
     createOcrQueue,
+    planOcrBoostLevels,
+    createOcrBoostController,
+    createOcrReferencePage() { return Promise.resolve(this.referencePage); },
     // The shared preparation worker (imagePreparer.test.js); the hook only ends it on unmount.
     disposeOcrImagePreparer: vi.fn(),
     // The language guess the hook wires in for the OCR languages (the real one is in
@@ -50,9 +74,10 @@ function makeModule(engine, prober) {
       const size = this.measured || options.fallbackSize;
       return { blob, width: size.width, height: size.height, rulingLinePixels: 0 };
     },
-    createConfiguredOcrEngine() {
+    createConfiguredOcrEngine(cfg, options = {}) {
       this.created += 1;
-      return { engine, setup: { languages: ['swe', 'eng'], assetUrls: {}, warnings: [] } };
+      this.createOptions.push(options);
+      return { engine, setup: { languages: ['swe', 'eng'], assetUrls: {}, warnings: [], workerCount: this.workerCount, workerPlan: this.workerPlan }, workerCount: this.workerCount };
     },
     createPdfTextProber: () => prober,
   };
@@ -122,7 +147,7 @@ describe('useOcrTextLayers', () => {
   it('holds an empty map and creates nothing without the module', async () => {
     const props = baseProps({ allPages: [page('doc', 0)], focusPageIndexes: [0] });
     await render(props);
-    expect(latest).toEqual({ ocrPages: {}, ocrEngineFailure: null });
+    expect(latest).toEqual({ ocrPages: {}, ocrEngineFailure: null, ocrBoost: null });
     expect(props.ensurePageAsset).not.toHaveBeenCalled();
     expect(fetchCalls).toEqual([]);
   });
@@ -439,6 +464,216 @@ describe('useOcrTextLayers', () => {
     expect(engine.terminate).toHaveBeenCalledTimes(1);
     expect(prober.releaseAll).toHaveBeenCalled();
     expect(ocrModule.disposeOcrImagePreparer).toHaveBeenCalledTimes(1);
+    root = createRoot(container);
+  });
+});
+
+describe('useOcrTextLayers boost', () => {
+  const BOOST = Object.freeze({ enabled: true, idleAfterMs: 1000, maxWorkerCount: 32, slowdownFraction: 0.25, triggers: { idle: true, hidden: true, search: true } });
+  const sixPages = () => [0, 1, 2, 3, 4, 5].map((index) => page('doc', index));
+
+  /** A module whose configured engine is a pool of one, automatic, with memory for many. */
+  function boostModule(pool) {
+    const ocrModule = makeModule(pool, makeProber());
+    ocrModule.workerCount = 1;
+    ocrModule.workerPlan = { automatic: true, caps: { cores: 3, memory: 63, pages: null, max: 8 } };
+    return ocrModule;
+  }
+
+  const listenersAdded = () => window.addEventListener.mock.calls.filter(([type]) => type === 'pointerdown').length;
+
+  beforeEach(() => {
+    vi.spyOn(window, 'addEventListener');
+    vi.spyOn(window, 'removeEventListener');
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('with the boost off asks for no pool, listens to nothing and exposes no boost state', async () => {
+    const engine = makeEngine();
+    const ocrModule = makeModule(engine, makeProber());
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: null, hardwareThreads: 4 }));
+    await flush();
+    expect(ocrModule.createOptions).toEqual([{}]);
+    expect(listenersAdded()).toBe(0);
+    expect(latest.ocrBoost).toBeNull();
+  });
+
+  it('with the boost on asks for a pool, engages after the idle time while pages wait, and input brings the cautious count back', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    expect(ocrModule.createOptions).toEqual([{ pool: true }]);
+    expect(listenersAdded()).toBe(1);
+    // Cautious 1 on four threads with room for 4: the climb is 2, 3, 4.
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', level: 1, cautious: 1, levels: [2, 3, 4] });
+    // One page in flight at the cautious count, no probe yet.
+    expect(pagesOf(pool)).toHaveLength(1);
+    expect(probesOf(pool)).toHaveLength(0);
+
+    await act(async () => { vi.advanceTimersByTime(999); });
+    expect(probesOf(pool)).toHaveLength(0);
+    await act(async () => { vi.advanceTimersByTime(1); });
+    await flush();
+    // Idle: the baseline probe runs at the cautious count.
+    expect(latest.ocrBoost.state).toBe('rising');
+    expect(probesOf(pool)).toHaveLength(1);
+    expect(pool.resize).not.toHaveBeenCalled();
+    await act(async () => { probesOf(pool)[0].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1000 }); });
+    await flush();
+    // Level 2 applied: the pool grows and a second page starts; the next probe is under way.
+    expect(pool.resize).toHaveBeenLastCalledWith(2);
+    expect(latest.ocrBoost).toMatchObject({ state: 'rising', level: 2 });
+    expect(pagesOf(pool)).toHaveLength(2);
+    expect(probesOf(pool)).toHaveLength(2);
+    await act(async () => { probesOf(pool)[1].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1100 }); });
+    await flush();
+    expect(pool.resize).toHaveBeenLastCalledWith(3);
+    expect(pagesOf(pool)).toHaveLength(3);
+
+    // Input: back to the cautious count at once; the probe of level 3 answers into the void.
+    await act(async () => { window.dispatchEvent(new Event('pointerdown')); });
+    expect(pool.resize).toHaveBeenLastCalledWith(1);
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', level: 1, settledLevel: null });
+    await act(async () => { probesOf(pool)[2].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1150 }); });
+    await flush();
+    expect(pool.resize).toHaveBeenLastCalledWith(1);
+    expect(latest.ocrBoost.state).toBe('cautious');
+    // The pages in flight were not cut short: three are still running, none rejected.
+    expect(pagesOf(pool)).toHaveLength(3);
+    expect(pool.terminate).not.toHaveBeenCalled();
+  });
+
+  it('settles where the reference page slows, and remembers the level across the next idle period', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    await act(async () => { probesOf(pool)[0].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1000 }); });
+    await flush();
+    await act(async () => { probesOf(pool)[1].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1000 }); }); // 2: fine
+    await flush();
+    await act(async () => { probesOf(pool)[2].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1400 }); }); // 3: 40 % slower
+    await flush();
+    expect(pool.resize.mock.calls.map(([size]) => size)).toEqual([2, 3, 2]);
+    expect(latest.ocrBoost).toMatchObject({ state: 'boosted', level: 2, settledLevel: 2 });
+
+    await act(async () => { window.dispatchEvent(new Event('keydown')); });
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', level: 1, settledLevel: 2 });
+    pool.resize.mockClear();
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    await act(async () => { probesOf(pool)[3].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1000 }); });
+    await flush();
+    // Straight to the remembered level, confirmed with one probe.
+    expect(pool.resize.mock.calls.map(([size]) => size)).toEqual([2]);
+    await act(async () => { probesOf(pool)[4].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1050 }); });
+    await flush();
+    expect(latest.ocrBoost).toMatchObject({ state: 'boosted', level: 2, settledLevel: 2 });
+    expect(probesOf(pool)).toHaveLength(5);
+  });
+
+  it('engages at once when the tab is hidden and when the search over the whole document opens, and ends when the search closes', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    const props = baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 });
+    await render(props);
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    // Hidden: no waiting for the idle time.
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(1);
+    expect(latest.ocrBoost.state).toBe('rising');
+    visibility.mockReturnValue('visible');
+    await act(async () => { window.dispatchEvent(new Event('wheel')); });
+    expect(latest.ocrBoost.state).toBe('cautious');
+
+    // The search opens with a term over the whole document: a way in of its own.
+    await render({ ...props, searchOpen: true });
+    await flush();
+    expect(latest.ocrBoost.state).toBe('rising');
+    expect(probesOf(pool)).toHaveLength(2);
+    // The search closes: the boosted state ends with it.
+    await render({ ...props, searchOpen: false });
+    expect(latest.ocrBoost.state).toBe('cautious');
+    visibility.mockRestore();
+  });
+
+  it('does not engage while fewer pages are pending than the cautious count can take, or while paused', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    ocrModule.workerCount = 3;
+    // Three pages for a cautious count of three: nothing to boost for.
+    const props = baseProps({ ocrModule, allPages: [page('doc', 0), page('doc', 1), page('doc', 2)], focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 8 });
+    await render(props);
+    await flush();
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', levels: [4, 6, 8] });
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    expect(latest.ocrBoost.state).toBe('cautious');
+
+    // Six pages, but paused: still nothing.
+    const paused = makePool();
+    const pausedModule = boostModule(paused);
+    await act(async () => { root.unmount(); });
+    root = createRoot(container);
+    await render(baseProps({ ocrModule: pausedModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4, paused: true }));
+    await flush();
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(probesOf(paused)).toHaveLength(0);
+    expect(latest.ocrBoost.state).toBe('cautious');
+  });
+
+  it('leaves the boost out, listening to nothing, for a manual worker count, no room above the cautious count, or no reference page', async () => {
+    const manual = boostModule(makePool());
+    manual.workerPlan = { automatic: false, caps: null };
+    await render(baseProps({ ocrModule: manual, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    expect(manual.createOptions).toEqual([{ pool: true }]);
+    expect(latest.ocrBoost).toBeNull();
+    expect(listenersAdded()).toBe(0);
+
+    await act(async () => { root.unmount(); });
+    root = createRoot(container);
+    const cramped = boostModule(makePool());
+    // Two threads and a cautious count of one, but the memory budget allows one engine only.
+    cramped.workerPlan = { automatic: true, caps: { cores: 1, memory: 1, pages: null, max: 8 } };
+    await render(baseProps({ ocrModule: cramped, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 2 }));
+    await flush();
+    expect(latest.ocrBoost).toBeNull();
+    expect(listenersAdded()).toBe(0);
+
+    await act(async () => { root.unmount(); });
+    root = createRoot(container);
+    const blind = boostModule(makePool());
+    blind.referencePage = null;
+    await render(baseProps({ ocrModule: blind, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    expect(latest.ocrBoost).toBeNull();
+    expect(listenersAdded()).toBe(0);
+  });
+
+  it('removes its listeners, ends the boost and clears the state on unmount', async () => {
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    expect(listenersAdded()).toBe(1);
+    await act(async () => { root.unmount(); });
+    expect(window.removeEventListener.mock.calls.filter(([type]) => type === 'pointerdown')).toHaveLength(1);
     root = createRoot(container);
   });
 });

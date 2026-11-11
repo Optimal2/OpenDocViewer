@@ -19,15 +19,41 @@
  * on (the default) each finished page's text is given a language guess among the viewer's OCR
  * languages (src/ocr/detectLanguage.js), which read-aloud and the text layer's
  * `lang` use; the guess is one pass over the page's words.
+ *
+ * With `ocr.boost.enabled` (off by default) the hook also owns the boost's triggers: the engine
+ * is then always a pool, and a boost control (src/ocr/boost.js) may raise its ceiling above the
+ * cautious count while the user is idle. The ways in are the configured triggers: no input for
+ * `idleAfterMs` (pointer, keys, wheel and touch on the window), a hidden tab, and the toolbar's
+ * search over the whole document waiting for pages (`searchOpen`); each applies only while
+ * more pages are pending than the cautious count can take. The first input ends the boosted
+ * state at once, and so does the end of the work. The control measures with a small synthetic
+ * reference page (src/ocr/referencePage.js), drawn once; where none can be drawn, or where
+ * `ocr.workerCount` is set by hand, or where the client has no room above the cautious count,
+ * there is no boost and nothing listens. The state is exposed as `ocrBoost`.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import logger from '../logging/systemLogger.js';
 import { ocrPageKeyOf } from '../utils/ocrPageKey.js';
-import { getOcrLanguages, isOcrWholeDocumentEnabled, isSpeechLanguageAutoDetectEnabled } from '../utils/runtimeConfig.js';
+import {
+  getOcrLanguages, isOcrBoostEnabled, isOcrWholeDocumentEnabled, isSpeechLanguageAutoDetectEnabled, normalizeOcrBoostConfig,
+} from '../utils/runtimeConfig.js';
 import { speechLanguagesForOcr } from '../utils/ocrLanguageCodes.js';
 
 /** Idle time after which the OCR worker is terminated to free its memory. */
 export const OCR_IDLE_SHUTDOWN_MS = 60000;
+
+/** Window events that count as input for the boost: they end the boosted state and restart the idle clock. */
+export const OCR_BOOST_ACTIVITY_EVENTS = Object.freeze(['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']);
+
+/** @returns {(Object|null)} The boost configuration when the boost is on, else null. */
+function readBoostConfig() {
+  return isOcrBoostEnabled() ? normalizeOcrBoostConfig() : null;
+}
+
+/** @returns {number} `navigator.hardwareConcurrency`, or 0 when unknown. */
+function reportedThreads() {
+  return typeof navigator !== 'undefined' ? Math.max(0, Math.floor(Number(navigator.hardwareConcurrency)) || 0) : 0;
+}
 
 const EMPTY_PAGES = Object.freeze({});
 
@@ -50,9 +76,16 @@ const EMPTY_PAGES = Object.freeze({});
  *   (`ocr.recognizeWholeDocument`); default from the runtime configuration. The outcome cache
  *   is then bounded by the page count, so no planned page's outcome is dropped and recognised
  *   again.
- * @returns {{ ocrPages: Object<string, Object>, ocrEngineFailure: (string|null) }}
+ * @param {boolean=} options.searchOpen  True while the toolbar's search over the whole document
+ *   is open with a term: one of the boost's ways in. Default false.
+ * @param {(Object|null)=} options.boost  The boost configuration (runtimeConfig.js
+ *   normalizeOcrBoostConfig), or null for no boost; default from the runtime configuration.
+ * @param {number=} options.hardwareThreads  Logical threads the boost may plan with; default
+ *   `navigator.hardwareConcurrency`.
+ * @returns {{ ocrPages: Object<string, Object>, ocrEngineFailure: (string|null), ocrBoost: (Object|null) }}
  *   `ocrPages` maps utils/ocrPageKey.js keys to outcomes (`status` done/skipped/failed with
- *   text, words and image size, or a transient queued/probing/recognizing state).
+ *   text, words and image size, or a transient queued/probing/recognizing state). `ocrBoost`
+ *   is the boost control's state (`inspect()` of src/ocr/boost.js), or null without a boost.
  */
 export default function useOcrTextLayers({
   ocrModule,
@@ -65,9 +98,21 @@ export default function useOcrTextLayers({
   releasePageAsset = null,
   idleShutdownMs = OCR_IDLE_SHUTDOWN_MS,
   wholeDocument = isOcrWholeDocumentEnabled(),
+  searchOpen = false,
+  boost = readBoostConfig(),
+  hardwareThreads = reportedThreads(),
 }) {
   const [snapshot, setSnapshot] = useState({ pages: EMPTY_PAGES, engineFailure: null });
+  const [boostState, setBoostState] = useState(/** @type {(Object|null)} */ (null));
   const runtimeRef = useRef(/** @type {(Object|null)} */ (null));
+  /** The boost control and its triggers while the boost is on: `{ controller, onPlanned, detach }`. */
+  const boostRef = useRef(/** @type {(Object|null)} */ (null));
+  /** What the last window plan decided, for the boost to read and to restore. */
+  const planRef = useRef({ concurrency: 1, pending: 0 });
+  const pausedRef = useRef(Boolean(paused) || !ready);
+  pausedRef.current = Boolean(paused) || !ready;
+  const searchOpenRef = useRef(Boolean(searchOpen));
+  searchOpenRef.current = Boolean(searchOpen);
   const allPagesRef = useRef(allPages);
   allPagesRef.current = allPages;
   const ensurePageAssetRef = useRef(ensurePageAsset);
@@ -97,7 +142,9 @@ export default function useOcrTextLayers({
     // up to that many pages at a time, lowered to what the pending pages warrant each time the
     // window is planned (resolveOcrConcurrency), since an engine the queue never reaches is
     // never started.
-    const { engine, setup, workerCount } = ocrModule.createConfiguredOcrEngine();
+    // With the boost on the engine is always a pool, which the boost control resizes.
+    const boostWanted = Boolean(boost?.enabled) && typeof ocrModule.createOcrBoostController === 'function';
+    const { engine, setup, workerCount } = ocrModule.createConfiguredOcrEngine(undefined, boostWanted ? { pool: true } : {});
     const prober = ocrModule.createPdfTextProber({
       readSourceArrayBuffer: (sourceKey) => readSourceRef.current(sourceKey),
     });
@@ -143,6 +190,8 @@ export default function useOcrTextLayers({
       },
       onBusy: clearIdleTimer,
       onIdle: () => {
+        // The work is done: nothing to boost for until more pages come.
+        boostRef.current?.controller.disengage('done');
         clearIdleTimer();
         idleTimerRef.current = setTimeout(() => {
           idleTimerRef.current = null;
@@ -153,17 +202,60 @@ export default function useOcrTextLayers({
       },
     });
     runtimeRef.current = { queue, prober, cache, setup, workerCount };
+    if (boostWanted) {
+      const cautious = Math.max(1, Math.floor(Number(workerCount)) || 1);
+      const plan = setup?.workerPlan;
+      if (plan && plan.automatic === false) {
+        logger.debug('OCR boost is off: ocr.workerCount is set by hand', { workerCount: cautious });
+      } else if (typeof engine.resize !== 'function') {
+        logger.debug('OCR boost is off: the engine is not a pool');
+      } else {
+        const memoryCap = Number.isFinite(Number(plan?.caps?.memory)) ? Number(plan.caps.memory) : Infinity;
+        const max = Math.min(hardwareThreads, memoryCap, boost.maxWorkerCount);
+        const levels = ocrModule.planOcrBoostLevels({ cautious, threads: hardwareThreads, max });
+        if (levels.length === 0) {
+          logger.debug('OCR boost has no room above the cautious count', { cautious, threads: hardwareThreads, memoryCap, maxWorkerCount: boost.maxWorkerCount });
+        } else {
+          // The reference page is drawn once; without a canvas there is no yardstick and no boost.
+          void Promise.resolve(ocrModule.createOcrReferencePage()).then((referencePage) => {
+            if (!active) return;
+            if (!referencePage) {
+              logger.debug('OCR boost is off: no canvas for the reference page');
+              return;
+            }
+            boostRef.current = attachBoost({
+              ocrModule, engine, queue, cautious, levels, referencePage, config: boost, planRef, pausedRef, searchOpenRef,
+              onChange: (next) => { if (active) setBoostState(next); },
+            });
+            setBoostState(boostRef.current.controller.inspect());
+          }, (error) => {
+            logger.debug('OCR boost is off: the reference page could not be drawn', { error: String(error?.message || error) });
+          });
+        }
+      }
+    }
     return () => {
       active = false;
       clearIdleTimer();
       runtimeRef.current = null;
+      boostRef.current?.detach();
+      boostRef.current = null;
+      setBoostState(null);
       queue.dispose();
       void prober.releaseAll();
       // The preparation worker is shared by the module; nothing uses it once the queue is gone.
       ocrModule.disposeOcrImagePreparer?.();
       setSnapshot({ pages: EMPTY_PAGES, engineFailure: null });
     };
-  }, [clearIdleTimer, idleShutdownMs, ocrModule]);
+  }, [boost, clearIdleTimer, hardwareThreads, idleShutdownMs, ocrModule]);
+
+  // The search over the whole document is one of the ways in; it also ends when the search closes.
+  useEffect(() => {
+    const control = boostRef.current;
+    if (!control) return;
+    if (searchOpen) control.onPlanned();
+    else control.controller.disengage('search closed');
+  }, [searchOpen]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
@@ -217,12 +309,95 @@ export default function useOcrTextLayers({
     // feed, the whole document gets the pool's capacity. Set together with the plan, so the
     // limit never pumps the old plan.
     let concurrency;
+    const pending = candidates.filter((entry) => !runtime.cache.has(entry.key)).length;
     if (typeof ocrModule.resolveOcrConcurrency === 'function') {
-      const pending = candidates.filter((entry) => !runtime.cache.has(entry.key)).length;
       concurrency = ocrModule.resolveOcrConcurrency(pending, runtime.setup);
     }
-    runtime.queue.setWindow(candidates, { concurrency });
+    planRef.current = { concurrency: Math.max(1, Math.floor(Number(concurrency ?? runtime.workerCount)) || 1), pending };
+    // While boosted, the boost's level is the limit; the plan's figure is restored with the cautious count.
+    const level = boostRef.current?.controller.level() ?? 0;
+    runtime.queue.setWindow(candidates, { concurrency: level > runtime.workerCount ? level : concurrency });
+    boostRef.current?.onPlanned();
   }, [allPages, focusPageIndexes, ocrModule, ready, wholeDocument]);
 
-  return { ocrPages: snapshot.pages, ocrEngineFailure: snapshot.engineFailure };
+  return { ocrPages: snapshot.pages, ocrEngineFailure: snapshot.engineFailure, ocrBoost: boostState };
+}
+
+/**
+ * Create the boost control and its triggers for one runtime.
+ *
+ * @param {Object} inputs
+ * @returns {{ controller: Object, onPlanned: function(): void, detach: function(): void }}
+ */
+function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage, config, planRef, pausedRef, searchOpenRef, onChange }) {
+  const controller = ocrModule.createOcrBoostController({
+    cautious,
+    levels,
+    slowdownFraction: config.slowdownFraction,
+    log: logger,
+    onChange,
+    // The pool's ceiling and the queue's pages in flight follow the level; back at the cautious
+    // count the queue gets what the last window plan decided for the pending pages.
+    apply: (count) => {
+      engine.resize(count);
+      queue.setConcurrency(count > cautious ? count : planRef.current.concurrency);
+    },
+    // The reference page on whichever engine is free: its own recognition time, without the
+    // wait for the engine or the engine's start (engine.js recognizeMs).
+    probe: () => Promise.resolve(engine.recognize(referencePage)).then((result) => Number(result?.recognizeMs)),
+  });
+  const triggers = config.triggers;
+  let idleTimer = null;
+  const clearIdle = () => {
+    if (idleTimer !== null) {
+      clearTimeout(idleTimer);
+      idleTimer = null;
+    }
+  };
+  // Worth boosting only while more pages are pending than the cautious count can take at once.
+  const hasWork = () => !pausedRef.current && planRef.current.pending > cautious;
+  const tryEngage = (reason) => {
+    if (!hasWork()) return;
+    void controller.engage(reason);
+  };
+  const armIdle = () => {
+    clearIdle();
+    if (!triggers.idle) return;
+    idleTimer = setTimeout(() => {
+      idleTimer = null;
+      tryEngage('idle');
+    }, Math.max(0, Number(config.idleAfterMs) || 0));
+  };
+  const onActivity = () => {
+    controller.disengage('input');
+    armIdle();
+  };
+  const onVisibility = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      if (triggers.hidden) tryEngage('hidden');
+    } else {
+      armIdle();
+    }
+  };
+  const listenerOptions = { passive: true, capture: true };
+  if (typeof window !== 'undefined') {
+    for (const type of OCR_BOOST_ACTIVITY_EVENTS) window.addEventListener(type, onActivity, listenerOptions);
+  }
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility);
+  armIdle();
+  return {
+    controller,
+    /** After a window plan (or a search opening): the search's way in, while it waits for pages. */
+    onPlanned() {
+      if (triggers.search && searchOpenRef.current) tryEngage('search');
+    },
+    detach() {
+      clearIdle();
+      if (typeof window !== 'undefined') {
+        for (const type of OCR_BOOST_ACTIVITY_EVENTS) window.removeEventListener(type, onActivity, listenerOptions);
+      }
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisibility);
+      controller.disengage('unmount');
+    },
+  };
 }

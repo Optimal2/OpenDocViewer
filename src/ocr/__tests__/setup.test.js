@@ -162,6 +162,16 @@ describe('createConfiguredOcrEngine', () => {
     expect(setup.workerPlan).toMatchObject({ automatic: true, caps: { cores: 3, memory: 2, pages: null, max: 8 }, inputs: { languageCount: 2, memoryPerWorkerMiB: 130 } });
   });
 
+  it('builds a pool even for a count of one when asked to (the boost control grows it later)', () => {
+    const { engine, workerCount } = createConfiguredOcrEngine({ ocr: { enabled: true } }, options({ createWorker: vi.fn(), cores: 2, deviceMemoryGiB: 8, pool: true }));
+    expect(workerCount).toBe(1);
+    expect(engine.size).toBe(1);
+    expect(typeof engine.resize).toBe('function');
+    // Anything but the literal true leaves a single engine.
+    const single = createConfiguredOcrEngine({ ocr: { enabled: true } }, options({ createWorker: vi.fn(), cores: 2, deviceMemoryGiB: 8, pool: 'yes' }));
+    expect(single.engine).not.toHaveProperty('size');
+  });
+
   it('builds a pool of the configured size whose engines each start their own worker', async () => {
     const createWorker = vi.fn(async () => ({ recognize: vi.fn(async () => ({ data: { text: '', blocks: [] } })), terminate: vi.fn(async () => {}) }));
     const { engine, workerCount } = createConfiguredOcrEngine(

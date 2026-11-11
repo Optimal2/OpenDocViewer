@@ -2757,6 +2757,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     ensurePageAsset,
     // A page rendered only for OCR (the whole document asked for) is dropped again once read.
     releasePageAsset: releaseOcrPageAsset,
+    // The search over the whole document (open, with a term, not limited to one page) is one of
+    // the boost's ways in (`ocr.boost`); read here, so the hook needs no search state of its own.
+    searchOpen: Boolean(ocrSearch?.term) && !ocrSearch?.onlyPageKey,
   });
   /**
    * @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first.

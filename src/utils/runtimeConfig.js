@@ -383,6 +383,64 @@ export function isOcrBoostBenchmarkEnabled(cfg = getRuntimeConfig()) {
   return isOcrEnabled(cfg) && cfg?.ocr?.boostBenchmark?.enabled === true;
 }
 
+/** Most workers the boost may ever use, whatever a client reports (`ocr.boost.maxWorkerCount` is clamped to it). */
+export const OCR_BOOST_HARD_MAX_WORKER_COUNT = 32;
+
+/**
+ * @typedef {Object} OcrBoostConfig  `ocr.boost`: more workers while the user is idle (src/ocr/boost.js).
+ * @property {boolean} enabled  Only the literal `true` turns the boost on.
+ * @property {number} idleAfterMs  Milliseconds without input before the boost may start.
+ * @property {number} maxWorkerCount  Ceiling of the boost; the thread count and the memory budget bound it further.
+ * @property {number} slowdownFraction  How much longer the reference page may take before the climb stops.
+ * @property {{ idle: boolean, hidden: boolean, search: boolean }} triggers  Which of the ways in are open.
+ */
+
+/**
+ * Defaults of `ocr.boost`. Off: a site turns the boost on once it has seen the boost benchmark
+ * on its own clients. The thresholds follow the agreed model (2026-11-11): four seconds of
+ * idleness, a quarter longer reference recognition as the stop, and the hard ceiling of 32.
+ */
+export const OCR_BOOST_DEFAULTS = Object.freeze(/** @type {OcrBoostConfig} */ ({
+  enabled: false,
+  idleAfterMs: 4000,
+  maxWorkerCount: OCR_BOOST_HARD_MAX_WORKER_COUNT,
+  slowdownFraction: 0.25,
+  triggers: Object.freeze({ idle: true, hidden: true, search: true }),
+}));
+
+/**
+ * Resolve whether the OCR boost runs (`ocr.boost.enabled`): only the boolean literal `true`, and
+ * only while OCR itself is on. With it off the cautious worker count applies throughout, and
+ * the viewer listens to no input for it.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {boolean}
+ */
+export function isOcrBoostEnabled(cfg = getRuntimeConfig()) {
+  return isOcrEnabled(cfg) && cfg?.ocr?.boost?.enabled === true;
+}
+
+/**
+ * Read `ocr.boost`: a number out of range is clamped to the nearest bound, whatever is missing
+ * or not a finite number gets the default, and a trigger is open unless it is the literal
+ * `false`. Means nothing while OCR or the boost is off.
+ *
+ * @param {RuntimeConfig} [cfg]
+ * @returns {OcrBoostConfig}
+ */
+export function normalizeOcrBoostConfig(cfg = getRuntimeConfig()) {
+  const raw = cfg?.ocr?.boost && typeof cfg.ocr.boost === 'object' ? cfg.ocr.boost : {};
+  const triggers = raw.triggers && typeof raw.triggers === 'object' ? raw.triggers : {};
+  const base = OCR_BOOST_DEFAULTS;
+  return {
+    enabled: raw.enabled === true,
+    idleAfterMs: boundedNumber(raw.idleAfterMs, base.idleAfterMs, 500, 600000),
+    maxWorkerCount: boundedNumber(raw.maxWorkerCount, base.maxWorkerCount, 1, OCR_BOOST_HARD_MAX_WORKER_COUNT),
+    slowdownFraction: boundedNumber(raw.slowdownFraction, base.slowdownFraction, 0.05, 2, false),
+    triggers: { idle: triggers.idle !== false, hidden: triggers.hidden !== false, search: triggers.search !== false },
+  };
+}
+
 /**
  * `ocr.workerCount` when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.
  * (Up to 2.4.311 the default was one worker.)

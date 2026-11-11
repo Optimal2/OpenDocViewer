@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 20. Line count: 4357. JSDoc symbol count: 173.
+File count: 22. Line count: 4658. JSDoc symbol count: 189.
 
 ## src/ocr/assetUrls.js
 
@@ -37,6 +37,27 @@ Symbols:
 - `planOcrBenchmarkScenarios` (function) - The scenarios a configuration stands for: the worker counts with the languages the engine loads and the full image, then \(with one worker\) the single\-language variant when more th...
 - `selectOcrBenchmarkPages` (function) - The pages to recognise: loaded pages the OCR queue would recognise \(not skipped by classifyPageSource\), sampled evenly over the document \(or the first ones\), at most pageLimit .
 - `summarizeDurations` (function) - Summary statistics of a list of durations.
+
+## src/ocr/boost.js
+
+OpenDocViewer — the OCR boost control: full throttle while the user is idle.
+
+Exports: `OCR_BOOST_STEPS`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `planOcrBoostLevels`, `createOcrBoostController`
+
+Symbols:
+
+- `OCR_BOOST_STEPS` (constant) - Steps of the climb from the starting level to the maximum.
+- `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION` (constant) - How much longer the reference recognition may take before the climb stops \(a quarter\).
+- `OCR_BOOST_STATE` (constant) - The states of the control \(see inspect \).
+- `CAUTIOUS` (member) - The cautious count applies.
+- `RISING` (member) - Climbing: a level has been applied and its probe is under way.
+- `BOOSTED` (member) - The climb ended; the level found applies until the next input.
+- `planOcrBoostLevels` (function) - The levels of the climb, in order, above the cautious count.
+- `OcrBoostProbe` (typedef) - No description.
+- `OcrBoostController` (typedef) - No description.
+- `createOcrBoostController` (function) - No description.
+- `createOcrBoostController~settledLevel` (member) - The level a climb settled at; the next climb starts there.
+- `createOcrBoostController~levelBelow` (function) - The level below level in the plan, or the cautious count.
 
 ## src/ocr/boostBenchmark.js
 
@@ -161,7 +182,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `OCR_BOOST_STEPS`, `createOcrBoostController`, `planOcrBoostLevels`, `OCR_REFERENCE_PAGE_LINES`, `OCR_REFERENCE_PAGE_SIZE`, `createOcrReferencePage`
 
 Local imports: `src/ocr/boostBenchmark.js`
 
@@ -298,6 +319,19 @@ Symbols:
 - `createOcrQueue` (function) - No description.
 - `createOcrQueue~retained` (member) - null until retainSources is called: every source is retained.
 - `createOcrQueue~abortJob` (function) - Abort one job's recognition: its worker on a pool, the engine as a whole otherwise.
+
+## src/ocr/referencePage.js
+
+The reference page of the OCR boost control \(boost.js\): a small synthetic image, always the same, that the control has an engine recognise to measure whether the engines still get the cores they need.
+
+Exports: `OCR_REFERENCE_PAGE_SIZE`, `OCR_REFERENCE_PAGE_LINES`, `createOcrReferencePage`
+
+Symbols:
+
+- `OCR_REFERENCE_PAGE_SIZE` (constant) - Size of the reference image in CSS pixels; the canvas is drawn at this exact size.
+- `OCR_REFERENCE_PAGE_LINES` (constant) - The text of the reference page: letters, digits and a few Swedish characters, two lines.
+- `createOcrReferencePage` (function) - Draw the reference page and encode it as a PNG blob.
+- `defaultCreateCanvas` (function) - No description.
 
 ## src/ocr/resultCache.js
 

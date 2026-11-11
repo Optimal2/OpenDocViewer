@@ -34,6 +34,10 @@ import {
   resolveOcrWorkerCount,
   isOcrBenchmarkEnabled,
   isOcrBoostBenchmarkEnabled,
+  OCR_BOOST_DEFAULTS,
+  OCR_BOOST_HARD_MAX_WORKER_COUNT,
+  isOcrBoostEnabled,
+  normalizeOcrBoostConfig,
   isOcrEnabled,
   isOcrLineRemovalEnabled,
   isOcrWholeDocumentEnabled,
@@ -975,5 +979,43 @@ describe('runtimeConfig', () => {
         theme: { bridge: { allowedOrigins: ['https://portal.example', '  ', 'https://portal.example', 7] } },
       })).toEqual(['https://portal.example']);
     });
+  });
+});
+
+describe('ocr.boost', () => {
+  it('is off by default and only the literal true turns it on, and only with OCR on', () => {
+    expect(OCR_BOOST_DEFAULTS.enabled).toBe(false);
+    expect(isOcrBoostEnabled({})).toBe(false);
+    expect(isOcrBoostEnabled({ ocr: { enabled: true } })).toBe(false);
+    expect(isOcrBoostEnabled({ ocr: { enabled: true, boost: { enabled: true } } })).toBe(true);
+    expect(isOcrBoostEnabled({ ocr: { enabled: false, boost: { enabled: true } } })).toBe(false);
+    for (const value of ['true', 1, {}, [], null]) {
+      expect(isOcrBoostEnabled({ ocr: { enabled: true, boost: { enabled: value } } })).toBe(false);
+    }
+  });
+
+  it('ships the agreed defaults and returns them for a missing or unusable section', () => {
+    expect(OCR_BOOST_DEFAULTS).toEqual({
+      enabled: false, idleAfterMs: 4000, maxWorkerCount: 32, slowdownFraction: 0.25, triggers: { idle: true, hidden: true, search: true },
+    });
+    expect(Object.isFrozen(OCR_BOOST_DEFAULTS) && Object.isFrozen(OCR_BOOST_DEFAULTS.triggers)).toBe(true);
+    expect(OCR_BOOST_HARD_MAX_WORKER_COUNT).toBe(32);
+    expect(normalizeOcrBoostConfig({})).toEqual(OCR_BOOST_DEFAULTS);
+    expect(normalizeOcrBoostConfig({ ocr: { boost: 'yes' } })).toEqual(OCR_BOOST_DEFAULTS);
+    expect(normalizeOcrBoostConfig(null)).not.toBe(OCR_BOOST_DEFAULTS);
+  });
+
+  it('bounds every number, ignores non-numbers and closes a trigger only for the literal false', () => {
+    expect(normalizeOcrBoostConfig({ ocr: { boost: {
+      enabled: true, idleAfterMs: 100, maxWorkerCount: 99, slowdownFraction: 5, triggers: { idle: false, hidden: 0, search: 'false' },
+    } } })).toEqual({
+      enabled: true, idleAfterMs: 500, maxWorkerCount: OCR_BOOST_HARD_MAX_WORKER_COUNT, slowdownFraction: 2, triggers: { idle: false, hidden: true, search: true },
+    });
+    expect(normalizeOcrBoostConfig({ ocr: { boost: {
+      enabled: 'true', idleAfterMs: '4000', maxWorkerCount: 12.9, slowdownFraction: 0.001, triggers: null,
+    } } })).toEqual({
+      enabled: false, idleAfterMs: 4000, maxWorkerCount: 12, slowdownFraction: 0.05, triggers: { idle: true, hidden: true, search: true },
+    });
+    expect(normalizeOcrBoostConfig({ ocr: { boost: { idleAfterMs: 1e9, maxWorkerCount: 0 } } })).toMatchObject({ idleAfterMs: 600000, maxWorkerCount: 1 });
   });
 });

@@ -148,12 +148,14 @@ export function resolveOcrConcurrency(pageCount, setup, cfg = getRuntimeConfig()
  * interface, which the queue uses with the matching concurrency.
  *
  * @param {Object=} cfg
- * @param {Object=} options  Passed to describeOcrSetup, plus `createWorker` for createOcrEngine
- *   and `workerCount` to override the configured count (the benchmark compares counts).
+ * @param {Object=} options  Passed to describeOcrSetup, plus `createWorker` for createOcrEngine,
+ *   `workerCount` to override the configured count (the benchmark compares counts) and `pool`
+ *   (default false) to get a pool even for a count of one: the boost control (boost.js) grows
+ *   the pool while the user is idle, which a single engine cannot do.
  * @returns {{ engine: Object, setup: OcrSetup, workerCount: number }}  `engine` is an OcrEngine
  *   or an OcrEnginePool; `workerCount` is how many pages it can recognise at a time.
  */
-export function createConfiguredOcrEngine(cfg = getRuntimeConfig(), { createWorker, workerCount, ...setupOptions } = {}) {
+export function createConfiguredOcrEngine(cfg = getRuntimeConfig(), { createWorker, workerCount, pool = false, ...setupOptions } = {}) {
   const setup = describeOcrSetup(cfg, setupOptions);
   const count = Number.isInteger(workerCount) && workerCount > 0
     ? Math.min(MAX_OCR_WORKER_COUNT, workerCount)
@@ -164,6 +166,6 @@ export function createConfiguredOcrEngine(cfg = getRuntimeConfig(), { createWork
     ...(createWorker ? { createWorker } : {}),
     ...(setupOptions.log ? { log: setupOptions.log } : {}),
   });
-  const engine = count > 1 ? createOcrEnginePool({ size: count, createEngine }) : createEngine();
+  const engine = count > 1 || pool === true ? createOcrEnginePool({ size: count, createEngine }) : createEngine();
   return { engine, setup, workerCount: count };
 }
