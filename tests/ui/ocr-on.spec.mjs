@@ -60,6 +60,8 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const origin = new URL(baseURL).origin;
   const requests = [];
   page.on('request', (request) => requests.push(request.url()));
+  const workers = [];
+  page.on('worker', (worker) => workers.push(worker.url()));
   const consoleErrors = [];
   page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 
@@ -592,4 +594,9 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   expect(ocrRequests.some((url) => /swe\.traineddata\.gz$/.test(url))).toBe(true);
   expect(ocrRequests.some((url) => /eng\.traineddata\.gz$/.test(url))).toBe(true);
   expect(consoleErrors.filter((text) => /ocr|tesseract|wasm/i.test(text))).toEqual([]);
+  // The page image was prepared in the preparation worker (src/ocr/prepareWorker.js), not
+  // on the main-thread fallback: the browser started that worker from the viewer's own origin.
+  const prepareWorkers = workers.filter((url) => /prepareWorker/.test(url));
+  expect(prepareWorkers.length, workers.join('\n')).toBeGreaterThanOrEqual(1);
+  for (const url of prepareWorkers) expect(url.startsWith(origin), url).toBe(true);
 });

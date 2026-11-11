@@ -10,7 +10,9 @@ import { test, expect } from '@playwright/test';
 import { describeOcrAssets } from '../../scripts/ocr-assets.mjs';
 import { loadSession } from './fixtureSession.mjs';
 
-const OCR_URL_PATTERN = /\/ocr\/|\/src\/ocr\/|tesseract|odv-ocr-assets/i;
+// The engine files, the lazy OCR source, the engine's own worker, and the image preparation
+// worker (src/ocr/prepareWorker.js, reached from the lazy chunk only).
+const OCR_URL_PATTERN = /\/ocr\/|\/src\/ocr\/|tesseract|odv-ocr-assets|prepareWorker/i;
 
 /**
  * The viewer keeps connections open (prefetch, log transport), so `networkidle` never arrives.
