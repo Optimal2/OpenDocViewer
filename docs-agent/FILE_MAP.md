@@ -120,8 +120,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/ocr/boostBenchmark.js</code> | 811 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but at and above the ceiling of the viewer&#39;s own worker policy. |
 | <code>src/ocr/classify.js</code> | 106 | 3 | 15 | high | Decides, per page, whether OCR is worth running. |
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
-| <code>src/ocr/engine.js</code> | 311 | 1 | 14 | high | Thin wrapper around a tesseract.js worker. |
-| <code>src/ocr/enginePool.js</code> | 165 | 1 | 5 | high | A pool of OCR engines \(engine.js\) behind the one-engine interface the queue \(queue.js\) uses, so that several pages \(the worker count, see setup.js\) can be recognised at the same time. |
+| <code>src/ocr/engine.js</code> | 323 | 1 | 15 | high | Thin wrapper around a tesseract.js worker. |
+| <code>src/ocr/enginePool.js</code> | 191 | 1 | 6 | high | A pool of OCR engines \(engine.js\) behind the one-engine interface the queue \(queue.js\) uses, so that several pages \(the worker count, see setup.js\) can be recognised at the same time. |
 | <code>src/ocr/imagePreparer.js</code> | 264 | 1 | 9 | high | Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot. |
 | <code>src/ocr/index.js</code> | 35 | 2 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
 | <code>src/ocr/languages.js</code> | 29 | 2 | 2 | high | Membership check for OCR language codes against the models tesseract.js knows. |

@@ -23939,7 +23939,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 157,
+    "line": 166,
     "description": "Create an engine for the given languages and asset URLs.",
     "params": [
       {
@@ -23983,6 +23983,12 @@
         "type": "Object",
         "optional": true,
         "description": "Logger (injectable for tests)."
+      },
+      {
+        "name": "options.now",
+        "type": "function",
+        "optional": false,
+        "description": "Clock for recognizeMs (default performance.now)."
       }
     ],
     "returns": [
@@ -24017,6 +24023,24 @@
     "description": "Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise).",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "defaultNow",
+    "name": "defaultNow",
+    "longname": "defaultNow",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/ocr/engine.js",
+    "line": 129,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "number",
+        "description": "Milliseconds from a monotonic clock where there is one."
+      }
+    ],
     "examples": 0
   },
   {
@@ -24090,7 +24114,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 133,
+    "line": 138,
     "description": "",
     "params": [],
     "returns": [],
@@ -24129,7 +24153,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/engine.js",
-    "line": 129,
+    "line": 134,
     "description": "",
     "params": [
       {
@@ -24162,7 +24186,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/enginePool.js",
-    "line": 45,
+    "line": 51,
     "description": "",
     "params": [
       {
@@ -24199,7 +24223,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/enginePool.js",
-    "line": 100,
+    "line": 120,
     "description": "Terminate one engine and forget it; the next acquisition creates a fresh one in its place.",
     "params": [],
     "returns": [],
@@ -24212,8 +24236,21 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/enginePool.js",
-    "line": 25,
+    "line": 29,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createOcrEnginePool~shrink",
+    "name": "shrink",
+    "longname": "createOcrEnginePool~shrink",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/ocr/enginePool.js",
+    "line": 102,
+    "description": "Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -24225,7 +24262,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/enginePool.js",
-    "line": 70,
+    "line": 76,
     "description": "A free entry now, a new one while under the limit, else null.",
     "params": [],
     "returns": [],
@@ -24238,7 +24275,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/enginePool.js",
-    "line": 23,
+    "line": 27,
     "description": "Rejection for callers waiting on a free engine when the pool is terminated.",
     "params": [],
     "returns": [],

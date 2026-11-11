@@ -3,7 +3,8 @@
  * The engine pool: engines are created lazily up to the size, the first starts alone and the
  * others wait for it, a caller beyond the size waits for a free engine, a job's control aborts
  * only its own engine (which is replaced lazily), a start-up failure of any engine is the pool's
- * failure and stops further engines, and terminate stops every engine and rejects the waiting.
+ * failure and stops further engines, terminate stops every engine and rejects the waiting, and
+ * resize grows the ceiling lazily and shrinks it without cutting a recognition short.
  * Engines are fakes with the shape of engine.js.
  */
 import { describe, expect, it, vi } from 'vitest';
@@ -218,6 +219,80 @@ describe('createOcrEnginePool', () => {
     expect(engines[0].jobs.map((job) => job.image)).toEqual(['a', 'b']);
     engines[0].jobs[1].resolve({ text: 'b', confidence: 90, words: [] });
     await b;
+  });
+
+  it('resize grows the ceiling: a page waiting for an engine gets a new one at once', async () => {
+    const { pool, engines } = makePool(1);
+
+    const first = pool.recognize('p1');
+    await flush();
+    engines[0].start.resolve();
+    await flush();
+    const second = pool.recognize('p2');
+    await flush();
+    // Size one: the second page waits, no second engine.
+    expect(engines).toHaveLength(1);
+    pool.resize(2);
+    expect(pool.size).toBe(2);
+    await flush();
+    expect(engines).toHaveLength(2);
+    engines[1].start.resolve();
+    await flush();
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 1, words: [] });
+    engines[1].jobs[0].resolve({ text: 'b', confidence: 1, words: [] });
+    expect((await first).text).toBe('a');
+    expect((await second).text).toBe('b');
+  });
+
+  it('resize shrinks: idle engines above the ceiling go at once, a busy one when its page is done, and nothing is cut short', async () => {
+    const { pool, engines } = makePool(3);
+    const jobs = [pool.recognize('p1'), pool.recognize('p2'), pool.recognize('p3')];
+    await flush();
+    expect(engines).toHaveLength(3);
+    for (const engine of engines) engine.start.resolve();
+    await flush();
+    // The second page finishes: its engine is idle, the others are busy.
+    engines[1].jobs[0].resolve({ text: 'b', confidence: 1, words: [] });
+    expect((await jobs[1]).text).toBe('b');
+    pool.resize(1);
+    expect(pool.size).toBe(1);
+    await flush();
+    // The idle engine is terminated now; the two busy ones keep working.
+    expect(engines[1].terminate).toHaveBeenCalledTimes(1);
+    expect(engines[0].terminate).not.toHaveBeenCalled();
+    expect(engines[2].terminate).not.toHaveBeenCalled();
+    expect(pool.engineCount()).toBe(2);
+    // A new page waits: no engine is free and none above the ceiling may be reused.
+    const fourth = pool.recognize('p4');
+    await flush();
+    expect(engines).toHaveLength(3);
+    // The third page finishes: its engine is above the ceiling and goes, the page still returns.
+    engines[2].jobs[0].resolve({ text: 'c', confidence: 1, words: [] });
+    expect((await jobs[2]).text).toBe('c');
+    await flush();
+    expect(engines[2].terminate).toHaveBeenCalledTimes(1);
+    expect(pool.engineCount()).toBe(1);
+    // The first page finishes: the one remaining engine is free and takes the waiting page.
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 1, words: [] });
+    expect((await jobs[0]).text).toBe('a');
+    await flush();
+    expect(engines).toHaveLength(3);
+    expect(engines[0].jobs).toHaveLength(2);
+    engines[0].jobs[1].resolve({ text: 'd', confidence: 1, words: [] });
+    expect((await fourth).text).toBe('d');
+    expect(engines[0].terminate).not.toHaveBeenCalled();
+  });
+
+  it('resize never goes below one and leaves a pool of one as it is', () => {
+    const { pool } = makePool(2);
+    pool.resize(0);
+    expect(pool.size).toBe(1);
+    pool.resize(-3);
+    expect(pool.size).toBe(1);
+    pool.resize('4');
+    expect(pool.size).toBe(4);
+    pool.resize(NaN);
+    expect(pool.size).toBe(1);
   });
 
   it('needs an engine factory', () => {

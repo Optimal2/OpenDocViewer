@@ -125,6 +125,11 @@ export function flattenOcrWords(data) {
   return words;
 }
 
+/** @returns {number} Milliseconds from a monotonic clock where there is one. */
+function defaultNow() {
+  return typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : Date.now();
+}
+
 /** @param {*} reason @returns {Error} */
 function toError(reason) {
   return reason instanceof Error ? reason : new Error(String(reason?.message ?? reason ?? 'unknown error'));
@@ -133,9 +138,12 @@ function toError(reason) {
 /**
  * @typedef {Object} OcrEngine
  * @property {function(): Promise<void>} ensureStarted  Create the worker if needed (loads core and models).
- * @property {function(*): Promise<{ text: string, confidence: number, words: Array<Object> }>} recognize
+ * @property {function(*): Promise<{ text: string, confidence: number, words: Array<Object>, recognizeMs: number }>} recognize
  *   Recognize one page image (anything tesseract.js accepts: canvas, Blob, ImageData, URL).
- *   Rejects with "terminated" when terminate() is called while it runs or before it starts.
+ *   `recognizeMs` is the wall time of the worker's recognition alone, without the start of the
+ *   worker, so a caller can compare recognitions under different loads (the boost control
+ *   measures its reference page with it). Rejects with "terminated" when terminate() is called
+ *   while it runs or before it starts.
  * @property {function(): Promise<void>} terminate  Stop the worker and release its WebAssembly memory.
  * @property {function(): ({ kind: string, error: Error }|null)} getFailure  The start-up failure, if any.
  * @property {function(): boolean} isStarted  True while a worker is running.
@@ -152,6 +160,7 @@ function toError(reason) {
  * @param {Function=} options.probeWebAssembly  Main-thread WebAssembly probe (injectable for tests).
  * @param {number=} options.startTimeoutMs  Bound on worker start-up (default 60 s).
  * @param {{ error: Function, debug: Function }=} options.log  Logger (injectable for tests).
+ * @param {function(): number=} options.now  Clock for `recognizeMs` (default performance.now).
  * @returns {OcrEngine}
  */
 export function createOcrEngine({
@@ -161,6 +170,7 @@ export function createOcrEngine({
   probeWebAssembly = probeWebAssemblyCompilation,
   startTimeoutMs = DEFAULT_OCR_START_TIMEOUT_MS,
   log = logger,
+  now = defaultNow,
 }) {
   if (!Array.isArray(languages) || !languages.length) throw new Error('OCR engine needs at least one language');
   if (!assetUrls?.workerPath || !assetUrls?.corePath || !assetUrls?.langPath) throw new Error('OCR engine needs worker, core and language URLs');
@@ -275,8 +285,10 @@ export function createOcrEngine({
       let release = null;
       const released = new Promise((_resolve, reject) => { release = reject; releaseInFlight.push(reject); });
       try {
+        const startedAt = now();
         const { data } = await Promise.race([worker.recognize(image, {}, { text: true, blocks: true }), released]);
-        return { text: String(data?.text ?? ''), confidence: Number(data?.confidence) || 0, words: flattenOcrWords(data) };
+        const recognizeMs = Math.max(0, Math.round(now() - startedAt));
+        return { text: String(data?.text ?? ''), confidence: Number(data?.confidence) || 0, words: flattenOcrWords(data), recognizeMs };
       } finally {
         releaseInFlight = releaseInFlight.filter((entry) => entry !== release);
       }

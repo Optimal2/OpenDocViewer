@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 20. Line count: 4319. JSDoc symbol count: 171.
+File count: 20. Line count: 4357. JSDoc symbol count: 173.
 
 ## src/ocr/assetUrls.js
 
@@ -120,7 +120,7 @@ Symbols:
 - `probeWebAssemblyCompilation` (function) - Throw the browser's own error when WebAssembly modules cannot be compiled on this page, which under a Content\-Security\-Policy without 'wasm\-unsafe\-eval' is a CompileError that nam...
 - `classifyOcrStartupError` (function) - Classify a start\-up error by its message.
 - `flattenOcrWords` (function) - Flatten tesseract.js' block tree into one word list with page\-pixel boxes.
-- `toError` (function) - No description.
+- `defaultNow` (function) - No description.
 
 ## src/ocr/enginePool.js
 
@@ -134,6 +134,7 @@ Symbols:
 - `OcrEnginePool` (typedef) - No description.
 - `createOcrEnginePool` (function) - No description.
 - `createOcrEnginePool~takeIdle` (function) - A free entry now, a new one while under the limit, else null.
+- `createOcrEnginePool~shrink` (function) - Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.
 - `createOcrEnginePool~drop` (function) - Terminate one engine and forget it; the next acquisition creates a fresh one in its place.
 
 ## src/ocr/imagePreparer.js

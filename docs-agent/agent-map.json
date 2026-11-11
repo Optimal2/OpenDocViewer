@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 203,
-    "sourceLineCount": 73008,
-    "docletCount": 2105,
+    "sourceLineCount": 73046,
+    "docletCount": 2107,
     "documentedFileCount": 199,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -1759,8 +1759,8 @@
     {
       "name": "src/ocr",
       "fileCount": 20,
-      "lineCount": 4319,
-      "docletCount": 171,
+      "lineCount": 4357,
+      "docletCount": 173,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
@@ -1810,9 +1810,9 @@
         {
           "path": "src/ocr/engine.js",
           "score": 64,
-          "lines": 311,
+          "lines": 323,
           "incomingLocalImports": 1,
-          "doclets": 14,
+          "doclets": 15,
           "summary": "Thin wrapper around a tesseract.js worker.",
           "summaryConfidence": "high"
         },
@@ -45108,9 +45108,9 @@
     },
     {
       "path": "src/ocr/engine.js",
-      "lines": 311,
+      "lines": 323,
       "extension": ".js",
-      "jsdocBlockCount": 18,
+      "jsdocBlockCount": 19,
       "sourceSummary": "Thin wrapper around a tesseract.js worker.",
       "imports": [
         {
@@ -45164,7 +45164,7 @@
         {
           "name": "createOcrEngine",
           "kind": "function",
-          "line": 157
+          "line": 166
         }
       ],
       "declarations": [
@@ -45184,29 +45184,34 @@
           "line": 108
         },
         {
-          "name": "toError",
+          "name": "defaultNow",
           "kind": "function",
           "line": 129
         },
         {
+          "name": "toError",
+          "kind": "function",
+          "line": 134
+        },
+        {
           "name": "createOcrEngine",
           "kind": "function",
-          "line": 157
+          "line": 166
         },
         {
           "name": "startWorker",
           "kind": "function",
-          "line": 183
+          "line": 193
         },
         {
           "name": "finish",
           "kind": "function",
-          "line": 187
+          "line": 197
         },
         {
           "name": "ensureStarted",
           "kind": "function",
-          "line": 234
+          "line": 244
         }
       ],
       "parseError": null,
@@ -45383,13 +45388,31 @@
           "examples": 0
         },
         {
+          "id": "defaultNow",
+          "name": "defaultNow",
+          "longname": "defaultNow",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/ocr/engine.js",
+          "line": 129,
+          "description": "",
+          "params": [],
+          "returns": [
+            {
+              "type": "number",
+              "description": "Milliseconds from a monotonic clock where there is one."
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "toError",
           "name": "toError",
           "longname": "toError",
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 129,
+          "line": 134,
           "description": "",
           "params": [
             {
@@ -45409,7 +45432,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 133,
+          "line": 138,
           "description": "",
           "params": [],
           "returns": [],
@@ -45422,7 +45445,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/engine.js",
-          "line": 157,
+          "line": 166,
           "description": "Create an engine for the given languages and asset URLs.",
           "params": [
             {
@@ -45466,6 +45489,12 @@
               "type": "Object",
               "optional": true,
               "description": "Logger (injectable for tests)."
+            },
+            {
+              "name": "options.now",
+              "type": "function",
+              "optional": false,
+              "description": "Clock for recognizeMs (default performance.now)."
             }
           ],
           "returns": [
@@ -45507,68 +45536,73 @@
     },
     {
       "path": "src/ocr/enginePool.js",
-      "lines": 165,
+      "lines": 191,
       "extension": ".js",
-      "jsdocBlockCount": 8,
+      "jsdocBlockCount": 9,
       "sourceSummary": "A pool of OCR engines (engine.js) behind the one-engine interface the queue (queue.js) uses, so that several pages (the worker count, see setup.js) can be recognised at the same time.",
       "imports": [],
       "exports": [
         {
           "name": "createOcrEnginePool",
           "kind": "function",
-          "line": 45
+          "line": 51
         }
       ],
       "declarations": [
         {
           "name": "createOcrEnginePool",
           "kind": "function",
-          "line": 45
+          "line": 51
         },
         {
           "name": "firstFailure",
           "kind": "function",
-          "line": 55
+          "line": 61
         },
         {
           "name": "createEntry",
           "kind": "function",
-          "line": 63
+          "line": 69
         },
         {
           "name": "entry",
           "kind": "object",
-          "line": 64
+          "line": 70
         },
         {
           "name": "takeIdle",
           "kind": "function",
-          "line": 70
+          "line": 76
         },
         {
           "name": "acquire",
           "kind": "function",
-          "line": 77
+          "line": 83
         },
         {
           "name": "release",
           "kind": "function",
-          "line": 85
+          "line": 91
+        },
+        {
+          "name": "shrink",
+          "kind": "function",
+          "line": 102
         },
         {
           "name": "wake",
           "kind": "function",
-          "line": 90
+          "line": 110
         },
         {
           "name": "drop",
           "kind": "function",
-          "line": 100
+          "line": 120
         },
         {
           "name": "ensureStarted",
           "kind": "function",
-          "line": 106
+          "line": 126
         }
       ],
       "parseError": null,
@@ -45584,7 +45618,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/enginePool.js",
-          "line": 23,
+          "line": 27,
           "description": "Rejection for callers waiting on a free engine when the pool is terminated.",
           "params": [],
           "returns": [],
@@ -45597,7 +45631,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/enginePool.js",
-          "line": 25,
+          "line": 29,
           "description": "",
           "params": [],
           "returns": [],
@@ -45610,7 +45644,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/enginePool.js",
-          "line": 45,
+          "line": 51,
           "description": "",
           "params": [
             {
@@ -45647,8 +45681,21 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/enginePool.js",
-          "line": 70,
+          "line": 76,
           "description": "A free entry now, a new one while under the limit, else null.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrEnginePool~shrink",
+          "name": "shrink",
+          "longname": "createOcrEnginePool~shrink",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/ocr/enginePool.js",
+          "line": 102,
+          "description": "Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -45660,7 +45707,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/enginePool.js",
-          "line": 100,
+          "line": 120,
           "description": "Terminate one engine and forget it; the next acquisition creates a fresh one in its place.",
           "params": [],
           "returns": [],
@@ -45671,7 +45718,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 29,
+      "importanceScore": 32,
       "summary": "A pool of OCR engines (engine.js) behind the one-engine interface the queue (queue.js) uses, so that several pages (the worker count, see setup.js) can be recognised at the same time.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -111556,7 +111603,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 157,
+      "line": 166,
       "description": "Create an engine for the given languages and asset URLs.",
       "params": [
         {
@@ -111600,6 +111647,12 @@
           "type": "Object",
           "optional": true,
           "description": "Logger (injectable for tests)."
+        },
+        {
+          "name": "options.now",
+          "type": "function",
+          "optional": false,
+          "description": "Clock for recognizeMs (default performance.now)."
         }
       ],
       "returns": [
@@ -111634,6 +111687,24 @@
       "description": "Default bound on worker start-up (core and models are a few MB; a stalled start stays silent otherwise).",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "defaultNow",
+      "name": "defaultNow",
+      "longname": "defaultNow",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/ocr/engine.js",
+      "line": 129,
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "type": "number",
+          "description": "Milliseconds from a monotonic clock where there is one."
+        }
+      ],
       "examples": 0
     },
     {
@@ -111707,7 +111778,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 133,
+      "line": 138,
       "description": "",
       "params": [],
       "returns": [],
@@ -111746,7 +111817,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/engine.js",
-      "line": 129,
+      "line": 134,
       "description": "",
       "params": [
         {
@@ -111779,7 +111850,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/enginePool.js",
-      "line": 45,
+      "line": 51,
       "description": "",
       "params": [
         {
@@ -111816,7 +111887,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/enginePool.js",
-      "line": 100,
+      "line": 120,
       "description": "Terminate one engine and forget it; the next acquisition creates a fresh one in its place.",
       "params": [],
       "returns": [],
@@ -111829,8 +111900,21 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/enginePool.js",
-      "line": 25,
+      "line": 29,
       "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createOcrEnginePool~shrink",
+      "name": "shrink",
+      "longname": "createOcrEnginePool~shrink",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/ocr/enginePool.js",
+      "line": 102,
+      "description": "Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -111842,7 +111926,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/enginePool.js",
-      "line": 70,
+      "line": 76,
       "description": "A free entry now, a new one while under the limit, else null.",
       "params": [],
       "returns": [],
@@ -111855,7 +111939,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/enginePool.js",
-      "line": 23,
+      "line": 27,
       "description": "Rejection for callers waiting on a free engine when the pool is terminated.",
       "params": [],
       "returns": [],

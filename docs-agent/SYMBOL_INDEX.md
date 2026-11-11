@@ -948,23 +948,25 @@
 | <code>TextLanguageGuess</code> | typedef | <code>src/ocr/detectLanguage.js:71</code> |  |
 | <code>ASSETS</code> | member | <code>src/ocr/engine.js:50</code> | The worker script, engine core or a language model could not be loaded. |
 | <code>classifyOcrStartupError</code> | function | <code>src/ocr/engine.js:94</code> | Classify a start-up error by its message. |
-| <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:157</code> | Create an engine for the given languages and asset URLs. |
+| <code>createOcrEngine</code> | function | <code>src/ocr/engine.js:166</code> | Create an engine for the given languages and asset URLs. |
 | <code>CSP</code> | member | <code>src/ocr/engine.js:48</code> | WebAssembly compilation refused: the site CSP lacks &#39;wasm-unsafe-eval&#39; in script-src. |
 | <code>DEFAULT_OCR_START_TIMEOUT_MS</code> | constant | <code>src/ocr/engine.js:58</code> | Default bound on worker start-up \(core and models are a few MB; a stalled start stays silent otherwise\). |
+| <code>defaultNow</code> | function | <code>src/ocr/engine.js:129</code> |  |
 | <code>EMPTY_WASM_MODULE</code> | constant | <code>src/ocr/engine.js:75</code> | The smallest valid WebAssembly module: magic number and version, nothing else. |
 | <code>flattenOcrWords</code> | function | <code>src/ocr/engine.js:108</code> | Flatten tesseract.js&#39; block tree into one word list with page-pixel boxes. |
 | <code>OCR_PAGE_SEGMENTATION_MODE</code> | constant | <code>src/ocr/engine.js:66</code> | Tesseract page segmentation mode every worker starts with: 3 = fully automatic page segmentation without orientation and script detection \(the mode the tesseract command line uses... |
 | <code>OCR_STARTUP_FAILURE</code> | constant | <code>src/ocr/engine.js:46</code> | Why the engine could not start \(see classifyOcrStartupError\). |
-| <code>OcrEngine</code> | typedef | <code>src/ocr/engine.js:133</code> |  |
+| <code>OcrEngine</code> | typedef | <code>src/ocr/engine.js:138</code> |  |
 | <code>probeWebAssemblyCompilation</code> | function | <code>src/ocr/engine.js:82</code> | Throw the browser&#39;s own error when WebAssembly modules cannot be compiled on this page, which under a Content-Security-Policy without &#39;wasm-unsafe-eval&#39; is a CompileError that nam... |
 | <code>TIMEOUT</code> | member | <code>src/ocr/engine.js:52</code> | The worker gave no answer within the start timeout. |
-| <code>toError</code> | function | <code>src/ocr/engine.js:129</code> |  |
+| <code>toError</code> | function | <code>src/ocr/engine.js:134</code> |  |
 | <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:54</code> | Anything else. |
-| <code>createOcrEnginePool</code> | function | <code>src/ocr/enginePool.js:45</code> |  |
-| <code>createOcrEnginePool~drop</code> | function | <code>src/ocr/enginePool.js:100</code> | Terminate one engine and forget it; the next acquisition creates a fresh one in its place. |
-| <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:25</code> |  |
-| <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:70</code> | A free entry now, a new one while under the limit, else null. |
-| <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:23</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
+| <code>createOcrEnginePool</code> | function | <code>src/ocr/enginePool.js:51</code> |  |
+| <code>createOcrEnginePool~drop</code> | function | <code>src/ocr/enginePool.js:120</code> | Terminate one engine and forget it; the next acquisition creates a fresh one in its place. |
+| <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:29</code> |  |
+| <code>createOcrEnginePool~shrink</code> | function | <code>src/ocr/enginePool.js:102</code> | Terminate idle engines above the ceiling, newest first; the busy ones go as they finish. |
+| <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:76</code> | A free entry now, a new one while under the limit, else null. |
+| <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:27</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
 | <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:74</code> |  |
 | <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:258</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
 | <code>getOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:252</code> | The viewer&#39;s one preparer, created on first use \(prepareImage.js, the benchmarks\). |

@@ -15,6 +15,10 @@
  * terminates only the worker holding that page, which the pool replaces lazily, so the other
  * pages in flight are left alone (a single engine can only be terminated as a whole).
  * `terminate()` stops every worker; a caller waiting for a free engine is rejected then.
+ * `resize(size)` changes the ceiling while the pool runs: a larger one lets more engines be
+ * created as the queue asks for them, a smaller one terminates the idle engines above it at
+ * once and each busy one as soon as its page is done, so no recognition is cut short (the
+ * boost control grows and shrinks the pool this way).
  *
  * Part of the lazy OCR chunk.
  */
@@ -24,7 +28,9 @@ const TERMINATED_MESSAGE = 'OCR engine was terminated';
 
 /**
  * @typedef {Object} OcrEnginePool
- * @property {number} size  Most engines the pool creates.
+ * @property {number} size  Most engines the pool creates (follows `resize`).
+ * @property {function(number): void} resize  Change the ceiling: grow lazily, shrink as engines
+ *   go idle; a value below one counts as one.
  * @property {function(): Promise<void>} ensureStarted  Start the first engine (loads core and models).
  * @property {function(*, Object=): Promise<{ text: string, confidence: number, words: Array<Object> }>} recognize
  *   Recognise one page image on a free engine; `control.abort`, when a control object is
@@ -44,7 +50,7 @@ const TERMINATED_MESSAGE = 'OCR engine was terminated';
  */
 export function createOcrEnginePool({ size, createEngine }) {
   if (typeof createEngine !== 'function') throw new Error('OCR engine pool needs an engine factory');
-  const limit = Math.max(1, Math.floor(Number(size)) || 1);
+  let limit = Math.max(1, Math.floor(Number(size)) || 1);
   /** @type {Array<{ engine: Object, busy: boolean }>} */
   let entries = [];
   /** @type {Array<{ resolve: function(Object): void, reject: function(Error): void }>} */
@@ -83,8 +89,22 @@ export function createOcrEnginePool({ size, createEngine }) {
   }
 
   function release(entry) {
+    if (entries.length > limit && entries.includes(entry)) {
+      // The pool was shrunk while this engine worked: its page is done, so it goes now.
+      drop(entry);
+      return;
+    }
     entry.busy = false;
     wake();
+  }
+
+  /** Terminate idle engines above the ceiling, newest first; the busy ones go as they finish. */
+  function shrink() {
+    while (entries.length > limit) {
+      const idle = [...entries].reverse().find((entry) => !entry.busy);
+      if (!idle) return;
+      drop(idle);
+    }
   }
 
   function wake() {
@@ -111,7 +131,13 @@ export function createOcrEnginePool({ size, createEngine }) {
   }
 
   return {
-    size: limit,
+    get size() { return limit; },
+    resize(nextSize) {
+      limit = Math.max(1, Math.floor(Number(nextSize)) || 1);
+      shrink();
+      // Grown: waiters may now get an engine of their own.
+      wake();
+    },
     ensureStarted,
     async recognize(image, control = null) {
       const callGeneration = generation;

@@ -158,6 +158,22 @@ describe('createOcrEngine', () => {
     ]);
   });
 
+  it('reports the wall time of the recognition alone as recognizeMs, from the injected clock', async () => {
+    const ticks = [1000, 3451.6];
+    // The clock is read once before and once after worker.recognize; the start of the worker
+    // (createWorker) happens before the first reading, so it is not counted.
+    const now = vi.fn(() => (ticks.length > 1 ? ticks.shift() : ticks[0]));
+    const worker = makeWorker();
+    const engine = makeEngine({ createWorker: vi.fn(async () => worker), now });
+    const result = await engine.recognize('page-1');
+    expect(result.recognizeMs).toBe(2452);
+    expect(now).toHaveBeenCalledTimes(2);
+    // Without a clock the engine uses performance.now: a non-negative integer.
+    const plain = makeEngine({ createWorker: vi.fn(async () => makeWorker()) });
+    const measured = await plain.recognize('page-2');
+    expect(Number.isInteger(measured.recognizeMs) && measured.recognizeMs >= 0).toBe(true);
+  });
+
   it('reports a CSP refusal from the WebAssembly probe before any worker is created, once, and stays off', async () => {
     const createWorker = vi.fn(async () => makeWorker());
     const log = makeLog();
