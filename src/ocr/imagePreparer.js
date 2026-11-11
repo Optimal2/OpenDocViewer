@@ -25,9 +25,11 @@
  *    are redone on the main thread, the worker is ended, and the next request starts a new one;
  *    after `maxFailures` such failures the main thread prepares for the rest of the session,
  *    with one warning;
- *  - the worker falls silent (no reply within `requestTimeoutMs`, which is under the queue's own
- *    bound on the page image, OCR_STEP_TIMEOUTS_MS.image in queue.js): treated as a failure of
- *    the worker, so the pages are redone on the main thread before the queue gives up on them.
+ *  - the worker falls silent (no reply within `requestTimeoutMs` for the request it is on; the
+ *    worker handles them one at a time, so the clock covers the oldest pending request and
+ *    restarts with every reply, and the bound is under the queue's own bound on the page image,
+ *    OCR_STEP_TIMEOUTS_MS.image in queue.js): treated as a failure of the worker, so the pages
+ *    are redone on the main thread before the queue gives up on them.
  * A reply that says the image could not be decoded is passed on as the rejection it always was
  * (the page fails, see prepareImageCore.js); redoing it on the main thread would only fail again.
  *
@@ -84,12 +86,14 @@ export function createOcrImagePreparer({
 } = {}) {
   /** @type {(Worker|null)} */
   let worker = null;
-  /** @type {Map<number, { resolve: function(Object): void, reject: function(*): void, blob: Blob, options: Object, timer: * }>} */
+  /** @type {Map<number, { resolve: function(Object): void, reject: function(*): void, blob: Blob, options: Object }>} */
   const pending = new Map();
   let nextId = 1;
   let failures = 0;
   let mainOnly = !workersSupported;
   let idleTimer = null;
+  /** The reply clock of the oldest pending request (the one the worker is on); null when none is pending. */
+  let replyTimer = null;
   let disposed = false;
 
   const onMainThread = (blob, options) => prepareOnMainThread(blob, { ...options, log });
@@ -117,12 +121,30 @@ export function createOcrImagePreparer({
     }, Math.max(0, Number(idleMs) || 0));
   };
 
-  /** Take a request out of the map, its reply timer with it. */
+  const clearReplyTimer = () => {
+    if (replyTimer !== null) {
+      clearTimer(replyTimer);
+      replyTimer = null;
+    }
+  };
+
+  /** Start the reply clock for the oldest pending request; nothing pending clears it. */
+  const armReplyTimer = () => {
+    clearReplyTimer();
+    if (pending.size === 0) return;
+    replyTimer = setTimer(() => {
+      replyTimer = null;
+      if (pending.size === 0) return;
+      failWorker(`gave no reply within ${requestTimeoutMs} ms`, null);
+    }, Math.max(0, Number(requestTimeoutMs) || 0));
+  };
+
+  /** Take a request out of the map; the reply clock restarts for the next oldest, or stops. */
   const takePending = (id) => {
     const entry = pending.get(id);
     if (!entry) return null;
     pending.delete(id);
-    if (entry.timer !== null) clearTimer(entry.timer);
+    armReplyTimer();
     return entry;
   };
 
@@ -214,21 +236,20 @@ export function createOcrImagePreparer({
       const id = nextId;
       nextId += 1;
       return new Promise((resolve, reject) => {
-        const entry = { resolve, reject, blob, options: request, timer: null };
+        const entry = { resolve, reject, blob, options: request };
         pending.set(id, entry);
         try {
           target.postMessage({ type: 'prepare', id, blob, ...request });
         } catch (error) {
           pending.delete(id);
+          armReplyTimer();
           failWorker('refused the page image', error);
           onMainThread(blob, request).then(resolve, reject);
           return;
         }
-        entry.timer = setTimer(() => {
-          entry.timer = null;
-          if (pending.get(id) !== entry) return;
-          failWorker(`gave no reply within ${requestTimeoutMs} ms`, null);
-        }, Math.max(0, Number(requestTimeoutMs) || 0));
+        // The clock runs for the request the worker is on: the first of a batch starts it, the
+        // others wait their turn behind it (prepareWorker.js handles them one at a time).
+        if (pending.size === 1) armReplyTimer();
       });
     },
     dispose() {

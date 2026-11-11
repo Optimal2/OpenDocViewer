@@ -18,7 +18,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentToolbar/usePrintPipeline.js` (800 lines) - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` (671 lines) - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentViewer/useDocumentViewer.js` (1918 lines) - Primary viewer\-state hook.
-- `src/hooks/useOcrTextLayers.js` (404 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
+- `src/hooks/useOcrTextLayers.js` (429 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 - `src/components/DocumentViewer/hooks/usePaneImageAdjustments.js` (181 lines) - File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per\-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the...
 - `src/hooks/useNavigationModifierState.js` (109 lines) - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` (367 lines) - Background prebuild/cache for configured "all pages" generated\-PDF variants.

@@ -609,6 +609,28 @@ describe('useOcrTextLayers boost', () => {
     visibility.mockRestore();
   });
 
+  it('restarts the idle clock when pages arrive after it ran out, so a document that loads while the user does nothing still boosts', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    // One page at first: the clock runs out with nothing to boost for.
+    const props = baseProps({ ocrModule, allPages: [page('doc', 0)], focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 });
+    await render(props);
+    await flush();
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    // The rest of the document arrives, still without input: the clock starts again and the
+    // boost engages one idle period later.
+    await render({ ...props, allPages: sixPages() });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(1);
+    expect(latest.ocrBoost.state).toBe('rising');
+  });
+
   it('does not engage while fewer pages are pending than the cautious count can take, or while paused', async () => {
     vi.useFakeTimers();
     const pool = makePool();
@@ -634,6 +656,24 @@ describe('useOcrTextLayers boost', () => {
     await act(async () => { vi.advanceTimersByTime(1000); });
     await flush();
     expect(probesOf(paused)).toHaveLength(0);
+    expect(latest.ocrBoost.state).toBe('cautious');
+  });
+
+  it('does not engage once the work is done, even when the idle clock fires afterwards', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    // The six pages are recognised one after another at the cautious count, before the clock fires.
+    for (let index = 0; index < 6; index += 1) {
+      await act(async () => { pagesOf(pool)[index].resolve(result(`page ${index}`)); });
+      await flush();
+    }
+    expect(Object.values(latest.ocrPages).filter((entry) => entry.status === 'done')).toHaveLength(6);
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
     expect(latest.ocrBoost.state).toBe('cautious');
   });
 
@@ -664,6 +704,29 @@ describe('useOcrTextLayers boost', () => {
     await flush();
     expect(latest.ocrBoost).toBeNull();
     expect(listenersAdded()).toBe(0);
+  });
+
+  it('reads the boost configuration from the runtime config once, so re-renders do not restart the runtime', async () => {
+    vi.stubGlobal('__ODV_CONFIG__', undefined);
+    window.__ODV_CONFIG__ = { ocr: { enabled: true, boost: { enabled: true, idleAfterMs: 1000 } } };
+    try {
+      const pool = makePool();
+      const ocrModule = boostModule(pool);
+      // No `boost` prop: the hook reads window.__ODV_CONFIG__ itself.
+      const props = baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, hardwareThreads: 4 });
+      await render(props);
+      await flush();
+      expect(latest.ocrBoost).toMatchObject({ state: 'cautious', levels: [2, 3, 4] });
+      // Several renders with new prop objects: one runtime, one set of listeners.
+      await render({ ...props, focusPageIndexes: [1] });
+      await render({ ...props, focusPageIndexes: [2] });
+      await flush();
+      expect(ocrModule.created).toBe(1);
+      expect(listenersAdded()).toBe(1);
+      expect(latest.ocrBoost).toMatchObject({ state: 'cautious', levels: [2, 3, 4] });
+    } finally {
+      delete window.__ODV_CONFIG__;
+    }
   });
 
   it('removes its listeners, ends the boost and clears the state on unmount', async () => {

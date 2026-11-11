@@ -102,6 +102,9 @@ export function planOcrBoostLevels({ cautious, threads, max, steps = OCR_BOOST_S
  * @param {function(): Promise<number>} options.probe  Recognise the reference page, resolve its
  *   recognizeMs. A rejection ends the climb at the level before.
  * @param {number=} options.slowdownFraction  Default DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION.
+ * @param {function(number): boolean=} options.hasRoom  Asked before each level: false when
+ *   fewer pages are waiting than that many engines could take, which ends the climb at the
+ *   level before (engines without a page would measure nothing and hold memory for nothing).
  * @param {function(Object): void=} options.onChange  Called with `inspect()` after every change
  *   of state or level (the viewer shows and logs it).
  * @param {{ debug: Function, warn: Function }=} options.log
@@ -113,6 +116,7 @@ export function createOcrBoostController({
   apply,
   probe,
   slowdownFraction = DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION,
+  hasRoom = null,
   onChange = null,
   log = { debug() {}, warn() {} },
 }) {
@@ -165,13 +169,28 @@ export function createOcrBoostController({
     log.debug('OCR boost starting', { reason, cautious: floor, levels: [...plan], settledLevel });
     changed();
     let reached = floor;
+    let baseline;
     try {
-      const baseline = await probe();
+      baseline = await probe();
+    } catch (error) {
       if (myGeneration !== generation) return;
-      baselineMs = Math.max(1, Number(baseline) || 1);
+      // No yardstick (the engine failed, or was terminated): stay cautious, so the next trigger
+      // may try again.
+      log.debug('OCR boost baseline failed; staying cautious', { error: String(error?.message || error) });
+      state = OCR_BOOST_STATE.CAUTIOUS;
+      changed();
+      return;
+    }
+    if (myGeneration !== generation) return;
+    baselineMs = Math.max(1, Number(baseline) || 1);
+    try {
       // A climb that settled before jumps to its level and confirms it with one probe.
       const candidates = settledLevel !== null && plan.includes(settledLevel) ? [settledLevel] : plan;
       for (const level of candidates) {
+        if (typeof hasRoom === 'function' && !hasRoom(level)) {
+          log.debug('OCR boost stops below a level without pages for it', { level, reached });
+          break;
+        }
         set(level);
         reached = level;
         const ms = Number(await probe());

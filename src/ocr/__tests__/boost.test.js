@@ -4,7 +4,8 @@
  * the cautious count and half the threads, three steps to the maximum), and the controller's
  * climb against a probe: baseline, a probe per level, back one level when the reference page
  * slows by more than the fraction, a remembered level on the next climb, input ends it at once
- * and a late probe result is ignored, a failing probe stays at the level before.
+ * and a late probe result is ignored, a failing probe stays at the level before, a failing
+ * baseline stays cautious, and a level without pages for it ends the climb.
  */
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -248,7 +249,7 @@ describe('createOcrBoostController', () => {
     expect(probe.probe).toHaveBeenCalledTimes(5);
   });
 
-  it('stays at the level before when a probe fails, and treats a failed baseline as no climb', async () => {
+  it('stays at the level before when a probe fails, and stays cautious when the baseline fails so the next trigger may try again', async () => {
     const { controller, apply, probe, log } = makeController();
     const climb = controller.engage();
     await flush();
@@ -268,7 +269,43 @@ describe('createOcrBoostController', () => {
     failing.probe.fail(new Error('no engine'));
     await noClimb;
     expect(failing.apply).not.toHaveBeenCalled();
-    expect(failing.controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.BOOSTED, level: 8, settledLevel: null, baselineMs: null });
+    expect(failing.controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.CAUTIOUS, level: 8, settledLevel: null, baselineMs: null });
+    expect(failing.log.debug).toHaveBeenCalledWith('OCR boost baseline failed; staying cautious', { error: 'no engine' });
+    // Cautious again: a later trigger starts a new climb.
+    const retry = failing.controller.engage();
+    await flush();
+    expect(failing.probe.probe).toHaveBeenCalledTimes(2);
+    failing.probe.answer(1000);
+    await flush();
+    expect(failing.apply).toHaveBeenLastCalledWith(12);
+    failing.controller.disengage();
+    failing.probe.answer(1000);
+    await retry;
+  });
+
+  it('ends the climb below a level that has no pages for it, and settles at the level before', async () => {
+    const hasRoom = vi.fn((level) => level <= 16);
+    const { controller, apply, probe, log } = makeController({ hasRoom });
+    const climb = controller.engage();
+    await flush();
+    probe.answer(2000);
+    await flush();
+    probe.answer(2050); // 12
+    await flush();
+    probe.answer(2100); // 16
+    await climb;
+    expect(hasRoom.mock.calls.map(([level]) => level)).toEqual([12, 16, 20]);
+    expect(apply.mock.calls.map(([count]) => count)).toEqual([12, 16]);
+    expect(controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.BOOSTED, level: 16, settledLevel: 16 });
+    expect(log.debug).toHaveBeenCalledWith('OCR boost stops below a level without pages for it', { level: 20, reached: 16 });
+    // No room even for the first level: boosted at the cautious count, nothing applied.
+    const cramped = makeController({ hasRoom: () => false });
+    const noRoom = cramped.controller.engage();
+    await flush();
+    cramped.probe.answer(2000);
+    await noRoom;
+    expect(cramped.apply).not.toHaveBeenCalled();
+    expect(cramped.controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.BOOSTED, level: 8, settledLevel: null });
   });
 
   it('does nothing without levels, and drops levels that are not above the cautious count', async () => {

@@ -177,7 +177,8 @@ describe('createOcrImagePreparer', () => {
     const { preparer, log, main, timers, worker } = setup({ requestTimeoutMs: 777 });
     const first = preparer.prepare(image, { removeRulingLines: true });
     const second = preparer.prepare(new Blob(['two']), { removeRulingLines: true });
-    expect(timers.map((t) => t.ms)).toEqual([777, 777]);
+    // One clock, for the request the worker is on; the second waits its turn behind it.
+    expect(timers.map((t) => t.ms)).toEqual([777]);
     const silent = worker();
     timers[0].fn();
     expect((await first).via).toBe('main');
@@ -193,6 +194,29 @@ describe('createOcrImagePreparer', () => {
     await third;
     expect(timers.map((t) => t.ms)).toEqual([OCR_IMAGE_PREPARER_IDLE_MS]);
     expect(OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS).toBeLessThan(30000);
+  });
+
+  it('times the request the worker is on, not the wait behind it: the clock restarts with every reply', async () => {
+    const { preparer, log, timers, worker } = setup({ requestTimeoutMs: 777 });
+    const jobs = [1, 2, 3].map((n) => preparer.prepare(new Blob([`page ${n}`]), { removeRulingLines: true }));
+    expect(timers.map((t) => t.ms)).toEqual([777]);
+    const firstClock = timers[0];
+    // The first reply arrives: a fresh clock starts for the second request, the old one is gone.
+    worker().reply({ type: 'prepared', id: 1, ok: true, blob: image, width: 1, height: 1, rulingLinePixels: 0 });
+    await jobs[0];
+    expect(timers.map((t) => t.ms)).toEqual([777]);
+    expect(timers[0]).not.toBe(firstClock);
+    const secondClock = timers[0];
+    worker().reply({ type: 'prepared', id: 2, ok: true, blob: image, width: 1, height: 1, rulingLinePixels: 0 });
+    await jobs[1];
+    expect(timers.map((t) => t.ms)).toEqual([777]);
+    expect(timers[0]).not.toBe(secondClock);
+    worker().reply({ type: 'prepared', id: 3, ok: true, blob: image, width: 1, height: 1, rulingLinePixels: 0 });
+    await jobs[2];
+    // Nothing pending: the idle clock alone remains, and no failure was counted.
+    expect(timers.map((t) => t.ms)).toEqual([OCR_IMAGE_PREPARER_IDLE_MS]);
+    expect(log.warn).not.toHaveBeenCalled();
+    expect(preparer.inspect()).toMatchObject({ mode: 'worker', failures: 0, pending: 0 });
   });
 
   it('prepares on the main thread when the worker cannot be created or refuses the image', async () => {

@@ -231,6 +231,8 @@
       // step: where that takes more than slowdownFraction longer than at the cautious count, the
       // step before is kept. The first input brings the cautious count back at once; engines
       // above it finish their page and are released. Each trigger can be closed with false.
+      // Made for recognizeWholeDocument: true; the window alone rarely holds more pages than
+      // the cautious count takes at once, and then there is nothing to boost for.
       boost: {
         enabled: false,
         idleAfterMs: 4000,

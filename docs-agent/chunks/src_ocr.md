@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4658. JSDoc symbol count: 189.
+File count: 22. Line count: 4698. JSDoc symbol count: 191.
 
 ## src/ocr/assetUrls.js
 
@@ -173,7 +173,9 @@ Symbols:
 - `OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS` (constant) - Longest wait for one reply before the worker counts as failed.
 - `OcrImagePreparer` (typedef) - No description.
 - `createOcrImagePreparer` (function) - No description.
-- `createOcrImagePreparer~takePending` (function) - Take a request out of the map, its reply timer with it.
+- `createOcrImagePreparer~replyTimer` (member) - The reply clock of the oldest pending request \(the one the worker is on\); null when none is pending.
+- `createOcrImagePreparer~armReplyTimer` (function) - Start the reply clock for the oldest pending request; nothing pending clears it.
+- `createOcrImagePreparer~takePending` (function) - Take a request out of the map; the reply clock restarts for the next oldest, or stops.
 - `createOcrImagePreparer~redoPendingOnMainThread` (function) - Finish every pending request on the main thread \(the worker is gone or going\).
 - `getOcrImagePreparer` (function) - The viewer's one preparer, created on first use \(prepareImage.js, the benchmarks\).
 - `disposeOcrImagePreparer` (function) - End the shared preparer's worker \(useOcrTextLayers.js on unmount\); the next use makes a new one.

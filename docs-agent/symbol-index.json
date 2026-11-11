@@ -18485,7 +18485,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 332,
+    "line": 338,
     "description": "Create the boost control and its triggers for one runtime.",
     "params": [
       {
@@ -18510,7 +18510,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 109,
+    "line": 115,
     "description": "The boost control and its triggers while the boost is on: { controller, onPlanned, detach } .",
     "params": [],
     "returns": [],
@@ -18523,7 +18523,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 90,
+    "line": 94,
     "description": "",
     "params": [
       {
@@ -18602,7 +18602,7 @@
         "name": "options.boost",
         "type": "Object|null",
         "optional": true,
-        "description": "The boost configuration (runtimeConfig.js normalizeOcrBoostConfig), or null for no boost; default from the runtime configuration."
+        "description": "The boost configuration (runtimeConfig.js normalizeOcrBoostConfig), or null for no boost; left out, it is read from the runtime configurati..."
       },
       {
         "name": "options.hardwareThreads",
@@ -18633,6 +18633,19 @@
     "examples": 0
   },
   {
+    "id": "OCR_BOOST_PENDING_STATUSES",
+    "name": "OCR_BOOST_PENDING_STATUSES",
+    "longname": "OCR_BOOST_PENDING_STATUSES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useOcrTextLayers.js",
+    "line": 49,
+    "description": "Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "OCR_IDLE_SHUTDOWN_MS",
     "name": "OCR_IDLE_SHUTDOWN_MS",
     "longname": "OCR_IDLE_SHUTDOWN_MS",
@@ -18652,8 +18665,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 391,
-    "description": "After a window plan (or a search opening): the search's way in, while it waits for pages.",
+    "line": 414,
+    "description": "After a window plan (or a search opening).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -18665,8 +18678,8 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 111,
-    "description": "What the last window plan decided, for the boost to read and to restore.",
+    "line": 117,
+    "description": "What the last window plan decided for the pages in flight, for the boost to restore.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -18678,7 +18691,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 49,
+    "line": 52,
     "description": "",
     "params": [],
     "returns": [
@@ -18696,7 +18709,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 54,
+    "line": 57,
     "description": "",
     "params": [],
     "returns": [
@@ -18714,7 +18727,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 125,
+    "line": 131,
     "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],
@@ -22973,7 +22986,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/boost.js",
-    "line": 110,
+    "line": 113,
     "description": "",
     "params": [
       {
@@ -23011,6 +23024,12 @@
         "type": "number",
         "optional": true,
         "description": "Default DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION."
+      },
+      {
+        "name": "options.hasRoom",
+        "type": "function",
+        "optional": false,
+        "description": "Asked before each level: false when fewer pages are waiting than that many engines could take, which ends the climb at the level before (en..."
       },
       {
         "name": "options.onChange",
@@ -23053,7 +23072,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/boost.js",
-    "line": 155,
+    "line": 159,
     "description": "The level below level in the plan, or the cautious count.",
     "params": [],
     "returns": [],
@@ -23180,7 +23199,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/ocr/boost.js",
-    "line": 131,
+    "line": 135,
     "description": "The level a climb settled at; the next climb starts there.",
     "params": [],
     "returns": [],
@@ -24659,13 +24678,26 @@
     "examples": 0
   },
   {
+    "id": "createOcrImagePreparer~armReplyTimer",
+    "name": "armReplyTimer",
+    "longname": "createOcrImagePreparer~armReplyTimer",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/ocr/imagePreparer.js",
+    "line": 132,
+    "description": "Start the reply clock for the oldest pending request; nothing pending clears it.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "createOcrImagePreparer",
     "name": "createOcrImagePreparer",
     "longname": "createOcrImagePreparer",
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 74,
+    "line": 76,
     "description": "",
     "params": [
       {
@@ -24744,7 +24776,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 258,
+    "line": 279,
     "description": "End the shared preparer's worker (useOcrTextLayers.js on unmount); the next use makes a new one.",
     "params": [],
     "returns": [],
@@ -24757,7 +24789,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 252,
+    "line": 273,
     "description": "The viewer's one preparer, created on first use (prepareImage.js, the benchmarks).",
     "params": [],
     "returns": [],
@@ -24770,7 +24802,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 42,
+    "line": 44,
     "description": "Idle time after which the preparation worker is terminated (restarted by the next page).",
     "params": [],
     "returns": [],
@@ -24783,7 +24815,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 44,
+    "line": 46,
     "description": "Worker failures after which the session prepares on the main thread only.",
     "params": [],
     "returns": [],
@@ -24796,7 +24828,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 51,
+    "line": 53,
     "description": "Longest wait for one reply before the worker counts as failed.",
     "params": [],
     "returns": [],
@@ -24809,7 +24841,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/imagePreparer.js",
-    "line": 53,
+    "line": 55,
     "description": "",
     "params": [],
     "returns": [],
@@ -24822,8 +24854,21 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/imagePreparer.js",
-    "line": 130,
+    "line": 152,
     "description": "Finish every pending request on the main thread (the worker is gone or going).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createOcrImagePreparer~replyTimer",
+    "name": "replyTimer",
+    "longname": "createOcrImagePreparer~replyTimer",
+    "kind": "member",
+    "scope": "inner",
+    "file": "src/ocr/imagePreparer.js",
+    "line": 96,
+    "description": "The reply clock of the oldest pending request (the one the worker is on); null when none is pending.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -24835,8 +24880,8 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/imagePreparer.js",
-    "line": 121,
-    "description": "Take a request out of the map, its reply timer with it.",
+    "line": 143,
+    "description": "Take a request out of the map; the reply clock restarts for the next oldest, or stops.",
     "params": [],
     "returns": [],
     "examples": 0

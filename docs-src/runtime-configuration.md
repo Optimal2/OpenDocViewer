@@ -463,7 +463,12 @@ ocr: {
   (`idle`: the input-free time; `hidden`: the tab going into the background; `search`: the
   toolbar's search over the whole document waiting for pages), each open unless it is the
   literal `false`. A number out of range is clamped to the nearest bound; a value that is not a
-  finite number gets the default. The boost needs the automatic worker count: with a manual
+  finite number gets the default. The boost has work to do only while more pages are pending
+  than the cautious count can take at once: in practice with `ocr.recognizeWholeDocument: true`
+  (the window around the shown page holds three or four pages, fewer than most clients'
+  cautious count), or on a client whose cautious count is one or two; the search trigger
+  likewise waits for pages only with the whole document planned. The boost needs the automatic
+  worker count: with a manual
   `ocr.workerCount` it stays off, as it does on a client with no room above the cautious count
   (the memory budget binds first on a browser that reports no device memory). The key means
   nothing while OCR is off.
@@ -737,7 +742,10 @@ browser reports logical threads only, and the boost benchmark showed that physic
 The ways in are the configured `triggers`: no input on the window for `idleAfterMs`, the tab
 going into the background, or the toolbar's search over the whole document waiting for pages.
 Each applies only while more pages are pending than the cautious count can take at once, so a
-short window never boosts and neither does a document that is done. The first pointer, key,
+short window never boosts and neither does a document that is done: the boost is made for
+`ocr.recognizeWholeDocument: true`, where a long document waits behind the window. The climb also
+stops below a level that has fewer pages waiting than engines, since an engine without a page
+would measure nothing and hold memory for nothing. The first pointer, key,
 wheel or touch input ends the boosted state at once: the ceiling goes back to the cautious
 count, the engines above it finish the page they hold and are released, and a measurement still
 under way is ignored. The end of the work ends it too.

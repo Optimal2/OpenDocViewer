@@ -31,7 +31,7 @@
  * `ocr.workerCount` is set by hand, or where the client has no room above the cautious count,
  * there is no boost and nothing listens. The state is exposed as `ocrBoost`.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import logger from '../logging/systemLogger.js';
 import { ocrPageKeyOf } from '../utils/ocrPageKey.js';
 import {
@@ -44,6 +44,9 @@ export const OCR_IDLE_SHUTDOWN_MS = 60000;
 
 /** Window events that count as input for the boost: they end the boosted state and restart the idle clock. */
 export const OCR_BOOST_ACTIVITY_EVENTS = Object.freeze(['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']);
+
+/** Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do. */
+const OCR_BOOST_PENDING_STATUSES = new Set(['queued', 'probing', 'recognizing']);
 
 /** @returns {(Object|null)} The boost configuration when the boost is on, else null. */
 function readBoostConfig() {
@@ -79,7 +82,8 @@ const EMPTY_PAGES = Object.freeze({});
  * @param {boolean=} options.searchOpen  True while the toolbar's search over the whole document
  *   is open with a term: one of the boost's ways in. Default false.
  * @param {(Object|null)=} options.boost  The boost configuration (runtimeConfig.js
- *   normalizeOcrBoostConfig), or null for no boost; default from the runtime configuration.
+ *   normalizeOcrBoostConfig), or null for no boost; left out, it is read from the runtime
+ *   configuration once (a fresh object every render would restart the runtime every render).
  * @param {number=} options.hardwareThreads  Logical threads the boost may plan with; default
  *   `navigator.hardwareConcurrency`.
  * @returns {{ ocrPages: Object<string, Object>, ocrEngineFailure: (string|null), ocrBoost: (Object|null) }}
@@ -99,16 +103,18 @@ export default function useOcrTextLayers({
   idleShutdownMs = OCR_IDLE_SHUTDOWN_MS,
   wholeDocument = isOcrWholeDocumentEnabled(),
   searchOpen = false,
-  boost = readBoostConfig(),
+  boost: boostOption,
   hardwareThreads = reportedThreads(),
 }) {
+  // Read once: the runtime effect depends on it, and the accessors hand out a new object every call.
+  const boost = useMemo(() => (boostOption === undefined ? readBoostConfig() : boostOption), [boostOption]);
   const [snapshot, setSnapshot] = useState({ pages: EMPTY_PAGES, engineFailure: null });
   const [boostState, setBoostState] = useState(/** @type {(Object|null)} */ (null));
   const runtimeRef = useRef(/** @type {(Object|null)} */ (null));
   /** The boost control and its triggers while the boost is on: `{ controller, onPlanned, detach }`. */
   const boostRef = useRef(/** @type {(Object|null)} */ (null));
-  /** What the last window plan decided, for the boost to read and to restore. */
-  const planRef = useRef({ concurrency: 1, pending: 0 });
+  /** What the last window plan decided for the pages in flight, for the boost to restore. */
+  const planRef = useRef({ concurrency: 1 });
   const pausedRef = useRef(Boolean(paused) || !ready);
   pausedRef.current = Boolean(paused) || !ready;
   const searchOpenRef = useRef(Boolean(searchOpen));
@@ -313,7 +319,7 @@ export default function useOcrTextLayers({
     if (typeof ocrModule.resolveOcrConcurrency === 'function') {
       concurrency = ocrModule.resolveOcrConcurrency(pending, runtime.setup);
     }
-    planRef.current = { concurrency: Math.max(1, Math.floor(Number(concurrency ?? runtime.workerCount)) || 1), pending };
+    planRef.current = { concurrency: Math.max(1, Math.floor(Number(concurrency ?? runtime.workerCount)) || 1) };
     // While boosted, the boost's level is the limit; the plan's figure is restored with the cautious count.
     const level = boostRef.current?.controller.level() ?? 0;
     runtime.queue.setWindow(candidates, { concurrency: level > runtime.workerCount ? level : concurrency });
@@ -330,12 +336,23 @@ export default function useOcrTextLayers({
  * @returns {{ controller: Object, onPlanned: function(): void, detach: function(): void }}
  */
 function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage, config, planRef, pausedRef, searchOpenRef, onChange }) {
+  // The queue's live count of pages still to do (queued, probing or recognising): the boost has
+  // work only while more of them wait than the cautious count takes at once, and a level is
+  // worth climbing to only while there are pages for that many engines.
+  const pendingNow = () => {
+    let count = 0;
+    for (const entry of Object.values(queue.getSnapshot().pages)) {
+      if (OCR_BOOST_PENDING_STATUSES.has(entry?.status)) count += 1;
+    }
+    return count;
+  };
   const controller = ocrModule.createOcrBoostController({
     cautious,
     levels,
     slowdownFraction: config.slowdownFraction,
     log: logger,
     onChange,
+    hasRoom: (level) => pendingNow() >= level,
     // The pool's ceiling and the queue's pages in flight follow the level; back at the cautious
     // count the queue gets what the last window plan decided for the pending pages.
     apply: (count) => {
@@ -355,7 +372,7 @@ function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage
     }
   };
   // Worth boosting only while more pages are pending than the cautious count can take at once.
-  const hasWork = () => !pausedRef.current && planRef.current.pending > cautious;
+  const hasWork = () => !pausedRef.current && pendingNow() > cautious;
   const tryEngage = (reason) => {
     if (!hasWork()) return;
     void controller.engage(reason);
@@ -385,11 +402,19 @@ function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage
   }
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility);
   armIdle();
+  const isHidden = () => typeof document !== 'undefined' && document.visibilityState === 'hidden';
   return {
     controller,
-    /** After a window plan (or a search opening): the search's way in, while it waits for pages. */
+    /**
+     * After a window plan (or a search opening). Pages arrive while the user does nothing (a
+     * document loading, the whole document asked for), so the ways in are looked at again: the
+     * search's, the hidden tab's, and the idle clock is restarted when it has run out without
+     * work to do, since nothing else would restart it before the next input.
+     */
     onPlanned() {
       if (triggers.search && searchOpenRef.current) tryEngage('search');
+      if (triggers.hidden && isHidden()) tryEngage('hidden');
+      if (triggers.idle && idleTimer === null && controller.inspect().state === 'cautious') armIdle();
     },
     detach() {
       clearIdle();

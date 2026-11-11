@@ -701,16 +701,17 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
-| <code>attachBoost</code> | function | <code>src/hooks/useOcrTextLayers.js:332</code> | Create the boost control and its triggers for one runtime. |
-| <code>useOcrTextLayers~boostRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:109</code> | The boost control and its triggers while the boost is on: { controller, onPlanned, detach } . |
-| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:90</code> |  |
+| <code>attachBoost</code> | function | <code>src/hooks/useOcrTextLayers.js:338</code> | Create the boost control and its triggers for one runtime. |
+| <code>useOcrTextLayers~boostRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:115</code> | The boost control and its triggers while the boost is on: { controller, onPlanned, detach } . |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:94</code> |  |
 | <code>OCR_BOOST_ACTIVITY_EVENTS</code> | constant | <code>src/hooks/useOcrTextLayers.js:46</code> | Window events that count as input for the boost: they end the boosted state and restart the idle clock. |
+| <code>OCR_BOOST_PENDING_STATUSES</code> | constant | <code>src/hooks/useOcrTextLayers.js:49</code> | Queue statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still to do. |
 | <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:43</code> | Idle time after which the OCR worker is terminated to free its memory. |
-| <code>onPlanned</code> | function | <code>src/hooks/useOcrTextLayers.js:391</code> | After a window plan \(or a search opening\): the search&#39;s way in, while it waits for pages. |
-| <code>useOcrTextLayers~planRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:111</code> | What the last window plan decided, for the boost to read and to restore. |
-| <code>readBoostConfig</code> | function | <code>src/hooks/useOcrTextLayers.js:49</code> |  |
-| <code>reportedThreads</code> | function | <code>src/hooks/useOcrTextLayers.js:54</code> |  |
-| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:125</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
+| <code>onPlanned</code> | function | <code>src/hooks/useOcrTextLayers.js:414</code> | After a window plan \(or a search opening\). |
+| <code>useOcrTextLayers~planRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:117</code> | What the last window plan decided for the pages in flight, for the boost to restore. |
+| <code>readBoostConfig</code> | function | <code>src/hooks/useOcrTextLayers.js:52</code> |  |
+| <code>reportedThreads</code> | function | <code>src/hooks/useOcrTextLayers.js:57</code> |  |
+| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:131</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |
@@ -906,16 +907,16 @@
 | <code>withTimeout</code> | function | <code>src/ocr/benchmark.js:373</code> |  |
 | <code>BOOSTED</code> | member | <code>src/ocr/boost.js:50</code> | The climb ended; the level found applies until the next input. |
 | <code>CAUTIOUS</code> | member | <code>src/ocr/boost.js:46</code> | The cautious count applies. |
-| <code>createOcrBoostController</code> | function | <code>src/ocr/boost.js:110</code> |  |
+| <code>createOcrBoostController</code> | function | <code>src/ocr/boost.js:113</code> |  |
 | <code>DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION</code> | constant | <code>src/ocr/boost.js:41</code> | How much longer the reference recognition may take before the climb stops \(a quarter\). |
-| <code>createOcrBoostController~levelBelow</code> | function | <code>src/ocr/boost.js:155</code> | The level below level in the plan, or the cautious count. |
+| <code>createOcrBoostController~levelBelow</code> | function | <code>src/ocr/boost.js:159</code> | The level below level in the plan, or the cautious count. |
 | <code>OCR_BOOST_STATE</code> | constant | <code>src/ocr/boost.js:44</code> | The states of the control \(see inspect \). |
 | <code>OCR_BOOST_STEPS</code> | constant | <code>src/ocr/boost.js:38</code> | Steps of the climb from the starting level to the maximum. |
 | <code>OcrBoostController</code> | typedef | <code>src/ocr/boost.js:86</code> |  |
 | <code>OcrBoostProbe</code> | typedef | <code>src/ocr/boost.js:79</code> |  |
 | <code>planOcrBoostLevels</code> | function | <code>src/ocr/boost.js:64</code> | The levels of the climb, in order, above the cautious count. |
 | <code>RISING</code> | member | <code>src/ocr/boost.js:48</code> | Climbing: a level has been applied and its probe is under way. |
-| <code>createOcrBoostController~settledLevel</code> | member | <code>src/ocr/boost.js:131</code> | The level a climb settled at; the next climb starts there. |
+| <code>createOcrBoostController~settledLevel</code> | member | <code>src/ocr/boost.js:135</code> | The level a climb settled at; the next climb starts there. |
 | <code>ASSUMED_DEVICE_MEMORY_GIB</code> | constant | <code>src/ocr/boostBenchmark.js:118</code> | Device memory assumed for a browser that does not report it \(Firefox, Safari\), in GiB. |
 | <code>BOOST_ABORT_REASON</code> | constant | <code>src/ocr/boostBenchmark.js:129</code> | Reasons a scenario stopped part-way. |
 | <code>BOOST_MAX_WORKER_COUNT</code> | constant | <code>src/ocr/boostBenchmark.js:97</code> | Most workers a boost scenario may ask for. |
@@ -986,15 +987,17 @@
 | <code>createOcrEnginePool~shrink</code> | function | <code>src/ocr/enginePool.js:102</code> | Terminate idle engines above the ceiling, newest first; the busy ones go as they finish. |
 | <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:76</code> | A free entry now, a new one while under the limit, else null. |
 | <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:27</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
-| <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:74</code> |  |
-| <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:258</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
-| <code>getOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:252</code> | The viewer&#39;s one preparer, created on first use \(prepareImage.js, the benchmarks\). |
-| <code>OCR_IMAGE_PREPARER_IDLE_MS</code> | constant | <code>src/ocr/imagePreparer.js:42</code> | Idle time after which the preparation worker is terminated \(restarted by the next page\). |
-| <code>OCR_IMAGE_PREPARER_MAX_FAILURES</code> | constant | <code>src/ocr/imagePreparer.js:44</code> | Worker failures after which the session prepares on the main thread only. |
-| <code>OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS</code> | constant | <code>src/ocr/imagePreparer.js:51</code> | Longest wait for one reply before the worker counts as failed. |
-| <code>OcrImagePreparer</code> | typedef | <code>src/ocr/imagePreparer.js:53</code> |  |
-| <code>createOcrImagePreparer~redoPendingOnMainThread</code> | function | <code>src/ocr/imagePreparer.js:130</code> | Finish every pending request on the main thread \(the worker is gone or going\). |
-| <code>createOcrImagePreparer~takePending</code> | function | <code>src/ocr/imagePreparer.js:121</code> | Take a request out of the map, its reply timer with it. |
+| <code>createOcrImagePreparer~armReplyTimer</code> | function | <code>src/ocr/imagePreparer.js:132</code> | Start the reply clock for the oldest pending request; nothing pending clears it. |
+| <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:76</code> |  |
+| <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:279</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
+| <code>getOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:273</code> | The viewer&#39;s one preparer, created on first use \(prepareImage.js, the benchmarks\). |
+| <code>OCR_IMAGE_PREPARER_IDLE_MS</code> | constant | <code>src/ocr/imagePreparer.js:44</code> | Idle time after which the preparation worker is terminated \(restarted by the next page\). |
+| <code>OCR_IMAGE_PREPARER_MAX_FAILURES</code> | constant | <code>src/ocr/imagePreparer.js:46</code> | Worker failures after which the session prepares on the main thread only. |
+| <code>OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS</code> | constant | <code>src/ocr/imagePreparer.js:53</code> | Longest wait for one reply before the worker counts as failed. |
+| <code>OcrImagePreparer</code> | typedef | <code>src/ocr/imagePreparer.js:55</code> |  |
+| <code>createOcrImagePreparer~redoPendingOnMainThread</code> | function | <code>src/ocr/imagePreparer.js:152</code> | Finish every pending request on the main thread \(the worker is gone or going\). |
+| <code>createOcrImagePreparer~replyTimer</code> | member | <code>src/ocr/imagePreparer.js:96</code> | The reply clock of the oldest pending request \(the one the worker is on\); null when none is pending. |
+| <code>createOcrImagePreparer~takePending</code> | function | <code>src/ocr/imagePreparer.js:143</code> | Take a request out of the map; the reply clock restarts for the next oldest, or stops. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
 | <code>createEventLoopYield</code> | function | <code>src/ocr/lineRemoval.js:248</code> | Build the function that hands control back to the event loop between bands. |

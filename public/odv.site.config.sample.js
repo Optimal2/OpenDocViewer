@@ -135,8 +135,9 @@
       // over the whole document waiting for pages): the viewer climbs in three steps towards
       // maxWorkerCount (bounded by the threads and the memory budget) and stops where a
       // reference page recognises more than slowdownFraction slower than at the cautious count;
-      // the first input brings the cautious count back. Only the literal true turns it on; see
-      // docs-src/runtime-configuration.md.
+      // the first input brings the cautious count back. Only the literal true turns it on; made
+      // for recognizeWholeDocument: true (the window alone rarely holds more pages than the
+      // cautious count takes at once); see docs-src/runtime-configuration.md.
       // boost: { enabled: false, idleAfterMs: 4000, maxWorkerCount: 32, slowdownFraction: 0.25, triggers: { idle: true, hidden: true, search: true } },
       // Serve the engine, worker and language files from a copy of the viewer's ocr/ folder at
       // the site's own location (same layout; same origin, or CORS-enabled and allowed by the
