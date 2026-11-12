@@ -86,7 +86,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 2 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | <code>src/contexts/viewerContext.js</code> | 265 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2932 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2937 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/generated/standard-manual/manual.en.js</code> | 2 | 1 | 0 | low | Default export for manual.en. |
 | <code>src/generated/standard-manual/manual.sv.js</code> | 2 | 1 | 0 | low | Default export for manual.sv. |
@@ -94,7 +94,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/useKeyTipsHeld.js</code> | 67 | 1 | 3 | high | Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
 | <code>src/hooks/useOcrModule.js</code> | 44 | 1 | 1 | high | Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true. |
-| <code>src/hooks/useOcrTextLayers.js</code> | 429 | 1 | 11 | high | Runs OCR for the pages near the viewer&#39;s focus and exposes the outcomes per page. |
+| <code>src/hooks/useOcrTextLayers.js</code> | 457 | 1 | 11 | high | Runs OCR for the pages near the viewer&#39;s focus and exposes the outcomes per page. |
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |

@@ -321,7 +321,11 @@ ocr: {
   `true`, the window keeps its priority and the remaining pages follow it (as many at a time as
   the worker count allows, see `ocr.workerCount` and `ocr.workerPolicy`) in reading order from
   the shown page to the end and then from the start of the document, while
-  the viewer is open; a page the viewer has not rendered is rendered for the purpose and dropped
+  the viewer is open, starting once the viewer has finished loading the document (until then
+  only the window is recognised, so the load, which is what the user waits for, keeps the cores:
+  on a four-core client the 300-page test document was all in after 15 s without OCR, 31 s with
+  four engines recognising the whole document meanwhile and 93 s with eight); a page the viewer
+  has not rendered is rendered for the purpose and dropped
   again as soon as its bytes are read (so a long document does not pile up page renders; a page
   the user has reached meanwhile is left to the viewer), the outcome cache grows to the page
   count (an outcome is never dropped while its page is still planned), and the queue still
@@ -741,6 +745,10 @@ browser reports logical threads only, and the boost benchmark showed that physic
 
 The ways in are the configured `triggers`: no input on the window for `idleAfterMs`, the tab
 going into the background, or the toolbar's search over the whole document waiting for pages.
+None of them applies while the viewer is still loading the document: someone waiting for the
+document to appear gives no input either, and the boost would take the cores from the very
+loading they wait for, so the boost stays out until every page is in, and a load that starts
+ends a boosted state like input does.
 Each applies only while more pages are pending than the cautious count can take at once, so a
 short window never boosts and neither does a document that is done: the boost is made for
 `ocr.recognizeWholeDocument: true`, where a long document waits behind the window. The climb also

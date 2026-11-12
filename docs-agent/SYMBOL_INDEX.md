@@ -612,8 +612,8 @@
 | <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1107</code> |  |
 | <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:580</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:219</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2808</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2794</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2813</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2799</code> |  |
 | <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1179</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:61</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:55</code> |  |
@@ -621,7 +621,7 @@
 | <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2056</code> | Render one PDF page again at twice its effective PDF scale. |
 | <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1863</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:76</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2813</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2818</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:151</code> |  |
 | <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2453</code> |  |
 | <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1519</code> |  |
@@ -662,9 +662,9 @@
 | <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1699</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:711</code> |  |
 | <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2410</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2803</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
-| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2768</code> |  |
-| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2781</code> |  |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2808</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2773</code> |  |
+| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2786</code> |  |
 | <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1686</code> |  |
 | <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1350</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:66</code> |  |
@@ -701,17 +701,17 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
-| <code>attachBoost</code> | function | <code>src/hooks/useOcrTextLayers.js:338</code> | Create the boost control and its triggers for one runtime. |
-| <code>useOcrTextLayers~boostRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:115</code> | The boost control and its triggers while the boost is on: { controller, onPlanned, detach } . |
-| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:94</code> |  |
-| <code>OCR_BOOST_ACTIVITY_EVENTS</code> | constant | <code>src/hooks/useOcrTextLayers.js:46</code> | Window events that count as input for the boost: they end the boosted state and restart the idle clock. |
-| <code>OCR_BOOST_PENDING_STATUSES</code> | constant | <code>src/hooks/useOcrTextLayers.js:49</code> | Queue statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still to do. |
-| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:43</code> | Idle time after which the OCR worker is terminated to free its memory. |
-| <code>onPlanned</code> | function | <code>src/hooks/useOcrTextLayers.js:414</code> | After a window plan \(or a search opening\). |
-| <code>useOcrTextLayers~planRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:117</code> | What the last window plan decided for the pages in flight, for the boost to restore. |
-| <code>readBoostConfig</code> | function | <code>src/hooks/useOcrTextLayers.js:52</code> |  |
-| <code>reportedThreads</code> | function | <code>src/hooks/useOcrTextLayers.js:57</code> |  |
-| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:131</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
+| <code>attachBoost</code> | function | <code>src/hooks/useOcrTextLayers.js:365</code> | Create the boost control and its triggers for one runtime. |
+| <code>useOcrTextLayers~boostRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:130</code> | The boost control and its triggers while the boost is on: { controller, onPlanned, detach } . |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:108</code> |  |
+| <code>OCR_BOOST_ACTIVITY_EVENTS</code> | constant | <code>src/hooks/useOcrTextLayers.js:55</code> | Window events that count as input for the boost: they end the boosted state and restart the idle clock. |
+| <code>OCR_BOOST_PENDING_STATUSES</code> | constant | <code>src/hooks/useOcrTextLayers.js:58</code> | Queue statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still to do. |
+| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:52</code> | Idle time after which the OCR worker is terminated to free its memory. |
+| <code>onPlanned</code> | function | <code>src/hooks/useOcrTextLayers.js:442</code> | After a window plan \(or a search opening\). |
+| <code>useOcrTextLayers~planRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:132</code> | What the last window plan decided for the pages in flight, for the boost to restore. |
+| <code>readBoostConfig</code> | function | <code>src/hooks/useOcrTextLayers.js:61</code> |  |
+| <code>reportedThreads</code> | function | <code>src/hooks/useOcrTextLayers.js:66</code> |  |
+| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:148</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |

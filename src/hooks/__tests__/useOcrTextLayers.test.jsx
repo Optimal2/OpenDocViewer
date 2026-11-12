@@ -307,6 +307,30 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(1);
   });
 
+  it('while the viewer loads the document, recognises the window only; the rest of the document follows when the load is done', async () => {
+    const engine = makeEngine();
+    const ocrModule = makeModule(engine, makeProber());
+    // What the real module does: fewer pages in flight for fewer pending pages.
+    ocrModule.resolveOcrConcurrency = vi.fn((pending) => Math.max(1, Math.min(8, Math.ceil(pending / 2))));
+    ocrModule.workerCount = 8;
+    const allPages = Array.from({ length: 12 }, (_, index) => page('doc', index));
+    const props = baseProps({ ocrModule, allPages, focusPageIndexes: [0], wholeDocument: true, loading: true });
+    await render(props);
+    await flush();
+    // Loading: the window is the shown page and the two after it, so three pages are planned
+    // and two engines' worth are in flight, whatever the document's length.
+    expect(ocrModule.resolveOcrConcurrency).toHaveBeenLastCalledWith(3, expect.anything());
+    expect(engine.pending).toHaveLength(2);
+    expect(Object.keys(latest.ocrPages)).toHaveLength(3);
+
+    // The load is done: the rest of the document is planned and the engines it warrants start.
+    await render({ ...props, loading: false });
+    await flush();
+    expect(ocrModule.resolveOcrConcurrency).toHaveBeenLastCalledWith(12, expect.anything());
+    expect(engine.pending).toHaveLength(6);
+    expect(Object.keys(latest.ocrPages)).toHaveLength(12);
+  });
+
   it('with the whole document asked for, queues the loaded pages beyond the window after it, rendered on demand', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());
@@ -657,6 +681,48 @@ describe('useOcrTextLayers boost', () => {
     await flush();
     expect(probesOf(paused)).toHaveLength(0);
     expect(latest.ocrBoost.state).toBe('cautious');
+  });
+
+  it('stays out while the viewer is loading the document, engages one idle period after the load, and ends when a load starts', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    const props = baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4, loading: true });
+    await render(props);
+    await flush();
+    // Loading: the idle clock runs out, pages wait, the search is even open, and nothing starts.
+    await act(async () => { vi.advanceTimersByTime(5000); });
+    await flush();
+    await render({ ...props, searchOpen: true });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    expect(latest.ocrBoost.state).toBe('cautious');
+    // Nor for a hidden tab while loading.
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    visibility.mockReturnValue('visible');
+    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); });
+    await render({ ...props, searchOpen: false });
+
+    // The load is done: one idle period later the boost engages.
+    await render({ ...props, loading: false });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(0);
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(1);
+    await act(async () => { probesOf(pool)[0].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1000 }); });
+    await flush();
+    expect(pool.resize).toHaveBeenLastCalledWith(2);
+    expect(latest.ocrBoost).toMatchObject({ state: 'rising', level: 2 });
+
+    // Another document starts loading: the cautious count is back at once.
+    await render({ ...props, loading: true });
+    expect(pool.resize).toHaveBeenLastCalledWith(1);
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', level: 1, endedBy: 'loading' });
+    visibility.mockRestore();
   });
 
   it('does not engage once the work is done, even when the idle clock fires afterwards', async () => {

@@ -5,23 +5,23 @@ Token counts are rough estimates using one token per four characters. Use this f
 ## Source Estimate
 
 - Source files: 206
-- Source lines: 73801
+- Source lines: 73834
 - Estimated source-map tokens: 7290
 
 ## Generated Output Estimate
 
 - Output files measured: 33 (excluding this budget file)
-- Output lines: 201799
-- Output characters: 5780780
-- Estimated output tokens: 1445207
+- Output lines: 201817
+- Output characters: 5781653
+- Estimated output tokens: 1445426
 
 ## Largest Output Files
 
 | File | Lines | Characters | Estimated tokens |
 | --- | ---: | ---: | ---: |
-| `agent-map.json` | 142082 | 3896245 | 974062 |
-| `symbol-index.json` | 53301 | 1285120 | 321280 |
-| `SYMBOL_INDEX.md` | 2153 | 326164 | 81541 |
+| `agent-map.json` | 142094 | 3896843 | 974211 |
+| `symbol-index.json` | 53307 | 1285394 | 321349 |
+| `SYMBOL_INDEX.md` | 2153 | 326165 | 81542 |
 | `chunks/src_utils.md` | 1188 | 71585 | 17897 |
 | `FILE_MAP.md` | 217 | 38224 | 9556 |
 | `chunks/src_ocr.md` | 379 | 25832 | 6458 |
