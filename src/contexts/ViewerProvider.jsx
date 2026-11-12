@@ -2747,7 +2747,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const releaseOcrPageAsset = useCallback((pageIndex, url) => {
     clearPageAssetReference(pageIndex, 'full', url);
   }, [clearPageAssetReference]);
-  const { ocrPages, ocrEngineFailure } = useOcrTextLayers({
+  const { ocrPages, ocrEngineFailure, ocrBoost } = useOcrTextLayers({
     ocrModule,
     allPages,
     focusPageIndexes: ocrFocusPageIndexes,
@@ -2857,6 +2857,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     getSignatureSourceFileName,
     ocrPages,
     ocrEngineFailure,
+    ocrBoost,
     setOcrFocusPageIndexes,
     ocrSearch,
     setOcrSearch,
@@ -2907,6 +2908,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     getSignatureSourceFileName,
     ocrPages,
     ocrEngineFailure,
+    ocrBoost,
     setOcrFocusPageIndexes,
     ocrSearch,
     setOcrSearch,

@@ -94,15 +94,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 205,
-    "sourceLineCount": 73648,
-    "docletCount": 2138,
-    "documentedFileCount": 201,
+    "fileCount": 206,
+    "sourceLineCount": 73749,
+    "docletCount": 2141,
+    "documentedFileCount": 202,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 7227
+    "estimatedSourceTokens": 7290
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -625,7 +625,7 @@
     {
       "path": "src/contexts/viewerContext.js",
       "score": 91,
-      "lines": 260,
+      "lines": 265,
       "incomingLocalImports": 13,
       "doclets": 12,
       "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
@@ -703,13 +703,13 @@
           {
             "path": "src/contexts/viewerContext.js",
             "score": 91,
-            "lines": 260,
+            "lines": 265,
             "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360)."
           },
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2930,
+            "lines": 2932,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -1204,7 +1204,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7973,
+      "lineCount": 7998,
       "docletCount": 113,
       "importantFiles": [
         {
@@ -1273,7 +1273,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 35,
-          "lines": 481,
+          "lines": 506,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -1408,13 +1408,13 @@
     {
       "name": "src/contexts",
       "fileCount": 5,
-      "lineCount": 3615,
+      "lineCount": 3622,
       "docletCount": 101,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
           "score": 91,
-          "lines": 260,
+          "lines": 265,
           "incomingLocalImports": 13,
           "doclets": 12,
           "summary": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
@@ -1423,7 +1423,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2930,
+          "lines": 2932,
           "incomingLocalImports": 1,
           "doclets": 71,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1889,9 +1889,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 65,
-      "lineCount": 24405,
-      "docletCount": 1012,
+      "fileCount": 66,
+      "lineCount": 24474,
+      "docletCount": 1015,
       "importantFiles": [
         {
           "path": "src/utils/runtimeConfig.js",
@@ -13807,7 +13807,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 481,
+      "lines": 506,
       "extension": ".jsx",
       "jsdocBlockCount": 13,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
@@ -13825,7 +13825,7 @@
             "useRef",
             "useState"
           ],
-          "line": 32,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -13833,7 +13833,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 33,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -13841,7 +13841,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 34,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -13849,7 +13849,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 35,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -13857,7 +13857,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 36,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -13865,7 +13865,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 37,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -13876,7 +13876,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 38,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -13885,7 +13885,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 39,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -13894,7 +13894,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 40,
+          "line": 44,
           "kind": "static"
         },
         {
@@ -13903,7 +13903,16 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 41,
+          "line": 45,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/ocrBoostStatus.js",
+          "specifiers": [
+            "OCR_BOOST_FALLBACK",
+            "describeOcrBoost"
+          ],
+          "line": 46,
           "kind": "static"
         }
       ],
@@ -13911,39 +13920,39 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 59
+          "line": 64
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 44
+          "line": 49
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 59
+          "line": 64
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 221
+          "line": 244
         },
         {
           "name": "within",
           "kind": "function",
-          "line": 226
+          "line": 249
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 281
+          "line": 304
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 289
+          "line": 312
         }
       ],
       "parseError": null,
@@ -13959,7 +13968,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 44,
+          "line": 49,
           "description": "",
           "params": [
             {
@@ -13979,7 +13988,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 59,
+          "line": 64,
           "description": "",
           "params": [
             {
@@ -14034,7 +14043,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 244,
+          "line": 267,
           "description": "",
           "params": [
             {
@@ -14054,7 +14063,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 265,
+          "line": 288,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14074,7 +14083,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 281,
+          "line": 304,
           "description": "",
           "params": [
             {
@@ -14094,7 +14103,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 289,
+          "line": 312,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14108,7 +14117,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 35,
+          "line": 39,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14117,7 +14126,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 36,
+          "line": 40,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14126,7 +14135,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 37,
+          "line": 41,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14138,7 +14147,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 38,
+          "line": 42,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14148,7 +14157,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 39,
+          "line": 43,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         },
@@ -14158,7 +14167,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 40,
+          "line": 44,
           "kind": "static",
           "resolved": "src/utils/ocrSearchPlacement.js"
         },
@@ -14168,9 +14177,19 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 41,
+          "line": 45,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerEffects.js"
+        },
+        {
+          "source": "../../utils/ocrBoostStatus.js",
+          "specifiers": [
+            "OCR_BOOST_FALLBACK",
+            "describeOcrBoost"
+          ],
+          "line": 46,
+          "kind": "static",
+          "resolved": "src/utils/ocrBoostStatus.js"
         }
       ],
       "packageImports": [
@@ -14187,7 +14206,7 @@
             "useRef",
             "useState"
           ],
-          "line": 32,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -14195,7 +14214,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 33,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -14203,7 +14222,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 34,
+          "line": 38,
           "kind": "static"
         }
       ],
@@ -32158,7 +32177,7 @@
     },
     {
       "path": "src/contexts/viewerContext.js",
-      "lines": 260,
+      "lines": 265,
       "extension": ".js",
       "jsdocBlockCount": 13,
       "sourceSummary": null,
@@ -32176,7 +32195,7 @@
         {
           "name": "ViewerContext",
           "kind": "default",
-          "line": 259
+          "line": 264
         }
       ],
       "declarations": [],
@@ -32312,7 +32331,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 234,
+          "line": 239,
           "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
           "params": [],
           "returns": [],
@@ -32325,7 +32344,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 244,
+          "line": 249,
           "description": "",
           "params": [],
           "returns": [],
@@ -32338,7 +32357,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 251,
+          "line": 256,
           "description": "",
           "params": [],
           "returns": [],
@@ -32365,7 +32384,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2930,
+      "lines": 2932,
       "extension": ".jsx",
       "jsdocBlockCount": 79,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -57613,6 +57632,99 @@
       "incomingLocalImports": 3,
       "importanceScore": 72,
       "summary": "Centralized helpers for object/blob URL lifecycle management.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/ocrBoostStatus.js",
+      "lines": 69,
+      "extension": ".js",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "What the toolbar says about the OCR boost (components/DocumentToolbar/OcrSearchBar.jsx): one key per situation with its English fallback text (public/locales/<lng>/common.json, `ocr.boost`), the number of engines to name",
+      "imports": [],
+      "exports": [
+        {
+          "name": "OCR_BOOST_FALLBACK",
+          "kind": "variable",
+          "line": 16
+        },
+        {
+          "name": "describeOcrBoost",
+          "kind": "function",
+          "line": 40
+        }
+      ],
+      "declarations": [
+        {
+          "name": "describeOcrBoost",
+          "kind": "function",
+          "line": 40
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OCR_BOOST_FALLBACK",
+          "name": "OCR_BOOST_FALLBACK",
+          "longname": "OCR_BOOST_FALLBACK",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrBoostStatus.js",
+          "line": 16,
+          "description": "Keys of ocr.boost and their English fallbacks.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OcrBoostDescription",
+          "name": "OcrBoostDescription",
+          "longname": "OcrBoostDescription",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/ocrBoostStatus.js",
+          "line": 26,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "describeOcrBoost",
+          "name": "describeOcrBoost",
+          "longname": "describeOcrBoost",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrBoostStatus.js",
+          "line": 40,
+          "description": "",
+          "params": [
+            {
+              "name": "boost",
+              "type": "Object|null|undefined",
+              "optional": false,
+              "description": "ocrBoost of the viewer context."
+            }
+          ],
+          "returns": [
+            {
+              "type": "OcrBoostDescription|null",
+              "description": "Null without a boost (off, or no room for one)."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 27,
+      "summary": "What the toolbar says about the OCR boost (components/DocumentToolbar/OcrSearchBar.jsx): one key per situation with its English fallback text (public/locales/<lng>/common.json, `ocr.boost`), the number of engines to name",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -94979,7 +95091,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 59,
+      "line": 64,
       "description": "",
       "params": [
         {
@@ -95034,7 +95146,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 244,
+      "line": 267,
       "description": "",
       "params": [
         {
@@ -95054,7 +95166,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 281,
+      "line": 304,
       "description": "",
       "params": [
         {
@@ -95074,7 +95186,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 289,
+      "line": 312,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -95087,7 +95199,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 44,
+      "line": 49,
       "description": "",
       "params": [
         {
@@ -95107,7 +95219,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 265,
+      "line": 288,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -104544,7 +104656,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 244,
+      "line": 249,
       "description": "",
       "params": [],
       "returns": [],
@@ -104557,7 +104669,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 234,
+      "line": 239,
       "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
       "params": [],
       "returns": [],
@@ -104570,7 +104682,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 251,
+      "line": 256,
       "description": "",
       "params": [],
       "returns": [],
@@ -120421,6 +120533,57 @@
           "description": ""
         }
       ],
+      "examples": 0
+    },
+    {
+      "id": "describeOcrBoost",
+      "name": "describeOcrBoost",
+      "longname": "describeOcrBoost",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrBoostStatus.js",
+      "line": 40,
+      "description": "",
+      "params": [
+        {
+          "name": "boost",
+          "type": "Object|null|undefined",
+          "optional": false,
+          "description": "ocrBoost of the viewer context."
+        }
+      ],
+      "returns": [
+        {
+          "type": "OcrBoostDescription|null",
+          "description": "Null without a boost (off, or no room for one)."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "OCR_BOOST_FALLBACK",
+      "name": "OCR_BOOST_FALLBACK",
+      "longname": "OCR_BOOST_FALLBACK",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrBoostStatus.js",
+      "line": 16,
+      "description": "Keys of ocr.boost and their English fallbacks.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OcrBoostDescription",
+      "name": "OcrBoostDescription",
+      "longname": "OcrBoostDescription",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/ocrBoostStatus.js",
+      "line": 26,
+      "description": "",
+      "params": [],
+      "returns": [],
       "examples": 0
     },
     {

@@ -215,6 +215,11 @@ import { createContext } from 'react';
  *   while `ocr.enabled` is not the literal true.
  * @property {(string|null)} ocrEngineFailure
  *   Why the OCR engine cannot start in this session (src/ocr/engine.js failure codes), else null.
+ * @property {(Object|null)} ocrBoost
+ *   The OCR boost control's state (`inspect()` of src/ocr/boost.js: state, level, cautious,
+ *   levels, baselineMs, probes, settledLevel), which the toolbar's OCR status shows
+ *   (utils/ocrBoostStatus.js); null while `ocr.boost.enabled` is not the literal true or the
+ *   client has no room for a boost.
  * @property {function(Array.<number>): void} setOcrFocusPageIndexes
  *   Indexes into allPages of the displayed page(s), primary first; the OCR queue covers them
  *   and a fixed number of neighbours. A no-op while OCR is off.

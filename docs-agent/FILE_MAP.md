@@ -32,7 +32,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 165 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 219 | 2 | 5 | high | Compact language selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 262 | 1 | 4 | high | Manual overlay: modal dialog chrome \(title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling\) around the shared {@link ManualView}, which loads, filters, searches and navigates the |
-| <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 481 | 1 | 6 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live |
+| <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 506 | 1 | 6 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button, the status as its tooltip and in a visually hidden live |
 | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx</code> | 52 | 1 | 1 | high | The toolbar&#39;s OCR group, right after the image-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: - \`ocr.search.enabled\` \(default true; only the literal false |
 | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 333 | 1 | 1 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
 | <code>src/components/DocumentToolbar/printFieldLabels.js</code> | 22 | 1 | 1 | high | Visible label for an optional/required print-dialog field. |
@@ -85,8 +85,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/readAloudContext.js</code> | 41 | 4 | 1 | high | The read-aloud state shared by the page&#39;s context menu \(&quot;Read the selection aloud&quot; / &quot;Stop reading aloud&quot;, components/ReadAloudMenuItem.jsx\) and the toolbar&#39;s language menu \(the &quot;Reading language&quot; section, DocumentToolba |
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 2 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
-| <code>src/contexts/viewerContext.js</code> | 260 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2930 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/viewerContext.js</code> | 265 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2932 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/generated/standard-manual/manual.en.js</code> | 2 | 1 | 0 | low | Default export for manual.en. |
 | <code>src/generated/standard-manual/manual.sv.js</code> | 2 | 1 | 0 | low | Default export for manual.sv. |
@@ -157,6 +157,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/memoryProfile.js</code> | 75 | 2 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
+| <code>src/utils/ocrBoostStatus.js</code> | 69 | 1 | 3 | high | What the toolbar says about the OCR boost \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per situation with its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.boost\`\), the number of engines to name |
 | <code>src/utils/ocrLanguageCodes.js</code> | 31 | 2 | 1 | high | Tesseract language codes \(\`ocr.languages\`\) and the ISO 639-1 language each one reads: what the read-aloud menu offers and the language guess chooses among. |
 | <code>src/utils/ocrLoader.js</code> | 41 | 2 | 3 | high | The only door into the OCR module. |
 | <code>src/utils/ocrPageKey.js</code> | 32 | 3 | 3 | high | Key of one document page in the OCR result map \(\`ocrPages\` on the viewer context\). |

@@ -448,6 +448,15 @@
       "failed": "The text could not be recognised",
       "unavailable": "Text recognition is unavailable"
     },
+    "boost": {
+      "ready": "Idle boost: ready",
+      "starting": "Boost: measuring the starting point",
+      "rising": "Boost: trying {engines} engines",
+      "boosted": "Boost: {engines} engines",
+      "held": "Boost tried: no gain over the cautious count",
+      "last": "Last boost: {engines} engines",
+      "slow": "{level} engines took {percent} % longer"
+    },
     "search": {
       "open": "Search in the recognised text",
       "placeholder": "Search",

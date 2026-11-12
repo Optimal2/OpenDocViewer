@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 59,
+    "line": 64,
     "description": "",
     "params": [
       {
@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 244,
+    "line": 267,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 281,
+    "line": 304,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 289,
+    "line": 312,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 44,
+    "line": 49,
     "description": "",
     "params": [
       {
@@ -6541,7 +6541,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 265,
+    "line": 288,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -15978,7 +15978,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 244,
+    "line": 249,
     "description": "",
     "params": [],
     "returns": [],
@@ -15991,7 +15991,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 234,
+    "line": 239,
     "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
     "params": [],
     "returns": [],
@@ -16004,7 +16004,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 251,
+    "line": 256,
     "description": "",
     "params": [],
     "returns": [],
@@ -31855,6 +31855,57 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "describeOcrBoost",
+    "name": "describeOcrBoost",
+    "longname": "describeOcrBoost",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrBoostStatus.js",
+    "line": 40,
+    "description": "",
+    "params": [
+      {
+        "name": "boost",
+        "type": "Object|null|undefined",
+        "optional": false,
+        "description": "ocrBoost of the viewer context."
+      }
+    ],
+    "returns": [
+      {
+        "type": "OcrBoostDescription|null",
+        "description": "Null without a boost (off, or no room for one)."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_BOOST_FALLBACK",
+    "name": "OCR_BOOST_FALLBACK",
+    "longname": "OCR_BOOST_FALLBACK",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrBoostStatus.js",
+    "line": 16,
+    "description": "Keys of ocr.boost and their English fallbacks.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OcrBoostDescription",
+    "name": "OcrBoostDescription",
+    "longname": "OcrBoostDescription",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ocrBoostStatus.js",
+    "line": 26,
+    "description": "",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {

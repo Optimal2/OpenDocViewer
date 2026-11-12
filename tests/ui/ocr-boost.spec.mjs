@@ -76,6 +76,10 @@ test('ocr boost on: left alone, the viewer starts a second engine for the waitin
   await expect.poll(() => engineWorkers(workers).length, { timeout: 150000 }).toBeGreaterThanOrEqual(2);
   // The shown page is recognised as before.
   await expect(page.locator('.toolbar [data-odv-ocr="status"]')).toHaveAttribute('data-ocr-state', 'done', { timeout: 120000 });
+  // The toolbar says so: the search carries the boost's state and the tooltip ends with a line
+  // about it (which line depends on how the climb went on this machine).
+  await expect(page.locator('.toolbar [data-odv-ocr="search"]')).toHaveAttribute('data-ocr-boost', /cautious|rising|boosted/);
+  await expect(page.locator('.toolbar [data-odv-ocr="status"]')).toHaveAttribute('title', /(Boost|boost|Pådrag|pådrag)/);
 
   // Everything stayed on the viewer's own origin, and the reference page was drawn, not fetched.
   for (const url of requests) expect(url.startsWith(origin) || url.startsWith('blob:') || url.startsWith('data:'), url).toBe(true);
@@ -96,4 +100,8 @@ test('ocr boost off (the default): the same document is recognised by the cautio
   // Give the queue the time the boosted run needed to grow, then look: still one engine.
   await page.waitForTimeout(5000);
   expect(engineWorkers(workers)).toHaveLength(1);
+  // And the toolbar says nothing about a boost: no attribute, no badge, no tooltip line.
+  expect(await page.locator('.toolbar [data-odv-ocr="search"]').getAttribute('data-ocr-boost')).toBeNull();
+  await expect(page.locator('[data-odv-ocr="boost"]')).toHaveCount(0);
+  expect(await status.getAttribute('title')).not.toMatch(/boost|pådrag/i);
 });

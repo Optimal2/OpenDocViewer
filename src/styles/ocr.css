@@ -218,6 +218,34 @@
   opacity: 0;
 }
 
+/* The boost's badge (`ocr.boost`): a small bolt and the number of engines, shown in the button
+   while more engines than the cautious count run because the user is idle. It sits between the
+   icon and the count; in the status-only button there is no count, so it clears the LED itself.
+   Gone while the field is open, like the count. */
+.toolbar-ocr-boost {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.25em;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.toolbar .toolbar-ocr-boost .material-icons.toolbar-ocr-boost-icon {
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.toolbar-ocr-search.is-status-only .toolbar-ocr-boost {
+  margin-right: 0.6em;
+}
+
+.toolbar-ocr-search.is-open .toolbar-ocr-boost {
+  display: none;
+}
+
 /* The field: zero wide and hidden until opened, then grown to its width (an inline style the
    component measures, utils/ocrSearchPlacement.js) in a short ease; closed again it shrinks back
    first and hides when the transition has ended. */

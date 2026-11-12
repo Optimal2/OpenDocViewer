@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 65. Line count: 24405. JSDoc symbol count: 1012.
+File count: 66. Line count: 24474. JSDoc symbol count: 1015.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -289,6 +289,18 @@ Symbols:
 - `isTrackedObjectUrl` (function) - Check whether a blob/object URL is still tracked as live by the viewer.
 - `getTrackedObjectUrlCount` (function) - No description.
 - `revokeAllTrackedObjectUrls` (function) - Revoke every tracked object URL.
+
+## src/utils/ocrBoostStatus.js
+
+What the toolbar says about the OCR boost \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per situation with its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.boost\`\), the number of engines to name
+
+Exports: `OCR_BOOST_FALLBACK`, `describeOcrBoost`
+
+Symbols:
+
+- `OCR_BOOST_FALLBACK` (constant) - Keys of ocr.boost and their English fallbacks.
+- `OcrBoostDescription` (typedef) - No description.
+- `describeOcrBoost` (function) - No description.
 
 ## src/utils/ocrLanguageCodes.js
 

@@ -24,6 +24,10 @@
  * `setPageNumber` takes), not ordinals among the visible pages. Mounted by OcrToolbarActions
  * (from DocumentToolbar) only while `ocr.enabled` is the literal true.
  *
+ * With `ocr.boost` on, the button also shows the boost (utils/ocrBoostStatus.js): a small badge
+ * with the engine count while more engines than the cautious count run, and a line at the end of
+ * the tooltip saying what the last climb found. Without a boost (the default) neither exists.
+ *
  * With `searchEnabled` false (`ocr.search.enabled: false`) only the status remains: the button
  * stays a never-enabled, status-only indicator with its LED, the status as its name and tooltip
  * and the live region, and no field exists, so no term is ever published and the layers mark
@@ -39,6 +43,7 @@ import { hasSearchableOcrText, OCR_STATUS_FALLBACK, OCR_STATUS_LED, ocrStatusKey
 import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js';
 import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
 import { hasActiveModalDialog, isEditableTarget } from '../DocumentViewer/hooks/useViewerEffects.js';
+import { OCR_BOOST_FALLBACK, describeOcrBoost } from '../../utils/ocrBoostStatus.js';
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -58,7 +63,7 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
  */
 export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true, ctrlFOverride = false }) {
   const { t } = useTranslation('common');
-  const { ocrPages, ocrEngineFailure, setOcrSearch } = useContext(ViewerContext);
+  const { ocrPages, ocrEngineFailure, ocrBoost = null, setOcrSearch } = useContext(ViewerContext);
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState('');
   // Limited to the displayed page: the page's own matches only, the steps never leave it.
@@ -91,6 +96,24 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const statusText = statusKey
     ? t(`ocr.status.${statusKey}`, { defaultValue: OCR_STATUS_FALLBACK[statusKey] })
     : t('ocr.status.notStarted', { defaultValue: 'Text recognition has not started on this page' });
+  // The boost (`ocr.boost`), when there is one: a line in the tooltip saying what the last climb
+  // found, and a badge with the engine count while it runs. The badge is the live part: reaching
+  // for the tooltip is input, and input ends the boost.
+  const boostInfo = describeOcrBoost(ocrBoost);
+  let boostText = '';
+  if (boostInfo) {
+    boostText = t(`ocr.boost.${boostInfo.key}`, { engines: boostInfo.engines, defaultValue: OCR_BOOST_FALLBACK[boostInfo.key] });
+    if (boostInfo.slow) {
+      boostText += ` (${t('ocr.boost.slow', { level: boostInfo.slow.level, percent: boostInfo.slow.percent, defaultValue: OCR_BOOST_FALLBACK.slow })})`;
+    }
+  }
+  const boostState = boostInfo ? String(ocrBoost.state) : undefined;
+  const boostBadge = boostInfo?.badge ? (
+    <span className="toolbar-ocr-boost" data-odv-ocr="boost" aria-hidden="true">
+      <span className="material-icons toolbar-ocr-boost-icon">bolt</span>
+      <span className="toolbar-ocr-boost-text">{boostInfo.badge}</span>
+    </span>
+  ) : null;
 
   // Every page with its outcome, in page order; the search runs over the ones with text.
   const searchablePages = useMemo(() => pages.map((page, index) => {
@@ -296,7 +319,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   if (!searchEnabled) {
     // Status only: the same place and LED as the search button, never enabled, no field.
     return (
-      <div ref={rootRef} className="toolbar-ocr-search is-status-only" data-odv-ocr="search" data-ocr-search="off">
+      <div ref={rootRef} className="toolbar-ocr-search is-status-only" data-odv-ocr="search" data-ocr-search="off" data-ocr-boost={boostState}>
         <button
           ref={buttonRef}
           type="button"
@@ -304,10 +327,11 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           data-odv-ocr="status"
           data-ocr-state={statusKey || 'notStarted'}
           aria-label={statusText}
-          title={statusText}
+          title={boostText ? `${statusText} · ${boostText}` : statusText}
           disabled
         >
           <span className="material-icons" aria-hidden="true">text_fields</span>
+          {boostBadge}
           <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
         </button>
         <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
@@ -318,7 +342,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
   const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
-  const buttonTitle = `${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}`;
+  const buttonTitle = `${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}${boostText ? ` · ${boostText}` : ''}`;
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   const pageOnlyShort = t('ocr.search.pageOnlyShort', { defaultValue: 'This page' });
   let statusLine = '';
@@ -346,7 +370,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     : statusLine;
 
   return (
-    <div ref={rootRef} className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search">
+    <div ref={rootRef} className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search" data-ocr-boost={boostState}>
       <button
         ref={buttonRef}
         type="button"
@@ -362,6 +386,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
         onClick={() => (open ? close() : setOpen(true))}
       >
         <span className="material-icons" aria-hidden="true">search</span>
+        {boostBadge}
         {/* The count: pages with a text layer over all pages ("4/300"), behind a thin divider;
             folded away (styles/ocr.css) while the field is open. The tooltip spells it out. */}
         <span className="toolbar-ocr-search-count" data-odv-ocr="count" aria-hidden="true">

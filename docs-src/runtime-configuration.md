@@ -776,8 +776,12 @@ count of one, so it can grow; the control itself is src/ocr/boost.js, the refere
 src/ocr/referencePage.js, and the triggers live in the hook that owns the OCR queue
 (src/hooks/useOcrTextLayers.js). With the key off none of it listens to anything, and the
 cautious count applies throughout. The state (cautious, rising, boosted; the level; the probes)
-is logged at debug level and exposed by the hook as `ocrBoost`; a visible indicator and a
-button to ask for the boost by hand are planned, not shipped.
+is logged at debug level and shown on the toolbar's OCR status button: while more engines than
+the cautious count run, a small badge (a bolt and the engine count) sits in the button, and the
+button's tooltip ends with a line about the boost: ready, measuring the starting point, the
+level being tried, the level kept, or what the last climb found, with the step that proved too
+slow ("16 engines took 31 % longer"). The badge is the live part, since reaching for the tooltip
+is input and input ends the boost. A button to ask for the boost by hand is planned, not shipped.
 
 ### CSP for OCR
 
