@@ -91,7 +91,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/generated/standard-manual/manual.en.js</code> | 2 | 1 | 0 | low | Default export for manual.en. |
 | <code>src/generated/standard-manual/manual.sv.js</code> | 2 | 1 | 0 | low | Default export for manual.sv. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
-| <code>src/hooks/useDocumentLoadSettled.js</code> | 111 | 1 | 5 | high | OpenDocViewer — has the document finished loading, as far as OCR is concerned? |
+| <code>src/hooks/useDocumentLoadSettled.js</code> | 135 | 1 | 6 | high | OpenDocViewer — has the document finished loading, as far as OCR is concerned? |
 | <code>src/hooks/useKeyTipsHeld.js</code> | 67 | 1 | 3 | high | Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
 | <code>src/hooks/useOcrModule.js</code> | 44 | 1 | 1 | high | Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true. |

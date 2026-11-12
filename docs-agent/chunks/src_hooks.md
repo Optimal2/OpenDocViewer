@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 10. Line count: 1699. JSDoc symbol count: 51.
+File count: 10. Line count: 1723. JSDoc symbol count: 52.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -26,7 +26,8 @@ Symbols:
 - `pageKeyOf` (function) - No description.
 - `hasBeenShown` (function) - Rendered at full size, or failed: either way nothing more is coming for this page.
 - `module.exports` (function) - No description.
-- `useDocumentLoadSettled~seenRef` (constant) - Keys of the pages rendered \(or failed\) at least once in this session.
+- `useDocumentLoadSettled~seenRef` (constant) - Keys of the pages rendered \(or failed\) at least once since the last run began.
+- `useDocumentLoadSettled~stalledRef` (constant) - True after the stall time ran out: the pages still missing are waited for no longer.
 
 ## src/hooks/useKeyTipsHeld.js
 

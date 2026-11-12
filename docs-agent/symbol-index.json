@@ -18263,7 +18263,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useDocumentLoadSettled.js",
-    "line": 28,
+    "line": 30,
     "description": "After the run, how long without a newly rendered page before the load counts as settled anyway.",
     "params": [],
     "returns": [],
@@ -18276,7 +18276,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useDocumentLoadSettled.js",
-    "line": 48,
+    "line": 50,
     "description": "",
     "params": [
       {
@@ -18325,7 +18325,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useDocumentLoadSettled.js",
-    "line": 36,
+    "line": 38,
     "description": "Rendered at full size, or failed: either way nothing more is coming for this page.",
     "params": [],
     "returns": [],
@@ -18338,7 +18338,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useDocumentLoadSettled.js",
-    "line": 31,
+    "line": 33,
     "description": "",
     "params": [
       {
@@ -18358,8 +18358,21 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useDocumentLoadSettled.js",
-    "line": 51,
-    "description": "Keys of the pages rendered (or failed) at least once in this session.",
+    "line": 53,
+    "description": "Keys of the pages rendered (or failed) at least once since the last run began.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "useDocumentLoadSettled~stalledRef",
+    "name": "stalledRef",
+    "longname": "useDocumentLoadSettled~stalledRef",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/hooks/useDocumentLoadSettled.js",
+    "line": 56,
+    "description": "True after the stall time ran out: the pages still missing are waited for no longer.",
     "params": [],
     "returns": [],
     "examples": 0

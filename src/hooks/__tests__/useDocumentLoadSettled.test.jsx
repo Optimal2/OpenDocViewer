@@ -129,6 +129,52 @@ describe('useDocumentLoadSettled', () => {
     expect(latest).toBe(false);
   });
 
+  it('is unsettled by pages that arrive without a run, until they are rendered', async () => {
+    await render({ enabled: true, pages: [page(0), page(1)], loadingRunActive: false });
+    expect(latest).toBe(true);
+    // The host adds pages to the session; no loader run is involved.
+    await render({ enabled: true, pages: [page(0), page(1), unrendered(2)], loadingRunActive: false });
+    expect(latest).toBe(false);
+    await render({ enabled: true, pages: [page(0), page(1), page(2)], loadingRunActive: false });
+    expect(latest).toBe(true);
+  });
+
+  it('does not take the wait up again after the stall time ran out, until a page does render', async () => {
+    const props = { enabled: true, loadingRunActive: false, stallMs: 1000 };
+    await render({ ...props, pages: [page(0), unrendered(1), unrendered(2)] });
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    expect(latest).toBe(true);
+    // The list changes without progress: still settled, no new timer.
+    await render({ ...props, pages: [page(0, { thumbnailStatus: 1 }), unrendered(1), unrendered(2)] });
+    expect(latest).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+    // A page renders after all: the remaining one is waited for again, for one stall time.
+    await render({ ...props, pages: [page(0), page(1), unrendered(2)] });
+    expect(latest).toBe(false);
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    expect(latest).toBe(true);
+  });
+
+  it('forgets what it saw when a new run begins, so the same document loaded again is waited for again', async () => {
+    await render({ enabled: true, pages: [page(0), page(1)], loadingRunActive: false });
+    expect(latest).toBe(true);
+    // The same document is loaded again: same keys, and the list is never seen empty.
+    await render({ enabled: true, pages: [unrendered(0), unrendered(1)], loadingRunActive: true });
+    expect(latest).toBe(false);
+    await render({ enabled: true, pages: [unrendered(0), unrendered(1)], loadingRunActive: false });
+    expect(latest).toBe(false);
+    await render({ enabled: true, pages: [page(0), page(1)], loadingRunActive: false });
+    expect(latest).toBe(true);
+  });
+
+  it('drops a waiting stall timer when OCR is turned off', async () => {
+    await render({ enabled: true, pages: [unrendered(0)], loadingRunActive: false });
+    expect(vi.getTimerCount()).toBe(1);
+    await render({ enabled: false, pages: [unrendered(0)], loadingRunActive: false });
+    expect(latest).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('clears its stall timer on unmount', async () => {
     await render({ enabled: true, pages: [unrendered(0)], loadingRunActive: false });
     expect(vi.getTimerCount()).toBe(1);

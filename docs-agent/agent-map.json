@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 207,
-    "sourceLineCount": 73960,
-    "docletCount": 2153,
+    "sourceLineCount": 73984,
+    "docletCount": 2154,
     "documentedFileCount": 203,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -803,16 +803,16 @@
             "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer."
           },
           {
+            "path": "src/hooks/useDocumentLoadSettled.js",
+            "score": 37,
+            "lines": 135,
+            "summary": "OpenDocViewer — has the document finished loading, as far as OCR is concerned?"
+          },
+          {
             "path": "src/components/DocumentViewer/hooks/useCompareOverlay.js",
             "score": 36,
             "lines": 186,
             "summary": "File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view (CompareOverlayView.jsx)."
-          },
-          {
-            "path": "src/hooks/useDocumentLoadSettled.js",
-            "score": 33,
-            "lines": 111,
-            "summary": "OpenDocViewer — has the document finished loading, as far as OCR is concerned?"
           },
           {
             "path": "src/hooks/useKeyTipsHeld.js",
@@ -1511,8 +1511,8 @@
     {
       "name": "src/hooks",
       "fileCount": 10,
-      "lineCount": 1699,
-      "docletCount": 51,
+      "lineCount": 1723,
+      "docletCount": 52,
       "importantFiles": [
         {
           "path": "src/hooks/useOcrTextLayers.js",
@@ -1552,10 +1552,10 @@
         },
         {
           "path": "src/hooks/useDocumentLoadSettled.js",
-          "score": 33,
-          "lines": 111,
+          "score": 37,
+          "lines": 135,
           "incomingLocalImports": 1,
-          "doclets": 5,
+          "doclets": 6,
           "summary": "OpenDocViewer — has the document finished loading, as far as OCR is concerned?",
           "summaryConfidence": "high"
         },
@@ -35383,9 +35383,9 @@
     },
     {
       "path": "src/hooks/useDocumentLoadSettled.js",
-      "lines": 111,
+      "lines": 135,
       "extension": ".js",
-      "jsdocBlockCount": 8,
+      "jsdocBlockCount": 9,
       "sourceSummary": "OpenDocViewer — has the document finished loading, as far as OCR is concerned?",
       "imports": [
         {
@@ -35395,7 +35395,7 @@
             "useRef",
             "useState"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         }
       ],
@@ -35403,34 +35403,34 @@
         {
           "name": "DOCUMENT_LOAD_STALL_MS",
           "kind": "variable",
-          "line": 28
+          "line": 30
         },
         {
           "name": "useDocumentLoadSettled",
           "kind": "default",
-          "line": 48
+          "line": 50
         }
       ],
       "declarations": [
         {
           "name": "pageKeyOf",
           "kind": "function",
-          "line": 31
+          "line": 33
         },
         {
           "name": "hasBeenShown",
           "kind": "function",
-          "line": 36
+          "line": 38
         },
         {
           "name": "useDocumentLoadSettled",
           "kind": "function",
-          "line": 48
+          "line": 50
         },
         {
           "name": "clearTimer",
           "kind": "function",
-          "line": 56
+          "line": 60
         }
       ],
       "parseError": null,
@@ -35448,7 +35448,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useDocumentLoadSettled.js",
-          "line": 28,
+          "line": 30,
           "description": "After the run, how long without a newly rendered page before the load counts as settled anyway.",
           "params": [],
           "returns": [],
@@ -35461,7 +35461,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useDocumentLoadSettled.js",
-          "line": 31,
+          "line": 33,
           "description": "",
           "params": [
             {
@@ -35481,7 +35481,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useDocumentLoadSettled.js",
-          "line": 36,
+          "line": 38,
           "description": "Rendered at full size, or failed: either way nothing more is coming for this page.",
           "params": [],
           "returns": [],
@@ -35494,7 +35494,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useDocumentLoadSettled.js",
-          "line": 48,
+          "line": 50,
           "description": "",
           "params": [
             {
@@ -35543,8 +35543,21 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useDocumentLoadSettled.js",
-          "line": 51,
-          "description": "Keys of the pages rendered (or failed) at least once in this session.",
+          "line": 53,
+          "description": "Keys of the pages rendered (or failed) at least once since the last run began.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "useDocumentLoadSettled~stalledRef",
+          "name": "stalledRef",
+          "longname": "useDocumentLoadSettled~stalledRef",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/hooks/useDocumentLoadSettled.js",
+          "line": 56,
+          "description": "True after the stall time ran out: the pages still missing are waited for no longer.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -35560,12 +35573,12 @@
             "useRef",
             "useState"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 33,
+      "importanceScore": 37,
       "summary": "OpenDocViewer — has the document finished loading, as far as OCR is concerned?",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -107262,7 +107275,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useDocumentLoadSettled.js",
-      "line": 28,
+      "line": 30,
       "description": "After the run, how long without a newly rendered page before the load counts as settled anyway.",
       "params": [],
       "returns": [],
@@ -107275,7 +107288,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useDocumentLoadSettled.js",
-      "line": 48,
+      "line": 50,
       "description": "",
       "params": [
         {
@@ -107324,7 +107337,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useDocumentLoadSettled.js",
-      "line": 36,
+      "line": 38,
       "description": "Rendered at full size, or failed: either way nothing more is coming for this page.",
       "params": [],
       "returns": [],
@@ -107337,7 +107350,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useDocumentLoadSettled.js",
-      "line": 31,
+      "line": 33,
       "description": "",
       "params": [
         {
@@ -107357,8 +107370,21 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useDocumentLoadSettled.js",
-      "line": 51,
-      "description": "Keys of the pages rendered (or failed) at least once in this session.",
+      "line": 53,
+      "description": "Keys of the pages rendered (or failed) at least once since the last run began.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "useDocumentLoadSettled~stalledRef",
+      "name": "stalledRef",
+      "longname": "useDocumentLoadSettled~stalledRef",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/hooks/useDocumentLoadSettled.js",
+      "line": 56,
+      "description": "True after the stall time ran out: the pages still missing are waited for no longer.",
       "params": [],
       "returns": [],
       "examples": 0

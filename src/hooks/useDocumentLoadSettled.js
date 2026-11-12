@@ -17,8 +17,10 @@
  * So the load is settled when the run is over and every page has been rendered (or has failed)
  * at least once: the first pass. What is evicted afterwards does not unsettle it. A pass that
  * stops making progress (a page that never renders and never fails) settles after `stallMs`
- * without a newly rendered page, so OCR is never held back for good. A new run unsettles it,
- * and so does a new document session (the page list emptied).
+ * without a newly rendered page, so OCR is never held back for good, and stays settled until
+ * a page does render. A new run unsettles it and forgets what was seen (the same document
+ * loaded again has the same page keys), a new document session (the page list emptied) does
+ * too, and so do pages that arrive without a run, until they are rendered.
  *
  * With `enabled` false (OCR off, the default) the hook does nothing and reports settled.
  */
@@ -47,22 +49,37 @@ function hasBeenShown(page) {
  */
 export default function useDocumentLoadSettled({ enabled, pages, loadingRunActive, stallMs = DOCUMENT_LOAD_STALL_MS }) {
   const [settled, setSettled] = useState(!enabled);
-  /** Keys of the pages rendered (or failed) at least once in this session. */
-  const seenRef = useRef(/** @type {Set<string>} */ (new Set()));
+  /** Keys of the pages rendered (or failed) at least once since the last run began. */
+  const seenRef = useRef(/** @type {(Set<string>|null)} */ (null));
   const timerRef = useRef(/** @type {*} */ (null));
+  /** True after the stall time ran out: the pages still missing are waited for no longer. */
+  const stalledRef = useRef(false);
+  const runWasActiveRef = useRef(false);
 
   useEffect(() => {
-    if (!enabled) return undefined;
     const clearTimer = () => {
       if (timerRef.current !== null) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
     };
+    if (!enabled) {
+      clearTimer();
+      return undefined;
+    }
+    if (seenRef.current === null) seenRef.current = new Set();
+    // A run that begins starts a new first pass: the same document loaded again has the same
+    // keys, and what was seen before says nothing about the rendering of this run.
+    if (loadingRunActive && !runWasActiveRef.current) {
+      seenRef.current = new Set();
+      stalledRef.current = false;
+    }
+    runWasActiveRef.current = Boolean(loadingRunActive);
     const list = Array.isArray(pages) ? pages : [];
     if (list.length === 0) {
       // A new session, or nothing loaded yet: nothing seen, and settled unless a run is under way.
       seenRef.current = new Set();
+      stalledRef.current = false;
       clearTimer();
       setSettled(!loadingRunActive);
       return undefined;
@@ -86,15 +103,22 @@ export default function useDocumentLoadSettled({ enabled, pages, loadingRunActiv
       return undefined;
     }
     if (allSeen) {
+      stalledRef.current = false;
       clearTimer();
       setSettled(true);
       return undefined;
     }
-    // The run is over and pages are still to be rendered: wait for them, but not for ever.
+    // The run is over and pages are still to be rendered (the tail of the load, or pages that
+    // arrived without a run): wait for them, but not for ever. Once the wait has run out it is
+    // not taken up again until a page does render, or the answer would flap.
+    if (grew) stalledRef.current = false;
+    if (stalledRef.current) return undefined;
+    setSettled(false);
     if (grew || timerRef.current === null) {
       clearTimer();
       timerRef.current = setTimeout(() => {
         timerRef.current = null;
+        stalledRef.current = true;
         setSettled(true);
       }, Math.max(0, Number(stallMs) || 0));
     }

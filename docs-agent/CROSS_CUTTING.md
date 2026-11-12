@@ -25,8 +25,8 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/hooks/usePageTimer.js` (149 lines) - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/hooks/useReadAloud.js` (242 lines) - Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's "Reading language" section \(contexts/readAloudContext.js\).
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` (311 lines) - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
+- `src/hooks/useDocumentLoadSettled.js` (135 lines) - OpenDocViewer — has the document finished loading, as far as OCR is concerned?
 - `src/components/DocumentViewer/hooks/useCompareOverlay.js` (186 lines) - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
-- `src/hooks/useDocumentLoadSettled.js` (111 lines) - OpenDocViewer — has the document finished loading, as far as OCR is concerned?
 - `src/hooks/useKeyTipsHeld.js` (67 lines) - Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs.
 - `src/hooks/usePageNavigation.js` (182 lines) - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 

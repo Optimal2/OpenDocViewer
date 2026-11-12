@@ -689,11 +689,12 @@
 | <code>toBool</code> | function | <code>src/ErrorBoundary.jsx:59</code> | Coerce unknown values to boolean using common string/number forms. |
 | <code>tr</code> | function | <code>src/ErrorBoundary.jsx:45</code> | Tiny helper to translate with safe fallback \(NS: &#39;common&#39;\). |
 | <code>module.exports</code> | function | <code>src/hooks/useAcceleratingHoldRepeat.js:57</code> |  |
-| <code>DOCUMENT_LOAD_STALL_MS</code> | constant | <code>src/hooks/useDocumentLoadSettled.js:28</code> | After the run, how long without a newly rendered page before the load counts as settled anyway. |
-| <code>module.exports</code> | function | <code>src/hooks/useDocumentLoadSettled.js:48</code> |  |
-| <code>hasBeenShown</code> | function | <code>src/hooks/useDocumentLoadSettled.js:36</code> | Rendered at full size, or failed: either way nothing more is coming for this page. |
-| <code>pageKeyOf</code> | function | <code>src/hooks/useDocumentLoadSettled.js:31</code> |  |
-| <code>useDocumentLoadSettled~seenRef</code> | constant | <code>src/hooks/useDocumentLoadSettled.js:51</code> | Keys of the pages rendered \(or failed\) at least once in this session. |
+| <code>DOCUMENT_LOAD_STALL_MS</code> | constant | <code>src/hooks/useDocumentLoadSettled.js:30</code> | After the run, how long without a newly rendered page before the load counts as settled anyway. |
+| <code>module.exports</code> | function | <code>src/hooks/useDocumentLoadSettled.js:50</code> |  |
+| <code>hasBeenShown</code> | function | <code>src/hooks/useDocumentLoadSettled.js:38</code> | Rendered at full size, or failed: either way nothing more is coming for this page. |
+| <code>pageKeyOf</code> | function | <code>src/hooks/useDocumentLoadSettled.js:33</code> |  |
+| <code>useDocumentLoadSettled~seenRef</code> | constant | <code>src/hooks/useDocumentLoadSettled.js:53</code> | Keys of the pages rendered \(or failed\) at least once since the last run began. |
+| <code>useDocumentLoadSettled~stalledRef</code> | constant | <code>src/hooks/useDocumentLoadSettled.js:56</code> | True after the stall time ran out: the pages still missing are waited for no longer. |
 | <code>&lt;anonymous&gt;~heldCode</code> | member | <code>src/hooks/useKeyTipsHeld.js:28</code> | The physical key that was pressed, so its release ends the hold whatever key it reports then. |
 | <code>KEY_TIPS_KEY</code> | constant | <code>src/hooks/useKeyTipsHeld.js:18</code> | The key that shows the tips while held. |
 | <code>useKeyTipsHeld</code> | function | <code>src/hooks/useKeyTipsHeld.js:23</code> |  |
