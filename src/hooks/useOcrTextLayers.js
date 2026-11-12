@@ -2,12 +2,14 @@
 /**
  * Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
  *
- * Loading the document comes before recognising it. While the viewer is still loading pages
- * (`loading`, the loader's run as the provider reports it), the queue is fed the window only, even with `ocr.recognizeWholeDocument`, so the
- * engines the window warrants (two for its four pages) are all that compete with the load for
- * the cores; the rest of the document is planned once the load is done. Measured on a four-core
- * client with the 300-page test document, the pages were all in after 15 s without OCR, 31 s
- * with four engines recognising the whole document meanwhile and 93 s with eight.
+ * Loading the document comes before recognising it. While the loader runs (`loading`, as the
+ * provider reports it), the queue is paused: nothing is recognised, not even the shown page, so
+ * the loader's own workers have the machine and the user sees the document as soon as it can
+ * be shown. When the load is done the queue takes over with everything it has. Pages already
+ * in flight when a load starts finish, as with every pause. Measured on a four-core client with
+ * the 300-page test document recognised as a whole, the pages were all in after 15 s without
+ * OCR, 19 s with the window's two engines recognising meanwhile, 31 s with four engines on the
+ * whole document and 93 s with eight.
  *
  * The hook is inert until the OCR module has arrived (useOcrModule.js hands it over only when
  * `ocr.enabled` is the literal true), so on the default code path it holds an empty map and
@@ -33,9 +35,10 @@
  * `idleAfterMs` (pointer, keys, wheel and touch on the window), a hidden tab, and the toolbar's
  * search over the whole document waiting for pages (`searchOpen`); each applies only while
  * more pages are pending than the cautious count can take, and never while the viewer is still
- * loading the document (`loading`): a user who waits for the document to appear gives no input
- * either, and a boost then would take the cores from the very thing they wait for. The first
- * input ends the boosted state at once, and so do the end of the work and the start of a load. The control measures with a small synthetic
+ * loading the document (`loading`, when the whole queue is paused): a user who waits for the
+ * document to appear gives no input either, and a boost then would take the cores from the very
+ * thing they wait for. The first input ends the boosted state at once, and so do the end of
+ * the work and the start of a load. The control measures with a small synthetic
  * reference page (src/ocr/referencePage.js), drawn once; where none can be drawn, or where
  * `ocr.workerCount` is set by hand, or where the client has no room above the cautious count,
  * there is no boost and nothing listens. The state is exposed as `ocrBoost`.
@@ -91,10 +94,9 @@ const EMPTY_PAGES = Object.freeze({});
  * @param {boolean=} options.searchOpen  True while the toolbar's search over the whole document
  *   is open with a term: one of the boost's ways in. Default false.
  * @param {boolean=} options.loading  True while the viewer is still loading the document's
- *   pages. Loading comes first, since it is what the user waits for: until it is done only the
- *   window around the shown page is recognised (the rest of the document, when asked for,
- *   waits, so as few engines as the window warrants compete with the load), the boost stays
- *   out, and a boosted state ends. Default false.
+ *   pages. Loading comes first, since it is what the user waits for: until it is done the
+ *   queue is paused (nothing new is recognised, so no engine competes with the loader's
+ *   workers), the boost stays out, and a boosted state ends. Default false.
  * @param {(Object|null)=} options.boost  The boost configuration (runtimeConfig.js
  *   normalizeOcrBoostConfig), or null for no boost; left out, it is read from the runtime
  *   configuration once (a fresh object every render would restart the runtime every render).
@@ -130,8 +132,8 @@ export default function useOcrTextLayers({
   const boostRef = useRef(/** @type {(Object|null)} */ (null));
   /** What the last window plan decided for the pages in flight, for the boost to restore. */
   const planRef = useRef({ concurrency: 1 });
-  const pausedRef = useRef(Boolean(paused) || !ready);
-  pausedRef.current = Boolean(paused) || !ready;
+  const pausedRef = useRef(Boolean(paused) || !ready || Boolean(loading));
+  pausedRef.current = Boolean(paused) || !ready || Boolean(loading);
   const searchOpenRef = useRef(Boolean(searchOpen));
   searchOpenRef.current = Boolean(searchOpen);
   const loadingRef = useRef(Boolean(loading));
@@ -291,8 +293,9 @@ export default function useOcrTextLayers({
   useEffect(() => {
     const runtime = runtimeRef.current;
     if (!runtime) return;
-    runtime.queue.setPaused(Boolean(paused) || !ready);
-  }, [ocrModule, paused, ready]);
+    // The load is a pause like the others: nothing new starts until the loader is done.
+    runtime.queue.setPaused(Boolean(paused) || !ready || Boolean(loading));
+  }, [loading, ocrModule, paused, ready]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
@@ -308,9 +311,7 @@ export default function useOcrTextLayers({
     if (!ready) return;
     const windowOrder = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length });
     windowIndexesRef.current = new Set(windowOrder);
-    // The rest of the document waits for the load to end: the load is what the user waits for.
-    const wholeDocumentNow = wholeDocument && !loading;
-    const order = wholeDocumentNow
+    const order = wholeDocument
       ? ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length, wholeDocument: true })
       : windowOrder;
     // With the whole document planned, every page's outcome must stay cached while it is
@@ -351,7 +352,7 @@ export default function useOcrTextLayers({
     const level = boostRef.current?.controller.level() ?? 0;
     runtime.queue.setWindow(candidates, { concurrency: level > runtime.workerCount ? level : concurrency });
     boostRef.current?.onPlanned();
-  }, [allPages, focusPageIndexes, loading, ocrModule, ready, wholeDocument]);
+  }, [allPages, focusPageIndexes, ocrModule, ready, wholeDocument]);
 
   return { ocrPages: snapshot.pages, ocrEngineFailure: snapshot.engineFailure, ocrBoost: boostState };
 }
@@ -399,7 +400,8 @@ function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage
     }
   };
   // Worth boosting only while more pages are pending than the cautious count can take at once,
-  // and never while the viewer is loading the document: the user is waiting for that.
+  // and never while the queue is paused, which includes the viewer loading the document (said
+  // twice on purpose: the boost must stay out of a load whatever the pause comes to mean).
   const hasWork = () => !pausedRef.current && !loadingRef.current && pendingNow() > cautious;
   const tryEngage = (reason) => {
     if (!hasWork()) return;

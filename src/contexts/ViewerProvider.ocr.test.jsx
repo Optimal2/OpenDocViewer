@@ -188,7 +188,7 @@ it('imports the module once and recognises the focus page from its rendered imag
   expect(container.querySelector('[data-odv-ocr], .ocr-text-layer')).toBeNull();
 });
 
-it('while the loader runs, recognises the window only; the rest of the document follows when the run ends, all pages ready or not', async () => {
+it('recognises nothing while the loader runs; the document follows when the run ends, all pages ready or not', async () => {
   vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true, recognizeWholeDocument: true } });
   let api;
   function Consumer() {
@@ -207,13 +207,14 @@ it('while the loader runs, recognises the window only; the rest of the document 
   await act(async () => { api.insertPagesAtIndex([0, 1, 2, 3, 4, 5].map(ready), 0); });
   await act(async () => { api.setOcrFocusPageIndexes([0]); });
   const done = () => Object.values(api.ocrPages).filter((entry) => entry.status === 'done').length;
-  // The loader runs: the shown page and the two after it, nothing beyond the window.
-  await waitFor(() => done() === 3);
+  // The loader runs: the pages wait in the queue, no page image is fetched, nothing is recognised.
+  await waitFor(() => Object.keys(api.ocrPages).length === 6);
   await flush();
-  expect(done()).toBe(3);
-  expect([...fetchedUrls].sort()).toEqual(['/pages/scan-0.png', '/pages/scan-1.png', '/pages/scan-2.png']);
+  expect(done()).toBe(0);
+  expect(fetchedUrls).toEqual([]);
+  expect(ocrModule.recognitions).toHaveLength(0);
 
-  // The run ends: the rest of the document is recognised, although not all planned pages came.
+  // The run ends: the document is recognised, although not all planned pages came.
   await act(async () => { api.setLoadingRunActive(false); });
   await waitFor(() => done() === 6);
   expect(api.pageLoadState.allPagesReady).toBe(false);

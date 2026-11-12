@@ -307,7 +307,7 @@ describe('useOcrTextLayers', () => {
     expect(engine.recognize).toHaveBeenCalledTimes(1);
   });
 
-  it('while the viewer loads the document, recognises the window only; the rest of the document follows when the load is done', async () => {
+  it('starts nothing while the viewer loads the document, not even the shown page; everything follows when the load is done', async () => {
     const engine = makeEngine();
     const ocrModule = makeModule(engine, makeProber());
     // What the real module does: fewer pages in flight for fewer pending pages.
@@ -317,18 +317,26 @@ describe('useOcrTextLayers', () => {
     const props = baseProps({ ocrModule, allPages, focusPageIndexes: [0], wholeDocument: true, loading: true });
     await render(props);
     await flush();
-    // Loading: the window is the shown page and the two after it, so three pages are planned
-    // and two engines' worth are in flight, whatever the document's length.
-    expect(ocrModule.resolveOcrConcurrency).toHaveBeenLastCalledWith(3, expect.anything());
-    expect(engine.pending).toHaveLength(2);
-    expect(Object.keys(latest.ocrPages)).toHaveLength(3);
+    // Loading: the pages are planned and wait; no image is fetched, no engine is asked.
+    expect(engine.recognize).not.toHaveBeenCalled();
+    expect(props.ensurePageAsset).not.toHaveBeenCalled();
+    expect(fetchCalls).toEqual([]);
+    expect(Object.values(latest.ocrPages).every((entry) => entry.status === 'queued')).toBe(true);
+    expect(Object.keys(latest.ocrPages)).toHaveLength(12);
 
-    // The load is done: the rest of the document is planned and the engines it warrants start.
+    // The load is done: the queue takes over with the engines the whole document warrants.
     await render({ ...props, loading: false });
     await flush();
-    expect(ocrModule.resolveOcrConcurrency).toHaveBeenLastCalledWith(12, expect.anything());
     expect(engine.pending).toHaveLength(6);
-    expect(Object.keys(latest.ocrPages)).toHaveLength(12);
+
+    // A new load pauses again: the pages in flight finish, nothing new starts.
+    await render({ ...props, loading: true });
+    await act(async () => { engine.pending[0].resolve(result('page')); });
+    await flush();
+    expect(engine.pending).toHaveLength(6);
+    await render({ ...props, loading: false });
+    await flush();
+    expect(engine.pending).toHaveLength(7);
   });
 
   it('with the whole document asked for, queues the loaded pages beyond the window after it, rendered on demand', async () => {

@@ -18485,7 +18485,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 365,
+    "line": 366,
     "description": "Create the boost control and its triggers for one runtime.",
     "params": [
       {
@@ -18510,7 +18510,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 130,
+    "line": 132,
     "description": "The boost control and its triggers while the boost is on: { controller, onPlanned, detach } .",
     "params": [],
     "returns": [],
@@ -18523,7 +18523,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 108,
+    "line": 110,
     "description": "",
     "params": [
       {
@@ -18602,7 +18602,7 @@
         "name": "options.loading",
         "type": "boolean",
         "optional": true,
-        "description": "True while the viewer is still loading the document's pages. Loading comes first, since it is what the user waits for: until it is done onl..."
+        "description": "True while the viewer is still loading the document's pages. Loading comes first, since it is what the user waits for: until it is done the..."
       },
       {
         "name": "options.boost",
@@ -18632,7 +18632,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 55,
+    "line": 58,
     "description": "Window events that count as input for the boost: they end the boosted state and restart the idle clock.",
     "params": [],
     "returns": [],
@@ -18645,7 +18645,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 58,
+    "line": 61,
     "description": "Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do.",
     "params": [],
     "returns": [],
@@ -18658,7 +18658,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 52,
+    "line": 55,
     "description": "Idle time after which the OCR worker is terminated to free its memory.",
     "params": [],
     "returns": [],
@@ -18671,7 +18671,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 442,
+    "line": 444,
     "description": "After a window plan (or a search opening).",
     "params": [],
     "returns": [],
@@ -18684,7 +18684,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 132,
+    "line": 134,
     "description": "What the last window plan decided for the pages in flight, for the boost to restore.",
     "params": [],
     "returns": [],
@@ -18697,7 +18697,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 61,
+    "line": 64,
     "description": "",
     "params": [],
     "returns": [
@@ -18715,7 +18715,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 66,
+    "line": 69,
     "description": "",
     "params": [],
     "returns": [
@@ -18733,7 +18733,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 148,
+    "line": 150,
     "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],
