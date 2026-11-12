@@ -454,6 +454,8 @@
       "rising": "Boost: trying {engines} engines",
       "boosted": "Boost: {engines} engines",
       "held": "Boost tried: no gain over the cautious count",
+      "noRoom": "Boost: too few pages waiting for more engines",
+      "interrupted": "Boost interrupted at {engines} engines",
       "last": "Last boost: {engines} engines",
       "slow": "{level} engines took {percent} % longer"
     },

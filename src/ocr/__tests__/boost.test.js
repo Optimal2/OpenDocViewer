@@ -317,6 +317,30 @@ describe('createOcrBoostController', () => {
     expect(filtered.controller.inspect().levels).toEqual([12]);
   });
 
+  it('keeps the remembered level when a later climb finds no pages for it and so measures nothing', async () => {
+    let room = true;
+    const { controller, apply, probe } = makeController({ levels: [12, 16], hasRoom: () => room });
+    const first = controller.engage();
+    await flush();
+    probe.answer(2000);
+    await flush();
+    probe.answer(2050); // 12
+    await flush();
+    probe.answer(2100); // 16
+    await first;
+    expect(controller.inspect().settledLevel).toBe(16);
+    controller.disengage();
+    // The next idle period has too few pages waiting: nothing is applied or measured.
+    room = false;
+    apply.mockClear();
+    const second = controller.engage();
+    await flush();
+    probe.answer(2000);
+    await second;
+    expect(apply).not.toHaveBeenCalled();
+    expect(controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.BOOSTED, level: 8, settledLevel: 16, probes: [] });
+  });
+
   it('reports every change of state or level to onChange, and survives a listener that throws', async () => {
     const onChange = vi.fn();
     const { controller, probe, log } = makeController({ levels: [12, 16], onChange });

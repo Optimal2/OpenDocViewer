@@ -31864,7 +31864,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrBoostStatus.js",
-    "line": 40,
+    "line": 44,
     "description": "",
     "params": [
       {
@@ -31902,7 +31902,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/ocrBoostStatus.js",
-    "line": 26,
+    "line": 28,
     "description": "",
     "params": [],
     "returns": [],

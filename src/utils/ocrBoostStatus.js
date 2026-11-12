@@ -19,13 +19,17 @@ export const OCR_BOOST_FALLBACK = Object.freeze({
   rising: 'Boost: trying {engines} engines',
   boosted: 'Boost: {engines} engines',
   held: 'Boost tried: no gain over the cautious count',
+  noRoom: 'Boost: too few pages waiting for more engines',
+  interrupted: 'Boost interrupted at {engines} engines',
   last: 'Last boost: {engines} engines',
   slow: '{level} engines took {percent} % longer',
 });
 
 /**
  * @typedef {Object} OcrBoostDescription
- * @property {string} key  One of OCR_BOOST_FALLBACK's keys except `slow`.
+ * @property {string} key  One of OCR_BOOST_FALLBACK's keys except `slow`: `ready`, `starting`,
+ *   `rising`, `boosted`, `held` (the first level was too slow), `noRoom` (too few pages waiting
+ *   for a climb), `interrupted` (input ended a climb that had found no limit yet) or `last`.
  * @property {(number|null)} engines  The engine count the text names, or null when it names none.
  * @property {(number|null)} badge  The engine count to show beside the status while the boost
  *   runs above the cautious count; null otherwise.
@@ -57,12 +61,19 @@ export function describeOcrBoost(boost) {
       : { key: 'starting', engines: null, badge: null, slow: null };
   }
   if (boost.state === 'boosted') {
-    return level > cautious
-      ? { key: 'boosted', engines: level, badge: level, slow }
-      : { key: 'held', engines: null, badge: null, slow };
+    if (level > cautious) return { key: 'boosted', engines: level, badge: level, slow };
+    // Settled at the cautious count: the first level was too slow, or the climb never began
+    // for want of pages (or of a working probe), which is not the same finding.
+    return slow
+      ? { key: 'held', engines: null, badge: null, slow }
+      : { key: 'noRoom', engines: null, badge: null, slow: null };
   }
   // Cautious: what the last climb found, if there was one.
   if (settled !== null) return { key: 'last', engines: settled, badge: null, slow };
-  if (probes.length > 0) return { key: 'held', engines: null, badge: null, slow };
+  if (slow) return { key: 'held', engines: null, badge: null, slow };
+  // Input ended a climb whose levels so far were all fine: it found no limit, it was interrupted.
+  if (lastProbe && Number.isFinite(Number(lastProbe.level))) {
+    return { key: 'interrupted', engines: Number(lastProbe.level), badge: null, slow: null };
+  }
   return { key: 'ready', engines: null, badge: null, slow: null };
 }

@@ -454,6 +454,8 @@
       "rising": "Pådrag: provar {engines} motorer",
       "boosted": "Pådrag: {engines} motorer",
       "held": "Pådrag provat: ingen vinst över försiktigt läge",
+      "noRoom": "Pådrag: för få sidor väntar för fler motorer",
+      "interrupted": "Pådrag avbrutet vid {engines} motorer",
       "last": "Senaste pådrag: {engines} motorer",
       "slow": "{level} motorer tog {percent} % längre tid"
     },

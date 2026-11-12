@@ -95,7 +95,7 @@
   },
   "stats": {
     "fileCount": 206,
-    "sourceLineCount": 73749,
+    "sourceLineCount": 73766,
     "docletCount": 2141,
     "documentedFileCount": 202,
     "lowConfidenceSummaryCount": 2,
@@ -1759,7 +1759,7 @@
     {
       "name": "src/ocr",
       "fileCount": 22,
-      "lineCount": 4698,
+      "lineCount": 4704,
       "docletCount": 191,
       "importantFiles": [
         {
@@ -1890,7 +1890,7 @@
     {
       "name": "src/utils",
       "fileCount": 66,
-      "lineCount": 24474,
+      "lineCount": 24485,
       "docletCount": 1015,
       "importantFiles": [
         {
@@ -43839,7 +43839,7 @@
     },
     {
       "path": "src/ocr/boost.js",
-      "lines": 237,
+      "lines": 243,
       "extension": ".js",
       "jsdocBlockCount": 15,
       "sourceSummary": "OpenDocViewer — the OCR boost control: full throttle while the user is idle.",
@@ -43910,7 +43910,7 @@
         {
           "name": "disengage",
           "kind": "function",
-          "line": 222
+          "line": 228
         }
       ],
       "parseError": null,
@@ -44176,7 +44176,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 0,
-      "importanceScore": 50,
+      "importanceScore": 51,
       "summary": "OpenDocViewer — the OCR boost control: full throttle while the user is idle.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -57637,7 +57637,7 @@
     },
     {
       "path": "src/utils/ocrBoostStatus.js",
-      "lines": 69,
+      "lines": 80,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "What the toolbar says about the OCR boost (components/DocumentToolbar/OcrSearchBar.jsx): one key per situation with its English fallback text (public/locales/<lng>/common.json, `ocr.boost`), the number of engines to name",
@@ -57651,14 +57651,14 @@
         {
           "name": "describeOcrBoost",
           "kind": "function",
-          "line": 40
+          "line": 44
         }
       ],
       "declarations": [
         {
           "name": "describeOcrBoost",
           "kind": "function",
-          "line": 40
+          "line": 44
         }
       ],
       "parseError": null,
@@ -57687,7 +57687,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/ocrBoostStatus.js",
-          "line": 26,
+          "line": 28,
           "description": "",
           "params": [],
           "returns": [],
@@ -57700,7 +57700,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrBoostStatus.js",
-          "line": 40,
+          "line": 44,
           "description": "",
           "params": [
             {
@@ -120542,7 +120542,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrBoostStatus.js",
-      "line": 40,
+      "line": 44,
       "description": "",
       "params": [
         {
@@ -120580,7 +120580,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/ocrBoostStatus.js",
-      "line": 26,
+      "line": 28,
       "description": "",
       "params": [],
       "returns": [],

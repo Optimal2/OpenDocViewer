@@ -183,6 +183,10 @@ export function createOcrBoostController({
     }
     if (myGeneration !== generation) return;
     baselineMs = Math.max(1, Number(baseline) || 1);
+    // True once a level has been measured (or its probe failed): only then does this climb say
+    // anything about where to settle. A climb that ends before, for want of pages, leaves the
+    // level remembered from an earlier climb alone.
+    let measured = false;
     try {
       // A climb that settled before jumps to its level and confirms it with one probe.
       const candidates = settledLevel !== null && plan.includes(settledLevel) ? [settledLevel] : plan;
@@ -197,6 +201,7 @@ export function createOcrBoostController({
         if (myGeneration !== generation) return;
         const slow = !(ms <= baselineMs * (1 + fraction));
         probes.push({ level, ms, slow });
+        measured = true;
         if (slow) {
           reached = levelBelow(level);
           set(reached);
@@ -208,12 +213,13 @@ export function createOcrBoostController({
       // The reference page could not be recognised (the engine failed, or was terminated):
       // stay where the climb was before this level.
       log.debug('OCR boost probe failed; staying at the level before', { error: String(error?.message || error) });
+      measured = true;
       if (reached !== floor) {
         reached = levelBelow(reached);
         set(reached);
       }
     }
-    settledLevel = reached > floor ? reached : null;
+    if (measured) settledLevel = reached > floor ? reached : null;
     state = OCR_BOOST_STATE.BOOSTED;
     log.debug('OCR boost settled', { level: reached, baselineMs, probes: [...probes] });
     changed();

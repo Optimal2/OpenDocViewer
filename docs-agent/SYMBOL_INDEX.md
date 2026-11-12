@@ -1293,9 +1293,9 @@
 | <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:89</code> | Revoke every tracked object URL. |
 | <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:47</code> |  |
 | <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:60</code> |  |
-| <code>describeOcrBoost</code> | function | <code>src/utils/ocrBoostStatus.js:40</code> |  |
+| <code>describeOcrBoost</code> | function | <code>src/utils/ocrBoostStatus.js:44</code> |  |
 | <code>OCR_BOOST_FALLBACK</code> | constant | <code>src/utils/ocrBoostStatus.js:16</code> | Keys of ocr.boost and their English fallbacks. |
-| <code>OcrBoostDescription</code> | typedef | <code>src/utils/ocrBoostStatus.js:26</code> |  |
+| <code>OcrBoostDescription</code> | typedef | <code>src/utils/ocrBoostStatus.js:28</code> |  |
 | <code>speechLanguagesForOcr</code> | function | <code>src/utils/ocrLanguageCodes.js:23</code> | The ISO 639-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out. |
 | <code>isOcrModuleRequested</code> | function | <code>src/utils/ocrLoader.js:33</code> | True once the module import has been requested in this session. |
 | <code>loadOcrModule</code> | function | <code>src/utils/ocrLoader.js:20</code> |  |
