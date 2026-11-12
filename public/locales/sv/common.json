@@ -449,15 +449,16 @@
       "unavailable": "Texttolkning är inte tillgänglig"
     },
     "boost": {
-      "ready": "Pådrag i vila: redo",
-      "starting": "Pådrag: mäter utgångsläget",
-      "rising": "Pådrag: provar {engines} motorer",
-      "boosted": "Pådrag: {engines} motorer",
-      "held": "Pådrag provat: ingen vinst över försiktigt läge",
-      "noRoom": "Pådrag: för få sidor väntar för fler motorer",
-      "interrupted": "Pådrag avbrutet vid {engines} motorer",
-      "last": "Senaste pådrag: {engines} motorer",
-      "slow": "{level} motorer tog {percent} % längre tid"
+      "ready": "OCR-boost: redo",
+      "starting": "OCR-boost: mäter utgångsläget",
+      "rising": "OCR-boost: provar {engines} arbetare",
+      "boosted": "OCR-boost: {engines} arbetare",
+      "held": "OCR-boost provad: ingen vinst över försiktigt läge",
+      "noRoom": "OCR-boost: för få sidor kvar att växla upp för",
+      "failed": "OCR-boost: mätningen misslyckades",
+      "interrupted": "OCR-boost avbruten; {engines} arbetare höll måttet",
+      "last": "Senaste OCR-boost: {engines} arbetare",
+      "slow": "{level} arbetare tog {percent} % längre tid"
     },
     "search": {
       "open": "Sök i tolkad text",

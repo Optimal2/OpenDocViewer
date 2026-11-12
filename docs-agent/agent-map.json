@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 206,
-    "sourceLineCount": 73766,
-    "docletCount": 2141,
+    "sourceLineCount": 73801,
+    "docletCount": 2148,
     "documentedFileCount": 202,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -1759,8 +1759,8 @@
     {
       "name": "src/ocr",
       "fileCount": 22,
-      "lineCount": 4704,
-      "docletCount": 191,
+      "lineCount": 4731,
+      "docletCount": 198,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
@@ -1890,7 +1890,7 @@
     {
       "name": "src/utils",
       "fileCount": 66,
-      "lineCount": 24485,
+      "lineCount": 24493,
       "docletCount": 1015,
       "importantFiles": [
         {
@@ -43839,9 +43839,9 @@
     },
     {
       "path": "src/ocr/boost.js",
-      "lines": 243,
+      "lines": 270,
       "extension": ".js",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 22,
       "sourceSummary": "OpenDocViewer — the OCR boost control: full throttle while the user is idle.",
       "imports": [],
       "exports": [
@@ -43861,56 +43861,61 @@
           "line": 44
         },
         {
+          "name": "OCR_BOOST_STOP",
+          "kind": "variable",
+          "line": 54
+        },
+        {
           "name": "planOcrBoostLevels",
           "kind": "function",
-          "line": 64
+          "line": 76
         },
         {
           "name": "createOcrBoostController",
           "kind": "function",
-          "line": 113
+          "line": 127
         }
       ],
       "declarations": [
         {
           "name": "planOcrBoostLevels",
           "kind": "function",
-          "line": 64
+          "line": 76
         },
         {
           "name": "createOcrBoostController",
           "kind": "function",
-          "line": 113
+          "line": 127
         },
         {
           "name": "inspect",
           "kind": "function",
-          "line": 139
+          "line": 157
         },
         {
           "name": "changed",
           "kind": "function",
-          "line": 143
+          "line": 161
         },
         {
           "name": "set",
           "kind": "function",
-          "line": 152
+          "line": 170
         },
         {
           "name": "levelBelow",
           "kind": "function",
-          "line": 159
+          "line": 177
         },
         {
           "name": "engage",
           "kind": "function",
-          "line": 164
+          "line": 182
         },
         {
           "name": "disengage",
           "kind": "function",
-          "line": 228
+          "line": 254
         }
       ],
       "parseError": null,
@@ -43998,13 +44003,78 @@
           "examples": 0
         },
         {
+          "id": "OCR_BOOST_STOP",
+          "name": "OCR_BOOST_STOP",
+          "longname": "OCR_BOOST_STOP",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/boost.js",
+          "line": 54,
+          "description": "Why a climb ended ( stop of inspect ).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "TOP",
+          "name": "TOP",
+          "longname": "TOP",
+          "kind": "member",
+          "scope": "global",
+          "file": "src/ocr/boost.js",
+          "line": 56,
+          "description": "Every level was fine: the climb reached the maximum.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "SLOW",
+          "name": "SLOW",
+          "longname": "SLOW",
+          "kind": "member",
+          "scope": "global",
+          "file": "src/ocr/boost.js",
+          "line": 58,
+          "description": "A level's reference recognition was too slow: the level before is kept.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "NO_ROOM",
+          "name": "NO_ROOM",
+          "longname": "NO_ROOM",
+          "kind": "member",
+          "scope": "global",
+          "file": "src/ocr/boost.js",
+          "line": 60,
+          "description": "Fewer pages were waiting than the next level's engines could take.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "PROBE_FAILED",
+          "name": "PROBE_FAILED",
+          "longname": "PROBE_FAILED",
+          "kind": "member",
+          "scope": "global",
+          "file": "src/ocr/boost.js",
+          "line": 62,
+          "description": "The reference page could not be recognised at a level, or at the cautious count.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "planOcrBoostLevels",
           "name": "planOcrBoostLevels",
           "longname": "planOcrBoostLevels",
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boost.js",
-          "line": 64,
+          "line": 76,
           "description": "The levels of the climb, in order, above the cautious count.",
           "params": [
             {
@@ -44053,7 +44123,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/boost.js",
-          "line": 79,
+          "line": 91,
           "description": "",
           "params": [],
           "returns": [],
@@ -44066,7 +44136,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/boost.js",
-          "line": 86,
+          "line": 98,
           "description": "",
           "params": [],
           "returns": [],
@@ -44079,7 +44149,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/boost.js",
-          "line": 113,
+          "line": 127,
           "description": "",
           "params": [
             {
@@ -44152,8 +44222,34 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/ocr/boost.js",
-          "line": 135,
+          "line": 149,
           "description": "The level a climb settled at; the next climb starts there.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrBoostController~stop",
+          "name": "stop",
+          "longname": "createOcrBoostController~stop",
+          "kind": "member",
+          "scope": "inner",
+          "file": "src/ocr/boost.js",
+          "line": 151,
+          "description": "Why the last climb ended (OCR_BOOST_STOP); null while one runs or was cut short.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrBoostController~endedBy",
+          "name": "endedBy",
+          "longname": "createOcrBoostController~endedBy",
+          "kind": "member",
+          "scope": "inner",
+          "file": "src/ocr/boost.js",
+          "line": 153,
+          "description": "The reason of the disengage that ended the last boosted state.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -44165,7 +44261,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/boost.js",
-          "line": 159,
+          "line": 177,
           "description": "The level below level in the plan, or the cautious count.",
           "params": [],
           "returns": [],
@@ -44176,7 +44272,7 @@
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 0,
-      "importanceScore": 51,
+      "importanceScore": 56,
       "summary": "OpenDocViewer — the OCR boost control: full throttle while the user is idle.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -47104,6 +47200,12 @@
         },
         {
           "name": "OCR_BOOST_STEPS",
+          "kind": "named",
+          "source": "./boost.js",
+          "line": 35
+        },
+        {
+          "name": "OCR_BOOST_STOP",
           "kind": "named",
           "source": "./boost.js",
           "line": 35
@@ -57637,7 +57739,7 @@
     },
     {
       "path": "src/utils/ocrBoostStatus.js",
-      "lines": 80,
+      "lines": 88,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "What the toolbar says about the OCR boost (components/DocumentToolbar/OcrSearchBar.jsx): one key per situation with its English fallback text (public/locales/<lng>/common.json, `ocr.boost`), the number of engines to name",
@@ -57651,14 +57753,14 @@
         {
           "name": "describeOcrBoost",
           "kind": "function",
-          "line": 44
+          "line": 47
         }
       ],
       "declarations": [
         {
           "name": "describeOcrBoost",
           "kind": "function",
-          "line": 44
+          "line": 47
         }
       ],
       "parseError": null,
@@ -57687,7 +57789,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/ocrBoostStatus.js",
-          "line": 28,
+          "line": 29,
           "description": "",
           "params": [],
           "returns": [],
@@ -57700,7 +57802,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/ocrBoostStatus.js",
-          "line": 44,
+          "line": 47,
           "description": "",
           "params": [
             {
@@ -111664,7 +111766,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boost.js",
-      "line": 113,
+      "line": 127,
       "description": "",
       "params": [
         {
@@ -111744,14 +111846,40 @@
       "examples": 0
     },
     {
+      "id": "createOcrBoostController~endedBy",
+      "name": "endedBy",
+      "longname": "createOcrBoostController~endedBy",
+      "kind": "member",
+      "scope": "inner",
+      "file": "src/ocr/boost.js",
+      "line": 153,
+      "description": "The reason of the disengage that ended the last boosted state.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createOcrBoostController~levelBelow",
       "name": "levelBelow",
       "longname": "createOcrBoostController~levelBelow",
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/boost.js",
-      "line": 159,
+      "line": 177,
       "description": "The level below level in the plan, or the cautious count.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "NO_ROOM",
+      "name": "NO_ROOM",
+      "longname": "NO_ROOM",
+      "kind": "member",
+      "scope": "global",
+      "file": "src/ocr/boost.js",
+      "line": 60,
+      "description": "Fewer pages were waiting than the next level's engines could take.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -111783,13 +111911,26 @@
       "examples": 0
     },
     {
+      "id": "OCR_BOOST_STOP",
+      "name": "OCR_BOOST_STOP",
+      "longname": "OCR_BOOST_STOP",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/boost.js",
+      "line": 54,
+      "description": "Why a climb ended ( stop of inspect ).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "OcrBoostController",
       "name": "OcrBoostController",
       "longname": "OcrBoostController",
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/boost.js",
-      "line": 86,
+      "line": 98,
       "description": "",
       "params": [],
       "returns": [],
@@ -111802,7 +111943,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/boost.js",
-      "line": 79,
+      "line": 91,
       "description": "",
       "params": [],
       "returns": [],
@@ -111815,7 +111956,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/boost.js",
-      "line": 64,
+      "line": 76,
       "description": "The levels of the climb, in order, above the cautious count.",
       "params": [
         {
@@ -111858,6 +111999,19 @@
       "examples": 0
     },
     {
+      "id": "PROBE_FAILED",
+      "name": "PROBE_FAILED",
+      "longname": "PROBE_FAILED",
+      "kind": "member",
+      "scope": "global",
+      "file": "src/ocr/boost.js",
+      "line": 62,
+      "description": "The reference page could not be recognised at a level, or at the cautious count.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "RISING",
       "name": "RISING",
       "longname": "RISING",
@@ -111877,8 +112031,47 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/ocr/boost.js",
-      "line": 135,
+      "line": 149,
       "description": "The level a climb settled at; the next climb starts there.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "SLOW",
+      "name": "SLOW",
+      "longname": "SLOW",
+      "kind": "member",
+      "scope": "global",
+      "file": "src/ocr/boost.js",
+      "line": 58,
+      "description": "A level's reference recognition was too slow: the level before is kept.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createOcrBoostController~stop",
+      "name": "stop",
+      "longname": "createOcrBoostController~stop",
+      "kind": "member",
+      "scope": "inner",
+      "file": "src/ocr/boost.js",
+      "line": 151,
+      "description": "Why the last climb ended (OCR_BOOST_STOP); null while one runs or was cut short.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "TOP",
+      "name": "TOP",
+      "longname": "TOP",
+      "kind": "member",
+      "scope": "global",
+      "file": "src/ocr/boost.js",
+      "line": 56,
+      "description": "Every level was fine: the climb reached the maximum.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -120542,7 +120735,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/ocrBoostStatus.js",
-      "line": 44,
+      "line": 47,
       "description": "",
       "params": [
         {
@@ -120580,7 +120773,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/ocrBoostStatus.js",
-      "line": 28,
+      "line": 29,
       "description": "",
       "params": [],
       "returns": [],

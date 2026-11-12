@@ -779,9 +779,9 @@ cautious count applies throughout. The state (cautious, rising, boosted; the lev
 is logged at debug level and shown on the toolbar's OCR status button: while more engines than
 the cautious count run, a small badge (a bolt and the engine count) sits in the button, and the
 button's tooltip ends with a line about the boost: ready, measuring the starting point, the
-level being tried, the level kept, too few pages waiting for a climb, a climb that input
-interrupted, or what the last climb found, with the step that proved too slow ("16 engines took
-31 % longer"). The badge is the live part, since reaching for the tooltip
+level being tried, the level kept, too few pages left for a climb, a measurement that failed,
+a climb that input interrupted (with the last level that held up), or what the last climb
+found, with the step that proved too slow ("16 workers took 31 % longer"). The badge is the live part, since reaching for the tooltip
 is input and input ends the boost. A button to ask for the boost by hand is planned, not shipped.
 
 ### CSP for OCR

@@ -32,5 +32,5 @@ export { canPrepareImagesHere, prepareOcrImageCore } from './prepareImageCore.js
 export {
   OCR_IMAGE_PREPARER_IDLE_MS, OCR_IMAGE_PREPARER_MAX_FAILURES, createOcrImagePreparer, disposeOcrImagePreparer, getOcrImagePreparer,
 } from './imagePreparer.js';
-export { DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION, OCR_BOOST_STATE, OCR_BOOST_STEPS, createOcrBoostController, planOcrBoostLevels } from './boost.js';
+export { DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION, OCR_BOOST_STATE, OCR_BOOST_STEPS, OCR_BOOST_STOP, createOcrBoostController, planOcrBoostLevels } from './boost.js';
 export { OCR_REFERENCE_PAGE_LINES, OCR_REFERENCE_PAGE_SIZE, createOcrReferencePage } from './referencePage.js';

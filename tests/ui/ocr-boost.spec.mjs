@@ -79,7 +79,7 @@ test('ocr boost on: left alone, the viewer starts a second engine for the waitin
   // The toolbar says so: the search carries the boost's state and the tooltip ends with a line
   // about it (which line depends on how the climb went on this machine).
   await expect(page.locator('.toolbar [data-odv-ocr="search"]')).toHaveAttribute('data-ocr-boost', /cautious|rising|boosted/);
-  await expect(page.locator('.toolbar [data-odv-ocr="status"]')).toHaveAttribute('title', /(Boost|boost|Pådrag|pådrag)/);
+  await expect(page.locator('.toolbar [data-odv-ocr="status"]')).toHaveAttribute('title', / · [^·]*OCR[ -]boost[^·]*$/);
 
   // Everything stayed on the viewer's own origin, and the reference page was drawn, not fetched.
   for (const url of requests) expect(url.startsWith(origin) || url.startsWith('blob:') || url.startsWith('data:'), url).toBe(true);
@@ -103,5 +103,5 @@ test('ocr boost off (the default): the same document is recognised by the cautio
   // And the toolbar says nothing about a boost: no attribute, no badge, no tooltip line.
   expect(await page.locator('.toolbar [data-odv-ocr="search"]').getAttribute('data-ocr-boost')).toBeNull();
   await expect(page.locator('[data-odv-ocr="boost"]')).toHaveCount(0);
-  expect(await status.getAttribute('title')).not.toMatch(/boost|pådrag/i);
+  expect(await status.getAttribute('title')).not.toMatch(/boost/i);
 });

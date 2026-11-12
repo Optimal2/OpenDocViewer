@@ -4,6 +4,7 @@
  * the starting point being measured; the level being tried and the level kept, each with a
  * badge; what the last climb found once input has ended it; and the step that proved too slow.
  */
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { OCR_BOOST_FALLBACK, describeOcrBoost } from '../ocrBoostStatus.js';
 import { createOcrBoostController } from '../../ocr/boost.js';
@@ -60,7 +61,7 @@ describe('describeOcrBoost', () => {
   });
 
   it('has an English fallback for every key it can return, and for the slow step', () => {
-    for (const key of ['ready', 'starting', 'rising', 'boosted', 'held', 'noRoom', 'interrupted', 'last', 'slow']) {
+    for (const key of ['ready', 'starting', 'rising', 'boosted', 'held', 'noRoom', 'failed', 'interrupted', 'last', 'slow']) {
       expect(typeof OCR_BOOST_FALLBACK[key]).toBe('string');
     }
     expect(Object.isFrozen(OCR_BOOST_FALLBACK)).toBe(true);
@@ -138,7 +139,7 @@ describe('describeOcrBoost against the real boost control', () => {
     expect(boost.describe()).toEqual({ key: 'held', engines: null, badge: null, slow: { level: 12, percent: 30 } });
   });
 
-  it('says too few pages when the climb never began for want of them, and ready again after input', async () => {
+  it('says too few pages when the climb never began for want of them, during the idle period and after it', async () => {
     const boost = control({ hasRoom: () => false });
     const climb = boost.controller.engage();
     await flush();
@@ -146,6 +147,19 @@ describe('describeOcrBoost against the real boost control', () => {
     await climb;
     expect(boost.describe()).toEqual({ key: 'noRoom', engines: null, badge: null, slow: null });
     boost.controller.disengage();
+    expect(boost.describe()).toEqual({ key: 'noRoom', engines: null, badge: null, slow: null });
+  });
+
+  it('does not call it interrupted when the work ran out during a climb', async () => {
+    const boost = control();
+    const climb = boost.controller.engage();
+    await flush();
+    await boost.answer(1000);
+    await boost.answer(1050); // 12: fine; the probe of 16 is under way when the queue goes idle
+    boost.controller.disengage('done');
+    expect(boost.describe()).toEqual({ key: 'ready', engines: null, badge: null, slow: null });
+    await boost.answer(1100);
+    await climb;
     expect(boost.describe().key).toBe('ready');
   });
 
@@ -169,13 +183,13 @@ describe('describeOcrBoost against the real boost control', () => {
     expect(boost.describe()).toMatchObject({ key: 'last', engines: 12 });
   });
 
-  it('says ready after a failed baseline and too few pages after a failed first probe, never no gain', async () => {
+  it('says the measurement failed after a failed baseline or a failed first probe, never no gain or too few pages', async () => {
     const baseline = control();
     const first = baseline.controller.engage();
     await flush();
     await baseline.fail();
     await first;
-    expect(baseline.describe().key).toBe('ready');
+    expect(baseline.describe()).toEqual({ key: 'failed', engines: null, badge: null, slow: null });
 
     const probe = control();
     const second = probe.controller.engage();
@@ -183,6 +197,34 @@ describe('describeOcrBoost against the real boost control', () => {
     await probe.answer(1000);
     await probe.fail();
     await second;
-    expect(probe.describe()).toEqual({ key: 'noRoom', engines: null, badge: null, slow: null });
+    expect(probe.describe()).toEqual({ key: 'failed', engines: null, badge: null, slow: null });
+    probe.controller.disengage();
+    expect(probe.describe().key).toBe('failed');
+    // A failed probe higher up keeps the level before, which is what the toolbar tells.
+    const higher = control();
+    const third = higher.controller.engage();
+    await flush();
+    await higher.answer(1000);
+    await higher.answer(1050);
+    await higher.fail();
+    await third;
+    expect(higher.describe()).toMatchObject({ key: 'boosted', engines: 12, badge: 12 });
+  });
+});
+
+describe('ocr.boost in the locale files', () => {
+  const placeholders = (text) => (String(text).match(/\{[a-zA-Z]+\}/g) || []).sort();
+
+  it.each(['sv', 'en'])('has every key of the fallbacks in %s, with the same placeholders', (language) => {
+    const strings = JSON.parse(readFileSync(`public/locales/${language}/common.json`, 'utf8')).ocr.boost;
+    expect(Object.keys(strings).sort()).toEqual(Object.keys(OCR_BOOST_FALLBACK).sort());
+    for (const [key, fallback] of Object.entries(OCR_BOOST_FALLBACK)) {
+      expect(placeholders(strings[key]), `${language}.${key}`).toEqual(placeholders(fallback));
+    }
+  });
+
+  it('keeps the English file identical to the fallbacks', () => {
+    const strings = JSON.parse(readFileSync('public/locales/en/common.json', 'utf8')).ocr.boost;
+    expect(strings).toEqual({ ...OCR_BOOST_FALLBACK });
   });
 });

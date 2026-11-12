@@ -117,7 +117,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/manual-page/mountManualPage.jsx</code> | 40 | 1 | 1 | high | Mount the stand-alone manual page into a container, the way src/index.jsx mounts the viewer: apply the shared theme and toolbar density to the document before the first render, then render the page inside the viewer&#39;s Th |
 | <code>src/ocr/assetUrls.js</code> | 82 | 1 | 4 | high | Resolves where the OCR worker, engine core and language models are loaded from. |
 | <code>src/ocr/benchmark.js</code> | 661 | 0 | 20 | high | Opt-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document&#39;s pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which |
-| <code>src/ocr/boost.js</code> | 243 | 0 | 12 | high | OpenDocViewer — the OCR boost control: full throttle while the user is idle. |
+| <code>src/ocr/boost.js</code> | 270 | 0 | 19 | high | OpenDocViewer — the OCR boost control: full throttle while the user is idle. |
 | <code>src/ocr/boostBenchmark.js</code> | 811 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but at and above the ceiling of the viewer&#39;s own worker policy. |
 | <code>src/ocr/classify.js</code> | 106 | 3 | 15 | high | Decides, per page, whether OCR is worth running. |
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
@@ -157,7 +157,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/memoryProfile.js</code> | 75 | 2 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
-| <code>src/utils/ocrBoostStatus.js</code> | 80 | 1 | 3 | high | What the toolbar says about the OCR boost \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per situation with its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.boost\`\), the number of engines to name |
+| <code>src/utils/ocrBoostStatus.js</code> | 88 | 1 | 3 | high | What the toolbar says about the OCR boost \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per situation with its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.boost\`\), the number of engines to name |
 | <code>src/utils/ocrLanguageCodes.js</code> | 31 | 2 | 1 | high | Tesseract language codes \(\`ocr.languages\`\) and the ISO 639-1 language each one reads: what the read-aloud menu offers and the language guess chooses among. |
 | <code>src/utils/ocrLoader.js</code> | 41 | 2 | 3 | high | The only door into the OCR module. |
 | <code>src/utils/ocrPageKey.js</code> | 32 | 3 | 3 | high | Key of one document page in the OCR result map \(\`ocrPages\` on the viewer context\). |

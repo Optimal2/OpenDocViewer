@@ -9,7 +9,7 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import {
-  DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION, OCR_BOOST_STATE, OCR_BOOST_STEPS, createOcrBoostController, planOcrBoostLevels,
+  DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION, OCR_BOOST_STATE, OCR_BOOST_STEPS, OCR_BOOST_STOP, createOcrBoostController, planOcrBoostLevels,
 } from '../boost.js';
 
 describe('planOcrBoostLevels', () => {
@@ -76,7 +76,7 @@ describe('createOcrBoostController', () => {
   it('starts cautious, applies nothing until engaged, and needs apply and probe', () => {
     const { controller, apply } = makeController();
     expect(controller.inspect()).toEqual({
-      state: OCR_BOOST_STATE.CAUTIOUS, level: 8, cautious: 8, levels: [12, 16, 20, 24], baselineMs: null, probes: [], settledLevel: null,
+      state: OCR_BOOST_STATE.CAUTIOUS, level: 8, cautious: 8, levels: [12, 16, 20, 24], baselineMs: null, probes: [], settledLevel: null, stop: null, endedBy: null,
     });
     expect(controller.level()).toBe(8);
     expect(apply).not.toHaveBeenCalled();
@@ -339,6 +339,63 @@ describe('createOcrBoostController', () => {
     await second;
     expect(apply).not.toHaveBeenCalled();
     expect(controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.BOOSTED, level: 8, settledLevel: 16, probes: [] });
+  });
+
+  it('says why a climb ended and what ended the boosted state: top, slow, no room, a failed probe; input or the end of the work', async () => {
+    expect(OCR_BOOST_STOP).toEqual({ TOP: 'top', SLOW: 'slow', NO_ROOM: 'noRoom', PROBE_FAILED: 'probeFailed' });
+    // To the top.
+    const top = makeController({ levels: [12] });
+    const first = top.controller.engage();
+    await flush();
+    expect(top.controller.inspect()).toMatchObject({ stop: null, endedBy: null });
+    top.probe.answer(1000);
+    await flush();
+    top.probe.answer(1000);
+    await first;
+    expect(top.controller.inspect()).toMatchObject({ stop: 'top', endedBy: null });
+    top.controller.disengage('done');
+    expect(top.controller.inspect()).toMatchObject({ stop: 'top', endedBy: 'done' });
+    // The next climb starts clean.
+    const again = top.controller.engage();
+    await flush();
+    expect(top.controller.inspect()).toMatchObject({ stop: null, endedBy: null });
+    top.controller.disengage('input');
+    top.probe.answer(1000);
+    await again;
+    // Cut short: no stop reason, the input is what ended it.
+    expect(top.controller.inspect()).toMatchObject({ stop: null, endedBy: 'input' });
+
+    const slow = makeController({ levels: [12] });
+    const second = slow.controller.engage();
+    await flush();
+    slow.probe.answer(1000);
+    await flush();
+    slow.probe.answer(1300);
+    await second;
+    expect(slow.controller.inspect().stop).toBe('slow');
+
+    const cramped = makeController({ levels: [12], hasRoom: () => false });
+    const third = cramped.controller.engage();
+    await flush();
+    cramped.probe.answer(1000);
+    await third;
+    expect(cramped.controller.inspect().stop).toBe('noRoom');
+
+    const broken = makeController({ levels: [12] });
+    const fourth = broken.controller.engage();
+    await flush();
+    broken.probe.answer(1000);
+    await flush();
+    broken.probe.fail(new Error('gone'));
+    await fourth;
+    expect(broken.controller.inspect().stop).toBe('probeFailed');
+
+    const noBaseline = makeController({ levels: [12] });
+    const fifth = noBaseline.controller.engage();
+    await flush();
+    noBaseline.probe.fail(new Error('gone'));
+    await fifth;
+    expect(noBaseline.controller.inspect()).toMatchObject({ state: OCR_BOOST_STATE.CAUTIOUS, stop: 'probeFailed' });
   });
 
   it('reports every change of state or level to onChange, and survives a listener that throws', async () => {

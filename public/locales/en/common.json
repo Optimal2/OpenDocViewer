@@ -449,15 +449,16 @@
       "unavailable": "Text recognition is unavailable"
     },
     "boost": {
-      "ready": "Idle boost: ready",
-      "starting": "Boost: measuring the starting point",
-      "rising": "Boost: trying {engines} engines",
-      "boosted": "Boost: {engines} engines",
-      "held": "Boost tried: no gain over the cautious count",
-      "noRoom": "Boost: too few pages waiting for more engines",
-      "interrupted": "Boost interrupted at {engines} engines",
-      "last": "Last boost: {engines} engines",
-      "slow": "{level} engines took {percent} % longer"
+      "ready": "OCR boost: ready",
+      "starting": "OCR boost: measuring the starting point",
+      "rising": "OCR boost: trying {engines} workers",
+      "boosted": "OCR boost: {engines} workers",
+      "held": "OCR boost tried: no gain over the cautious count",
+      "noRoom": "OCR boost: too few pages left to climb for",
+      "failed": "OCR boost: the measurement failed",
+      "interrupted": "OCR boost interrupted; {engines} workers held up",
+      "last": "Last OCR boost: {engines} workers",
+      "slow": "{level} workers took {percent} % longer"
     },
     "search": {
       "open": "Search in the recognised text",

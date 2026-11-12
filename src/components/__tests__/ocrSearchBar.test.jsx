@@ -115,34 +115,34 @@ describe('OcrSearchBar', () => {
   it('with a boost, ends the tooltip with its state and shows the badge only while more engines than the cautious count run', () => {
     const ocrPages = { [KEY(0)]: done(['Hej']) };
     render({ ocrPages, ocrBoost: boost() });
-    expect(button().getAttribute('title')).toMatch(/ · Idle boost: ready$/);
+    expect(button().getAttribute('title')).toMatch(/ · OCR boost: ready$/);
     expect(searchRoot().getAttribute('data-ocr-boost')).toBe('cautious');
     expect(boostBadge()).toBeNull();
 
     render({ ocrPages, ocrBoost: boost({ state: 'rising' }) });
-    expect(button().getAttribute('title')).toMatch(/ · Boost: measuring the starting point$/);
+    expect(button().getAttribute('title')).toMatch(/ · OCR boost: measuring the starting point$/);
     expect(boostBadge()).toBeNull();
 
     render({ ocrPages, ocrBoost: boost({ state: 'rising', level: 12, baselineMs: 2000 }) });
-    expect(button().getAttribute('title')).toMatch(/ · Boost: trying 12 engines$/);
+    expect(button().getAttribute('title')).toMatch(/ · OCR boost: trying 12 workers$/);
     expect(searchRoot().getAttribute('data-ocr-boost')).toBe('rising');
     expect(boostBadge().textContent).toBe('bolt12');
     expect(boostBadge().getAttribute('aria-hidden')).toBe('true');
 
     const probes = [{ level: 12, ms: 2200, slow: false }, { level: 16, ms: 2620, slow: true }];
     render({ ocrPages, ocrBoost: boost({ state: 'boosted', level: 12, baselineMs: 2000, settledLevel: 12, probes }) });
-    expect(button().getAttribute('title')).toMatch(/ · Boost: 12 engines \(16 engines took 31 % longer\)$/);
+    expect(button().getAttribute('title')).toMatch(/ · OCR boost: 12 workers \(16 workers took 31 % longer\)$/);
     expect(boostBadge().textContent).toBe('bolt12');
 
     // Input ended it: the badge goes, the tooltip keeps what the climb found.
     render({ ocrPages, ocrBoost: boost({ baselineMs: 2000, settledLevel: 12, probes }) });
-    expect(button().getAttribute('title')).toMatch(/ · Last boost: 12 engines \(16 engines took 31 % longer\)$/);
+    expect(button().getAttribute('title')).toMatch(/ · Last OCR boost: 12 workers \(16 workers took 31 % longer\)$/);
     expect(boostBadge()).toBeNull();
   });
 
   it('shows the boost on the status-only button too', () => {
     render({ ocrPages: { [KEY(0)]: done(['Hej']) }, searchEnabled: false, ocrBoost: boost({ state: 'boosted', level: 16, baselineMs: 2000, settledLevel: 16, probes: [{ level: 16, ms: 2100, slow: false }] }) });
-    expect(button().getAttribute('title')).toBe('Text recognised · Boost: 16 engines');
+    expect(button().getAttribute('title')).toBe('Text recognised · OCR boost: 16 workers');
     expect(button().getAttribute('aria-label')).toBe('Text recognised');
     expect(boostBadge().textContent).toBe('bolt16');
     expect(searchRoot().getAttribute('data-ocr-boost')).toBe('boosted');

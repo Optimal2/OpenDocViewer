@@ -907,16 +907,23 @@
 | <code>withTimeout</code> | function | <code>src/ocr/benchmark.js:373</code> |  |
 | <code>BOOSTED</code> | member | <code>src/ocr/boost.js:50</code> | The climb ended; the level found applies until the next input. |
 | <code>CAUTIOUS</code> | member | <code>src/ocr/boost.js:46</code> | The cautious count applies. |
-| <code>createOcrBoostController</code> | function | <code>src/ocr/boost.js:113</code> |  |
+| <code>createOcrBoostController</code> | function | <code>src/ocr/boost.js:127</code> |  |
 | <code>DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION</code> | constant | <code>src/ocr/boost.js:41</code> | How much longer the reference recognition may take before the climb stops \(a quarter\). |
-| <code>createOcrBoostController~levelBelow</code> | function | <code>src/ocr/boost.js:159</code> | The level below level in the plan, or the cautious count. |
+| <code>createOcrBoostController~endedBy</code> | member | <code>src/ocr/boost.js:153</code> | The reason of the disengage that ended the last boosted state. |
+| <code>createOcrBoostController~levelBelow</code> | function | <code>src/ocr/boost.js:177</code> | The level below level in the plan, or the cautious count. |
+| <code>NO_ROOM</code> | member | <code>src/ocr/boost.js:60</code> | Fewer pages were waiting than the next level&#39;s engines could take. |
 | <code>OCR_BOOST_STATE</code> | constant | <code>src/ocr/boost.js:44</code> | The states of the control \(see inspect \). |
 | <code>OCR_BOOST_STEPS</code> | constant | <code>src/ocr/boost.js:38</code> | Steps of the climb from the starting level to the maximum. |
-| <code>OcrBoostController</code> | typedef | <code>src/ocr/boost.js:86</code> |  |
-| <code>OcrBoostProbe</code> | typedef | <code>src/ocr/boost.js:79</code> |  |
-| <code>planOcrBoostLevels</code> | function | <code>src/ocr/boost.js:64</code> | The levels of the climb, in order, above the cautious count. |
+| <code>OCR_BOOST_STOP</code> | constant | <code>src/ocr/boost.js:54</code> | Why a climb ended \( stop of inspect \). |
+| <code>OcrBoostController</code> | typedef | <code>src/ocr/boost.js:98</code> |  |
+| <code>OcrBoostProbe</code> | typedef | <code>src/ocr/boost.js:91</code> |  |
+| <code>planOcrBoostLevels</code> | function | <code>src/ocr/boost.js:76</code> | The levels of the climb, in order, above the cautious count. |
+| <code>PROBE_FAILED</code> | member | <code>src/ocr/boost.js:62</code> | The reference page could not be recognised at a level, or at the cautious count. |
 | <code>RISING</code> | member | <code>src/ocr/boost.js:48</code> | Climbing: a level has been applied and its probe is under way. |
-| <code>createOcrBoostController~settledLevel</code> | member | <code>src/ocr/boost.js:135</code> | The level a climb settled at; the next climb starts there. |
+| <code>createOcrBoostController~settledLevel</code> | member | <code>src/ocr/boost.js:149</code> | The level a climb settled at; the next climb starts there. |
+| <code>SLOW</code> | member | <code>src/ocr/boost.js:58</code> | A level&#39;s reference recognition was too slow: the level before is kept. |
+| <code>createOcrBoostController~stop</code> | member | <code>src/ocr/boost.js:151</code> | Why the last climb ended \(OCR_BOOST_STOP\); null while one runs or was cut short. |
+| <code>TOP</code> | member | <code>src/ocr/boost.js:56</code> | Every level was fine: the climb reached the maximum. |
 | <code>ASSUMED_DEVICE_MEMORY_GIB</code> | constant | <code>src/ocr/boostBenchmark.js:118</code> | Device memory assumed for a browser that does not report it \(Firefox, Safari\), in GiB. |
 | <code>BOOST_ABORT_REASON</code> | constant | <code>src/ocr/boostBenchmark.js:129</code> | Reasons a scenario stopped part-way. |
 | <code>BOOST_MAX_WORKER_COUNT</code> | constant | <code>src/ocr/boostBenchmark.js:97</code> | Most workers a boost scenario may ask for. |
@@ -1293,9 +1300,9 @@
 | <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:89</code> | Revoke every tracked object URL. |
 | <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:47</code> |  |
 | <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:60</code> |  |
-| <code>describeOcrBoost</code> | function | <code>src/utils/ocrBoostStatus.js:44</code> |  |
+| <code>describeOcrBoost</code> | function | <code>src/utils/ocrBoostStatus.js:47</code> |  |
 | <code>OCR_BOOST_FALLBACK</code> | constant | <code>src/utils/ocrBoostStatus.js:16</code> | Keys of ocr.boost and their English fallbacks. |
-| <code>OcrBoostDescription</code> | typedef | <code>src/utils/ocrBoostStatus.js:28</code> |  |
+| <code>OcrBoostDescription</code> | typedef | <code>src/utils/ocrBoostStatus.js:29</code> |  |
 | <code>speechLanguagesForOcr</code> | function | <code>src/utils/ocrLanguageCodes.js:23</code> | The ISO 639-1 languages of a list of Tesseract codes, each once, in order; codes without a known language are left out. |
 | <code>isOcrModuleRequested</code> | function | <code>src/utils/ocrLoader.js:33</code> | True once the module import has been requested in this session. |
 | <code>loadOcrModule</code> | function | <code>src/utils/ocrLoader.js:20</code> |  |

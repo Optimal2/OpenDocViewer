@@ -50,6 +50,18 @@ export const OCR_BOOST_STATE = Object.freeze({
   BOOSTED: 'boosted',
 });
 
+/** Why a climb ended (`stop` of `inspect`). */
+export const OCR_BOOST_STOP = Object.freeze({
+  /** Every level was fine: the climb reached the maximum. */
+  TOP: 'top',
+  /** A level's reference recognition was too slow: the level before is kept. */
+  SLOW: 'slow',
+  /** Fewer pages were waiting than the next level's engines could take. */
+  NO_ROOM: 'noRoom',
+  /** The reference page could not be recognised at a level, or at the cautious count. */
+  PROBE_FAILED: 'probeFailed',
+});
+
 /**
  * The levels of the climb, in order, above the cautious count.
  *
@@ -90,7 +102,9 @@ export function planOcrBoostLevels({ cautious, threads, max, steps = OCR_BOOST_S
  *   never rejects.
  * @property {function(string=): void} disengage  Back to the cautious count at once.
  * @property {function(): number} level  The count applied right now.
- * @property {function(): { state: string, level: number, cautious: number, levels: Array<number>, baselineMs: (number|null), probes: Array<OcrBoostProbe>, settledLevel: (number|null) }} inspect
+ * @property {function(): { state: string, level: number, cautious: number, levels: Array<number>, baselineMs: (number|null), probes: Array<OcrBoostProbe>, settledLevel: (number|null), stop: (string|null), endedBy: (string|null) }} inspect
+ *   `stop` says why the last climb ended (OCR_BOOST_STOP; null while it runs or was cut short),
+ *   `endedBy` the reason given to the `disengage` that ended the boosted state since.
  */
 
 /**
@@ -133,11 +147,15 @@ export function createOcrBoostController({
   let probes = [];
   /** @type {(number|null)} The level a climb settled at; the next climb starts there. */
   let settledLevel = null;
+  /** @type {(string|null)} Why the last climb ended (OCR_BOOST_STOP); null while one runs or was cut short. */
+  let stop = null;
+  /** @type {(string|null)} The reason of the disengage that ended the last boosted state. */
+  let endedBy = null;
   // Bumped by disengage(): a climb that began under an older generation stops acting.
   let generation = 0;
 
   function inspect() {
-    return { state, level: current, cautious: floor, levels: [...plan], baselineMs, probes: [...probes], settledLevel };
+    return { state, level: current, cautious: floor, levels: [...plan], baselineMs, probes: [...probes], settledLevel, stop, endedBy };
   }
 
   function changed() {
@@ -166,6 +184,8 @@ export function createOcrBoostController({
     const myGeneration = generation;
     state = OCR_BOOST_STATE.RISING;
     probes = [];
+    stop = null;
+    endedBy = null;
     log.debug('OCR boost starting', { reason, cautious: floor, levels: [...plan], settledLevel });
     changed();
     let reached = floor;
@@ -177,6 +197,7 @@ export function createOcrBoostController({
       // No yardstick (the engine failed, or was terminated): stay cautious, so the next trigger
       // may try again.
       log.debug('OCR boost baseline failed; staying cautious', { error: String(error?.message || error) });
+      stop = OCR_BOOST_STOP.PROBE_FAILED;
       state = OCR_BOOST_STATE.CAUTIOUS;
       changed();
       return;
@@ -187,12 +208,14 @@ export function createOcrBoostController({
     // anything about where to settle. A climb that ends before, for want of pages, leaves the
     // level remembered from an earlier climb alone.
     let measured = false;
+    let ending = OCR_BOOST_STOP.TOP;
     try {
       // A climb that settled before jumps to its level and confirms it with one probe.
       const candidates = settledLevel !== null && plan.includes(settledLevel) ? [settledLevel] : plan;
       for (const level of candidates) {
         if (typeof hasRoom === 'function' && !hasRoom(level)) {
           log.debug('OCR boost stops below a level without pages for it', { level, reached });
+          ending = OCR_BOOST_STOP.NO_ROOM;
           break;
         }
         set(level);
@@ -203,6 +226,7 @@ export function createOcrBoostController({
         probes.push({ level, ms, slow });
         measured = true;
         if (slow) {
+          ending = OCR_BOOST_STOP.SLOW;
           reached = levelBelow(level);
           set(reached);
           break;
@@ -213,6 +237,7 @@ export function createOcrBoostController({
       // The reference page could not be recognised (the engine failed, or was terminated):
       // stay where the climb was before this level.
       log.debug('OCR boost probe failed; staying at the level before', { error: String(error?.message || error) });
+      ending = OCR_BOOST_STOP.PROBE_FAILED;
       measured = true;
       if (reached !== floor) {
         reached = levelBelow(reached);
@@ -220,8 +245,9 @@ export function createOcrBoostController({
       }
     }
     if (measured) settledLevel = reached > floor ? reached : null;
+    stop = ending;
     state = OCR_BOOST_STATE.BOOSTED;
-    log.debug('OCR boost settled', { level: reached, baselineMs, probes: [...probes] });
+    log.debug('OCR boost settled', { level: reached, stop, baselineMs, probes: [...probes] });
     changed();
   }
 
@@ -229,6 +255,7 @@ export function createOcrBoostController({
     generation += 1;
     if (state === OCR_BOOST_STATE.CAUTIOUS) return;
     state = OCR_BOOST_STATE.CAUTIOUS;
+    endedBy = String(reason);
     set(floor);
     log.debug('OCR boost ended', { reason, settledLevel });
   }

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4704. JSDoc symbol count: 191.
+File count: 22. Line count: 4731. JSDoc symbol count: 198.
 
 ## src/ocr/assetUrls.js
 
@@ -42,7 +42,7 @@ Symbols:
 
 OpenDocViewer — the OCR boost control: full throttle while the user is idle.
 
-Exports: `OCR_BOOST_STEPS`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `planOcrBoostLevels`, `createOcrBoostController`
+Exports: `OCR_BOOST_STEPS`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `OCR_BOOST_STOP`, `planOcrBoostLevels`, `createOcrBoostController`
 
 Symbols:
 
@@ -52,12 +52,12 @@ Symbols:
 - `CAUTIOUS` (member) - The cautious count applies.
 - `RISING` (member) - Climbing: a level has been applied and its probe is under way.
 - `BOOSTED` (member) - The climb ended; the level found applies until the next input.
+- `OCR_BOOST_STOP` (constant) - Why a climb ended \( stop of inspect \).
+- `TOP` (member) - Every level was fine: the climb reached the maximum.
+- `SLOW` (member) - A level's reference recognition was too slow: the level before is kept.
+- `NO_ROOM` (member) - Fewer pages were waiting than the next level's engines could take.
+- `PROBE_FAILED` (member) - The reference page could not be recognised at a level, or at the cautious count.
 - `planOcrBoostLevels` (function) - The levels of the climb, in order, above the cautious count.
-- `OcrBoostProbe` (typedef) - No description.
-- `OcrBoostController` (typedef) - No description.
-- `createOcrBoostController` (function) - No description.
-- `createOcrBoostController~settledLevel` (member) - The level a climb settled at; the next climb starts there.
-- `createOcrBoostController~levelBelow` (function) - The level below level in the plan, or the cautious count.
 
 ## src/ocr/boostBenchmark.js
 
@@ -184,7 +184,7 @@ Symbols:
 
 Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `OCR_BOOST_STEPS`, `createOcrBoostController`, `planOcrBoostLevels`, `OCR_REFERENCE_PAGE_LINES`, `OCR_REFERENCE_PAGE_SIZE`, `createOcrReferencePage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `OCR_BOOST_STEPS`, `OCR_BOOST_STOP`, `createOcrBoostController`, `planOcrBoostLevels`, `OCR_REFERENCE_PAGE_LINES`, `OCR_REFERENCE_PAGE_SIZE`, `createOcrReferencePage`
 
 Local imports: `src/ocr/boostBenchmark.js`
 
