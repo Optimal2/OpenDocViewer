@@ -726,10 +726,15 @@ describe('useOcrTextLayers boost', () => {
     expect(pool.resize).toHaveBeenLastCalledWith(2);
     expect(latest.ocrBoost).toMatchObject({ state: 'rising', level: 2 });
 
-    // Another document starts loading: the cautious count is back at once.
+    // Another document starts loading: the cautious count is back at once, and ending the
+    // boost starts no page on the way (two were in flight; they finish, no third begins).
+    const inFlight = pagesOf(pool).length;
     await render({ ...props, loading: true });
     expect(pool.resize).toHaveBeenLastCalledWith(1);
     expect(latest.ocrBoost).toMatchObject({ state: 'cautious', level: 1, endedBy: 'loading' });
+    await act(async () => { pagesOf(pool)[0].resolve(result('first')); });
+    await flush();
+    expect(pagesOf(pool)).toHaveLength(inFlight);
     visibility.mockRestore();
   });
 

@@ -84,7 +84,7 @@ File count: 4. Line count: 1746. JSDoc symbol count: 49.
 
 ## src/contexts
 
-File count: 5. Line count: 3629. JSDoc symbol count: 101.
+File count: 5. Line count: 3633. JSDoc symbol count: 101.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -107,16 +107,16 @@ File count: 2. Line count: 4. JSDoc symbol count: 0.
 
 ## src/hooks
 
-File count: 9. Line count: 1581. JSDoc symbol count: 46.
+File count: 10. Line count: 1699. JSDoc symbol count: 51.
 
 - `src/hooks/useOcrTextLayers.js` - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/hooks/useReadAloud.js` - Read the selected recognised text aloud: the state behind the page's context menu entry and the toolbar's "Reading language" section \(contexts/readAloudContext.js\).
+- `src/hooks/useDocumentLoadSettled.js` - OpenDocViewer — has the document finished loading, as far as OCR is concerned?
 - `src/hooks/useKeyTipsHeld.js` - Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs.
 - `src/hooks/usePageNavigation.js` - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/hooks/useAcceleratingHoldRepeat.js` - Reusable press\-and\-hold behavior for toolbar buttons.
-- `src/hooks/usePdfSignatureReports.js` - Browser PDF signature inspection.
 
 ## src/i18n.js
 

@@ -42,6 +42,7 @@ import {
 import usePdfSignatureReports from '../hooks/usePdfSignatureReports.js';
 import useOcrModule from '../hooks/useOcrModule.js';
 import useOcrTextLayers from '../hooks/useOcrTextLayers.js';
+import useDocumentLoadSettled from '../hooks/useDocumentLoadSettled.js';
 import { disposePdfSignatureWorker } from '../utils/pdfSignatureInspector.js';
 import { getSourceFileNameFromUrl } from '../utils/pdfSignatureDocuments.js';
 import {
@@ -2747,6 +2748,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const releaseOcrPageAsset = useCallback((pageIndex, url) => {
     clearPageAssetReference(pageIndex, 'full', url);
   }, [clearPageAssetReference]);
+  // The load, as OCR has to respect it: the loader's run and the first rendering of every
+  // page after it (hooks/useDocumentLoadSettled.js). Inert while OCR is off.
+  const ocrLoadSettled = useDocumentLoadSettled({ enabled: isOcrEnabled(), pages: allPages, loadingRunActive });
   const { ocrPages, ocrEngineFailure, ocrBoost } = useOcrTextLayers({
     ocrModule,
     allPages,
@@ -2760,13 +2764,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     // The search over the whole document (open, with a term, not limited to one page) is one of
     // the boost's ways in (`ocr.boost`); read here, so the hook needs no search state of its own.
     searchOpen: Boolean(ocrSearch?.term) && !ocrSearch?.onlyPageKey,
-    // Loading comes before recognising: while the loader's run is active, OCR starts nothing
-    // and the boost stays out, so the loader's workers have the machine and the user sees the
-    // document first. The run alone decides it. Neither `allPagesReady` nor `pendingPages` may:
-    // in the memory modes full-size images are evicted and rendered again for as long as the
-    // viewer is open, so some page is always pending, and a page count that was planned but
-    // never discovered never arrives; either would hold the rest of the document back for good.
-    loading: loadingRunActive,
+    // Loading comes before recognising: until the load is settled, OCR starts nothing and the
+    // boost stays out, so the loader's and renderer's workers have the machine and the user
+    // sees the document first. Settled is the run over and every page rendered once; neither
+    // `allPagesReady` nor `pendingPages` could say it, since in the memory modes full-size
+    // images are evicted and rendered again for as long as the viewer is open, and a planned
+    // page count that is never discovered never arrives.
+    loading: !ocrLoadSettled,
   });
   /**
    * @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first.

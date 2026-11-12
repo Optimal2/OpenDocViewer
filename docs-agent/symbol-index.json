@@ -16134,7 +16134,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1065,
+    "line": 1066,
     "description": "",
     "params": [
       {
@@ -16159,7 +16159,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1391,
+    "line": 1392,
     "description": "",
     "params": [],
     "returns": [
@@ -16177,7 +16177,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1080,
+    "line": 1081,
     "description": "",
     "params": [
       {
@@ -16214,7 +16214,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1541,
+    "line": 1542,
     "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
     "params": [
       {
@@ -16251,7 +16251,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1107,
+    "line": 1108,
     "description": "",
     "params": [],
     "returns": [
@@ -16269,7 +16269,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 580,
+    "line": 581,
     "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
     "params": [],
     "returns": [
@@ -16287,7 +16287,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 219,
+    "line": 220,
     "description": "",
     "params": [
       {
@@ -16312,7 +16312,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2815,
+    "line": 2819,
     "description": "",
     "params": [
       {
@@ -16332,7 +16332,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2801,
+    "line": 2805,
     "description": "",
     "params": [
       {
@@ -16352,7 +16352,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1179,
+    "line": 1180,
     "description": "",
     "params": [
       {
@@ -16377,7 +16377,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 61,
+    "line": 62,
     "description": "",
     "params": [],
     "returns": [],
@@ -16390,7 +16390,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 55,
+    "line": 56,
     "description": "",
     "params": [],
     "returns": [],
@@ -16403,7 +16403,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1639,
+    "line": 1640,
     "description": "",
     "params": [
       {
@@ -16428,7 +16428,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2056,
+    "line": 2057,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -16453,7 +16453,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1863,
+    "line": 1864,
     "description": "",
     "params": [
       {
@@ -16490,7 +16490,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 76,
+    "line": 77,
     "description": "",
     "params": [],
     "returns": [],
@@ -16503,7 +16503,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2820,
+    "line": 2824,
     "description": "",
     "params": [
       {
@@ -16523,7 +16523,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 151,
+    "line": 152,
     "description": "",
     "params": [
       {
@@ -16554,7 +16554,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2453,
+    "line": 2454,
     "description": "",
     "params": [
       {
@@ -16579,7 +16579,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1519,
+    "line": 1520,
     "description": "",
     "params": [
       {
@@ -16604,7 +16604,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1615,
+    "line": 1616,
     "description": "",
     "params": [
       {
@@ -16629,7 +16629,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1116,
+    "line": 1117,
     "description": "",
     "params": [
       {
@@ -16654,7 +16654,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 900,
+    "line": 901,
     "description": "",
     "params": [
       {
@@ -16685,7 +16685,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 917,
+    "line": 918,
     "description": "",
     "params": [
       {
@@ -16716,7 +16716,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 185,
+    "line": 186,
     "description": "",
     "params": [
       {
@@ -16741,7 +16741,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 966,
+    "line": 967,
     "description": "",
     "params": [
       {
@@ -16766,7 +16766,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 211,
+    "line": 212,
     "description": "",
     "params": [
       {
@@ -16791,7 +16791,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 203,
+    "line": 204,
     "description": "",
     "params": [
       {
@@ -16816,7 +16816,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 122,
+    "line": 123,
     "description": "",
     "params": [
       {
@@ -16841,7 +16841,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 946,
+    "line": 947,
     "description": "",
     "params": [
       {
@@ -16866,7 +16866,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 193,
+    "line": 194,
     "description": "",
     "params": [
       {
@@ -16891,7 +16891,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 342,
+    "line": 343,
     "description": "",
     "params": [
       {
@@ -16922,7 +16922,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 955,
+    "line": 956,
     "description": "",
     "params": [
       {
@@ -16947,7 +16947,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 91,
+    "line": 92,
     "description": "",
     "params": [
       {
@@ -16978,7 +16978,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 112,
+    "line": 113,
     "description": "",
     "params": [
       {
@@ -17003,7 +17003,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 101,
+    "line": 102,
     "description": "",
     "params": [
       {
@@ -17040,7 +17040,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 133,
+    "line": 134,
     "description": "",
     "params": [
       {
@@ -17083,7 +17083,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1403,
+    "line": 1404,
     "description": "",
     "params": [
       {
@@ -17108,7 +17108,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 230,
+    "line": 231,
     "description": "",
     "params": [
       {
@@ -17133,7 +17133,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 557,
+    "line": 558,
     "description": "Record that a page now has a reusable full-size asset available.",
     "params": [
       {
@@ -17158,7 +17158,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 567,
+    "line": 568,
     "description": "Record that a page now has a reusable thumbnail asset available.",
     "params": [
       {
@@ -17183,7 +17183,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1015,
+    "line": 1016,
     "description": "",
     "params": [
       {
@@ -17214,7 +17214,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1450,
+    "line": 1451,
     "description": "",
     "params": [
       {
@@ -17251,7 +17251,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1593,
+    "line": 1594,
     "description": "",
     "params": [
       {
@@ -17282,7 +17282,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2319,
+    "line": 2320,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -17300,7 +17300,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1374,
+    "line": 1375,
     "description": "",
     "params": [
       {
@@ -17325,7 +17325,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1383,
+    "line": 1384,
     "description": "",
     "params": [
       {
@@ -17350,7 +17350,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2138,
+    "line": 2139,
     "description": "",
     "params": [
       {
@@ -17381,7 +17381,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1331,
+    "line": 1332,
     "description": "",
     "params": [
       {
@@ -17406,7 +17406,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2747,
+    "line": 2748,
     "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
     "params": [],
     "returns": [],
@@ -17419,7 +17419,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 990,
+    "line": 991,
     "description": "Release print leases previously acquired through getPrintablePageUrls .",
     "params": [
       {
@@ -17444,7 +17444,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1771,
+    "line": 1772,
     "description": "",
     "params": [
       {
@@ -17481,7 +17481,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 739,
+    "line": 740,
     "description": "",
     "params": [],
     "returns": [
@@ -17499,7 +17499,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 161,
+    "line": 162,
     "description": "",
     "params": [
       {
@@ -17530,7 +17530,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1699,
+    "line": 1700,
     "description": "",
     "params": [
       {
@@ -17567,7 +17567,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 711,
+    "line": 712,
     "description": "",
     "params": [],
     "returns": [
@@ -17585,7 +17585,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2410,
+    "line": 2411,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -17616,7 +17616,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2810,
+    "line": 2814,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -17642,7 +17642,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2775,
+    "line": 2779,
     "description": "",
     "params": [
       {
@@ -17662,7 +17662,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2788,
+    "line": 2792,
     "description": "",
     "params": [
       {
@@ -17682,7 +17682,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1686,
+    "line": 1687,
     "description": "",
     "params": [
       {
@@ -17707,7 +17707,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1350,
+    "line": 1351,
     "description": "",
     "params": [
       {
@@ -17732,7 +17732,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 66,
+    "line": 67,
     "description": "",
     "params": [],
     "returns": [],
@@ -17745,7 +17745,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 937,
+    "line": 938,
     "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
     "params": [],
     "returns": [],
@@ -17758,7 +17758,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 174,
+    "line": 175,
     "description": "",
     "params": [
       {
@@ -17789,7 +17789,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1528,
+    "line": 1529,
     "description": "",
     "params": [
       {
@@ -17820,7 +17820,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2160,
+    "line": 2161,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {
@@ -17845,7 +17845,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1604,
+    "line": 1605,
     "description": "",
     "params": [
       {
@@ -17876,7 +17876,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 533,
+    "line": 534,
     "description": "",
     "params": [
       {
@@ -17901,7 +17901,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 358,
+    "line": 359,
     "description": "",
     "params": [
       {
@@ -17926,7 +17926,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 329,
+    "line": 330,
     "description": "",
     "params": [],
     "returns": [],
@@ -18257,6 +18257,114 @@
     "examples": 0
   },
   {
+    "id": "DOCUMENT_LOAD_STALL_MS",
+    "name": "DOCUMENT_LOAD_STALL_MS",
+    "longname": "DOCUMENT_LOAD_STALL_MS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useDocumentLoadSettled.js",
+    "line": 28,
+    "description": "After the run, how long without a newly rendered page before the load counts as settled anyway.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module.exports",
+    "name": "exports",
+    "longname": "module.exports",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/hooks/useDocumentLoadSettled.js",
+    "line": 48,
+    "description": "",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.enabled",
+        "type": "boolean",
+        "optional": false,
+        "description": "False: do nothing, report settled."
+      },
+      {
+        "name": "options.pages",
+        "type": "Array.<Object>",
+        "optional": false,
+        "description": "The viewer's pages."
+      },
+      {
+        "name": "options.loadingRunActive",
+        "type": "boolean",
+        "optional": false,
+        "description": "The loader's run."
+      },
+      {
+        "name": "options.stallMs",
+        "type": "number",
+        "optional": true,
+        "description": "Default DOCUMENT_LOAD_STALL_MS."
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "True once the load is settled."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "hasBeenShown",
+    "name": "hasBeenShown",
+    "longname": "hasBeenShown",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/hooks/useDocumentLoadSettled.js",
+    "line": 36,
+    "description": "Rendered at full size, or failed: either way nothing more is coming for this page.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "pageKeyOf",
+    "name": "pageKeyOf",
+    "longname": "pageKeyOf",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/hooks/useDocumentLoadSettled.js",
+    "line": 31,
+    "description": "",
+    "params": [
+      {
+        "name": "page",
+        "type": "*",
+        "optional": false,
+        "description": "@returns {string}"
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "useDocumentLoadSettled~seenRef",
+    "name": "seenRef",
+    "longname": "useDocumentLoadSettled~seenRef",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/hooks/useDocumentLoadSettled.js",
+    "line": 51,
+    "description": "Keys of the pages rendered (or failed) at least once in this session.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "<anonymous>~heldCode",
     "name": "heldCode",
     "longname": "<anonymous>~heldCode",
@@ -18485,7 +18593,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 366,
+    "line": 373,
     "description": "Create the boost control and its triggers for one runtime.",
     "params": [
       {
@@ -18510,7 +18618,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 132,
+    "line": 133,
     "description": "The boost control and its triggers while the boost is on: { controller, onPlanned, detach } .",
     "params": [],
     "returns": [],
@@ -18523,7 +18631,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 110,
+    "line": 111,
     "description": "",
     "params": [
       {
@@ -18632,7 +18740,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 58,
+    "line": 59,
     "description": "Window events that count as input for the boost: they end the boosted state and restart the idle clock.",
     "params": [],
     "returns": [],
@@ -18645,7 +18753,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 61,
+    "line": 62,
     "description": "Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do.",
     "params": [],
     "returns": [],
@@ -18658,7 +18766,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 55,
+    "line": 56,
     "description": "Idle time after which the OCR worker is terminated to free its memory.",
     "params": [],
     "returns": [],
@@ -18671,7 +18779,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 444,
+    "line": 451,
     "description": "After a window plan (or a search opening).",
     "params": [],
     "returns": [],
@@ -18684,7 +18792,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 134,
+    "line": 135,
     "description": "What the last window plan decided for the pages in flight, for the boost to restore.",
     "params": [],
     "returns": [],
@@ -18697,7 +18805,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 64,
+    "line": 65,
     "description": "",
     "params": [],
     "returns": [
@@ -18715,7 +18823,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 69,
+    "line": 70,
     "description": "",
     "params": [],
     "returns": [
@@ -18733,7 +18841,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 150,
+    "line": 151,
     "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],

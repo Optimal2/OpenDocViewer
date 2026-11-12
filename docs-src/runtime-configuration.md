@@ -313,7 +313,10 @@ ocr: {
   Loading comes before recognising, with OCR on as well: while the viewer is still loading the
   document, nothing is recognised, not even the shown page, so the loader's own workers have the
   machine and the document is on screen as soon as it can be; when the load is done the queue
-  takes over. On a four-core client the 300-page test document was all in after 15 s without
+  takes over. The load is the loader's run and the first rendering of every page that follows
+  it; pages evicted and rendered again later (the memory modes) do not count as loading, and a
+  page that neither renders nor fails stops holding OCR back after twenty seconds without
+  progress. On a four-core client the 300-page test document was all in after 15 s without
   OCR, against 19 s with the two engines of the window recognising meanwhile, 31 s with four
   engines on the whole document and 93 s with eight, which is why nothing runs during the load.
   The text layer of the shown page therefore appears after the load, not during it.

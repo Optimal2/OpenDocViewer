@@ -2,8 +2,9 @@
 /**
  * Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
  *
- * Loading the document comes before recognising it. While the loader runs (`loading`, as the
- * provider reports it), the queue is paused: nothing is recognised, not even the shown page, so
+ * Loading the document comes before recognising it. While the load is not settled (`loading`,
+ * as the provider reports it: the loader's run and the first rendering of every page after
+ * it, hooks/useDocumentLoadSettled.js), the queue is paused: nothing is recognised, not even the shown page, so
  * the loader's own workers have the machine and the user sees the document as soon as it can
  * be shown. When the load is done the queue takes over with everything it has. Pages already
  * in flight when a load starts finish, as with every pause. Measured on a four-core client with
@@ -286,8 +287,14 @@ export default function useOcrTextLayers({
   useEffect(() => {
     const control = boostRef.current;
     if (!control) return;
-    if (loading) control.controller.disengage('loading');
-    else control.onPlanned();
+    if (loading) {
+      // Paused first: ending the boost hands the queue its cautious count and pumps it, which
+      // must not start a page at the very moment the load begins.
+      runtimeRef.current?.queue.setPaused(true);
+      control.controller.disengage('loading');
+    } else {
+      control.onPlanned();
+    }
   }, [loading]);
 
   useEffect(() => {

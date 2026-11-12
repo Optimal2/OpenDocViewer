@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 9. Line count: 1581. JSDoc symbol count: 46.
+File count: 10. Line count: 1699. JSDoc symbol count: 51.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -13,6 +13,20 @@ Local imports: `src/logging/systemLogger.js`
 Symbols:
 
 - `module.exports` (function) - No description.
+
+## src/hooks/useDocumentLoadSettled.js
+
+OpenDocViewer — has the document finished loading, as far as OCR is concerned?
+
+Exports: `DOCUMENT_LOAD_STALL_MS`, `useDocumentLoadSettled`
+
+Symbols:
+
+- `DOCUMENT_LOAD_STALL_MS` (constant) - After the run, how long without a newly rendered page before the load counts as settled anyway.
+- `pageKeyOf` (function) - No description.
+- `hasBeenShown` (function) - Rendered at full size, or failed: either way nothing more is coming for this page.
+- `module.exports` (function) - No description.
+- `useDocumentLoadSettled~seenRef` (constant) - Keys of the pages rendered \(or failed\) at least once in this session.
 
 ## src/hooks/useKeyTipsHeld.js
 
