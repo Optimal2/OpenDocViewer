@@ -188,6 +188,38 @@ it('imports the module once and recognises the focus page from its rendered imag
   expect(container.querySelector('[data-odv-ocr], .ocr-text-layer')).toBeNull();
 });
 
+it('while the loader runs, recognises the window only; the rest of the document follows when the run ends, all pages ready or not', async () => {
+  vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true, recognizeWholeDocument: true } });
+  let api;
+  function Consumer() {
+    api = useContext(ViewerContext);
+    return createElement('div', { className: 'consumer' });
+  }
+  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
+  await act(async () => { await api.initializeDocumentSession(); });
+  const ready = (index) => ({
+    sourceKey: 'scan', fileExtension: 'png', pageIndex: index, status: 1, fullSizeStatus: 1, fullSizeUrl: `/pages/scan-${index}.png`, realWidth: 1240, realHeight: 1754,
+  });
+  // The loader starts its run before the first page arrives, as the real loader does, and it
+  // planned more pages than will ever be discovered: `allPagesReady` stays false for good,
+  // which must not hold the rest of the document back once the run ends.
+  await act(async () => { api.setLoadingRunActive(true); api.setPlannedPageCount(10); });
+  await act(async () => { api.insertPagesAtIndex([0, 1, 2, 3, 4, 5].map(ready), 0); });
+  await act(async () => { api.setOcrFocusPageIndexes([0]); });
+  const done = () => Object.values(api.ocrPages).filter((entry) => entry.status === 'done').length;
+  // The loader runs: the shown page and the two after it, nothing beyond the window.
+  await waitFor(() => done() === 3);
+  await flush();
+  expect(done()).toBe(3);
+  expect([...fetchedUrls].sort()).toEqual(['/pages/scan-0.png', '/pages/scan-1.png', '/pages/scan-2.png']);
+
+  // The run ends: the rest of the document is recognised, although not all planned pages came.
+  await act(async () => { api.setLoadingRunActive(false); });
+  await waitFor(() => done() === 6);
+  expect(api.pageLoadState.allPagesReady).toBe(false);
+  expect([...fetchedUrls].sort()).toEqual([0, 1, 2, 3, 4, 5].map((index) => `/pages/scan-${index}.png`));
+});
+
 it('does nothing until the viewer names a focus page', async () => {
   vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: true } });
   const api = await renderProviderWithOnePage();

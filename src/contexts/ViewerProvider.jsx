@@ -2760,11 +2760,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     // The search over the whole document (open, with a term, not limited to one page) is one of
     // the boost's ways in (`ocr.boost`); read here, so the hook needs no search state of its own.
     searchOpen: Boolean(ocrSearch?.term) && !ocrSearch?.onlyPageKey,
-    // Loading comes before recognising: until the load run is over and no page is pending, OCR
-    // keeps to the window around the shown page and the boost stays out, so the cores go to
-    // what the user is waiting for. (Not `allPagesReady`: a page count that was planned but
-    // never discovered must not hold the rest of the document back for good.)
-    loading: loadingRunActive || pageLoadState.pendingPages > 0,
+    // Loading comes before recognising: while the loader's run is active, OCR keeps to the
+    // window around the shown page and the boost stays out, so the cores go to what the user is
+    // waiting for. The run alone decides it. Neither `allPagesReady` nor `pendingPages` may:
+    // in the memory modes full-size images are evicted and rendered again for as long as the
+    // viewer is open, so some page is always pending, and a page count that was planned but
+    // never discovered never arrives; either would hold the rest of the document back for good.
+    loading: loadingRunActive,
   });
   /**
    * @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first.

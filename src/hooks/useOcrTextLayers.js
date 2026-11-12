@@ -3,7 +3,7 @@
  * Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
  *
  * Loading the document comes before recognising it. While the viewer is still loading pages
- * (`loading`), the queue is fed the window only, even with `ocr.recognizeWholeDocument`, so the
+ * (`loading`, the loader's run as the provider reports it), the queue is fed the window only, even with `ocr.recognizeWholeDocument`, so the
  * engines the window warrants (two for its four pages) are all that compete with the load for
  * the cores; the rest of the document is planned once the load is done. Measured on a four-core
  * client with the 300-page test document, the pages were all in after 15 s without OCR, 31 s

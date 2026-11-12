@@ -95,7 +95,7 @@
   },
   "stats": {
     "fileCount": 206,
-    "sourceLineCount": 73834,
+    "sourceLineCount": 73836,
     "docletCount": 2148,
     "documentedFileCount": 202,
     "lowConfidenceSummaryCount": 2,
@@ -709,7 +709,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2937,
+            "lines": 2939,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -1408,7 +1408,7 @@
     {
       "name": "src/contexts",
       "fileCount": 5,
-      "lineCount": 3627,
+      "lineCount": 3629,
       "docletCount": 101,
       "importantFiles": [
         {
@@ -1423,7 +1423,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2937,
+          "lines": 2939,
           "incomingLocalImports": 1,
           "doclets": 71,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -32384,7 +32384,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2937,
+      "lines": 2939,
       "extension": ".jsx",
       "jsdocBlockCount": 79,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -34427,7 +34427,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2773,
+          "line": 2775,
           "description": "",
           "params": [
             {
@@ -34447,7 +34447,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2786,
+          "line": 2788,
           "description": "",
           "params": [
             {
@@ -34467,7 +34467,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2799,
+          "line": 2801,
           "description": "",
           "params": [
             {
@@ -34487,7 +34487,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2808,
+          "line": 2810,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -34513,7 +34513,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2813,
+          "line": 2815,
           "description": "",
           "params": [
             {
@@ -34533,7 +34533,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2818,
+          "line": 2820,
           "description": "",
           "params": [
             {
@@ -105098,7 +105098,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2813,
+      "line": 2815,
       "description": "",
       "params": [
         {
@@ -105118,7 +105118,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2799,
+      "line": 2801,
       "description": "",
       "params": [
         {
@@ -105289,7 +105289,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2818,
+      "line": 2820,
       "description": "",
       "params": [
         {
@@ -106402,7 +106402,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2808,
+      "line": 2810,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -106428,7 +106428,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2773,
+      "line": 2775,
       "description": "",
       "params": [
         {
@@ -106448,7 +106448,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2786,
+      "line": 2788,
       "description": "",
       "params": [
         {

@@ -16312,7 +16312,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2813,
+    "line": 2815,
     "description": "",
     "params": [
       {
@@ -16332,7 +16332,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2799,
+    "line": 2801,
     "description": "",
     "params": [
       {
@@ -16503,7 +16503,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2818,
+    "line": 2820,
     "description": "",
     "params": [
       {
@@ -17616,7 +17616,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2808,
+    "line": 2810,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -17642,7 +17642,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2773,
+    "line": 2775,
     "description": "",
     "params": [
       {
@@ -17662,7 +17662,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2786,
+    "line": 2788,
     "description": "",
     "params": [
       {
