@@ -108,10 +108,41 @@ describe('createOcrProgressEstimator', () => {
     expect(estimator.remainingMs(10)).toBe(20000);
     wait(0.001);
     expect(estimator.remainingMs(10)).toBeNull();
-    // The work goes on: the estimate is back with the next page, the pause counted in its pace
-    // for as long as it is within what the estimator keeps.
-    after(1, 6);
-    expect(estimator.remainingMs(9)).not.toBeNull();
+  });
+
+  it('takes a page finished more than a window after the one before it as a new starting point: a pause is no pace', () => {
+    const { estimator, after } = onClock();
+    estimator.record(0);
+    // A page every ten seconds, then ten minutes of nothing (a print prepared, a load).
+    for (let done = 1; done <= 5; done += 1) after(10, done);
+    expect(estimator.remainingMs(100)).toBe(1000000);
+    after(600, 6);
+    // Not five hours: nothing, until three pages say what the pace is now.
+    expect(estimator.remainingMs(99)).toBeNull();
+    after(10, 7);
+    after(10, 8);
+    expect(estimator.remainingMs(97)).toBeNull();
+    after(10, 9);
+    expect(estimator.remainingMs(96)).toBe(960000);
+    // A gap of exactly the window is still a pace (a slow client).
+    after(60, 10);
+    // The last four measurements: three pages in eighty seconds.
+    expect(estimator.remainingMs(90)).toBe(90 * 80000 / 3);
+  });
+
+  it('says when its pace runs out: a window after the last finished page', () => {
+    const { estimator, after, wait } = onClock();
+    expect(estimator.expiresInMs()).toBeNull();
+    estimator.record(0);
+    expect(estimator.expiresInMs()).toBeNull();
+    after(1, 1);
+    expect(estimator.expiresInMs()).toBe(60000);
+    wait(45);
+    expect(estimator.expiresInMs()).toBe(15000);
+    wait(100);
+    expect(estimator.expiresInMs()).toBe(0);
+    after(1, 2);
+    expect(estimator.expiresInMs()).toBe(60000);
   });
 
   it('starts again when the count goes down: another document', () => {

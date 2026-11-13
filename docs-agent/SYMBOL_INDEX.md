@@ -237,13 +237,13 @@
 | <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:71</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
 | <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:29</code> | Ids the dialog renders around the manual view. |
 | <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:23</code> | Id of the dialog title. |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:71</code> |  |
-| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:299</code> |  |
-| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:336</code> |  |
-| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:344</code> | Escape closes the field from any of its controls. |
-| <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:56</code> |  |
-| <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:53</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
-| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:320</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:74</code> |  |
+| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:314</code> |  |
+| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:351</code> |  |
+| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:359</code> | Escape closes the field from any of its controls. |
+| <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:59</code> |  |
+| <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:56</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
+| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:335</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx:36</code> |  |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |
@@ -1320,14 +1320,15 @@
 | <code>makeOcrPageKey</code> | function | <code>src/utils/ocrPageKey.js:18</code> |  |
 | <code>ocrPageKeyOf</code> | function | <code>src/utils/ocrPageKey.js:29</code> |  |
 | <code>SEPARATOR</code> | constant | <code>src/utils/ocrPageKey.js:11</code> | Key of one document page in the OCR result map \( ocrPages on the viewer context\). |
-| <code>createOcrProgressEstimator</code> | function | <code>src/utils/ocrProgress.js:43</code> |  |
-| <code>describeOcrTimeLeft</code> | function | <code>src/utils/ocrProgress.js:95</code> | The words for an estimate: which ocr.progress key, and its figures. |
-| <code>MIN_SAMPLES</code> | constant | <code>src/utils/ocrProgress.js:27</code> | Measurements kept however old they are, so a slow client still gets a pace. |
-| <code>OCR_PROGRESS_FALLBACK</code> | constant | <code>src/utils/ocrProgress.js:30</code> | Keys of ocr.progress and their English fallbacks. |
-| <code>OCR_PROGRESS_MIN_PAGES</code> | constant | <code>src/utils/ocrProgress.js:25</code> | Pages that must have been finished since the starting point before a pace is trusted. |
-| <code>OCR_PROGRESS_WINDOW_MS</code> | constant | <code>src/utils/ocrProgress.js:23</code> | Finished pages older than this say nothing about the pace now. |
-| <code>record</code> | function | <code>src/utils/ocrProgress.js:55</code> | Tell the estimator how many pages are finished now. |
-| <code>remainingMs</code> | function | <code>src/utils/ocrProgress.js:74</code> |  |
+| <code>createOcrProgressEstimator</code> | function | <code>src/utils/ocrProgress.js:48</code> |  |
+| <code>describeOcrTimeLeft</code> | function | <code>src/utils/ocrProgress.js:110</code> | The words for an estimate: which ocr.progress key, and its figures. |
+| <code>expiresInMs</code> | function | <code>src/utils/ocrProgress.js:96</code> |  |
+| <code>MIN_SAMPLES</code> | constant | <code>src/utils/ocrProgress.js:32</code> | Measurements kept however old they are, so a slow client still gets a pace. |
+| <code>OCR_PROGRESS_FALLBACK</code> | constant | <code>src/utils/ocrProgress.js:35</code> | Keys of ocr.progress and their English fallbacks. |
+| <code>OCR_PROGRESS_MIN_PAGES</code> | constant | <code>src/utils/ocrProgress.js:30</code> | Pages that must have been finished since the starting point before a pace is trusted. |
+| <code>OCR_PROGRESS_WINDOW_MS</code> | constant | <code>src/utils/ocrProgress.js:28</code> | Finished pages older than this say nothing about the pace now. |
+| <code>record</code> | function | <code>src/utils/ocrProgress.js:60</code> | Tell the estimator how many pages are finished now. |
+| <code>remainingMs</code> | function | <code>src/utils/ocrProgress.js:81</code> |  |
 | <code>findOcrMatches</code> | function | <code>src/utils/ocrSearch.js:73</code> | All matches of a term in an index, in reading order, without overlaps. |
 | <code>findOcrMatchesInOutcome</code> | function | <code>src/utils/ocrSearch.js:102</code> | Matches of a term in one outcome \(the index is built on first use\). |
 | <code>indexes</code> | constant | <code>src/utils/ocrSearch.js:32</code> | Index per outcome; outcomes are immutable objects from the result cache. |

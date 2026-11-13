@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8030. JSDoc symbol count: 114.
+File count: 21. Line count: 8045. JSDoc symbol count: 114.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -113,7 +113,7 @@ Search in the recognised text, from the toolbar: a search button right after the
 
 Exports: `OcrSearchBar`
 
-Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`, `src/utils/ocrSearchPlacement.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`, `src/utils/ocrBoostStatus.js`, `src/utils/ocrProgress.js`
+Local imports: `src/contexts/viewerContext.js`, `src/components/common/StatusLed.jsx`, `src/utils/ocrPageKey.js`, `src/utils/ocrStatus.js`, `src/utils/ocrSearch.js`, `src/utils/ocrSearchPlacement.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`, `src/utils/ocrBoostStatus.js`, `src/utils/ocrProgress.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 

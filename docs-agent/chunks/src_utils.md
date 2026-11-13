@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 67. Line count: 24600. JSDoc symbol count: 1023.
+File count: 67. Line count: 24615. JSDoc symbol count: 1024.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -353,6 +353,7 @@ Symbols:
 - `createOcrProgressEstimator` (function) - No description.
 - `record` (function) - Tell the estimator how many pages are finished now.
 - `remainingMs` (function) - No description.
+- `expiresInMs` (function) - No description.
 - `describeOcrTimeLeft` (function) - The words for an estimate: which ocr.progress key, and its figures.
 
 ## src/utils/ocrSearch.js

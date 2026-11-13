@@ -863,10 +863,11 @@ not a toolbar button, see below:
   recognised" or "Text recognition is unavailable", the last when the engine could not start; see
   CSP below). Behind a thin divider the button also counts the pages the search can cover over
   all pages ("4/300", spelt out in the tooltip); the count folds away while the field is open.
-  While pages wait for OCR, the tooltip also says roughly how long they will take ("about 6 min
-  left"), from the pace of the pages finished in the last minute, so it follows the number of
-  workers as that changes; it says nothing before a few pages have shown what the pace is, and
-  nothing when no page has been finished for a minute.
+  With `ocr.recognizeWholeDocument` on, while pages wait for OCR the tooltip also says roughly
+  how long they will take ("about 6 min left"), from the pace of the pages recognised in the
+  last minute, so it follows the number of workers as that changes; it says nothing before a
+  few pages have shown what the pace is, nothing when no page has been recognised for a minute,
+  and a pause (a print being prepared, another document loading) is not counted as pace.
   The button is enabled once the displayed page has a text layer (recognised, or the
   PDF page's own). Clicking it grows a search field out of
   the button to the right (a short ease) into the room the toolbar has; when there is too little,

@@ -13,10 +13,15 @@
  * again at the first input. There is no estimate before OCR_PROGRESS_MIN_PAGES pages have been
  * finished since the starting point, none when nothing waits, and none when no page has been
  * finished for the length of the window (OCR paused, or stuck): a figure from a pace that no
- * longer holds would be worse than none.
+ * longer holds would be worse than none. For the same reason a page finished more than a
+ * window after the one before it is a new starting point: the time between them was a pause
+ * (a print being prepared, another document loading), not a pace, and counted as one it would
+ * give an estimate many times too long.
  *
- * It is an estimate and is worded as one. Pages that need no engine (a PDF page with its own
- * text) finish at once and make the pace look better than the pages that follow them will be.
+ * It is an estimate and is worded as one. The caller counts the pages the engine recognised:
+ * a PDF page with its own text is done without the engine, at once, and counted it would make
+ * the pace look many times better than the scanned pages after it will be. The pages waiting
+ * may still hold such pages, so the estimate errs on the long side for a mixed document.
  */
 
 /** Finished pages older than this say nothing about the pace now. */
@@ -38,7 +43,7 @@ export const OCR_PROGRESS_FALLBACK = Object.freeze({
  * @param {number=} options.windowMs  Default OCR_PROGRESS_WINDOW_MS.
  * @param {number=} options.minPages  Default OCR_PROGRESS_MIN_PAGES.
  * @param {function(): number=} options.now  Clock in milliseconds; default Date.now.
- * @returns {{ record: function(number): void, remainingMs: function(number): (number|null) }}
+ * @returns {{ record: function(number): void, remainingMs: function(number): (number|null), expiresInMs: function(): (number|null) }}
  */
 export function createOcrProgressEstimator({ windowMs = OCR_PROGRESS_WINDOW_MS, minPages = OCR_PROGRESS_MIN_PAGES, now = Date.now } = {}) {
   /** @type {Array<{ at: number, done: number }>} */
@@ -62,6 +67,8 @@ export function createOcrProgressEstimator({ windowMs = OCR_PROGRESS_WINDOW_MS, 
       if (count < lastDone) samples = [];
       if (count > lastDone) {
         const at = now();
+        // More than a window since the page before: a pause, and this page starts the measuring.
+        if (samples.length > 0 && at - samples[samples.length - 1].at > windowMs) samples = [];
         samples.push({ at, done: count });
         while (samples.length > MIN_SAMPLES && at - samples[0].at > windowMs) samples.shift();
       }
@@ -81,6 +88,14 @@ export function createOcrProgressEstimator({ windowMs = OCR_PROGRESS_WINDOW_MS, 
       if (pages < minPages || !(elapsed > 0)) return null;
       if (now() - last.at > windowMs) return null;
       return (waiting * elapsed) / pages;
+    },
+    /**
+     * @returns {(number|null)}  Milliseconds until the last finished page is a window old and
+     *   the pace no longer holds; null without a finished page.
+     */
+    expiresInMs() {
+      if (samples.length === 0) return null;
+      return Math.max(0, windowMs - (now() - samples[samples.length - 1].at));
     },
   };
 }

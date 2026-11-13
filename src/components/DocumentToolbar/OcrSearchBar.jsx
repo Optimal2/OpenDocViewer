@@ -28,8 +28,10 @@
  * with the engine count while more engines than the cautious count run, and a line at the end of
  * the tooltip saying what the last climb found. Without a boost (the default) neither exists.
  *
- * While pages wait for OCR and enough of them have been finished to tell the pace, the tooltip
- * also says roughly how long the rest will take (utils/ocrProgress.js), after the page count.
+ * With `ocr.recognizeWholeDocument` on, while pages wait for OCR and enough of them have been
+ * recognised to tell the pace, the tooltip also says roughly how long the rest will take
+ * (utils/ocrProgress.js), after the page count. Without it only the few pages around the shown
+ * one are ever queued, and a time for those next to the count of all pages would mislead.
  *
  * With `searchEnabled` false (`ocr.search.enabled: false`) only the status remains: the button
  * stays a never-enabled, status-only indicator with its LED, the status as its name and tooltip
@@ -47,7 +49,8 @@ import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js
 import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
 import { hasActiveModalDialog, isEditableTarget } from '../DocumentViewer/hooks/useViewerEffects.js';
 import { OCR_BOOST_FALLBACK, describeOcrBoost } from '../../utils/ocrBoostStatus.js';
-import { OCR_PROGRESS_FALLBACK, OCR_PROGRESS_WINDOW_MS, createOcrProgressEstimator, describeOcrTimeLeft } from '../../utils/ocrProgress.js';
+import { OCR_PROGRESS_FALLBACK, createOcrProgressEstimator, describeOcrTimeLeft } from '../../utils/ocrProgress.js';
+import { isOcrWholeDocumentEnabled } from '../../utils/runtimeConfig.js';
 
 /** Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR. */
 const OCR_PENDING_STATUSES = new Set(['queued', 'probing', 'recognizing']);
@@ -134,25 +137,37 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     () => searchablePages.filter((page) => page.outcome?.status === 'done').length,
     [searchablePages]
   );
-  // Pages still waiting for OCR, and roughly how long they will take at the pace of the pages
-  // finished lately (utils/ocrProgress.js). The estimate is dropped when no page has been
-  // finished for the length of its window: a figure from a pace that no longer holds is worse
-  // than none, and without a finished page nothing else would take it away.
-  const pendingPages = useMemo(
-    () => searchablePages.filter((page) => OCR_PENDING_STATUSES.has(page.outcome?.status)).length,
-    [searchablePages]
-  );
+  // With the whole document asked for: the pages still waiting for OCR, and roughly how long
+  // they will take at the pace of the pages the engine recognised lately (utils/ocrProgress.js;
+  // a PDF page's own text is done without the engine and is no pace). The estimate is dropped
+  // a window after the last recognised page, whatever else changes meanwhile: a figure from a
+  // pace that no longer holds is worse than none, and without a new page nothing else would
+  // take it away.
+  const wholeDocument = isOcrWholeDocumentEnabled();
+  const [pendingPages, enginePages] = useMemo(() => {
+    let pending = 0;
+    let engine = 0;
+    if (wholeDocument) {
+      for (const page of searchablePages) {
+        const outcome = page.outcome;
+        if (OCR_PENDING_STATUSES.has(outcome?.status)) pending += 1;
+        else if (outcome?.status === 'done' && outcome.source !== 'pdf-text') engine += 1;
+      }
+    }
+    return [pending, engine];
+  }, [searchablePages, wholeDocument]);
   const progressRef = useRef(/** @type {*} */ (null));
   const [timeLeftMs, setTimeLeftMs] = useState(/** @type {(number|null)} */ (null));
   useEffect(() => {
+    if (!wholeDocument) return undefined;
     if (!progressRef.current) progressRef.current = createOcrProgressEstimator();
-    progressRef.current.record(recognisedPages);
+    progressRef.current.record(enginePages);
     const estimate = progressRef.current.remainingMs(pendingPages);
     setTimeLeftMs(estimate);
     if (estimate === null) return undefined;
-    const timer = setTimeout(() => setTimeLeftMs(null), OCR_PROGRESS_WINDOW_MS);
+    const timer = setTimeout(() => setTimeLeftMs(null), progressRef.current.expiresInMs() ?? 0);
     return () => clearTimeout(timer);
-  }, [pendingPages, recognisedPages]);
+  }, [enginePages, pendingPages, wholeDocument]);
   const timeLeft = describeOcrTimeLeft(timeLeftMs);
   const timeLeftText = timeLeft
     ? t(`ocr.progress.${timeLeft.key}`, { minutes: timeLeft.minutes, hours: timeLeft.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeft.key] })

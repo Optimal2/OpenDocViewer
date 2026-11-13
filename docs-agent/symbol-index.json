@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 71,
+    "line": 74,
     "description": "",
     "params": [
       {
@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 299,
+    "line": 314,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 336,
+    "line": 351,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 344,
+    "line": 359,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 56,
+    "line": 59,
     "description": "",
     "params": [
       {
@@ -6541,7 +6541,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 53,
+    "line": 56,
     "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
     "params": [],
     "returns": [],
@@ -6554,7 +6554,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 320,
+    "line": 335,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -32342,7 +32342,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 43,
+    "line": 48,
     "description": "",
     "params": [
       {
@@ -32385,7 +32385,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 95,
+    "line": 110,
     "description": "The words for an estimate: which ocr.progress key, and its figures.",
     "params": [
       {
@@ -32404,13 +32404,31 @@
     "examples": 0
   },
   {
+    "id": "expiresInMs",
+    "name": "expiresInMs",
+    "longname": "expiresInMs",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrProgress.js",
+    "line": 96,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "number|null",
+        "description": "Milliseconds until the last finished page is a window old and the pace no longer holds; null without a finished page."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "MIN_SAMPLES",
     "name": "MIN_SAMPLES",
     "longname": "MIN_SAMPLES",
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 27,
+    "line": 32,
     "description": "Measurements kept however old they are, so a slow client still gets a pace.",
     "params": [],
     "returns": [],
@@ -32423,7 +32441,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 30,
+    "line": 35,
     "description": "Keys of ocr.progress and their English fallbacks.",
     "params": [],
     "returns": [],
@@ -32436,7 +32454,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 25,
+    "line": 30,
     "description": "Pages that must have been finished since the starting point before a pace is trusted.",
     "params": [],
     "returns": [],
@@ -32449,7 +32467,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 23,
+    "line": 28,
     "description": "Finished pages older than this say nothing about the pace now.",
     "params": [],
     "returns": [],
@@ -32462,7 +32480,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 55,
+    "line": 60,
     "description": "Tell the estimator how many pages are finished now.",
     "params": [
       {
@@ -32482,7 +32500,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 74,
+    "line": 81,
     "description": "",
     "params": [
       {

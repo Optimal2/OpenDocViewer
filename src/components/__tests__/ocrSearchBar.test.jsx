@@ -108,8 +108,22 @@ describe('OcrSearchBar', () => {
       render({ allPages: MANY, ocrPages: progress(finished), ...extra });
     };
 
-    beforeEach(() => { vi.useFakeTimers(); });
-    afterEach(() => { vi.useRealTimers(); });
+    beforeEach(() => {
+      vi.useFakeTimers();
+      window.__ODV_CONFIG__ = { ocr: { enabled: true, recognizeWholeDocument: true } };
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+      delete window.__ODV_CONFIG__;
+    });
+
+    it('says nothing about time without the whole document: the few pages around the shown one are no measure of the document', () => {
+      window.__ODV_CONFIG__ = { ocr: { enabled: true } };
+      render({ allPages: MANY, ocrPages: progress(0) });
+      for (const finished of [1, 2, 3, 4, 5, 6]) after(10, finished);
+      expect(button().getAttribute('title')).toMatch(/ · 6 of 40 pages ready$/);
+      expect(vi.getTimerCount()).toBe(0);
+    });
 
     it('says in the tooltip roughly how long the waiting pages will take, once enough pages are finished to tell the pace', () => {
       render({ allPages: MANY, ocrPages: progress(0) });
@@ -155,6 +169,38 @@ describe('OcrSearchBar', () => {
       act(() => { vi.advanceTimersByTime(1); });
       expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready$/);
       expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('goes away a minute after the last finished page even when the waiting pages change meanwhile', () => {
+      render({ allPages: MANY, ocrPages: progress(0) });
+      for (const finished of [1, 2, 3, 4]) after(10, finished);
+      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      // Fifty seconds on a waiting page fails: no page was finished, the clock is not started again.
+      act(() => { vi.advanceTimersByTime(50000); });
+      render({ allPages: MANY, ocrPages: { ...progress(4), [KEY(39)]: { status: 'failed' } } });
+      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      act(() => { vi.advanceTimersByTime(10001); });
+      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready$/);
+    });
+
+    it('takes its pace from the pages the engine recognised: a PDF page with its own text is done at once and is no pace', () => {
+      const ownText = { ...done(['ord']), source: 'pdf-text' };
+      /** The first ten pages have their own text and are done from the start; `finished` more are recognised. */
+      const mixed = (finished) => Object.fromEntries(MANY.map((_, index) => {
+        if (index < 10) return [KEY(index), ownText];
+        return [KEY(index), index < 10 + finished ? { ...done(['ord']), source: 'recognition' } : { status: 'queued' }];
+      }));
+      render({ allPages: MANY, ocrPages: { ...mixed(0), ...Object.fromEntries([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) => [KEY(index), { status: 'queued' }])) } });
+      // The ten pages with their own text arrive within a second: no pace, no estimate.
+      act(() => { vi.advanceTimersByTime(1000); });
+      render({ allPages: MANY, ocrPages: mixed(0) });
+      expect(button().getAttribute('title')).toMatch(/ · 10 of 40 pages ready$/);
+      for (const finished of [1, 2, 3, 4]) {
+        act(() => { vi.advanceTimersByTime(10000); });
+        render({ allPages: MANY, ocrPages: mixed(finished) });
+      }
+      // Three recognised pages in thirty seconds, 26 waiting: four minutes twenty, said as five.
+      expect(button().getAttribute('title')).toMatch(/ · 14 of 40 pages ready · about 5 min left$/);
     });
 
     it('counts only waiting pages: skipped and failed ones are not waited for', () => {
