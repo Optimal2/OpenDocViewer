@@ -10,6 +10,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 
 | Package | Version | Imports | Used In |
 | --- | --- | ---: | --- |
+| <code>@noble/hashes</code> | <code>2.4.0</code> | 1 | <code>src/utils/jxlDecode.js</code> |
 | <code>asn1js</code> | <code>^4.0.0</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
 | <code>axios</code> | <code>^1.21.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
@@ -23,6 +24,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>i18next-http-backend</code> | <code>^4.0.10</code> | 1 | <code>src/i18n.js</code> |
 | <code>i18next-icu</code> | <code>^2.7.0</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 2 (dynamic) | <code>src/utils/printPdf.js</code><br><code>src/workers/pdfWorker.js</code> |
+| <code>jxl-oxide-wasm</code> | <code>0.12.6</code> | 2 (dynamic) | <code>src/utils/jxlDecode.js</code><br>(1 file total) |
 | <code>material-icons</code> | <code>^1.13.14</code> | 2 | <code>src/index.jsx</code><br><code>src/manual-page/main.jsx</code> |
 | <code>morgan</code> | <code>^1.12.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 2 (dynamic) | <code>src/utils/pdfSignatures.js</code><br><code>src/utils/pdfWorkerDispatcher.js</code> |
@@ -56,6 +58,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>eslint</code> | <code>^10.14.0</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
 | <code>eslint-plugin-react-refresh</code> | <code>^0.5.7</code> | 0 |
+| <code>fast-png</code> | <code>^8.0.0</code> | 0 |
 | <code>globals</code> | <code>^17.14.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>jsdom</code> | <code>31.0.0</code> | 0 |

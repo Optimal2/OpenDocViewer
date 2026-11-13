@@ -32,6 +32,7 @@
       "release:major": "npm version major -m \"chore(release): %s\""
     },
     "dependencies": {
+      "@noble/hashes": "2.4.0",
       "asn1js": "^4.0.0",
       "axios": "^1.21.0",
       "cors": "^2.8.6",
@@ -45,6 +46,7 @@
       "i18next-http-backend": "^4.0.10",
       "i18next-icu": "^2.7.0",
       "jspdf": "^4.2.1",
+      "jxl-oxide-wasm": "0.12.6",
       "material-icons": "^1.13.14",
       "morgan": "^1.12.1",
       "pdf-lib": "^1.17.1",
@@ -75,6 +77,7 @@
       "eslint": "^10.14.0",
       "eslint-plugin-react-hooks": "^7.1.1",
       "eslint-plugin-react-refresh": "^0.5.7",
+      "fast-png": "^8.0.0",
       "globals": "^17.14.0",
       "jsdoc": "^4.0.5",
       "jsdom": "31.0.0",
@@ -94,15 +97,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 208,
-    "sourceLineCount": 74591,
-    "docletCount": 2186,
-    "documentedFileCount": 204,
+    "fileCount": 210,
+    "sourceLineCount": 74726,
+    "docletCount": 2189,
+    "documentedFileCount": 206,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
-    "packageDependencyCount": 25,
-    "devDependencyCount": 24,
-    "estimatedSourceTokens": 7380
+    "packageDependencyCount": 27,
+    "devDependencyCount": 25,
+    "estimatedSourceTokens": 7424
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -414,6 +417,14 @@
       ]
     },
     {
+      "packageName": "jxl-oxide-wasm",
+      "importCount": 2,
+      "dynamicImportCount": 2,
+      "files": [
+        "src/utils/jxlDecode.js"
+      ]
+    },
+    {
       "packageName": "material-icons",
       "importCount": 2,
       "dynamicImportCount": 0,
@@ -447,6 +458,14 @@
       "files": [
         "src/ocr/engine.js",
         "src/ocr/languages.js"
+      ]
+    },
+    {
+      "packageName": "@noble/hashes",
+      "importCount": 1,
+      "dynamicImportCount": 0,
+      "files": [
+        "src/utils/jxlDecode.js"
       ]
     },
     {
@@ -536,7 +555,7 @@
     {
       "path": "src/utils/documentLoadingConfig.js",
       "score": 123,
-      "lines": 1099,
+      "lines": 1100,
       "incomingLocalImports": 14,
       "doclets": 34,
       "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
@@ -599,7 +618,7 @@
     {
       "path": "src/utils/printPdf.js",
       "score": 98,
-      "lines": 2489,
+      "lines": 2490,
       "incomingLocalImports": 3,
       "doclets": 101,
       "summary": "OpenDocViewer — Generated PDF print backend.",
@@ -710,7 +729,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2943,
+            "lines": 2948,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -876,7 +895,7 @@
           {
             "path": "src/utils/pageAssetWorkerPool.js",
             "score": 44,
-            "lines": 320,
+            "lines": 322,
             "summary": "OpenDocViewer — Page-asset worker pool."
           },
           {
@@ -900,13 +919,13 @@
           {
             "path": "src/workers/pdfWorker.js",
             "score": 8,
-            "lines": 628,
+            "lines": 629,
             "summary": "OpenDocViewer - generated PDF worker."
           },
           {
             "path": "src/workers/imageWorker.js",
             "score": 7,
-            "lines": 500,
+            "lines": 511,
             "summary": "OpenDocViewer — image / TIFF worker."
           },
           {
@@ -1131,7 +1150,7 @@
     {
       "name": "src/components/DocumentLoader",
       "fileCount": 8,
-      "lineCount": 4109,
+      "lineCount": 4123,
       "docletCount": 106,
       "importantFiles": [
         {
@@ -1146,7 +1165,7 @@
         {
           "path": "src/components/DocumentLoader/DocumentLoader.js",
           "score": 63,
-          "lines": 2172,
+          "lines": 2186,
           "incomingLocalImports": 2,
           "doclets": 58,
           "summary": "OpenDocViewer — Document loader orchestrator.",
@@ -1415,7 +1434,7 @@
     {
       "name": "src/contexts",
       "fileCount": 5,
-      "lineCount": 3633,
+      "lineCount": 3638,
       "docletCount": 101,
       "importantFiles": [
         {
@@ -1430,7 +1449,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2943,
+          "lines": 2948,
           "incomingLocalImports": 1,
           "doclets": 71,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1896,9 +1915,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 67,
-      "lineCount": 24716,
-      "docletCount": 1030,
+      "fileCount": 69,
+      "lineCount": 24820,
+      "docletCount": 1033,
       "importantFiles": [
         {
           "path": "src/utils/runtimeConfig.js",
@@ -1912,7 +1931,7 @@
         {
           "path": "src/utils/documentLoadingConfig.js",
           "score": 123,
-          "lines": 1099,
+          "lines": 1100,
           "incomingLocalImports": 14,
           "doclets": 34,
           "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
@@ -1966,7 +1985,7 @@
         {
           "path": "src/utils/printPdf.js",
           "score": 98,
-          "lines": 2489,
+          "lines": 2490,
           "incomingLocalImports": 3,
           "doclets": 101,
           "summary": "OpenDocViewer — Generated PDF print backend.",
@@ -1977,13 +1996,13 @@
     {
       "name": "src/workers",
       "fileCount": 4,
-      "lineCount": 1649,
+      "lineCount": 1661,
       "docletCount": 5,
       "importantFiles": [
         {
           "path": "src/workers/pdfWorker.js",
           "score": 8,
-          "lines": 628,
+          "lines": 629,
           "incomingLocalImports": 0,
           "doclets": 1,
           "summary": "OpenDocViewer - generated PDF worker.",
@@ -1992,7 +2011,7 @@
         {
           "path": "src/workers/imageWorker.js",
           "score": 7,
-          "lines": 500,
+          "lines": 511,
           "incomingLocalImports": 0,
           "doclets": 1,
           "summary": "OpenDocViewer — image / TIFF worker.",
@@ -4471,7 +4490,7 @@
     },
     {
       "path": "src/components/DocumentLoader/DocumentLoader.js",
-      "lines": 2172,
+      "lines": 2186,
       "extension": ".js",
       "jsdocBlockCount": 60,
       "sourceSummary": "OpenDocViewer — Document loader orchestrator.",
@@ -4506,11 +4525,20 @@
           "kind": "static"
         },
         {
+          "source": "../../utils/modernImageSignatures.js",
+          "specifiers": [
+            "hasJxlSignature",
+            "hasAvifSignature"
+          ],
+          "line": 21,
+          "kind": "static"
+        },
+        {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 21,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -4518,7 +4546,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 22,
+          "line": 23,
           "kind": "static"
         },
         {
@@ -4529,7 +4557,7 @@
             "generateDemoList",
             "getTotalPages"
           ],
-          "line": 23,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -4538,7 +4566,7 @@
             "getDocumentLoadingConfig",
             "shouldRecommendStopping"
           ],
-          "line": 24,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -4546,7 +4574,7 @@
           "specifiers": [
             "LoadPressureDialog"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -4554,7 +4582,7 @@
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -4563,7 +4591,7 @@
             "createReloadCacheSessionId",
             "describeDocumentSourceKey"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         }
       ],
@@ -4571,324 +4599,324 @@
         {
           "name": "DocumentLoader",
           "kind": "default",
-          "line": 2171
+          "line": 2185
         }
       ],
       "declarations": [
         {
           "name": "createLimiter",
           "kind": "function",
-          "line": 161
+          "line": 162
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 167
+          "line": 168
         },
         {
           "name": "nowMs",
           "kind": "function",
-          "line": 193
+          "line": 194
         },
         {
           "name": "inferUrlExtension",
           "kind": "function",
-          "line": 206
+          "line": 207
         },
         {
           "name": "normalizeExtension",
           "kind": "function",
-          "line": 215
+          "line": 216
         },
         {
           "name": "isSupportedSourceExtension",
           "kind": "function",
-          "line": 238
+          "line": 241
         },
         {
           "name": "isTextLikeSourceMime",
           "kind": "function",
-          "line": 246
+          "line": 249
         },
         {
           "name": "asciiHead",
           "kind": "function",
-          "line": 254
+          "line": 257
         },
         {
           "name": "looksLikeTextPayload",
           "kind": "function",
-          "line": 269
+          "line": 272
         },
         {
           "name": "startsWithAscii",
           "kind": "function",
-          "line": 284
+          "line": 287
         },
         {
           "name": "matchesKnownSourceSignature",
           "kind": "function",
-          "line": 298
+          "line": 301
         },
         {
           "name": "readBlobHeadBytes",
           "kind": "function",
-          "line": 335
+          "line": 340
         },
         {
           "name": "resolveFetchedSourcePayload",
           "kind": "function",
-          "line": 353
+          "line": 358
         },
         {
           "name": "resolveTrustedSourcePackPayload",
           "kind": "function",
-          "line": 418
+          "line": 423
         },
         {
           "name": "needsPageCountAnalysis",
           "kind": "function",
-          "line": 452
+          "line": 457
         },
         {
           "name": "resolveTrustedEntryPageCountHint",
           "kind": "function",
-          "line": 462
+          "line": 467
         },
         {
           "name": "resolveExactPlannedPageCount",
           "kind": "function",
-          "line": 477
+          "line": 482
         },
         {
           "name": "shouldDeferSourceWarmup",
           "kind": "function",
-          "line": 499
+          "line": 504
         },
         {
           "name": "resolvePrefetchedPageCountHint",
           "kind": "function",
-          "line": 517
+          "line": 522
         },
         {
           "name": "redactUrlForLog",
           "kind": "function",
-          "line": 548
+          "line": 553
         },
         {
           "name": "mimeToExtension",
           "kind": "function",
-          "line": 566
+          "line": 571
         },
         {
           "name": "isReloadCacheEnabled",
           "kind": "function",
-          "line": 582
+          "line": 589
         },
         {
           "name": "getInitialTempStoreMode",
           "kind": "function",
-          "line": 591
+          "line": 598
         },
         {
           "name": "getEstimatedEntryExtension",
           "kind": "function",
-          "line": 604
+          "line": 611
         },
         {
           "name": "updatePageEstimateStats",
           "kind": "function",
-          "line": 619
+          "line": 626
         },
         {
           "name": "estimateTotalPagesConservatively",
           "kind": "function",
-          "line": 645
+          "line": 652
         },
         {
           "name": "sleep",
           "kind": "function",
-          "line": 667
+          "line": 674
         },
         {
           "name": "createPrefetchHttpError",
           "kind": "function",
-          "line": 682
+          "line": 689
         },
         {
           "name": "isSourceUnavailableError",
           "kind": "function",
-          "line": 697
+          "line": 704
         },
         {
           "name": "createSourceUnavailableSessionError",
           "kind": "function",
-          "line": 710
+          "line": 717
         },
         {
           "name": "createPrefetchTimeoutError",
           "kind": "function",
-          "line": 726
+          "line": 733
         },
         {
           "name": "createInvalidSourcePayloadError",
           "kind": "function",
-          "line": 742
+          "line": 749
         },
         {
           "name": "validateFetchedSourceBlob",
           "kind": "function",
-          "line": 764
+          "line": 771
         },
         {
           "name": "details",
           "kind": "object",
-          "line": 774
+          "line": 781
         },
         {
           "name": "isTransientPrefetchError",
           "kind": "function",
-          "line": 819
+          "line": 831
         },
         {
           "name": "buildInlineSourceBlob",
           "kind": "function",
-          "line": 847
+          "line": 859
         },
         {
           "name": "getSourcePackUrl",
           "kind": "function",
-          "line": 878
+          "line": 890
         },
         {
           "name": "readUint32LittleEndian",
           "kind": "function",
-          "line": 888
+          "line": 900
         },
         {
           "name": "readExactStreamBytes",
           "kind": "function",
-          "line": 893
+          "line": 905
         },
         {
           "name": "mimeForExtension",
           "kind": "function",
-          "line": 923
+          "line": 935
         },
         {
           "name": "toPositiveIntOrUndefined",
           "kind": "function",
-          "line": 940
+          "line": 954
         },
         {
           "name": "resolveDocumentSourceContext",
           "kind": "function",
-          "line": 951
+          "line": 965
         },
         {
           "name": "getDocumentProgressKey",
           "kind": "function",
-          "line": 977
+          "line": 991
         },
         {
           "name": "finalizeDocumentPages",
           "kind": "function",
-          "line": 993
+          "line": 1007
         },
         {
           "name": "createPagePlaceholders",
           "kind": "function",
-          "line": 1017
+          "line": 1031
         },
         {
           "name": "createFailedPlaceholder",
           "kind": "function",
-          "line": 1059
+          "line": 1073
         },
         {
           "name": "resolveEntries",
           "kind": "function",
-          "line": 1101
+          "line": 1115
         },
         {
           "name": "safeMessage",
           "kind": "function",
-          "line": 1161
+          "line": 1175
         },
         {
           "name": "DocumentLoader",
           "kind": "component",
-          "line": 1169
+          "line": 1183
         },
         {
           "name": "abortAllFetches",
           "kind": "function",
-          "line": 1263
+          "line": 1277
         },
         {
           "name": "shouldStopRun",
           "kind": "function",
-          "line": 1277
+          "line": 1291
         },
         {
           "name": "maybePrompt",
           "kind": "function",
-          "line": 1283
+          "line": 1297
         },
         {
           "name": "prefetchSource",
           "kind": "function",
-          "line": 1304
+          "line": 1318
         },
         {
           "name": "createSourcePackPrefetchTasks",
           "kind": "function",
-          "line": 1581
+          "line": 1595
         },
         {
           "name": "resolve",
           "kind": "function",
-          "line": 1584
+          "line": 1598
         },
         {
           "name": "settle",
           "kind": "function",
-          "line": 1589
+          "line": 1603
         },
         {
           "name": "settleMissing",
           "kind": "function",
-          "line": 1596
+          "line": 1610
         },
         {
           "name": "processSourcePackFrame",
           "kind": "function",
-          "line": 1611
+          "line": 1625
         },
         {
           "name": "queueSourcePackFrame",
           "kind": "function",
-          "line": 1701
+          "line": 1715
         },
         {
           "name": "waitForSourcePackProcessing",
           "kind": "function",
-          "line": 1710
+          "line": 1724
         },
         {
           "name": "runSourcePack",
           "kind": "function",
-          "line": 1716
+          "line": 1730
         },
         {
           "name": "state",
           "kind": "object",
-          "line": 1733
+          "line": 1747
         },
         {
           "name": "run",
           "kind": "function",
-          "line": 1808
+          "line": 1822
         }
       ],
       "parseError": null,
@@ -4904,7 +4932,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 35,
+          "line": 36,
           "description": "",
           "params": [],
           "returns": [],
@@ -4917,7 +4945,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 58,
+          "line": 59,
           "description": "",
           "params": [],
           "returns": [],
@@ -4930,7 +4958,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 73,
+          "line": 74,
           "description": "",
           "params": [],
           "returns": [],
@@ -4943,7 +4971,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 91,
+          "line": 92,
           "description": "",
           "params": [],
           "returns": [],
@@ -4956,7 +4984,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 102,
+          "line": 103,
           "description": "",
           "params": [],
           "returns": [],
@@ -4969,7 +4997,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 121,
+          "line": 122,
           "description": "",
           "params": [],
           "returns": [],
@@ -4982,7 +5010,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 134,
+          "line": 135,
           "description": "",
           "params": [],
           "returns": [],
@@ -4995,7 +5023,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 140,
+          "line": 141,
           "description": "",
           "params": [],
           "returns": [],
@@ -5008,7 +5036,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 161,
+          "line": 162,
           "description": "",
           "params": [
             {
@@ -5033,7 +5061,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 206,
+          "line": 207,
           "description": "",
           "params": [
             {
@@ -5058,7 +5086,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 215,
+          "line": 216,
           "description": "",
           "params": [
             {
@@ -5083,7 +5111,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 238,
+          "line": 241,
           "description": "",
           "params": [
             {
@@ -5108,7 +5136,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 246,
+          "line": 249,
           "description": "",
           "params": [
             {
@@ -5133,7 +5161,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 254,
+          "line": 257,
           "description": "",
           "params": [
             {
@@ -5158,7 +5186,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 269,
+          "line": 272,
           "description": "",
           "params": [
             {
@@ -5183,7 +5211,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 284,
+          "line": 287,
           "description": "",
           "params": [
             {
@@ -5214,7 +5242,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 298,
+          "line": 301,
           "description": "",
           "params": [
             {
@@ -5245,7 +5273,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 335,
+          "line": 340,
           "description": "",
           "params": [
             {
@@ -5270,7 +5298,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 353,
+          "line": 358,
           "description": "Resolve source type information with a cheap signature-first path.",
           "params": [
             {
@@ -5313,7 +5341,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 418,
+          "line": 423,
           "description": "Gateway source packs already carry verified file metadata from the prepared server-side session.",
           "params": [
             {
@@ -5362,7 +5390,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 452,
+          "line": 457,
           "description": "",
           "params": [
             {
@@ -5387,7 +5415,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 462,
+          "line": 467,
           "description": "",
           "params": [
             {
@@ -5418,7 +5446,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 477,
+          "line": 482,
           "description": "",
           "params": [
             {
@@ -5443,7 +5471,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 499,
+          "line": 504,
           "description": "Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources.",
           "params": [
             {
@@ -5486,7 +5514,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 517,
+          "line": 522,
           "description": "Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe...",
           "params": [
             {
@@ -5541,7 +5569,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 548,
+          "line": 553,
           "description": "",
           "params": [
             {
@@ -5566,7 +5594,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 566,
+          "line": 571,
           "description": "",
           "params": [
             {
@@ -5591,7 +5619,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 582,
+          "line": 589,
           "description": "",
           "params": [
             {
@@ -5616,7 +5644,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 591,
+          "line": 598,
           "description": "",
           "params": [
             {
@@ -5641,7 +5669,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 604,
+          "line": 611,
           "description": "Resolve the best-effort extension we can use for page-count estimation before every source has been fetched.",
           "params": [
             {
@@ -5666,7 +5694,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 619,
+          "line": 626,
           "description": "Update per-extension page-count statistics used by the conservative warning estimator.",
           "params": [
             {
@@ -5703,7 +5731,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 645,
+          "line": 652,
           "description": "Estimate the final page count conservatively.",
           "params": [
             {
@@ -5746,7 +5774,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 667,
+          "line": 674,
           "description": "",
           "params": [
             {
@@ -5771,7 +5799,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 682,
+          "line": 689,
           "description": "Build a consistent HTTP error so the retry classifier can inspect the status code.",
           "params": [
             {
@@ -5802,7 +5830,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 697,
+          "line": 704,
           "description": "Host integrations often expose short-lived file tickets.",
           "params": [
             {
@@ -5827,7 +5855,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 710,
+          "line": 717,
           "description": "",
           "params": [
             {
@@ -5864,7 +5892,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 726,
+          "line": 733,
           "description": "Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die.",
           "params": [
             {
@@ -5895,7 +5923,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 742,
+          "line": 749,
           "description": "Build a source-validation error.",
           "params": [
             {
@@ -5926,7 +5954,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 764,
+          "line": 771,
           "description": "Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store.",
           "params": [
             {
@@ -5987,7 +6015,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 819,
+          "line": 831,
           "description": "Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses.",
           "params": [
             {
@@ -6012,7 +6040,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 847,
+          "line": 859,
           "description": "Decode host-provided Base64 source bytes without routing through fetch(data:...) .",
           "params": [
             {
@@ -6037,7 +6065,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 888,
+          "line": 900,
           "description": "",
           "params": [
             {
@@ -6062,7 +6090,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 923,
+          "line": 935,
           "description": "",
           "params": [
             {
@@ -6087,7 +6115,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 940,
+          "line": 954,
           "description": "",
           "params": [
             {
@@ -6112,7 +6140,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 951,
+          "line": 965,
           "description": "Extract multi-document source context from an entry or placeholder input.",
           "params": [
             {
@@ -6137,7 +6165,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 977,
+          "line": 991,
           "description": "",
           "params": [
             {
@@ -6162,7 +6190,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 993,
+          "line": 1007,
           "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
           "params": [
             {
@@ -6205,7 +6233,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1017,
+          "line": 1031,
           "description": "",
           "params": [
             {
@@ -6230,7 +6258,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1059,
+          "line": 1073,
           "description": "",
           "params": [
             {
@@ -6255,7 +6283,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1101,
+          "line": 1115,
           "description": "",
           "params": [
             {
@@ -6322,7 +6350,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1161,
+          "line": 1175,
           "description": "",
           "params": [
             {
@@ -6347,7 +6375,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1169,
+          "line": 1183,
           "description": "",
           "params": [
             {
@@ -6372,7 +6400,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1213,
+          "line": 1227,
           "description": "",
           "params": [
             {
@@ -6397,7 +6425,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1222,
+          "line": 1236,
           "description": "",
           "params": [
             {
@@ -6422,7 +6450,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1277,
+          "line": 1291,
           "description": "Whether this load run is no longer allowed to mutate React state.",
           "params": [],
           "returns": [
@@ -6440,7 +6468,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1283,
+          "line": 1297,
           "description": "",
           "params": [
             {
@@ -6465,7 +6493,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1304,
+          "line": 1318,
           "description": "Fetch and persist one source blob with conservative retry behavior.",
           "params": [
             {
@@ -6496,7 +6524,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1584,
+          "line": 1598,
           "description": "",
           "params": [],
           "returns": [],
@@ -6506,11 +6534,21 @@
       "moduleKey": "src/components/DocumentLoader",
       "localImports": [
         {
+          "source": "../../utils/modernImageSignatures.js",
+          "specifiers": [
+            "hasJxlSignature",
+            "hasAvifSignature"
+          ],
+          "line": 21,
+          "kind": "static",
+          "resolved": "src/utils/modernImageSignatures.js"
+        },
+        {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 21,
+          "line": 22,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -6519,7 +6557,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 22,
+          "line": 23,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -6531,7 +6569,7 @@
             "generateDemoList",
             "getTotalPages"
           ],
-          "line": 23,
+          "line": 24,
           "kind": "static",
           "resolved": "src/components/DocumentLoader/documentLoaderUtils.js"
         },
@@ -6541,7 +6579,7 @@
             "getDocumentLoadingConfig",
             "shouldRecommendStopping"
           ],
-          "line": 24,
+          "line": 25,
           "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
@@ -6550,7 +6588,7 @@
           "specifiers": [
             "LoadPressureDialog"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static",
           "resolved": "src/components/DocumentLoader/LoadPressureDialog.jsx"
         },
@@ -6559,7 +6597,7 @@
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         },
@@ -6569,7 +6607,7 @@
             "createReloadCacheSessionId",
             "describeDocumentSourceKey"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static",
           "resolved": "src/utils/reloadCacheIdentity.js"
         }
@@ -32495,7 +32533,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2943,
+      "lines": 2948,
       "extension": ".jsx",
       "jsdocBlockCount": 79,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -32814,42 +32852,42 @@
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1784
+          "line": 1787
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2199
+          "line": 2204
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2213
+          "line": 2218
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2227
+          "line": 2232
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2260
+          "line": 2265
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2430
+          "line": 2435
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2529
+          "line": 2534
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2531
+          "line": 2536
         }
       ],
       "parseError": null,
@@ -34037,7 +34075,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1520,
+          "line": 1521,
           "description": "",
           "params": [
             {
@@ -34062,7 +34100,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1529,
+          "line": 1530,
           "description": "",
           "params": [
             {
@@ -34093,7 +34131,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1542,
+          "line": 1543,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -34130,7 +34168,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1594,
+          "line": 1595,
           "description": "",
           "params": [
             {
@@ -34161,7 +34199,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1605,
+          "line": 1606,
           "description": "",
           "params": [
             {
@@ -34192,7 +34230,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1616,
+          "line": 1617,
           "description": "",
           "params": [
             {
@@ -34217,7 +34255,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1640,
+          "line": 1641,
           "description": "",
           "params": [
             {
@@ -34242,7 +34280,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1687,
+          "line": 1688,
           "description": "",
           "params": [
             {
@@ -34267,7 +34305,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1700,
+          "line": 1701,
           "description": "",
           "params": [
             {
@@ -34304,7 +34342,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1772,
+          "line": 1775,
           "description": "",
           "params": [
             {
@@ -34341,7 +34379,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1864,
+          "line": 1869,
           "description": "",
           "params": [
             {
@@ -34378,7 +34416,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2057,
+          "line": 2062,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -34403,7 +34441,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2139,
+          "line": 2144,
           "description": "",
           "params": [
             {
@@ -34434,7 +34472,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2161,
+          "line": 2166,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -34459,7 +34497,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2320,
+          "line": 2325,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -34477,7 +34515,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2411,
+          "line": 2416,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -34508,7 +34546,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2454,
+          "line": 2459,
           "description": "",
           "params": [
             {
@@ -34533,7 +34571,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2748,
+          "line": 2753,
           "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
           "params": [],
           "returns": [],
@@ -34546,7 +34584,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2779,
+          "line": 2784,
           "description": "",
           "params": [
             {
@@ -34566,7 +34604,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2792,
+          "line": 2797,
           "description": "",
           "params": [
             {
@@ -34586,7 +34624,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2805,
+          "line": 2810,
           "description": "",
           "params": [
             {
@@ -34606,7 +34644,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2814,
+          "line": 2819,
           "description": "Write one page's transform: a partial transform or current =&gt; partial .",
           "params": [
             {
@@ -34632,7 +34670,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2819,
+          "line": 2824,
           "description": "",
           "params": [
             {
@@ -34652,7 +34690,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2824,
+          "line": 2829,
           "description": "",
           "params": [
             {
@@ -54262,7 +54300,7 @@
     },
     {
       "path": "src/utils/documentLoadingConfig.js",
-      "lines": 1099,
+      "lines": 1100,
       "extension": ".js",
       "jsdocBlockCount": 36,
       "sourceSummary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
@@ -54362,27 +54400,27 @@
         {
           "name": "shouldUseFullImagesForThumbnails",
           "kind": "function",
-          "line": 1037
+          "line": 1038
         },
         {
           "name": "shouldKeepAllFullImageAssets",
           "kind": "function",
-          "line": 1048
+          "line": 1049
         },
         {
           "name": "formatBytes",
           "kind": "function",
-          "line": 1060
+          "line": 1061
         },
         {
           "name": "formatCount",
           "kind": "function",
-          "line": 1078
+          "line": 1079
         },
         {
           "name": "shouldRecommendStopping",
           "kind": "function",
-          "line": 1086
+          "line": 1087
         }
       ],
       "declarations": [
@@ -54559,27 +54597,27 @@
         {
           "name": "shouldUseFullImagesForThumbnails",
           "kind": "function",
-          "line": 1037
+          "line": 1038
         },
         {
           "name": "shouldKeepAllFullImageAssets",
           "kind": "function",
-          "line": 1048
+          "line": 1049
         },
         {
           "name": "formatBytes",
           "kind": "function",
-          "line": 1060
+          "line": 1061
         },
         {
           "name": "formatCount",
           "kind": "function",
-          "line": 1078
+          "line": 1079
         },
         {
           "name": "shouldRecommendStopping",
           "kind": "function",
-          "line": 1086
+          "line": 1087
         }
       ],
       "parseError": null,
@@ -55170,7 +55208,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1060,
+          "line": 1061,
           "description": "",
           "params": [
             {
@@ -55195,7 +55233,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1078,
+          "line": 1079,
           "description": "",
           "params": [
             {
@@ -55220,7 +55258,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1086,
+          "line": 1087,
           "description": "",
           "params": [
             {
@@ -56571,6 +56609,138 @@
       "summarySource": "module-doclet"
     },
     {
+      "path": "src/utils/jxlDecode.js",
+      "lines": 59,
+      "extension": ".js",
+      "jsdocBlockCount": 1,
+      "sourceSummary": null,
+      "imports": [
+        {
+          "source": "./modernImageSignatures.js",
+          "specifiers": [
+            "hasJxlSignature"
+          ],
+          "line": 1,
+          "kind": "static"
+        },
+        {
+          "source": "@noble/hashes/sha2.js",
+          "specifiers": [
+            "sha256"
+          ],
+          "line": 2,
+          "kind": "static"
+        },
+        {
+          "source": "jxl-oxide-wasm",
+          "specifiers": [],
+          "line": 12,
+          "kind": "dynamic"
+        },
+        {
+          "source": "jxl-oxide-wasm/module.wasm?url",
+          "specifiers": [],
+          "line": 13,
+          "kind": "dynamic"
+        }
+      ],
+      "exports": [
+        {
+          "name": "decodeJxl",
+          "kind": "function",
+          "line": 28
+        }
+      ],
+      "declarations": [
+        {
+          "name": "sha256Hex",
+          "kind": "function",
+          "line": 4
+        },
+        {
+          "name": "loadCodec",
+          "kind": "function",
+          "line": 9
+        },
+        {
+          "name": "decodeJxl",
+          "kind": "function",
+          "line": 28
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "decodeJxl",
+          "name": "decodeJxl",
+          "longname": "decodeJxl",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/jxlDecode.js",
+          "line": 28,
+          "description": "Decode frame 1 in our Rust/WASM codec.",
+          "params": [
+            {
+              "name": "source",
+              "type": "Blob",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<Object>",
+              "description": "PNG asset with explicit first-frame metadata."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [
+        {
+          "source": "./modernImageSignatures.js",
+          "specifiers": [
+            "hasJxlSignature"
+          ],
+          "line": 1,
+          "kind": "static",
+          "resolved": "src/utils/modernImageSignatures.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "@noble/hashes/sha2.js",
+          "specifiers": [
+            "sha256"
+          ],
+          "line": 2,
+          "kind": "static"
+        },
+        {
+          "source": "jxl-oxide-wasm",
+          "specifiers": [],
+          "line": 12,
+          "kind": "dynamic"
+        },
+        {
+          "source": "jxl-oxide-wasm/module.wasm?url",
+          "specifiers": [],
+          "line": 13,
+          "kind": "dynamic"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 24,
+      "summary": "Decode frame 1 in our Rust/WASM codec.",
+      "summaryConfidence": "high",
+      "summarySource": "doclet"
+    },
+    {
       "path": "src/utils/keyTipLayout.js",
       "lines": 65,
       "extension": ".js",
@@ -57818,6 +57988,84 @@
       "incomingLocalImports": 2,
       "importanceScore": 39,
       "summary": "OpenDocViewer — Runtime memory profile helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/modernImageSignatures.js",
+      "lines": 21,
+      "extension": ".js",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "Identify modern raster formats by bytes, independently of names and MIME hints.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "hasJxlSignature",
+          "kind": "function",
+          "line": 2
+        },
+        {
+          "name": "hasAvifSignature",
+          "kind": "function",
+          "line": 9
+        }
+      ],
+      "declarations": [
+        {
+          "name": "hasJxlSignature",
+          "kind": "function",
+          "line": 2
+        },
+        {
+          "name": "hasAvifSignature",
+          "kind": "function",
+          "line": 9
+        },
+        {
+          "name": "isAvif",
+          "kind": "function",
+          "line": 14
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "hasJxlSignature",
+          "name": "hasJxlSignature",
+          "longname": "hasJxlSignature",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/modernImageSignatures.js",
+          "line": 2,
+          "description": "Identify modern raster formats by bytes, independently of names and MIME hints.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "hasAvifSignature",
+          "name": "hasAvifSignature",
+          "longname": "hasAvifSignature",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/modernImageSignatures.js",
+          "line": 9,
+          "description": "Accept AVIF major or compatible brands only within the first ISO BMFF ftyp box.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 2,
+      "importanceScore": 32,
+      "summary": "Identify modern raster formats by bytes, independently of names and MIME hints.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -61102,7 +61350,7 @@
     },
     {
       "path": "src/utils/pageAssetRenderer.js",
-      "lines": 918,
+      "lines": 933,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "OpenDocViewer — hybrid page-asset renderer.",
@@ -61183,6 +61431,12 @@
           ],
           "line": 18,
           "kind": "static"
+        },
+        {
+          "source": "./jxlDecode.js",
+          "specifiers": [],
+          "line": 753,
+          "kind": "dynamic"
         }
       ],
       "exports": [
@@ -61393,7 +61647,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetRenderer.js",
-          "line": 780,
+          "line": 795,
           "description": "Read page geometry only when a persisted asset needs an exact resolution identity.",
           "params": [],
           "returns": [],
@@ -61458,6 +61712,13 @@
           "line": 18,
           "kind": "static",
           "resolved": "src/utils/pdfResolutionRuntime.js"
+        },
+        {
+          "source": "./jxlDecode.js",
+          "specifiers": [],
+          "line": 753,
+          "kind": "dynamic",
+          "resolved": "src/utils/jxlDecode.js"
         }
       ],
       "packageImports": [
@@ -61496,7 +61757,7 @@
     },
     {
       "path": "src/utils/pageAssetStore.js",
-      "lines": 746,
+      "lines": 751,
       "extension": ".js",
       "jsdocBlockCount": 38,
       "sourceSummary": "OpenDocViewer — Browser-side rendered page-asset storage.",
@@ -61531,12 +61792,12 @@
         {
           "name": "createPageAssetStore",
           "kind": "function",
-          "line": 211
+          "line": 213
         },
         {
           "name": "PageAssetStore",
           "kind": "class",
-          "line": 215
+          "line": 217
         }
       ],
       "declarations": [
@@ -61578,32 +61839,32 @@
         {
           "name": "BlobLruCache",
           "kind": "class",
-          "line": 166
+          "line": 168
         },
         {
           "name": "createPageAssetStore",
           "kind": "function",
-          "line": 211
+          "line": 213
         },
         {
           "name": "PageAssetStore",
           "kind": "class",
-          "line": 215
+          "line": 217
         },
         {
           "name": "meta",
           "kind": "object",
-          "line": 349
+          "line": 351
         },
         {
           "name": "promotedMeta",
           "kind": "object",
-          "line": 593
+          "line": 596
         },
         {
           "name": "base",
           "kind": "object",
-          "line": 633
+          "line": 636
         }
       ],
       "parseError": null,
@@ -61798,7 +62059,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/pageAssetStore.js",
-          "line": 154,
+          "line": 155,
           "description": "",
           "params": [],
           "returns": [],
@@ -61811,7 +62072,7 @@
           "kind": "class",
           "scope": "global",
           "file": "src/utils/pageAssetStore.js",
-          "line": 170,
+          "line": 172,
           "description": "",
           "params": [
             {
@@ -61831,7 +62092,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 180,
+          "line": 182,
           "description": "",
           "params": [
             {
@@ -61856,7 +62117,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 193,
+          "line": 195,
           "description": "",
           "params": [
             {
@@ -61887,7 +62148,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pageAssetStore.js",
-          "line": 211,
+          "line": 213,
           "description": "",
           "params": [
             {
@@ -61912,7 +62173,7 @@
           "kind": "class",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 219,
+          "line": 221,
           "description": "",
           "params": [
             {
@@ -61932,7 +62193,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 272,
+          "line": 274,
           "description": "",
           "params": [],
           "returns": [
@@ -61950,7 +62211,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 281,
+          "line": 283,
           "description": "",
           "params": [],
           "returns": [
@@ -61968,7 +62229,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 308,
+          "line": 310,
           "description": "Update runtime thresholds for the active session.",
           "params": [
             {
@@ -61993,7 +62254,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 322,
+          "line": 324,
           "description": "Force promotion to IndexedDB for the current session when supported.",
           "params": [],
           "returns": [
@@ -62011,7 +62272,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 333,
+          "line": 335,
           "description": "",
           "params": [
             {
@@ -62036,7 +62297,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 343,
+          "line": 345,
           "description": "",
           "params": [
             {
@@ -62061,7 +62322,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 398,
+          "line": 401,
           "description": "",
           "params": [
             {
@@ -62086,7 +62347,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 455,
+          "line": 458,
           "description": "",
           "params": [],
           "returns": [
@@ -62104,7 +62365,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 499,
+          "line": 502,
           "description": "",
           "params": [],
           "returns": [
@@ -62122,7 +62383,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 540,
+          "line": 543,
           "description": "",
           "params": [],
           "returns": [
@@ -62140,7 +62401,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 549,
+          "line": 552,
           "description": "",
           "params": [],
           "returns": [
@@ -62158,7 +62419,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 573,
+          "line": 576,
           "description": "",
           "params": [],
           "returns": [
@@ -62176,7 +62437,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 617,
+          "line": 620,
           "description": "",
           "params": [
             {
@@ -62207,7 +62468,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 632,
+          "line": 635,
           "description": "",
           "params": [
             {
@@ -62238,7 +62499,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 675,
+          "line": 679,
           "description": "",
           "params": [
             {
@@ -62263,7 +62524,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 696,
+          "line": 701,
           "description": "",
           "params": [
             {
@@ -62288,7 +62549,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 710,
+          "line": 715,
           "description": "",
           "params": [
             {
@@ -62313,7 +62574,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetStore.js",
-          "line": 728,
+          "line": 733,
           "description": "",
           "params": [
             {
@@ -62372,7 +62633,7 @@
     },
     {
       "path": "src/utils/pageAssetWorkerPool.js",
-      "lines": 320,
+      "lines": 322,
       "extension": ".js",
       "jsdocBlockCount": 19,
       "sourceSummary": "OpenDocViewer — Page-asset worker pool.",
@@ -62403,7 +62664,7 @@
         {
           "name": "PageAssetWorkerPool",
           "kind": "class",
-          "line": 78
+          "line": 79
         }
       ],
       "declarations": [
@@ -62420,12 +62681,12 @@
         {
           "name": "nowMs",
           "kind": "function",
-          "line": 70
+          "line": 71
         },
         {
           "name": "PageAssetWorkerPool",
           "kind": "class",
-          "line": 78
+          "line": 79
         }
       ],
       "parseError": null,
@@ -62545,7 +62806,7 @@
           "kind": "class",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 82,
+          "line": 83,
           "description": "",
           "params": [
             {
@@ -62565,7 +62826,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 119,
+          "line": 120,
           "description": "",
           "params": [],
           "returns": [
@@ -62583,7 +62844,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 128,
+          "line": 129,
           "description": "",
           "params": [
             {
@@ -62614,7 +62875,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 140,
+          "line": 141,
           "description": "",
           "params": [
             {
@@ -62639,7 +62900,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 156,
+          "line": 157,
           "description": "",
           "params": [],
           "returns": [
@@ -62657,7 +62918,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 176,
+          "line": 177,
           "description": "",
           "params": [],
           "returns": [
@@ -62675,7 +62936,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 226,
+          "line": 227,
           "description": "",
           "params": [
             {
@@ -62706,7 +62967,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 267,
+          "line": 269,
           "description": "",
           "params": [
             {
@@ -62737,7 +62998,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetWorkerPool.js",
-          "line": 298,
+          "line": 300,
           "description": "",
           "params": [],
           "returns": [
@@ -73147,7 +73408,7 @@
     },
     {
       "path": "src/utils/printPdf.js",
-      "lines": 2489,
+      "lines": 2490,
       "extension": ".js",
       "jsdocBlockCount": 109,
       "sourceSummary": "OpenDocViewer — Generated PDF print backend.",
@@ -73241,7 +73502,7 @@
         {
           "source": "jspdf",
           "specifiers": [],
-          "line": 1645,
+          "line": 1646,
           "kind": "dynamic"
         }
       ],
@@ -73249,57 +73510,57 @@
         {
           "name": "createPrintPdfBlob",
           "kind": "function",
-          "line": 1663
+          "line": 1664
         },
         {
           "name": "downloadPdfBlob",
           "kind": "function",
-          "line": 1815
+          "line": 1816
         },
         {
           "name": "printPdfBlob",
           "kind": "function",
-          "line": 1835
+          "line": 1836
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2204
+          "line": 2205
         },
         {
           "name": "releasePrintablePdfSources",
           "kind": "function",
-          "line": 2218
+          "line": 2219
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2244
+          "line": 2245
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2261
+          "line": 2262
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2369
+          "line": 2370
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2400
+          "line": 2401
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2472
+          "line": 2473
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2486
+          "line": 2487
         }
       ],
       "declarations": [
@@ -73546,322 +73807,322 @@
         {
           "name": "normalizePdfOrientationMode",
           "kind": "function",
-          "line": 1000
+          "line": 1001
         },
         {
           "name": "resolvePdfOrientationMode",
           "kind": "function",
-          "line": 1010
+          "line": 1011
         },
         {
           "name": "pageFormatForImage",
           "kind": "function",
-          "line": 1029
+          "line": 1030
         },
         {
           "name": "createJsPdfOptions",
           "kind": "function",
-          "line": 1041
+          "line": 1042
         },
         {
           "name": "normalizeRichSegments",
           "kind": "function",
-          "line": 1057
+          "line": 1058
         },
         {
           "name": "getRichLineColumns",
           "kind": "function",
-          "line": 1074
+          "line": 1075
         },
         {
           "name": "normalizeRichLine",
           "kind": "function",
-          "line": 1098
+          "line": 1099
         },
         {
           "name": "segmentFontStyle",
           "kind": "function",
-          "line": 1110
+          "line": 1111
         },
         {
           "name": "measureRichSegment",
           "kind": "function",
-          "line": 1123
+          "line": 1124
         },
         {
           "name": "measureRichSegments",
           "kind": "function",
-          "line": 1135
+          "line": 1136
         },
         {
           "name": "createDefaultSegment",
           "kind": "function",
-          "line": 1144
+          "line": 1145
         },
         {
           "name": "fitRichSegmentTextToWidth",
           "kind": "function",
-          "line": 1155
+          "line": 1156
         },
         {
           "name": "fitRichSegmentsToWidth",
           "kind": "function",
-          "line": 1185
+          "line": 1186
         },
         {
           "name": "layoutRichColumns",
           "kind": "function",
-          "line": 1229
+          "line": 1230
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 1283
+          "line": 1284
         },
         {
           "name": "wrapRichLines",
           "kind": "function",
-          "line": 1310
+          "line": 1311
         },
         {
           "name": "nextSegment",
           "kind": "object",
-          "line": 1331
+          "line": 1332
         },
         {
           "name": "drawRichSegments",
           "kind": "function",
-          "line": 1360
+          "line": 1361
         },
         {
           "name": "drawRichTextBlock",
           "kind": "function",
-          "line": 1383
+          "line": 1384
         },
         {
           "name": "drawWatermark",
           "kind": "function",
-          "line": 1415
+          "line": 1416
         },
         {
           "name": "drawWatermarkImage",
           "kind": "function",
-          "line": 1462
+          "line": 1463
         },
         {
           "name": "makeTokenContext",
           "kind": "function",
-          "line": 1496
+          "line": 1497
         },
         {
           "name": "reportProgress",
           "kind": "function",
-          "line": 1511
+          "line": 1512
         },
         {
           "name": "resolvePdfImageLoadConcurrency",
           "kind": "function",
-          "line": 1524
+          "line": 1525
         },
         {
           "name": "resolvePdfWorkerPlan",
           "kind": "function",
-          "line": 1537
+          "line": 1538
         },
         {
           "name": "buildPdfPagePlans",
           "kind": "function",
-          "line": 1560
+          "line": 1561
         },
         {
           "name": "createPrintPdfBlobInWorker",
           "kind": "function",
-          "line": 1581
+          "line": 1582
         },
         {
           "name": "pdfCfg",
           "kind": "object",
-          "line": 1582
+          "line": 1583
         },
         {
           "name": "calculateOverlayReserve",
           "kind": "function",
-          "line": 1605
+          "line": 1606
         },
         {
           "name": "resolveJsPdfConstructor",
           "kind": "function",
-          "line": 1617
+          "line": 1618
         },
         {
           "name": "describeModuleExports",
           "kind": "function",
-          "line": 1630
+          "line": 1631
         },
         {
           "name": "loadJsPdf",
           "kind": "function",
-          "line": 1643
+          "line": 1644
         },
         {
           "name": "createPrintPdfBlob",
           "kind": "function",
-          "line": 1663
+          "line": 1664
         },
         {
           "name": "downloadPdfBlob",
           "kind": "function",
-          "line": 1815
+          "line": 1816
         },
         {
           "name": "printPdfBlob",
           "kind": "function",
-          "line": 1835
+          "line": 1836
         },
         {
           "name": "addCleanupListener",
           "kind": "function",
-          "line": 1861
+          "line": 1862
         },
         {
           "name": "handler",
           "kind": "function",
-          "line": 1863
+          "line": 1864
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 1881
+          "line": 1882
         },
         {
           "name": "settleResolve",
           "kind": "function",
-          "line": 1907
+          "line": 1908
         },
         {
           "name": "settleReject",
           "kind": "function",
-          "line": 1912
+          "line": 1913
         },
         {
           "name": "tryWindowFallback",
           "kind": "function",
-          "line": 1918
+          "line": 1919
         },
         {
           "name": "invokePrint",
           "kind": "function",
-          "line": 1962
+          "line": 1963
         },
         {
           "name": "selectPageContexts",
           "kind": "function",
-          "line": 2026
+          "line": 2027
         },
         {
           "name": "executeOutputAction",
           "kind": "function",
-          "line": 2036
+          "line": 2037
         },
         {
           "name": "warnDeprecatedPrintableUrlExportAlias",
           "kind": "function",
-          "line": 2052
+          "line": 2053
         },
         {
           "name": "isLeasableSurfaceUrl",
           "kind": "function",
-          "line": 2069
+          "line": 2070
         },
         {
           "name": "leaseSurfaceBlobUrls",
           "kind": "function",
-          "line": 2083
+          "line": 2084
         },
         {
           "name": "releasePrintableDataUrls",
           "kind": "function",
-          "line": 2105
+          "line": 2106
         },
         {
           "name": "getSelectedPrintableDataUrls",
           "kind": "function",
-          "line": 2126
+          "line": 2127
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2204
+          "line": 2205
         },
         {
           "name": "releasePrintablePdfSources",
           "kind": "function",
-          "line": 2218
+          "line": 2219
         },
         {
           "name": "pageNumberToIndex",
           "kind": "function",
-          "line": 2231
+          "line": 2232
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2244
+          "line": 2245
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2261
+          "line": 2262
         },
         {
           "name": "printableSourceFromElement",
           "kind": "function",
-          "line": 2282
+          "line": 2283
         },
         {
           "name": "imageElementUrl",
           "kind": "function",
-          "line": 2308
+          "line": 2309
         },
         {
           "name": "canvasToPngDataUrl",
           "kind": "function",
-          "line": 2319
+          "line": 2320
         },
         {
           "name": "canvasToBlob",
           "kind": "function",
-          "line": 2333
+          "line": 2334
         },
         {
           "name": "blobToDataUrl",
           "kind": "function",
-          "line": 2348
+          "line": 2349
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2369
+          "line": 2370
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2400
+          "line": 2401
         },
         {
           "name": "pdfComposedComparison",
           "kind": "function",
-          "line": 2441
+          "line": 2442
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2472
+          "line": 2473
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2486
+          "line": 2487
         }
       ],
       "parseError": null,
@@ -75104,7 +75365,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1000,
+          "line": 1001,
           "description": "",
           "params": [
             {
@@ -75135,7 +75396,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1010,
+          "line": 1011,
           "description": "",
           "params": [
             {
@@ -75160,7 +75421,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1029,
+          "line": 1030,
           "description": "",
           "params": [
             {
@@ -75197,7 +75458,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1041,
+          "line": 1042,
           "description": "",
           "params": [
             {
@@ -75234,7 +75495,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1057,
+          "line": 1058,
           "description": "",
           "params": [
             {
@@ -75259,7 +75520,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1074,
+          "line": 1075,
           "description": "",
           "params": [
             {
@@ -75284,7 +75545,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1098,
+          "line": 1099,
           "description": "",
           "params": [
             {
@@ -75309,7 +75570,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1110,
+          "line": 1111,
           "description": "",
           "params": [
             {
@@ -75334,7 +75595,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1123,
+          "line": 1124,
           "description": "",
           "params": [
             {
@@ -75371,7 +75632,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1135,
+          "line": 1136,
           "description": "",
           "params": [
             {
@@ -75408,7 +75669,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1144,
+          "line": 1145,
           "description": "",
           "params": [
             {
@@ -75433,7 +75694,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1155,
+          "line": 1156,
           "description": "",
           "params": [
             {
@@ -75476,7 +75737,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1185,
+          "line": 1186,
           "description": "",
           "params": [
             {
@@ -75519,7 +75780,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1229,
+          "line": 1230,
           "description": "",
           "params": [
             {
@@ -75562,7 +75823,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1310,
+          "line": 1311,
           "description": "",
           "params": [
             {
@@ -75611,7 +75872,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1360,
+          "line": 1361,
           "description": "",
           "params": [
             {
@@ -75654,7 +75915,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1383,
+          "line": 1384,
           "description": "",
           "params": [
             {
@@ -75721,7 +75982,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1415,
+          "line": 1416,
           "description": "",
           "params": [
             {
@@ -75764,7 +76025,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1462,
+          "line": 1463,
           "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
           "params": [
             {
@@ -75807,7 +76068,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1496,
+          "line": 1497,
           "description": "",
           "params": [
             {
@@ -75832,7 +76093,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1511,
+          "line": 1512,
           "description": "",
           "params": [
             {
@@ -75863,7 +76124,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1524,
+          "line": 1525,
           "description": "",
           "params": [
             {
@@ -75888,7 +76149,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1537,
+          "line": 1538,
           "description": "Resolve the generated-PDF worker plan.",
           "params": [
             {
@@ -75919,7 +76180,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1560,
+          "line": 1561,
           "description": "",
           "params": [
             {
@@ -75950,7 +76211,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1581,
+          "line": 1582,
           "description": "",
           "params": [
             {
@@ -75993,7 +76254,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1605,
+          "line": 1606,
           "description": "",
           "params": [
             {
@@ -76036,7 +76297,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1617,
+          "line": 1618,
           "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
           "params": [
             {
@@ -76061,7 +76322,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1630,
+          "line": 1631,
           "description": "",
           "params": [
             {
@@ -76086,7 +76347,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1643,
+          "line": 1644,
           "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
           "params": [],
           "returns": [
@@ -76104,7 +76365,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1663,
+          "line": 1664,
           "description": "Build a PDF blob from page image URLs and print metadata.",
           "params": [
             {
@@ -76135,7 +76396,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1815,
+          "line": 1816,
           "description": "",
           "params": [
             {
@@ -76166,7 +76427,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1835,
+          "line": 1836,
           "description": "Print a generated PDF through a hidden iframe.",
           "params": [
             {
@@ -76191,7 +76452,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2026,
+          "line": 2027,
           "description": "",
           "params": [
             {
@@ -76222,7 +76483,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2036,
+          "line": 2037,
           "description": "",
           "params": [
             {
@@ -76259,7 +76520,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2052,
+          "line": 2053,
           "description": "",
           "params": [
             {
@@ -76284,7 +76545,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2069,
+          "line": 2070,
           "description": "Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease (releasing them is a no-op).",
           "params": [
             {
@@ -76309,7 +76570,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2083,
+          "line": 2084,
           "description": "Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow.",
           "params": [
             {
@@ -76346,7 +76607,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2105,
+          "line": 2106,
           "description": "Release print URL leases held through the document renderer.",
           "params": [
             {
@@ -76377,7 +76638,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2126,
+          "line": 2127,
           "description": "Read printable page image URLs from the document renderer.",
           "params": [
             {
@@ -76414,7 +76675,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2193,
+          "line": 2194,
           "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
           "params": [],
           "returns": [],
@@ -76427,7 +76688,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2204,
+          "line": 2205,
           "description": "Collect printable page image URLs without creating or opening a PDF.",
           "params": [
             {
@@ -76464,7 +76725,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2218,
+          "line": 2219,
           "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
           "params": [
             {
@@ -76495,7 +76756,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2231,
+          "line": 2232,
           "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
           "params": [
             {
@@ -76526,7 +76787,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2244,
+          "line": 2245,
           "description": "",
           "params": [
             {
@@ -76563,7 +76824,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2261,
+          "line": 2262,
           "description": "",
           "params": [
             {
@@ -76600,7 +76861,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2282,
+          "line": 2283,
           "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
           "params": [
             {
@@ -76625,7 +76886,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2308,
+          "line": 2309,
           "description": "Read the URL an surface currently displays (empty for any other element).",
           "params": [
             {
@@ -76650,7 +76911,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2319,
+          "line": 2320,
           "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
           "params": [
             {
@@ -76675,7 +76936,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2333,
+          "line": 2334,
           "description": "",
           "params": [
             {
@@ -76706,7 +76967,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2348,
+          "line": 2349,
           "description": "",
           "params": [
             {
@@ -76731,7 +76992,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2369,
+          "line": 2370,
           "description": "Generate/print/download a PDF from the currently rendered active page surface.",
           "params": [
             {
@@ -76762,7 +77023,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2400,
+          "line": 2401,
           "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
           "params": [
             {
@@ -76799,7 +77060,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2441,
+          "line": 2442,
           "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
           "params": [
             {
@@ -76854,7 +77115,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2472,
+          "line": 2473,
           "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
           "params": [
             {
@@ -76897,7 +77158,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2486,
+          "line": 2487,
           "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
           "params": [
             {
@@ -77035,7 +77296,7 @@
         {
           "source": "jspdf",
           "specifiers": [],
-          "line": 1645,
+          "line": 1646,
           "kind": "dynamic"
         }
       ],
@@ -89081,7 +89342,7 @@
     },
     {
       "path": "src/workers/imageWorker.js",
-      "lines": 500,
+      "lines": 511,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "OpenDocViewer — image / TIFF worker.",
@@ -89090,6 +89351,12 @@
           "source": "utif2",
           "specifiers": [],
           "line": 105,
+          "kind": "dynamic"
+        },
+        {
+          "source": "../utils/jxlDecode.js",
+          "specifiers": [],
+          "line": 213,
           "kind": "dynamic"
         }
       ],
@@ -89168,37 +89435,37 @@
         {
           "name": "renderTiffAsset",
           "kind": "function",
-          "line": 237
+          "line": 247
         },
         {
           "name": "renderPageAssetPayload",
           "kind": "function",
-          "line": 323
+          "line": 333
         },
         {
           "name": "postMainThreadFallback",
           "kind": "function",
-          "line": 348
+          "line": 358
         },
         {
           "name": "processTiff",
           "kind": "function",
-          "line": 362
+          "line": 372
         },
         {
           "name": "processImage",
           "kind": "function",
-          "line": 418
+          "line": 428
         },
         {
           "name": "handleLegacyBatchMessage",
           "kind": "function",
-          "line": 437
+          "line": 447
         },
         {
           "name": "handleRenderPageAssetMessage",
           "kind": "function",
-          "line": 468
+          "line": 478
         }
       ],
       "parseError": null,
@@ -89236,7 +89503,15 @@
         }
       ],
       "moduleKey": "src/workers",
-      "localImports": [],
+      "localImports": [
+        {
+          "source": "../utils/jxlDecode.js",
+          "specifiers": [],
+          "line": 213,
+          "kind": "dynamic",
+          "resolved": "src/utils/jxlDecode.js"
+        }
+      ],
       "packageImports": [
         {
           "source": "utif2",
@@ -89614,7 +89889,7 @@
     },
     {
       "path": "src/workers/pdfWorker.js",
-      "lines": 628,
+      "lines": 629,
       "extension": ".js",
       "jsdocBlockCount": 1,
       "sourceSummary": "OpenDocViewer - generated PDF worker.",
@@ -89806,17 +90081,17 @@
         {
           "name": "drawWatermark",
           "kind": "function",
-          "line": 483
+          "line": 484
         },
         {
           "name": "drawWatermarkImage",
           "kind": "function",
-          "line": 512
+          "line": 513
         },
         {
           "name": "createPdf",
           "kind": "function",
-          "line": 532
+          "line": 533
         }
       ],
       "parseError": null,
@@ -90800,7 +91075,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 254,
+      "line": 257,
       "description": "",
       "params": [
         {
@@ -90825,7 +91100,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 847,
+      "line": 859,
       "description": "Decode host-provided Base64 source bytes without routing through fetch(data:...) .",
       "params": [
         {
@@ -90850,7 +91125,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1059,
+      "line": 1073,
       "description": "",
       "params": [
         {
@@ -90875,7 +91150,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 742,
+      "line": 749,
       "description": "Build a source-validation error.",
       "params": [
         {
@@ -90906,7 +91181,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 161,
+      "line": 162,
       "description": "",
       "params": [
         {
@@ -90931,7 +91206,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1017,
+      "line": 1031,
       "description": "",
       "params": [
         {
@@ -90956,7 +91231,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 682,
+      "line": 689,
       "description": "Build a consistent HTTP error so the retry classifier can inspect the status code.",
       "params": [
         {
@@ -90987,7 +91262,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 726,
+      "line": 733,
       "description": "Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die.",
       "params": [
         {
@@ -91018,7 +91293,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 710,
+      "line": 717,
       "description": "",
       "params": [
         {
@@ -91055,7 +91330,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1169,
+      "line": 1183,
       "description": "",
       "params": [
         {
@@ -91080,7 +91355,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 58,
+      "line": 59,
       "description": "",
       "params": [],
       "returns": [],
@@ -91093,7 +91368,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 35,
+      "line": 36,
       "description": "",
       "params": [],
       "returns": [],
@@ -91106,7 +91381,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 645,
+      "line": 652,
       "description": "Estimate the final page count conservatively.",
       "params": [
         {
@@ -91149,7 +91424,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 91,
+      "line": 92,
       "description": "",
       "params": [],
       "returns": [],
@@ -91162,7 +91437,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 993,
+      "line": 1007,
       "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
       "params": [
         {
@@ -91205,7 +91480,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 977,
+      "line": 991,
       "description": "",
       "params": [
         {
@@ -91230,7 +91505,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 604,
+      "line": 611,
       "description": "Resolve the best-effort extension we can use for page-count estimation before every source has been fetched.",
       "params": [
         {
@@ -91255,7 +91530,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 591,
+      "line": 598,
       "description": "",
       "params": [
         {
@@ -91280,7 +91555,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 206,
+      "line": 207,
       "description": "",
       "params": [
         {
@@ -91305,7 +91580,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 582,
+      "line": 589,
       "description": "",
       "params": [
         {
@@ -91330,7 +91605,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 697,
+      "line": 704,
       "description": "Host integrations often expose short-lived file tickets.",
       "params": [
         {
@@ -91355,7 +91630,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 238,
+      "line": 241,
       "description": "",
       "params": [
         {
@@ -91380,7 +91655,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 246,
+      "line": 249,
       "description": "",
       "params": [
         {
@@ -91405,7 +91680,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 819,
+      "line": 831,
       "description": "Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses.",
       "params": [
         {
@@ -91430,7 +91705,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 121,
+      "line": 122,
       "description": "",
       "params": [],
       "returns": [],
@@ -91443,7 +91718,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 269,
+      "line": 272,
       "description": "",
       "params": [
         {
@@ -91468,7 +91743,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 298,
+      "line": 301,
       "description": "",
       "params": [
         {
@@ -91499,7 +91774,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1283,
+      "line": 1297,
       "description": "",
       "params": [
         {
@@ -91524,7 +91799,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 923,
+      "line": 935,
       "description": "",
       "params": [
         {
@@ -91549,7 +91824,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 566,
+      "line": 571,
       "description": "",
       "params": [
         {
@@ -91574,7 +91849,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 452,
+      "line": 457,
       "description": "",
       "params": [
         {
@@ -91599,7 +91874,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 215,
+      "line": 216,
       "description": "",
       "params": [
         {
@@ -91624,7 +91899,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 134,
+      "line": 135,
       "description": "",
       "params": [],
       "returns": [],
@@ -91637,7 +91912,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 73,
+      "line": 74,
       "description": "",
       "params": [],
       "returns": [],
@@ -91650,7 +91925,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 140,
+      "line": 141,
       "description": "",
       "params": [],
       "returns": [],
@@ -91663,7 +91938,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1304,
+      "line": 1318,
       "description": "Fetch and persist one source blob with conservative retry behavior.",
       "params": [
         {
@@ -91694,7 +91969,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1213,
+      "line": 1227,
       "description": "",
       "params": [
         {
@@ -91719,7 +91994,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 335,
+      "line": 340,
       "description": "",
       "params": [
         {
@@ -91744,7 +92019,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 888,
+      "line": 900,
       "description": "",
       "params": [
         {
@@ -91769,7 +92044,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 548,
+      "line": 553,
       "description": "",
       "params": [
         {
@@ -91794,7 +92069,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1584,
+      "line": 1598,
       "description": "",
       "params": [],
       "returns": [],
@@ -91807,7 +92082,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 102,
+      "line": 103,
       "description": "",
       "params": [],
       "returns": [],
@@ -91820,7 +92095,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 951,
+      "line": 965,
       "description": "Extract multi-document source context from an entry or placeholder input.",
       "params": [
         {
@@ -91845,7 +92120,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1101,
+      "line": 1115,
       "description": "",
       "params": [
         {
@@ -91912,7 +92187,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 477,
+      "line": 482,
       "description": "",
       "params": [
         {
@@ -91937,7 +92212,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 353,
+      "line": 358,
       "description": "Resolve source type information with a cheap signature-first path.",
       "params": [
         {
@@ -91980,7 +92255,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 517,
+      "line": 522,
       "description": "Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe...",
       "params": [
         {
@@ -92035,7 +92310,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1222,
+      "line": 1236,
       "description": "",
       "params": [
         {
@@ -92060,7 +92335,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 462,
+      "line": 467,
       "description": "",
       "params": [
         {
@@ -92091,7 +92366,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 418,
+      "line": 423,
       "description": "Gateway source packs already carry verified file metadata from the prepared server-side session.",
       "params": [
         {
@@ -92140,7 +92415,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1161,
+      "line": 1175,
       "description": "",
       "params": [
         {
@@ -92165,7 +92440,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 499,
+      "line": 504,
       "description": "Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources.",
       "params": [
         {
@@ -92208,7 +92483,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1277,
+      "line": 1291,
       "description": "Whether this load run is no longer allowed to mutate React state.",
       "params": [],
       "returns": [
@@ -92226,7 +92501,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 667,
+      "line": 674,
       "description": "",
       "params": [
         {
@@ -92251,7 +92526,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 284,
+      "line": 287,
       "description": "",
       "params": [
         {
@@ -92282,7 +92557,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 940,
+      "line": 954,
       "description": "",
       "params": [
         {
@@ -92307,7 +92582,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 619,
+      "line": 626,
       "description": "Update per-extension page-count statistics used by the conservative warning estimator.",
       "params": [
         {
@@ -92344,7 +92619,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 764,
+      "line": 771,
       "description": "Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store.",
       "params": [
         {
@@ -106126,7 +106401,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1542,
+      "line": 1543,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -106224,7 +106499,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2819,
+      "line": 2824,
       "description": "",
       "params": [
         {
@@ -106244,7 +106519,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2805,
+      "line": 2810,
       "description": "",
       "params": [
         {
@@ -106315,7 +106590,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1640,
+      "line": 1641,
       "description": "",
       "params": [
         {
@@ -106340,7 +106615,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2057,
+      "line": 2062,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -106365,7 +106640,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1864,
+      "line": 1869,
       "description": "",
       "params": [
         {
@@ -106415,7 +106690,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2824,
+      "line": 2829,
       "description": "",
       "params": [
         {
@@ -106466,7 +106741,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2454,
+      "line": 2459,
       "description": "",
       "params": [
         {
@@ -106491,7 +106766,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1520,
+      "line": 1521,
       "description": "",
       "params": [
         {
@@ -106516,7 +106791,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1616,
+      "line": 1617,
       "description": "",
       "params": [
         {
@@ -107163,7 +107438,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1594,
+      "line": 1595,
       "description": "",
       "params": [
         {
@@ -107194,7 +107469,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2320,
+      "line": 2325,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -107262,7 +107537,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2139,
+      "line": 2144,
       "description": "",
       "params": [
         {
@@ -107318,7 +107593,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2748,
+      "line": 2753,
       "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
       "params": [],
       "returns": [],
@@ -107356,7 +107631,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1772,
+      "line": 1775,
       "description": "",
       "params": [
         {
@@ -107442,7 +107717,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1700,
+      "line": 1701,
       "description": "",
       "params": [
         {
@@ -107497,7 +107772,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2411,
+      "line": 2416,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -107528,7 +107803,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2814,
+      "line": 2819,
       "description": "Write one page's transform: a partial transform or current =&gt; partial .",
       "params": [
         {
@@ -107554,7 +107829,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2779,
+      "line": 2784,
       "description": "",
       "params": [
         {
@@ -107574,7 +107849,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2792,
+      "line": 2797,
       "description": "",
       "params": [
         {
@@ -107594,7 +107869,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1687,
+      "line": 1688,
       "description": "",
       "params": [
         {
@@ -107701,7 +107976,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1529,
+      "line": 1530,
       "description": "",
       "params": [
         {
@@ -107732,7 +108007,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2161,
+      "line": 2166,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -107757,7 +108032,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1605,
+      "line": 1606,
       "description": "",
       "params": [
         {
@@ -119652,7 +119927,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1060,
+      "line": 1061,
       "description": "",
       "params": [
         {
@@ -119677,7 +119952,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1078,
+      "line": 1079,
       "description": "",
       "params": [
         {
@@ -119938,7 +120213,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1086,
+      "line": 1087,
       "description": "",
       "params": [
         {
@@ -121001,6 +121276,31 @@
       "examples": 0
     },
     {
+      "id": "decodeJxl",
+      "name": "decodeJxl",
+      "longname": "decodeJxl",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/jxlDecode.js",
+      "line": 28,
+      "description": "Decode frame 1 in our Rust/WASM codec.",
+      "params": [
+        {
+          "name": "source",
+          "type": "Blob",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<Object>",
+          "description": "PNG asset with explicit first-frame metadata."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "KEY_TIP_GAP",
       "name": "KEY_TIP_GAP",
       "longname": "KEY_TIP_GAP",
@@ -121860,6 +122160,32 @@
       "file": "src/utils/memoryProfile.js",
       "line": 10,
       "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "hasAvifSignature",
+      "name": "hasAvifSignature",
+      "longname": "hasAvifSignature",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/modernImageSignatures.js",
+      "line": 9,
+      "description": "Accept AVIF major or compatible brands only within the first ISO BMFF ftyp box.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "hasJxlSignature",
+      "name": "hasJxlSignature",
+      "longname": "hasJxlSignature",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/modernImageSignatures.js",
+      "line": 2,
+      "description": "Identify modern raster formats by bytes, independently of names and MIME hints.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -124143,7 +124469,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetRenderer.js",
-      "line": 780,
+      "line": 795,
       "description": "Read page geometry only when a persisted asset needs an exact resolution identity.",
       "params": [],
       "returns": [],
@@ -124156,7 +124482,7 @@
       "kind": "class",
       "scope": "global",
       "file": "src/utils/pageAssetStore.js",
-      "line": 170,
+      "line": 172,
       "description": "",
       "params": [
         {
@@ -124176,7 +124502,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 455,
+      "line": 458,
       "description": "",
       "params": [],
       "returns": [
@@ -124194,7 +124520,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 499,
+      "line": 502,
       "description": "",
       "params": [],
       "returns": [
@@ -124212,7 +124538,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pageAssetStore.js",
-      "line": 211,
+      "line": 213,
       "description": "",
       "params": [
         {
@@ -124255,7 +124581,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 333,
+      "line": 335,
       "description": "",
       "params": [
         {
@@ -124280,7 +124606,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 540,
+      "line": 543,
       "description": "",
       "params": [],
       "returns": [
@@ -124298,7 +124624,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 549,
+      "line": 552,
       "description": "",
       "params": [],
       "returns": [
@@ -124316,7 +124642,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 180,
+      "line": 182,
       "description": "",
       "params": [
         {
@@ -124341,7 +124667,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 398,
+      "line": 401,
       "description": "",
       "params": [
         {
@@ -124366,7 +124692,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 696,
+      "line": 701,
       "description": "",
       "params": [
         {
@@ -124391,7 +124717,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 281,
+      "line": 283,
       "description": "",
       "params": [],
       "returns": [
@@ -124445,7 +124771,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 632,
+      "line": 635,
       "description": "",
       "params": [
         {
@@ -124507,7 +124833,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 573,
+      "line": 576,
       "description": "",
       "params": [],
       "returns": [
@@ -124543,7 +124869,7 @@
       "kind": "class",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 219,
+      "line": 221,
       "description": "",
       "params": [
         {
@@ -124576,7 +124902,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 322,
+      "line": 324,
       "description": "Force promotion to IndexedDB for the current session when supported.",
       "params": [],
       "returns": [
@@ -124594,7 +124920,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 343,
+      "line": 345,
       "description": "",
       "params": [
         {
@@ -124619,7 +124945,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 617,
+      "line": 620,
       "description": "",
       "params": [
         {
@@ -124650,7 +124976,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/pageAssetStore.js",
-      "line": 154,
+      "line": 155,
       "description": "",
       "params": [],
       "returns": [],
@@ -124663,7 +124989,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 272,
+      "line": 274,
       "description": "",
       "params": [],
       "returns": [
@@ -124681,7 +125007,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 728,
+      "line": 733,
       "description": "",
       "params": [
         {
@@ -124706,7 +125032,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 675,
+      "line": 679,
       "description": "",
       "params": [
         {
@@ -124756,7 +125082,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 193,
+      "line": 195,
       "description": "",
       "params": [
         {
@@ -124800,7 +125126,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 710,
+      "line": 715,
       "description": "",
       "params": [
         {
@@ -124850,7 +125176,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetStore.js",
-      "line": 308,
+      "line": 310,
       "description": "Update runtime thresholds for the active session.",
       "params": [
         {
@@ -124875,7 +125201,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 156,
+      "line": 157,
       "description": "",
       "params": [],
       "returns": [
@@ -124893,7 +125219,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 128,
+      "line": 129,
       "description": "",
       "params": [
         {
@@ -124949,7 +125275,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 298,
+      "line": 300,
       "description": "",
       "params": [],
       "returns": [
@@ -124967,7 +125293,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 119,
+      "line": 120,
       "description": "",
       "params": [],
       "returns": [
@@ -124985,7 +125311,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 267,
+      "line": 269,
       "description": "",
       "params": [
         {
@@ -125016,7 +125342,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 226,
+      "line": 227,
       "description": "",
       "params": [
         {
@@ -125085,7 +125411,7 @@
       "kind": "class",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 82,
+      "line": 83,
       "description": "",
       "params": [
         {
@@ -125131,7 +125457,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 176,
+      "line": 177,
       "description": "",
       "params": [],
       "returns": [
@@ -125149,7 +125475,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetWorkerPool.js",
-      "line": 140,
+      "line": 141,
       "description": "",
       "params": [
         {
@@ -132240,7 +132566,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2348,
+      "line": 2349,
       "description": "",
       "params": [
         {
@@ -132265,7 +132591,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1560,
+      "line": 1561,
       "description": "",
       "params": [
         {
@@ -132296,7 +132622,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1605,
+      "line": 1606,
       "description": "",
       "params": [
         {
@@ -132339,7 +132665,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2333,
+      "line": 2334,
       "description": "",
       "params": [
         {
@@ -132370,7 +132696,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2319,
+      "line": 2320,
       "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
       "params": [
         {
@@ -132420,7 +132746,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2193,
+      "line": 2194,
       "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
       "params": [],
       "returns": [],
@@ -132433,7 +132759,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2204,
+      "line": 2205,
       "description": "Collect printable page image URLs without creating or opening a PDF.",
       "params": [
         {
@@ -132488,7 +132814,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1144,
+      "line": 1145,
       "description": "",
       "params": [
         {
@@ -132513,7 +132839,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1041,
+      "line": 1042,
       "description": "",
       "params": [
         {
@@ -132550,7 +132876,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2244,
+      "line": 2245,
       "description": "",
       "params": [
         {
@@ -132587,7 +132913,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1663,
+      "line": 1664,
       "description": "Build a PDF blob from page image URLs and print metadata.",
       "params": [
         {
@@ -132618,7 +132944,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1581,
+      "line": 1582,
       "description": "",
       "params": [
         {
@@ -132686,7 +133012,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1630,
+      "line": 1631,
       "description": "",
       "params": [
         {
@@ -132736,7 +133062,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1815,
+      "line": 1816,
       "description": "",
       "params": [
         {
@@ -132767,7 +133093,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1360,
+      "line": 1361,
       "description": "",
       "params": [
         {
@@ -132810,7 +133136,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1383,
+      "line": 1384,
       "description": "",
       "params": [
         {
@@ -132877,7 +133203,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1415,
+      "line": 1416,
       "description": "",
       "params": [
         {
@@ -132920,7 +133246,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1462,
+      "line": 1463,
       "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
       "params": [
         {
@@ -133044,7 +133370,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2036,
+      "line": 2037,
       "description": "",
       "params": [
         {
@@ -133081,7 +133407,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1185,
+      "line": 1186,
       "description": "",
       "params": [
         {
@@ -133124,7 +133450,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1155,
+      "line": 1156,
       "description": "",
       "params": [
         {
@@ -133254,7 +133580,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1074,
+      "line": 1075,
       "description": "",
       "params": [
         {
@@ -133279,7 +133605,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2126,
+      "line": 2127,
       "description": "Read printable page image URLs from the document renderer.",
       "params": [
         {
@@ -133316,7 +133642,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2486,
+      "line": 2487,
       "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
       "params": [
         {
@@ -133359,7 +133685,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2472,
+      "line": 2473,
       "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
       "params": [
         {
@@ -133402,7 +133728,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2369,
+      "line": 2370,
       "description": "Generate/print/download a PDF from the currently rendered active page surface.",
       "params": [
         {
@@ -133433,7 +133759,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2400,
+      "line": 2401,
       "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
       "params": [
         {
@@ -133470,7 +133796,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2261,
+      "line": 2262,
       "description": "",
       "params": [
         {
@@ -133538,7 +133864,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2308,
+      "line": 2309,
       "description": "Read the URL an surface currently displays (empty for any other element).",
       "params": [
         {
@@ -133719,7 +134045,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2069,
+      "line": 2070,
       "description": "Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease (releasing them is a no-op).",
       "params": [
         {
@@ -133744,7 +134070,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1229,
+      "line": 1230,
       "description": "",
       "params": [
         {
@@ -133787,7 +134113,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2083,
+      "line": 2084,
       "description": "Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow.",
       "params": [
         {
@@ -133898,7 +134224,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1643,
+      "line": 1644,
       "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
       "params": [],
       "returns": [
@@ -133916,7 +134242,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1496,
+      "line": 1497,
       "description": "",
       "params": [
         {
@@ -133941,7 +134267,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1123,
+      "line": 1124,
       "description": "",
       "params": [
         {
@@ -133978,7 +134304,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1135,
+      "line": 1136,
       "description": "",
       "params": [
         {
@@ -134015,7 +134341,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1000,
+      "line": 1001,
       "description": "",
       "params": [
         {
@@ -134083,7 +134409,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1098,
+      "line": 1099,
       "description": "",
       "params": [
         {
@@ -134108,7 +134434,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1057,
+      "line": 1058,
       "description": "",
       "params": [
         {
@@ -134133,7 +134459,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1029,
+      "line": 1030,
       "description": "",
       "params": [
         {
@@ -134170,7 +134496,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2231,
+      "line": 2232,
       "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
       "params": [
         {
@@ -134276,7 +134602,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2441,
+      "line": 2442,
       "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
       "params": [
         {
@@ -134409,7 +134735,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2282,
+      "line": 2283,
       "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
       "params": [
         {
@@ -134434,7 +134760,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1835,
+      "line": 1836,
       "description": "Print a generated PDF through a hidden iframe.",
       "params": [
         {
@@ -134459,7 +134785,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2105,
+      "line": 2106,
       "description": "Release print URL leases held through the document renderer.",
       "params": [
         {
@@ -134490,7 +134816,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2218,
+      "line": 2219,
       "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
       "params": [
         {
@@ -134564,7 +134890,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1511,
+      "line": 1512,
       "description": "",
       "params": [
         {
@@ -134595,7 +134921,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1617,
+      "line": 1618,
       "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
       "params": [
         {
@@ -134620,7 +134946,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1524,
+      "line": 1525,
       "description": "",
       "params": [
         {
@@ -134645,7 +134971,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1010,
+      "line": 1011,
       "description": "",
       "params": [
         {
@@ -134670,7 +134996,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1537,
+      "line": 1538,
       "description": "Resolve the generated-PDF worker plan.",
       "params": [
         {
@@ -134826,7 +135152,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1110,
+      "line": 1111,
       "description": "",
       "params": [
         {
@@ -134851,7 +135177,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2026,
+      "line": 2027,
       "description": "",
       "params": [
         {
@@ -135025,7 +135351,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2052,
+      "line": 2053,
       "description": "",
       "params": [
         {
@@ -135050,7 +135376,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1310,
+      "line": 1311,
       "description": "",
       "params": [
         {

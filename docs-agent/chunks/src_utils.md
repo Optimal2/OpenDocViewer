@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 67. Line count: 24716. JSDoc symbol count: 1030.
+File count: 69. Line count: 24820. JSDoc symbol count: 1033.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -164,6 +164,18 @@ Symbols:
 - `module:imageAdjustments.needsCanvas` (function) - Whether the page must be drawn on the canvas instead of the plain &lt;img&gt; .
 - `module:imageAdjustments.buildImageFilter` (function) - The canvas 2d filter for the adjustments, composed as brightness, contrast, grayscale, invert.
 
+## src/utils/jxlDecode.js
+
+Decode frame 1 in our Rust/WASM codec.
+
+Exports: `decodeJxl`
+
+Local imports: `src/utils/modernImageSignatures.js`
+
+Symbols:
+
+- `decodeJxl` (function) - Decode frame 1 in our Rust/WASM codec.
+
 ## src/utils/keyTipLayout.js
 
 Where the key tips go \(components/KeyTips.jsx\): one label under each toolbar button, centred on the button, packed into rows so that the labels of neighbouring buttons do not cover each other.
@@ -256,6 +268,17 @@ Symbols:
 - `readJsHeapLimitMiB` (function) - No description.
 - `resolveTier` (function) - No description.
 - `getRuntimeMemoryProfile` (function) - No description.
+
+## src/utils/modernImageSignatures.js
+
+Identify modern raster formats by bytes, independently of names and MIME hints.
+
+Exports: `hasJxlSignature`, `hasAvifSignature`
+
+Symbols:
+
+- `hasJxlSignature` (function) - Identify modern raster formats by bytes, independently of names and MIME hints.
+- `hasAvifSignature` (function) - Accept AVIF major or compatible brands only within the first ISO BMFF ftyp box.
 
 ## src/utils/navigationUtils.js
 
@@ -462,7 +485,7 @@ OpenDocViewer — hybrid page\-asset renderer.
 
 Exports: `createPageAssetRenderer`, `PageAssetRenderer`
 
-Local imports: `src/utils/documentLoadingConfig.js`, `src/utils/pageAssetWorkerPool.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/pdfjsDocumentOptions.js`, `src/utils/pdfResolution.js`, `src/utils/pdfResolutionRuntime.js`
+Local imports: `src/utils/documentLoadingConfig.js`, `src/utils/pageAssetWorkerPool.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/pdfjsDocumentOptions.js`, `src/utils/pdfResolution.js`, `src/utils/pdfResolutionRuntime.js`, `src/utils/jxlDecode.js`
 
 Symbols:
 

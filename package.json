@@ -52,6 +52,7 @@
     "release:major": "npm version major -m \"chore(release): %s\""
   },
   "dependencies": {
+    "@noble/hashes": "2.4.0",
     "asn1js": "^4.0.0",
     "axios": "^1.21.0",
     "cors": "^2.8.6",
@@ -65,6 +66,7 @@
     "i18next-http-backend": "^4.0.10",
     "i18next-icu": "^2.7.0",
     "jspdf": "^4.2.1",
+    "jxl-oxide-wasm": "0.12.6",
     "material-icons": "^1.13.14",
     "morgan": "^1.12.1",
     "pdf-lib": "^1.17.1",
@@ -95,6 +97,7 @@
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
+    "fast-png": "^8.0.0",
     "globals": "^17.14.0",
     "jsdoc": "^4.0.5",
     "jsdom": "31.0.0",

@@ -8,13 +8,14 @@ list with licence identifiers is in `package.json` / `package-lock.json`.
 
 | Component | Licence | Used for |
 | --- | --- | --- |
+| `jxl-oxide-wasm` 0.12.6 | MIT OR Apache-2.0 (Wonwoo Choi and contributors, github.com/tirr-c/jxl-oxide) | JPEG XL decoding and lossless PNG encoding in Rust/WebAssembly, loaded only for JPEG XL input. The package includes LICENSE-MIT and LICENSE-APACHE. |
 | `pkijs` | BSD-3-Clause (Copyright (c) 2014 GlobalSign, 2015-2019 Peculiar Ventures) | Parsing CMS/PKCS#7 signature payloads in signed PDFs (loaded dynamically only when a document contains signature fields) |
 | `asn1js` | BSD-3-Clause (Copyright (c) 2014 GMO GlobalSign, 2015-2022 Peculiar Ventures) | ASN.1/DER decoding backing `pkijs` |
-| `@noble/hashes` | MIT (Copyright (c) 2022 Paul Miller) | SHA-1 and SHA-2 hashing backing `pkijs` |
+| `@noble/hashes` | MIT (Copyright (c) 2022 Paul Miller) | SHA-1 and SHA-2 hashing backing `pkijs`, and SHA-256 conversion provenance for JPEG XL |
 | `@peculiar/utils` | MIT (Copyright (c) 2017-2026 Peculiar Ventures, LLC) | Binary, hex and base64 conversion helpers backing `pkijs` and `asn1js` |
 | `bytestreamjs` | BSD-3-Clause (Copyright (c) 2016-2022 Peculiar Ventures) | Byte-stream reading and writing backing `pkijs` |
 
-All five ship their licence text inside their npm packages
+The signature components ship their licence text inside their npm packages
 (`node_modules/pkijs/LICENSE`, `node_modules/asn1js/LICENSE`,
 `node_modules/@noble/hashes/LICENSE`, `node_modules/@peculiar/utils/LICENSE`,
 `node_modules/bytestreamjs/LICENSE`). The bundled `@peculiar/utils` 4.1.0 is installed once

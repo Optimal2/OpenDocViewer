@@ -64,7 +64,8 @@ function isRasterExt(fileExtension) {
     || ext === 'gif'
     || ext === 'webp'
     || ext === 'bmp'
-    || ext === 'avif';
+    || ext === 'avif'
+    || ext === 'jxl';
 }
 
 function nowMs() {
@@ -247,6 +248,7 @@ export class PageAssetWorkerPool {
         width: Math.max(1, Number(data.width) || 1),
         height: Math.max(1, Number(data.height) || 1),
         mimeType: String(data.mimeType || data.blob?.type || 'application/octet-stream'),
+        imageMetadata: data.imageMetadata,
         workerQueueMs: Math.max(0, Number(startedAt) - Number(queuedAt)),
         workerRunMs: Math.max(0, completedAt - Number(startedAt)),
       });

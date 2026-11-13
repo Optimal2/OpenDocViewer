@@ -1031,7 +1031,8 @@ export function isRasterImageExtension(value) {
     || ext === 'bmp'
     || ext === 'tif'
     || ext === 'tiff'
-    || ext === 'avif';
+    || ext === 'avif'
+    || ext === 'jxl';
 }
 
 export function shouldUseFullImagesForThumbnails(config, page, totalPages) {

@@ -18,6 +18,7 @@
 import React, { useEffect, useContext, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fileTypeFromBlob } from 'file-type';
+import { hasJxlSignature, hasAvifSignature } from '../../utils/modernImageSignatures.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import logger from '../../logging/systemLogger.js';
 import { fetchAndArrayBuffer, generateDocumentList, generateDemoList, getTotalPages } from './documentLoaderUtils.js';
@@ -220,9 +221,11 @@ function normalizeExtension(value) {
 }
 
 const SUPPORTED_SOURCE_EXTENSIONS = Object.freeze(new Set([
+  'avif',
   'bmp',
   'gif',
   'jpg',
+  'jxl',
   'pdf',
   'png',
   'tiff',
@@ -297,6 +300,8 @@ function startsWithAscii(bytes, signature) {
  */
 function matchesKnownSourceSignature(bytes, ext) {
   const normalized = normalizeExtension(ext);
+  if (normalized === 'jxl') return hasJxlSignature(bytes);
+  if (normalized === 'avif') return hasAvifSignature(bytes);
   if (!bytes || bytes.length < 4) return false;
 
   switch (normalized) {
@@ -359,7 +364,7 @@ async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' 
   const expectedExt = normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
   const mimeExt = normalizeExtension(mimeToExtension(initialMimeType));
   const headBytes = await readBlobHeadBytes(blob);
-  const signatureExt = [expectedExt, mimeExt]
+  const signatureExt = [expectedExt, mimeExt, 'jxl', 'avif']
     .filter(Boolean)
     .find((ext) => isSupportedSourceExtension(ext) && matchesKnownSourceSignature(headBytes, ext)) || '';
 
@@ -565,6 +570,8 @@ function redactUrlForLog(url) {
  */
 function mimeToExtension(mimeType) {
   const type = String(mimeType || '').toLowerCase();
+  if (type.split(';')[0].trim() === 'image/jxl') return 'jxl';
+  if (type.split(';')[0].trim() === 'image/avif') return 'avif';
   if (type.includes('pdf')) return 'pdf';
   if (type.includes('tif')) return 'tiff';
   if (type.includes('png')) return 'png';
@@ -782,6 +789,11 @@ async function validateFetchedSourceBlob({ entry, blob, detectedType, mimeType, 
     sizeBytes: Number(blob?.size || 0),
   };
 
+  if ((normalizedExt === 'jxl' || normalizedExt === 'avif')
+    && !matchesKnownSourceSignature(resolvedHeadBytes, normalizedExt)) {
+    throw createInvalidSourcePayloadError('Modern image signature does not match its declared type.', details);
+  }
+
   if (!isSupportedSourceExtension(normalizedExt)) {
     throw createInvalidSourcePayloadError(
       `Fetched source is not a supported ODV document type (${normalizedExt || 'unknown'}).`,
@@ -922,6 +934,8 @@ async function readExactStreamBytes(reader, state, length) {
  */
 function mimeForExtension(ext) {
   switch (normalizeExtension(ext)) {
+    case 'jxl': return 'image/jxl';
+    case 'avif': return 'image/avif';
     case 'pdf': return 'application/pdf';
     case 'tiff': return 'image/tiff';
     case 'png': return 'image/png';

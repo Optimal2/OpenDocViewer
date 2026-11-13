@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentLoader
 
-File count: 8. Line count: 4109. JSDoc symbol count: 106.
+File count: 8. Line count: 4123. JSDoc symbol count: 106.
 
 ## src/components/DocumentLoader/batchHandler.js
 
@@ -38,7 +38,7 @@ OpenDocViewer — Document loader orchestrator.
 
 Exports: `DocumentLoader`
 
-Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/documentLoadingConfig.js`, `src/components/DocumentLoader/LoadPressureDialog.jsx`, `src/utils/publicAssetUrl.js`, `src/utils/reloadCacheIdentity.js`
+Local imports: `src/utils/modernImageSignatures.js`, `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/documentLoadingConfig.js`, `src/components/DocumentLoader/LoadPressureDialog.jsx`, `src/utils/publicAssetUrl.js`, `src/utils/reloadCacheIdentity.js`
 
 Symbols:
 

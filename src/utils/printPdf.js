@@ -950,7 +950,7 @@ function getImageDimension(img, dimension) {
  * @returns {Array<'PNG'|'JPEG'|'WEBP'>}
  */
 function imageFormatAttempts(preferred) {
-  if (preferred === 'PNG') return ['PNG', 'JPEG'];
+  if (preferred === 'PNG') return ['PNG'];
   if (preferred === 'JPEG') return ['JPEG', 'PNG'];
   return ['WEBP', 'PNG', 'JPEG'];
 }
@@ -984,6 +984,7 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
       });
     }
   }
+  if (preferred === 'PNG') throw new Error('Unable to embed PNG losslessly in generated PDF.');
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
   if (!jpeg) {
     throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. Native jsPDF image insertion and JPEG fallback conversion both failed. ${SUPPORTED_PDF_IMAGE_FORMAT_HINT} Check that the image is readable.`);

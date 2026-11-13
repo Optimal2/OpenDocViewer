@@ -93,7 +93,7 @@ function formatFromMimeOrUrl(mimeType, src) {
 }
 
 function imageFormatAttempts(preferred) {
-  if (preferred === 'PNG') return ['PNG', 'JPEG'];
+  if (preferred === 'PNG') return ['PNG'];
   if (preferred === 'JPEG') return ['JPEG', 'PNG'];
   return ['WEBP', 'PNG', 'JPEG'];
 }
@@ -475,6 +475,7 @@ async function addImageWithFallback(pdf, image, x, y, width, height, fallbackQua
     }
   }
 
+  if (image.format === 'PNG') throw new Error('Unable to embed PNG losslessly in generated PDF inside worker.');
   const jpeg = await imageToJpegDataUrl(image, fallbackQuality);
   if (!jpeg) throw new Error('Unable to add image to generated PDF inside worker.');
   pdf.addImage(jpeg, 'JPEG', x, y, width, height, undefined, 'FAST');

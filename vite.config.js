@@ -304,6 +304,9 @@ export default defineConfig(({ mode }) => {
      * parser behavior without relying on deprecated esbuild optimizer options.
      */
     optimizeDeps: {
+      // Discover the lazy worker codec before the first JXL request, avoiding a dev-only
+      // optimizer reload. This does not import it into the application's eager chunks.
+      include: ['jxl-oxide-wasm'],
       rolldownOptions: {
         moduleTypes: {
           '.js': 'jsx',

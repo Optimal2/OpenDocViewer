@@ -209,9 +209,19 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
 
 async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMaxWidth, thumbnailMaxHeight) {
   const ext = normalizeExtension(fileExtension);
+  if (ext === 'jxl') {
+    const { decodeJxl } = await import('../utils/jxlDecode.js');
+    const decoded = await decodeJxl(sourceBlob);
+    if (variant === 'full') return decoded;
+    return {
+      ...await scaleBlob(decoded.blob, normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH),
+        normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT)),
+      imageMetadata: decoded.imageMetadata,
+    };
+  }
   const maxThumbnailWidth = normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH);
   const maxThumbnailHeight = normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT);
-  if (variant === 'full') {
+  if (variant === 'full' && ext !== 'avif') {
     // Intentional decode: the worker still needs trustworthy intrinsic dimensions for layout/math
     // metadata, and the Blob alone does not expose width/height in a cross-format way.
     const bitmap = await createBitmap(sourceBlob);
@@ -229,8 +239,8 @@ async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMa
 
   return scaleBlob(
     sourceBlob,
-    maxThumbnailWidth,
-    maxThumbnailHeight
+    variant === 'full' ? undefined : maxThumbnailWidth,
+    variant === 'full' ? undefined : maxThumbnailHeight
   );
 }
 
@@ -477,6 +487,7 @@ async function handleRenderPageAssetMessage(data) {
       width: rendered.width,
       height: rendered.height,
       mimeType: rendered.mimeType,
+      imageMetadata: rendered.imageMetadata,
     });
   } catch (error) {
     workerScope.postMessage({

@@ -1464,6 +1464,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       variant,
       blob: rendered.blob,
       mimeType: rendered.mimeType,
+      imageMetadata: rendered.imageMetadata,
       width: rendered.width,
       height: rendered.height,
     });
@@ -1741,6 +1742,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           thumbnailUsesFullAsset: false,
           realWidth: stored.meta.width,
           realHeight: stored.meta.height,
+          imageMetadata: stored.meta.imageMetadata,
         }
       : {
           fullSizeUrl: url,
@@ -1748,6 +1750,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           loaded: true,
           realWidth: stored.meta.width,
           realHeight: stored.meta.height,
+          imageMetadata: stored.meta.imageMetadata,
           status: 1,
           pdfResolution,
           ...(reuseThumbnail
@@ -1832,6 +1835,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           thumbnailUsesFullAsset: false,
           realWidth: rendered.width,
           realHeight: rendered.height,
+          imageMetadata: rendered.imageMetadata,
         }
       : {
           fullSizeUrl: url,
@@ -1839,6 +1843,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           loaded: true,
           realWidth: rendered.width,
           realHeight: rendered.height,
+          imageMetadata: rendered.imageMetadata,
           status: 1,
           pdfResolution: rendered.pdfResolution,
           ...(reuseThumbnail

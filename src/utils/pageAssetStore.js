@@ -144,6 +144,7 @@ function openAssetStoreDb() {
  * @property {number} pageIndex
  * @property {'full'|'thumbnail'} variant
  * @property {string} mimeType
+ * @property {Object=} imageMetadata JPEG XL frame selection and conversion provenance.
  * @property {number} width
  * @property {number} height
  * @property {number} sizeBytes
@@ -159,6 +160,7 @@ function openAssetStoreDb() {
  * @property {'full'|'thumbnail'} variant
  * @property {Blob} blob
  * @property {string=} mimeType
+ * @property {Object=} imageMetadata
  * @property {number=} width
  * @property {number=} height
  */
@@ -354,6 +356,7 @@ export class PageAssetStore {
         pageIndex: Math.max(0, Number(options?.pageIndex) || 0),
         variant: String(options?.variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full',
         mimeType: String(options?.mimeType || blob.type || 'application/octet-stream'),
+        imageMetadata: options?.imageMetadata,
         width: Math.max(1, Number(options?.width) || 1),
         height: Math.max(1, Number(options?.height) || 1),
         sizeBytes: Number(blob.size || 0),
@@ -638,6 +641,7 @@ export class PageAssetStore {
       pageIndex: meta.pageIndex,
       variant: meta.variant,
       mimeType: meta.mimeType,
+      imageMetadata: meta.imageMetadata,
       width: meta.width,
       height: meta.height,
       sizeBytes: meta.sizeBytes,
@@ -681,6 +685,7 @@ export class PageAssetStore {
       pageIndex: Math.max(0, Number(record?.pageIndex) || 0),
       variant: String(record?.variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full',
       mimeType: String(record?.mimeType || 'application/octet-stream'),
+      imageMetadata: record?.imageMetadata,
       width: Math.max(1, Number(record?.width) || 1),
       height: Math.max(1, Number(record?.height) || 1),
       sizeBytes: Number(record?.sizeBytes || 0),

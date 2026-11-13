@@ -745,8 +745,22 @@ export class PageAssetRenderer {
   }
 
   async renderImagePage(descriptor, options) {
-    const blob = await this.tempStore.getBlob(descriptor.sourceKey);
+    let blob = await this.tempStore.getBlob(descriptor.sourceKey);
     if (!blob) throw new Error(`Missing source blob for image ${descriptor.sourceKey}`);
+    let imageMetadata;
+    const ext = String(descriptor.fileExtension || '').toLowerCase();
+    if (ext === 'jxl') {
+      const { decodeJxl } = await import('./jxlDecode.js');
+      const decoded = await decodeJxl(blob);
+      if (options.variant === 'full') return decoded;
+      blob = decoded.blob;
+      imageMetadata = decoded.imageMetadata;
+    }
+
+    if (ext === 'avif' && options.variant === 'full') {
+      const full = await scaleBlob(blob);
+      return { ...full, mimeType: 'image/png' };
+    }
 
     if (options.variant === 'full') {
       const decoded = await loadBlobForDrawing(blob);
@@ -773,6 +787,7 @@ export class PageAssetRenderer {
       width: thumb.width,
       height: thumb.height,
       mimeType: thumb.blob.type || 'image/png',
+      imageMetadata,
     };
   }
 
