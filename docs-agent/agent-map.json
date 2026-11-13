@@ -98,7 +98,7 @@
   },
   "stats": {
     "fileCount": 210,
-    "sourceLineCount": 74802,
+    "sourceLineCount": 74862,
     "docletCount": 2192,
     "documentedFileCount": 206,
     "lowConfidenceSummaryCount": 2,
@@ -618,7 +618,7 @@
     {
       "path": "src/utils/printPdf.js",
       "score": 98,
-      "lines": 2503,
+      "lines": 2530,
       "incomingLocalImports": 3,
       "doclets": 101,
       "summary": "OpenDocViewer — Generated PDF print backend.",
@@ -919,7 +919,7 @@
           {
             "path": "src/workers/pdfWorker.js",
             "score": 8,
-            "lines": 640,
+            "lines": 673,
             "summary": "OpenDocViewer - generated PDF worker."
           },
           {
@@ -1916,7 +1916,7 @@
     {
       "name": "src/utils",
       "fileCount": 69,
-      "lineCount": 24869,
+      "lineCount": 24896,
       "docletCount": 1036,
       "importantFiles": [
         {
@@ -1985,7 +1985,7 @@
         {
           "path": "src/utils/printPdf.js",
           "score": 98,
-          "lines": 2503,
+          "lines": 2530,
           "incomingLocalImports": 3,
           "doclets": 101,
           "summary": "OpenDocViewer — Generated PDF print backend.",
@@ -1996,13 +1996,13 @@
     {
       "name": "src/workers",
       "fileCount": 4,
-      "lineCount": 1674,
+      "lineCount": 1707,
       "docletCount": 5,
       "importantFiles": [
         {
           "path": "src/workers/pdfWorker.js",
           "score": 8,
-          "lines": 640,
+          "lines": 673,
           "incomingLocalImports": 0,
           "doclets": 1,
           "summary": "OpenDocViewer - generated PDF worker.",
@@ -73468,7 +73468,7 @@
     },
     {
       "path": "src/utils/printPdf.js",
-      "lines": 2503,
+      "lines": 2530,
       "extension": ".js",
       "jsdocBlockCount": 109,
       "sourceSummary": "OpenDocViewer — Generated PDF print backend.",
@@ -73570,7 +73570,7 @@
         {
           "source": "jspdf",
           "specifiers": [],
-          "line": 1659,
+          "line": 1686,
           "kind": "dynamic"
         }
       ],
@@ -73578,57 +73578,57 @@
         {
           "name": "createPrintPdfBlob",
           "kind": "function",
-          "line": 1677
+          "line": 1704
         },
         {
           "name": "downloadPdfBlob",
           "kind": "function",
-          "line": 1829
+          "line": 1856
         },
         {
           "name": "printPdfBlob",
           "kind": "function",
-          "line": 1849
+          "line": 1876
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2218
+          "line": 2245
         },
         {
           "name": "releasePrintablePdfSources",
           "kind": "function",
-          "line": 2232
+          "line": 2259
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2258
+          "line": 2285
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2275
+          "line": 2302
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2383
+          "line": 2410
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2414
+          "line": 2441
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2486
+          "line": 2513
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2500
+          "line": 2527
         }
       ],
       "declarations": [
@@ -73853,344 +73853,349 @@
           "line": 902
         },
         {
-          "name": "imageToJpegDataUrl",
+          "name": "imageToPngDataUrl",
           "kind": "function",
           "line": 923
         },
         {
+          "name": "imageToJpegDataUrl",
+          "kind": "function",
+          "line": 939
+        },
+        {
           "name": "getImageDimension",
           "kind": "function",
-          "line": 949
+          "line": 965
         },
         {
           "name": "imageFormatAttempts",
           "kind": "function",
-          "line": 960
+          "line": 976
         },
         {
           "name": "addImageWithFallback",
           "kind": "function",
-          "line": 977
+          "line": 993
         },
         {
           "name": "normalizePdfOrientationMode",
           "kind": "function",
-          "line": 1013
+          "line": 1040
         },
         {
           "name": "resolvePdfOrientationMode",
           "kind": "function",
-          "line": 1023
+          "line": 1050
         },
         {
           "name": "pageFormatForImage",
           "kind": "function",
-          "line": 1042
+          "line": 1069
         },
         {
           "name": "createJsPdfOptions",
           "kind": "function",
-          "line": 1054
+          "line": 1081
         },
         {
           "name": "normalizeRichSegments",
           "kind": "function",
-          "line": 1070
+          "line": 1097
         },
         {
           "name": "getRichLineColumns",
           "kind": "function",
-          "line": 1087
+          "line": 1114
         },
         {
           "name": "normalizeRichLine",
           "kind": "function",
-          "line": 1111
+          "line": 1138
         },
         {
           "name": "segmentFontStyle",
           "kind": "function",
-          "line": 1123
+          "line": 1150
         },
         {
           "name": "measureRichSegment",
           "kind": "function",
-          "line": 1136
+          "line": 1163
         },
         {
           "name": "measureRichSegments",
           "kind": "function",
-          "line": 1148
+          "line": 1175
         },
         {
           "name": "createDefaultSegment",
           "kind": "function",
-          "line": 1157
+          "line": 1184
         },
         {
           "name": "fitRichSegmentTextToWidth",
           "kind": "function",
-          "line": 1168
+          "line": 1195
         },
         {
           "name": "fitRichSegmentsToWidth",
           "kind": "function",
-          "line": 1198
+          "line": 1225
         },
         {
           "name": "layoutRichColumns",
           "kind": "function",
-          "line": 1242
+          "line": 1269
         },
         {
           "name": "result",
           "kind": "object",
-          "line": 1296
+          "line": 1323
         },
         {
           "name": "wrapRichLines",
           "kind": "function",
-          "line": 1323
+          "line": 1350
         },
         {
           "name": "nextSegment",
           "kind": "object",
-          "line": 1344
+          "line": 1371
         },
         {
           "name": "drawRichSegments",
           "kind": "function",
-          "line": 1373
+          "line": 1400
         },
         {
           "name": "drawRichTextBlock",
           "kind": "function",
-          "line": 1396
+          "line": 1423
         },
         {
           "name": "drawWatermark",
           "kind": "function",
-          "line": 1428
+          "line": 1455
         },
         {
           "name": "drawWatermarkImage",
           "kind": "function",
-          "line": 1475
+          "line": 1502
         },
         {
           "name": "makeTokenContext",
           "kind": "function",
-          "line": 1509
+          "line": 1536
         },
         {
           "name": "reportProgress",
           "kind": "function",
-          "line": 1524
+          "line": 1551
         },
         {
           "name": "resolvePdfImageLoadConcurrency",
           "kind": "function",
-          "line": 1537
+          "line": 1564
         },
         {
           "name": "resolvePdfWorkerPlan",
           "kind": "function",
-          "line": 1550
+          "line": 1577
         },
         {
           "name": "buildPdfPagePlans",
           "kind": "function",
-          "line": 1573
+          "line": 1600
         },
         {
           "name": "createPrintPdfBlobInWorker",
           "kind": "function",
-          "line": 1594
+          "line": 1621
         },
         {
           "name": "pdfCfg",
           "kind": "object",
-          "line": 1595
+          "line": 1622
         },
         {
           "name": "calculateOverlayReserve",
           "kind": "function",
-          "line": 1619
+          "line": 1646
         },
         {
           "name": "resolveJsPdfConstructor",
           "kind": "function",
-          "line": 1631
+          "line": 1658
         },
         {
           "name": "describeModuleExports",
           "kind": "function",
-          "line": 1644
+          "line": 1671
         },
         {
           "name": "loadJsPdf",
           "kind": "function",
-          "line": 1657
+          "line": 1684
         },
         {
           "name": "createPrintPdfBlob",
           "kind": "function",
-          "line": 1677
+          "line": 1704
         },
         {
           "name": "downloadPdfBlob",
           "kind": "function",
-          "line": 1829
+          "line": 1856
         },
         {
           "name": "printPdfBlob",
           "kind": "function",
-          "line": 1849
+          "line": 1876
         },
         {
           "name": "addCleanupListener",
           "kind": "function",
-          "line": 1875
+          "line": 1902
         },
         {
           "name": "handler",
           "kind": "function",
-          "line": 1877
+          "line": 1904
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 1895
+          "line": 1922
         },
         {
           "name": "settleResolve",
           "kind": "function",
-          "line": 1921
+          "line": 1948
         },
         {
           "name": "settleReject",
           "kind": "function",
-          "line": 1926
+          "line": 1953
         },
         {
           "name": "tryWindowFallback",
           "kind": "function",
-          "line": 1932
+          "line": 1959
         },
         {
           "name": "invokePrint",
           "kind": "function",
-          "line": 1976
+          "line": 2003
         },
         {
           "name": "selectPageContexts",
           "kind": "function",
-          "line": 2040
+          "line": 2067
         },
         {
           "name": "executeOutputAction",
           "kind": "function",
-          "line": 2050
+          "line": 2077
         },
         {
           "name": "warnDeprecatedPrintableUrlExportAlias",
           "kind": "function",
-          "line": 2066
+          "line": 2093
         },
         {
           "name": "isLeasableSurfaceUrl",
           "kind": "function",
-          "line": 2083
+          "line": 2110
         },
         {
           "name": "leaseSurfaceBlobUrls",
           "kind": "function",
-          "line": 2097
+          "line": 2124
         },
         {
           "name": "releasePrintableDataUrls",
           "kind": "function",
-          "line": 2119
+          "line": 2146
         },
         {
           "name": "getSelectedPrintableDataUrls",
           "kind": "function",
-          "line": 2140
+          "line": 2167
         },
         {
           "name": "collectPrintablePdfSources",
           "kind": "function",
-          "line": 2218
+          "line": 2245
         },
         {
           "name": "releasePrintablePdfSources",
           "kind": "function",
-          "line": 2232
+          "line": 2259
         },
         {
           "name": "pageNumberToIndex",
           "kind": "function",
-          "line": 2245
+          "line": 2272
         },
         {
           "name": "createPdfFromDocumentHandle",
           "kind": "function",
-          "line": 2258
+          "line": 2285
         },
         {
           "name": "handlePdfOutput",
           "kind": "function",
-          "line": 2275
+          "line": 2302
         },
         {
           "name": "printableSourceFromElement",
           "kind": "function",
-          "line": 2296
+          "line": 2323
         },
         {
           "name": "imageElementUrl",
           "kind": "function",
-          "line": 2322
+          "line": 2349
         },
         {
           "name": "canvasToPngDataUrl",
           "kind": "function",
-          "line": 2333
+          "line": 2360
         },
         {
           "name": "canvasToBlob",
           "kind": "function",
-          "line": 2347
+          "line": 2374
         },
         {
           "name": "blobToDataUrl",
           "kind": "function",
-          "line": 2362
+          "line": 2389
         },
         {
           "name": "handlePdfCurrent",
           "kind": "function",
-          "line": 2383
+          "line": 2410
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "function",
-          "line": 2414
+          "line": 2441
         },
         {
           "name": "pdfComposedComparison",
           "kind": "function",
-          "line": 2455
+          "line": 2482
         },
         {
           "name": "handlePdfCompareOverlay",
           "kind": "function",
-          "line": 2486
+          "line": 2513
         },
         {
           "name": "handlePdfCompareCurtain",
           "kind": "function",
-          "line": 2500
+          "line": 2527
         }
       ],
       "parseError": null,
@@ -75279,9 +75284,9 @@
           "examples": 0
         },
         {
-          "id": "imageToJpegDataUrl",
-          "name": "imageToJpegDataUrl",
-          "longname": "imageToJpegDataUrl",
+          "id": "imageToPngDataUrl",
+          "name": "imageToPngDataUrl",
+          "longname": "imageToPngDataUrl",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
@@ -75316,7 +75321,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 949,
+          "line": 965,
           "description": "",
           "params": [
             {
@@ -75347,7 +75352,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 960,
+          "line": 976,
           "description": "",
           "params": [
             {
@@ -75372,7 +75377,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 977,
+          "line": 993,
           "description": "",
           "params": [
             {
@@ -75433,7 +75438,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1013,
+          "line": 1040,
           "description": "",
           "params": [
             {
@@ -75464,7 +75469,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1023,
+          "line": 1050,
           "description": "",
           "params": [
             {
@@ -75489,7 +75494,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1042,
+          "line": 1069,
           "description": "",
           "params": [
             {
@@ -75526,7 +75531,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1054,
+          "line": 1081,
           "description": "",
           "params": [
             {
@@ -75563,7 +75568,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1070,
+          "line": 1097,
           "description": "",
           "params": [
             {
@@ -75588,7 +75593,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1087,
+          "line": 1114,
           "description": "",
           "params": [
             {
@@ -75613,7 +75618,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1111,
+          "line": 1138,
           "description": "",
           "params": [
             {
@@ -75638,7 +75643,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1123,
+          "line": 1150,
           "description": "",
           "params": [
             {
@@ -75663,7 +75668,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1136,
+          "line": 1163,
           "description": "",
           "params": [
             {
@@ -75700,7 +75705,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1148,
+          "line": 1175,
           "description": "",
           "params": [
             {
@@ -75737,7 +75742,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1157,
+          "line": 1184,
           "description": "",
           "params": [
             {
@@ -75762,7 +75767,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1168,
+          "line": 1195,
           "description": "",
           "params": [
             {
@@ -75805,7 +75810,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1198,
+          "line": 1225,
           "description": "",
           "params": [
             {
@@ -75848,7 +75853,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1242,
+          "line": 1269,
           "description": "",
           "params": [
             {
@@ -75891,7 +75896,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1323,
+          "line": 1350,
           "description": "",
           "params": [
             {
@@ -75940,7 +75945,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1373,
+          "line": 1400,
           "description": "",
           "params": [
             {
@@ -75983,7 +75988,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1396,
+          "line": 1423,
           "description": "",
           "params": [
             {
@@ -76050,7 +76055,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1428,
+          "line": 1455,
           "description": "",
           "params": [
             {
@@ -76093,7 +76098,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1475,
+          "line": 1502,
           "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
           "params": [
             {
@@ -76136,7 +76141,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1509,
+          "line": 1536,
           "description": "",
           "params": [
             {
@@ -76161,7 +76166,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1524,
+          "line": 1551,
           "description": "",
           "params": [
             {
@@ -76192,7 +76197,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1537,
+          "line": 1564,
           "description": "",
           "params": [
             {
@@ -76217,7 +76222,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1550,
+          "line": 1577,
           "description": "Resolve the generated-PDF worker plan.",
           "params": [
             {
@@ -76248,7 +76253,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1573,
+          "line": 1600,
           "description": "",
           "params": [
             {
@@ -76279,7 +76284,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1594,
+          "line": 1621,
           "description": "",
           "params": [
             {
@@ -76322,7 +76327,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1619,
+          "line": 1646,
           "description": "",
           "params": [
             {
@@ -76365,7 +76370,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1631,
+          "line": 1658,
           "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
           "params": [
             {
@@ -76390,7 +76395,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1644,
+          "line": 1671,
           "description": "",
           "params": [
             {
@@ -76415,7 +76420,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1657,
+          "line": 1684,
           "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
           "params": [],
           "returns": [
@@ -76433,7 +76438,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1677,
+          "line": 1704,
           "description": "Build a PDF blob from page image URLs and print metadata.",
           "params": [
             {
@@ -76464,7 +76469,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1829,
+          "line": 1856,
           "description": "",
           "params": [
             {
@@ -76495,7 +76500,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 1849,
+          "line": 1876,
           "description": "Print a generated PDF through a hidden iframe.",
           "params": [
             {
@@ -76520,7 +76525,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2040,
+          "line": 2067,
           "description": "",
           "params": [
             {
@@ -76551,7 +76556,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2050,
+          "line": 2077,
           "description": "",
           "params": [
             {
@@ -76588,7 +76593,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2066,
+          "line": 2093,
           "description": "",
           "params": [
             {
@@ -76613,7 +76618,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2083,
+          "line": 2110,
           "description": "Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease (releasing them is a no-op).",
           "params": [
             {
@@ -76638,7 +76643,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2097,
+          "line": 2124,
           "description": "Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow.",
           "params": [
             {
@@ -76675,7 +76680,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2119,
+          "line": 2146,
           "description": "Release print URL leases held through the document renderer.",
           "params": [
             {
@@ -76706,7 +76711,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2140,
+          "line": 2167,
           "description": "Read printable page image URLs from the document renderer.",
           "params": [
             {
@@ -76743,7 +76748,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2207,
+          "line": 2234,
           "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
           "params": [],
           "returns": [],
@@ -76756,7 +76761,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2218,
+          "line": 2245,
           "description": "Collect printable page image URLs without creating or opening a PDF.",
           "params": [
             {
@@ -76793,7 +76798,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2232,
+          "line": 2259,
           "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
           "params": [
             {
@@ -76824,7 +76829,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2245,
+          "line": 2272,
           "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
           "params": [
             {
@@ -76855,7 +76860,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2258,
+          "line": 2285,
           "description": "",
           "params": [
             {
@@ -76892,7 +76897,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2275,
+          "line": 2302,
           "description": "",
           "params": [
             {
@@ -76929,7 +76934,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2296,
+          "line": 2323,
           "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
           "params": [
             {
@@ -76954,7 +76959,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2322,
+          "line": 2349,
           "description": "Read the URL an surface currently displays (empty for any other element).",
           "params": [
             {
@@ -76979,7 +76984,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2333,
+          "line": 2360,
           "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
           "params": [
             {
@@ -77004,7 +77009,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2347,
+          "line": 2374,
           "description": "",
           "params": [
             {
@@ -77035,7 +77040,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2362,
+          "line": 2389,
           "description": "",
           "params": [
             {
@@ -77060,7 +77065,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2383,
+          "line": 2410,
           "description": "Generate/print/download a PDF from the currently rendered active page surface.",
           "params": [
             {
@@ -77091,7 +77096,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2414,
+          "line": 2441,
           "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
           "params": [
             {
@@ -77128,7 +77133,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2455,
+          "line": 2482,
           "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
           "params": [
             {
@@ -77183,7 +77188,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2486,
+          "line": 2513,
           "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
           "params": [
             {
@@ -77226,7 +77231,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/printPdf.js",
-          "line": 2500,
+          "line": 2527,
           "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
           "params": [
             {
@@ -77373,7 +77378,7 @@
         {
           "source": "jspdf",
           "specifiers": [],
-          "line": 1659,
+          "line": 1686,
           "kind": "dynamic"
         }
       ],
@@ -89966,7 +89971,7 @@
     },
     {
       "path": "src/workers/pdfWorker.js",
-      "lines": 640,
+      "lines": 673,
       "extension": ".js",
       "jsdocBlockCount": 1,
       "sourceSummary": "OpenDocViewer - generated PDF worker.",
@@ -90146,29 +90151,34 @@
           "line": 438
         },
         {
-          "name": "imageToJpegDataUrl",
+          "name": "imageToPngDataUrl",
           "kind": "function",
           "line": 445
         },
         {
+          "name": "imageToJpegDataUrl",
+          "kind": "function",
+          "line": 467
+        },
+        {
           "name": "addImageWithFallback",
           "kind": "function",
-          "line": 476
+          "line": 498
         },
         {
           "name": "drawWatermark",
           "kind": "function",
-          "line": 495
+          "line": 528
         },
         {
           "name": "drawWatermarkImage",
           "kind": "function",
-          "line": 524
+          "line": 557
         },
         {
           "name": "createPdf",
           "kind": "function",
-          "line": 544
+          "line": 577
         }
       ],
       "parseError": null,
@@ -132521,7 +132531,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 977,
+      "line": 993,
       "description": "",
       "params": [
         {
@@ -132700,7 +132710,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2362,
+      "line": 2389,
       "description": "",
       "params": [
         {
@@ -132725,7 +132735,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1573,
+      "line": 1600,
       "description": "",
       "params": [
         {
@@ -132756,7 +132766,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1619,
+      "line": 1646,
       "description": "",
       "params": [
         {
@@ -132799,7 +132809,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2347,
+      "line": 2374,
       "description": "",
       "params": [
         {
@@ -132830,7 +132840,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2333,
+      "line": 2360,
       "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
       "params": [
         {
@@ -132880,7 +132890,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2207,
+      "line": 2234,
       "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
       "params": [],
       "returns": [],
@@ -132893,7 +132903,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2218,
+      "line": 2245,
       "description": "Collect printable page image URLs without creating or opening a PDF.",
       "params": [
         {
@@ -132948,7 +132958,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1157,
+      "line": 1184,
       "description": "",
       "params": [
         {
@@ -132973,7 +132983,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1054,
+      "line": 1081,
       "description": "",
       "params": [
         {
@@ -133010,7 +133020,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2258,
+      "line": 2285,
       "description": "",
       "params": [
         {
@@ -133047,7 +133057,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1677,
+      "line": 1704,
       "description": "Build a PDF blob from page image URLs and print metadata.",
       "params": [
         {
@@ -133078,7 +133088,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1594,
+      "line": 1621,
       "description": "",
       "params": [
         {
@@ -133146,7 +133156,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1644,
+      "line": 1671,
       "description": "",
       "params": [
         {
@@ -133196,7 +133206,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1829,
+      "line": 1856,
       "description": "",
       "params": [
         {
@@ -133227,7 +133237,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1373,
+      "line": 1400,
       "description": "",
       "params": [
         {
@@ -133270,7 +133280,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1396,
+      "line": 1423,
       "description": "",
       "params": [
         {
@@ -133337,7 +133347,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1428,
+      "line": 1455,
       "description": "",
       "params": [
         {
@@ -133380,7 +133390,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1475,
+      "line": 1502,
       "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
       "params": [
         {
@@ -133504,7 +133514,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2050,
+      "line": 2077,
       "description": "",
       "params": [
         {
@@ -133541,7 +133551,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1198,
+      "line": 1225,
       "description": "",
       "params": [
         {
@@ -133584,7 +133594,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1168,
+      "line": 1195,
       "description": "",
       "params": [
         {
@@ -133683,7 +133693,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 949,
+      "line": 965,
       "description": "",
       "params": [
         {
@@ -133714,7 +133724,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1087,
+      "line": 1114,
       "description": "",
       "params": [
         {
@@ -133739,7 +133749,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2140,
+      "line": 2167,
       "description": "Read printable page image URLs from the document renderer.",
       "params": [
         {
@@ -133776,7 +133786,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2500,
+      "line": 2527,
       "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
       "params": [
         {
@@ -133819,7 +133829,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2486,
+      "line": 2513,
       "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
       "params": [
         {
@@ -133862,7 +133872,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2383,
+      "line": 2410,
       "description": "Generate/print/download a PDF from the currently rendered active page surface.",
       "params": [
         {
@@ -133893,7 +133903,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2414,
+      "line": 2441,
       "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
       "params": [
         {
@@ -133930,7 +133940,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2275,
+      "line": 2302,
       "description": "",
       "params": [
         {
@@ -133998,7 +134008,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2322,
+      "line": 2349,
       "description": "Read the URL an surface currently displays (empty for any other element).",
       "params": [
         {
@@ -134048,7 +134058,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 960,
+      "line": 976,
       "description": "",
       "params": [
         {
@@ -134067,9 +134077,9 @@
       "examples": 0
     },
     {
-      "id": "imageToJpegDataUrl",
-      "name": "imageToJpegDataUrl",
-      "longname": "imageToJpegDataUrl",
+      "id": "imageToPngDataUrl",
+      "name": "imageToPngDataUrl",
+      "longname": "imageToPngDataUrl",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
@@ -134179,7 +134189,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2083,
+      "line": 2110,
       "description": "Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease (releasing them is a no-op).",
       "params": [
         {
@@ -134204,7 +134214,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1242,
+      "line": 1269,
       "description": "",
       "params": [
         {
@@ -134247,7 +134257,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2097,
+      "line": 2124,
       "description": "Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow.",
       "params": [
         {
@@ -134358,7 +134368,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1657,
+      "line": 1684,
       "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
       "params": [],
       "returns": [
@@ -134376,7 +134386,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1509,
+      "line": 1536,
       "description": "",
       "params": [
         {
@@ -134401,7 +134411,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1136,
+      "line": 1163,
       "description": "",
       "params": [
         {
@@ -134438,7 +134448,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1148,
+      "line": 1175,
       "description": "",
       "params": [
         {
@@ -134475,7 +134485,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1013,
+      "line": 1040,
       "description": "",
       "params": [
         {
@@ -134543,7 +134553,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1111,
+      "line": 1138,
       "description": "",
       "params": [
         {
@@ -134568,7 +134578,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1070,
+      "line": 1097,
       "description": "",
       "params": [
         {
@@ -134593,7 +134603,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1042,
+      "line": 1069,
       "description": "",
       "params": [
         {
@@ -134630,7 +134640,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2245,
+      "line": 2272,
       "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
       "params": [
         {
@@ -134736,7 +134746,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2455,
+      "line": 2482,
       "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
       "params": [
         {
@@ -134869,7 +134879,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2296,
+      "line": 2323,
       "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
       "params": [
         {
@@ -134894,7 +134904,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1849,
+      "line": 1876,
       "description": "Print a generated PDF through a hidden iframe.",
       "params": [
         {
@@ -134919,7 +134929,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2119,
+      "line": 2146,
       "description": "Release print URL leases held through the document renderer.",
       "params": [
         {
@@ -134950,7 +134960,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2232,
+      "line": 2259,
       "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
       "params": [
         {
@@ -135024,7 +135034,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1524,
+      "line": 1551,
       "description": "",
       "params": [
         {
@@ -135055,7 +135065,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1631,
+      "line": 1658,
       "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
       "params": [
         {
@@ -135080,7 +135090,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1537,
+      "line": 1564,
       "description": "",
       "params": [
         {
@@ -135105,7 +135115,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1023,
+      "line": 1050,
       "description": "",
       "params": [
         {
@@ -135130,7 +135140,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1550,
+      "line": 1577,
       "description": "Resolve the generated-PDF worker plan.",
       "params": [
         {
@@ -135286,7 +135296,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1123,
+      "line": 1150,
       "description": "",
       "params": [
         {
@@ -135311,7 +135321,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2040,
+      "line": 2067,
       "description": "",
       "params": [
         {
@@ -135485,7 +135495,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 2066,
+      "line": 2093,
       "description": "",
       "params": [
         {
@@ -135510,7 +135520,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/printPdf.js",
-      "line": 1323,
+      "line": 1350,
       "description": "",
       "params": [
         {

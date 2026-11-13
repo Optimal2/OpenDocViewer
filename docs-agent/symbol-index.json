@@ -42309,7 +42309,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 977,
+    "line": 993,
     "description": "",
     "params": [
       {
@@ -42488,7 +42488,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2362,
+    "line": 2389,
     "description": "",
     "params": [
       {
@@ -42513,7 +42513,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1573,
+    "line": 1600,
     "description": "",
     "params": [
       {
@@ -42544,7 +42544,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1619,
+    "line": 1646,
     "description": "",
     "params": [
       {
@@ -42587,7 +42587,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2347,
+    "line": 2374,
     "description": "",
     "params": [
       {
@@ -42618,7 +42618,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2333,
+    "line": 2360,
     "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
     "params": [
       {
@@ -42668,7 +42668,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2207,
+    "line": 2234,
     "description": "Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence.",
     "params": [],
     "returns": [],
@@ -42681,7 +42681,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2218,
+    "line": 2245,
     "description": "Collect printable page image URLs without creating or opening a PDF.",
     "params": [
       {
@@ -42736,7 +42736,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1157,
+    "line": 1184,
     "description": "",
     "params": [
       {
@@ -42761,7 +42761,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1054,
+    "line": 1081,
     "description": "",
     "params": [
       {
@@ -42798,7 +42798,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2258,
+    "line": 2285,
     "description": "",
     "params": [
       {
@@ -42835,7 +42835,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1677,
+    "line": 1704,
     "description": "Build a PDF blob from page image URLs and print metadata.",
     "params": [
       {
@@ -42866,7 +42866,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1594,
+    "line": 1621,
     "description": "",
     "params": [
       {
@@ -42934,7 +42934,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1644,
+    "line": 1671,
     "description": "",
     "params": [
       {
@@ -42984,7 +42984,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1829,
+    "line": 1856,
     "description": "",
     "params": [
       {
@@ -43015,7 +43015,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1373,
+    "line": 1400,
     "description": "",
     "params": [
       {
@@ -43058,7 +43058,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1396,
+    "line": 1423,
     "description": "",
     "params": [
       {
@@ -43125,7 +43125,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1428,
+    "line": 1455,
     "description": "",
     "params": [
       {
@@ -43168,7 +43168,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1475,
+    "line": 1502,
     "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
     "params": [
       {
@@ -43292,7 +43292,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2050,
+    "line": 2077,
     "description": "",
     "params": [
       {
@@ -43329,7 +43329,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1198,
+    "line": 1225,
     "description": "",
     "params": [
       {
@@ -43372,7 +43372,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1168,
+    "line": 1195,
     "description": "",
     "params": [
       {
@@ -43471,7 +43471,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 949,
+    "line": 965,
     "description": "",
     "params": [
       {
@@ -43502,7 +43502,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1087,
+    "line": 1114,
     "description": "",
     "params": [
       {
@@ -43527,7 +43527,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2140,
+    "line": 2167,
     "description": "Read printable page image URLs from the document renderer.",
     "params": [
       {
@@ -43564,7 +43564,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2500,
+    "line": 2527,
     "description": "Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform.",
     "params": [
       {
@@ -43607,7 +43607,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2486,
+    "line": 2513,
     "description": "Generate/print/download a ONE-page PDF of the overlay view: page B over page A (or swapped) at the current opacity, each page with its own compare transform.",
     "params": [
       {
@@ -43650,7 +43650,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2383,
+    "line": 2410,
     "description": "Generate/print/download a PDF from the currently rendered active page surface.",
     "params": [
       {
@@ -43681,7 +43681,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2414,
+    "line": 2441,
     "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
     "params": [
       {
@@ -43718,7 +43718,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2275,
+    "line": 2302,
     "description": "",
     "params": [
       {
@@ -43786,7 +43786,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2322,
+    "line": 2349,
     "description": "Read the URL an surface currently displays (empty for any other element).",
     "params": [
       {
@@ -43836,7 +43836,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 960,
+    "line": 976,
     "description": "",
     "params": [
       {
@@ -43855,9 +43855,9 @@
     "examples": 0
   },
   {
-    "id": "imageToJpegDataUrl",
-    "name": "imageToJpegDataUrl",
-    "longname": "imageToJpegDataUrl",
+    "id": "imageToPngDataUrl",
+    "name": "imageToPngDataUrl",
+    "longname": "imageToPngDataUrl",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
@@ -43967,7 +43967,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2083,
+    "line": 2110,
     "description": "Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease (releasing them is a no-op).",
     "params": [
       {
@@ -43992,7 +43992,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1242,
+    "line": 1269,
     "description": "",
     "params": [
       {
@@ -44035,7 +44035,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2097,
+    "line": 2124,
     "description": "Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow.",
     "params": [
       {
@@ -44146,7 +44146,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1657,
+    "line": 1684,
     "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
     "params": [],
     "returns": [
@@ -44164,7 +44164,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1509,
+    "line": 1536,
     "description": "",
     "params": [
       {
@@ -44189,7 +44189,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1136,
+    "line": 1163,
     "description": "",
     "params": [
       {
@@ -44226,7 +44226,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1148,
+    "line": 1175,
     "description": "",
     "params": [
       {
@@ -44263,7 +44263,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1013,
+    "line": 1040,
     "description": "",
     "params": [
       {
@@ -44331,7 +44331,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1111,
+    "line": 1138,
     "description": "",
     "params": [
       {
@@ -44356,7 +44356,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1070,
+    "line": 1097,
     "description": "",
     "params": [
       {
@@ -44381,7 +44381,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1042,
+    "line": 1069,
     "description": "",
     "params": [
       {
@@ -44418,7 +44418,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2245,
+    "line": 2272,
     "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
     "params": [
       {
@@ -44524,7 +44524,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2455,
+    "line": 2482,
     "description": "Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page.",
     "params": [
       {
@@ -44657,7 +44657,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2296,
+    "line": 2323,
     "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
     "params": [
       {
@@ -44682,7 +44682,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1849,
+    "line": 1876,
     "description": "Print a generated PDF through a hidden iframe.",
     "params": [
       {
@@ -44707,7 +44707,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2119,
+    "line": 2146,
     "description": "Release print URL leases held through the document renderer.",
     "params": [
       {
@@ -44738,7 +44738,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2232,
+    "line": 2259,
     "description": "Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them (prebuild/benchmark keep the URLs only while rendering).",
     "params": [
       {
@@ -44812,7 +44812,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1524,
+    "line": 1551,
     "description": "",
     "params": [
       {
@@ -44843,7 +44843,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1631,
+    "line": 1658,
     "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
     "params": [
       {
@@ -44868,7 +44868,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1537,
+    "line": 1564,
     "description": "",
     "params": [
       {
@@ -44893,7 +44893,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1023,
+    "line": 1050,
     "description": "",
     "params": [
       {
@@ -44918,7 +44918,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1550,
+    "line": 1577,
     "description": "Resolve the generated-PDF worker plan.",
     "params": [
       {
@@ -45074,7 +45074,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1123,
+    "line": 1150,
     "description": "",
     "params": [
       {
@@ -45099,7 +45099,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2040,
+    "line": 2067,
     "description": "",
     "params": [
       {
@@ -45273,7 +45273,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2066,
+    "line": 2093,
     "description": "",
     "params": [
       {
@@ -45298,7 +45298,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1323,
+    "line": 1350,
     "description": "",
     "params": [
       {

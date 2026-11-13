@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 69. Line count: 24869. JSDoc symbol count: 1036.
+File count: 69. Line count: 24896. JSDoc symbol count: 1036.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
@@ -204,7 +204,7 @@ File count: 69. Line count: 24869. JSDoc symbol count: 1036.
 
 ## src/workers
 
-File count: 4. Line count: 1674. JSDoc symbol count: 5.
+File count: 4. Line count: 1707. JSDoc symbol count: 5.
 
 - `src/workers/pdfWorker.js` - OpenDocViewer \- generated PDF worker.
 - `src/workers/imageWorker.js` - OpenDocViewer — image / TIFF worker.

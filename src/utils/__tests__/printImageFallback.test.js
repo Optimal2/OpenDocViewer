@@ -89,4 +89,22 @@ describe('generated PDF image fallback formats', () => {
     await expect(createPrintPdfBlob(['data:image/avif;base64,AA=='])).rejects.toThrow(/AVIF.*losslessly/i);
     expect(pdf.addImage.mock.calls.map(([, format]) => format)).toEqual(['PNG']);
   });
+
+  it('converts a native AVIF display image to PNG for jsPDF without JPEG degradation', async () => {
+    pdf.addImage.mockImplementation((image) => {
+      if (typeof image !== 'string') throw new Error('Native AVIF element cannot be embedded');
+    });
+    vi.stubGlobal('document', { createElement: () => ({
+      width: 0,
+      height: 0,
+      getContext: () => ({ clearRect: vi.fn(), drawImage: vi.fn() }),
+      toDataURL: (type) => `data:${type};base64,AA==`,
+    }) });
+
+    const result = await createPrintPdfBlob(['data:image/avif;base64,AA==']);
+
+    expect(result.type).toBe('application/pdf');
+    expect(pdf.addImage.mock.calls.map(([, format]) => format)).toEqual(['PNG', 'PNG']);
+    expect(pdf.addImage.mock.calls[1][0]).toMatch(/^data:image\/png/);
+  });
 });

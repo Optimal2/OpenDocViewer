@@ -920,6 +920,22 @@ function imageExtensionFromUrl(src) {
  * @param {number} quality
  * @returns {string|null}
  */
+function imageToPngDataUrl(img) {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = getImageDimension(img, 'width');
+    canvas.height = getImageDimension(img, 'height');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/png');
+  } catch (error) {
+    logger.warn('PDF image PNG conversion failed', { error: String(error?.message || error) });
+    return null;
+  }
+}
+
 function imageToJpegDataUrl(img, quality) {
   try {
     const canvas = document.createElement('canvas');
@@ -991,6 +1007,17 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
         compressionHint: 'FAST',
         error: String(error?.message || error),
       });
+    }
+  }
+  if (preferred === 'AVIF') {
+    const png = imageToPngDataUrl(img);
+    if (png) {
+      try {
+        pdf.addImage(png, 'PNG', x, y, width, height, undefined, 'FAST');
+        return;
+      } catch (error) {
+        logger.debug('PDF converted AVIF PNG embed failed', { error: String(error?.message || error) });
+      }
     }
   }
   if (preferred === 'JXL' || preferred === 'AVIF') {

@@ -442,6 +442,28 @@ function calculateOverlayReserve(hasOverlay, reservePt, lineCount, fontSize) {
   return Math.max(Math.max(0, reservePt), contentReserve);
 }
 
+async function imageToPngDataUrl(image) {
+  if (typeof OffscreenCanvas !== 'function') return null;
+  try {
+    const width = Math.max(1, image.width || 1);
+    const height = Math.max(1, image.height || 1);
+    const canvas = new OffscreenCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    const bitmap = await createImageBitmap(image.blob);
+    try {
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(bitmap, 0, 0, width, height);
+    } finally {
+      try { bitmap.close(); } catch {}
+    }
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    return blobToDataUrl(blob);
+  } catch {
+    return null;
+  }
+}
+
 function imageToJpegDataUrl(image, quality) {
   if (typeof OffscreenCanvas !== 'function') return null;
   try {
@@ -483,6 +505,17 @@ async function addImageWithFallback(pdf, image, x, y, width, height, fallbackQua
     }
   }
 
+  if (image.format === 'AVIF') {
+    const png = await imageToPngDataUrl(image);
+    if (png) {
+      try {
+        pdf.addImage(png, 'PNG', x, y, width, height, undefined, 'FAST');
+        return;
+      } catch {
+        // Report the lossless-only failure below if the converted PNG cannot be embedded either.
+      }
+    }
+  }
   if (image.format === 'JXL' || image.format === 'AVIF') {
     const label = image.format === 'JXL' ? 'JPEG XL' : 'AVIF';
     throw new Error(`Unable to embed ${label} image losslessly in generated PDF inside worker.`);

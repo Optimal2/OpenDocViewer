@@ -37,7 +37,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/components/DocumentLoader/workerHandler.js` (301 lines) - OpenDocViewer — Worker orchestration & message handling \- Create image workers for off\-main\-thread rasterization/conversion.
 - `src/utils/pdfPageWorkerPool.js` (479 lines) - OpenDocViewer \- PDF page\-image worker pool.
 - `src/ocr/prepareWorker.js` (85 lines) - OpenDocViewer — OCR image preparation worker.
-- `src/workers/pdfWorker.js` (640 lines) - OpenDocViewer \- generated PDF worker.
+- `src/workers/pdfWorker.js` (673 lines) - OpenDocViewer \- generated PDF worker.
 - `src/workers/imageWorker.js` (513 lines) - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` (441 lines) - OpenDocViewer \- PDF page image worker.
 - `src/workers/pdfSignatureWorker.js` (80 lines) - Web worker entry for PDF signature inspection.

@@ -59,4 +59,18 @@ describe('PDF worker image fallback formats', () => {
     expect(result.error).toMatch(/JPEG XL.*losslessly/i);
     expect(pdf.addImage.mock.calls.map(([, format]) => format)).toEqual(['PNG']);
   });
+
+  it('converts native AVIF input to PNG for jsPDF without JPEG degradation', async () => {
+    pdf.addImage.mockImplementationOnce(() => { throw new Error('Native AVIF cannot be embedded'); });
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(width, height) { this.width = width; this.height = height; }
+      getContext() { return { clearRect: vi.fn(), drawImage: vi.fn() }; }
+      async convertToBlob({ type }) { return new Blob(['converted'], { type }); }
+    });
+
+    const result = await runJob('image/avif');
+
+    expect(result.type).toBe('result');
+    expect(pdf.addImage.mock.calls.map(([, format]) => format)).toEqual(['PNG', 'PNG']);
+  });
 });
