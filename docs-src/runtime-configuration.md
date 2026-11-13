@@ -765,11 +765,11 @@ count, the engines above it finish the page they hold and are released, and a me
 under way is ignored. The end of the work ends it too.
 
 A pointer that rests on the page is not input. A hand on a mouse or a finger on a trackpad
-moves the pointer by a pixel or two without the user doing anything, and browsers report moves
-without travel when the content under the pointer changes, which it does all the time while
-pages are recognised. So a pointer move counts only once the pointer has travelled eight CSS
-pixels from where it last rested; a press, a key, the wheel and a touch always count. Moving
-the pointer on purpose ends the boost within those few pixels, as before.
+moves the pointer by a pixel or two without the user doing anything, and a browser may report
+a move without travel when the content under the pointer changes. So a pointer move counts
+only once the pointer has travelled eight CSS pixels from where it last rested (mouse, pen and
+touch each rest in a place of their own); a press, a key, the wheel and a touch always count.
+Moving the pointer on purpose ends the boost within those few pixels, as before.
 
 The climb: from the cautious count, the viewer first goes to the larger of that count and half
 the logical threads, then to the maximum in three steps of equal size (the distance divided by

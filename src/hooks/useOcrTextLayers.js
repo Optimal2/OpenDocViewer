@@ -57,16 +57,20 @@ import { speechLanguagesForOcr } from '../utils/ocrLanguageCodes.js';
 /** Idle time after which the OCR worker is terminated to free its memory. */
 export const OCR_IDLE_SHUTDOWN_MS = 60000;
 
-/** Window events that count as input for the boost: they end the boosted state and restart the idle clock. */
+/**
+ * Window events that count as input for the boost: they end the boosted state and restart the
+ * idle clock. A `pointermove` does so only once the pointer has travelled
+ * (OCR_BOOST_POINTER_SLOP_PX); the others always do.
+ */
 export const OCR_BOOST_ACTIVITY_EVENTS = Object.freeze(['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']);
 
 /**
  * How far (CSS pixels) the pointer must travel before a pointer move counts as input for the
  * boost. A pointer that rests on the page is not still as the browser reports it: a hand on a
- * mouse or a finger on a trackpad jitters by a pixel or two, and browsers send moves without
- * travel when the content under the pointer changes (text layers arriving, pages rendering).
- * Counted as input, either keeps the idle clock from ever running out and ends a boost that
- * had started, for a user who is doing nothing.
+ * mouse or a finger on a trackpad jitters by a pixel or two, and a browser may report a move
+ * without travel when the content under the pointer changes (the specification says it should
+ * not, and not every browser follows it). Counted as input, such moves keep the idle clock
+ * from ever running out and end a boost that had started, for a user who is doing nothing.
  */
 export const OCR_BOOST_POINTER_SLOP_PX = 8;
 
@@ -75,27 +79,30 @@ export const OCR_BOOST_POINTER_SLOP_PX = 8;
  * a resting place; after that a move counts once it is `slopPx` or more from that place, which
  * then moves there. So jitter around a point never counts, however long it goes on, and a
  * pointer that is moved on purpose counts within a few pixels. A move without a position
- * counts, since nothing says it did not travel.
+ * counts, since nothing says it did not travel. Each kind of pointer (`pointerType`: mouse,
+ * pen, touch) has a resting place of its own, so a pen hovering in one place and a mouse
+ * resting in another are both at rest.
  *
  * @param {number=} slopPx
  * @returns {function(*): boolean}  True when the move is input.
  */
 export function createPointerTravelFilter(slopPx = OCR_BOOST_POINTER_SLOP_PX) {
   const slop = Math.max(0, Number(slopPx) || 0);
-  let restX = NaN;
-  let restY = NaN;
+  /** Resting place per pointer type: a handful of entries at most. */
+  const resting = new Map();
   return (event) => {
     const x = Number(event?.clientX);
     const y = Number(event?.clientY);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return true;
-    if (Number.isNaN(restX)) {
-      restX = x;
-      restY = y;
+    const kind = String(event?.pointerType || '');
+    const rest = resting.get(kind);
+    if (!rest) {
+      resting.set(kind, { x, y });
       return false;
     }
-    if (Math.hypot(x - restX, y - restY) < slop) return false;
-    restX = x;
-    restY = y;
+    if (Math.hypot(x - rest.x, y - rest.y) < slop) return false;
+    rest.x = x;
+    rest.y = y;
     return true;
   };
 }

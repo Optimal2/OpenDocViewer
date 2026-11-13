@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 10. Line count: 1768. JSDoc symbol count: 54.
+File count: 10. Line count: 1775. JSDoc symbol count: 55.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -86,6 +86,7 @@ Symbols:
 - `OCR_BOOST_ACTIVITY_EVENTS` (constant) - Window events that count as input for the boost: they end the boosted state and restart the idle clock.
 - `OCR_BOOST_POINTER_SLOP_PX` (constant) - How far \(CSS pixels\) the pointer must travel before a pointer move counts as input for the boost.
 - `createPointerTravelFilter` (function) - Tell pointer moves that travel from those that do not.
+- `createPointerTravelFilter~resting` (constant) - Resting place per pointer type: a handful of entries at most.
 - `OCR_BOOST_PENDING_STATUSES` (constant) - Queue statuses \(src/ocr/queue.js OCR\_PAGE\_STATUS\) of a page still to do.
 - `readBoostConfig` (function) - No description.
 - `reportedThreads` (function) - No description.
@@ -93,7 +94,6 @@ Symbols:
 - `useOcrTextLayers~boostRef` (constant) - The boost control and its triggers while the boost is on: \{ controller, onPlanned, detach \} .
 - `useOcrTextLayers~planRef` (constant) - What the last window plan decided for the pages in flight, for the boost to restore.
 - `useOcrTextLayers~windowIndexesRef` (constant) - Viewer indexes of the current window \(focus pages and neighbours\): never released.
-- `attachBoost` (function) - Create the boost control and its triggers for one runtime.
 
 ## src/hooks/usePageNavigation.js
 

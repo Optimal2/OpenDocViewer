@@ -698,6 +698,16 @@ describe('useOcrTextLayers boost', () => {
     // No position to judge by: counted.
     expect(travelled({})).toBe(true);
     expect(travelled(undefined)).toBe(true);
+    // Each kind of pointer rests in its own place: a pen hovering far from a resting mouse
+    // does not make either of them travel, whichever is reported last.
+    const mixed = createPointerTravelFilter(8);
+    expect(mixed({ pointerType: 'mouse', clientX: 100, clientY: 100 })).toBe(false);
+    expect(mixed({ pointerType: 'pen', clientX: 500, clientY: 400 })).toBe(false);
+    expect(mixed({ pointerType: 'mouse', clientX: 101, clientY: 100 })).toBe(false);
+    expect(mixed({ pointerType: 'pen', clientX: 501, clientY: 399 })).toBe(false);
+    expect(mixed({ pointerType: 'mouse', clientX: 100, clientY: 99 })).toBe(false);
+    expect(mixed({ pointerType: 'pen', clientX: 520, clientY: 400 })).toBe(true);
+    expect(mixed({ pointerType: 'mouse', clientX: 100, clientY: 100 })).toBe(false);
     // A threshold of nothing counts every move after the first.
     const any = createPointerTravelFilter(0);
     expect(any({ clientX: 1, clientY: 1 })).toBe(false);

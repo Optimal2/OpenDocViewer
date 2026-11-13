@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 207,
-    "sourceLineCount": 74029,
-    "docletCount": 2156,
+    "sourceLineCount": 74036,
+    "docletCount": 2157,
     "documentedFileCount": 203,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -751,7 +751,7 @@
           {
             "path": "src/hooks/useOcrTextLayers.js",
             "score": 61,
-            "lines": 511,
+            "lines": 518,
             "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page."
           },
           {
@@ -1511,15 +1511,15 @@
     {
       "name": "src/hooks",
       "fileCount": 10,
-      "lineCount": 1768,
-      "docletCount": 54,
+      "lineCount": 1775,
+      "docletCount": 55,
       "importantFiles": [
         {
           "path": "src/hooks/useOcrTextLayers.js",
           "score": 61,
-          "lines": 511,
+          "lines": 518,
           "incomingLocalImports": 1,
-          "doclets": 13,
+          "doclets": 14,
           "summary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
           "summaryConfidence": "high"
         },
@@ -36126,9 +36126,9 @@
     },
     {
       "path": "src/hooks/useOcrTextLayers.js",
-      "lines": 511,
+      "lines": 518,
       "extension": ".js",
-      "jsdocBlockCount": 19,
+      "jsdocBlockCount": 20,
       "sourceSummary": "Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.",
       "imports": [
         {
@@ -36189,99 +36189,99 @@
         {
           "name": "OCR_BOOST_ACTIVITY_EVENTS",
           "kind": "variable",
-          "line": 61
+          "line": 65
         },
         {
           "name": "OCR_BOOST_POINTER_SLOP_PX",
           "kind": "variable",
-          "line": 71
+          "line": 75
         },
         {
           "name": "createPointerTravelFilter",
           "kind": "function",
-          "line": 83
+          "line": 89
         },
         {
           "name": "useOcrTextLayers",
           "kind": "default",
-          "line": 153
+          "line": 160
         }
       ],
       "declarations": [
         {
           "name": "createPointerTravelFilter",
           "kind": "function",
-          "line": 83
+          "line": 89
         },
         {
           "name": "readBoostConfig",
           "kind": "function",
-          "line": 107
+          "line": 114
         },
         {
           "name": "reportedThreads",
           "kind": "function",
-          "line": 112
+          "line": 119
         },
         {
           "name": "useOcrTextLayers",
           "kind": "function",
-          "line": 153
+          "line": 160
         },
         {
           "name": "getPageImage",
           "kind": "function",
-          "line": 219
+          "line": 226
         },
         {
           "name": "attachBoost",
           "kind": "function",
-          "line": 415
+          "line": 422
         },
         {
           "name": "pendingNow",
           "kind": "function",
-          "line": 419
+          "line": 426
         },
         {
           "name": "clearIdle",
           "kind": "function",
-          "line": 445
+          "line": 452
         },
         {
           "name": "hasWork",
           "kind": "function",
-          "line": 454
+          "line": 461
         },
         {
           "name": "tryEngage",
           "kind": "function",
-          "line": 455
+          "line": 462
         },
         {
           "name": "armIdle",
           "kind": "function",
-          "line": 459
+          "line": 466
         },
         {
           "name": "onActivity",
           "kind": "function",
-          "line": 468
+          "line": 475
         },
         {
           "name": "onVisibility",
           "kind": "function",
-          "line": 474
+          "line": 481
         },
         {
           "name": "listenerOptions",
           "kind": "object",
-          "line": 481
+          "line": 488
         },
         {
           "name": "isHidden",
           "kind": "function",
-          "line": 487
+          "line": 494
         }
       ],
       "parseError": null,
@@ -36312,7 +36312,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 61,
+          "line": 65,
           "description": "Window events that count as input for the boost: they end the boosted state and restart the idle clock.",
           "params": [],
           "returns": [],
@@ -36325,7 +36325,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 71,
+          "line": 75,
           "description": "How far (CSS pixels) the pointer must travel before a pointer move counts as input for the boost.",
           "params": [],
           "returns": [],
@@ -36338,7 +36338,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 83,
+          "line": 89,
           "description": "Tell pointer moves that travel from those that do not.",
           "params": [
             {
@@ -36357,13 +36357,26 @@
           "examples": 0
         },
         {
+          "id": "createPointerTravelFilter~resting",
+          "name": "resting",
+          "longname": "createPointerTravelFilter~resting",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/hooks/useOcrTextLayers.js",
+          "line": 92,
+          "description": "Resting place per pointer type: a handful of entries at most.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "OCR_BOOST_PENDING_STATUSES",
           "name": "OCR_BOOST_PENDING_STATUSES",
           "longname": "OCR_BOOST_PENDING_STATUSES",
           "kind": "constant",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 104,
+          "line": 111,
           "description": "Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do.",
           "params": [],
           "returns": [],
@@ -36376,7 +36389,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 107,
+          "line": 114,
           "description": "",
           "params": [],
           "returns": [
@@ -36394,7 +36407,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 112,
+          "line": 119,
           "description": "",
           "params": [],
           "returns": [
@@ -36412,7 +36425,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 153,
+          "line": 160,
           "description": "",
           "params": [
             {
@@ -36521,7 +36534,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 175,
+          "line": 182,
           "description": "The boost control and its triggers while the boost is on: { controller, onPlanned, detach } .",
           "params": [],
           "returns": [],
@@ -36534,7 +36547,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 177,
+          "line": 184,
           "description": "What the last window plan decided for the pages in flight, for the boost to restore.",
           "params": [],
           "returns": [],
@@ -36547,7 +36560,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 193,
+          "line": 200,
           "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
           "params": [],
           "returns": [],
@@ -36560,7 +36573,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 415,
+          "line": 422,
           "description": "Create the boost control and its triggers for one runtime.",
           "params": [
             {
@@ -36585,7 +36598,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/hooks/useOcrTextLayers.js",
-          "line": 496,
+          "line": 503,
           "description": "After a window plan (or a search opening).",
           "params": [],
           "returns": [],
@@ -107671,7 +107684,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 415,
+      "line": 422,
       "description": "Create the boost control and its triggers for one runtime.",
       "params": [
         {
@@ -107696,7 +107709,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 175,
+      "line": 182,
       "description": "The boost control and its triggers while the boost is on: { controller, onPlanned, detach } .",
       "params": [],
       "returns": [],
@@ -107709,7 +107722,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 83,
+      "line": 89,
       "description": "Tell pointer moves that travel from those that do not.",
       "params": [
         {
@@ -107734,7 +107747,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 153,
+      "line": 160,
       "description": "",
       "params": [
         {
@@ -107843,7 +107856,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 61,
+      "line": 65,
       "description": "Window events that count as input for the boost: they end the boosted state and restart the idle clock.",
       "params": [],
       "returns": [],
@@ -107856,7 +107869,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 104,
+      "line": 111,
       "description": "Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do.",
       "params": [],
       "returns": [],
@@ -107869,7 +107882,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 71,
+      "line": 75,
       "description": "How far (CSS pixels) the pointer must travel before a pointer move counts as input for the boost.",
       "params": [],
       "returns": [],
@@ -107895,7 +107908,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 496,
+      "line": 503,
       "description": "After a window plan (or a search opening).",
       "params": [],
       "returns": [],
@@ -107908,7 +107921,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 177,
+      "line": 184,
       "description": "What the last window plan decided for the pages in flight, for the boost to restore.",
       "params": [],
       "returns": [],
@@ -107921,7 +107934,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 107,
+      "line": 114,
       "description": "",
       "params": [],
       "returns": [
@@ -107939,7 +107952,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 112,
+      "line": 119,
       "description": "",
       "params": [],
       "returns": [
@@ -107951,13 +107964,26 @@
       "examples": 0
     },
     {
+      "id": "createPointerTravelFilter~resting",
+      "name": "resting",
+      "longname": "createPointerTravelFilter~resting",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/hooks/useOcrTextLayers.js",
+      "line": 92,
+      "description": "Resting place per pointer type: a handful of entries at most.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "useOcrTextLayers~windowIndexesRef",
       "name": "windowIndexesRef",
       "longname": "useOcrTextLayers~windowIndexesRef",
       "kind": "constant",
       "scope": "inner",
       "file": "src/hooks/useOcrTextLayers.js",
-      "line": 193,
+      "line": 200,
       "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
       "params": [],
       "returns": [],
