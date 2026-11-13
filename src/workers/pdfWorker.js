@@ -81,19 +81,27 @@ function imageExtensionFromUrl(src) {
   }
 }
 
-function formatFromMimeOrUrl(mimeType, src) {
+function formatFromMimeOrUrl(mimeType, src, sourceFormat = '') {
+  const original = String(sourceFormat || '').toLowerCase();
+  if (original === 'image/jxl' || original === 'jxl') return 'JXL';
+  if (original === 'image/avif' || original === 'avif') return 'AVIF';
   const mime = String(mimeType || '').toLowerCase();
+  if (mime.includes('jxl')) return 'JXL';
+  if (mime.includes('avif')) return 'AVIF';
   if (mime.includes('jpeg') || mime.includes('jpg')) return 'JPEG';
   if (mime.includes('webp')) return 'WEBP';
   if (mime.includes('png')) return 'PNG';
   const ext = imageExtensionFromUrl(src);
+  if (ext === 'jxl') return 'JXL';
+  if (ext === 'avif') return 'AVIF';
   if (ext === 'jpg' || ext === 'jpeg') return 'JPEG';
   if (ext === 'webp') return 'WEBP';
   return 'PNG';
 }
 
 function imageFormatAttempts(preferred) {
-  if (preferred === 'PNG') return ['PNG'];
+  if (preferred === 'JXL' || preferred === 'AVIF') return ['PNG'];
+  if (preferred === 'PNG') return ['PNG', 'JPEG'];
   if (preferred === 'JPEG') return ['JPEG', 'PNG'];
   return ['WEBP', 'PNG', 'JPEG'];
 }
@@ -110,7 +118,7 @@ function blobToDataUrl(blob) {
   });
 }
 
-async function loadImageData(src) {
+async function loadImageData(src, sourceFormat = '') {
   const response = await fetch(src);
   if (!response.ok) throw new Error(`Failed to fetch image for PDF worker: ${response.status}`);
   const blob = await response.blob();
@@ -121,14 +129,14 @@ async function loadImageData(src) {
       blob,
       width: Math.max(1, bitmap.width || 1),
       height: Math.max(1, bitmap.height || 1),
-      format: formatFromMimeOrUrl(blob.type, src),
+      format: formatFromMimeOrUrl(blob.type, src, sourceFormat),
     };
   } finally {
     try { bitmap.close(); } catch {}
   }
 }
 
-async function loadImagesConcurrently(urls, concurrency) {
+async function loadImagesConcurrently(urls, concurrency, sourceFormats = []) {
   const results = new Array(urls.length);
   const workerCount = Math.min(Math.max(1, Number(concurrency) || 1), urls.length);
   const pendingIndexes = Array.from({ length: urls.length }, (_, index) => urls.length - 1 - index);
@@ -137,7 +145,7 @@ async function loadImagesConcurrently(urls, concurrency) {
 
   async function loadNext() {
     for (let index = takeNextIndex(); index !== null; index = takeNextIndex()) {
-      results[index] = await loadImageData(urls[index]);
+      results[index] = await loadImageData(urls[index], sourceFormats[index]);
       completed += 1;
       postProgress({ phase: 'loading-images', current: completed, total: urls.length });
     }
@@ -475,7 +483,10 @@ async function addImageWithFallback(pdf, image, x, y, width, height, fallbackQua
     }
   }
 
-  if (image.format === 'PNG') throw new Error('Unable to embed PNG losslessly in generated PDF inside worker.');
+  if (image.format === 'JXL' || image.format === 'AVIF') {
+    const label = image.format === 'JXL' ? 'JPEG XL' : 'AVIF';
+    throw new Error(`Unable to embed ${label} image losslessly in generated PDF inside worker.`);
+  }
   const jpeg = await imageToJpegDataUrl(image, fallbackQuality);
   if (!jpeg) throw new Error('Unable to add image to generated PDF inside worker.');
   pdf.addImage(jpeg, 'JPEG', x, y, width, height, undefined, 'FAST');
@@ -550,7 +561,7 @@ async function createPdf(job) {
     : null;
 
   postProgress({ phase: 'loading-images', current: 0, total });
-  const images = await loadImagesConcurrently(urls, workerPlan.imageLoadConcurrency);
+  const images = await loadImagesConcurrently(urls, workerPlan.imageLoadConcurrency, job?.sourceFormats);
   postProgress({ phase: 'generating', current: 0, total });
 
   let pdf = null;

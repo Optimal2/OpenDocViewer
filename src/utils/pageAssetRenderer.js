@@ -757,11 +757,6 @@ export class PageAssetRenderer {
       imageMetadata = decoded.imageMetadata;
     }
 
-    if (ext === 'avif' && options.variant === 'full') {
-      const full = await scaleBlob(blob);
-      return { ...full, mimeType: 'image/png' };
-    }
-
     if (options.variant === 'full') {
       const decoded = await loadBlobForDrawing(blob);
       try {
@@ -769,7 +764,8 @@ export class PageAssetRenderer {
           blob,
           width: decoded.width,
           height: decoded.height,
-          mimeType: blob.type || 'application/octet-stream',
+          mimeType: ext === 'avif' ? 'image/avif' : blob.type || 'application/octet-stream',
+          imageMetadata: ext === 'avif' ? { sourceFormat: 'image/avif' } : undefined,
         };
       } finally {
         decoded.close();

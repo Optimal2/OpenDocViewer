@@ -20,6 +20,7 @@ import { resolveWatermarkAssetSrc } from './printWatermark.js';
 import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
 import { createPdfWithWorkerDispatcher, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
 import { composeCompareCurtainCanvas, composeCompareOverlayCanvas, resolvePrintableSurface } from './printCore.js';
+import { getTrackedObjectUrlSourceFormat } from './objectUrlRegistry.js';
 
 /**
  * Escape regular-expression metacharacters in literal text.
@@ -874,14 +875,21 @@ async function loadImagesConcurrently(urls, signal, onLoaded, concurrency = 1) {
 
 /**
  * @param {HTMLImageElement} img
- * @returns {'PNG'|'JPEG'|'WEBP'}
+ * @returns {'PNG'|'JPEG'|'WEBP'|'JXL'|'AVIF'}
  */
 function inferImageFormat(img) {
   const src = String(img.currentSrc || img.src || '').toLowerCase();
+  const sourceFormat = getTrackedObjectUrlSourceFormat(src);
+  if (sourceFormat === 'image/jxl') return 'JXL';
+  if (sourceFormat === 'image/avif') return 'AVIF';
+  if (src.startsWith('data:image/jxl')) return 'JXL';
+  if (src.startsWith('data:image/avif')) return 'AVIF';
   if (src.startsWith('data:image/jpeg') || src.startsWith('data:image/jpg')) return 'JPEG';
   if (src.startsWith('data:image/png')) return 'PNG';
   if (src.startsWith('data:image/webp')) return 'WEBP';
   const extension = imageExtensionFromUrl(src);
+  if (extension === 'jxl') return 'JXL';
+  if (extension === 'avif') return 'AVIF';
   if (extension === 'jpg' || extension === 'jpeg') return 'JPEG';
   if (extension === 'webp') return 'WEBP';
   return 'PNG';
@@ -946,11 +954,12 @@ function getImageDimension(img, dimension) {
 }
 
 /**
- * @param {'PNG'|'JPEG'|'WEBP'} preferred
+ * @param {'PNG'|'JPEG'|'WEBP'|'JXL'|'AVIF'} preferred
  * @returns {Array<'PNG'|'JPEG'|'WEBP'>}
  */
 function imageFormatAttempts(preferred) {
-  if (preferred === 'PNG') return ['PNG'];
+  if (preferred === 'JXL' || preferred === 'AVIF') return ['PNG'];
+  if (preferred === 'PNG') return ['PNG', 'JPEG'];
   if (preferred === 'JPEG') return ['JPEG', 'PNG'];
   return ['WEBP', 'PNG', 'JPEG'];
 }
@@ -984,7 +993,10 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
       });
     }
   }
-  if (preferred === 'PNG') throw new Error('Unable to embed PNG losslessly in generated PDF.');
+  if (preferred === 'JXL' || preferred === 'AVIF') {
+    const label = preferred === 'JXL' ? 'JPEG XL' : 'AVIF';
+    throw new Error(`Unable to embed ${label} image losslessly in generated PDF.`);
+  }
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
   if (!jpeg) {
     throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. Native jsPDF image insertion and JPEG fallback conversion both failed. ${SUPPORTED_PDF_IMAGE_FORMAT_HINT} Check that the image is readable.`);
@@ -1586,6 +1598,7 @@ function createPrintPdfBlobInWorker(urls, options, workerPlan, watermarkAssetSrc
   };
   return createPdfWithWorkerDispatcher({
     urls,
+    sourceFormats: urls.map((url) => getTrackedObjectUrlSourceFormat(url)),
     pagePlans: buildPdfPagePlans(options, urls.length),
     pdfCfg,
     watermarkEnabled: options.printFormatCfg?.watermark?.enabled !== false,

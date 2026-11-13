@@ -278,6 +278,7 @@ function createBatchJob(batch, args, workerPlan) {
   const end = start + batch.pageCount;
   return {
     urls: args.urls.slice(start, end),
+    sourceFormats: Array.isArray(args.sourceFormats) ? args.sourceFormats.slice(start, end) : [],
     pagePlans: args.pagePlans.slice(start, end),
     pdfCfg: args.pdfCfg || {},
     watermarkEnabled: args.watermarkEnabled !== false,
@@ -370,6 +371,7 @@ async function mergePdfBlobs(initialParts, progressPlan, signal, onProgress) {
  * page batches are rendered in parallel and then merged in one final pass.
  * @param {Object} args
  * @param {Array<string>} args.urls
+ * @param {Array<string>=} args.sourceFormats Original source MIME types, aligned with urls.
  * @param {Array<Object>} args.pagePlans
  * @param {Object} args.pdfCfg
  * @param {boolean} args.watermarkEnabled

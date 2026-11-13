@@ -43,63 +43,63 @@
 | <code>WorkerMessageHandler</code> | typedef | <code>src/components/DocumentLoader/batchHandler.js:59</code> | Handle a worker&#39;s message and insert results. |
 | <code>module.exports</code> | function | <code>src/components/DocumentLoader/DemoControls.jsx:35</code> | DemoControls — wraps DocumentLoader with demo-mode props and a small control UI. |
 | <code>asciiHead</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:257</code> |  |
-| <code>buildInlineSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:859</code> | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
-| <code>createFailedPlaceholder</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1073</code> |  |
-| <code>createInvalidSourcePayloadError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:749</code> | Build a source-validation error. |
+| <code>buildInlineSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:869</code> | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
+| <code>createFailedPlaceholder</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1083</code> |  |
+| <code>createInvalidSourcePayloadError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:759</code> | Build a source-validation error. |
 | <code>createLimiter</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:162</code> |  |
-| <code>createPagePlaceholders</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1031</code> |  |
-| <code>createPrefetchHttpError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:689</code> | Build a consistent HTTP error so the retry classifier can inspect the status code. |
-| <code>createPrefetchTimeoutError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:733</code> | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
-| <code>createSourceUnavailableSessionError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:717</code> |  |
-| <code>DocumentLoader</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1183</code> |  |
+| <code>createPagePlaceholders</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1041</code> |  |
+| <code>createPrefetchHttpError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:699</code> | Build a consistent HTTP error so the retry classifier can inspect the status code. |
+| <code>createPrefetchTimeoutError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:743</code> | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
+| <code>createSourceUnavailableSessionError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:727</code> |  |
+| <code>DocumentLoader</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1193</code> |  |
 | <code>DocumentLoaderProps</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:59</code> |  |
 | <code>DocumentSourceItem</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:36</code> |  |
-| <code>estimateTotalPagesConservatively</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:652</code> | Estimate the final page count conservatively. |
+| <code>estimateTotalPagesConservatively</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:662</code> | Estimate the final page count conservatively. |
 | <code>FailedPlaceholderInput</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:92</code> |  |
-| <code>finalizeDocumentPages</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1007</code> | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
-| <code>getDocumentProgressKey</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:991</code> |  |
-| <code>getEstimatedEntryExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:611</code> | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
-| <code>getInitialTempStoreMode</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:598</code> |  |
+| <code>finalizeDocumentPages</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1017</code> | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
+| <code>getDocumentProgressKey</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1001</code> |  |
+| <code>getEstimatedEntryExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:621</code> | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
+| <code>getInitialTempStoreMode</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:608</code> |  |
 | <code>inferUrlExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:207</code> |  |
-| <code>isReloadCacheEnabled</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:589</code> |  |
-| <code>isSourceUnavailableError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:704</code> | Host integrations often expose short-lived file tickets. |
+| <code>isReloadCacheEnabled</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:599</code> |  |
+| <code>isSourceUnavailableError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:714</code> | Host integrations often expose short-lived file tickets. |
 | <code>isSupportedSourceExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:241</code> |  |
 | <code>isTextLikeSourceMime</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:249</code> |  |
-| <code>isTransientPrefetchError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:831</code> | Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses. |
+| <code>isTransientPrefetchError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:841</code> | Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses. |
 | <code>LoadPressureSummary</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:122</code> |  |
 | <code>looksLikeTextPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:272</code> |  |
 | <code>matchesKnownSourceSignature</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:301</code> |  |
-| <code>&lt;anonymous&gt;~maybePrompt</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1297</code> |  |
-| <code>mimeForExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:935</code> |  |
-| <code>mimeToExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:571</code> |  |
-| <code>needsPageCountAnalysis</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:457</code> |  |
+| <code>&lt;anonymous&gt;~maybePrompt</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1307</code> |  |
+| <code>mimeForExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:945</code> |  |
+| <code>mimeToExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:581</code> |  |
+| <code>needsPageCountAnalysis</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:467</code> |  |
 | <code>normalizeExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:216</code> |  |
 | <code>PageEstimateStats</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:135</code> |  |
 | <code>PagePlaceholderInput</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:74</code> |  |
 | <code>PrefetchResult</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:141</code> |  |
-| <code>&lt;anonymous&gt;~prefetchSource</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1318</code> | Fetch and persist one source blob with conservative retry behavior. |
-| <code>DocumentLoader~promptForPressure</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1227</code> |  |
+| <code>&lt;anonymous&gt;~prefetchSource</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1328</code> | Fetch and persist one source blob with conservative retry behavior. |
+| <code>DocumentLoader~promptForPressure</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1237</code> |  |
 | <code>readBlobHeadBytes</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:340</code> |  |
-| <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:900</code> |  |
-| <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:553</code> |  |
-| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1598</code> |  |
+| <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:910</code> |  |
+| <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:563</code> |  |
+| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1608</code> |  |
 | <code>ResolvedEntry</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:103</code> |  |
-| <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:965</code> | Extract multi-document source context from an entry or placeholder input. |
-| <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1115</code> |  |
-| <code>resolveExactPlannedPageCount</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:482</code> |  |
+| <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:975</code> | Extract multi-document source context from an entry or placeholder input. |
+| <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1125</code> |  |
+| <code>resolveExactPlannedPageCount</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:492</code> |  |
 | <code>resolveFetchedSourcePayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:358</code> | Resolve source type information with a cheap signature-first path. |
-| <code>resolvePrefetchedPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:522</code> | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
-| <code>DocumentLoader~resolvePressurePrompt</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1236</code> |  |
-| <code>resolveTrustedEntryPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:467</code> |  |
+| <code>resolvePrefetchedPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:532</code> | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
+| <code>DocumentLoader~resolvePressurePrompt</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1246</code> |  |
+| <code>resolveTrustedEntryPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:477</code> |  |
 | <code>resolveTrustedSourcePackPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:423</code> | Gateway source packs already carry verified file metadata from the prepared server-side session. |
-| <code>safeMessage</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1175</code> |  |
-| <code>shouldDeferSourceWarmup</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:504</code> | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
-| <code>&lt;anonymous&gt;~shouldStopRun</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1291</code> | Whether this load run is no longer allowed to mutate React state. |
-| <code>sleep</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:674</code> |  |
+| <code>safeMessage</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1185</code> |  |
+| <code>shouldDeferSourceWarmup</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:514</code> | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
+| <code>&lt;anonymous&gt;~shouldStopRun</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1301</code> | Whether this load run is no longer allowed to mutate React state. |
+| <code>sleep</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:684</code> |  |
 | <code>startsWithAscii</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:287</code> |  |
-| <code>toPositiveIntOrUndefined</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:954</code> |  |
-| <code>updatePageEstimateStats</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:626</code> | Update per-extension page-count statistics used by the conservative warning estimator. |
-| <code>validateFetchedSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:771</code> | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
+| <code>toPositiveIntOrUndefined</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:964</code> |  |
+| <code>updatePageEstimateStats</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:636</code> | Update per-extension page-count statistics used by the conservative warning estimator. |
+| <code>validateFetchedSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:781</code> | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
 | <code>fetchAndArrayBuffer</code> | constant | <code>src/components/DocumentLoader/documentLoaderUtils.js:170</code> | Fetch a resource and return its ArrayBuffer. |
 | <code>FetchOptions</code> | typedef | <code>src/components/DocumentLoader/documentLoaderUtils.js:105</code> | Options for fetchAndArrayBuffer. |
 | <code>generateDemoList</code> | constant | <code>src/components/DocumentLoader/documentLoaderUtils.js:80</code> | Generate a list of demo document URLs by repeating or mixing sample files. |
@@ -616,8 +616,8 @@
 | <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:1108</code> |  |
 | <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:581</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:220</code> |  |
-| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2824</code> |  |
-| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2810</code> |  |
+| <code>ViewerProvider~dispatchCompareOverlay</code> | constant | <code>src/contexts/ViewerProvider.jsx:2827</code> |  |
+| <code>ViewerProvider~dispatchCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2813</code> |  |
 | <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1180</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:62</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:56</code> |  |
@@ -625,7 +625,7 @@
 | <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:2062</code> | Render one PDF page again at twice its effective PDF scale. |
 | <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1869</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:77</code> |  |
-| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2829</code> |  |
+| <code>ViewerProvider~getCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2832</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:152</code> |  |
 | <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2459</code> |  |
 | <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1521</code> |  |
@@ -658,7 +658,7 @@
 | <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1384</code> |  |
 | <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:2144</code> |  |
 | <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1332</code> |  |
-| <code>ViewerProvider~releaseOcrPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:2753</code> | Drop a page render made only for OCR \(the whole document asked for\) once its bytes are read. |
+| <code>ViewerProvider~releaseOcrPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:2756</code> | Drop a page render made only for OCR \(the whole document asked for\) once its bytes are read. |
 | <code>ViewerProvider~releasePrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:991</code> | Release print leases previously acquired through getPrintablePageUrls . |
 | <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1775</code> |  |
 | <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:740</code> |  |
@@ -666,9 +666,9 @@
 | <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1701</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:712</code> |  |
 | <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2416</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2819</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
-| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2784</code> |  |
-| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2797</code> |  |
+| <code>ViewerProvider~setCompareTransform</code> | constant | <code>src/contexts/ViewerProvider.jsx:2822</code> | Write one page&#39;s transform: a partial transform or current =&amp;gt; partial . |
+| <code>ViewerProvider~setOcrFocusPageIndexes</code> | constant | <code>src/contexts/ViewerProvider.jsx:2787</code> |  |
+| <code>ViewerProvider~setOcrSearch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2800</code> |  |
 | <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1688</code> |  |
 | <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1351</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:67</code> |  |
@@ -1271,7 +1271,8 @@
 | <code>module:imageAdjustments.normalizeGrayscale</code> | function | <code>src/utils/imageAdjustments.js:36</code> | Grayscale amount in percent, clamped to 0..100. |
 | <code>module:imageAdjustments.normalizeInvert</code> | function | <code>src/utils/imageAdjustments.js:47</code> | Invert as a real boolean. |
 | <code>module:imageAdjustments.pickStoredImageAdjustments</code> | function | <code>src/utils/imageAdjustments.js:73</code> | The stored image adjustment of one page, normalized: brightness, contrast, grayscale and invert. |
-| <code>decodeJxl</code> | function | <code>src/utils/jxlDecode.js:28</code> | Decode frame 1 in our Rust/WASM codec. |
+| <code>decodeJxl</code> | function | <code>src/utils/jxlDecode.js:40</code> | Decode frame 1 in our Rust/WASM codec. |
+| <code>MAX_JXL_PIXELS</code> | constant | <code>src/utils/jxlDecode.js:9</code> | Decode-time input bound: 100 megapixels, checked before any rendered frame is allocated. |
 | <code>KEY_TIP_GAP</code> | constant | <code>src/utils/keyTipLayout.js:12</code> | Gap between two labels in a row and between the rows \(CSS px\). |
 | <code>KEY_TIP_MAX_ROWS</code> | constant | <code>src/utils/keyTipLayout.js:14</code> | Rows the labels may spread over before they are allowed to overlap. |
 | <code>KeyTipInput</code> | typedef | <code>src/utils/keyTipLayout.js:16</code> |  |
@@ -1320,12 +1321,14 @@
 | <code>handlePrevPage</code> | constant | <code>src/utils/navigationUtils.js:69</code> | Navigate to the previous page \(no-op if already at page 1\). |
 | <code>isValidTotalPages</code> | function | <code>src/utils/navigationUtils.js:43</code> | Check whether totalPages looks valid \(&amp;gt;= 1\). |
 | <code>toPositiveInt</code> | function | <code>src/utils/navigationUtils.js:31</code> | Coerce a value to a positive integer \(minimum 1\). |
-| <code>createTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:31</code> |  |
-| <code>getTrackedObjectUrlCount</code> | function | <code>src/utils/objectUrlRegistry.js:81</code> |  |
-| <code>isTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:71</code> | Check whether a blob/object URL is still tracked as live by the viewer. |
-| <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:89</code> | Revoke every tracked object URL. |
-| <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:47</code> |  |
-| <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:60</code> |  |
+| <code>createTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:35</code> |  |
+| <code>getTrackedObjectUrlCount</code> | function | <code>src/utils/objectUrlRegistry.js:95</code> |  |
+| <code>getTrackedObjectUrlSourceFormat</code> | function | <code>src/utils/objectUrlRegistry.js:66</code> | Return the original JXL/AVIF MIME type for a tracked URL, or an empty string for other assets. |
+| <code>isTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:85</code> | Check whether a blob/object URL is still tracked as live by the viewer. |
+| <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:103</code> | Revoke every tracked object URL. |
+| <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:55</code> |  |
+| <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:74</code> |  |
+| <code>TRACKED_URL_SOURCE_FORMATS</code> | constant | <code>src/utils/objectUrlRegistry.js:13</code> | Original formats that must remain lossless when their displayed asset is printed. |
 | <code>describeOcrBoost</code> | function | <code>src/utils/ocrBoostStatus.js:47</code> |  |
 | <code>OCR_BOOST_FALLBACK</code> | constant | <code>src/utils/ocrBoostStatus.js:16</code> | Keys of ocr.boost and their English fallbacks. |
 | <code>OcrBoostDescription</code> | typedef | <code>src/utils/ocrBoostStatus.js:29</code> |  |
@@ -1416,7 +1419,7 @@
 | <code>PageAssetRenderer#renderPageAsset</code> | function | <code>src/utils/pageAssetRenderer.js:669</code> | Render one requested page asset. |
 | <code>RenderPageAssetOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:44</code> |  |
 | <code>PageAssetRenderer#renderPdfPageAssetBatch</code> | function | <code>src/utils/pageAssetRenderer.js:541</code> | Render a PDF page set through the PDF worker pool as one partitioned batch. |
-| <code>PageAssetRenderer#resolvePdfPageResolution</code> | function | <code>src/utils/pageAssetRenderer.js:795</code> | Read page geometry only when a persisted asset needs an exact resolution identity. |
+| <code>PageAssetRenderer#resolvePdfPageResolution</code> | function | <code>src/utils/pageAssetRenderer.js:791</code> | Read page geometry only when a persisted asset needs an exact resolution identity. |
 | <code>BlobLruCache</code> | class | <code>src/utils/pageAssetStore.js:172</code> |  |
 | <code>PageAssetStore#cleanup</code> | function | <code>src/utils/pageAssetStore.js:458</code> |  |
 | <code>PageAssetStore#cleanupStaleSessions</code> | function | <code>src/utils/pageAssetStore.js:502</code> |  |
@@ -1656,17 +1659,17 @@
 | <code>countBatchJobUnits</code> | function | <code>src/utils/pdfWorkerDispatcher.js:124</code> |  |
 | <code>createBatchJob</code> | function | <code>src/utils/pdfWorkerDispatcher.js:276</code> |  |
 | <code>createPdfProgressPlan</code> | function | <code>src/utils/pdfWorkerDispatcher.js:135</code> |  |
-| <code>createPdfWithWorkerDispatcher</code> | function | <code>src/utils/pdfWorkerDispatcher.js:382</code> | Dispatch generated-PDF work to the worker layer. |
-| <code>mergePdfBlobs</code> | function | <code>src/utils/pdfWorkerDispatcher.js:361</code> |  |
-| <code>mergePdfBlobsSinglePass</code> | function | <code>src/utils/pdfWorkerDispatcher.js:319</code> |  |
+| <code>createPdfWithWorkerDispatcher</code> | function | <code>src/utils/pdfWorkerDispatcher.js:384</code> | Dispatch generated-PDF work to the worker layer. |
+| <code>mergePdfBlobs</code> | function | <code>src/utils/pdfWorkerDispatcher.js:362</code> |  |
+| <code>mergePdfBlobsSinglePass</code> | function | <code>src/utils/pdfWorkerDispatcher.js:320</code> |  |
 | <code>PdfWorkerBatch</code> | typedef | <code>src/utils/pdfWorkerDispatcher.js:16</code> |  |
 | <code>PdfWorkerPlan</code> | typedef | <code>src/utils/pdfWorkerDispatcher.js:23</code> |  |
 | <code>planPdfWorkerBatches</code> | function | <code>src/utils/pdfWorkerDispatcher.js:78</code> | Split pages into worker tasks. |
-| <code>progressValueFromWorkerEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:297</code> |  |
+| <code>progressValueFromWorkerEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:298</code> |  |
 | <code>resolveAutoPdfWorkerBatchSize</code> | function | <code>src/utils/pdfWorkerDispatcher.js:56</code> | Pick a conservative future batch size from a pages-per-worker target. |
 | <code>runLimitedTasks</code> | function | <code>src/utils/pdfWorkerDispatcher.js:188</code> | Run async work with a small in-process dispatcher. |
 | <code>runPdfWorkerTask</code> | function | <code>src/utils/pdfWorkerDispatcher.js:217</code> |  |
-| <code>sumProgress</code> | function | <code>src/utils/pdfWorkerDispatcher.js:308</code> |  |
+| <code>sumProgress</code> | function | <code>src/utils/pdfWorkerDispatcher.js:309</code> |  |
 | <code>throwIfAborted</code> | function | <code>src/utils/pdfWorkerDispatcher.js:101</code> |  |
 | <code>escapeMetaName</code> | function | <code>src/utils/performanceOverlayFlag.js:14</code> |  |
 | <code>isPerformanceOverlayEnabled</code> | function | <code>src/utils/performanceOverlayFlag.js:72</code> | Determine whether the diagnostics/performance overlay is enabled. |
@@ -1732,107 +1735,107 @@
 | <code>parsePrintSequence</code> | function | <code>src/utils/printParse.js:48</code> | Parse &amp;quot;Custom pages&amp;quot; into a sequence. |
 | <code>ParseResult</code> | typedef | <code>src/utils/printParse.js:15</code> | Result of parsing a custom pages string. |
 | <code>tr</code> | function | <code>src/utils/printParse.js:30</code> | Tiny helper to translate with safe fallback. |
-| <code>addImageWithFallback</code> | function | <code>src/utils/printPdf.js:968</code> |  |
-| <code>appendRichColumnLine</code> | function | <code>src/utils/printPdf.js:592</code> |  |
-| <code>appendRichLineBreak</code> | function | <code>src/utils/printPdf.js:553</code> |  |
-| <code>appendRichText</code> | function | <code>src/utils/printPdf.js:563</code> |  |
-| <code>asNumber</code> | function | <code>src/utils/printPdf.js:217</code> | Convert a value to a finite number for PDF layout calculations. |
-| <code>blobToDataUrl</code> | function | <code>src/utils/printPdf.js:2349</code> |  |
-| <code>buildPdfPagePlans</code> | function | <code>src/utils/printPdf.js:1561</code> |  |
-| <code>calculateOverlayReserve</code> | function | <code>src/utils/printPdf.js:1606</code> |  |
-| <code>canvasToBlob</code> | function | <code>src/utils/printPdf.js:2334</code> |  |
-| <code>canvasToPngDataUrl</code> | function | <code>src/utils/printPdf.js:2320</code> | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
-| <code>clamp01</code> | function | <code>src/utils/printPdf.js:242</code> | Clamp a numeric value to the inclusive 0..1 range. |
-| <code>collectedSourceLeases</code> | constant | <code>src/utils/printPdf.js:2194</code> | Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence. |
-| <code>collectPrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2205</code> | Collect printable page image URLs without creating or opening a PDF. |
-| <code>createAbortError</code> | function | <code>src/utils/printPdf.js:249</code> |  |
-| <code>createDefaultSegment</code> | function | <code>src/utils/printPdf.js:1145</code> |  |
-| <code>createJsPdfOptions</code> | function | <code>src/utils/printPdf.js:1042</code> |  |
-| <code>createPdfFromDocumentHandle</code> | function | <code>src/utils/printPdf.js:2245</code> |  |
-| <code>createPrintPdfBlob</code> | function | <code>src/utils/printPdf.js:1664</code> | Build a PDF blob from page image URLs and print metadata. |
-| <code>createPrintPdfBlobInWorker</code> | function | <code>src/utils/printPdf.js:1582</code> |  |
-| <code>describeImageSource</code> | function | <code>src/utils/printPdf.js:797</code> |  |
-| <code>describeModuleExports</code> | function | <code>src/utils/printPdf.js:1631</code> |  |
-| <code>describeValueType</code> | function | <code>src/utils/printPdf.js:823</code> |  |
-| <code>downloadPdfBlob</code> | function | <code>src/utils/printPdf.js:1816</code> |  |
-| <code>drawRichSegments</code> | function | <code>src/utils/printPdf.js:1361</code> |  |
-| <code>drawRichTextBlock</code> | function | <code>src/utils/printPdf.js:1384</code> |  |
-| <code>drawWatermark</code> | function | <code>src/utils/printPdf.js:1416</code> |  |
-| <code>drawWatermarkImage</code> | function | <code>src/utils/printPdf.js:1463</code> | Draw a prepared transparent PNG watermark, scaled to page width and centered. |
-| <code>elementMatchesClassSelectorPart</code> | function | <code>src/utils/printPdf.js:359</code> |  |
-| <code>ensureWritableRichLine</code> | function | <code>src/utils/printPdf.js:545</code> |  |
-| <code>escapeRegExp</code> | function | <code>src/utils/printPdf.js:29</code> | Escape regular-expression metacharacters in literal text. |
-| <code>executeOutputAction</code> | function | <code>src/utils/printPdf.js:2037</code> |  |
-| <code>fitRichSegmentsToWidth</code> | function | <code>src/utils/printPdf.js:1186</code> |  |
-| <code>fitRichSegmentTextToWidth</code> | function | <code>src/utils/printPdf.js:1156</code> |  |
-| <code>flattenRichLines</code> | function | <code>src/utils/printPdf.js:612</code> |  |
-| <code>getElementStyleHints</code> | function | <code>src/utils/printPdf.js:420</code> |  |
-| <code>getImageDimension</code> | function | <code>src/utils/printPdf.js:941</code> |  |
-| <code>getRichLineColumns</code> | function | <code>src/utils/printPdf.js:1075</code> |  |
-| <code>getSelectedPrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2127</code> | Read printable page image URLs from the document renderer. |
-| <code>handlePdfCompareCurtain</code> | function | <code>src/utils/printPdf.js:2487</code> | Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform. |
-| <code>handlePdfCompareOverlay</code> | function | <code>src/utils/printPdf.js:2473</code> | Generate/print/download a ONE-page PDF of the overlay view: page B over page A \(or swapped\) at the current opacity, each page with its own compare transform. |
-| <code>handlePdfCurrent</code> | function | <code>src/utils/printPdf.js:2370</code> | Generate/print/download a PDF from the currently rendered active page surface. |
-| <code>handlePdfCurrentComparison</code> | function | <code>src/utils/printPdf.js:2401</code> | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
-| <code>handlePdfOutput</code> | function | <code>src/utils/printPdf.js:2262</code> |  |
-| <code>htmlToRichLines</code> | function | <code>src/utils/printPdf.js:636</code> | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
-| <code>imageElementUrl</code> | function | <code>src/utils/printPdf.js:2309</code> | Read the URL an surface currently displays \(empty for any other element\). |
-| <code>imageExtensionFromUrl</code> | function | <code>src/utils/printPdf.js:894</code> |  |
-| <code>imageFormatAttempts</code> | function | <code>src/utils/printPdf.js:952</code> |  |
-| <code>imageToJpegDataUrl</code> | function | <code>src/utils/printPdf.js:915</code> | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
-| <code>inferImageFormat</code> | function | <code>src/utils/printPdf.js:879</code> |  |
-| <code>isBlockNode</code> | function | <code>src/utils/printPdf.js:436</code> | Check whether an HTML node name should be treated as block-level in PDF text flow. |
-| <code>isBoldFontWeight</code> | function | <code>src/utils/printPdf.js:293</code> | Check whether a CSS font-weight value should be treated as bold text. |
-| <code>isLeasableSurfaceUrl</code> | function | <code>src/utils/printPdf.js:2070</code> | Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease \(releasing them is a no-op\). |
-| <code>layoutRichColumns</code> | function | <code>src/utils/printPdf.js:1230</code> |  |
-| <code>leaseSurfaceBlobUrls</code> | function | <code>src/utils/printPdf.js:2084</code> | Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow. |
-| <code>loadImage</code> | function | <code>src/utils/printPdf.js:747</code> |  |
-| <code>loadImagesConcurrently</code> | function | <code>src/utils/printPdf.js:838</code> |  |
-| <code>loadJsPdf</code> | function | <code>src/utils/printPdf.js:1644</code> | Dynamically load the jsPDF constructor used by generated PDF output. |
-| <code>makeTokenContext</code> | function | <code>src/utils/printPdf.js:1497</code> |  |
-| <code>measureRichSegment</code> | function | <code>src/utils/printPdf.js:1124</code> |  |
-| <code>measureRichSegments</code> | function | <code>src/utils/printPdf.js:1136</code> |  |
-| <code>normalizePdfOrientationMode</code> | function | <code>src/utils/printPdf.js:1001</code> |  |
-| <code>normalizeQuality</code> | function | <code>src/utils/printPdf.js:229</code> | Normalize canvas/PDF image quality to the browser-supported 0..1 range. |
-| <code>normalizeRichLine</code> | function | <code>src/utils/printPdf.js:1099</code> |  |
-| <code>normalizeRichSegments</code> | function | <code>src/utils/printPdf.js:1058</code> |  |
-| <code>pageFormatForImage</code> | function | <code>src/utils/printPdf.js:1030</code> |  |
-| <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2232</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
-| <code>parseTemplateCssClassSelector</code> | function | <code>src/utils/printPdf.js:335</code> | Parse a supported class-only selector into descendant selector parts. |
-| <code>parseTemplateCssStyleRules</code> | function | <code>src/utils/printPdf.js:398</code> | Parse only the small CSS subset used by trusted print header/footer templates. |
-| <code>parseTextStyleDeclarations</code> | function | <code>src/utils/printPdf.js:305</code> |  |
-| <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2442</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
-| <code>PdfPrintOptions</code> | typedef | <code>src/utils/printPdf.js:157</code> |  |
-| <code>PdfRichColumn</code> | typedef | <code>src/utils/printPdf.js:200</code> |  |
-| <code>PdfRichLine</code> | typedef | <code>src/utils/printPdf.js:208</code> |  |
-| <code>PdfRichSegment</code> | typedef | <code>src/utils/printPdf.js:192</code> |  |
-| <code>PdfTemplateCssStyleRule</code> | typedef | <code>src/utils/printPdf.js:186</code> |  |
-| <code>PdfTextStyleHints</code> | typedef | <code>src/utils/printPdf.js:176</code> |  |
-| <code>printableSourceFromElement</code> | function | <code>src/utils/printPdf.js:2283</code> | Extract a safe printable image source from an already-rendered canvas or image element. |
-| <code>printPdfBlob</code> | function | <code>src/utils/printPdf.js:1836</code> | Print a generated PDF through a hidden iframe. |
-| <code>releasePrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2106</code> | Release print URL leases held through the document renderer. |
-| <code>releasePrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2219</code> | Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them \(prebuild/benchmark keep the URLs only while rendering\). |
-| <code>renderOverlayRichLines</code> | function | <code>src/utils/printPdf.js:731</code> |  |
-| <code>reportProgress</code> | function | <code>src/utils/printPdf.js:1512</code> |  |
-| <code>resolveJsPdfConstructor</code> | function | <code>src/utils/printPdf.js:1618</code> | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |
-| <code>resolvePdfImageLoadConcurrency</code> | function | <code>src/utils/printPdf.js:1525</code> |  |
-| <code>resolvePdfOrientationMode</code> | function | <code>src/utils/printPdf.js:1011</code> |  |
-| <code>resolvePdfWorkerPlan</code> | function | <code>src/utils/printPdf.js:1538</code> | Resolve the generated-PDF worker plan. |
-| <code>richLineHasText</code> | function | <code>src/utils/printPdf.js:514</code> |  |
-| <code>richLineIsEmpty</code> | function | <code>src/utils/printPdf.js:522</code> |  |
-| <code>sanitizeDiagnosticText</code> | function | <code>src/utils/printPdf.js:810</code> |  |
-| <code>sanitizeParsedTemplateDocument</code> | function | <code>src/utils/printPdf.js:499</code> | Keep only the attributes used by the generated-PDF rich text subset. |
-| <code>sanitizeTemplateHtmlForPdf</code> | function | <code>src/utils/printPdf.js:485</code> | Keep generated-PDF print templates inside the small rich-text subset consumed below. |
-| <code>segmentFontStyle</code> | function | <code>src/utils/printPdf.js:1111</code> |  |
-| <code>selectPageContexts</code> | function | <code>src/utils/printPdf.js:2027</code> |  |
-| <code>stripDisallowedTemplateElements</code> | function | <code>src/utils/printPdf.js:448</code> | Remove elements that are never meaningful in generated PDF header/footer text. |
-| <code>swapRichLineBufferContents</code> | function | <code>src/utils/printPdf.js:534</code> | Replace one line buffer with another while preserving the original array object. |
-| <code>templateCssRuleMatchesElement</code> | function | <code>src/utils/printPdf.js:368</code> |  |
-| <code>throwIfAborted</code> | function | <code>src/utils/printPdf.js:266</code> | Stop PDF generation as soon as the caller cancels the operation. |
-| <code>htmlToRichLines~walk</code> | function | <code>src/utils/printPdf.js:651</code> |  |
-| <code>warnDeprecatedPrintableUrlExportAlias</code> | function | <code>src/utils/printPdf.js:2053</code> |  |
-| <code>wrapRichLines</code> | function | <code>src/utils/printPdf.js:1311</code> |  |
-| <code>yieldToBrowser</code> | function | <code>src/utils/printPdf.js:276</code> | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
+| <code>addImageWithFallback</code> | function | <code>src/utils/printPdf.js:977</code> |  |
+| <code>appendRichColumnLine</code> | function | <code>src/utils/printPdf.js:593</code> |  |
+| <code>appendRichLineBreak</code> | function | <code>src/utils/printPdf.js:554</code> |  |
+| <code>appendRichText</code> | function | <code>src/utils/printPdf.js:564</code> |  |
+| <code>asNumber</code> | function | <code>src/utils/printPdf.js:218</code> | Convert a value to a finite number for PDF layout calculations. |
+| <code>blobToDataUrl</code> | function | <code>src/utils/printPdf.js:2362</code> |  |
+| <code>buildPdfPagePlans</code> | function | <code>src/utils/printPdf.js:1573</code> |  |
+| <code>calculateOverlayReserve</code> | function | <code>src/utils/printPdf.js:1619</code> |  |
+| <code>canvasToBlob</code> | function | <code>src/utils/printPdf.js:2347</code> |  |
+| <code>canvasToPngDataUrl</code> | function | <code>src/utils/printPdf.js:2333</code> | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
+| <code>clamp01</code> | function | <code>src/utils/printPdf.js:243</code> | Clamp a numeric value to the inclusive 0..1 range. |
+| <code>collectedSourceLeases</code> | constant | <code>src/utils/printPdf.js:2207</code> | Exact lease entries behind each array returned by collectPrintablePdfSources, so releasePrintablePdfSources releases what was leased rather than one per occurrence. |
+| <code>collectPrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2218</code> | Collect printable page image URLs without creating or opening a PDF. |
+| <code>createAbortError</code> | function | <code>src/utils/printPdf.js:250</code> |  |
+| <code>createDefaultSegment</code> | function | <code>src/utils/printPdf.js:1157</code> |  |
+| <code>createJsPdfOptions</code> | function | <code>src/utils/printPdf.js:1054</code> |  |
+| <code>createPdfFromDocumentHandle</code> | function | <code>src/utils/printPdf.js:2258</code> |  |
+| <code>createPrintPdfBlob</code> | function | <code>src/utils/printPdf.js:1677</code> | Build a PDF blob from page image URLs and print metadata. |
+| <code>createPrintPdfBlobInWorker</code> | function | <code>src/utils/printPdf.js:1594</code> |  |
+| <code>describeImageSource</code> | function | <code>src/utils/printPdf.js:798</code> |  |
+| <code>describeModuleExports</code> | function | <code>src/utils/printPdf.js:1644</code> |  |
+| <code>describeValueType</code> | function | <code>src/utils/printPdf.js:824</code> |  |
+| <code>downloadPdfBlob</code> | function | <code>src/utils/printPdf.js:1829</code> |  |
+| <code>drawRichSegments</code> | function | <code>src/utils/printPdf.js:1373</code> |  |
+| <code>drawRichTextBlock</code> | function | <code>src/utils/printPdf.js:1396</code> |  |
+| <code>drawWatermark</code> | function | <code>src/utils/printPdf.js:1428</code> |  |
+| <code>drawWatermarkImage</code> | function | <code>src/utils/printPdf.js:1475</code> | Draw a prepared transparent PNG watermark, scaled to page width and centered. |
+| <code>elementMatchesClassSelectorPart</code> | function | <code>src/utils/printPdf.js:360</code> |  |
+| <code>ensureWritableRichLine</code> | function | <code>src/utils/printPdf.js:546</code> |  |
+| <code>escapeRegExp</code> | function | <code>src/utils/printPdf.js:30</code> | Escape regular-expression metacharacters in literal text. |
+| <code>executeOutputAction</code> | function | <code>src/utils/printPdf.js:2050</code> |  |
+| <code>fitRichSegmentsToWidth</code> | function | <code>src/utils/printPdf.js:1198</code> |  |
+| <code>fitRichSegmentTextToWidth</code> | function | <code>src/utils/printPdf.js:1168</code> |  |
+| <code>flattenRichLines</code> | function | <code>src/utils/printPdf.js:613</code> |  |
+| <code>getElementStyleHints</code> | function | <code>src/utils/printPdf.js:421</code> |  |
+| <code>getImageDimension</code> | function | <code>src/utils/printPdf.js:949</code> |  |
+| <code>getRichLineColumns</code> | function | <code>src/utils/printPdf.js:1087</code> |  |
+| <code>getSelectedPrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2140</code> | Read printable page image URLs from the document renderer. |
+| <code>handlePdfCompareCurtain</code> | function | <code>src/utils/printPdf.js:2500</code> | Generate/print/download a ONE-page PDF of the curtain view: page A with page B clipped at the current border, each page with its own compare transform. |
+| <code>handlePdfCompareOverlay</code> | function | <code>src/utils/printPdf.js:2486</code> | Generate/print/download a ONE-page PDF of the overlay view: page B over page A \(or swapped\) at the current opacity, each page with its own compare transform. |
+| <code>handlePdfCurrent</code> | function | <code>src/utils/printPdf.js:2383</code> | Generate/print/download a PDF from the currently rendered active page surface. |
+| <code>handlePdfCurrentComparison</code> | function | <code>src/utils/printPdf.js:2414</code> | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
+| <code>handlePdfOutput</code> | function | <code>src/utils/printPdf.js:2275</code> |  |
+| <code>htmlToRichLines</code> | function | <code>src/utils/printPdf.js:637</code> | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
+| <code>imageElementUrl</code> | function | <code>src/utils/printPdf.js:2322</code> | Read the URL an surface currently displays \(empty for any other element\). |
+| <code>imageExtensionFromUrl</code> | function | <code>src/utils/printPdf.js:902</code> |  |
+| <code>imageFormatAttempts</code> | function | <code>src/utils/printPdf.js:960</code> |  |
+| <code>imageToJpegDataUrl</code> | function | <code>src/utils/printPdf.js:923</code> | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
+| <code>inferImageFormat</code> | function | <code>src/utils/printPdf.js:880</code> |  |
+| <code>isBlockNode</code> | function | <code>src/utils/printPdf.js:437</code> | Check whether an HTML node name should be treated as block-level in PDF text flow. |
+| <code>isBoldFontWeight</code> | function | <code>src/utils/printPdf.js:294</code> | Check whether a CSS font-weight value should be treated as bold text. |
+| <code>isLeasableSurfaceUrl</code> | function | <code>src/utils/printPdf.js:2083</code> | Only blob URLs can be revoked mid-print by the provider; data: and remote URLs need no lease \(releasing them is a no-op\). |
+| <code>layoutRichColumns</code> | function | <code>src/utils/printPdf.js:1242</code> |  |
+| <code>leaseSurfaceBlobUrls</code> | function | <code>src/utils/printPdf.js:2097</code> | Lease the live blob URL behind an already-rendered surface for the duration of a PDF flow. |
+| <code>loadImage</code> | function | <code>src/utils/printPdf.js:748</code> |  |
+| <code>loadImagesConcurrently</code> | function | <code>src/utils/printPdf.js:839</code> |  |
+| <code>loadJsPdf</code> | function | <code>src/utils/printPdf.js:1657</code> | Dynamically load the jsPDF constructor used by generated PDF output. |
+| <code>makeTokenContext</code> | function | <code>src/utils/printPdf.js:1509</code> |  |
+| <code>measureRichSegment</code> | function | <code>src/utils/printPdf.js:1136</code> |  |
+| <code>measureRichSegments</code> | function | <code>src/utils/printPdf.js:1148</code> |  |
+| <code>normalizePdfOrientationMode</code> | function | <code>src/utils/printPdf.js:1013</code> |  |
+| <code>normalizeQuality</code> | function | <code>src/utils/printPdf.js:230</code> | Normalize canvas/PDF image quality to the browser-supported 0..1 range. |
+| <code>normalizeRichLine</code> | function | <code>src/utils/printPdf.js:1111</code> |  |
+| <code>normalizeRichSegments</code> | function | <code>src/utils/printPdf.js:1070</code> |  |
+| <code>pageFormatForImage</code> | function | <code>src/utils/printPdf.js:1042</code> |  |
+| <code>pageNumberToIndex</code> | function | <code>src/utils/printPdf.js:2245</code> | Convert a 1-based printable page number into the matching 0-based data URL index. |
+| <code>parseTemplateCssClassSelector</code> | function | <code>src/utils/printPdf.js:336</code> | Parse a supported class-only selector into descendant selector parts. |
+| <code>parseTemplateCssStyleRules</code> | function | <code>src/utils/printPdf.js:399</code> | Parse only the small CSS subset used by trusted print header/footer templates. |
+| <code>parseTextStyleDeclarations</code> | function | <code>src/utils/printPdf.js:306</code> |  |
+| <code>pdfComposedComparison</code> | function | <code>src/utils/printPdf.js:2455</code> | Shared body of the overlay and curtain PDF output: the compared pages composed onto ONE page, then generated/printed/downloaded like the single active page. |
+| <code>PdfPrintOptions</code> | typedef | <code>src/utils/printPdf.js:158</code> |  |
+| <code>PdfRichColumn</code> | typedef | <code>src/utils/printPdf.js:201</code> |  |
+| <code>PdfRichLine</code> | typedef | <code>src/utils/printPdf.js:209</code> |  |
+| <code>PdfRichSegment</code> | typedef | <code>src/utils/printPdf.js:193</code> |  |
+| <code>PdfTemplateCssStyleRule</code> | typedef | <code>src/utils/printPdf.js:187</code> |  |
+| <code>PdfTextStyleHints</code> | typedef | <code>src/utils/printPdf.js:177</code> |  |
+| <code>printableSourceFromElement</code> | function | <code>src/utils/printPdf.js:2296</code> | Extract a safe printable image source from an already-rendered canvas or image element. |
+| <code>printPdfBlob</code> | function | <code>src/utils/printPdf.js:1849</code> | Print a generated PDF through a hidden iframe. |
+| <code>releasePrintableDataUrls</code> | function | <code>src/utils/printPdf.js:2119</code> | Release print URL leases held through the document renderer. |
+| <code>releasePrintablePdfSources</code> | function | <code>src/utils/printPdf.js:2232</code> | Release URL leases previously acquired through collectPrintablePdfSources when the consumer is done with them \(prebuild/benchmark keep the URLs only while rendering\). |
+| <code>renderOverlayRichLines</code> | function | <code>src/utils/printPdf.js:732</code> |  |
+| <code>reportProgress</code> | function | <code>src/utils/printPdf.js:1524</code> |  |
+| <code>resolveJsPdfConstructor</code> | function | <code>src/utils/printPdf.js:1631</code> | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |
+| <code>resolvePdfImageLoadConcurrency</code> | function | <code>src/utils/printPdf.js:1537</code> |  |
+| <code>resolvePdfOrientationMode</code> | function | <code>src/utils/printPdf.js:1023</code> |  |
+| <code>resolvePdfWorkerPlan</code> | function | <code>src/utils/printPdf.js:1550</code> | Resolve the generated-PDF worker plan. |
+| <code>richLineHasText</code> | function | <code>src/utils/printPdf.js:515</code> |  |
+| <code>richLineIsEmpty</code> | function | <code>src/utils/printPdf.js:523</code> |  |
+| <code>sanitizeDiagnosticText</code> | function | <code>src/utils/printPdf.js:811</code> |  |
+| <code>sanitizeParsedTemplateDocument</code> | function | <code>src/utils/printPdf.js:500</code> | Keep only the attributes used by the generated-PDF rich text subset. |
+| <code>sanitizeTemplateHtmlForPdf</code> | function | <code>src/utils/printPdf.js:486</code> | Keep generated-PDF print templates inside the small rich-text subset consumed below. |
+| <code>segmentFontStyle</code> | function | <code>src/utils/printPdf.js:1123</code> |  |
+| <code>selectPageContexts</code> | function | <code>src/utils/printPdf.js:2040</code> |  |
+| <code>stripDisallowedTemplateElements</code> | function | <code>src/utils/printPdf.js:449</code> | Remove elements that are never meaningful in generated PDF header/footer text. |
+| <code>swapRichLineBufferContents</code> | function | <code>src/utils/printPdf.js:535</code> | Replace one line buffer with another while preserving the original array object. |
+| <code>templateCssRuleMatchesElement</code> | function | <code>src/utils/printPdf.js:369</code> |  |
+| <code>throwIfAborted</code> | function | <code>src/utils/printPdf.js:267</code> | Stop PDF generation as soon as the caller cancels the operation. |
+| <code>htmlToRichLines~walk</code> | function | <code>src/utils/printPdf.js:652</code> |  |
+| <code>warnDeprecatedPrintableUrlExportAlias</code> | function | <code>src/utils/printPdf.js:2066</code> |  |
+| <code>wrapRichLines</code> | function | <code>src/utils/printPdf.js:1323</code> |  |
+| <code>yieldToBrowser</code> | function | <code>src/utils/printPdf.js:277</code> | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
 | <code>isSafeImageSrc</code> | function | <code>src/utils/printSanitize.js:16</code> | Allow-list image sources used for printing. |
 | <code>applyBraceTokensEscaped</code> | function | <code>src/utils/printTemplate.js:649</code> |  |
 | <code>applyConditionalBlocks</code> | function | <code>src/utils/printTemplate.js:720</code> | Resolve conditional blocks of the form \[\[{{path}}, &amp;quot;content&amp;quot;\]\]. |

@@ -9,11 +9,22 @@ export function hasJxlSignature(bytes) {
 export function hasAvifSignature(bytes) {
   if (!bytes || bytes.length < 16) return false;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const size = view.getUint32(0);
-  if (size < 16 || size % 4 !== 0 || String.fromCharCode(...bytes.subarray(4, 8)) !== 'ftyp') return false;
+  const size32 = view.getUint32(0);
+  let headerSize = 8;
+  let boxSize = size32;
+  if (size32 === 0) boxSize = bytes.length;
+  if (size32 === 1) {
+    if (bytes.length < 24) return false;
+    const largeSize = view.getBigUint64(8);
+    if (largeSize > BigInt(Number.MAX_SAFE_INTEGER)) return false;
+    boxSize = Number(largeSize);
+    headerSize = 16;
+  }
+  if (boxSize < headerSize + 8 || boxSize % 4 !== 0
+    || String.fromCharCode(...bytes.subarray(4, 8)) !== 'ftyp') return false;
   const isAvif = (offset) => ['avif', 'avis'].includes(String.fromCharCode(...bytes.subarray(offset, offset + 4)));
-  if (isAvif(8)) return true;
-  for (let offset = 16; offset + 4 <= Math.min(size, bytes.length); offset += 4) {
+  if (isAvif(headerSize)) return true;
+  for (let offset = headerSize + 8; offset + 4 <= Math.min(boxSize, bytes.length); offset += 4) {
     if (isAvif(offset)) return true;
   }
   return false;

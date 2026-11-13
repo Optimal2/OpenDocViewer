@@ -7,7 +7,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 ### React Contexts
 
 - `src/contexts/viewerContext.js` (265 lines) - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
-- `src/contexts/ViewerProvider.jsx` (2948 lines) - OpenDocViewer — Viewer state provider.
+- `src/contexts/ViewerProvider.jsx` (2951 lines) - OpenDocViewer — Viewer state provider.
 - `src/contexts/ThemeProvider.jsx` (343 lines) - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
 - `src/contexts/readAloudContext.js` (41 lines) - The read\-aloud state shared by the page's context menu \("Read the selection aloud" / "Stop reading aloud", components/ReadAloudMenuItem.jsx\) and the toolbar's language menu \(the "Reading language" section, DocumentToolba
 - `src/contexts/themeContext.js` (41 lines) - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
@@ -32,13 +32,13 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 ### Workers
 
-- `src/utils/pdfWorkerDispatcher.js` (451 lines) - OpenDocViewer \- generated PDF worker dispatcher.
+- `src/utils/pdfWorkerDispatcher.js` (453 lines) - OpenDocViewer \- generated PDF worker dispatcher.
 - `src/utils/pageAssetWorkerPool.js` (322 lines) - OpenDocViewer — Page\-asset worker pool.
 - `src/components/DocumentLoader/workerHandler.js` (301 lines) - OpenDocViewer — Worker orchestration & message handling \- Create image workers for off\-main\-thread rasterization/conversion.
 - `src/utils/pdfPageWorkerPool.js` (479 lines) - OpenDocViewer \- PDF page\-image worker pool.
 - `src/ocr/prepareWorker.js` (85 lines) - OpenDocViewer — OCR image preparation worker.
-- `src/workers/pdfWorker.js` (629 lines) - OpenDocViewer \- generated PDF worker.
-- `src/workers/imageWorker.js` (511 lines) - OpenDocViewer — image / TIFF worker.
+- `src/workers/pdfWorker.js` (640 lines) - OpenDocViewer \- generated PDF worker.
+- `src/workers/imageWorker.js` (513 lines) - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` (441 lines) - OpenDocViewer \- PDF page image worker.
 - `src/workers/pdfSignatureWorker.js` (80 lines) - Web worker entry for PDF signature inspection.
 

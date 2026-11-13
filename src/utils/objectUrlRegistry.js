@@ -9,6 +9,8 @@
 
 /** @type {Set<string>} */
 const TRACKED_URLS = new Set();
+/** Original formats that must remain lossless when their displayed asset is printed. @type {Map<string, string>} */
+const TRACKED_URL_SOURCE_FORMATS = new Map();
 const MAX_TRACKED_URLS = 16384;
 let cleanupInstalled = false;
 
@@ -26,12 +28,18 @@ function installTrackedUrlCleanup() {
 
 /**
  * @param {Blob} blob
+ * @param {Object=} metadata Original format metadata for a converted Blob.
+ * @param {string=} metadata.sourceFormat Original MIME type when conversion changed the Blob MIME type.
  * @returns {string}
  */
-export function createTrackedObjectUrl(blob) {
+export function createTrackedObjectUrl(blob, metadata = {}) {
   installTrackedUrlCleanup();
   const url = URL.createObjectURL(blob);
   TRACKED_URLS.add(url);
+  const sourceFormat = String(metadata?.sourceFormat || blob?.type || '').toLowerCase();
+  if (sourceFormat === 'image/jxl' || sourceFormat === 'image/avif') {
+    TRACKED_URL_SOURCE_FORMATS.set(url, sourceFormat);
+  }
   while (TRACKED_URLS.size > MAX_TRACKED_URLS) {
     const oldest = TRACKED_URLS.values().next().value;
     if (!oldest) break;
@@ -51,6 +59,12 @@ export function revokeTrackedObjectUrl(url) {
     URL.revokeObjectURL(value);
   } catch {}
   TRACKED_URLS.delete(value);
+  TRACKED_URL_SOURCE_FORMATS.delete(value);
+}
+
+/** Return the original JXL/AVIF MIME type for a tracked URL, or an empty string for other assets. */
+export function getTrackedObjectUrlSourceFormat(url) {
+  return TRACKED_URL_SOURCE_FORMATS.get(String(url || '').trim()) || '';
 }
 
 /**

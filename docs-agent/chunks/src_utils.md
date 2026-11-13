@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 69. Line count: 24820. JSDoc symbol count: 1033.
+File count: 69. Line count: 24869. JSDoc symbol count: 1036.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -168,12 +168,13 @@ Symbols:
 
 Decode frame 1 in our Rust/WASM codec.
 
-Exports: `decodeJxl`
+Exports: `MAX_JXL_PIXELS`, `decodeJxl`
 
 Local imports: `src/utils/modernImageSignatures.js`
 
 Symbols:
 
+- `MAX_JXL_PIXELS` (constant) - Decode\-time input bound: 100 megapixels, checked before any rendered frame is allocated.
 - `decodeJxl` (function) - Decode frame 1 in our Rust/WASM codec.
 
 ## src/utils/keyTipLayout.js
@@ -302,12 +303,14 @@ Symbols:
 
 Centralized helpers for object/blob URL lifecycle management.
 
-Exports: `createTrackedObjectUrl`, `revokeTrackedObjectUrl`, `revokeTrackedObjectUrls`, `isTrackedObjectUrl`, `getTrackedObjectUrlCount`, `revokeAllTrackedObjectUrls`
+Exports: `createTrackedObjectUrl`, `revokeTrackedObjectUrl`, `getTrackedObjectUrlSourceFormat`, `revokeTrackedObjectUrls`, `isTrackedObjectUrl`, `getTrackedObjectUrlCount`, `revokeAllTrackedObjectUrls`
 
 Symbols:
 
+- `TRACKED_URL_SOURCE_FORMATS` (constant) - Original formats that must remain lossless when their displayed asset is printed.
 - `createTrackedObjectUrl` (function) - No description.
 - `revokeTrackedObjectUrl` (function) - No description.
+- `getTrackedObjectUrlSourceFormat` (function) - Return the original JXL/AVIF MIME type for a tracked URL, or an empty string for other assets.
 - `revokeTrackedObjectUrls` (function) - No description.
 - `isTrackedObjectUrl` (function) - Check whether a blob/object URL is still tracked as live by the viewer.
 - `getTrackedObjectUrlCount` (function) - No description.
@@ -886,7 +889,7 @@ OpenDocViewer — Generated PDF print backend.
 
 Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `releasePrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `handlePdfCompareOverlay`, `handlePdfCompareCurtain`
 
-Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/printCore.js`
+Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/printCore.js`, `src/utils/objectUrlRegistry.js`
 
 Symbols:
 

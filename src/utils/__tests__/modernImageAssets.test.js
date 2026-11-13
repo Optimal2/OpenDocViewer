@@ -34,3 +34,20 @@ it('uses the same decoder after a worker capability failure, preserving provenan
   expect(store.recordToMeta(record).imageMetadata).toEqual(asset.imageMetadata);
   expect(asset.imageMetadata).toMatchObject({ displayedFrame: 1, frameCount: 1, animated: false });
 });
+
+it('displays a full AVIF asset from its original blob without an 8-bit PNG roundtrip', async () => {
+  const source = new Blob(['avif payload'], { type: 'image/avif' });
+  const renderer = new PageAssetRenderer({ tempStore: { getBlob: async () => source }, config: { backend: 'main-only' } });
+  const bitmap = { width: 320, height: 200, close: vi.fn() };
+  vi.stubGlobal('createImageBitmap', vi.fn(async () => bitmap));
+  vi.stubGlobal('document', { createElement: () => { throw new Error('Full AVIF display must not allocate a canvas'); } });
+
+  const asset = await renderer.renderPageAsset({ sourceKey: 'avif', fileExtension: 'avif' }, { variant: 'full' });
+
+  expect(asset).toMatchObject({
+    blob: source, width: 320, height: 200, mimeType: 'image/avif',
+    imageMetadata: { sourceFormat: 'image/avif' },
+  });
+  expect(asset.blob).toBe(source);
+  expect(bitmap.close).toHaveBeenCalledOnce();
+});

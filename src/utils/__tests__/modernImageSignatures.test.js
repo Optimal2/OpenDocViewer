@@ -26,4 +26,21 @@ describe('modern image signatures', () => {
     expect(hasAvifSignature(bytes)).toBe(false);
     expect(hasAvifSignature(bytes.slice(0, 12))).toBe(false);
   });
+
+  it('accepts an ftyp box with size zero extending to end of file', () => {
+    const bytes = Uint8Array.of(0, 0, 0, 0, ...new TextEncoder().encode('ftypmif1'), 0, 0, 0, 0,
+      ...new TextEncoder().encode('avif'));
+    expect(hasAvifSignature(bytes)).toBe(true);
+  });
+
+  it('accepts an ftyp box with a 64-bit largesize', () => {
+    const bytes = new Uint8Array(28);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(0, 1);
+    view.setBigUint64(8, 28n);
+    bytes.set(new TextEncoder().encode('ftyp'), 4);
+    bytes.set(new TextEncoder().encode('mif1'), 16);
+    bytes.set(new TextEncoder().encode('avif'), 24);
+    expect(hasAvifSignature(bytes)).toBe(true);
+  });
 });

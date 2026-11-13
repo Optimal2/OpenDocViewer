@@ -221,16 +221,18 @@ async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMa
   }
   const maxThumbnailWidth = normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH);
   const maxThumbnailHeight = normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT);
-  if (variant === 'full' && ext !== 'avif') {
+  if (variant === 'full') {
     // Intentional decode: the worker still needs trustworthy intrinsic dimensions for layout/math
-    // metadata, and the Blob alone does not expose width/height in a cross-format way.
+    // metadata, and the Blob alone does not expose width/height in a cross-format way. AVIF stays
+    // in its original container too, preserving 10/12-bit and HDR samples for native display.
     const bitmap = await createBitmap(sourceBlob);
     try {
       return {
         blob: sourceBlob,
         width: Math.max(1, bitmap.width || 1),
         height: Math.max(1, bitmap.height || 1),
-        mimeType: sourceBlob.type || mimeFromExt(ext),
+        mimeType: ext === 'avif' ? 'image/avif' : sourceBlob.type || mimeFromExt(ext),
+        imageMetadata: ext === 'avif' ? { sourceFormat: 'image/avif' } : undefined,
       };
     } finally {
       try { bitmap.close(); } catch {}

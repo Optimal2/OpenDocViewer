@@ -5,6 +5,18 @@ function sha256Hex(bytes) {
   return Array.from(sha256(bytes), (value) => value.toString(16).padStart(2, '0')).join('');
 }
 
+/** Decode-time input bound: 100 megapixels, checked before any rendered frame is allocated. */
+export const MAX_JXL_PIXELS = 100_000_000;
+
+function assertJxlDimensionsWithinLimit(width, height) {
+  const area = Number(width) * Number(height);
+  if (Number.isFinite(area) && area <= MAX_JXL_PIXELS) return;
+  const error = new Error(`JPEG XL image dimensions ${width} x ${height} exceed the decode limit of 100 megapixels.`);
+  error.name = 'JxlDimensionLimitError';
+  error.code = 'JXL_DIMENSION_LIMIT_EXCEEDED';
+  throw error;
+}
+
 let codecPromise;
 function loadCodec() {
   if (!codecPromise) {
@@ -36,6 +48,7 @@ export async function decodeJxl(source) {
     if (!image.tryInit() || !image.loaded || image.numLoadedKeyframes < 1) {
       throw new Error('Incomplete JPEG XL image');
     }
+    assertJxlDimensionsWithinLimit(image.width, image.height);
     const frame = image.render(0);
     // encodeToPng consumes and frees the render result, including on encoding failure.
     const png = frame.encodeToPng();

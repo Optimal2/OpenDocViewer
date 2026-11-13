@@ -433,6 +433,16 @@ async function resolveTrustedSourcePackPayload({ entry, blob, header = null, hea
     || 'application/octet-stream'
   );
   const resolvedHeadBytes = headBytes instanceof Uint8Array ? headBytes : await readBlobHeadBytes(blob);
+  const modernSignatureExt = ['jxl', 'avif']
+    .find((ext) => matchesKnownSourceSignature(resolvedHeadBytes, ext)) || '';
+  if (modernSignatureExt) {
+    return {
+      detectedType: null,
+      mimeType: mimeForExtension(modernSignatureExt) || headerMimeType,
+      fileExtension: modernSignatureExt,
+      headBytes: resolvedHeadBytes,
+    };
+  }
 
   if (isSupportedSourceExtension(expectedExt)) {
     return {

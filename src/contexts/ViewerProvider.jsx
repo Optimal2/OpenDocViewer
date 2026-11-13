@@ -1723,7 +1723,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     recordPdfResolution(pdfResolution);
 
     const cache = getVariantCache(variant);
-    const url = createTrackedObjectUrl(stored.blob);
+    const url = createTrackedObjectUrl(stored.blob, { sourceFormat: stored.meta?.imageMetadata?.sourceFormat });
     if (options.trackInCache !== false) {
       cache.set(pageIndex, { url, lastAccess: Date.now() });
       touchCacheEntry(cache, pageIndex);
@@ -1816,7 +1816,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     recordPdfResolution(rendered.pdfResolution);
     const safeIndex = Math.max(0, Number(pageIndex) || 0);
     const cache = getVariantCache(variant);
-    const url = createTrackedObjectUrl(rendered.blob);
+    const url = createTrackedObjectUrl(rendered.blob, { sourceFormat: rendered.imageMetadata?.sourceFormat });
     if (options.trackInCache !== false) {
       cache.set(safeIndex, { url, lastAccess: Date.now() });
       touchCacheEntry(cache, safeIndex);
@@ -2480,19 +2480,22 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
         try {
           let blob = null;
+          let imageMetadata;
           const stored = await pageAssetStoreRef.current?.getAsset?.(
             makePersistedAssetKey(page, 'full', sessionConfigRef.current.render)
           );
           if (stored?.blob) {
             blob = stored.blob;
+            imageMetadata = stored.meta?.imageMetadata;
           } else {
             const rendered = await renderPageBlob(pageIndex, 'full', 'high');
             await persistRenderedAsset(pageIndex, 'full', rendered);
             blob = rendered.blob;
+            imageMetadata = rendered.imageMetadata;
           }
 
           if (blob) {
-            const url = createTrackedObjectUrl(blob);
+            const url = createTrackedObjectUrl(blob, { sourceFormat: imageMetadata?.sourceFormat });
             ephemeralPrintUrlsRef.current.add(url);
             leasePrintablePageUrl(url);
             urls.push(url);
