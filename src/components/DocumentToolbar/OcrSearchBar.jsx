@@ -32,8 +32,9 @@
  * tooltip holds only what rarely changes (what the button does, the page's status, the boost).
  * The button grows only into the room the toolbar's spacer leaves (measured when the pointer or
  * the focus arrives and while it stays, utils/ocrSearchPlacement.js): with too little room the
- * details are dropped whole from the end, the count last, so the toolbar's end is never pushed
- * out for them. They are folded away at once when the field opens, before the field is placed
+ * details are dropped whole from the end and only the count is left, so the toolbar's end is
+ * not pushed out for more than the count, which always stood in the button. They are folded
+ * away at once when the field opens, before the field is placed
  * (the field takes the room). The button's description for assistive technology spells the
  * same things out.
  *
@@ -202,8 +203,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // dropped whole from the end when it is too small (utils/ocrSearchPlacement.js). The unfolding
   // itself is CSS (`:hover`, `:focus-visible`); the pointer and the focus are followed here only
   // to measure while the details show: when they arrive, whenever the details' text changes and
-  // whenever the spacer changes size (the window, the field closing). Unfolding does not change
-  // the answer (the spacer gives what the details take), so the observer settles at once.
+  // whenever the toolbar or its spacer changes size (the window, the field closing). Unfolding
+  // does not change the answer (the spacer gives what the details take, and a toolbar that
+  // overflows is counted by how much), so the observer settles at once.
   const [detailsHover, setDetailsHover] = useState(false);
   const [detailsFocus, setDetailsFocus] = useState(false);
   const [detailsWidth, setDetailsWidth] = useState(/** @type {(number|null)} */ (null));
@@ -215,9 +217,11 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   useLayoutEffect(() => {
     if (!detailsShown) return undefined;
     fitDetails();
-    const spacer = rootRef.current?.closest?.('.toolbar')?.querySelector?.('.toolbar-spacer');
+    const toolbar = rootRef.current?.closest?.('.toolbar');
+    const spacer = toolbar?.querySelector?.('.toolbar-spacer');
     if (!spacer || typeof ResizeObserver !== 'function') return undefined;
     const sizes = new ResizeObserver(fitDetails);
+    sizes.observe(toolbar);
     sizes.observe(spacer);
     return () => sizes.disconnect();
   }, [detailsShown, fitDetails, recognisedPages, pages.length, timeLeftShortText, workersText]);

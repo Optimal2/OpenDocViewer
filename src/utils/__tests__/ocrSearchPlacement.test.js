@@ -169,3 +169,50 @@ describe('measureOcrDetailsWidth', () => {
     expect(measureOcrDetailsWidth({})).toBeNull();
   });
 });
+
+describe('resolveOcrDetailsRoom', () => {
+  const MARGIN = 7.5;
+
+  it('is what the spacer has left, less the margin the details will take', async () => {
+    const { resolveOcrDetailsRoom } = await import('../ocrSearchPlacement.js');
+    expect(resolveOcrDetailsRoom({ spacerWidth: 300, detailsWidth: 0, marginRight: 0, unfoldedMargin: MARGIN, overflow: 0 })).toBe(292.5);
+  });
+
+  it('is the same folded, unfolded and in between: the spacer gives what the details take', async () => {
+    const { resolveOcrDetailsRoom, resolveOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    const edges = [60, 140, 220];
+    const folded = resolveOcrDetailsRoom({ spacerWidth: 300, detailsWidth: 0, marginRight: 0, unfoldedMargin: MARGIN, overflow: 0 });
+    const halfway = resolveOcrDetailsRoom({ spacerWidth: 300 - 110 - 3, detailsWidth: 110, marginRight: 3, unfoldedMargin: MARGIN, overflow: 0 });
+    const unfolded = resolveOcrDetailsRoom({ spacerWidth: 300 - 220 - MARGIN, detailsWidth: 220, marginRight: MARGIN, unfoldedMargin: MARGIN, overflow: 0 });
+    expect(halfway).toBe(folded);
+    expect(unfolded).toBe(folded);
+    expect(resolveOcrDetailsWidth({ room: unfolded, edges })).toBe(220);
+  });
+
+  it('counts what the toolbar overflows by: unfolded details shrink when the room does', async () => {
+    const { resolveOcrDetailsRoom, resolveOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    const edges = [60, 140, 220];
+    // Unfolded to all three, then the window narrows until the toolbar's end is 50 px outside:
+    // the spacer is at nothing and cannot say so, the overflow does.
+    const squeezed = resolveOcrDetailsRoom({ spacerWidth: 0, detailsWidth: 220, marginRight: MARGIN, unfoldedMargin: MARGIN, overflow: 50 });
+    expect(squeezed).toBe(170);
+    expect(resolveOcrDetailsWidth({ room: squeezed, edges })).toBe(140);
+    // Shrunk to two, the spacer has the 30 px that are over: the same room, the same answer.
+    const settled = resolveOcrDetailsRoom({ spacerWidth: 30, detailsWidth: 140, marginRight: MARGIN, unfoldedMargin: MARGIN, overflow: 0 });
+    expect(settled).toBe(squeezed);
+  });
+
+  it('is negative in a toolbar that overflows without the details, folded or unfolded to the count alone', async () => {
+    const { resolveOcrDetailsRoom, resolveOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    const folded = resolveOcrDetailsRoom({ spacerWidth: 0, detailsWidth: 0, marginRight: 0, unfoldedMargin: MARGIN, overflow: 80 });
+    const countOnly = resolveOcrDetailsRoom({ spacerWidth: 0, detailsWidth: 60, marginRight: MARGIN, unfoldedMargin: MARGIN, overflow: 80 + 60 + MARGIN });
+    expect(folded).toBe(-87.5);
+    expect(countOnly).toBe(folded);
+    expect(resolveOcrDetailsWidth({ room: folded, edges: [60, 140, 220] })).toBe(60);
+  });
+
+  it('reads what is no number as nothing', async () => {
+    const { resolveOcrDetailsRoom } = await import('../ocrSearchPlacement.js');
+    expect(resolveOcrDetailsRoom({ spacerWidth: 100, detailsWidth: undefined, marginRight: Number.NaN, unfoldedMargin: undefined, overflow: -5 })).toBe(100);
+  });
+});

@@ -185,7 +185,8 @@
    wait so a pointer on its way across the toolbar does not set it off, and folds back at once
    when the pointer leaves. They unfold only into the room the toolbar's spacer leaves: the
    component measures it and sets the width (--odv-ocr-details-max), dropping details whole
-   from the end when it is too small, so the toolbar's end is never pushed out for them. Folded
+   from the end when it is too small, down to the count, which always shows (it always stood
+   in the button), so the toolbar's end is not pushed out for more than the count. Folded
    too while the field is open (the field takes the room), and then at once, without the ease:
    the field is placed by measuring the toolbar the moment it opens, and the button must be at
    its resting width by then. Tabular digits keep the figures steady as they change. The

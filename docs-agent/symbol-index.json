@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 89,
+    "line": 90,
     "description": "",
     "params": [
       {
@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 385,
+    "line": 389,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 422,
+    "line": 426,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 430,
+    "line": 434,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 74,
+    "line": 75,
     "description": "",
     "params": [
       {
@@ -6541,7 +6541,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 71,
+    "line": 72,
     "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
     "params": [],
     "returns": [],
@@ -6554,7 +6554,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 69,
+    "line": 70,
     "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
     "params": [],
     "returns": [],
@@ -6567,7 +6567,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 406,
+    "line": 410,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -32771,8 +32771,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 220,
-    "description": "Measure the room for the search button's details and resolve their width.",
+    "line": 240,
+    "description": "Measure the room for the search button's details ( resolveOcrDetailsRoom ) and resolve their width.",
     "params": [
       {
         "name": "root",
@@ -32994,14 +32994,69 @@
     "examples": 0
   },
   {
+    "id": "resolveOcrDetailsRoom",
+    "name": "resolveOcrDetailsRoom",
+    "longname": "resolveOcrDetailsRoom",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 204,
+    "description": "The room the search button's details may take (CSS px): what the toolbar's spacer has left, plus what the details take already (the spacer gave it), less what the toolbar overflow...",
+    "params": [
+      {
+        "name": "measured",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "measured.spacerWidth",
+        "type": "number",
+        "optional": false,
+        "description": "The toolbar spacer's width now."
+      },
+      {
+        "name": "measured.detailsWidth",
+        "type": "number",
+        "optional": false,
+        "description": "The details' width now (0 folded)."
+      },
+      {
+        "name": "measured.marginRight",
+        "type": "number",
+        "optional": false,
+        "description": "The details' right margin now (0 folded)."
+      },
+      {
+        "name": "measured.unfoldedMargin",
+        "type": "number",
+        "optional": false,
+        "description": "The details' right margin when unfolded."
+      },
+      {
+        "name": "measured.overflow",
+        "type": "number",
+        "optional": false,
+        "description": "What the toolbar's contents reach beyond it by (0 when they fit)."
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": "May be negative: a toolbar that overflows without the details."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "resolveOcrDetailsWidth",
     "name": "resolveOcrDetailsWidth",
     "longname": "resolveOcrDetailsWidth",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrSearchPlacement.js",
-    "line": 200,
-    "description": "How wide the search button's details may unfold (CSS px): the button grows into the room the toolbar's spacer leaves and never pushes the toolbar's end out for them.",
+    "line": 221,
+    "description": "How wide the search button's details may unfold (CSS px): the button grows into the room the toolbar has and does not push the toolbar's end out for more than the count.",
     "params": [
       {
         "name": "measured",

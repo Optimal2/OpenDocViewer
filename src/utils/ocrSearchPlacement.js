@@ -186,11 +186,32 @@ export function measureOcrSearchPlacement(root, panel, anchor = null) {
 export const OCR_DETAILS_UNFOLDED_MARGIN_EM = 0.6;
 
 /**
+ * The room the search button's details may take (CSS px): what the toolbar's spacer has left,
+ * plus what the details take already (the spacer gave it), less what the toolbar overflows by
+ * (with the spacer at nothing, the details may be what pushes the toolbar's end out). The same
+ * folded, unfolded and anywhere in between, in a toolbar with room and in one without: the
+ * details' width and margin are counted at what they are now and the margin at what it will be.
+ * Pure: `measureOcrDetailsWidth` gathers the numbers.
+ *
+ * @param {Object} measured
+ * @param {number} measured.spacerWidth  The toolbar spacer's width now.
+ * @param {number} measured.detailsWidth  The details' width now (0 folded).
+ * @param {number} measured.marginRight  The details' right margin now (0 folded).
+ * @param {number} measured.unfoldedMargin  The details' right margin when unfolded.
+ * @param {number} measured.overflow  What the toolbar's contents reach beyond it by (0 when they fit).
+ * @returns {number}  May be negative: a toolbar that overflows without the details.
+ */
+export function resolveOcrDetailsRoom({ spacerWidth, detailsWidth, marginRight, unfoldedMargin, overflow }) {
+  const number = (value) => (Number.isFinite(Number(value)) ? Number(value) : 0);
+  return number(spacerWidth) + number(detailsWidth) + number(marginRight) - number(unfoldedMargin) - Math.max(0, number(overflow));
+}
+
+/**
  * How wide the search button's details may unfold (CSS px): the button grows into the room the
- * toolbar's spacer leaves and never pushes the toolbar's end out for them. The details are
+ * toolbar has and does not push the toolbar's end out for more than the count. The details are
  * dropped whole from the end (the pages being worked on first, then the time left), never cut
- * mid-word; the first one (the count) always shows, as it did when it stood in the button at
- * all times. Pure: `measureOcrDetailsWidth` gathers the numbers.
+ * mid-word; the first one (the count) always shows, whatever the room, as it did when it stood
+ * in the button at all times. Pure: `measureOcrDetailsWidth` gathers the numbers.
  *
  * @param {Object} measured
  * @param {number} measured.room  Width the details may take (CSS px).
@@ -210,9 +231,8 @@ export function resolveOcrDetailsWidth({ room, edges }) {
 }
 
 /**
- * Measure the room for the search button's details and resolve their width. The room is the
- * spacer's width plus what the details take already, so the answer is the same folded, unfolded
- * and anywhere in between (the spacer gives what the details take).
+ * Measure the room for the search button's details (`resolveOcrDetailsRoom`) and resolve their
+ * width.
  *
  * @param {(Element|null)} root  The search's root (`.toolbar-ocr-search`).
  * @returns {(number|null)}  Null when there is nothing to measure against (no toolbar spacer).
@@ -220,12 +240,18 @@ export function resolveOcrDetailsWidth({ room, edges }) {
 export function measureOcrDetailsWidth(root) {
   if (!root || typeof root.querySelector !== 'function' || typeof getComputedStyle !== 'function') return null;
   const details = root.querySelector('.toolbar-ocr-search-details');
-  const spacer = root.closest?.('.toolbar')?.querySelector?.('.toolbar-spacer');
+  const toolbar = root.closest?.('.toolbar');
+  const spacer = toolbar?.querySelector?.('.toolbar-spacer');
   if (!details || !spacer) return null;
   const box = details.getBoundingClientRect();
   const style = getComputedStyle(details);
-  const unfoldedMargin = (Number.parseFloat(style.fontSize) || 0) * OCR_DETAILS_UNFOLDED_MARGIN_EM;
-  const room = spacer.getBoundingClientRect().width + box.width + (Number.parseFloat(style.marginRight) || 0) - unfoldedMargin;
+  const room = resolveOcrDetailsRoom({
+    spacerWidth: spacer.getBoundingClientRect().width,
+    detailsWidth: box.width,
+    marginRight: Number.parseFloat(style.marginRight),
+    unfoldedMargin: (Number.parseFloat(style.fontSize) || 0) * OCR_DETAILS_UNFOLDED_MARGIN_EM,
+    overflow: toolbar.scrollWidth - toolbar.clientWidth,
+  });
   const edges = Array.from(details.querySelectorAll('.toolbar-ocr-search-detail'), (item) => item.getBoundingClientRect().right - box.left);
   return resolveOcrDetailsWidth({ room, edges });
 }
