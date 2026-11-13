@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "moduleKey": "opendocviewer",
-  "definitionVersion": "2.0.293",
+  "definitionVersion": "2.0.294",
   "module": {
     "displayName": "OpenDocViewer",
     "moduleType": "WebAppModule",
@@ -27,7 +27,7 @@
       "targetName": "opendocviewer",
       "relativePathTemplate": "opendocviewer/web/{version}",
       "minVersion": "2.0.3",
-      "maxVersion": "2.4.335"
+      "maxVersion": "2.4.336"
     }
   ],
   "sqlScripts": [
