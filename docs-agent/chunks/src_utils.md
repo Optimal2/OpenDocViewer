@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 67. Line count: 24641. JSDoc symbol count: 1026.
+File count: 67. Line count: 24689. JSDoc symbol count: 1029.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -382,7 +382,7 @@ Symbols:
 
 Where the toolbar's OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when
 
-Exports: `OCR_SEARCH_PANEL_WIDTH`, `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH`, `OCR_SEARCH_INPUT_MIN_WIDTH`, `OCR_SEARCH_INPUT_PREFERRED_WIDTH`, `OCR_SEARCH_PANEL_HANG_INSET`, `OCR_SEARCH_PANEL_MARGIN`, `OCR_SEARCH_PANEL_HANG_GAP`, `resolveOcrSearchPlacement`, `measureOcrSearchInputMinWidth`, `measureOcrSearchContentWidth`, `measureOcrSearchPlacement`
+Exports: `OCR_SEARCH_PANEL_WIDTH`, `OCR_SEARCH_PANEL_MIN_INLINE_WIDTH`, `OCR_SEARCH_INPUT_MIN_WIDTH`, `OCR_SEARCH_INPUT_PREFERRED_WIDTH`, `OCR_SEARCH_PANEL_HANG_INSET`, `OCR_SEARCH_PANEL_MARGIN`, `OCR_SEARCH_PANEL_HANG_GAP`, `resolveOcrSearchPlacement`, `measureOcrSearchInputMinWidth`, `measureOcrSearchContentWidth`, `measureOcrSearchPlacement`, `OCR_DETAILS_UNFOLDED_MARGIN_EM`, `resolveOcrDetailsWidth`, `measureOcrDetailsWidth`
 
 Symbols:
 

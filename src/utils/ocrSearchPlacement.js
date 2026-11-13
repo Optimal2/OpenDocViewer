@@ -181,3 +181,51 @@ export function measureOcrSearchPlacement(root, panel, anchor = null) {
     inputMinWidth: measureOcrSearchInputMinWidth(panel.querySelector('.toolbar-ocr-search-input')),
   });
 }
+
+/** The details' right margin when unfolded, in their own em (styles/ocr.css). */
+export const OCR_DETAILS_UNFOLDED_MARGIN_EM = 0.6;
+
+/**
+ * How wide the search button's details may unfold (CSS px): the button grows into the room the
+ * toolbar's spacer leaves and never pushes the toolbar's end out for them. The details are
+ * dropped whole from the end (the pages being worked on first, then the time left), never cut
+ * mid-word; the first one (the count) always shows, as it did when it stood in the button at
+ * all times. Pure: `measureOcrDetailsWidth` gathers the numbers.
+ *
+ * @param {Object} measured
+ * @param {number} measured.room  Width the details may take (CSS px).
+ * @param {Array<number>} measured.edges  Right edge of each detail, from the details' left edge.
+ * @returns {number}  The width to unfold to; 0 without a detail.
+ */
+export function resolveOcrDetailsWidth({ room, edges }) {
+  const list = (Array.isArray(edges) ? edges : []).map(Number).filter((edge) => Number.isFinite(edge) && edge > 0);
+  if (list.length === 0) return 0;
+  const space = Number.isFinite(Number(room)) ? Number(room) : 0;
+  let width = list[0];
+  for (const edge of list.slice(1)) {
+    if (edge > space) break;
+    width = edge;
+  }
+  return Math.ceil(width);
+}
+
+/**
+ * Measure the room for the search button's details and resolve their width. The room is the
+ * spacer's width plus what the details take already, so the answer is the same folded, unfolded
+ * and anywhere in between (the spacer gives what the details take).
+ *
+ * @param {(Element|null)} root  The search's root (`.toolbar-ocr-search`).
+ * @returns {(number|null)}  Null when there is nothing to measure against (no toolbar spacer).
+ */
+export function measureOcrDetailsWidth(root) {
+  if (!root || typeof root.querySelector !== 'function' || typeof getComputedStyle !== 'function') return null;
+  const details = root.querySelector('.toolbar-ocr-search-details');
+  const spacer = root.closest?.('.toolbar')?.querySelector?.('.toolbar-spacer');
+  if (!details || !spacer) return null;
+  const box = details.getBoundingClientRect();
+  const style = getComputedStyle(details);
+  const unfoldedMargin = (Number.parseFloat(style.fontSize) || 0) * OCR_DETAILS_UNFOLDED_MARGIN_EM;
+  const room = spacer.getBoundingClientRect().width + box.width + (Number.parseFloat(style.marginRight) || 0) - unfoldedMargin;
+  const edges = Array.from(details.querySelectorAll('.toolbar-ocr-search-detail'), (item) => item.getBoundingClientRect().right - box.left);
+  return resolveOcrDetailsWidth({ room, edges });
+}

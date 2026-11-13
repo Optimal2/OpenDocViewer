@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 208,
-    "sourceLineCount": 74265,
-    "docletCount": 2170,
+    "sourceLineCount": 74353,
+    "docletCount": 2173,
     "documentedFileCount": 204,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -1211,7 +1211,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8077,
+      "lineCount": 8117,
       "docletCount": 115,
       "importantFiles": [
         {
@@ -1252,8 +1252,8 @@
         },
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "score": 41,
-          "lines": 585,
+          "score": 42,
+          "lines": 625,
           "incomingLocalImports": 1,
           "doclets": 8,
           "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status in its tooltip and in a visually hidden live",
@@ -1897,8 +1897,8 @@
     {
       "name": "src/utils",
       "fileCount": 67,
-      "lineCount": 24641,
-      "docletCount": 1026,
+      "lineCount": 24689,
+      "docletCount": 1029,
       "importantFiles": [
         {
           "path": "src/utils/runtimeConfig.js",
@@ -13814,9 +13814,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 585,
+      "lines": 625,
       "extension": ".jsx",
-      "jsdocBlockCount": 17,
+      "jsdocBlockCount": 18,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status in its tooltip and in a visually hidden live",
       "imports": [
         {
@@ -13832,7 +13832,7 @@
             "useRef",
             "useState"
           ],
-          "line": 50,
+          "line": 54,
           "kind": "static"
         },
         {
@@ -13840,7 +13840,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 51,
+          "line": 55,
           "kind": "static"
         },
         {
@@ -13848,7 +13848,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 52,
+          "line": 56,
           "kind": "static"
         },
         {
@@ -13856,7 +13856,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 53,
+          "line": 57,
           "kind": "static"
         },
         {
@@ -13864,7 +13864,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 54,
+          "line": 58,
           "kind": "static"
         },
         {
@@ -13872,7 +13872,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 55,
+          "line": 59,
           "kind": "static"
         },
         {
@@ -13883,7 +13883,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 56,
+          "line": 60,
           "kind": "static"
         },
         {
@@ -13892,16 +13892,17 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 57,
+          "line": 61,
           "kind": "static"
         },
         {
           "source": "../../utils/ocrSearchPlacement.js",
           "specifiers": [
+            "measureOcrDetailsWidth",
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 58,
+          "line": 62,
           "kind": "static"
         },
         {
@@ -13910,7 +13911,7 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 59,
+          "line": 63,
           "kind": "static"
         },
         {
@@ -13919,7 +13920,7 @@
             "OCR_BOOST_FALLBACK",
             "describeOcrBoost"
           ],
-          "line": 60,
+          "line": 64,
           "kind": "static"
         },
         {
@@ -13930,7 +13931,7 @@
             "describeOcrTimeLeft",
             "describeOcrTimeLeftShort"
           ],
-          "line": 61,
+          "line": 65,
           "kind": "static"
         },
         {
@@ -13938,7 +13939,7 @@
           "specifiers": [
             "isOcrWholeDocumentEnabled"
           ],
-          "line": 62,
+          "line": 66,
           "kind": "static"
         }
       ],
@@ -13946,44 +13947,49 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 85
+          "line": 89
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 70
+          "line": 74
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 85
+          "line": 89
         },
         {
           "name": "withBoost",
           "kind": "function",
-          "line": 133
+          "line": 137
+        },
+        {
+          "name": "detailsHandlers",
+          "kind": "object",
+          "line": 224
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 324
+          "line": 362
         },
         {
           "name": "within",
           "kind": "function",
-          "line": 329
+          "line": 367
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 384
+          "line": 422
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 392
+          "line": 430
         }
       ],
       "parseError": null,
@@ -13999,7 +14005,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 65,
+          "line": 69,
           "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
           "params": [],
           "returns": [],
@@ -14012,7 +14018,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 67,
+          "line": 71,
           "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
           "params": [],
           "returns": [],
@@ -14025,7 +14031,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 70,
+          "line": 74,
           "description": "",
           "params": [
             {
@@ -14045,7 +14051,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 85,
+          "line": 89,
           "description": "",
           "params": [
             {
@@ -14100,7 +14106,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 347,
+          "line": 385,
           "description": "",
           "params": [
             {
@@ -14120,7 +14126,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 368,
+          "line": 406,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14140,7 +14146,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 384,
+          "line": 422,
           "description": "",
           "params": [
             {
@@ -14160,7 +14166,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 392,
+          "line": 430,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14174,7 +14180,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 53,
+          "line": 57,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14183,7 +14189,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 54,
+          "line": 58,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14192,7 +14198,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 55,
+          "line": 59,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14204,7 +14210,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 56,
+          "line": 60,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14214,17 +14220,18 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 57,
+          "line": 61,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         },
         {
           "source": "../../utils/ocrSearchPlacement.js",
           "specifiers": [
+            "measureOcrDetailsWidth",
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 58,
+          "line": 62,
           "kind": "static",
           "resolved": "src/utils/ocrSearchPlacement.js"
         },
@@ -14234,7 +14241,7 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 59,
+          "line": 63,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerEffects.js"
         },
@@ -14244,7 +14251,7 @@
             "OCR_BOOST_FALLBACK",
             "describeOcrBoost"
           ],
-          "line": 60,
+          "line": 64,
           "kind": "static",
           "resolved": "src/utils/ocrBoostStatus.js"
         },
@@ -14256,7 +14263,7 @@
             "describeOcrTimeLeft",
             "describeOcrTimeLeftShort"
           ],
-          "line": 61,
+          "line": 65,
           "kind": "static",
           "resolved": "src/utils/ocrProgress.js"
         },
@@ -14265,7 +14272,7 @@
           "specifiers": [
             "isOcrWholeDocumentEnabled"
           ],
-          "line": 62,
+          "line": 66,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
@@ -14284,7 +14291,7 @@
             "useRef",
             "useState"
           ],
-          "line": 50,
+          "line": 54,
           "kind": "static"
         },
         {
@@ -14292,7 +14299,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 51,
+          "line": 55,
           "kind": "static"
         },
         {
@@ -14300,12 +14307,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 52,
+          "line": 56,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 41,
+      "importanceScore": 42,
       "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status in its tooltip and in a visually hidden live",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -59113,9 +59120,9 @@
     },
     {
       "path": "src/utils/ocrSearchPlacement.js",
-      "lines": 184,
+      "lines": 232,
       "extension": ".js",
-      "jsdocBlockCount": 13,
+      "jsdocBlockCount": 16,
       "sourceSummary": "Where the toolbar's OCR search field goes and how wide it is (components/DocumentToolbar/OcrSearchBar.jsx): inline in the toolbar, grown out of the button to the right into the room the toolbar's spacer leaves, or, when",
       "imports": [],
       "exports": [
@@ -59173,6 +59180,21 @@
           "name": "measureOcrSearchPlacement",
           "kind": "function",
           "line": 161
+        },
+        {
+          "name": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+          "kind": "variable",
+          "line": 186
+        },
+        {
+          "name": "resolveOcrDetailsWidth",
+          "kind": "function",
+          "line": 200
+        },
+        {
+          "name": "measureOcrDetailsWidth",
+          "kind": "function",
+          "line": 220
         }
       ],
       "declarations": [
@@ -59195,6 +59217,16 @@
           "name": "measureOcrSearchPlacement",
           "kind": "function",
           "line": 161
+        },
+        {
+          "name": "resolveOcrDetailsWidth",
+          "kind": "function",
+          "line": 200
+        },
+        {
+          "name": "measureOcrDetailsWidth",
+          "kind": "function",
+          "line": 220
         }
       ],
       "parseError": null,
@@ -59475,6 +59507,81 @@
             {
               "type": "OcrSearchPlacement",
               "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+          "name": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+          "longname": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 186,
+          "description": "The details' right margin when unfolded, in their own em (styles/ocr.css).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "resolveOcrDetailsWidth",
+          "name": "resolveOcrDetailsWidth",
+          "longname": "resolveOcrDetailsWidth",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 200,
+          "description": "How wide the search button's details may unfold (CSS px): the button grows into the room the toolbar's spacer leaves and never pushes the toolbar's end out for them.",
+          "params": [
+            {
+              "name": "measured",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "measured.room",
+              "type": "number",
+              "optional": false,
+              "description": "Width the details may take (CSS px)."
+            },
+            {
+              "name": "measured.edges",
+              "type": "Array.<number>",
+              "optional": false,
+              "description": "Right edge of each detail, from the details' left edge."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": "The width to unfold to; 0 without a detail."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "measureOcrDetailsWidth",
+          "name": "measureOcrDetailsWidth",
+          "longname": "measureOcrDetailsWidth",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrSearchPlacement.js",
+          "line": 220,
+          "description": "Measure the room for the search button's details and resolve their width.",
+          "params": [
+            {
+              "name": "root",
+              "type": "Element|null",
+              "optional": false,
+              "description": "The search's root ( .toolbar-ocr-search )."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number|null",
+              "description": "Null when there is nothing to measure against (no toolbar spacer)."
             }
           ],
           "examples": 0
@@ -95855,7 +95962,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 85,
+      "line": 89,
       "description": "",
       "params": [
         {
@@ -95910,7 +96017,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 347,
+      "line": 385,
       "description": "",
       "params": [
         {
@@ -95930,7 +96037,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 384,
+      "line": 422,
       "description": "",
       "params": [
         {
@@ -95950,7 +96057,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 392,
+      "line": 430,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -95963,7 +96070,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 70,
+      "line": 74,
       "description": "",
       "params": [
         {
@@ -95983,7 +96090,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 67,
+      "line": 71,
       "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
       "params": [],
       "returns": [],
@@ -95996,7 +96103,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 65,
+      "line": 69,
       "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
       "params": [],
       "returns": [],
@@ -96009,7 +96116,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 368,
+      "line": 406,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -122207,6 +122314,31 @@
       "examples": 0
     },
     {
+      "id": "measureOcrDetailsWidth",
+      "name": "measureOcrDetailsWidth",
+      "longname": "measureOcrDetailsWidth",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 220,
+      "description": "Measure the room for the search button's details and resolve their width.",
+      "params": [
+        {
+          "name": "root",
+          "type": "Element|null",
+          "optional": false,
+          "description": "The search's root ( .toolbar-ocr-search )."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number|null",
+          "description": "Null when there is nothing to measure against (no toolbar spacer)."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "measureOcrSearchContentWidth",
       "name": "measureOcrSearchContentWidth",
       "longname": "measureOcrSearchContentWidth",
@@ -122291,6 +122423,19 @@
           "description": ""
         }
       ],
+      "examples": 0
+    },
+    {
+      "id": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+      "name": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+      "longname": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 186,
+      "description": "The details' right margin when unfolded, in their own em (styles/ocr.css).",
+      "params": [],
+      "returns": [],
       "examples": 0
     },
     {
@@ -122395,6 +122540,43 @@
       "description": "",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "resolveOcrDetailsWidth",
+      "name": "resolveOcrDetailsWidth",
+      "longname": "resolveOcrDetailsWidth",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrSearchPlacement.js",
+      "line": 200,
+      "description": "How wide the search button's details may unfold (CSS px): the button grows into the room the toolbar's spacer leaves and never pushes the toolbar's end out for them.",
+      "params": [
+        {
+          "name": "measured",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "measured.room",
+          "type": "number",
+          "optional": false,
+          "description": "Width the details may take (CSS px)."
+        },
+        {
+          "name": "measured.edges",
+          "type": "Array.<number>",
+          "optional": false,
+          "description": "Right edge of each detail, from the details' left edge."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": "The width to unfold to; 0 without a detail."
+        }
+      ],
       "examples": 0
     },
     {

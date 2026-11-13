@@ -136,3 +136,36 @@ describe('measureOcrSearchContentWidth', () => {
     expect(measureOcrSearchContentWidth(document.createElement('div'))).toBe(0);
   });
 });
+
+describe('resolveOcrDetailsWidth', () => {
+  it('unfolds to the last detail when the room holds them all', async () => {
+    const { resolveOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    expect(resolveOcrDetailsWidth({ room: 300, edges: [60, 140, 220] })).toBe(220);
+    expect(resolveOcrDetailsWidth({ room: 220, edges: [60, 140, 220] })).toBe(220);
+    expect(resolveOcrDetailsWidth({ room: 500, edges: [58.4] })).toBe(59);
+  });
+
+  it('drops details whole from the end when the room is too small, and never the first', async () => {
+    const { resolveOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    expect(resolveOcrDetailsWidth({ room: 219.9, edges: [60, 140, 220] })).toBe(140);
+    expect(resolveOcrDetailsWidth({ room: 100, edges: [60, 140, 220] })).toBe(60);
+    expect(resolveOcrDetailsWidth({ room: 0, edges: [60, 140, 220] })).toBe(60);
+    expect(resolveOcrDetailsWidth({ room: -8, edges: [60, 140, 220] })).toBe(60);
+    expect(resolveOcrDetailsWidth({ room: Number.NaN, edges: [60, 140] })).toBe(60);
+  });
+
+  it('is nothing without a detail to measure', async () => {
+    const { resolveOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    expect(resolveOcrDetailsWidth({ room: 300, edges: [] })).toBe(0);
+    expect(resolveOcrDetailsWidth({ room: 300, edges: undefined })).toBe(0);
+    expect(resolveOcrDetailsWidth({ room: 300, edges: [0, Number.NaN] })).toBe(0);
+  });
+});
+
+describe('measureOcrDetailsWidth', () => {
+  it('has nothing to say without a root, the details or a toolbar spacer', async () => {
+    const { measureOcrDetailsWidth } = await import('../ocrSearchPlacement.js');
+    expect(measureOcrDetailsWidth(null)).toBeNull();
+    expect(measureOcrDetailsWidth({})).toBeNull();
+  });
+});

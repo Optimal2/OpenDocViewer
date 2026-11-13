@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 85,
+    "line": 89,
     "description": "",
     "params": [
       {
@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 347,
+    "line": 385,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 384,
+    "line": 422,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 392,
+    "line": 430,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 70,
+    "line": 74,
     "description": "",
     "params": [
       {
@@ -6541,7 +6541,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 67,
+    "line": 71,
     "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
     "params": [],
     "returns": [],
@@ -6554,7 +6554,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 65,
+    "line": 69,
     "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
     "params": [],
     "returns": [],
@@ -6567,7 +6567,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 368,
+    "line": 406,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -32765,6 +32765,31 @@
     "examples": 0
   },
   {
+    "id": "measureOcrDetailsWidth",
+    "name": "measureOcrDetailsWidth",
+    "longname": "measureOcrDetailsWidth",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 220,
+    "description": "Measure the room for the search button's details and resolve their width.",
+    "params": [
+      {
+        "name": "root",
+        "type": "Element|null",
+        "optional": false,
+        "description": "The search's root ( .toolbar-ocr-search )."
+      }
+    ],
+    "returns": [
+      {
+        "type": "number|null",
+        "description": "Null when there is nothing to measure against (no toolbar spacer)."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "measureOcrSearchContentWidth",
     "name": "measureOcrSearchContentWidth",
     "longname": "measureOcrSearchContentWidth",
@@ -32849,6 +32874,19 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+    "name": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+    "longname": "OCR_DETAILS_UNFOLDED_MARGIN_EM",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 186,
+    "description": "The details' right margin when unfolded, in their own em (styles/ocr.css).",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -32953,6 +32991,43 @@
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "resolveOcrDetailsWidth",
+    "name": "resolveOcrDetailsWidth",
+    "longname": "resolveOcrDetailsWidth",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrSearchPlacement.js",
+    "line": 200,
+    "description": "How wide the search button's details may unfold (CSS px): the button grows into the room the toolbar's spacer leaves and never pushes the toolbar's end out for them.",
+    "params": [
+      {
+        "name": "measured",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "measured.room",
+        "type": "number",
+        "optional": false,
+        "description": "Width the details may take (CSS px)."
+      },
+      {
+        "name": "measured.edges",
+        "type": "Array.<number>",
+        "optional": false,
+        "description": "Right edge of each detail, from the details' left edge."
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": "The width to unfold to; 0 without a detail."
+      }
+    ],
     "examples": 0
   },
   {

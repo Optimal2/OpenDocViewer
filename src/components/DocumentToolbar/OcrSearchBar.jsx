@@ -30,8 +30,12 @@
  * on right now. They live in the button and not in its tooltip because they change with every
  * recognised page, and a browser takes a native tooltip away whenever its text changes: the
  * tooltip holds only what rarely changes (what the button does, the page's status, the boost).
- * The details are folded away while the field is open (the field takes the room). The button's
- * description for assistive technology spells the same things out.
+ * The button grows only into the room the toolbar's spacer leaves (measured when the pointer or
+ * the focus arrives and while it stays, utils/ocrSearchPlacement.js): with too little room the
+ * details are dropped whole from the end, the count last, so the toolbar's end is never pushed
+ * out for them. They are folded away at once when the field opens, before the field is placed
+ * (the field takes the room). The button's description for assistive technology spells the
+ * same things out.
  *
  * With `ocr.boost` on, the button also shows the boost (utils/ocrBoostStatus.js): a small badge
  * with the engine count while more engines than the cautious count run, and a line at the end of
@@ -55,7 +59,7 @@ import StatusLed from '../common/StatusLed.jsx';
 import { ocrPageKeyOf } from '../../utils/ocrPageKey.js';
 import { hasSearchableOcrText, OCR_STATUS_FALLBACK, OCR_STATUS_LED, ocrStatusKeyOf } from '../../utils/ocrStatus.js';
 import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js';
-import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
+import { measureOcrDetailsWidth, measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
 import { hasActiveModalDialog, isEditableTarget } from '../DocumentViewer/hooks/useViewerEffects.js';
 import { OCR_BOOST_FALLBACK, describeOcrBoost } from '../../utils/ocrBoostStatus.js';
 import { OCR_PROGRESS_FALLBACK, createOcrProgressEstimator, describeOcrTimeLeft, describeOcrTimeLeftShort } from '../../utils/ocrProgress.js';
@@ -194,11 +198,45 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   let workersText = '';
   if (activePages === 1) workersText = t('ocr.progress.workerOne', { defaultValue: OCR_PROGRESS_FALLBACK.workerOne });
   else if (activePages > 1) workersText = t('ocr.progress.workers', { workers: activePages, defaultValue: OCR_PROGRESS_FALLBACK.workers });
+  // How wide the details may unfold: into the room the toolbar's spacer leaves and no further,
+  // dropped whole from the end when it is too small (utils/ocrSearchPlacement.js). The unfolding
+  // itself is CSS (`:hover`, `:focus-visible`); the pointer and the focus are followed here only
+  // to measure while the details show: when they arrive, whenever the details' text changes and
+  // whenever the spacer changes size (the window, the field closing). Unfolding does not change
+  // the answer (the spacer gives what the details take), so the observer settles at once.
+  const [detailsHover, setDetailsHover] = useState(false);
+  const [detailsFocus, setDetailsFocus] = useState(false);
+  const [detailsWidth, setDetailsWidth] = useState(/** @type {(number|null)} */ (null));
+  const detailsShown = (detailsHover || detailsFocus) && !open;
+  const fitDetails = useCallback(() => {
+    const width = measureOcrDetailsWidth(rootRef.current);
+    if (width !== null) setDetailsWidth((current) => (current === width ? current : width));
+  }, []);
+  useLayoutEffect(() => {
+    if (!detailsShown) return undefined;
+    fitDetails();
+    const spacer = rootRef.current?.closest?.('.toolbar')?.querySelector?.('.toolbar-spacer');
+    if (!spacer || typeof ResizeObserver !== 'function') return undefined;
+    const sizes = new ResizeObserver(fitDetails);
+    sizes.observe(spacer);
+    return () => sizes.disconnect();
+  }, [detailsShown, fitDetails, recognisedPages, pages.length, timeLeftShortText, workersText]);
+  const detailsHandlers = {
+    onPointerEnter: () => setDetailsHover(true),
+    onPointerLeave: () => setDetailsHover(false),
+  };
   // The details the button unfolds under the pointer and with keyboard focus (styles/ocr.css):
   // the count behind a thin divider, then the time left and the pages being worked on while
   // there are any. For the eye only: the button's description spells them out.
+  const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
+  const describedText = [coverageTitle, timeLeftText, workersText].filter(Boolean).join(' · ');
   const details = (
-    <span className="toolbar-ocr-search-details" data-odv-ocr="details" aria-hidden="true">
+    <span
+      className="toolbar-ocr-search-details"
+      data-odv-ocr="details"
+      aria-hidden="true"
+      style={detailsWidth === null ? undefined : { '--odv-ocr-details-max': `${detailsWidth}px` }}
+    >
       <span className="toolbar-ocr-search-details-divider" />
       <span className="toolbar-ocr-search-detail" data-odv-ocr="count">{`${recognisedPages}/${pages.length}`}</span>
       {timeLeftShortText ? <span className="toolbar-ocr-search-detail" data-odv-ocr="time-left">{timeLeftShortText}</span> : null}
@@ -399,7 +437,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   if (!searchEnabled) {
     // Status only: the same place and LED as the search button, never enabled, no field.
     return (
-      <div ref={rootRef} className="toolbar-ocr-search is-status-only" data-odv-ocr="search" data-ocr-search="off" data-ocr-boost={boostState}>
+      <div ref={rootRef} className="toolbar-ocr-search is-status-only" data-odv-ocr="search" data-ocr-search="off" data-ocr-boost={boostState} {...detailsHandlers}>
         <button
           ref={buttonRef}
           type="button"
@@ -407,6 +445,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           data-odv-ocr="status"
           data-ocr-state={statusKey || 'notStarted'}
           aria-label={statusText}
+          aria-describedby={coverageId}
           title={withBoost(statusText)}
           disabled
         >
@@ -416,17 +455,16 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
         </button>
         <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
+        {/* The details spelt out as the indicator's description, as on the search button. */}
+        <span className="sr-only" id={coverageId} data-odv-ocr="coverage-text">{describedText}</span>
       </div>
     );
   }
 
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
-  const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
   // The tooltip holds only what rarely changes; what changes with every page is in the details.
   const buttonTitle = withBoost(ready || open ? `${openTitle} · ${statusText}` : statusText);
-  // The details spelt out, as the button's description.
-  const describedText = [coverageTitle, timeLeftText, workersText].filter(Boolean).join(' · ');
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   const pageOnlyShort = t('ocr.search.pageOnlyShort', { defaultValue: 'This page' });
   let statusLine = '';
@@ -454,7 +492,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     : statusLine;
 
   return (
-    <div ref={rootRef} className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search" data-ocr-boost={boostState}>
+    <div ref={rootRef} className={`toolbar-ocr-search${open ? ' is-open' : ''}`} data-odv-ocr="search" data-ocr-boost={boostState} {...detailsHandlers}>
       <button
         ref={buttonRef}
         type="button"
@@ -468,6 +506,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
         aria-controls={panelId}
         disabled={!ready && !open}
         onClick={() => (open ? close() : setOpen(true))}
+        onFocus={() => setDetailsFocus(true)}
+        onBlur={() => setDetailsFocus(false)}
       >
         <span className="material-icons" aria-hidden="true">search</span>
         {boostBadge}

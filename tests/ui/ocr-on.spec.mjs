@@ -471,9 +471,11 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const closedNarrow = await measureToolbar();
   expect(hanging.overflow).toBeLessThanOrEqual(closedNarrow.overflow);
 
-  // Deterministic counterexample to the old moving-anchor equality: place with a small positive
-  // clamp offset, then let count collapse move the live anchor back inside the unclamped range.
-  // The root and panel drift together, preserving the frozen offset and a correct contained layout.
+  // The button's details are unfolded under the pointer that opens the field, and fold away at
+  // once as it opens, before the field is placed: the placement is measured against the button
+  // at its resting width, so the anchor does not move under the placed field afterwards. The
+  // viewport is cut at the unfolded button's right edge to make a measurement against the
+  // unfolded button show (it would clamp the field by the details' width).
   await page.setViewportSize({ width: 1100, height: 900 });
   await settleToolbarLayout();
   // The button's details (the count) unfold under the pointer and fold away as the field opens.
@@ -500,17 +502,15 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   const drifted = await measureToolbar();
   const collapsedCount = await countWidth();
   assertPlacementOffset(driftPlacement);
-  expect(driftPlacement.offset).toBeGreaterThan(0);
-  expect(drifted.anchorRight).toBeLessThan(drifted.viewport - 8);
-  expect(Math.abs(drifted.anchorRight - drifted.right - driftPlacement.offset)).toBeLessThanOrEqual(1);
   expect(collapsedCount.width).toBe(0);
+  // Measured with the details folded already: the anchor the placement saw is the settled one,
+  // well inside the viewport the unfolded button reached to.
+  expect(Math.abs(driftPlacement.measuredAnchorRight - drifted.anchorRight)).toBeLessThanOrEqual(1);
+  expect(driftPlacement.measuredAnchorRight).toBeLessThan(expandedAnchorRight - 10);
+  expect(Math.abs(drifted.anchorRight - drifted.right - driftPlacement.offset)).toBeLessThanOrEqual(1);
   assertContained(drifted);
-  const oldMovingAnchorError = Math.abs(drifted.right - Math.min(drifted.anchorRight, drifted.viewport - 8));
-  console.log(`OCR count-collapse counterexample: ${JSON.stringify({ expandedCount, collapsedCount, driftPlacement, drifted, oldMovingAnchorError })}`);
-  // The old oracle rejects this supported-correct layout; the placement and containment checks
-  // above accept it without assigning a tolerance to unrelated later anchor drift.
-  expect(oldMovingAnchorError).toBeGreaterThan(1);
-  geometries.push({ viewport: driftViewport, placed: driftPlacement, settled: drifted, expandedCount, collapsedCount, oldMovingAnchorError });
+  console.log(`OCR details fold before placement: ${JSON.stringify({ expandedCount, collapsedCount, driftPlacement, drifted })}`);
+  geometries.push({ viewport: driftViewport, placed: driftPlacement, settled: drifted, expandedCount, collapsedCount });
   await test.info().attach('ocr-hanging-geometry', {
     body: JSON.stringify(geometries, null, 2),
     contentType: 'application/json',

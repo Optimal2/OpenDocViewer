@@ -865,8 +865,11 @@ not a toolbar button, see below:
   short ease and shows its details: behind a thin divider the count of pages the search can
   cover over all pages ("4/300"), then, while there are any, roughly how long the waiting pages
   will take ("about 6 min", "about 40 s") and how many pages are being worked on right now
-  ("4 workers"). The details fold away again when the pointer leaves and while the field is
-  open; on a touch screen, where no pointer can rest over the button, they stay unfolded. They
+  ("4 workers", the pages in flight: a PDF page whose own text is being read counts too). The
+  button grows only into the room the toolbar's spacer leaves: with too little room the details
+  are dropped whole from the end, the count last, so the toolbar's end is never pushed out for
+  them. The details fold away again when the pointer leaves and while the field is open; on a
+  touch screen, where no pointer can rest over the button, the count alone stays in it. They
   are in the button and not in its tooltip because they change with every recognised page, and
   a browser takes a native tooltip away whenever its text changes; the button's description for
   assistive technology spells them out. The time is said only with `ocr.recognizeWholeDocument`

@@ -268,11 +268,90 @@ describe('OcrSearchBar', () => {
       expect(detail('workers')).toBeNull();
     });
 
-    it('names them on the status-only button too', () => {
+    it('names them on the status-only button too, and in its description', () => {
       render({ ocrPages: { [KEY(0)]: { status: 'recognizing' }, [KEY(1)]: { status: 'recognizing' } }, searchEnabled: false });
       expect(detail('count')).toBe('0/3');
       expect(detail('workers')).toBe('2 workers');
       expect(button().getAttribute('title')).toBe('Recognising text…');
+      expect(document.getElementById(button().getAttribute('aria-describedby')).textContent).toBe('0 of 3 pages ready · 2 workers');
+    });
+  });
+
+  describe('room for the details', () => {
+    const EDGES = { count: 60, 'time-left': 140, workers: 220 };
+    let original;
+    /** Lay the details out as a browser would: each detail's right edge from the details' left. */
+    beforeEach(() => {
+      original = Element.prototype.getBoundingClientRect;
+      Element.prototype.getBoundingClientRect = function rect() {
+        const edge = EDGES[this.getAttribute?.('data-odv-ocr')];
+        if (edge !== undefined && this.classList.contains('toolbar-ocr-search-detail')) return { left: 0, right: edge, width: edge, top: 0, bottom: 0, height: 0 };
+        return original.call(this);
+      };
+      vi.useFakeTimers();
+      window.__ODV_CONFIG__ = { ocr: { enabled: true, recognizeWholeDocument: true } };
+    });
+    afterEach(() => {
+      Element.prototype.getBoundingClientRect = original;
+      vi.useRealTimers();
+      delete window.__ODV_CONFIG__;
+    });
+    const MANY = Array.from({ length: 40 }, (_, index) => ({ sourceKey: 'doc', pageIndex: index }));
+    /** The first `finished` pages done, the next two being recognised, the rest waiting. */
+    const working = (finished) => Object.fromEntries(MANY.map((_, index) => {
+      if (index < finished) return [KEY(index), done(['ord'])];
+      return [KEY(index), { status: index < finished + 2 ? 'recognizing' : 'queued' }];
+    }));
+    /** Count, time left and workers all showing. */
+    const withAllDetails = (extra = {}) => {
+      render({ allPages: MANY, ocrPages: working(0), ...extra });
+      for (const finished of [1, 2, 3, 4]) {
+        act(() => { vi.advanceTimersByTime(10000); });
+        render({ allPages: MANY, ocrPages: working(finished), ...extra });
+      }
+      expect(detail('time-left')).toBe('about 6 min');
+      expect(detail('workers')).toBe('2 workers');
+    };
+    const detailsMax = () => container.querySelector('[data-odv-ocr="details"]').style.getPropertyValue('--odv-ocr-details-max');
+    const pointer = (type) => act(() => {
+      // React takes pointerenter/pointerleave from pointerover/pointerout.
+      searchRoot().dispatchEvent(new MouseEvent(type, { bubbles: true, relatedTarget: document.body }));
+    });
+
+    it('measures nothing until the pointer or the focus arrives: the width is the style sheet\'s', () => {
+      fakeToolbar({ width: 1000, spacerWidth: 300 });
+      withAllDetails();
+      expect(detailsMax()).toBe('');
+    });
+
+    it('unfolds to every detail when the spacer has the room', () => {
+      fakeToolbar({ width: 1000, spacerWidth: 300 });
+      withAllDetails();
+      pointer('pointerover');
+      expect(detailsMax()).toBe('220px');
+    });
+
+    it('drops details whole from the end when the spacer is too small, the count last', () => {
+      fakeToolbar({ width: 1000, spacerWidth: 150 });
+      withAllDetails();
+      pointer('pointerover');
+      expect(detailsMax()).toBe('140px');
+      // No room at all (the toolbar overflows already): the count alone, as it always stood there.
+      fakeToolbar({ width: 1000, spacerWidth: 0 });
+      withAllDetails();
+      pointer('pointerover');
+      expect(detailsMax()).toBe('60px');
+    });
+
+    it('measures with keyboard focus too, and on the status-only indicator under the pointer', () => {
+      fakeToolbar({ width: 1000, spacerWidth: 150 });
+      withAllDetails();
+      act(() => { button().focus(); });
+      expect(detailsMax()).toBe('140px');
+      fakeToolbar({ width: 1000, spacerWidth: 300 });
+      withAllDetails({ searchEnabled: false });
+      pointer('pointerover');
+      expect(detailsMax()).toBe('220px');
     });
   });
 
