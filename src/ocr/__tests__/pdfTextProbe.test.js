@@ -129,4 +129,97 @@ describe('createPdfTextProber', () => {
     await prober.probe('keep', 0);
     expect(calls).toBe(3);
   });
+
+  /** A fake PDF whose page text arrives when the test says so. */
+  function makeSlowPdf(line) {
+    const destroyed = { document: 0, task: 0 };
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const document = {
+      getPage: vi.fn(async () => {
+        if (destroyed.document > 0) throw new Error('Transport destroyed');
+        return {
+          getTextContent: async () => {
+            await gate;
+            if (destroyed.document > 0) throw new Error('Transport destroyed');
+            return {
+              items: [{ str: line, dir: 'ltr', transform: [12, 0, 0, 12, 60, 780], width: line.length * 6, height: 12, fontName: 'f1', hasEOL: true }],
+              styles: { f1: { ascent: 0.75, descent: -0.25, vertical: false } },
+            };
+          },
+          getViewport: () => BASE_VIEWPORT,
+          cleanup: () => {},
+        };
+      }),
+      destroy: async () => { destroyed.document += 1; },
+    };
+    const task = { promise: Promise.resolve(document), destroy: async () => { destroyed.task += 1; } };
+    return { task, destroyed, release };
+  }
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('never closes a document a probe is reading: several documents are probed at once, and the ones over the bound close as their probes end', async () => {
+    const text = 'En rad med text som är lång nog för att räknas som en riktig textsida i provet.';
+    const pdfs = { a: makeSlowPdf(text), b: makeSlowPdf(text), c: makeSlowPdf(text), d: makeSlowPdf(text) };
+    // Each source opens its own document, whatever order the bytes arrive in.
+    const bySource = createPdfTextProber({
+      readSourceArrayBuffer: async (sourceKey) => new TextEncoder().encode(sourceKey).buffer,
+      getDocument: (bytes) => pdfs[new TextDecoder().decode(bytes)].task,
+      maxOpenDocuments: 2,
+    });
+    // Four pages in flight, each from a document of its own, with room for two.
+    const probes = ['a', 'b', 'c', 'd'].map((key) => bySource.probe(key, 0));
+    await settle();
+    expect(bySource.openCount()).toBe(4);
+    for (const pdf of Object.values(pdfs)) expect(pdf.destroyed).toEqual({ document: 0, task: 0 });
+    // The probes end one by one: every page gets its text, and the documents over the bound go.
+    pdfs.a.release();
+    await expect(probes[0]).resolves.toMatchObject({ usable: true });
+    await settle();
+    expect(bySource.openCount()).toBe(3);
+    expect(pdfs.a.destroyed).toEqual({ document: 1, task: 1 });
+    pdfs.c.release();
+    await expect(probes[2]).resolves.toMatchObject({ usable: true });
+    await settle();
+    expect(bySource.openCount()).toBe(2);
+    expect(pdfs.c.destroyed).toEqual({ document: 1, task: 1 });
+    pdfs.b.release();
+    pdfs.d.release();
+    await expect(probes[1]).resolves.toMatchObject({ usable: true });
+    await expect(probes[3]).resolves.toMatchObject({ usable: true });
+    await settle();
+    // Within the bound again: the last two stay open for their neighbouring pages.
+    expect(bySource.openCount()).toBe(2);
+    expect(pdfs.b.destroyed).toEqual({ document: 0, task: 0 });
+    expect(pdfs.d.destroyed).toEqual({ document: 0, task: 0 });
+  });
+
+  it('closes a document that leaves the viewer, or everything at the idle shutdown, only when its probe has ended', async () => {
+    const text = 'En rad med text som är lång nog för att räknas som en riktig textsida i provet.';
+    const pdfs = { a: makeSlowPdf(text), b: makeSlowPdf(text) };
+    const prober = createPdfTextProber({
+      readSourceArrayBuffer: async (sourceKey) => new TextEncoder().encode(sourceKey).buffer,
+      getDocument: (bytes) => pdfs[new TextDecoder().decode(bytes)].task,
+    });
+    const a = prober.probe('a', 0);
+    const b = prober.probe('b', 0);
+    await settle();
+    await prober.retainSources(new Set(['b']));
+    await prober.releaseAll();
+    expect(pdfs.a.destroyed).toEqual({ document: 0, task: 0 });
+    expect(pdfs.b.destroyed).toEqual({ document: 0, task: 0 });
+    pdfs.a.release();
+    await expect(a).resolves.toMatchObject({ usable: true });
+    await settle();
+    expect(pdfs.a.destroyed).toEqual({ document: 1, task: 1 });
+    expect(prober.openCount()).toBe(1);
+    // Wanted again before its probe ended: the document stays.
+    const again = prober.probe('b', 0);
+    pdfs.b.release();
+    await expect(b).resolves.toMatchObject({ usable: true });
+    await expect(again).resolves.toMatchObject({ usable: true });
+    await settle();
+    expect(pdfs.b.destroyed).toEqual({ document: 0, task: 0 });
+    expect(prober.openCount()).toBe(1);
+  });
 });

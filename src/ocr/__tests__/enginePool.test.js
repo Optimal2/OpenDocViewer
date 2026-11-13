@@ -2,9 +2,11 @@
 /**
  * The engine pool: engines are created lazily up to the size, the first starts alone and the
  * others wait for it, a caller beyond the size waits for a free engine, a job's control aborts
- * only its own engine (which is replaced lazily), a start-up failure of any engine is the pool's
- * failure and stops further engines, terminate stops every engine and rejects the waiting, and
- * resize grows the ceiling lazily and shrinks it without cutting a recognition short.
+ * only its own engine (which is replaced lazily), a start-up failure while no engine has ever
+ * started is the pool's failure and stops further engines, an engine that cannot start once the
+ * pool has worked is dropped and its page recognised on another engine, terminate stops every
+ * engine and rejects the waiting, and resize grows the ceiling lazily and shrinks it without
+ * cutting a recognition short.
  * Engines are fakes with the shape of engine.js.
  */
 import { describe, expect, it, vi } from 'vitest';
@@ -61,8 +63,15 @@ function makePool(size) {
     engines.push(engine);
     return engine;
   });
-  const pool = createOcrEnginePool({ size, createEngine });
-  return { pool, engines, createEngine };
+  const log = { warn: vi.fn() };
+  const pool = createOcrEnginePool({ size, createEngine, log });
+  return { pool, engines, createEngine, log };
+}
+
+/** Let an engine's start fail as engine.js does: the failure is kept, the start rejects with it. */
+function failStart(engine, kind) {
+  engine.setFailure(kind);
+  engine.start.reject(new Error(`OCR engine could not start (${kind})`));
 }
 
 describe('createOcrEnginePool', () => {
@@ -166,6 +175,141 @@ describe('createOcrEnginePool', () => {
     await expect(pool.recognize('c')).rejects.toThrow(/csp/);
     await expect(pool.ensureStarted()).rejects.toThrow(/csp/);
     expect(createEngine).toHaveBeenCalledTimes(2);
+  });
+
+  it('drops an additional engine that cannot start once the pool has worked: its page goes to another engine and OCR carries on', async () => {
+    const { pool, engines, createEngine, log } = makePool(3);
+    expect(pool.capacity()).toBe(3);
+    const a = pool.recognize('a');
+    const b = pool.recognize('b');
+    await flush();
+    // The first engine starts; the second one's language model never arrives.
+    engines[0].start.resolve();
+    await flush();
+    expect(engines[0].jobs.map((job) => job.image)).toEqual(['a']);
+    failStart(engines[1], 'assets');
+    await flush();
+    // Not the pool's failure: the engine is gone, and the page waits for the one that works.
+    expect(pool.getFailure()).toBeNull();
+    expect(engines[1].terminate).toHaveBeenCalledTimes(1);
+    expect(pool.engineCount()).toBe(1);
+    expect(pool.capacity()).toBe(1);
+    expect(log.warn).toHaveBeenCalledTimes(1);
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 90, words: [] });
+    await expect(a).resolves.toMatchObject({ text: 'a' });
+    await flush();
+    expect(engines[0].jobs.map((job) => job.image)).toEqual(['a', 'b']);
+    engines[0].jobs[1].resolve({ text: 'b', confidence: 90, words: [] });
+    await expect(b).resolves.toMatchObject({ text: 'b' });
+
+    // No further engine is tried for the pages that follow: they take the one that works.
+    const c = pool.recognize('c');
+    const d = pool.recognize('d');
+    await flush();
+    expect(createEngine).toHaveBeenCalledTimes(2);
+    engines[0].jobs[2].resolve({ text: 'c', confidence: 90, words: [] });
+    await expect(c).resolves.toMatchObject({ text: 'c' });
+    await flush();
+    engines[0].jobs[3].resolve({ text: 'd', confidence: 90, words: [] });
+    await expect(d).resolves.toMatchObject({ text: 'd' });
+
+    // A new size is a new attempt.
+    pool.resize(3);
+    expect(pool.capacity()).toBe(3);
+    const e = pool.recognize('e');
+    const f = pool.recognize('f');
+    await flush();
+    expect(createEngine).toHaveBeenCalledTimes(3);
+    engines[2].start.resolve();
+    await flush();
+    engines[0].jobs[4].resolve({ text: 'e', confidence: 90, words: [] });
+    engines[2].jobs[0].resolve({ text: 'f', confidence: 90, words: [] });
+    await expect(e).resolves.toMatchObject({ text: 'e' });
+    await expect(f).resolves.toMatchObject({ text: 'f' });
+  });
+
+  it('starts no engine after engine for the pages when every additional one fails: they all wait for the one that works', async () => {
+    const { pool, engines, createEngine } = makePool(4);
+    const pages = ['a', 'b', 'c', 'd'].map((image) => pool.recognize(image));
+    await flush();
+    engines[0].start.resolve();
+    await flush();
+    expect(createEngine).toHaveBeenCalledTimes(4);
+    // The three additional engines all fail to start, one after the other.
+    for (const index of [1, 2, 3]) {
+      failStart(engines[index], 'assets');
+      await flush();
+    }
+    expect(createEngine).toHaveBeenCalledTimes(4);
+    expect(pool.engineCount()).toBe(1);
+    expect(pool.capacity()).toBe(1);
+    expect(pool.getFailure()).toBeNull();
+    // Every page is recognised, in turn, on the engine that works: none of them fails.
+    for (let done = 0; done < 4; done += 1) {
+      expect(engines[0].jobs).toHaveLength(done + 1);
+      const job = engines[0].jobs[done];
+      job.resolve({ text: job.image, confidence: 90, words: [] });
+      await flush();
+    }
+    const texts = (await Promise.all(pages)).map((result) => result.text);
+    expect(texts.sort()).toEqual(['a', 'b', 'c', 'd']);
+    expect(createEngine).toHaveBeenCalledTimes(4);
+  });
+
+  it('keeps the engines that are still starting when another one fails to', async () => {
+    const { pool, engines, createEngine } = makePool(3);
+    const a = pool.recognize('a');
+    const b = pool.recognize('b');
+    const c = pool.recognize('c');
+    await flush();
+    engines[0].start.resolve();
+    await flush();
+    // The third engine fails while the second is still starting: the second is not given up,
+    // and no fourth is started for the page that lost its engine.
+    failStart(engines[2], 'timeout');
+    await flush();
+    expect(pool.engineCount()).toBe(2);
+    expect(pool.capacity()).toBe(2);
+    expect(createEngine).toHaveBeenCalledTimes(3);
+    engines[1].start.resolve();
+    await flush();
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 90, words: [] });
+    engines[1].jobs[0].resolve({ text: 'b', confidence: 90, words: [] });
+    await expect(a).resolves.toMatchObject({ text: 'a' });
+    await expect(b).resolves.toMatchObject({ text: 'b' });
+    await flush();
+    // The page of the engine that failed is recognised on one of the two that work.
+    const taken = [...engines[0].jobs, ...engines[1].jobs].find((job) => job.image === 'c');
+    expect(taken).toBeTruthy();
+    taken.resolve({ text: 'c', confidence: 90, words: [] });
+    await expect(c).resolves.toMatchObject({ text: 'c' });
+  });
+
+  it('fails only the page when the one engine of a pool that has worked cannot start again, and starts a fresh engine for the next', async () => {
+    const { pool, engines, createEngine } = makePool(1);
+    const a = pool.recognize('a');
+    await flush();
+    engines[0].start.resolve();
+    await flush();
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 90, words: [] });
+    await expect(a).resolves.toMatchObject({ text: 'a' });
+    // The idle shutdown stops the worker; the next page starts a new one, which cannot start.
+    await pool.terminate();
+    const b = pool.recognize('b');
+    await flush();
+    failStart(engines[1], 'assets');
+    await expect(b).rejects.toThrow(/assets/);
+    expect(pool.getFailure()).toBeNull();
+    expect(pool.engineCount()).toBe(0);
+    expect(pool.capacity()).toBe(1);
+    // The page after it gets a fresh engine, and OCR is back.
+    const c = pool.recognize('c');
+    await flush();
+    expect(createEngine).toHaveBeenCalledTimes(3);
+    engines[2].start.resolve();
+    await flush();
+    engines[2].jobs[0].resolve({ text: 'c', confidence: 90, words: [] });
+    await expect(c).resolves.toMatchObject({ text: 'c' });
   });
 
   it('terminates every engine and rejects callers waiting for one', async () => {

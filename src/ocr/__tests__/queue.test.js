@@ -435,6 +435,50 @@ describe('createOcrQueue', () => {
       };
     }
 
+    it('takes no more pages at a time than the pool says it can recognise', async () => {
+      // A pool of four whose additional engines could not start: one page at a time, whatever
+      // the concurrency, so no page spends its recognition bound waiting for an engine.
+      const engine = makePool(4);
+      let capacity = 1;
+      engine.capacity = () => capacity;
+      const { queue, latest } = makeQueue({ engine, concurrency: 4 });
+      const pages = [candidate('doc', 0), candidate('doc', 1), candidate('doc', 2)];
+      queue.setWindow(pages);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(1);
+      expect(latest().pages[pages[1].key]).toEqual({ status: OCR_PAGE_STATUS.QUEUED });
+      engine.pending[0].resolve(result('ett'));
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(2);
+      // The pool can take more again (resized): the next pump uses it.
+      capacity = 4;
+      queue.setConcurrency(4);
+      await flush();
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+    });
+
+    it('goes on to the next page when a page fails, as long as the pool has no failure of its own', async () => {
+      const engine = makePool(2);
+      const { queue, cache, latest } = makeQueue({ engine, concurrency: 2 });
+      const [a, b, c, d] = [candidate('doc', 0), candidate('doc', 1), candidate('doc', 2), candidate('doc', 3)];
+      queue.setWindow([a, b, c, d]);
+      await flush();
+      // One page cannot be recognised (an engine that could not start for it, a broken image).
+      engine.pending[0].reject(new Error('OCR engine could not start (assets)'));
+      await flush();
+      expect(latest().engineFailure).toBeNull();
+      expect(cache.get(a.key)).toMatchObject({ status: OCR_PAGE_STATUS.FAILED });
+      // The page after it has started; nothing has stopped.
+      expect(engine.recognize).toHaveBeenCalledTimes(3);
+      engine.pending[1].resolve(result('två'));
+      engine.pending[2].resolve(result('tre'));
+      await flush();
+      engine.pending[3].resolve(result('fyra'));
+      await flush();
+      expect([b, c, d].map((entry) => cache.get(entry.key).text)).toEqual(['två', 'tre', 'fyra']);
+      expect(latest().busy).toBe(false);
+    });
+
     it('keeps as many pages in flight as the concurrency allows and refills as each finishes', async () => {
       const engine = makePool(2);
       const { queue, cache, events, latest } = makeQueue({ engine, concurrency: 2 });

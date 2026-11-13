@@ -6,8 +6,13 @@
  *
  * The prober opens a document from the bytes the viewer already holds (`readSourceArrayBuffer`,
  * the file is never fetched again), keeps a few documents open so neighbouring pages reuse the
- * parse, and closes them when the document leaves the viewer or the engine goes idle. pdf.js
- * itself is the copy the viewer already ships for rendering; this module adds no second one.
+ * parse, and closes them when the document leaves the viewer or the engine goes idle. A
+ * document is never closed while a probe reads it: several pages are probed at a time (the
+ * queue's pages in flight), in a session of many small documents each from a document of its
+ * own, and closing the least recently used one under a probe failed that page for good
+ * ("Transport destroyed"). More documents than the bound are therefore open while that many
+ * probes run, and the ones over it are closed as their probes end. pdf.js itself is the copy
+ * the viewer already ships for rendering; this module adds no second one.
  * Part of the lazy OCR chunk.
  */
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
@@ -16,7 +21,7 @@ import { withPdfJsDocumentOptions } from '../utils/pdfjsDocumentOptions.js';
 import { assessPdfTextLayer } from './classify.js';
 import { pdfTextLayerWords } from './pdfTextWords.js';
 
-/** Open pdf.js documents kept for neighbouring pages before the least recently used is closed. */
+/** Open pdf.js documents kept for neighbouring pages before the least recently used idle one is closed. */
 export const DEFAULT_OPEN_PDF_DOCUMENTS = 2;
 
 /**
@@ -62,12 +67,21 @@ export function createPdfTextProber({
   maxOpenDocuments = DEFAULT_OPEN_PDF_DOCUMENTS,
 }) {
   const limit = Math.max(1, Math.floor(Number(maxOpenDocuments)) || DEFAULT_OPEN_PDF_DOCUMENTS);
-  /** @type {Map<string, { promise: Promise<Object>, task: Object }>} */
+  /**
+   * `users`: probes reading the document now. `closing`: asked to close while in use; closed
+   * when the last probe ends.
+   * @type {Map<string, { promise: Promise<Object>, task: Object, users: number, closing: boolean }>}
+   */
   const open = new Map();
 
+  /** Close a document now, or, while probes read it, as soon as the last of them ends. */
   async function close(sourceKey) {
     const entry = open.get(sourceKey);
     if (!entry) return;
+    if (entry.users > 0) {
+      entry.closing = true;
+      return;
+    }
     open.delete(sourceKey);
     try {
       const document = await entry.promise;
@@ -82,14 +96,27 @@ export function createPdfTextProber({
     }
   }
 
-  function openDocument(sourceKey) {
+  /** Close the least recently used idle documents above the bound; the ones in use stay. */
+  function trim() {
+    if (open.size <= limit) return;
+    for (const [key, entry] of [...open]) {
+      if (open.size <= limit) break;
+      if (entry.users === 0) void close(key);
+    }
+  }
+
+  /** The document's entry, opened if need be, with one more probe reading it. */
+  function holdDocument(sourceKey) {
     const existing = open.get(sourceKey);
     if (existing) {
       open.delete(sourceKey);
       open.set(sourceKey, existing);
-      return existing.promise;
+      // Wanted again: whoever asked for it to be closed is overtaken.
+      existing.closing = false;
+      existing.users += 1;
+      return existing;
     }
-    const entry = { task: null, promise: null };
+    const entry = { task: null, promise: null, users: 1, closing: false };
     entry.promise = (async () => {
       const bytes = await readSourceArrayBuffer(sourceKey);
       if (!bytes) throw new Error('PDF source bytes are unavailable');
@@ -100,42 +127,57 @@ export function createPdfTextProber({
       if (open.get(sourceKey) === entry) open.delete(sourceKey);
     });
     open.set(sourceKey, entry);
-    const closing = [];
-    while (open.size > limit) {
-      const oldest = open.keys().next().value;
-      closing.push(close(oldest));
+    trim();
+    return entry;
+  }
+
+  /** One probe has stopped reading the document. */
+  function releaseDocument(sourceKey, entry) {
+    entry.users = Math.max(0, entry.users - 1);
+    if (entry.users === 0 && entry.closing && open.get(sourceKey) === entry) void close(sourceKey);
+    trim();
+  }
+
+  /**
+   * @param {Object} document  The open pdf.js document.
+   * @param {number} pageIndex
+   * @returns {Promise<Object>}
+   */
+  async function probeDocument(document, pageIndex) {
+    const page = await document.getPage(Math.max(0, Math.floor(Number(pageIndex)) || 0) + 1);
+    try {
+      const content = await page.getTextContent({ includeMarkedContent: false });
+      const items = Array.isArray(content?.items) ? content.items : [];
+      const assessment = assessPdfTextLayer(items.map((item) => item?.str ?? ''));
+      if (!assessment.usable) return assessment;
+      // The base viewport: scale 1 with the page's own rotation, the same frame the renderer
+      // scales to pixels, so the boxes map onto the page image by proportion.
+      const viewport = page.getViewport({ scale: 1 });
+      const { words, text } = pdfTextLayerWords({ items, styles: content?.styles, viewportTransform: viewport?.transform });
+      return {
+        ...assessment,
+        words,
+        text,
+        pageWidth: Math.max(0, Number(viewport?.width) || 0),
+        pageHeight: Math.max(0, Number(viewport?.height) || 0),
+      };
+    } finally {
+      try {
+        page.cleanup?.();
+      } catch {
+        // Nothing to release.
+      }
     }
-    void Promise.all(closing);
-    return entry.promise;
   }
 
   return {
     async probe(sourceKey, pageIndex) {
       const key = String(sourceKey || '');
-      const document = await openDocument(key);
-      const page = await document.getPage(Math.max(0, Math.floor(Number(pageIndex)) || 0) + 1);
+      const entry = holdDocument(key);
       try {
-        const content = await page.getTextContent({ includeMarkedContent: false });
-        const items = Array.isArray(content?.items) ? content.items : [];
-        const assessment = assessPdfTextLayer(items.map((item) => item?.str ?? ''));
-        if (!assessment.usable) return assessment;
-        // The base viewport: scale 1 with the page's own rotation, the same frame the renderer
-        // scales to pixels, so the boxes map onto the page image by proportion.
-        const viewport = page.getViewport({ scale: 1 });
-        const { words, text } = pdfTextLayerWords({ items, styles: content?.styles, viewportTransform: viewport?.transform });
-        return {
-          ...assessment,
-          words,
-          text,
-          pageWidth: Math.max(0, Number(viewport?.width) || 0),
-          pageHeight: Math.max(0, Number(viewport?.height) || 0),
-        };
+        return await probeDocument(await entry.promise, pageIndex);
       } finally {
-        try {
-          page.cleanup?.();
-        } catch {
-          // Nothing to release.
-        }
+        releaseDocument(key, entry);
       }
     },
     async retainSources(sourceKeys) {

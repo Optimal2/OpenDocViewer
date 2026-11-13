@@ -256,7 +256,7 @@ export function createOcrEngine({
         if (startGeneration !== generation) throw error;
         failure = { kind: classifyOcrStartupError(error), error };
         workerPromise = null;
-        log.error('OCR engine could not start; OCR stays off for this session', {
+        log.error('OCR engine could not start', {
           kind: failure.kind,
           languages: [...languageList],
           hint: failure.kind === OCR_STARTUP_FAILURE.CSP

@@ -210,7 +210,10 @@ export function createOcrQueue({
         if (inFlight.size === 0) onIdle?.();
         return;
       }
-      while (inFlight.size < limit) {
+      // A pool that cannot start all its engines takes fewer pages at a time: a page beyond
+      // them would spend its recognition bound waiting for an engine.
+      const capacity = typeof engine.capacity === 'function' ? Math.max(1, Math.floor(Number(engine.capacity())) || 1) : Infinity;
+      while (inFlight.size < Math.min(limit, capacity)) {
         const candidate = nextCandidate();
         if (!candidate) break;
         // run() is synchronous up to its first await, so the page is in flight (and, unless it is
@@ -290,8 +293,11 @@ export function createOcrQueue({
     } catch (error) {
       const failure = typeof engine.getFailure === 'function' ? engine.getFailure() : null;
       if (failure) {
-        // The engine cannot start in this session (CSP, missing files, timeout); engine.js has
-        // logged the cause. Stop the queue instead of failing page after page.
+        // The engine cannot start in this session (CSP, missing files, timeout; no engine has
+        // ever started, enginePool.js); engine.js has logged the cause. Stop the queue instead
+        // of failing page after page. Anything else that goes wrong is the page's own failure,
+        // below, and the queue goes on to the next page.
+        if (!engineFailure) log.warn?.('OCR is off for this session: no engine could start', { kind: String(failure?.kind || failure) });
         engineFailure = String(failure?.kind || failure);
         outcome = { status: OCR_PAGE_STATUS.FAILED, reason: `engine:${engineFailure}` };
       } else if (!job.abandoned) {
