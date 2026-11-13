@@ -279,13 +279,15 @@ describe('OcrSearchBar', () => {
 
   describe('room for the details', () => {
     const EDGES = { count: 60, 'time-left': 140, workers: 220 };
+    const BADGE_WIDTH = 30;
     let original;
-    /** Lay the details out as a browser would: each detail's right edge from the details' left. */
+    /** Lay the details out as a browser would: each detail's right edge from the details' left; and the boost badge. */
     beforeEach(() => {
       original = Element.prototype.getBoundingClientRect;
       Element.prototype.getBoundingClientRect = function rect() {
         const edge = EDGES[this.getAttribute?.('data-odv-ocr')];
         if (edge !== undefined && this.classList.contains('toolbar-ocr-search-detail')) return { left: 0, right: edge, width: edge, top: 0, bottom: 0, height: 0 };
+        if (this.getAttribute?.('data-odv-ocr') === 'boost') return { left: 0, right: BADGE_WIDTH, width: BADGE_WIDTH, top: 0, bottom: 0, height: 0 };
         return original.call(this);
       };
       vi.useFakeTimers();
@@ -341,6 +343,33 @@ describe('OcrSearchBar', () => {
       withAllDetails();
       pointer('pointerover');
       expect(detailsMax()).toBe('60px');
+    });
+
+    it('holds the boost badge\'s width when the badge leaves under a pointer that has just arrived, until the pointer leaves', () => {
+      const minWidth = () => container.querySelector('[data-odv-ocr="details"]').style.minWidth;
+      const ocrPages = { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'recognizing' } };
+      const boosted = boost({ state: 'boosted', level: 12, baselineMs: 2000, settledLevel: 12, probes: [{ level: 12, ms: 2100, slow: false }] });
+      const ended = boost({ baselineMs: 2000, settledLevel: 12, probes: [{ level: 12, ms: 2100, slow: false }] });
+      fakeToolbar({ width: 1000, spacerWidth: 300 });
+      render({ ocrPages, ocrBoost: boosted });
+      expect(boostBadge()).not.toBeNull();
+      // The pointer arrives over the boosted button: nothing is held while the badge is there.
+      pointer('pointerover');
+      expect(minWidth()).toBe('');
+      // The same move was input and ended the boost: the details hold the badge's place.
+      render({ ocrPages, ocrBoost: ended });
+      expect(boostBadge()).toBeNull();
+      expect(minWidth()).toBe(`${BADGE_WIDTH}px`);
+      // Not while the field is open (it is placed against the button at its resting width).
+      act(() => button().click());
+      expect(minWidth()).toBe('');
+      act(() => button().click());
+      expect(minWidth()).toBe(`${BADGE_WIDTH}px`);
+      pointer('pointerout');
+      expect(minWidth()).toBe('');
+      // A pointer that arrives without a badge holds nothing.
+      pointer('pointerover');
+      expect(minWidth()).toBe('');
     });
 
     it('measures with keyboard focus too, and on the status-only indicator under the pointer', () => {

@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 389,
+    "line": 411,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 426,
+    "line": 448,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 434,
+    "line": 456,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6567,7 +6567,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 410,
+    "line": 432,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {

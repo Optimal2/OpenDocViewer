@@ -225,10 +225,32 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     sizes.observe(spacer);
     return () => sizes.disconnect();
   }, [detailsShown, fitDetails, recognisedPages, pages.length, timeLeftShortText, workersText]);
+  // The boost's badge leaves at the first input, and the move that brings the pointer onto the
+  // button is input: the button would lose the badge's width at once, before the details have
+  // begun to unfold, and a pointer that came in over the badge would be left outside a button
+  // that then never unfolds. The badge's width is therefore measured as the pointer arrives
+  // (the arrival is dispatched before the move that ends the boost) and held by the details
+  // while the pointer stays and no badge shows.
+  const [detailsHold, setDetailsHold] = useState(/** @type {(number|null)} */ (null));
   const detailsHandlers = {
-    onPointerEnter: () => setDetailsHover(true),
-    onPointerLeave: () => setDetailsHover(false),
+    onPointerEnter: () => {
+      setDetailsHover(true);
+      const badge = rootRef.current?.querySelector?.('[data-odv-ocr="boost"]');
+      let hold = 0;
+      if (badge && typeof getComputedStyle === 'function') {
+        const style = getComputedStyle(badge);
+        hold = badge.getBoundingClientRect().width + (Number.parseFloat(style.marginLeft) || 0) + (Number.parseFloat(style.marginRight) || 0);
+      }
+      setDetailsHold(hold > 0 ? hold : null);
+    },
+    onPointerLeave: () => {
+      setDetailsHover(false);
+      setDetailsHold(null);
+    },
   };
+  const detailsStyle = {};
+  if (detailsWidth !== null) detailsStyle['--odv-ocr-details-max'] = `${detailsWidth}px`;
+  if (detailsHold !== null && !boostBadge && !open) detailsStyle.minWidth = `${detailsHold}px`;
   // The details the button unfolds under the pointer and with keyboard focus (styles/ocr.css):
   // the count behind a thin divider, then the time left and the pages being worked on while
   // there are any. For the eye only: the button's description spells them out.
@@ -239,7 +261,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       className="toolbar-ocr-search-details"
       data-odv-ocr="details"
       aria-hidden="true"
-      style={detailsWidth === null ? undefined : { '--odv-ocr-details-max': `${detailsWidth}px` }}
+      style={detailsStyle}
     >
       <span className="toolbar-ocr-search-details-divider" />
       <span className="toolbar-ocr-search-detail" data-odv-ocr="count">{`${recognisedPages}/${pages.length}`}</span>

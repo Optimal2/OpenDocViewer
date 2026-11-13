@@ -189,7 +189,10 @@
    in the button), so the toolbar's end is not pushed out for more than the count. Folded
    too while the field is open (the field takes the room), and then at once, without the ease:
    the field is placed by measuring the toolbar the moment it opens, and the button must be at
-   its resting width by then. Tabular digits keep the figures steady as they change. The
+   its resting width by then. When the boost's badge leaves under a pointer that has just
+   arrived, the component has the details hold the badge's width (an inline min-width), so the
+   button does not shrink away from the pointer before they unfold. Tabular digits keep the
+   figures steady as they change. The
    details are in the button and not in its tooltip because they change with every recognised
    page, and a browser takes a native tooltip away whenever its text changes. */
 .toolbar .toolbar-ocr-search-toggle {

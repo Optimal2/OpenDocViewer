@@ -238,13 +238,13 @@
 | <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:29</code> | Ids the dialog renders around the manual view. |
 | <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:23</code> | Id of the dialog title. |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:90</code> |  |
-| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:389</code> |  |
-| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:426</code> |  |
-| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:434</code> | Escape closes the field from any of its controls. |
+| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:411</code> |  |
+| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:448</code> |  |
+| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:456</code> | Escape closes the field from any of its controls. |
 | <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:75</code> |  |
 | <code>OCR_ACTIVE_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:72</code> | Statuses of a page being worked on right now: one for each of the queue&#39;s pages in flight. |
 | <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:70</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
-| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:410</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
+| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:432</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx:36</code> |  |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |

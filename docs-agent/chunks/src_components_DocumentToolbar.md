@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8121. JSDoc symbol count: 115.
+File count: 21. Line count: 8143. JSDoc symbol count: 115.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 

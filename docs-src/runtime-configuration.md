@@ -869,7 +869,10 @@ not a toolbar button, see below:
   button grows only into the room the toolbar's spacer leaves: with too little room the details
   are dropped whole from the end, down to the count, which always shows (as it did when it
   stood in the button at all times), so the toolbar's end is not pushed out for more than the
-  count. The details fold away again when the pointer leaves and while the field is open; on a
+  count. When the boost's badge leaves under a pointer that has just arrived (arriving is
+  input, and input ends the boost), the button keeps the badge's width until the details have
+  unfolded, so it does not shrink away from the pointer. The details fold away again when the
+  pointer leaves and while the field is open; on a
   touch screen, where no pointer can rest over the button, the count alone stays in it. They
   are in the button and not in its tooltip because they change with every recognised page, and
   a browser takes a native tooltip away whenever its text changes; the button's description for
