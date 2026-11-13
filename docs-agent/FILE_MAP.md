@@ -124,7 +124,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
 | <code>src/ocr/engine.js</code> | 323 | 1 | 15 | high | Thin wrapper around a tesseract.js worker. |
 | <code>src/ocr/enginePool.js</code> | 297 | 1 | 10 | high | A pool of OCR engines \(engine.js\) behind the one-engine interface the queue \(queue.js\) uses, so that several pages \(the worker count, see setup.js\) can be recognised at the same time. |
-| <code>src/ocr/imagePreparer.js</code> | 285 | 1 | 11 | high | Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot. |
+| <code>src/ocr/imagePreparer.js</code> | 286 | 1 | 11 | high | Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot. |
 | <code>src/ocr/index.js</code> | 37 | 2 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
 | <code>src/ocr/languages.js</code> | 29 | 2 | 2 | high | Membership check for OCR language codes against the models tesseract.js knows. |
 | <code>src/ocr/lineRemoval.js</code> | 292 | 2 | 16 | high | Ruling-line removal before recognition: the pre-processing step for ruled tables and forms. |

@@ -42,6 +42,8 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   const origin = new URL(baseURL).origin;
   const requests = [];
   page.on('request', (request) => requests.push(request.url()));
+  const workers = [];
+  page.on('worker', (worker) => workers.push(worker.url()));
   const consoleErrors = [];
   page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
 
@@ -152,6 +154,7 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   // module itself loads, it holds the probe), and nothing left the origin.
   const engineRequests = requests.filter((url) => /\/ocr\/[^?]*(tesseract|tessdata|worker|traineddata)/i.test(url));
   expect(engineRequests).toEqual([]);
+  expect(workers.filter((url) => /\/ocr\/|tesseract|prepareWorker/i.test(url))).toEqual([]);
   const foreign = requests.filter((url) => !url.startsWith(origin) && !url.startsWith('blob:') && !url.startsWith('data:'));
   expect(foreign).toEqual([]);
   expect(consoleErrors).toEqual([]);

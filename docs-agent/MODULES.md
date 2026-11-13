@@ -160,7 +160,7 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 22. Line count: 4880. JSDoc symbol count: 208.
+File count: 22. Line count: 4881. JSDoc symbol count: 208.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/prepareImageCore.js` - The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de

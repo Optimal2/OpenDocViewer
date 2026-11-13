@@ -37,7 +37,6 @@
  * `ocr.enabled` is the literal true. With the switch off no worker exists.
  */
 import logger from '../logging/systemLogger.js';
-import OcrPrepareWorker from './prepareWorker.js?worker';
 import { prepareOcrImageCore } from './prepareImageCore.js';
 
 /** Idle time after which the preparation worker is terminated (restarted by the next page). */
@@ -74,7 +73,9 @@ export const OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS = 25000;
  * @returns {OcrImagePreparer}
  */
 export function createOcrImagePreparer({
-  createWorker = () => new OcrPrepareWorker({ type: 'module', name: 'odv-ocr-prepare' }),
+  // Keep the worker out of the module import graph: a PDF with its own text loads the OCR
+  // module for probing, but never prepares an image or needs even a worker wrapper request.
+  createWorker = () => new Worker(new URL('./prepareWorker.js', import.meta.url), { type: 'module', name: 'odv-ocr-prepare' }),
   workersSupported = typeof Worker === 'function',
   prepareOnMainThread = (blob, options) => prepareOcrImageCore(blob, options),
   idleMs = OCR_IMAGE_PREPARER_IDLE_MS,

@@ -1011,17 +1011,17 @@
 | <code>createOcrEnginePool~shrink</code> | function | <code>src/ocr/enginePool.js:179</code> | Terminate idle engines above the ceiling, newest first; the busy ones go as they finish. |
 | <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:116</code> | A free entry now, a new one while under the limit, else null. |
 | <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:45</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
-| <code>createOcrImagePreparer~armReplyTimer</code> | function | <code>src/ocr/imagePreparer.js:132</code> | Start the reply clock for the oldest pending request; nothing pending clears it. |
-| <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:76</code> |  |
-| <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:279</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
-| <code>getOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:273</code> | The viewer&#39;s one preparer, created on first use \(prepareImage.js, the benchmarks\). |
-| <code>OCR_IMAGE_PREPARER_IDLE_MS</code> | constant | <code>src/ocr/imagePreparer.js:44</code> | Idle time after which the preparation worker is terminated \(restarted by the next page\). |
-| <code>OCR_IMAGE_PREPARER_MAX_FAILURES</code> | constant | <code>src/ocr/imagePreparer.js:46</code> | Worker failures after which the session prepares on the main thread only. |
-| <code>OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS</code> | constant | <code>src/ocr/imagePreparer.js:53</code> | Longest wait for one reply before the worker counts as failed. |
-| <code>OcrImagePreparer</code> | typedef | <code>src/ocr/imagePreparer.js:55</code> |  |
-| <code>createOcrImagePreparer~redoPendingOnMainThread</code> | function | <code>src/ocr/imagePreparer.js:152</code> | Finish every pending request on the main thread \(the worker is gone or going\). |
-| <code>createOcrImagePreparer~replyTimer</code> | member | <code>src/ocr/imagePreparer.js:96</code> | The reply clock of the oldest pending request \(the one the worker is on\); null when none is pending. |
-| <code>createOcrImagePreparer~takePending</code> | function | <code>src/ocr/imagePreparer.js:143</code> | Take a request out of the map; the reply clock restarts for the next oldest, or stops. |
+| <code>createOcrImagePreparer~armReplyTimer</code> | function | <code>src/ocr/imagePreparer.js:133</code> | Start the reply clock for the oldest pending request; nothing pending clears it. |
+| <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:75</code> |  |
+| <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:280</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
+| <code>getOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:274</code> | The viewer&#39;s one preparer, created on first use \(prepareImage.js, the benchmarks\). |
+| <code>OCR_IMAGE_PREPARER_IDLE_MS</code> | constant | <code>src/ocr/imagePreparer.js:43</code> | Idle time after which the preparation worker is terminated \(restarted by the next page\). |
+| <code>OCR_IMAGE_PREPARER_MAX_FAILURES</code> | constant | <code>src/ocr/imagePreparer.js:45</code> | Worker failures after which the session prepares on the main thread only. |
+| <code>OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS</code> | constant | <code>src/ocr/imagePreparer.js:52</code> | Longest wait for one reply before the worker counts as failed. |
+| <code>OcrImagePreparer</code> | typedef | <code>src/ocr/imagePreparer.js:54</code> |  |
+| <code>createOcrImagePreparer~redoPendingOnMainThread</code> | function | <code>src/ocr/imagePreparer.js:153</code> | Finish every pending request on the main thread \(the worker is gone or going\). |
+| <code>createOcrImagePreparer~replyTimer</code> | member | <code>src/ocr/imagePreparer.js:97</code> | The reply clock of the oldest pending request \(the one the worker is on\); null when none is pending. |
+| <code>createOcrImagePreparer~takePending</code> | function | <code>src/ocr/imagePreparer.js:144</code> | Take a request out of the map; the reply clock restarts for the next oldest, or stops. |
 | <code>KNOWN_OCR_LANGUAGES</code> | constant | <code>src/ocr/languages.js:13</code> | Every language code tesseract.js lists a model for \(lower-case, e.g. |
 | <code>partitionOcrLanguages</code> | function | <code>src/ocr/languages.js:21</code> | Split codes into those tesseract.js knows a model for and the rest. |
 | <code>createEventLoopYield</code> | function | <code>src/ocr/lineRemoval.js:248</code> | Build the function that hands control back to the event loop between bands. |

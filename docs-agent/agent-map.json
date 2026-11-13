@@ -98,7 +98,7 @@
   },
   "stats": {
     "fileCount": 210,
-    "sourceLineCount": 74726,
+    "sourceLineCount": 74727,
     "docletCount": 2189,
     "documentedFileCount": 206,
     "lowConfidenceSummaryCount": 2,
@@ -1785,7 +1785,7 @@
     {
       "name": "src/ocr",
       "fileCount": 22,
-      "lineCount": 4880,
+      "lineCount": 4881,
       "docletCount": 208,
       "importantFiles": [
         {
@@ -1845,7 +1845,7 @@
         {
           "path": "src/ocr/imagePreparer.js",
           "score": 64,
-          "lines": 285,
+          "lines": 286,
           "incomingLocalImports": 1,
           "doclets": 11,
           "summary": "Hands page images to the preparation worker (src/ocr/prepareWorker.js) and falls back to the main thread where it cannot.",
@@ -46943,7 +46943,7 @@
     },
     {
       "path": "src/ocr/imagePreparer.js",
-      "lines": 285,
+      "lines": 286,
       "extension": ".js",
       "jsdocBlockCount": 15,
       "sourceSummary": "Hands page images to the preparation worker (src/ocr/prepareWorker.js) and falls back to the main thread where it cannot.",
@@ -46957,19 +46957,11 @@
           "kind": "static"
         },
         {
-          "source": "./prepareWorker.js?worker",
-          "specifiers": [
-            "OcrPrepareWorker"
-          ],
-          "line": 40,
-          "kind": "static"
-        },
-        {
           "source": "./prepareImageCore.js",
           "specifiers": [
             "prepareOcrImageCore"
           ],
-          "line": 41,
+          "line": 40,
           "kind": "static"
         }
       ],
@@ -46977,124 +46969,124 @@
         {
           "name": "OCR_IMAGE_PREPARER_IDLE_MS",
           "kind": "variable",
-          "line": 44
+          "line": 43
         },
         {
           "name": "OCR_IMAGE_PREPARER_MAX_FAILURES",
           "kind": "variable",
-          "line": 46
+          "line": 45
         },
         {
           "name": "OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS",
           "kind": "variable",
-          "line": 53
+          "line": 52
         },
         {
           "name": "createOcrImagePreparer",
           "kind": "function",
-          "line": 76
+          "line": 75
         },
         {
           "name": "getOcrImagePreparer",
           "kind": "function",
-          "line": 273
+          "line": 274
         },
         {
           "name": "disposeOcrImagePreparer",
           "kind": "function",
-          "line": 279
+          "line": 280
         }
       ],
       "declarations": [
         {
           "name": "createOcrImagePreparer",
           "kind": "function",
-          "line": 76
+          "line": 75
         },
         {
           "name": "onMainThread",
           "kind": "function",
-          "line": 99
+          "line": 100
         },
         {
           "name": "clearIdle",
           "kind": "function",
-          "line": 101
+          "line": 102
         },
         {
           "name": "endWorker",
           "kind": "function",
-          "line": 108
+          "line": 109
         },
         {
           "name": "scheduleIdle",
           "kind": "function",
-          "line": 115
+          "line": 116
         },
         {
           "name": "clearReplyTimer",
           "kind": "function",
-          "line": 124
+          "line": 125
         },
         {
           "name": "armReplyTimer",
           "kind": "function",
-          "line": 132
+          "line": 133
         },
         {
           "name": "takePending",
           "kind": "function",
-          "line": 143
+          "line": 144
         },
         {
           "name": "redoPendingOnMainThread",
           "kind": "function",
-          "line": 152
+          "line": 153
         },
         {
           "name": "failWorker",
           "kind": "function",
-          "line": 159
+          "line": 160
         },
         {
           "name": "details",
           "kind": "object",
-          "line": 162
+          "line": 163
         },
         {
           "name": "forwardLog",
           "kind": "function",
-          "line": 172
+          "line": 173
         },
         {
           "name": "onReply",
           "kind": "function",
-          "line": 180
+          "line": 181
         },
         {
           "name": "ensureWorker",
           "kind": "function",
-          "line": 210
+          "line": 211
         },
         {
           "name": "request",
           "kind": "object",
-          "line": 227
+          "line": 228
         },
         {
           "name": "entry",
           "kind": "object",
-          "line": 239
+          "line": 240
         },
         {
           "name": "getOcrImagePreparer",
           "kind": "function",
-          "line": 273
+          "line": 274
         },
         {
           "name": "disposeOcrImagePreparer",
           "kind": "function",
-          "line": 279
+          "line": 280
         }
       ],
       "parseError": null,
@@ -47110,7 +47102,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 44,
+          "line": 43,
           "description": "Idle time after which the preparation worker is terminated (restarted by the next page).",
           "params": [],
           "returns": [],
@@ -47123,7 +47115,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 46,
+          "line": 45,
           "description": "Worker failures after which the session prepares on the main thread only.",
           "params": [],
           "returns": [],
@@ -47136,7 +47128,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 53,
+          "line": 52,
           "description": "Longest wait for one reply before the worker counts as failed.",
           "params": [],
           "returns": [],
@@ -47149,7 +47141,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 55,
+          "line": 54,
           "description": "",
           "params": [],
           "returns": [],
@@ -47162,7 +47154,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 76,
+          "line": 75,
           "description": "",
           "params": [
             {
@@ -47241,7 +47233,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/ocr/imagePreparer.js",
-          "line": 96,
+          "line": 97,
           "description": "The reply clock of the oldest pending request (the one the worker is on); null when none is pending.",
           "params": [],
           "returns": [],
@@ -47254,7 +47246,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/imagePreparer.js",
-          "line": 132,
+          "line": 133,
           "description": "Start the reply clock for the oldest pending request; nothing pending clears it.",
           "params": [],
           "returns": [],
@@ -47267,7 +47259,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/imagePreparer.js",
-          "line": 143,
+          "line": 144,
           "description": "Take a request out of the map; the reply clock restarts for the next oldest, or stops.",
           "params": [],
           "returns": [],
@@ -47280,7 +47272,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/imagePreparer.js",
-          "line": 152,
+          "line": 153,
           "description": "Finish every pending request on the main thread (the worker is gone or going).",
           "params": [],
           "returns": [],
@@ -47293,7 +47285,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 273,
+          "line": 274,
           "description": "The viewer's one preparer, created on first use (prepareImage.js, the benchmarks).",
           "params": [],
           "returns": [],
@@ -47306,7 +47298,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/imagePreparer.js",
-          "line": 279,
+          "line": 280,
           "description": "End the shared preparer's worker (useOcrTextLayers.js on unmount); the next use makes a new one.",
           "params": [],
           "returns": [],
@@ -47325,20 +47317,11 @@
           "resolved": "src/logging/systemLogger.js"
         },
         {
-          "source": "./prepareWorker.js?worker",
-          "specifiers": [
-            "OcrPrepareWorker"
-          ],
-          "line": 40,
-          "kind": "static",
-          "resolved": null
-        },
-        {
           "source": "./prepareImageCore.js",
           "specifiers": [
             "prepareOcrImageCore"
           ],
-          "line": 41,
+          "line": 40,
           "kind": "static",
           "resolved": "src/ocr/prepareImageCore.js"
         }
@@ -115205,7 +115188,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/imagePreparer.js",
-      "line": 132,
+      "line": 133,
       "description": "Start the reply clock for the oldest pending request; nothing pending clears it.",
       "params": [],
       "returns": [],
@@ -115218,7 +115201,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 76,
+      "line": 75,
       "description": "",
       "params": [
         {
@@ -115297,7 +115280,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 279,
+      "line": 280,
       "description": "End the shared preparer's worker (useOcrTextLayers.js on unmount); the next use makes a new one.",
       "params": [],
       "returns": [],
@@ -115310,7 +115293,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 273,
+      "line": 274,
       "description": "The viewer's one preparer, created on first use (prepareImage.js, the benchmarks).",
       "params": [],
       "returns": [],
@@ -115323,7 +115306,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 44,
+      "line": 43,
       "description": "Idle time after which the preparation worker is terminated (restarted by the next page).",
       "params": [],
       "returns": [],
@@ -115336,7 +115319,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 46,
+      "line": 45,
       "description": "Worker failures after which the session prepares on the main thread only.",
       "params": [],
       "returns": [],
@@ -115349,7 +115332,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 53,
+      "line": 52,
       "description": "Longest wait for one reply before the worker counts as failed.",
       "params": [],
       "returns": [],
@@ -115362,7 +115345,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/imagePreparer.js",
-      "line": 55,
+      "line": 54,
       "description": "",
       "params": [],
       "returns": [],
@@ -115375,7 +115358,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/imagePreparer.js",
-      "line": 152,
+      "line": 153,
       "description": "Finish every pending request on the main thread (the worker is gone or going).",
       "params": [],
       "returns": [],
@@ -115388,7 +115371,7 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/ocr/imagePreparer.js",
-      "line": 96,
+      "line": 97,
       "description": "The reply clock of the oldest pending request (the one the worker is on); null when none is pending.",
       "params": [],
       "returns": [],
@@ -115401,7 +115384,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/imagePreparer.js",
-      "line": 143,
+      "line": 144,
       "description": "Take a request out of the map; the reply clock restarts for the next oldest, or stops.",
       "params": [],
       "returns": [],

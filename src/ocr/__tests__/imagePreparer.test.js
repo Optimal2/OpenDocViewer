@@ -15,7 +15,6 @@ import {
 } from '../imagePreparer.js';
 
 vi.mock('../../logging/systemLogger.js', () => ({ default: { warn: vi.fn(), debug: vi.fn() } }));
-vi.mock('../prepareWorker.js?worker', () => ({ default: class { constructor() { throw new Error('no real worker in tests'); } } }));
 
 /** A worker that records what it was sent and lets the test answer. */
 class FakeWorker {

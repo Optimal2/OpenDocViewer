@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4880. JSDoc symbol count: 208.
+File count: 22. Line count: 4881. JSDoc symbol count: 208.
 
 ## src/ocr/assetUrls.js
 
@@ -170,7 +170,7 @@ Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and fal
 
 Exports: `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `OCR_IMAGE_PREPARER_REQUEST_TIMEOUT_MS`, `createOcrImagePreparer`, `getOcrImagePreparer`, `disposeOcrImagePreparer`
 
-Local imports: `src/logging/systemLogger.js`, `./prepareWorker.js?worker`, `src/ocr/prepareImageCore.js`
+Local imports: `src/logging/systemLogger.js`, `src/ocr/prepareImageCore.js`
 
 Symbols:
 
