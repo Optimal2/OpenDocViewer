@@ -57,6 +57,7 @@ const SHIPPED_OCR_DEFAULTS = Object.freeze({
     idleAfterMs: 4000,
     maxWorkerCount: 32,
     slowdownFraction: 0.25,
+    pointerTravelPx: 16,
     triggers: { idle: true, hidden: true, search: true },
   },
   assetBaseUrl: null,

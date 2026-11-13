@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 10. Line count: 1775. JSDoc symbol count: 55.
+File count: 10. Line count: 1777. JSDoc symbol count: 55.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -84,7 +84,7 @@ Symbols:
 
 - `OCR_IDLE_SHUTDOWN_MS` (constant) - Idle time after which the OCR worker is terminated to free its memory.
 - `OCR_BOOST_ACTIVITY_EVENTS` (constant) - Window events that count as input for the boost: they end the boosted state and restart the idle clock.
-- `OCR_BOOST_POINTER_SLOP_PX` (constant) - How far \(CSS pixels\) the pointer must travel before a pointer move counts as input for the boost.
+- `OCR_BOOST_POINTER_SLOP_PX` (constant) - How far \(CSS pixels\) the pointer must travel before a pointer move counts as input for the boost, where the site says nothing else \( ocr.boost.pointerTravelPx , whose default this...
 - `createPointerTravelFilter` (function) - Tell pointer moves that travel from those that do not.
 - `createPointerTravelFilter~resting` (constant) - Resting place per pointer type: a handful of entries at most.
 - `OCR_BOOST_PENDING_STATUSES` (constant) - Queue statuses \(src/ocr/queue.js OCR\_PAGE\_STATUS\) of a page still to do.

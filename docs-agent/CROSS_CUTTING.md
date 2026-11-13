@@ -16,7 +16,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` (123 lines) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentToolbar/usePrintPipeline.js` (800 lines) - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
-- `src/hooks/useOcrTextLayers.js` (518 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
+- `src/hooks/useOcrTextLayers.js` (520 lines) - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` (671 lines) - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentViewer/useDocumentViewer.js` (1918 lines) - Primary viewer\-state hook.
 - `src/components/DocumentViewer/hooks/usePaneImageAdjustments.js` (181 lines) - File: src/components/DocumentViewer/hooks/usePaneImageAdjustments.js Per\-pane image adjustments \(brightness, contrast, grayscale, invert\) and the resets that combine them with the...

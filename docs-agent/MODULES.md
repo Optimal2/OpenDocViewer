@@ -107,7 +107,7 @@ File count: 2. Line count: 4. JSDoc symbol count: 0.
 
 ## src/hooks
 
-File count: 10. Line count: 1775. JSDoc symbol count: 55.
+File count: 10. Line count: 1777. JSDoc symbol count: 55.
 
 - `src/hooks/useOcrTextLayers.js` - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 66. Line count: 24493. JSDoc symbol count: 1015.
+File count: 66. Line count: 24498. JSDoc symbol count: 1015.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

@@ -230,7 +230,9 @@
       // and the memory budget of workerPolicy), recognising a small reference page after each
       // step: where that takes more than slowdownFraction longer than at the cautious count, the
       // step before is kept. The first input brings the cautious count back at once; engines
-      // above it finish their page and are released. Each trigger can be closed with false.
+      // above it finish their page and are released. A pointer move is input only once the
+      // pointer has travelled pointerTravelPx CSS pixels from where it rested (0 to 200; a hand
+      // resting on a mouse is never still). Each trigger can be closed with false.
       // Made for recognizeWholeDocument: true; the window alone rarely holds more pages than
       // the cautious count takes at once, and then there is nothing to boost for.
       boost: {
@@ -238,6 +240,7 @@
         idleAfterMs: 4000,
         maxWorkerCount: 32,
         slowdownFraction: 0.25,
+        pointerTravelPx: 16,
         triggers: { idle: true, hidden: true, search: true }
       },
       // Where the OCR engine, worker and language files are served from. null (default) uses the

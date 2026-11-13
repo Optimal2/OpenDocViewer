@@ -996,7 +996,7 @@ describe('ocr.boost', () => {
 
   it('ships the agreed defaults and returns them for a missing or unusable section', () => {
     expect(OCR_BOOST_DEFAULTS).toEqual({
-      enabled: false, idleAfterMs: 4000, maxWorkerCount: 32, slowdownFraction: 0.25, triggers: { idle: true, hidden: true, search: true },
+      enabled: false, idleAfterMs: 4000, maxWorkerCount: 32, slowdownFraction: 0.25, pointerTravelPx: 16, triggers: { idle: true, hidden: true, search: true },
     });
     expect(Object.isFrozen(OCR_BOOST_DEFAULTS) && Object.isFrozen(OCR_BOOST_DEFAULTS.triggers)).toBe(true);
     expect(OCR_BOOST_HARD_MAX_WORKER_COUNT).toBe(32);
@@ -1007,15 +1007,19 @@ describe('ocr.boost', () => {
 
   it('bounds every number, ignores non-numbers and closes a trigger only for the literal false', () => {
     expect(normalizeOcrBoostConfig({ ocr: { boost: {
-      enabled: true, idleAfterMs: 100, maxWorkerCount: 99, slowdownFraction: 5, triggers: { idle: false, hidden: 0, search: 'false' },
+      enabled: true, idleAfterMs: 100, maxWorkerCount: 99, slowdownFraction: 5, pointerTravelPx: 5000, triggers: { idle: false, hidden: 0, search: 'false' },
     } } })).toEqual({
-      enabled: true, idleAfterMs: 500, maxWorkerCount: OCR_BOOST_HARD_MAX_WORKER_COUNT, slowdownFraction: 2, triggers: { idle: false, hidden: true, search: true },
+      enabled: true, idleAfterMs: 500, maxWorkerCount: OCR_BOOST_HARD_MAX_WORKER_COUNT, slowdownFraction: 2, pointerTravelPx: 200, triggers: { idle: false, hidden: true, search: true },
     });
     expect(normalizeOcrBoostConfig({ ocr: { boost: {
-      enabled: 'true', idleAfterMs: '4000', maxWorkerCount: 12.9, slowdownFraction: 0.001, triggers: null,
+      enabled: 'true', idleAfterMs: '4000', maxWorkerCount: 12.9, slowdownFraction: 0.001, pointerTravelPx: '40', triggers: null,
     } } })).toEqual({
-      enabled: false, idleAfterMs: 4000, maxWorkerCount: 12, slowdownFraction: 0.05, triggers: { idle: true, hidden: true, search: true },
+      enabled: false, idleAfterMs: 4000, maxWorkerCount: 12, slowdownFraction: 0.05, pointerTravelPx: 16, triggers: { idle: true, hidden: true, search: true },
     });
+    // Nothing (every move counts) and a fraction are taken as given, whole pixels.
+    expect(normalizeOcrBoostConfig({ ocr: { boost: { pointerTravelPx: 0 } } }).pointerTravelPx).toBe(0);
+    expect(normalizeOcrBoostConfig({ ocr: { boost: { pointerTravelPx: -3 } } }).pointerTravelPx).toBe(0);
+    expect(normalizeOcrBoostConfig({ ocr: { boost: { pointerTravelPx: 24.7 } } }).pointerTravelPx).toBe(24);
     expect(normalizeOcrBoostConfig({ ocr: { boost: { idleAfterMs: 1e9, maxWorkerCount: 0 } } })).toMatchObject({ idleAfterMs: 600000, maxWorkerCount: 1 });
   });
 });

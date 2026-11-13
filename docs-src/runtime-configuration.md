@@ -297,6 +297,7 @@ ocr: {
     idleAfterMs: 4000,         // input-free time before the boost may start
     maxWorkerCount: 32,        // ceiling of the boost; the threads and the memory budget bound it further
     slowdownFraction: 0.25,    // how much longer the reference page may take before the climb stops
+    pointerTravelPx: 16,       // pointer travel (CSS pixels) that counts as input
     triggers: { idle: true, hidden: true, search: true } // the ways in; false closes one
   },
   assetBaseUrl: null           // null: the viewer's own ocr/ folder; or a site-hosted base URL
@@ -466,7 +467,9 @@ ocr: {
   model and the measurements behind it. `enabled` is `false` by default and only the boolean
   literal `true` turns it on, and only while OCR itself is on. `idleAfterMs` (`4000`, 500 to
   600000) is how long the window must see no pointer, key, wheel or touch input before the
-  boost may start (a pointer resting on the page is not input, see below); `maxWorkerCount` (`32`, 1 to 32) is its ceiling, which the client's logical
+  boost may start; `pointerTravelPx` (`16`, 0 to 200) is how many CSS pixels the pointer must
+  travel before a pointer move counts as that input, since a pointer resting on the page is
+  never still; `maxWorkerCount` (`32`, 1 to 32) is its ceiling, which the client's logical
   threads and the memory budget of `ocr.workerPolicy` bound further; `slowdownFraction`
   (`0.25`, 0.05 to 2) is how much longer the reference page may take to recognise than at the
   cautious count before the climb stops; and `triggers` opens or closes the three ways in
@@ -765,11 +768,12 @@ count, the engines above it finish the page they hold and are released, and a me
 under way is ignored. The end of the work ends it too.
 
 A pointer that rests on the page is not input. A hand on a mouse or a finger on a trackpad
-moves the pointer by a pixel or two without the user doing anything, and a browser may report
+moves the pointer by a few pixels without the user doing anything, and a browser may report
 a move without travel when the content under the pointer changes. So a pointer move counts
-only once the pointer has travelled eight CSS pixels from where it last rested (mouse, pen and
-touch each rest in a place of their own); a press, a key, the wheel and a touch always count.
-Moving the pointer on purpose ends the boost within those few pixels, as before.
+only once the pointer has travelled `pointerTravelPx` CSS pixels (`16`, 0 to 200; `0` counts
+every move) from where it last rested (mouse, pen and touch each rest in a place of their
+own); a press, a key, the wheel and a touch always count. Moving the pointer on purpose ends
+the boost within those few pixels, as before.
 
 The climb: from the cautious count, the viewer first goes to the larger of that count and half
 the logical threads, then to the maximum in three steps of equal size (the distance divided by

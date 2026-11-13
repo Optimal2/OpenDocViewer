@@ -392,6 +392,7 @@ export const OCR_BOOST_HARD_MAX_WORKER_COUNT = 32;
  * @property {number} idleAfterMs  Milliseconds without input before the boost may start.
  * @property {number} maxWorkerCount  Ceiling of the boost; the thread count and the memory budget bound it further.
  * @property {number} slowdownFraction  How much longer the reference page may take before the climb stops.
+ * @property {number} pointerTravelPx  CSS pixels the pointer must travel before a pointer move counts as input.
  * @property {{ idle: boolean, hidden: boolean, search: boolean }} triggers  Which of the ways in are open.
  */
 
@@ -399,12 +400,15 @@ export const OCR_BOOST_HARD_MAX_WORKER_COUNT = 32;
  * Defaults of `ocr.boost`. Off: a site turns the boost on once it has seen the boost benchmark
  * on its own clients. The thresholds follow the agreed model (2026-11-11): four seconds of
  * idleness, a quarter longer reference recognition as the stop, and the hard ceiling of 32.
+ * `pointerTravelPx` came with the first trial on real clients (2026-11-13): a pointer resting
+ * on the page is never still, and eight pixels proved too little for a hand on a mouse.
  */
 export const OCR_BOOST_DEFAULTS = Object.freeze(/** @type {OcrBoostConfig} */ ({
   enabled: false,
   idleAfterMs: 4000,
   maxWorkerCount: OCR_BOOST_HARD_MAX_WORKER_COUNT,
   slowdownFraction: 0.25,
+  pointerTravelPx: 16,
   triggers: Object.freeze({ idle: true, hidden: true, search: true }),
 }));
 
@@ -437,6 +441,7 @@ export function normalizeOcrBoostConfig(cfg = getRuntimeConfig()) {
     idleAfterMs: boundedNumber(raw.idleAfterMs, base.idleAfterMs, 500, 600000),
     maxWorkerCount: boundedNumber(raw.maxWorkerCount, base.maxWorkerCount, 1, OCR_BOOST_HARD_MAX_WORKER_COUNT),
     slowdownFraction: boundedNumber(raw.slowdownFraction, base.slowdownFraction, 0.05, 2, false),
+    pointerTravelPx: boundedNumber(raw.pointerTravelPx, base.pointerTravelPx, 0, 200),
     triggers: { idle: triggers.idle !== false, hidden: triggers.hidden !== false, search: triggers.search !== false },
   };
 }

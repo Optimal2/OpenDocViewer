@@ -681,8 +681,32 @@ describe('useOcrTextLayers boost', () => {
     expect(probesOf(pool)).toHaveLength(probes + 1);
   });
 
+  it('takes the travel that counts from the site (ocr.boost.pointerTravelPx)', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    const move = (x, y) => act(async () => { window.dispatchEvent(new MouseEvent('pointermove', { clientX: x, clientY: y })); });
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: { ...BOOST, pointerTravelPx: 40 }, hardwareThreads: 4 }));
+    await flush();
+    await move(300, 300);
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    await flush();
+    expect(latest.ocrBoost.state).toBe('rising');
+    // Thirty-nine pixels is still rest for this site; forty is travel.
+    await move(339, 300);
+    expect(latest.ocrBoost.state).toBe('rising');
+    await move(340, 300);
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', endedBy: 'input' });
+  });
+
   it('counts pointer travel from where the pointer last rested, and a move without a position as travel', () => {
-    expect(OCR_BOOST_POINTER_SLOP_PX).toBe(8);
+    expect(OCR_BOOST_POINTER_SLOP_PX).toBe(16);
+    // No threshold given, or one that is no number: the default.
+    for (const filter of [createPointerTravelFilter(), createPointerTravelFilter(undefined), createPointerTravelFilter('wide')]) {
+      expect(filter({ clientX: 0, clientY: 0 })).toBe(false);
+      expect(filter({ clientX: 15, clientY: 0 })).toBe(false);
+      expect(filter({ clientX: 16, clientY: 0 })).toBe(true);
+    }
     const travelled = createPointerTravelFilter(8);
     // The first move only says where the pointer is.
     expect(travelled({ clientX: 100, clientY: 100 })).toBe(false);

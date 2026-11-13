@@ -34,7 +34,7 @@
  * is then always a pool, and a boost control (src/ocr/boost.js) may raise its ceiling above the
  * cautious count while the user is idle. The ways in are the configured triggers: no input for
  * `idleAfterMs` (pointer, keys, wheel and touch on the window; a pointer move counts only once
- * the pointer has travelled OCR_BOOST_POINTER_SLOP_PX, so a pointer resting on the page is not
+ * the pointer has travelled `pointerTravelPx`, so a pointer resting on the page is not
  * input), a hidden tab, and the toolbar's
  * search over the whole document waiting for pages (`searchOpen`); each applies only while
  * more pages are pending than the cautious count can take, and never while the viewer is still
@@ -60,19 +60,20 @@ export const OCR_IDLE_SHUTDOWN_MS = 60000;
 /**
  * Window events that count as input for the boost: they end the boosted state and restart the
  * idle clock. A `pointermove` does so only once the pointer has travelled
- * (OCR_BOOST_POINTER_SLOP_PX); the others always do.
+ * (`ocr.boost.pointerTravelPx`); the others always do.
  */
 export const OCR_BOOST_ACTIVITY_EVENTS = Object.freeze(['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']);
 
 /**
  * How far (CSS pixels) the pointer must travel before a pointer move counts as input for the
- * boost. A pointer that rests on the page is not still as the browser reports it: a hand on a
+ * boost, where the site says nothing else (`ocr.boost.pointerTravelPx`, whose default this
+ * is). A pointer that rests on the page is not still as the browser reports it: a hand on a
  * mouse or a finger on a trackpad jitters by a pixel or two, and a browser may report a move
  * without travel when the content under the pointer changes (the specification says it should
  * not, and not every browser follows it). Counted as input, such moves keep the idle clock
  * from ever running out and end a boost that had started, for a user who is doing nothing.
  */
-export const OCR_BOOST_POINTER_SLOP_PX = 8;
+export const OCR_BOOST_POINTER_SLOP_PX = 16;
 
 /**
  * Tell pointer moves that travel from those that do not. The first move only gives the pointer
@@ -87,7 +88,8 @@ export const OCR_BOOST_POINTER_SLOP_PX = 8;
  * @returns {function(*): boolean}  True when the move is input.
  */
 export function createPointerTravelFilter(slopPx = OCR_BOOST_POINTER_SLOP_PX) {
-  const slop = Math.max(0, Number(slopPx) || 0);
+  const given = Number(slopPx);
+  const slop = Number.isFinite(given) ? Math.max(0, given) : OCR_BOOST_POINTER_SLOP_PX;
   /** Resting place per pointer type: a handful of entries at most. */
   const resting = new Map();
   return (event) => {
@@ -471,7 +473,7 @@ function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage
       tryEngage('idle');
     }, Math.max(0, Number(config.idleAfterMs) || 0));
   };
-  const pointerTravelled = createPointerTravelFilter();
+  const pointerTravelled = createPointerTravelFilter(config.pointerTravelPx);
   const onActivity = (event) => {
     // A pointer resting on the page is not input (see OCR_BOOST_POINTER_SLOP_PX).
     if (event?.type === 'pointermove' && !pointerTravelled(event)) return;
