@@ -6,12 +6,15 @@
  *
  * The prober opens a document from the bytes the viewer already holds (`readSourceArrayBuffer`,
  * the file is never fetched again), keeps a few documents open so neighbouring pages reuse the
- * parse, and closes them when the document leaves the viewer or the engine goes idle. A
- * document is never closed while a probe reads it: several pages are probed at a time (the
+ * parse, and closes them when the document leaves the viewer or the engine goes idle. The
+ * bound never closes a document while a probe reads it: several pages are probed at a time (the
  * queue's pages in flight), in a session of many small documents each from a document of its
  * own, and closing the least recently used one under a probe failed that page for good
  * ("Transport destroyed"). More documents than the bound are therefore open while that many
- * probes run, and the ones over it are closed as their probes end. pdf.js itself is the copy
+ * probes run, and the ones over it are closed as their probes end. A document that leaves the
+ * viewer, and every document at the idle shutdown, is closed at once whatever reads it: the
+ * queue has given those pages up by then, and a probe that never answers must not keep its
+ * document open for good. pdf.js itself is the copy
  * the viewer already ships for rendering; this module adds no second one.
  * Part of the lazy OCR chunk.
  */
@@ -68,20 +71,15 @@ export function createPdfTextProber({
 }) {
   const limit = Math.max(1, Math.floor(Number(maxOpenDocuments)) || DEFAULT_OPEN_PDF_DOCUMENTS);
   /**
-   * `users`: probes reading the document now. `closing`: asked to close while in use; closed
-   * when the last probe ends.
-   * @type {Map<string, { promise: Promise<Object>, task: Object, users: number, closing: boolean }>}
+   * `users`: probes reading the document now; the bound leaves it open while there are any.
+   * @type {Map<string, { promise: Promise<Object>, task: Object, users: number }>}
    */
   const open = new Map();
 
-  /** Close a document now, or, while probes read it, as soon as the last of them ends. */
+  /** Close a document now, whatever reads it. */
   async function close(sourceKey) {
     const entry = open.get(sourceKey);
     if (!entry) return;
-    if (entry.users > 0) {
-      entry.closing = true;
-      return;
-    }
     open.delete(sourceKey);
     try {
       const document = await entry.promise;
@@ -111,12 +109,10 @@ export function createPdfTextProber({
     if (existing) {
       open.delete(sourceKey);
       open.set(sourceKey, existing);
-      // Wanted again: whoever asked for it to be closed is overtaken.
-      existing.closing = false;
       existing.users += 1;
       return existing;
     }
-    const entry = { task: null, promise: null, users: 1, closing: false };
+    const entry = { task: null, promise: null, users: 1 };
     entry.promise = (async () => {
       const bytes = await readSourceArrayBuffer(sourceKey);
       if (!bytes) throw new Error('PDF source bytes are unavailable');
@@ -132,9 +128,8 @@ export function createPdfTextProber({
   }
 
   /** One probe has stopped reading the document. */
-  function releaseDocument(sourceKey, entry) {
+  function releaseDocument(entry) {
     entry.users = Math.max(0, entry.users - 1);
-    if (entry.users === 0 && entry.closing && open.get(sourceKey) === entry) void close(sourceKey);
     trim();
   }
 
@@ -177,7 +172,7 @@ export function createPdfTextProber({
       try {
         return await probeDocument(await entry.promise, pageIndex);
       } finally {
-        releaseDocument(key, entry);
+        releaseDocument(entry);
       }
     },
     async retainSources(sourceKeys) {

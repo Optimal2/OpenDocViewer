@@ -288,11 +288,28 @@ describe('OcrSearchBar', () => {
       }
     });
 
-    it('says no time without the whole document, and nothing of the work when no engine can start', () => {
+    it('without the whole document keeps no places: most pages never get an outcome, so the workers are named while pages are queued or in flight', () => {
+      // Two of three pages will never be queued: no "until the document is done" to wait for.
       render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
-      expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['1/3', null, '0 workers']);
-      render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ocrEngineFailure: 'csp' });
       expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['1/3', null, null]);
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'queued' } } });
+      expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['1/3', null, '0 workers']);
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'recognizing' } } });
+      expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['1/3', null, '1 worker']);
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: done(['Hej']) } });
+      expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['2/3', null, null]);
+    });
+
+    it('says nothing of the work when no engine can start, in either mode', () => {
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'queued' } }, ocrEngineFailure: 'csp' });
+      expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['1/3', null, null]);
+      window.__ODV_CONFIG__ = { ocr: { enabled: true, recognizeWholeDocument: true } };
+      try {
+        render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ocrEngineFailure: 'csp' });
+        expect([detail('count'), detail('time-left'), detail('workers')]).toEqual(['1/3', null, null]);
+      } finally {
+        delete window.__ODV_CONFIG__;
+      }
     });
 
     it('says in the tooltip why the displayed page has no text to search, and only then', () => {

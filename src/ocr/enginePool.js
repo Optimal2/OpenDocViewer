@@ -15,9 +15,12 @@
  * the policy are known to be in order, and an engine that cannot start after that (a model that
  * did not arrive over a slow link, a start that timed out on a loaded machine, memory that ran
  * out for one more worker) is that engine's own trouble: it is dropped, its page is recognised
- * on another engine, and the pool carries on with the engines it has, creating no further one
- * until it is resized or terminated (`capacity()` says how many it has). With no engine left
- * the page fails alone and the next page starts a fresh engine. A recognition can be
+ * on another engine, and the pool carries on with the engines it has, creating no more than
+ * those until it is resized or terminated (`capacity()` says how many). With no engine left
+ * the page fails alone and the next page starts a fresh engine; when that has happened
+ * OCR_ENGINE_BARREN_STARTS times in a row the engines cannot start any more (the server went
+ * away, say), and the failure is the pool's after all, so the queue stops instead of failing
+ * every page that is left. A recognition can be
  * aborted on its own: `recognize(image, control)` sets `control.abort` to a function that
  * terminates only the worker holding that page, which the pool replaces lazily, so the other
  * pages in flight are left alone (a single engine can only be terminated as a whole).
@@ -31,6 +34,12 @@
  */
 
 import logger from '../logging/systemLogger.js';
+
+/**
+ * Start-up failures in a row, each leaving the pool without an engine, after which a pool that
+ * has worked gives OCR up for the session after all.
+ */
+export const OCR_ENGINE_BARREN_STARTS = 3;
 
 /** Rejection for callers waiting on a free engine when the pool is terminated. */
 const TERMINATED_MESSAGE = 'OCR engine was terminated';
@@ -67,9 +76,14 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
   // dropped instead of ending OCR for the session. Kept across terminate(): the idle shutdown
   // stops the workers, not what the session has learnt.
   let everStarted = false;
-  // True while additional engines cannot start: no further engine is created beyond the ones
-  // the pool has (one, when it has none). A new size or a terminate is a new attempt.
-  let blocked = false;
+  // Engines at most while additional engines cannot start: the ones the pool had when one
+  // failed to (at least one). No bound otherwise; a new size or a terminate is a new attempt.
+  let cap = Infinity;
+  // Start-up failures in a row that left the pool without an engine, and the last of them:
+  // at OCR_ENGINE_BARREN_STARTS the failure is the pool's. Any engine that works clears it.
+  let barrenStarts = 0;
+  /** @type {({ kind: string, error: Error }|null)} */
+  let barrenFailure = null;
   /** @type {Array<{ engine: Object, busy: boolean }>} */
   let entries = [];
   /** @type {Array<{ resolve: function(Object): void, reject: function(Error): void }>} */
@@ -79,9 +93,12 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
 
   const failureOf = (entry) => (typeof entry.engine.getFailure === 'function' ? entry.engine.getFailure() : null);
 
-  /** The failure that ends OCR for the session: an engine's, while none has ever started. */
+  /**
+   * The failure that ends OCR for the session: an engine's, while none has ever started; or,
+   * in a pool that has worked, the last of several in a row that each left it without an engine.
+   */
   function firstFailure() {
-    if (everStarted) return null;
+    if (everStarted) return barrenStarts >= OCR_ENGINE_BARREN_STARTS ? barrenFailure : null;
     for (const entry of entries) {
       const failure = failureOf(entry);
       if (failure) return failure;
@@ -98,18 +115,54 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
   /** A free entry now, a new one while under the limit, else null. */
   function takeIdle() {
     const idle = entries.find((entry) => !entry.busy);
-    const room = blocked ? entries.length === 0 : entries.length < limit;
-    const entry = idle || (room ? createEntry() : null);
+    const entry = idle || (entries.length < Math.min(limit, cap) ? createEntry() : null);
     if (entry) entry.busy = true;
     return entry;
   }
 
-  function acquire() {
+  /**
+   * @param {(Object|null)} control  The job's control object: while the job waits for an engine,
+   *   `control.abort` takes it out of the line (the queue gave the page up), so no engine is
+   *   later spent on a page nobody waits for.
+   */
+  function acquire(control) {
     const failure = firstFailure();
     if (failure) return Promise.reject(failure.error);
     const entry = takeIdle();
     if (entry) return Promise.resolve(entry);
-    return new Promise((resolve, reject) => { waiters.push({ resolve, reject }); });
+    return new Promise((resolve, reject) => {
+      const waiter = { resolve, reject };
+      waiters.push(waiter);
+      if (control && typeof control === 'object') {
+        control.abort = () => {
+          if (!waiters.includes(waiter)) return;
+          waiters = waiters.filter((candidate) => candidate !== waiter);
+          reject(new Error(TERMINATED_MESSAGE));
+        };
+      }
+    });
+  }
+
+  /**
+   * An engine could not start in a pool that has worked. It goes, and no more engines than the
+   * pool is left with are created until the next resize or terminate (set before the drop,
+   * which wakes the pages waiting: they must not be handed another start).
+   */
+  function dropUnstartable(entry) {
+    const failure = failureOf(entry);
+    cap = Math.max(1, entries.length - 1);
+    drop(entry);
+    if (entries.length === 0) {
+      barrenStarts += 1;
+      barrenFailure = failure;
+    }
+    log.warn?.(barrenStarts >= OCR_ENGINE_BARREN_STARTS
+      ? 'No OCR engine can start any more; OCR stops for this session'
+      : 'An OCR engine could not start; OCR carries on with the engines it has', {
+      engines: entries.length,
+      kind: String(failure?.kind || ''),
+      error: String(failure?.error?.message || failure?.error || ''),
+    });
   }
 
   function release(entry) {
@@ -154,11 +207,12 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
     try {
       await first.engine.ensureStarted();
       everStarted = true;
+      barrenStarts = 0;
     } catch (error) {
       // A first engine that cannot start in a pool that has worked (started again after the
       // idle shutdown, say): gone, so the next call starts a fresh one instead of meeting the
       // same failure for good.
-      if (everStarted && failureOf(first) && entries.includes(first)) drop(first);
+      if (everStarted && failureOf(first) && entries.includes(first)) dropUnstartable(first);
       throw error;
     }
   }
@@ -167,7 +221,7 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
     get size() { return limit; },
     resize(nextSize) {
       limit = Math.max(1, Math.floor(Number(nextSize)) || 1);
-      blocked = false;
+      cap = Infinity;
       shrink();
       // Grown: waiters may now get an engine of their own.
       wake();
@@ -178,7 +232,7 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
       // More than one turn only when the engine the page was given could not start while the
       // pool has others: the page then goes to one of those.
       for (let misses = 0; ; misses += 1) {
-        const entry = await acquire();
+        const entry = await acquire(control);
         if (callGeneration !== generation) throw new Error(TERMINATED_MESSAGE);
         let dropped = false;
         if (control && typeof control === 'object') {
@@ -208,21 +262,15 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
           }
           const result = await entry.engine.recognize(image);
           everStarted = true;
+          barrenStarts = 0;
           return result;
         } catch (error) {
-          // An engine that could not start, in a pool that has worked: its own trouble. It goes,
-          // and no further engine is created until the next resize or terminate. The page waits
-          // for one of the others; with none left, or after a third such engine, it fails
-          // alone, and the next page starts a fresh engine.
+          // An engine that could not start, in a pool that has worked: its own trouble. The
+          // page waits for one of the others; with none left, or after a third such engine, it
+          // fails alone, and the next page starts a fresh engine.
           if (!everStarted || dropped || callGeneration !== generation || !failureOf(entry) || !entries.includes(entry)) throw error;
           dropped = true;
-          blocked = true;
-          drop(entry);
-          log.warn?.('An additional OCR engine could not start; OCR carries on with the engines it has', {
-            engines: entries.length,
-            kind: String(failureOf(entry)?.kind || ''),
-            error: String(error?.message || error),
-          });
+          dropUnstartable(entry);
           if (entries.length === 0 || misses >= 2) throw error;
         } finally {
           if (control && typeof control === 'object') control.abort = null;
@@ -232,7 +280,7 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
     },
     async terminate() {
       generation += 1;
-      blocked = false;
+      cap = Infinity;
       const stopping = entries;
       entries = [];
       const waiting = waiters;
@@ -241,7 +289,7 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
       await Promise.all(stopping.map((entry) => Promise.resolve(entry.engine.terminate()).catch(() => {})));
     },
     getFailure: firstFailure,
-    capacity: () => (blocked ? Math.max(1, Math.min(limit, entries.length)) : limit),
+    capacity: () => Math.min(limit, cap),
     isStarted: () => entries.some((entry) => typeof entry.engine.isStarted === 'function' && entry.engine.isStarted()),
     engineCount: () => entries.length,
   };

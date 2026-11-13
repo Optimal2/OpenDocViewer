@@ -194,7 +194,7 @@ describe('createPdfTextProber', () => {
     expect(pdfs.d.destroyed).toEqual({ document: 0, task: 0 });
   });
 
-  it('closes a document that leaves the viewer, or everything at the idle shutdown, only when its probe has ended', async () => {
+  it('closes a document that leaves the viewer, and everything at the idle shutdown, at once: no probe keeps a document open for good', async () => {
     const text = 'En rad med text som är lång nog för att räknas som en riktig textsida i provet.';
     const pdfs = { a: makeSlowPdf(text), b: makeSlowPdf(text) };
     const prober = createPdfTextProber({
@@ -203,23 +203,23 @@ describe('createPdfTextProber', () => {
     });
     const a = prober.probe('a', 0);
     const b = prober.probe('b', 0);
+    // Rejections are expected below; nothing may count as unhandled meanwhile.
+    a.catch(() => {});
+    b.catch(() => {});
     await settle();
+    // Document a leaves the viewer (the queue has given its pages up): closed under its probe.
     await prober.retainSources(new Set(['b']));
-    await prober.releaseAll();
-    expect(pdfs.a.destroyed).toEqual({ document: 0, task: 0 });
-    expect(pdfs.b.destroyed).toEqual({ document: 0, task: 0 });
-    pdfs.a.release();
-    await expect(a).resolves.toMatchObject({ usable: true });
-    await settle();
     expect(pdfs.a.destroyed).toEqual({ document: 1, task: 1 });
-    expect(prober.openCount()).toBe(1);
-    // Wanted again before its probe ended: the document stays.
-    const again = prober.probe('b', 0);
-    pdfs.b.release();
-    await expect(b).resolves.toMatchObject({ usable: true });
-    await expect(again).resolves.toMatchObject({ usable: true });
-    await settle();
     expect(pdfs.b.destroyed).toEqual({ document: 0, task: 0 });
     expect(prober.openCount()).toBe(1);
+    // The idle shutdown: document b's probe never answered, and its document goes all the same.
+    await prober.releaseAll();
+    expect(pdfs.b.destroyed).toEqual({ document: 1, task: 1 });
+    expect(prober.openCount()).toBe(0);
+    pdfs.a.release();
+    pdfs.b.release();
+    await expect(a).rejects.toThrow(/Transport destroyed/);
+    await expect(b).rejects.toThrow(/Transport destroyed/);
+    expect(prober.openCount()).toBe(0);
   });
 });

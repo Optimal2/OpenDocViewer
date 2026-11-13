@@ -561,11 +561,15 @@ Which pages are recognised, and when:
   ran out for one more worker) is dropped: its page is recognised on another engine and OCR
   carries on with the engines it has, starting no further one until the worker count changes
   (the boost) or the idle shutdown has stopped them; with no engine left that one page fails and
-  the next page starts a fresh engine.
+  the next page starts a fresh engine. Three such starts in a row that each leave no engine mean
+  the engines cannot start any more (the server went away, say): the queue then stops for the
+  session after all, instead of failing every page that is left.
 - A PDF page's own text is read from a pdf.js document opened from the bytes the viewer holds;
-  two such documents are kept open for neighbouring pages. A document is never closed while a
-  page of it is being read: several pages are read at a time, in a session of many small PDF
-  files each from a file of its own, and more than two are then open until those pages are done.
+  two such documents are kept open for neighbouring pages. That bound never closes a document
+  while a page of it is being read: several pages are read at a time, in a session of many
+  small PDF files each from a file of its own, and more than two are then open until those pages
+  are done. A document that leaves the viewer, and every document when the worker is stopped
+  after a minute without work, is closed at once.
 
 Ruled tables. Tesseract reads the body of a ruled table badly: the cell borders are taken for
 glyphs or column separators and the text between them comes out garbled or missing. Before a
@@ -879,10 +883,12 @@ not a toolbar button, see below:
   cover over all pages ("4/300"), then, while there are any, roughly how long the waiting pages
   will take ("about 6 min", "about 40 s") and how many pages are being worked on right now
   ("4 workers", the pages in flight: a PDF page whose own text is being read counts too).
-  While pages are still to be recognised the time and the workers keep their places from the
-  start, with "about – min" until the pace is known and "0 workers" while nothing runs, so
-  nothing pops in or out as the work starts, pauses and goes on; they go once, when every page
-  has its outcome. The
+  With `ocr.recognizeWholeDocument` on, while pages are still to be recognised the time and
+  the workers keep their places from the start, with "about – min" until the pace is known and
+  "0 workers" while nothing runs, so nothing pops in or out as the work starts, pauses and goes
+  on; they go once, when every page has its outcome (a page that never gets one keeps them).
+  Without it most pages never get an outcome, so the workers are named only while pages are
+  queued or in flight. The
   button grows only into the room the toolbar's spacer leaves: with too little room the details
   are dropped whole from the end, down to the count, which always shows (as it did when it
   stood in the button at all times), so the toolbar's end is not pushed out for more than the

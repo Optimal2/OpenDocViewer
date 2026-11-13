@@ -27,10 +27,13 @@
  * Under the pointer, and with keyboard focus, the button grows to the right in a short ease
  * (styles/ocr.css) and shows its details: the count of pages with a text layer over all pages
  * ("4/300"), roughly how long the waiting pages will take, and how many pages are being worked
- * on right now. While pages are still to be recognised the time and the workers keep their
- * places from the start, with a placeholder for a time that cannot be told yet ("about \u2013 min")
- * and "0 workers" while nothing runs, so nothing pops in or out as the work goes on; they go
- * once, when every page has its outcome. They live in the button and not in its tooltip because
+ * on right now. With `ocr.recognizeWholeDocument` on, while pages are still to be recognised
+ * the time and the workers keep their places from the start, with a placeholder for a time that
+ * cannot be told yet ("about \u2013 min") and "0 workers" while nothing runs, so nothing pops in or
+ * out as the work goes on; they go once, when every page has its outcome. Without it most pages
+ * never get an outcome (only the few around the shown one are queued), so there is no "until
+ * the document is done" to keep places for: the workers are named while pages are queued or in
+ * flight, and the time never. They live in the button and not in its tooltip because
  * they change with every recognised page, and a browser takes a native tooltip away whenever
  * its text changes: the tooltip says what the button does ("Search in the recognised text") and
  * nothing that changes, except the reason when the displayed page has no text to search (not
@@ -173,20 +176,22 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // pace that no longer holds is worse than none, and without a new page nothing else would
   // take it away.
   const wholeDocument = isOcrWholeDocumentEnabled();
-  const [pendingPages, enginePages, activePages, unfinishedPages] = useMemo(() => {
+  const [pendingPages, enginePages, activePages, unfinishedPages, queuedPages] = useMemo(() => {
     let pending = 0;
     let engine = 0;
     let active = 0;
     let unfinished = 0;
+    let queued = 0;
     for (const page of searchablePages) {
       const outcome = page.outcome;
       if (OCR_ACTIVE_STATUSES.has(outcome?.status)) active += 1;
+      if (OCR_PENDING_STATUSES.has(outcome?.status)) queued += 1;
       if (!OCR_FINAL_STATUSES.has(outcome?.status)) unfinished += 1;
       if (!wholeDocument) continue;
       if (OCR_PENDING_STATUSES.has(outcome?.status)) pending += 1;
       else if (outcome?.status === 'done' && outcome.source !== 'pdf-text') engine += 1;
     }
-    return [pending, engine, active, unfinished];
+    return [pending, engine, active, unfinished, queued];
   }, [searchablePages, wholeDocument]);
   const progressRef = useRef(/** @type {*} */ (null));
   const [timeLeftMs, setTimeLeftMs] = useState(/** @type {(number|null)} */ (null));
@@ -204,12 +209,14 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const timeLeftText = timeLeft
     ? t(`ocr.progress.${timeLeft.key}`, { minutes: timeLeft.minutes, hours: timeLeft.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeft.key] })
     : '';
-  // While pages are still to be recognised (and an engine can do it) the time and the workers
-  // keep their places in the details, so nothing pops in or out as the work starts, pauses and
-  // goes on: a time that cannot be told yet is a placeholder, and no page in flight is "0
-  // workers". They go, once, when every page has its outcome. The time is said only with the
-  // whole document asked for, as above.
-  const progressShown = unfinishedPages > 0 && !ocrEngineFailure;
+  // With the whole document asked for, while pages are still to be recognised (and an engine
+  // can do it), the time and the workers keep their places in the details, so nothing pops in
+  // or out as the work starts, pauses and goes on: a time that cannot be told yet is a
+  // placeholder, and no page in flight is "0 workers". They go, once, when every page has its
+  // outcome. Without the whole document most pages never get one, and places kept "until the
+  // document is done" would stay for good: the workers are named while pages are queued or in
+  // flight, and the time is not said, as above.
+  const progressShown = !ocrEngineFailure && (wholeDocument ? unfinishedPages > 0 : queuedPages > 0);
   const timeLeftShort = describeOcrTimeLeftShort(timeLeftMs);
   let timeLeftShortText = '';
   if (timeLeftShort) {

@@ -95,8 +95,8 @@
   },
   "stats": {
     "fileCount": 208,
-    "sourceLineCount": 74541,
-    "docletCount": 2183,
+    "sourceLineCount": 74591,
+    "docletCount": 2186,
     "documentedFileCount": 204,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -1211,7 +1211,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8172,
+      "lineCount": 8179,
       "docletCount": 117,
       "importantFiles": [
         {
@@ -1253,7 +1253,7 @@
         {
           "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
           "score": 42,
-          "lines": 680,
+          "lines": 687,
           "incomingLocalImports": 1,
           "doclets": 10,
           "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button and the status in a visually hidden live region; the but",
@@ -1766,8 +1766,8 @@
     {
       "name": "src/ocr",
       "fileCount": 22,
-      "lineCount": 4837,
-      "docletCount": 205,
+      "lineCount": 4880,
+      "docletCount": 208,
       "importantFiles": [
         {
           "path": "src/ocr/index.js",
@@ -13814,7 +13814,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 680,
+      "lines": 687,
       "extension": ".jsx",
       "jsdocBlockCount": 21,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button and the status in a visually hidden live region; the but",
@@ -13832,7 +13832,7 @@
             "useRef",
             "useState"
           ],
-          "line": 61,
+          "line": 64,
           "kind": "static"
         },
         {
@@ -13840,7 +13840,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 62,
+          "line": 65,
           "kind": "static"
         },
         {
@@ -13848,7 +13848,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 63,
+          "line": 66,
           "kind": "static"
         },
         {
@@ -13856,7 +13856,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 64,
+          "line": 67,
           "kind": "static"
         },
         {
@@ -13864,7 +13864,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 65,
+          "line": 68,
           "kind": "static"
         },
         {
@@ -13872,7 +13872,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 66,
+          "line": 69,
           "kind": "static"
         },
         {
@@ -13883,7 +13883,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 67,
+          "line": 70,
           "kind": "static"
         },
         {
@@ -13892,7 +13892,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 68,
+          "line": 71,
           "kind": "static"
         },
         {
@@ -13902,7 +13902,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 69,
+          "line": 72,
           "kind": "static"
         },
         {
@@ -13911,7 +13911,7 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 70,
+          "line": 73,
           "kind": "static"
         },
         {
@@ -13920,7 +13920,7 @@
             "OCR_BOOST_FALLBACK",
             "describeOcrBoost"
           ],
-          "line": 71,
+          "line": 74,
           "kind": "static"
         },
         {
@@ -13931,7 +13931,7 @@
             "describeOcrTimeLeft",
             "describeOcrTimeLeftShort"
           ],
-          "line": 72,
+          "line": 75,
           "kind": "static"
         },
         {
@@ -13939,7 +13939,7 @@
           "specifiers": [
             "isOcrWholeDocumentEnabled"
           ],
-          "line": 73,
+          "line": 76,
           "kind": "static"
         }
       ],
@@ -13947,49 +13947,49 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 103
+          "line": 106
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 88
+          "line": 91
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 103
+          "line": 106
         },
         {
           "name": "detailsHandlers",
           "kind": "object",
-          "line": 259
+          "line": 266
         },
         {
           "name": "detailsStyle",
           "kind": "object",
-          "line": 277
+          "line": 284
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 416
+          "line": 423
         },
         {
           "name": "within",
           "kind": "function",
-          "line": 421
+          "line": 428
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 476
+          "line": 483
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 484
+          "line": 491
         }
       ],
       "parseError": null,
@@ -14005,7 +14005,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 76,
+          "line": 79,
           "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
           "params": [],
           "returns": [],
@@ -14018,7 +14018,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 78,
+          "line": 81,
           "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
           "params": [],
           "returns": [],
@@ -14031,7 +14031,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 80,
+          "line": 83,
           "description": "Statuses of a page whose outcome is final: nothing more will be done about it.",
           "params": [],
           "returns": [],
@@ -14044,7 +14044,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 85,
+          "line": 88,
           "description": "Status keys (utils/ocrStatus.js) of a displayed page without text to search, for a reason that stands still: said in the search button's tooltip, which otherwise only names the bu...",
           "params": [],
           "returns": [],
@@ -14057,7 +14057,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 88,
+          "line": 91,
           "description": "",
           "params": [
             {
@@ -14077,7 +14077,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 103,
+          "line": 106,
           "description": "",
           "params": [
             {
@@ -14132,7 +14132,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 439,
+          "line": 446,
           "description": "",
           "params": [
             {
@@ -14152,7 +14152,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 460,
+          "line": 467,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14172,7 +14172,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 476,
+          "line": 483,
           "description": "",
           "params": [
             {
@@ -14192,7 +14192,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 484,
+          "line": 491,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14206,7 +14206,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 64,
+          "line": 67,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14215,7 +14215,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 65,
+          "line": 68,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14224,7 +14224,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 66,
+          "line": 69,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14236,7 +14236,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 67,
+          "line": 70,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14246,7 +14246,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 68,
+          "line": 71,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         },
@@ -14257,7 +14257,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 69,
+          "line": 72,
           "kind": "static",
           "resolved": "src/utils/ocrSearchPlacement.js"
         },
@@ -14267,7 +14267,7 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 70,
+          "line": 73,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerEffects.js"
         },
@@ -14277,7 +14277,7 @@
             "OCR_BOOST_FALLBACK",
             "describeOcrBoost"
           ],
-          "line": 71,
+          "line": 74,
           "kind": "static",
           "resolved": "src/utils/ocrBoostStatus.js"
         },
@@ -14289,7 +14289,7 @@
             "describeOcrTimeLeft",
             "describeOcrTimeLeftShort"
           ],
-          "line": 72,
+          "line": 75,
           "kind": "static",
           "resolved": "src/utils/ocrProgress.js"
         },
@@ -14298,7 +14298,7 @@
           "specifiers": [
             "isOcrWholeDocumentEnabled"
           ],
-          "line": 73,
+          "line": 76,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
@@ -14317,7 +14317,7 @@
             "useRef",
             "useState"
           ],
-          "line": 61,
+          "line": 64,
           "kind": "static"
         },
         {
@@ -14325,7 +14325,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 62,
+          "line": 65,
           "kind": "static"
         },
         {
@@ -14333,7 +14333,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 63,
+          "line": 66,
           "kind": "static"
         }
       ],
@@ -46612,9 +46612,9 @@
     },
     {
       "path": "src/ocr/enginePool.js",
-      "lines": 249,
+      "lines": 297,
       "extension": ".js",
-      "jsdocBlockCount": 10,
+      "jsdocBlockCount": 14,
       "sourceSummary": "A pool of OCR engines (engine.js) behind the one-engine interface the queue (queue.js) uses, so that several pages (the worker count, see setup.js) can be recognised at the same time.",
       "imports": [
         {
@@ -46622,77 +46622,92 @@
           "specifiers": [
             "logger"
           ],
-          "line": 33,
+          "line": 36,
           "kind": "static"
         }
       ],
       "exports": [
         {
+          "name": "OCR_ENGINE_BARREN_STARTS",
+          "kind": "variable",
+          "line": 42
+        },
+        {
           "name": "createOcrEnginePool",
           "kind": "function",
-          "line": 63
+          "line": 72
         }
       ],
       "declarations": [
         {
           "name": "createOcrEnginePool",
           "kind": "function",
-          "line": 63
+          "line": 72
         },
         {
           "name": "failureOf",
           "kind": "function",
-          "line": 80
+          "line": 94
         },
         {
           "name": "firstFailure",
           "kind": "function",
-          "line": 83
+          "line": 100
         },
         {
           "name": "createEntry",
           "kind": "function",
-          "line": 92
+          "line": 109
         },
         {
           "name": "entry",
           "kind": "object",
-          "line": 93
+          "line": 110
         },
         {
           "name": "takeIdle",
           "kind": "function",
-          "line": 99
+          "line": 116
         },
         {
           "name": "acquire",
           "kind": "function",
-          "line": 107
+          "line": 128
+        },
+        {
+          "name": "waiter",
+          "kind": "object",
+          "line": 134
+        },
+        {
+          "name": "dropUnstartable",
+          "kind": "function",
+          "line": 151
         },
         {
           "name": "release",
           "kind": "function",
-          "line": 115
+          "line": 168
         },
         {
           "name": "shrink",
           "kind": "function",
-          "line": 126
+          "line": 179
         },
         {
           "name": "wake",
           "kind": "function",
-          "line": 134
+          "line": 187
         },
         {
           "name": "drop",
           "kind": "function",
-          "line": 144
+          "line": 197
         },
         {
           "name": "ensureStarted",
           "kind": "function",
-          "line": 150
+          "line": 203
         }
       ],
       "parseError": null,
@@ -46702,13 +46717,26 @@
       },
       "doclets": [
         {
+          "id": "OCR_ENGINE_BARREN_STARTS",
+          "name": "OCR_ENGINE_BARREN_STARTS",
+          "longname": "OCR_ENGINE_BARREN_STARTS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/ocr/enginePool.js",
+          "line": 42,
+          "description": "Start-up failures in a row, each leaving the pool without an engine, after which a pool that has worked gives OCR up for the session after all.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "TERMINATED_MESSAGE",
           "name": "TERMINATED_MESSAGE",
           "longname": "TERMINATED_MESSAGE",
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/enginePool.js",
-          "line": 36,
+          "line": 45,
           "description": "Rejection for callers waiting on a free engine when the pool is terminated.",
           "params": [],
           "returns": [],
@@ -46721,7 +46749,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/enginePool.js",
-          "line": 38,
+          "line": 47,
           "description": "",
           "params": [],
           "returns": [],
@@ -46734,7 +46762,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/enginePool.js",
-          "line": 63,
+          "line": 72,
           "description": "",
           "params": [
             {
@@ -46777,8 +46805,8 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/enginePool.js",
-          "line": 83,
-          "description": "The failure that ends OCR for the session: an engine's, while none has ever started.",
+          "line": 100,
+          "description": "The failure that ends OCR for the session: an engine's, while none has ever started; or, in a pool that has worked, the last of several in a row that each left it without an engin...",
           "params": [],
           "returns": [],
           "examples": 0
@@ -46790,8 +46818,41 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/enginePool.js",
-          "line": 99,
+          "line": 116,
           "description": "A free entry now, a new one while under the limit, else null.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrEnginePool~acquire",
+          "name": "acquire",
+          "longname": "createOcrEnginePool~acquire",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/ocr/enginePool.js",
+          "line": 128,
+          "description": "",
+          "params": [
+            {
+              "name": "control",
+              "type": "Object|null",
+              "optional": false,
+              "description": "The job's control object: while the job waits for an engine, control.abort takes it out of the line (the queue gave the page up), so no eng..."
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrEnginePool~dropUnstartable",
+          "name": "dropUnstartable",
+          "longname": "createOcrEnginePool~dropUnstartable",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/ocr/enginePool.js",
+          "line": 151,
+          "description": "An engine could not start in a pool that has worked.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -46803,7 +46864,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/enginePool.js",
-          "line": 126,
+          "line": 179,
           "description": "Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.",
           "params": [],
           "returns": [],
@@ -46816,7 +46877,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/enginePool.js",
-          "line": 144,
+          "line": 197,
           "description": "Terminate one engine and forget it; the next acquisition creates a fresh one in its place.",
           "params": [],
           "returns": [],
@@ -46830,14 +46891,14 @@
           "specifiers": [
             "logger"
           ],
-          "line": 33,
+          "line": 36,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 36,
+      "importanceScore": 44,
       "summary": "A pool of OCR engines (engine.js) behind the one-engine interface the queue (queue.js) uses, so that several pages (the worker count, see setup.js) can be recognised at the same time.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -48353,7 +48414,7 @@
     },
     {
       "path": "src/ocr/pdfTextProbe.js",
-      "lines": 198,
+      "lines": 193,
       "extension": ".js",
       "jsdocBlockCount": 11,
       "sourceSummary": "Reads a PDF page's own text layer through pdf.js so classify.js can decide whether OCR is needed at all, and, when the layer is usable, hands it over as words with boxes (pdfTextWords.js) so the page gets the same text l",
@@ -48363,7 +48424,7 @@
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 18,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -48371,7 +48432,7 @@
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 19,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -48379,7 +48440,7 @@
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 20,
+          "line": 23,
           "kind": "static"
         },
         {
@@ -48387,7 +48448,7 @@
           "specifiers": [
             "assessPdfTextLayer"
           ],
-          "line": 21,
+          "line": 24,
           "kind": "static"
         },
         {
@@ -48395,7 +48456,7 @@
           "specifiers": [
             "pdfTextLayerWords"
           ],
-          "line": 22,
+          "line": 25,
           "kind": "static"
         }
       ],
@@ -48403,54 +48464,54 @@
         {
           "name": "DEFAULT_OPEN_PDF_DOCUMENTS",
           "kind": "variable",
-          "line": 25
+          "line": 28
         },
         {
           "name": "createPdfTextProber",
           "kind": "function",
-          "line": 64
+          "line": 67
         }
       ],
       "declarations": [
         {
           "name": "defaultGetDocument",
           "kind": "function",
-          "line": 33
+          "line": 36
         },
         {
           "name": "createPdfTextProber",
           "kind": "function",
-          "line": 64
+          "line": 67
         },
         {
           "name": "close",
           "kind": "function",
-          "line": 78
+          "line": 80
         },
         {
           "name": "trim",
           "kind": "function",
-          "line": 100
+          "line": 98
         },
         {
           "name": "holdDocument",
           "kind": "function",
-          "line": 109
+          "line": 107
         },
         {
           "name": "entry",
           "kind": "object",
-          "line": 119
+          "line": 115
         },
         {
           "name": "releaseDocument",
           "kind": "function",
-          "line": 135
+          "line": 131
         },
         {
           "name": "probeDocument",
           "kind": "function",
-          "line": 146
+          "line": 141
         }
       ],
       "parseError": null,
@@ -48466,7 +48527,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 25,
+          "line": 28,
           "description": "Open pdf.js documents kept for neighbouring pages before the least recently used idle one is closed.",
           "params": [],
           "returns": [],
@@ -48479,7 +48540,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 33,
+          "line": 36,
           "description": "pdf.js loading task for a copy of the bytes (pdf.js takes ownership of the buffer it is given).",
           "params": [
             {
@@ -48504,7 +48565,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 44,
+          "line": 47,
           "description": "",
           "params": [],
           "returns": [],
@@ -48517,7 +48578,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 64,
+          "line": 67,
           "description": "",
           "params": [
             {
@@ -48560,8 +48621,8 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 75,
-          "description": "users : probes reading the document now.",
+          "line": 77,
+          "description": "users : probes reading the document now; the bound leaves it open while there are any.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -48573,8 +48634,8 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 78,
-          "description": "Close a document now, or, while probes read it, as soon as the last of them ends.",
+          "line": 80,
+          "description": "Close a document now, whatever reads it.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -48586,7 +48647,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 100,
+          "line": 98,
           "description": "Close the least recently used idle documents above the bound; the ones in use stay.",
           "params": [],
           "returns": [],
@@ -48599,7 +48660,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 109,
+          "line": 107,
           "description": "The document's entry, opened if need be, with one more probe reading it.",
           "params": [],
           "returns": [],
@@ -48612,7 +48673,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 135,
+          "line": 131,
           "description": "One probe has stopped reading the document.",
           "params": [],
           "returns": [],
@@ -48625,7 +48686,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/ocr/pdfTextProbe.js",
-          "line": 146,
+          "line": 141,
           "description": "",
           "params": [
             {
@@ -48657,7 +48718,7 @@
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 20,
+          "line": 23,
           "kind": "static",
           "resolved": "src/utils/pdfjsDocumentOptions.js"
         },
@@ -48666,7 +48727,7 @@
           "specifiers": [
             "assessPdfTextLayer"
           ],
-          "line": 21,
+          "line": 24,
           "kind": "static",
           "resolved": "src/ocr/classify.js"
         },
@@ -48675,7 +48736,7 @@
           "specifiers": [
             "pdfTextLayerWords"
           ],
-          "line": 22,
+          "line": 25,
           "kind": "static",
           "resolved": "src/ocr/pdfTextWords.js"
         }
@@ -48686,7 +48747,7 @@
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 18,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -48694,7 +48755,7 @@
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 19,
+          "line": 22,
           "kind": "static"
         }
       ],
@@ -96212,7 +96273,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 103,
+      "line": 106,
       "description": "",
       "params": [
         {
@@ -96267,7 +96328,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 439,
+      "line": 446,
       "description": "",
       "params": [
         {
@@ -96287,7 +96348,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 476,
+      "line": 483,
       "description": "",
       "params": [
         {
@@ -96307,7 +96368,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 484,
+      "line": 491,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -96320,7 +96381,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 88,
+      "line": 91,
       "description": "",
       "params": [
         {
@@ -96340,7 +96401,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 78,
+      "line": 81,
       "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
       "params": [],
       "returns": [],
@@ -96353,7 +96414,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 80,
+      "line": 83,
       "description": "Statuses of a page whose outcome is final: nothing more will be done about it.",
       "params": [],
       "returns": [],
@@ -96366,7 +96427,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 76,
+      "line": 79,
       "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
       "params": [],
       "returns": [],
@@ -96379,7 +96440,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 85,
+      "line": 88,
       "description": "Status keys (utils/ocrStatus.js) of a displayed page without text to search, for a reason that stands still: said in the search button's tooltip, which otherwise only names the bu...",
       "params": [],
       "returns": [],
@@ -96392,7 +96453,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 460,
+      "line": 467,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -114696,13 +114757,33 @@
       "examples": 0
     },
     {
+      "id": "createOcrEnginePool~acquire",
+      "name": "acquire",
+      "longname": "createOcrEnginePool~acquire",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/ocr/enginePool.js",
+      "line": 128,
+      "description": "",
+      "params": [
+        {
+          "name": "control",
+          "type": "Object|null",
+          "optional": false,
+          "description": "The job's control object: while the job waits for an engine, control.abort takes it out of the line (the queue gave the page up), so no eng..."
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createOcrEnginePool",
       "name": "createOcrEnginePool",
       "longname": "createOcrEnginePool",
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/enginePool.js",
-      "line": 63,
+      "line": 72,
       "description": "",
       "params": [
         {
@@ -114745,8 +114826,21 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/enginePool.js",
-      "line": 144,
+      "line": 197,
       "description": "Terminate one engine and forget it; the next acquisition creates a fresh one in its place.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createOcrEnginePool~dropUnstartable",
+      "name": "dropUnstartable",
+      "longname": "createOcrEnginePool~dropUnstartable",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/ocr/enginePool.js",
+      "line": 151,
+      "description": "An engine could not start in a pool that has worked.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -114758,8 +114852,21 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/enginePool.js",
-      "line": 83,
-      "description": "The failure that ends OCR for the session: an engine's, while none has ever started.",
+      "line": 100,
+      "description": "The failure that ends OCR for the session: an engine's, while none has ever started; or, in a pool that has worked, the last of several in a row that each left it without an engin...",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_ENGINE_BARREN_STARTS",
+      "name": "OCR_ENGINE_BARREN_STARTS",
+      "longname": "OCR_ENGINE_BARREN_STARTS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/ocr/enginePool.js",
+      "line": 42,
+      "description": "Start-up failures in a row, each leaving the pool without an engine, after which a pool that has worked gives OCR up for the session after all.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -114771,7 +114878,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/enginePool.js",
-      "line": 38,
+      "line": 47,
       "description": "",
       "params": [],
       "returns": [],
@@ -114784,7 +114891,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/enginePool.js",
-      "line": 126,
+      "line": 179,
       "description": "Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.",
       "params": [],
       "returns": [],
@@ -114797,7 +114904,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/enginePool.js",
-      "line": 99,
+      "line": 116,
       "description": "A free entry now, a new one while under the limit, else null.",
       "params": [],
       "returns": [],
@@ -114810,7 +114917,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/enginePool.js",
-      "line": 36,
+      "line": 45,
       "description": "Rejection for callers waiting on a free engine when the pool is terminated.",
       "params": [],
       "returns": [],
@@ -115470,8 +115577,8 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 78,
-      "description": "Close a document now, or, while probes read it, as soon as the last of them ends.",
+      "line": 80,
+      "description": "Close a document now, whatever reads it.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -115483,7 +115590,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 64,
+      "line": 67,
       "description": "",
       "params": [
         {
@@ -115526,7 +115633,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 25,
+      "line": 28,
       "description": "Open pdf.js documents kept for neighbouring pages before the least recently used idle one is closed.",
       "params": [],
       "returns": [],
@@ -115539,7 +115646,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 33,
+      "line": 36,
       "description": "pdf.js loading task for a copy of the bytes (pdf.js takes ownership of the buffer it is given).",
       "params": [
         {
@@ -115564,7 +115671,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 109,
+      "line": 107,
       "description": "The document's entry, opened if need be, with one more probe reading it.",
       "params": [],
       "returns": [],
@@ -115577,8 +115684,8 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 75,
-      "description": "users : probes reading the document now.",
+      "line": 77,
+      "description": "users : probes reading the document now; the bound leaves it open while there are any.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -115590,7 +115697,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 44,
+      "line": 47,
       "description": "",
       "params": [],
       "returns": [],
@@ -115603,7 +115710,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 146,
+      "line": 141,
       "description": "",
       "params": [
         {
@@ -115634,7 +115741,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 135,
+      "line": 131,
       "description": "One probe has stopped reading the document.",
       "params": [],
       "returns": [],
@@ -115647,7 +115754,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/ocr/pdfTextProbe.js",
-      "line": 100,
+      "line": 98,
       "description": "Close the least recently used idle documents above the bound; the ones in use stay.",
       "params": [],
       "returns": [],

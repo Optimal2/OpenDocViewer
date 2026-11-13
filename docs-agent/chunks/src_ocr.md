@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4837. JSDoc symbol count: 205.
+File count: 22. Line count: 4880. JSDoc symbol count: 208.
 
 ## src/ocr/assetUrls.js
 
@@ -147,17 +147,20 @@ Symbols:
 
 A pool of OCR engines \(engine.js\) behind the one\-engine interface the queue \(queue.js\) uses, so that several pages \(the worker count, see setup.js\) can be recognised at the same time.
 
-Exports: `createOcrEnginePool`
+Exports: `OCR_ENGINE_BARREN_STARTS`, `createOcrEnginePool`
 
 Local imports: `src/logging/systemLogger.js`
 
 Symbols:
 
+- `OCR_ENGINE_BARREN_STARTS` (constant) - Start\-up failures in a row, each leaving the pool without an engine, after which a pool that has worked gives OCR up for the session after all.
 - `TERMINATED_MESSAGE` (constant) - Rejection for callers waiting on a free engine when the pool is terminated.
 - `OcrEnginePool` (typedef) - No description.
 - `createOcrEnginePool` (function) - No description.
-- `createOcrEnginePool~firstFailure` (function) - The failure that ends OCR for the session: an engine's, while none has ever started.
+- `createOcrEnginePool~firstFailure` (function) - The failure that ends OCR for the session: an engine's, while none has ever started; or, in a pool that has worked, the last of several in a row that each left it without an engin...
 - `createOcrEnginePool~takeIdle` (function) - A free entry now, a new one while under the limit, else null.
+- `createOcrEnginePool~acquire` (function) - No description.
+- `createOcrEnginePool~dropUnstartable` (function) - An engine could not start in a pool that has worked.
 - `createOcrEnginePool~shrink` (function) - Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.
 - `createOcrEnginePool~drop` (function) - Terminate one engine and forget it; the next acquisition creates a fresh one in its place.
 
@@ -237,8 +240,8 @@ Symbols:
 - `defaultGetDocument` (function) - pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\).
 - `PdfTextProber` (typedef) - No description.
 - `createPdfTextProber` (function) - No description.
-- `createPdfTextProber~open` (constant) - users : probes reading the document now.
-- `createPdfTextProber~close` (function) - Close a document now, or, while probes read it, as soon as the last of them ends.
+- `createPdfTextProber~open` (constant) - users : probes reading the document now; the bound leaves it open while there are any.
+- `createPdfTextProber~close` (function) - Close a document now, whatever reads it.
 - `createPdfTextProber~trim` (function) - Close the least recently used idle documents above the bound; the ones in use stay.
 - `createPdfTextProber~holdDocument` (function) - The document's entry, opened if need be, with one more probe reading it.
 - `createPdfTextProber~releaseDocument` (function) - One probe has stopped reading the document.

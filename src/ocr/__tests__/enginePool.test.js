@@ -10,7 +10,7 @@
  * Engines are fakes with the shape of engine.js.
  */
 import { describe, expect, it, vi } from 'vitest';
-import { createOcrEnginePool } from '../enginePool.js';
+import { OCR_ENGINE_BARREN_STARTS, createOcrEnginePool } from '../enginePool.js';
 
 function deferred() {
   let resolve;
@@ -309,6 +309,118 @@ describe('createOcrEnginePool', () => {
     engines[2].start.resolve();
     await flush();
     engines[2].jobs[0].resolve({ text: 'c', confidence: 90, words: [] });
+    await expect(c).resolves.toMatchObject({ text: 'c' });
+  });
+
+  it('gives OCR up after all when engine after engine cannot start and none is left: the queue stops instead of failing every page', async () => {
+    expect(OCR_ENGINE_BARREN_STARTS).toBe(3);
+    const { pool, engines, createEngine, log } = makePool(1);
+    const a = pool.recognize('a');
+    await flush();
+    engines[0].start.resolve();
+    await flush();
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 90, words: [] });
+    await expect(a).resolves.toMatchObject({ text: 'a' });
+    await pool.terminate();
+    // The server has gone away: each page starts a fresh engine, which cannot start.
+    for (const [index, image] of [[1, 'b'], [2, 'c']]) {
+      const page = pool.recognize(image);
+      await flush();
+      failStart(engines[index], 'assets');
+      await expect(page).rejects.toThrow(/assets/);
+      expect(pool.getFailure()).toBeNull();
+    }
+    const d = pool.recognize('d');
+    await flush();
+    failStart(engines[3], 'assets');
+    await expect(d).rejects.toThrow(/assets/);
+    // The third in a row: the failure is the pool's now, and no further engine is tried.
+    expect(pool.getFailure()).toMatchObject({ kind: 'assets' });
+    await expect(pool.recognize('e')).rejects.toThrow(/assets/);
+    await expect(pool.ensureStarted()).rejects.toThrow(/assets/);
+    expect(createEngine).toHaveBeenCalledTimes(4);
+    expect(log.warn).toHaveBeenLastCalledWith(expect.stringMatching(/stops for this session/), expect.anything());
+  });
+
+  it('counts only failures in a row: an engine that works in between clears them', async () => {
+    const { pool, engines } = makePool(1);
+    const work = async (index, image) => {
+      const page = pool.recognize(image);
+      await flush();
+      engines[index].start.resolve();
+      await flush();
+      engines[index].jobs[0].resolve({ text: image, confidence: 90, words: [] });
+      await expect(page).resolves.toMatchObject({ text: image });
+      await pool.terminate();
+    };
+    const fail = async (index, image) => {
+      const page = pool.recognize(image);
+      await flush();
+      failStart(engines[index], 'timeout');
+      await expect(page).rejects.toThrow(/timeout/);
+    };
+    await work(0, 'a');
+    await fail(1, 'b');
+    await fail(2, 'c');
+    await work(3, 'd');
+    await fail(4, 'e');
+    await fail(5, 'f');
+    expect(pool.getFailure()).toBeNull();
+  });
+
+  it('takes a page out of the line for an engine when its control aborts it: no engine is spent on it later', async () => {
+    const { pool, engines } = makePool(1);
+    const a = pool.recognize('a');
+    await flush();
+    engines[0].start.resolve();
+    await flush();
+    const control = {};
+    const b = pool.recognize('b', control);
+    const c = pool.recognize('c');
+    await flush();
+    expect(typeof control.abort).toBe('function');
+    control.abort();
+    await expect(b).rejects.toThrow(/terminated/);
+    // Aborting again, or after it left the line, does nothing.
+    control.abort();
+    engines[0].jobs[0].resolve({ text: 'a', confidence: 90, words: [] });
+    await expect(a).resolves.toMatchObject({ text: 'a' });
+    await flush();
+    // The engine goes to the page behind it, never to the one that was given up.
+    expect(engines[0].jobs.map((job) => job.image)).toEqual(['a', 'c']);
+    engines[0].jobs[1].resolve({ text: 'c', confidence: 90, words: [] });
+    await expect(c).resolves.toMatchObject({ text: 'c' });
+    expect(engines[0].terminate).not.toHaveBeenCalled();
+  });
+
+  it('replaces an engine whose page was aborted while the pool is held to the engines that could start', async () => {
+    const { pool, engines, createEngine } = makePool(3);
+    const controlA = {};
+    const a = pool.recognize('a', controlA);
+    const b = pool.recognize('b');
+    const c = pool.recognize('c');
+    await flush();
+    engines[0].start.resolve();
+    engines[1].start.resolve();
+    await flush();
+    failStart(engines[2], 'timeout');
+    await flush();
+    expect(pool.capacity()).toBe(2);
+    expect(createEngine).toHaveBeenCalledTimes(3);
+    // The first page's recognition never answers: the queue aborts it, and its engine goes.
+    controlA.abort();
+    await expect(a).rejects.toThrow(/terminated/);
+    await flush();
+    // Held to two engines, not to the one that is left: the waiting page gets a new second one.
+    expect(createEngine).toHaveBeenCalledTimes(4);
+    expect(pool.engineCount()).toBe(2);
+    engines[3].start.resolve();
+    await flush();
+    engines[1].jobs[0].resolve({ text: 'b', confidence: 90, words: [] });
+    await expect(b).resolves.toMatchObject({ text: 'b' });
+    const taken = [...engines[1].jobs, ...engines[3].jobs].find((job) => job.image === 'c');
+    expect(taken).toBeTruthy();
+    taken.resolve({ text: 'c', confidence: 90, words: [] });
     await expect(c).resolves.toMatchObject({ text: 'c' });
   });
 
