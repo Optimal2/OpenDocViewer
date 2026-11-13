@@ -338,11 +338,41 @@ describe('OcrSearchBar', () => {
       withAllDetails();
       pointer('pointerover');
       expect(detailsMax()).toBe('140px');
-      // No room at all (the toolbar overflows already): the count alone, as it always stood there.
+      // No room at all: the count alone, as it always stood there.
       fakeToolbar({ width: 1000, spacerWidth: 0 });
       withAllDetails();
       pointer('pointerover');
       expect(detailsMax()).toBe('60px');
+    });
+
+    it('counts what the toolbar overflows by as room taken', () => {
+      // The spacer says 200 px, but the toolbar's contents reach 100 px beyond it: 100 px of room.
+      fakeToolbar({ width: 1000, scrollWidth: 1100, spacerWidth: 200 });
+      withAllDetails();
+      pointer('pointerover');
+      expect(detailsMax()).toBe('60px');
+      // Without the overflow the same spacer holds the count and the time.
+      fakeToolbar({ width: 1000, scrollWidth: 1000, spacerWidth: 200 });
+      withAllDetails();
+      pointer('pointerover');
+      expect(detailsMax()).toBe('140px');
+    });
+
+    it('measures again when the boost badge comes or goes under the pointer', () => {
+      const ocrPages = { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'recognizing' } };
+      const boosted = boost({ state: 'boosted', level: 12, baselineMs: 2000, settledLevel: 12, probes: [{ level: 12, ms: 2100, slow: false }] });
+      fakeToolbar({ width: 1000, spacerWidth: 300 });
+      const spacer = container.querySelector('.toolbar-spacer');
+      const measured = vi.spyOn(spacer, 'getBoundingClientRect');
+      render({ ocrPages, ocrBoost: boost() });
+      pointer('pointerover');
+      const before = measured.mock.calls.length;
+      expect(before).toBeGreaterThan(0);
+      render({ ocrPages, ocrBoost: boosted });
+      expect(measured.mock.calls.length).toBeGreaterThan(before);
+      const withBadge = measured.mock.calls.length;
+      render({ ocrPages, ocrBoost: boost() });
+      expect(measured.mock.calls.length).toBeGreaterThan(withBadge);
     });
 
     it('holds the boost badge\'s width when the badge leaves under a pointer that has just arrived, until the pointer leaves', () => {
@@ -370,6 +400,14 @@ describe('OcrSearchBar', () => {
       // A pointer that arrives without a badge holds nothing.
       pointer('pointerover');
       expect(minWidth()).toBe('');
+      pointer('pointerout');
+      // Nor does one that arrives over a badge that takes no room (hidden while the field is open).
+      render({ ocrPages, ocrBoost: boosted });
+      const hidden = vi.spyOn(boostBadge(), 'getBoundingClientRect').mockReturnValue({ left: 0, right: 0, width: 0, top: 0, bottom: 0, height: 0 });
+      pointer('pointerover');
+      render({ ocrPages, ocrBoost: ended });
+      expect(minWidth()).toBe('');
+      hidden.mockRestore();
     });
 
     it('measures with keyboard focus too, and on the status-only indicator under the pointer', () => {

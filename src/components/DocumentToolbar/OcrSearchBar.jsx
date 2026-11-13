@@ -202,7 +202,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // How wide the details may unfold: into the room the toolbar's spacer leaves and no further,
   // dropped whole from the end when it is too small (utils/ocrSearchPlacement.js). The unfolding
   // itself is CSS (`:hover`, `:focus-visible`); the pointer and the focus are followed here only
-  // to measure while the details show: when they arrive, whenever the details' text changes and
+  // to measure while the details show: when they arrive, whenever the details' text changes,
+  // whenever the boost's badge comes or goes (it takes room in the button too) and
   // whenever the toolbar or its spacer changes size (the window, the field closing). Unfolding
   // does not change the answer (the spacer gives what the details take, and a toolbar that
   // overflows is counted by how much), so the observer settles at once.
@@ -224,7 +225,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     sizes.observe(toolbar);
     sizes.observe(spacer);
     return () => sizes.disconnect();
-  }, [detailsShown, fitDetails, recognisedPages, pages.length, timeLeftShortText, workersText]);
+  }, [detailsShown, fitDetails, recognisedPages, pages.length, timeLeftShortText, workersText, boostInfo?.badge]);
   // The boost's badge leaves at the first input, and the move that brings the pointer onto the
   // button is input: the button would lose the badge's width at once, before the details have
   // begun to unfold, and a pointer that came in over the badge would be left outside a button
@@ -237,9 +238,11 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       setDetailsHover(true);
       const badge = rootRef.current?.querySelector?.('[data-odv-ocr="boost"]');
       let hold = 0;
-      if (badge && typeof getComputedStyle === 'function') {
+      // A badge that takes no room (hidden while the field is open) leaves nothing to hold.
+      const badgeWidth = badge ? badge.getBoundingClientRect().width : 0;
+      if (badgeWidth > 0 && typeof getComputedStyle === 'function') {
         const style = getComputedStyle(badge);
-        hold = badge.getBoundingClientRect().width + (Number.parseFloat(style.marginLeft) || 0) + (Number.parseFloat(style.marginRight) || 0);
+        hold = badgeWidth + (Number.parseFloat(style.marginLeft) || 0) + (Number.parseFloat(style.marginRight) || 0);
       }
       setDetailsHold(hold > 0 ? hold : null);
     },
