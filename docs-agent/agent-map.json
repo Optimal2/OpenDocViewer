@@ -94,15 +94,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 207,
-    "sourceLineCount": 74043,
-    "docletCount": 2157,
-    "documentedFileCount": 203,
+    "fileCount": 208,
+    "sourceLineCount": 74177,
+    "docletCount": 2166,
+    "documentedFileCount": 204,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 25,
     "devDependencyCount": 24,
-    "estimatedSourceTokens": 7318
+    "estimatedSourceTokens": 7380
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -1211,8 +1211,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 7998,
-      "docletCount": 113,
+      "lineCount": 8030,
+      "docletCount": 114,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1269,21 +1269,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+          "score": 38,
+          "lines": 538,
+          "incomingLocalImports": 1,
+          "doclets": 7,
+          "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
           "score": 37,
           "lines": 219,
           "incomingLocalImports": 2,
           "doclets": 5,
           "summary": "Compact language selector for the toolbar.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "score": 35,
-          "lines": 506,
-          "incomingLocalImports": 1,
-          "doclets": 6,
-          "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
           "summaryConfidence": "high"
         }
       ]
@@ -1896,9 +1896,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 66,
-      "lineCount": 24498,
-      "docletCount": 1015,
+      "fileCount": 67,
+      "lineCount": 24600,
+      "docletCount": 1023,
       "importantFiles": [
         {
           "path": "src/utils/runtimeConfig.js",
@@ -13814,9 +13814,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "lines": 506,
+      "lines": 538,
       "extension": ".jsx",
-      "jsdocBlockCount": 13,
+      "jsdocBlockCount": 16,
       "sourceSummary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
       "imports": [
         {
@@ -13832,7 +13832,7 @@
             "useRef",
             "useState"
           ],
-          "line": 36,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -13840,7 +13840,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 37,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -13848,7 +13848,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 38,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -13856,7 +13856,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 39,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -13864,7 +13864,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 40,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -13872,7 +13872,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 41,
+          "line": 44,
           "kind": "static"
         },
         {
@@ -13883,7 +13883,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 42,
+          "line": 45,
           "kind": "static"
         },
         {
@@ -13892,7 +13892,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 43,
+          "line": 46,
           "kind": "static"
         },
         {
@@ -13901,7 +13901,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 44,
+          "line": 47,
           "kind": "static"
         },
         {
@@ -13910,7 +13910,7 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 45,
+          "line": 48,
           "kind": "static"
         },
         {
@@ -13919,7 +13919,18 @@
             "OCR_BOOST_FALLBACK",
             "describeOcrBoost"
           ],
-          "line": 46,
+          "line": 49,
+          "kind": "static"
+        },
+        {
+          "source": "../../utils/ocrProgress.js",
+          "specifiers": [
+            "OCR_PROGRESS_FALLBACK",
+            "OCR_PROGRESS_WINDOW_MS",
+            "createOcrProgressEstimator",
+            "describeOcrTimeLeft"
+          ],
+          "line": 50,
           "kind": "static"
         }
       ],
@@ -13927,39 +13938,44 @@
         {
           "name": "OcrSearchBar",
           "kind": "default",
-          "line": 64
+          "line": 71
         }
       ],
       "declarations": [
         {
           "name": "matchIdOf",
           "kind": "function",
-          "line": 49
+          "line": 56
         },
         {
           "name": "OcrSearchBar",
           "kind": "component",
-          "line": 64
+          "line": 71
+        },
+        {
+          "name": "withBoost",
+          "kind": "function",
+          "line": 119
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 244
+          "line": 276
         },
         {
           "name": "within",
           "kind": "function",
-          "line": 249
+          "line": 281
         },
         {
           "name": "handleInputKeyDown",
           "kind": "function",
-          "line": 304
+          "line": 336
         },
         {
           "name": "handlePanelKeyDown",
           "kind": "function",
-          "line": 312
+          "line": 344
         }
       ],
       "parseError": null,
@@ -13969,13 +13985,26 @@
       },
       "doclets": [
         {
+          "id": "OCR_PENDING_STATUSES",
+          "name": "OCR_PENDING_STATUSES",
+          "longname": "OCR_PENDING_STATUSES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+          "line": 53,
+          "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "matchIdOf",
           "name": "matchIdOf",
           "longname": "matchIdOf",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 49,
+          "line": 56,
           "description": "",
           "params": [
             {
@@ -13995,7 +14024,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 64,
+          "line": 71,
           "description": "",
           "params": [
             {
@@ -14050,7 +14079,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 267,
+          "line": 299,
           "description": "",
           "params": [
             {
@@ -14070,7 +14099,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 288,
+          "line": 320,
           "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
           "params": [
             {
@@ -14090,7 +14119,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 304,
+          "line": 336,
           "description": "",
           "params": [
             {
@@ -14110,7 +14139,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-          "line": 312,
+          "line": 344,
           "description": "Escape closes the field from any of its controls.",
           "params": [],
           "returns": [],
@@ -14124,7 +14153,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 39,
+          "line": 42,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -14133,7 +14162,7 @@
           "specifiers": [
             "StatusLed"
           ],
-          "line": 40,
+          "line": 43,
           "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
@@ -14142,7 +14171,7 @@
           "specifiers": [
             "ocrPageKeyOf"
           ],
-          "line": 41,
+          "line": 44,
           "kind": "static",
           "resolved": "src/utils/ocrPageKey.js"
         },
@@ -14154,7 +14183,7 @@
             "OCR_STATUS_LED",
             "ocrStatusKeyOf"
           ],
-          "line": 42,
+          "line": 45,
           "kind": "static",
           "resolved": "src/utils/ocrStatus.js"
         },
@@ -14164,7 +14193,7 @@
             "normalizeOcrSearchTerm",
             "searchOcrPages"
           ],
-          "line": 43,
+          "line": 46,
           "kind": "static",
           "resolved": "src/utils/ocrSearch.js"
         },
@@ -14174,7 +14203,7 @@
             "measureOcrSearchPlacement",
             "OCR_SEARCH_PANEL_WIDTH"
           ],
-          "line": 44,
+          "line": 47,
           "kind": "static",
           "resolved": "src/utils/ocrSearchPlacement.js"
         },
@@ -14184,7 +14213,7 @@
             "hasActiveModalDialog",
             "isEditableTarget"
           ],
-          "line": 45,
+          "line": 48,
           "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerEffects.js"
         },
@@ -14194,9 +14223,21 @@
             "OCR_BOOST_FALLBACK",
             "describeOcrBoost"
           ],
-          "line": 46,
+          "line": 49,
           "kind": "static",
           "resolved": "src/utils/ocrBoostStatus.js"
+        },
+        {
+          "source": "../../utils/ocrProgress.js",
+          "specifiers": [
+            "OCR_PROGRESS_FALLBACK",
+            "OCR_PROGRESS_WINDOW_MS",
+            "createOcrProgressEstimator",
+            "describeOcrTimeLeft"
+          ],
+          "line": 50,
+          "kind": "static",
+          "resolved": "src/utils/ocrProgress.js"
         }
       ],
       "packageImports": [
@@ -14213,7 +14254,7 @@
             "useRef",
             "useState"
           ],
-          "line": 36,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -14221,7 +14262,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 37,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -14229,12 +14270,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 38,
+          "line": 41,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 35,
+      "importanceScore": 38,
       "summary": "Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page's OCR status (an LED on the button, the status as its tooltip and in a visually hidden live",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -58452,6 +58493,233 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/utils/ocrProgress.js",
+      "lines": 102,
+      "extension": ".js",
+      "jsdocBlockCount": 10,
+      "sourceSummary": "How long the pages still waiting for OCR will take, for the toolbar's tooltip (components/DocumentToolbar/OcrSearchBar.jsx): an estimate from the pace of the pages that were finished lately, and the text that says it (pu",
+      "imports": [],
+      "exports": [
+        {
+          "name": "OCR_PROGRESS_WINDOW_MS",
+          "kind": "variable",
+          "line": 23
+        },
+        {
+          "name": "OCR_PROGRESS_MIN_PAGES",
+          "kind": "variable",
+          "line": 25
+        },
+        {
+          "name": "OCR_PROGRESS_FALLBACK",
+          "kind": "variable",
+          "line": 30
+        },
+        {
+          "name": "createOcrProgressEstimator",
+          "kind": "function",
+          "line": 43
+        },
+        {
+          "name": "describeOcrTimeLeft",
+          "kind": "function",
+          "line": 95
+        }
+      ],
+      "declarations": [
+        {
+          "name": "createOcrProgressEstimator",
+          "kind": "function",
+          "line": 43
+        },
+        {
+          "name": "describeOcrTimeLeft",
+          "kind": "function",
+          "line": 95
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OCR_PROGRESS_WINDOW_MS",
+          "name": "OCR_PROGRESS_WINDOW_MS",
+          "longname": "OCR_PROGRESS_WINDOW_MS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 23,
+          "description": "Finished pages older than this say nothing about the pace now.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_PROGRESS_MIN_PAGES",
+          "name": "OCR_PROGRESS_MIN_PAGES",
+          "longname": "OCR_PROGRESS_MIN_PAGES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 25,
+          "description": "Pages that must have been finished since the starting point before a pace is trusted.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "MIN_SAMPLES",
+          "name": "MIN_SAMPLES",
+          "longname": "MIN_SAMPLES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 27,
+          "description": "Measurements kept however old they are, so a slow client still gets a pace.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OCR_PROGRESS_FALLBACK",
+          "name": "OCR_PROGRESS_FALLBACK",
+          "longname": "OCR_PROGRESS_FALLBACK",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 30,
+          "description": "Keys of ocr.progress and their English fallbacks.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createOcrProgressEstimator",
+          "name": "createOcrProgressEstimator",
+          "longname": "createOcrProgressEstimator",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 43,
+          "description": "",
+          "params": [
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "options.windowMs",
+              "type": "number",
+              "optional": true,
+              "description": "Default OCR_PROGRESS_WINDOW_MS."
+            },
+            {
+              "name": "options.minPages",
+              "type": "number",
+              "optional": true,
+              "description": "Default OCR_PROGRESS_MIN_PAGES."
+            },
+            {
+              "name": "options.now",
+              "type": "function",
+              "optional": false,
+              "description": "Clock in milliseconds; default Date.now."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "record",
+          "name": "record",
+          "longname": "record",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 55,
+          "description": "Tell the estimator how many pages are finished now.",
+          "params": [
+            {
+              "name": "done",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "remainingMs",
+          "name": "remainingMs",
+          "longname": "remainingMs",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 74,
+          "description": "",
+          "params": [
+            {
+              "name": "pending",
+              "type": "number",
+              "optional": false,
+              "description": "Pages still waiting for OCR."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number|null",
+              "description": "Milliseconds, or null when there is nothing to say."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "describeOcrTimeLeft",
+          "name": "describeOcrTimeLeft",
+          "longname": "describeOcrTimeLeft",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/ocrProgress.js",
+          "line": 95,
+          "description": "The words for an estimate: which ocr.progress key, and its figures.",
+          "params": [
+            {
+              "name": "remainingMs",
+              "type": "number|null",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 57,
+      "summary": "How long the pages still waiting for OCR will take, for the toolbar's tooltip (components/DocumentToolbar/OcrSearchBar.jsx): an estimate from the pace of the pages that were finished lately, and the text that says it (pu",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/utils/ocrSearch.js",
       "lines": 143,
       "extension": ".js",
@@ -95491,7 +95759,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 64,
+      "line": 71,
       "description": "",
       "params": [
         {
@@ -95546,7 +95814,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 267,
+      "line": 299,
       "description": "",
       "params": [
         {
@@ -95566,7 +95834,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 304,
+      "line": 336,
       "description": "",
       "params": [
         {
@@ -95586,7 +95854,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 312,
+      "line": 344,
       "description": "Escape closes the field from any of its controls.",
       "params": [],
       "returns": [],
@@ -95599,7 +95867,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 49,
+      "line": 56,
       "description": "",
       "params": [
         {
@@ -95613,13 +95881,26 @@
       "examples": 0
     },
     {
+      "id": "OCR_PENDING_STATUSES",
+      "name": "OCR_PENDING_STATUSES",
+      "longname": "OCR_PENDING_STATUSES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+      "line": 53,
+      "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "OcrSearchBar~step",
       "name": "step",
       "longname": "OcrSearchBar~step",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-      "line": 288,
+      "line": 320,
       "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
       "params": [
         {
@@ -121398,6 +121679,171 @@
       "description": "Key of one document page in the OCR result map ( ocrPages on the viewer context).",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createOcrProgressEstimator",
+      "name": "createOcrProgressEstimator",
+      "longname": "createOcrProgressEstimator",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 43,
+      "description": "",
+      "params": [
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "options.windowMs",
+          "type": "number",
+          "optional": true,
+          "description": "Default OCR_PROGRESS_WINDOW_MS."
+        },
+        {
+          "name": "options.minPages",
+          "type": "number",
+          "optional": true,
+          "description": "Default OCR_PROGRESS_MIN_PAGES."
+        },
+        {
+          "name": "options.now",
+          "type": "function",
+          "optional": false,
+          "description": "Clock in milliseconds; default Date.now."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "describeOcrTimeLeft",
+      "name": "describeOcrTimeLeft",
+      "longname": "describeOcrTimeLeft",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 95,
+      "description": "The words for an estimate: which ocr.progress key, and its figures.",
+      "params": [
+        {
+          "name": "remainingMs",
+          "type": "number|null",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "MIN_SAMPLES",
+      "name": "MIN_SAMPLES",
+      "longname": "MIN_SAMPLES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 27,
+      "description": "Measurements kept however old they are, so a slow client still gets a pace.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_PROGRESS_FALLBACK",
+      "name": "OCR_PROGRESS_FALLBACK",
+      "longname": "OCR_PROGRESS_FALLBACK",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 30,
+      "description": "Keys of ocr.progress and their English fallbacks.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_PROGRESS_MIN_PAGES",
+      "name": "OCR_PROGRESS_MIN_PAGES",
+      "longname": "OCR_PROGRESS_MIN_PAGES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 25,
+      "description": "Pages that must have been finished since the starting point before a pace is trusted.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OCR_PROGRESS_WINDOW_MS",
+      "name": "OCR_PROGRESS_WINDOW_MS",
+      "longname": "OCR_PROGRESS_WINDOW_MS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 23,
+      "description": "Finished pages older than this say nothing about the pace now.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "record",
+      "name": "record",
+      "longname": "record",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 55,
+      "description": "Tell the estimator how many pages are finished now.",
+      "params": [
+        {
+          "name": "done",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "remainingMs",
+      "name": "remainingMs",
+      "longname": "remainingMs",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/ocrProgress.js",
+      "line": 74,
+      "description": "",
+      "params": [
+        {
+          "name": "pending",
+          "type": "number",
+          "optional": false,
+          "description": "Pages still waiting for OCR."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number|null",
+          "description": "Milliseconds, or null when there is nothing to say."
+        }
+      ],
       "examples": 0
     },
     {

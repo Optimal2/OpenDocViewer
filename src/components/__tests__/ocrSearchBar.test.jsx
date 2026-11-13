@@ -55,7 +55,7 @@ describe('OcrSearchBar', () => {
     container.remove();
   });
 
-  const render = ({ ocrPages = {}, ocrEngineFailure = null, ocrBoost, pageNumber = 1, setPageNumber = vi.fn(), setOcrSearch = vi.fn(), searchEnabled, ctrlFOverride }) => {
+  const render = ({ ocrPages = {}, ocrEngineFailure = null, ocrBoost, pageNumber = 1, setPageNumber = vi.fn(), setOcrSearch = vi.fn(), searchEnabled, ctrlFOverride, allPages = PAGES }) => {
     act(() => {
       root.render(createElement(
         ViewerContext.Provider,
@@ -63,7 +63,7 @@ describe('OcrSearchBar', () => {
         createElement(OcrSearchBar, {
           pageNumber,
           setPageNumber,
-          allPages: PAGES,
+          allPages,
           ...(searchEnabled === undefined ? {} : { searchEnabled }),
           ...(ctrlFOverride === undefined ? {} : { ctrlFOverride }),
         })
@@ -96,6 +96,81 @@ describe('OcrSearchBar', () => {
   const searchRoot = () => container.querySelector('[data-odv-ocr="search"]');
   const boost = (overrides = {}) => ({
     state: 'cautious', level: 8, cautious: 8, levels: [12, 16, 20, 24], baselineMs: null, probes: [], settledLevel: null, ...overrides,
+  });
+
+  describe('time left', () => {
+    const MANY = Array.from({ length: 40 }, (_, index) => ({ sourceKey: 'doc', pageIndex: index }));
+    /** The first `finished` pages done, the rest waiting in the queue. */
+    const progress = (finished) => Object.fromEntries(MANY.map((_, index) => [KEY(index), index < finished ? done(['ord']) : { status: 'queued' }]));
+    /** Let `seconds` pass, then show `finished` pages done. */
+    const after = (seconds, finished, extra = {}) => {
+      act(() => { vi.advanceTimersByTime(seconds * 1000); });
+      render({ allPages: MANY, ocrPages: progress(finished), ...extra });
+    };
+
+    beforeEach(() => { vi.useFakeTimers(); });
+    afterEach(() => { vi.useRealTimers(); });
+
+    it('says in the tooltip roughly how long the waiting pages will take, once enough pages are finished to tell the pace', () => {
+      render({ allPages: MANY, ocrPages: progress(0) });
+      expect(button().getAttribute('title')).toMatch(/ · 0 of 40 pages ready$/);
+      // The first finished page is the starting point; two more say too little.
+      after(20, 1);
+      after(10, 2);
+      after(10, 3);
+      expect(button().getAttribute('title')).toMatch(/ · 3 of 40 pages ready$/);
+      // Three pages in thirty seconds, 36 waiting: six minutes.
+      after(10, 4);
+      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready · about 6 min left$/);
+      // The pace picks up: the estimate follows.
+      after(1, 10);
+      expect(button().getAttribute('title')).toMatch(/ · 10 of 40 pages ready · about 2 min left$/);
+      // The count's spelt-out description for assistive technology stays the count alone.
+      expect(container.querySelector('[data-odv-ocr="coverage-text"]').textContent).toBe('10 of 40 pages ready');
+    });
+
+    it('keeps the boost line last, and says it on the status-only button too', () => {
+      const withBoost = { ocrBoost: boost({ state: 'boosted', level: 12, baselineMs: 2000, settledLevel: 12, probes: [{ level: 12, ms: 2100, slow: false }] }) };
+      render({ allPages: MANY, ocrPages: progress(0), ...withBoost });
+      for (const finished of [1, 2, 3, 4]) after(10, finished, withBoost);
+      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready · about 6 min left · OCR boost: 12 workers$/);
+      after(10, 5, { searchEnabled: false });
+      expect(button().getAttribute('title')).toBe('Text recognised · about 6 min left');
+    });
+
+    it('says under a minute as that, and nothing once every page is done', () => {
+      render({ allPages: MANY, ocrPages: progress(30) });
+      for (const finished of [31, 32, 33, 34]) after(1, finished);
+      expect(button().getAttribute('title')).toMatch(/ · 34 of 40 pages ready · less than a minute left$/);
+      after(1, 40);
+      expect(button().getAttribute('title')).toMatch(/ · 40 of 40 pages ready$/);
+    });
+
+    it('drops the estimate when no page has been finished for a minute', () => {
+      render({ allPages: MANY, ocrPages: progress(0) });
+      for (const finished of [1, 2, 3, 4]) after(10, finished);
+      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      act(() => { vi.advanceTimersByTime(59999); });
+      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      act(() => { vi.advanceTimersByTime(1); });
+      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready$/);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('counts only waiting pages: skipped and failed ones are not waited for', () => {
+      const pages = (finished) => ({
+        ...progress(finished),
+        [KEY(38)]: { status: 'skipped', reason: 'pdf-text' },
+        [KEY(39)]: { status: 'failed' },
+      });
+      render({ allPages: MANY, ocrPages: pages(0) });
+      for (const finished of [1, 2, 3, 4]) {
+        act(() => { vi.advanceTimersByTime(60000 / 34 * 10); });
+        render({ allPages: MANY, ocrPages: pages(finished) });
+      }
+      // 34 pages wait (40 less 4 done, one skipped, one failed) at 60/34 × 10 s a page: ten minutes.
+      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready · about 10 min left$/);
+    });
   });
 
   it('shows and says nothing about the boost without one: no badge, no attribute, the tooltip as before', () => {

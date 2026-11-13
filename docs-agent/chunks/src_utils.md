@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 66. Line count: 24498. JSDoc symbol count: 1015.
+File count: 67. Line count: 24600. JSDoc symbol count: 1023.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -337,6 +337,23 @@ Symbols:
 - `SEPARATOR` (constant) - Key of one document page in the OCR result map \( ocrPages on the viewer context\).
 - `makeOcrPageKey` (function) - No description.
 - `ocrPageKeyOf` (function) - No description.
+
+## src/utils/ocrProgress.js
+
+How long the pages still waiting for OCR will take, for the toolbar's tooltip \(components/DocumentToolbar/OcrSearchBar.jsx\): an estimate from the pace of the pages that were finished lately, and the text that says it \(pu
+
+Exports: `OCR_PROGRESS_WINDOW_MS`, `OCR_PROGRESS_MIN_PAGES`, `OCR_PROGRESS_FALLBACK`, `createOcrProgressEstimator`, `describeOcrTimeLeft`
+
+Symbols:
+
+- `OCR_PROGRESS_WINDOW_MS` (constant) - Finished pages older than this say nothing about the pace now.
+- `OCR_PROGRESS_MIN_PAGES` (constant) - Pages that must have been finished since the starting point before a pace is trusted.
+- `MIN_SAMPLES` (constant) - Measurements kept however old they are, so a slow client still gets a pace.
+- `OCR_PROGRESS_FALLBACK` (constant) - Keys of ocr.progress and their English fallbacks.
+- `createOcrProgressEstimator` (function) - No description.
+- `record` (function) - Tell the estimator how many pages are finished now.
+- `remainingMs` (function) - No description.
+- `describeOcrTimeLeft` (function) - The words for an estimate: which ocr.progress key, and its figures.
 
 ## src/utils/ocrSearch.js
 

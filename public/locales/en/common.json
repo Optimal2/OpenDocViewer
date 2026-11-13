@@ -460,6 +460,11 @@
       "last": "Last OCR boost: {engines} workers",
       "slow": "{level} workers took {percent} % longer"
     },
+    "progress": {
+      "underMinute": "less than a minute left",
+      "minutes": "about {minutes} min left",
+      "hours": "about {hours} h {minutes} min left"
+    },
     "search": {
       "open": "Search in the recognised text",
       "placeholder": "Search",

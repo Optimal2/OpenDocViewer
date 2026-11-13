@@ -28,6 +28,9 @@
  * with the engine count while more engines than the cautious count run, and a line at the end of
  * the tooltip saying what the last climb found. Without a boost (the default) neither exists.
  *
+ * While pages wait for OCR and enough of them have been finished to tell the pace, the tooltip
+ * also says roughly how long the rest will take (utils/ocrProgress.js), after the page count.
+ *
  * With `searchEnabled` false (`ocr.search.enabled: false`) only the status remains: the button
  * stays a never-enabled, status-only indicator with its LED, the status as its name and tooltip
  * and the live region, and no field exists, so no term is ever published and the layers mark
@@ -44,6 +47,10 @@ import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js
 import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
 import { hasActiveModalDialog, isEditableTarget } from '../DocumentViewer/hooks/useViewerEffects.js';
 import { OCR_BOOST_FALLBACK, describeOcrBoost } from '../../utils/ocrBoostStatus.js';
+import { OCR_PROGRESS_FALLBACK, OCR_PROGRESS_WINDOW_MS, createOcrProgressEstimator, describeOcrTimeLeft } from '../../utils/ocrProgress.js';
+
+/** Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR. */
+const OCR_PENDING_STATUSES = new Set(['queued', 'probing', 'recognizing']);
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -108,6 +115,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     }
   }
   const boostState = boostInfo ? String(ocrBoost.state) : undefined;
+  // The boost's line comes last in the tooltip; what goes before it is `head`.
+  const withBoost = (head) => (boostText ? `${head} · ${boostText}` : head);
   const boostBadge = boostInfo?.badge ? (
     <span className="toolbar-ocr-boost" data-odv-ocr="boost" aria-hidden="true">
       <span className="material-icons toolbar-ocr-boost-icon">bolt</span>
@@ -125,6 +134,29 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     () => searchablePages.filter((page) => page.outcome?.status === 'done').length,
     [searchablePages]
   );
+  // Pages still waiting for OCR, and roughly how long they will take at the pace of the pages
+  // finished lately (utils/ocrProgress.js). The estimate is dropped when no page has been
+  // finished for the length of its window: a figure from a pace that no longer holds is worse
+  // than none, and without a finished page nothing else would take it away.
+  const pendingPages = useMemo(
+    () => searchablePages.filter((page) => OCR_PENDING_STATUSES.has(page.outcome?.status)).length,
+    [searchablePages]
+  );
+  const progressRef = useRef(/** @type {*} */ (null));
+  const [timeLeftMs, setTimeLeftMs] = useState(/** @type {(number|null)} */ (null));
+  useEffect(() => {
+    if (!progressRef.current) progressRef.current = createOcrProgressEstimator();
+    progressRef.current.record(recognisedPages);
+    const estimate = progressRef.current.remainingMs(pendingPages);
+    setTimeLeftMs(estimate);
+    if (estimate === null) return undefined;
+    const timer = setTimeout(() => setTimeLeftMs(null), OCR_PROGRESS_WINDOW_MS);
+    return () => clearTimeout(timer);
+  }, [pendingPages, recognisedPages]);
+  const timeLeft = describeOcrTimeLeft(timeLeftMs);
+  const timeLeftText = timeLeft
+    ? t(`ocr.progress.${timeLeft.key}`, { minutes: timeLeft.minutes, hours: timeLeft.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeft.key] })
+    : '';
   // The displayed page's text, or (a page without text, skipped or failed) any page's.
   const ready = hasSearchableOcrText(displayedEntry)
     || searchablePages.some((page) => hasSearchableOcrText(page.outcome));
@@ -327,7 +359,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           data-odv-ocr="status"
           data-ocr-state={statusKey || 'notStarted'}
           aria-label={statusText}
-          title={boostText ? `${statusText} · ${boostText}` : statusText}
+          title={withBoost(timeLeftText ? `${statusText} · ${timeLeftText}` : statusText)}
           disabled
         >
           <span className="material-icons" aria-hidden="true">text_fields</span>
@@ -342,7 +374,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
   const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
-  const buttonTitle = `${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}${boostText ? ` · ${boostText}` : ''}`;
+  const buttonTitle = withBoost(`${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}${timeLeftText ? ` · ${timeLeftText}` : ''}`);
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   const pageOnlyShort = t('ocr.search.pageOnlyShort', { defaultValue: 'This page' });
   let statusLine = '';
