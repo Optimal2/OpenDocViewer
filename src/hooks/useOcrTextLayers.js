@@ -33,7 +33,9 @@
  * With `ocr.boost.enabled` (off by default) the hook also owns the boost's triggers: the engine
  * is then always a pool, and a boost control (src/ocr/boost.js) may raise its ceiling above the
  * cautious count while the user is idle. The ways in are the configured triggers: no input for
- * `idleAfterMs` (pointer, keys, wheel and touch on the window), a hidden tab, and the toolbar's
+ * `idleAfterMs` (pointer, keys, wheel and touch on the window; a pointer move counts only once
+ * the pointer has travelled OCR_BOOST_POINTER_SLOP_PX, so a pointer resting on the page is not
+ * input), a hidden tab, and the toolbar's
  * search over the whole document waiting for pages (`searchOpen`); each applies only while
  * more pages are pending than the cautious count can take, and never while the viewer is still
  * loading the document (`loading`, when the whole queue is paused): a user who waits for the
@@ -57,6 +59,46 @@ export const OCR_IDLE_SHUTDOWN_MS = 60000;
 
 /** Window events that count as input for the boost: they end the boosted state and restart the idle clock. */
 export const OCR_BOOST_ACTIVITY_EVENTS = Object.freeze(['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']);
+
+/**
+ * How far (CSS pixels) the pointer must travel before a pointer move counts as input for the
+ * boost. A pointer that rests on the page is not still as the browser reports it: a hand on a
+ * mouse or a finger on a trackpad jitters by a pixel or two, and browsers send moves without
+ * travel when the content under the pointer changes (text layers arriving, pages rendering).
+ * Counted as input, either keeps the idle clock from ever running out and ends a boost that
+ * had started, for a user who is doing nothing.
+ */
+export const OCR_BOOST_POINTER_SLOP_PX = 8;
+
+/**
+ * Tell pointer moves that travel from those that do not. The first move only gives the pointer
+ * a resting place; after that a move counts once it is `slopPx` or more from that place, which
+ * then moves there. So jitter around a point never counts, however long it goes on, and a
+ * pointer that is moved on purpose counts within a few pixels. A move without a position
+ * counts, since nothing says it did not travel.
+ *
+ * @param {number=} slopPx
+ * @returns {function(*): boolean}  True when the move is input.
+ */
+export function createPointerTravelFilter(slopPx = OCR_BOOST_POINTER_SLOP_PX) {
+  const slop = Math.max(0, Number(slopPx) || 0);
+  let restX = NaN;
+  let restY = NaN;
+  return (event) => {
+    const x = Number(event?.clientX);
+    const y = Number(event?.clientY);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return true;
+    if (Number.isNaN(restX)) {
+      restX = x;
+      restY = y;
+      return false;
+    }
+    if (Math.hypot(x - restX, y - restY) < slop) return false;
+    restX = x;
+    restY = y;
+    return true;
+  };
+}
 
 /** Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do. */
 const OCR_BOOST_PENDING_STATUSES = new Set(['queued', 'probing', 'recognizing']);
@@ -422,7 +464,10 @@ function attachBoost({ ocrModule, engine, queue, cautious, levels, referencePage
       tryEngage('idle');
     }, Math.max(0, Number(config.idleAfterMs) || 0));
   };
-  const onActivity = () => {
+  const pointerTravelled = createPointerTravelFilter();
+  const onActivity = (event) => {
+    // A pointer resting on the page is not input (see OCR_BOOST_POINTER_SLOP_PX).
+    if (event?.type === 'pointermove' && !pointerTravelled(event)) return;
     controller.disengage('input');
     armIdle();
   };

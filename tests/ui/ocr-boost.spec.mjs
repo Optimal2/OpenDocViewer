@@ -4,7 +4,8 @@
  * (drawn in the browser; no document from anywhere else), the client pinned to two threads so the
  * cautious count is one engine, and the boost's idle trigger set to one second. With nothing
  * happening the boost control climbs to its one level above the cautious count, two engines, so
- * the browser starts a second tesseract.js worker while the first still works; with the key off
+ * the browser starts a second tesseract.js worker while the first still works, and a pointer that
+ * rests on the page and jitters by a pixel or two the whole time is still nothing happening; with the key off
  * (the shipped default) the same document is recognised by one engine throughout. Everything
  * stays on the viewer's own origin either way, and the reference page is never requested.
  */
@@ -73,7 +74,22 @@ test('ocr boost on: left alone, the viewer starts a second engine for the waitin
   await expect.poll(() => engineWorkers(workers).length, { timeout: 60000 }).toBeGreaterThanOrEqual(1);
   // Nothing happens on the page: after the idle second the control measures the reference page
   // at the cautious count and climbs to two engines, so a second worker starts while pages wait.
-  await expect.poll(() => engineWorkers(workers).length, { timeout: 150000 }).toBeGreaterThanOrEqual(2);
+  // The pointer rests on the page meanwhile and jitters by a pixel or two, several times within
+  // every idle second, as a hand on a mouse does: that is not input, and the boost starts anyway.
+  let resting = true;
+  const jitter = (async () => {
+    await page.mouse.move(400, 400);
+    for (let step = 0; resting; step += 1) {
+      await page.mouse.move(400 + (step % 3) - 1, 400 + (step % 2));
+      await page.waitForTimeout(200);
+    }
+  })();
+  try {
+    await expect.poll(() => engineWorkers(workers).length, { timeout: 150000 }).toBeGreaterThanOrEqual(2);
+  } finally {
+    resting = false;
+    await jitter;
+  }
   // The shown page is recognised as before.
   await expect(page.locator('.toolbar [data-odv-ocr="status"]')).toHaveAttribute('data-ocr-state', 'done', { timeout: 120000 });
   // The toolbar says so: the search carries the boost's state and the tooltip ends with a line

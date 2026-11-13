@@ -95,7 +95,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/useKeyTipsHeld.js</code> | 67 | 1 | 3 | high | Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
 | <code>src/hooks/useOcrModule.js</code> | 44 | 1 | 1 | high | Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true. |
-| <code>src/hooks/useOcrTextLayers.js</code> | 466 | 1 | 11 | high | Runs OCR for the pages near the viewer&#39;s focus and exposes the outcomes per page. |
+| <code>src/hooks/useOcrTextLayers.js</code> | 511 | 1 | 13 | high | Runs OCR for the pages near the viewer&#39;s focus and exposes the outcomes per page. |
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |

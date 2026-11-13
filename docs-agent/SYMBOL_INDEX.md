@@ -707,17 +707,19 @@
 | <code>&lt;anonymous&gt;~syncModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:79</code> |  |
 | <code>useNavigationModifierState</code> | function | <code>src/hooks/useNavigationModifierState.js:44</code> |  |
 | <code>module.exports</code> | function | <code>src/hooks/useOcrModule.js:21</code> |  |
-| <code>attachBoost</code> | function | <code>src/hooks/useOcrTextLayers.js:373</code> | Create the boost control and its triggers for one runtime. |
-| <code>useOcrTextLayers~boostRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:133</code> | The boost control and its triggers while the boost is on: { controller, onPlanned, detach } . |
-| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:111</code> |  |
-| <code>OCR_BOOST_ACTIVITY_EVENTS</code> | constant | <code>src/hooks/useOcrTextLayers.js:59</code> | Window events that count as input for the boost: they end the boosted state and restart the idle clock. |
-| <code>OCR_BOOST_PENDING_STATUSES</code> | constant | <code>src/hooks/useOcrTextLayers.js:62</code> | Queue statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still to do. |
-| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:56</code> | Idle time after which the OCR worker is terminated to free its memory. |
-| <code>onPlanned</code> | function | <code>src/hooks/useOcrTextLayers.js:451</code> | After a window plan \(or a search opening\). |
-| <code>useOcrTextLayers~planRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:135</code> | What the last window plan decided for the pages in flight, for the boost to restore. |
-| <code>readBoostConfig</code> | function | <code>src/hooks/useOcrTextLayers.js:65</code> |  |
-| <code>reportedThreads</code> | function | <code>src/hooks/useOcrTextLayers.js:70</code> |  |
-| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:151</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
+| <code>attachBoost</code> | function | <code>src/hooks/useOcrTextLayers.js:415</code> | Create the boost control and its triggers for one runtime. |
+| <code>useOcrTextLayers~boostRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:175</code> | The boost control and its triggers while the boost is on: { controller, onPlanned, detach } . |
+| <code>createPointerTravelFilter</code> | function | <code>src/hooks/useOcrTextLayers.js:83</code> | Tell pointer moves that travel from those that do not. |
+| <code>module.exports</code> | function | <code>src/hooks/useOcrTextLayers.js:153</code> |  |
+| <code>OCR_BOOST_ACTIVITY_EVENTS</code> | constant | <code>src/hooks/useOcrTextLayers.js:61</code> | Window events that count as input for the boost: they end the boosted state and restart the idle clock. |
+| <code>OCR_BOOST_PENDING_STATUSES</code> | constant | <code>src/hooks/useOcrTextLayers.js:104</code> | Queue statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still to do. |
+| <code>OCR_BOOST_POINTER_SLOP_PX</code> | constant | <code>src/hooks/useOcrTextLayers.js:71</code> | How far \(CSS pixels\) the pointer must travel before a pointer move counts as input for the boost. |
+| <code>OCR_IDLE_SHUTDOWN_MS</code> | constant | <code>src/hooks/useOcrTextLayers.js:58</code> | Idle time after which the OCR worker is terminated to free its memory. |
+| <code>onPlanned</code> | function | <code>src/hooks/useOcrTextLayers.js:496</code> | After a window plan \(or a search opening\). |
+| <code>useOcrTextLayers~planRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:177</code> | What the last window plan decided for the pages in flight, for the boost to restore. |
+| <code>readBoostConfig</code> | function | <code>src/hooks/useOcrTextLayers.js:107</code> |  |
+| <code>reportedThreads</code> | function | <code>src/hooks/useOcrTextLayers.js:112</code> |  |
+| <code>useOcrTextLayers~windowIndexesRef</code> | constant | <code>src/hooks/useOcrTextLayers.js:193</code> | Viewer indexes of the current window \(focus pages and neighbours\): never released. |
 | <code>usePageNavigation~fastNext</code> | constant | <code>src/hooks/usePageNavigation.js:140</code> | Fast step: next \(used by timers\). |
 | <code>usePageNavigation~fastPrev</code> | constant | <code>src/hooks/usePageNavigation.js:131</code> | Fast step: previous \(used by timers\). |
 | <code>usePageNavigation~handleFirstPageWrapper</code> | constant | <code>src/hooks/usePageNavigation.js:104</code> | Wrapper: go to first page. |

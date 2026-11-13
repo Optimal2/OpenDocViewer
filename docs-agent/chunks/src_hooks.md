@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 10. Line count: 1723. JSDoc symbol count: 52.
+File count: 10. Line count: 1768. JSDoc symbol count: 54.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -76,7 +76,7 @@ Symbols:
 
 Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 
-Exports: `OCR_IDLE_SHUTDOWN_MS`, `OCR_BOOST_ACTIVITY_EVENTS`, `useOcrTextLayers`
+Exports: `OCR_IDLE_SHUTDOWN_MS`, `OCR_BOOST_ACTIVITY_EVENTS`, `OCR_BOOST_POINTER_SLOP_PX`, `createPointerTravelFilter`, `useOcrTextLayers`
 
 Local imports: `src/logging/systemLogger.js`, `src/utils/ocrPageKey.js`, `src/utils/runtimeConfig.js`, `src/utils/ocrLanguageCodes.js`
 
@@ -84,6 +84,8 @@ Symbols:
 
 - `OCR_IDLE_SHUTDOWN_MS` (constant) - Idle time after which the OCR worker is terminated to free its memory.
 - `OCR_BOOST_ACTIVITY_EVENTS` (constant) - Window events that count as input for the boost: they end the boosted state and restart the idle clock.
+- `OCR_BOOST_POINTER_SLOP_PX` (constant) - How far \(CSS pixels\) the pointer must travel before a pointer move counts as input for the boost.
+- `createPointerTravelFilter` (function) - Tell pointer moves that travel from those that do not.
 - `OCR_BOOST_PENDING_STATUSES` (constant) - Queue statuses \(src/ocr/queue.js OCR\_PAGE\_STATUS\) of a page still to do.
 - `readBoostConfig` (function) - No description.
 - `reportedThreads` (function) - No description.
@@ -92,7 +94,6 @@ Symbols:
 - `useOcrTextLayers~planRef` (constant) - What the last window plan decided for the pages in flight, for the boost to restore.
 - `useOcrTextLayers~windowIndexesRef` (constant) - Viewer indexes of the current window \(focus pages and neighbours\): never released.
 - `attachBoost` (function) - Create the boost control and its triggers for one runtime.
-- `onPlanned` (function) - After a window plan \(or a search opening\).
 
 ## src/hooks/usePageNavigation.js
 

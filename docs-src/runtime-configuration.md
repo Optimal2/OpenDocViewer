@@ -466,7 +466,7 @@ ocr: {
   model and the measurements behind it. `enabled` is `false` by default and only the boolean
   literal `true` turns it on, and only while OCR itself is on. `idleAfterMs` (`4000`, 500 to
   600000) is how long the window must see no pointer, key, wheel or touch input before the
-  boost may start; `maxWorkerCount` (`32`, 1 to 32) is its ceiling, which the client's logical
+  boost may start (a pointer resting on the page is not input, see below); `maxWorkerCount` (`32`, 1 to 32) is its ceiling, which the client's logical
   threads and the memory budget of `ocr.workerPolicy` bound further; `slowdownFraction`
   (`0.25`, 0.05 to 2) is how much longer the reference page may take to recognise than at the
   cautious count before the climb stops; and `triggers` opens or closes the three ways in
@@ -763,6 +763,13 @@ would measure nothing and hold memory for nothing. The first pointer, key,
 wheel or touch input ends the boosted state at once: the ceiling goes back to the cautious
 count, the engines above it finish the page they hold and are released, and a measurement still
 under way is ignored. The end of the work ends it too.
+
+A pointer that rests on the page is not input. A hand on a mouse or a finger on a trackpad
+moves the pointer by a pixel or two without the user doing anything, and browsers report moves
+without travel when the content under the pointer changes, which it does all the time while
+pages are recognised. So a pointer move counts only once the pointer has travelled eight CSS
+pixels from where it last rested; a press, a key, the wheel and a touch always count. Moving
+the pointer on purpose ends the boost within those few pixels, as before.
 
 The climb: from the cautious count, the viewer first goes to the larger of that count and half
 the logical threads, then to the maximum in three steps of equal size (the distance divided by

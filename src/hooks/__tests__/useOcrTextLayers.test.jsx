@@ -14,7 +14,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import useOcrTextLayers, { OCR_IDLE_SHUTDOWN_MS } from '../useOcrTextLayers.js';
+import useOcrTextLayers, { OCR_BOOST_POINTER_SLOP_PX, OCR_IDLE_SHUTDOWN_MS, createPointerTravelFilter } from '../useOcrTextLayers.js';
 import { createOcrResultCache } from '../../ocr/resultCache.js';
 import { createOcrQueue } from '../../ocr/queue.js';
 import { planOcrWindow } from '../../ocr/window.js';
@@ -639,6 +639,69 @@ describe('useOcrTextLayers boost', () => {
     await render({ ...props, searchOpen: false });
     expect(latest.ocrBoost.state).toBe('cautious');
     visibility.mockRestore();
+  });
+
+  it('does not take a pointer resting on the page for input: jitter neither restarts the idle clock nor ends the boost, travel does both', async () => {
+    vi.useFakeTimers();
+    const pool = makePool();
+    const ocrModule = boostModule(pool);
+    const move = (x, y) => act(async () => { window.dispatchEvent(new MouseEvent('pointermove', { clientX: x, clientY: y })); });
+    await render(baseProps({ ocrModule, allPages: sixPages(), focusPageIndexes: [0], wholeDocument: true, boost: BOOST, hardwareThreads: 4 }));
+    await flush();
+    // The pointer comes to rest on the page, then jitters by a pixel or two (and is reported
+    // without travel at all) for the whole idle time: the clock runs out as if nothing happened.
+    await move(300, 300);
+    for (const [dx, dy] of [[1, 0], [0, 0], [-2, 1], [1, -1], [0, 0], [2, 2], [-1, -2], [0, 1], [1, 0]]) {
+      await act(async () => { vi.advanceTimersByTime(100); });
+      await move(300 + dx, 300 + dy);
+    }
+    expect(probesOf(pool)).toHaveLength(0);
+    await act(async () => { vi.advanceTimersByTime(100); });
+    await flush();
+    expect(latest.ocrBoost.state).toBe('rising');
+    expect(probesOf(pool)).toHaveLength(1);
+    await act(async () => { probesOf(pool)[0].resolve({ text: '', confidence: 0, words: [], recognizeMs: 1000 }); });
+    await flush();
+    expect(pool.resize).toHaveBeenLastCalledWith(2);
+    // More jitter while boosted: still boosted.
+    await move(301, 299);
+    await move(300, 300);
+    expect(latest.ocrBoost).toMatchObject({ state: 'rising', level: 2 });
+    expect(pool.resize).toHaveBeenLastCalledWith(2);
+    // The pointer is moved on purpose: the cautious count is back at once.
+    await move(300 + OCR_BOOST_POINTER_SLOP_PX, 300);
+    expect(pool.resize).toHaveBeenLastCalledWith(1);
+    expect(latest.ocrBoost).toMatchObject({ state: 'cautious', level: 1, endedBy: 'input' });
+    // And the idle clock started again from that move: nothing after 999 ms, the boost after 1000.
+    const probes = probesOf(pool).length;
+    await act(async () => { vi.advanceTimersByTime(999); });
+    expect(probesOf(pool)).toHaveLength(probes);
+    await act(async () => { vi.advanceTimersByTime(1); });
+    await flush();
+    expect(probesOf(pool)).toHaveLength(probes + 1);
+  });
+
+  it('counts pointer travel from where the pointer last rested, and a move without a position as travel', () => {
+    expect(OCR_BOOST_POINTER_SLOP_PX).toBe(8);
+    const travelled = createPointerTravelFilter(8);
+    // The first move only says where the pointer is.
+    expect(travelled({ clientX: 100, clientY: 100 })).toBe(false);
+    expect(travelled({ clientX: 105, clientY: 105 })).toBe(false); // 7.1 px away
+    expect(travelled({ clientX: 100, clientY: 100 })).toBe(false);
+    // Slow drift is travel once it has gone far enough from the resting place, which then moves.
+    expect(travelled({ clientX: 104, clientY: 100 })).toBe(false);
+    expect(travelled({ clientX: 108, clientY: 100 })).toBe(true);
+    expect(travelled({ clientX: 104, clientY: 100 })).toBe(false);
+    expect(travelled({ clientX: 100, clientY: 100 })).toBe(true);
+    // The pointer left the window and comes back somewhere else: travel at once.
+    expect(travelled({ clientX: 600, clientY: 20 })).toBe(true);
+    // No position to judge by: counted.
+    expect(travelled({})).toBe(true);
+    expect(travelled(undefined)).toBe(true);
+    // A threshold of nothing counts every move after the first.
+    const any = createPointerTravelFilter(0);
+    expect(any({ clientX: 1, clientY: 1 })).toBe(false);
+    expect(any({ clientX: 1, clientY: 1 })).toBe(true);
   });
 
   it('restarts the idle clock when pages arrive after it ran out, so a document that loads while the user does nothing still boosts', async () => {
