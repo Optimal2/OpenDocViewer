@@ -807,7 +807,7 @@ the cautious count run, a small badge (a bolt and the engine count) sits in the 
 button's tooltip ends with a line about the boost: ready, measuring the starting point, the
 level being tried, the level kept, too few pages left for a climb, a measurement that failed,
 a climb that input interrupted (with the last level that held up), or what the last climb
-found, with the step that proved too slow ("16 workers took 31 % longer"). The badge is the live part, since reaching for the tooltip
+found, with the step that proved too slow ("16 workers took 31 % longer"). The badge is the live part, since reaching for the button
 is input and input ends the boost. A button to ask for the boost by hand is planned, not shipped.
 
 ### CSP for OCR
@@ -858,16 +858,22 @@ loose buttons. It holds the search (`ocr.search.enabled`); read-aloud (`ocr.spee
 not a toolbar button, see below:
 
 - A search button that doubles as the page's OCR status: a small LED on the button and the
-  status as its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
+  status in its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
   "No text found", "Not recognised: the page has its own text", "The text could not be
   recognised" or "Text recognition is unavailable", the last when the engine could not start; see
-  CSP below). Behind a thin divider the button also counts the pages the search can cover over
-  all pages ("4/300", spelt out in the tooltip); the count folds away while the field is open.
-  With `ocr.recognizeWholeDocument` on, while pages wait for OCR the tooltip also says roughly
-  how long they will take ("about 6 min left"), from the pace of the pages recognised in the
-  last minute, so it follows the number of workers as that changes; it says nothing before a
-  few pages have shown what the pace is, nothing when no page has been recognised for a minute,
-  and a pause (a print being prepared, another document loading) is not counted as pace.
+  CSP below). Under the pointer, and with keyboard focus, the button grows to the right in a
+  short ease and shows its details: behind a thin divider the count of pages the search can
+  cover over all pages ("4/300"), then, while there are any, roughly how long the waiting pages
+  will take ("about 6 min", "about 40 s") and how many pages are being worked on right now
+  ("4 workers"). The details fold away again when the pointer leaves and while the field is
+  open; on a touch screen, where no pointer can rest over the button, they stay unfolded. They
+  are in the button and not in its tooltip because they change with every recognised page, and
+  a browser takes a native tooltip away whenever its text changes; the button's description for
+  assistive technology spells them out. The time is said only with `ocr.recognizeWholeDocument`
+  on, from the pace of the pages recognised in the last minute, so it follows the number of
+  workers as that changes; it says nothing before a few pages have shown what the pace is,
+  nothing when no page has been recognised for a minute, and a pause (a print being prepared,
+  another document loading) is not counted as pace.
   The button is enabled once the displayed page has a text layer (recognised, or the
   PDF page's own). Clicking it grows a search field out of
   the button to the right (a short ease) into the room the toolbar has; when there is too little,

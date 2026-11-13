@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   OCR_PROGRESS_FALLBACK, OCR_PROGRESS_MIN_PAGES, OCR_PROGRESS_WINDOW_MS, createOcrProgressEstimator, describeOcrTimeLeft,
+  describeOcrTimeLeftShort,
 } from '../ocrProgress.js';
 
 /** An estimator on a clock the test moves. */
@@ -186,6 +187,36 @@ describe('describeOcrTimeLeft', () => {
 
   it('has no words for no estimate', () => {
     for (const value of [null, undefined, NaN, Infinity, -1, '60000']) expect(describeOcrTimeLeft(value)).toBeNull();
+  });
+});
+
+describe('describeOcrTimeLeftShort', () => {
+  it('counts seconds in steps of five under a minute, rounded up, and never says none', () => {
+    expect(describeOcrTimeLeftShort(0)).toEqual({ key: 'shortSeconds', seconds: 5 });
+    expect(describeOcrTimeLeftShort(5000)).toEqual({ key: 'shortSeconds', seconds: 5 });
+    expect(describeOcrTimeLeftShort(5001)).toEqual({ key: 'shortSeconds', seconds: 10 });
+    expect(describeOcrTimeLeftShort(41000)).toEqual({ key: 'shortSeconds', seconds: 45 });
+    expect(describeOcrTimeLeftShort(55000)).toEqual({ key: 'shortSeconds', seconds: 55 });
+    // Rounded up to sixty seconds it is a minute.
+    expect(describeOcrTimeLeftShort(55001)).toEqual({ key: 'shortMinutes', minutes: 1 });
+    expect(describeOcrTimeLeftShort(59999)).toEqual({ key: 'shortMinutes', minutes: 1 });
+  });
+
+  it('says minutes and hours as the long form does', () => {
+    expect(describeOcrTimeLeftShort(60000)).toEqual({ key: 'shortMinutes', minutes: 1 });
+    expect(describeOcrTimeLeftShort(60001)).toEqual({ key: 'shortMinutes', minutes: 2 });
+    expect(describeOcrTimeLeftShort(59 * 60000)).toEqual({ key: 'shortMinutes', minutes: 59 });
+    expect(describeOcrTimeLeftShort(125 * 60000)).toEqual({ key: 'shortHours', hours: 2, minutes: 5 });
+  });
+
+  it('has no words for no estimate', () => {
+    for (const value of [null, undefined, NaN, Infinity, -1, '60000']) expect(describeOcrTimeLeftShort(value)).toBeNull();
+  });
+
+  it('names only keys that have a text', () => {
+    for (const ms of [0, 30000, 60000, 3600000 * 3]) {
+      expect(Object.keys(OCR_PROGRESS_FALLBACK)).toContain(describeOcrTimeLeftShort(ms).key);
+    }
   });
 });
 

@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 74,
+    "line": 85,
     "description": "",
     "params": [
       {
@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 314,
+    "line": 347,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 351,
+    "line": 384,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 359,
+    "line": 392,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 59,
+    "line": 70,
     "description": "",
     "params": [
       {
@@ -6535,13 +6535,26 @@
     "examples": 0
   },
   {
+    "id": "OCR_ACTIVE_STATUSES",
+    "name": "OCR_ACTIVE_STATUSES",
+    "longname": "OCR_ACTIVE_STATUSES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
+    "line": 67,
+    "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "OCR_PENDING_STATUSES",
     "name": "OCR_PENDING_STATUSES",
     "longname": "OCR_PENDING_STATUSES",
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 56,
+    "line": 65,
     "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
     "params": [],
     "returns": [],
@@ -6554,7 +6567,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 335,
+    "line": 368,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -32342,7 +32355,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 48,
+    "line": 57,
     "description": "",
     "params": [
       {
@@ -32385,8 +32398,33 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 110,
+    "line": 119,
     "description": "The words for an estimate: which ocr.progress key, and its figures.",
+    "params": [
+      {
+        "name": "remainingMs",
+        "type": "number|null",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "describeOcrTimeLeftShort",
+    "name": "describeOcrTimeLeftShort",
+    "longname": "describeOcrTimeLeftShort",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrProgress.js",
+    "line": 135,
+    "description": "The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures.",
     "params": [
       {
         "name": "remainingMs",
@@ -32410,7 +32448,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 96,
+    "line": 105,
     "description": "",
     "params": [],
     "returns": [
@@ -32428,7 +32466,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 32,
+    "line": 33,
     "description": "Measurements kept however old they are, so a slow client still gets a pace.",
     "params": [],
     "returns": [],
@@ -32441,7 +32479,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 35,
+    "line": 36,
     "description": "Keys of ocr.progress and their English fallbacks.",
     "params": [],
     "returns": [],
@@ -32454,7 +32492,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 30,
+    "line": 31,
     "description": "Pages that must have been finished since the starting point before a pace is trusted.",
     "params": [],
     "returns": [],
@@ -32467,7 +32505,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 28,
+    "line": 29,
     "description": "Finished pages older than this say nothing about the pace now.",
     "params": [],
     "returns": [],
@@ -32480,7 +32518,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 60,
+    "line": 69,
     "description": "Tell the estimator how many pages are finished now.",
     "params": [
       {
@@ -32500,7 +32538,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 81,
+    "line": 90,
     "description": "",
     "params": [
       {
@@ -32516,6 +32554,19 @@
         "description": "Milliseconds, or null when there is nothing to say."
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "SHORT_SECONDS_STEP",
+    "name": "SHORT_SECONDS_STEP",
+    "longname": "SHORT_SECONDS_STEP",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/ocrProgress.js",
+    "line": 48,
+    "description": "Under a minute the short form counts seconds in steps of this many.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {

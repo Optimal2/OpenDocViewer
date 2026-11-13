@@ -2,7 +2,7 @@
 /**
  * Search in the recognised text, from the toolbar: a search button right after the
  * image-adjustment group that doubles as the page's OCR status (an LED on the button, the status
- * as its tooltip and in a visually hidden live region; the button is enabled once the displayed
+ * in its tooltip and in a visually hidden live region; the button is enabled once the displayed
  * page's text is recognised, or any page's when the displayed page has none), and a field that
  * grows out of it to the right (a short width transition, styles/ocr.css) with the match
  * position, previous/next and close. The field takes only the room the toolbar's spacer leaves
@@ -24,19 +24,28 @@
  * `setPageNumber` takes), not ordinals among the visible pages. Mounted by OcrToolbarActions
  * (from DocumentToolbar) only while `ocr.enabled` is the literal true.
  *
+ * Under the pointer, and with keyboard focus, the button grows to the right in a short ease
+ * (styles/ocr.css) and shows its details: the count of pages with a text layer over all pages
+ * ("4/300"), roughly how long the waiting pages will take, and how many pages are being worked
+ * on right now. They live in the button and not in its tooltip because they change with every
+ * recognised page, and a browser takes a native tooltip away whenever its text changes: the
+ * tooltip holds only what rarely changes (what the button does, the page's status, the boost).
+ * The details are folded away while the field is open (the field takes the room). The button's
+ * description for assistive technology spells the same things out.
+ *
  * With `ocr.boost` on, the button also shows the boost (utils/ocrBoostStatus.js): a small badge
  * with the engine count while more engines than the cautious count run, and a line at the end of
  * the tooltip saying what the last climb found. Without a boost (the default) neither exists.
  *
  * With `ocr.recognizeWholeDocument` on, while pages wait for OCR and enough of them have been
- * recognised to tell the pace, the tooltip also says roughly how long the rest will take
- * (utils/ocrProgress.js), after the page count. Without it only the few pages around the shown
- * one are ever queued, and a time for those next to the count of all pages would mislead.
+ * recognised to tell the pace, the details say roughly how long the rest will take
+ * (utils/ocrProgress.js). Without it only the few pages around the shown one are ever queued,
+ * and a time for those next to the count of all pages would mislead.
  *
  * With `searchEnabled` false (`ocr.search.enabled: false`) only the status remains: the button
- * stays a never-enabled, status-only indicator with its LED, the status as its name and tooltip
- * and the live region, and no field exists, so no term is ever published and the layers mark
- * nothing.
+ * stays a never-enabled, status-only indicator with its LED, the status as its name and in its
+ * tooltip, the details and the live region, and no field exists, so no term is ever published
+ * and the layers mark nothing.
  */
 import React, { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -49,11 +58,13 @@ import { normalizeOcrSearchTerm, searchOcrPages } from '../../utils/ocrSearch.js
 import { measureOcrSearchPlacement, OCR_SEARCH_PANEL_WIDTH } from '../../utils/ocrSearchPlacement.js';
 import { hasActiveModalDialog, isEditableTarget } from '../DocumentViewer/hooks/useViewerEffects.js';
 import { OCR_BOOST_FALLBACK, describeOcrBoost } from '../../utils/ocrBoostStatus.js';
-import { OCR_PROGRESS_FALLBACK, createOcrProgressEstimator, describeOcrTimeLeft } from '../../utils/ocrProgress.js';
+import { OCR_PROGRESS_FALLBACK, createOcrProgressEstimator, describeOcrTimeLeft, describeOcrTimeLeftShort } from '../../utils/ocrProgress.js';
 import { isOcrWholeDocumentEnabled } from '../../utils/runtimeConfig.js';
 
 /** Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR. */
 const OCR_PENDING_STATUSES = new Set(['queued', 'probing', 'recognizing']);
+/** Statuses of a page being worked on right now: one for each of the queue's pages in flight. */
+const OCR_ACTIVE_STATUSES = new Set(['probing', 'recognizing']);
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -108,7 +119,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     : t('ocr.status.notStarted', { defaultValue: 'Text recognition has not started on this page' });
   // The boost (`ocr.boost`), when there is one: a line in the tooltip saying what the last climb
   // found, and a badge with the engine count while it runs. The badge is the live part: reaching
-  // for the tooltip is input, and input ends the boost.
+  // for the button is input, and input ends the boost.
   const boostInfo = describeOcrBoost(ocrBoost);
   let boostText = '';
   if (boostInfo) {
@@ -137,24 +148,26 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     () => searchablePages.filter((page) => page.outcome?.status === 'done').length,
     [searchablePages]
   );
-  // With the whole document asked for: the pages still waiting for OCR, and roughly how long
+  // The pages being worked on right now (the queue's pages in flight), whatever the mode. And
+  // with the whole document asked for: the pages still waiting for OCR, and roughly how long
   // they will take at the pace of the pages the engine recognised lately (utils/ocrProgress.js;
   // a PDF page's own text is done without the engine and is no pace). The estimate is dropped
   // a window after the last recognised page, whatever else changes meanwhile: a figure from a
   // pace that no longer holds is worse than none, and without a new page nothing else would
   // take it away.
   const wholeDocument = isOcrWholeDocumentEnabled();
-  const [pendingPages, enginePages] = useMemo(() => {
+  const [pendingPages, enginePages, activePages] = useMemo(() => {
     let pending = 0;
     let engine = 0;
-    if (wholeDocument) {
-      for (const page of searchablePages) {
-        const outcome = page.outcome;
-        if (OCR_PENDING_STATUSES.has(outcome?.status)) pending += 1;
-        else if (outcome?.status === 'done' && outcome.source !== 'pdf-text') engine += 1;
-      }
+    let active = 0;
+    for (const page of searchablePages) {
+      const outcome = page.outcome;
+      if (OCR_ACTIVE_STATUSES.has(outcome?.status)) active += 1;
+      if (!wholeDocument) continue;
+      if (OCR_PENDING_STATUSES.has(outcome?.status)) pending += 1;
+      else if (outcome?.status === 'done' && outcome.source !== 'pdf-text') engine += 1;
     }
-    return [pending, engine];
+    return [pending, engine, active];
   }, [searchablePages, wholeDocument]);
   const progressRef = useRef(/** @type {*} */ (null));
   const [timeLeftMs, setTimeLeftMs] = useState(/** @type {(number|null)} */ (null));
@@ -172,6 +185,26 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const timeLeftText = timeLeft
     ? t(`ocr.progress.${timeLeft.key}`, { minutes: timeLeft.minutes, hours: timeLeft.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeft.key] })
     : '';
+  const timeLeftShort = describeOcrTimeLeftShort(timeLeftMs);
+  const timeLeftShortText = timeLeftShort
+    ? t(`ocr.progress.${timeLeftShort.key}`, {
+      seconds: timeLeftShort.seconds, minutes: timeLeftShort.minutes, hours: timeLeftShort.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeftShort.key],
+    })
+    : '';
+  let workersText = '';
+  if (activePages === 1) workersText = t('ocr.progress.workerOne', { defaultValue: OCR_PROGRESS_FALLBACK.workerOne });
+  else if (activePages > 1) workersText = t('ocr.progress.workers', { workers: activePages, defaultValue: OCR_PROGRESS_FALLBACK.workers });
+  // The details the button unfolds under the pointer and with keyboard focus (styles/ocr.css):
+  // the count behind a thin divider, then the time left and the pages being worked on while
+  // there are any. For the eye only: the button's description spells them out.
+  const details = (
+    <span className="toolbar-ocr-search-details" data-odv-ocr="details" aria-hidden="true">
+      <span className="toolbar-ocr-search-details-divider" />
+      <span className="toolbar-ocr-search-detail" data-odv-ocr="count">{`${recognisedPages}/${pages.length}`}</span>
+      {timeLeftShortText ? <span className="toolbar-ocr-search-detail" data-odv-ocr="time-left">{timeLeftShortText}</span> : null}
+      {workersText ? <span className="toolbar-ocr-search-detail" data-odv-ocr="workers">{workersText}</span> : null}
+    </span>
+  );
   // The displayed page's text, or (a page without text, skipped or failed) any page's.
   const ready = hasSearchableOcrText(displayedEntry)
     || searchablePages.some((page) => hasSearchableOcrText(page.outcome));
@@ -374,11 +407,12 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           data-odv-ocr="status"
           data-ocr-state={statusKey || 'notStarted'}
           aria-label={statusText}
-          title={withBoost(timeLeftText ? `${statusText} · ${timeLeftText}` : statusText)}
+          title={withBoost(statusText)}
           disabled
         >
           <span className="material-icons" aria-hidden="true">text_fields</span>
           {boostBadge}
+          {details}
           <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
         </button>
         <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
@@ -389,7 +423,10 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
   const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
-  const buttonTitle = withBoost(`${ready || open ? `${openTitle} · ${statusText}` : statusText} · ${coverageTitle}${timeLeftText ? ` · ${timeLeftText}` : ''}`);
+  // The tooltip holds only what rarely changes; what changes with every page is in the details.
+  const buttonTitle = withBoost(ready || open ? `${openTitle} · ${statusText}` : statusText);
+  // The details spelt out, as the button's description.
+  const describedText = [coverageTitle, timeLeftText, workersText].filter(Boolean).join(' · ');
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   const pageOnlyShort = t('ocr.search.pageOnlyShort', { defaultValue: 'This page' });
   let statusLine = '';
@@ -434,18 +471,13 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       >
         <span className="material-icons" aria-hidden="true">search</span>
         {boostBadge}
-        {/* The count: pages with a text layer over all pages ("4/300"), behind a thin divider;
-            folded away (styles/ocr.css) while the field is open. The tooltip spells it out. */}
-        <span className="toolbar-ocr-search-count" data-odv-ocr="count" aria-hidden="true">
-          <span className="toolbar-ocr-search-count-divider" />
-          <span className="toolbar-ocr-search-count-text">{`${recognisedPages}/${pages.length}`}</span>
-        </span>
+        {details}
         <StatusLed state={OCR_STATUS_LED[statusKey] || 'off'} size="xs" title={statusText} className="odv-toolbar-runtime-led" />
       </button>
       <span className="sr-only" role="status" aria-live="polite" data-odv-ocr="status-text">{statusText}</span>
-      {/* The count spelt out as the button's description (read on focus, never announced on
-          its own), so assistive technology gets the search's reach too. */}
-      <span className="sr-only" id={coverageId} data-odv-ocr="coverage-text">{coverageTitle}</span>
+      {/* The details spelt out as the button's description (read on focus, never announced on
+          their own), so assistive technology gets the search's reach and the progress too. */}
+      <span className="sr-only" id={coverageId} data-odv-ocr="coverage-text">{describedText}</span>
       <div
         ref={panelRef}
         id={panelId}

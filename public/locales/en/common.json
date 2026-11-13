@@ -463,7 +463,12 @@
     "progress": {
       "underMinute": "less than a minute left",
       "minutes": "about {minutes} min left",
-      "hours": "about {hours} h {minutes} min left"
+      "hours": "about {hours} h {minutes} min left",
+      "shortSeconds": "about {seconds} s",
+      "shortMinutes": "about {minutes} min",
+      "shortHours": "about {hours} h {minutes} min",
+      "workers": "{workers} workers",
+      "workerOne": "1 worker"
     },
     "search": {
       "open": "Search in the recognised text",

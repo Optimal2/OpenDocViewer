@@ -178,32 +178,55 @@
   align-items: center;
 }
 
-/* The search button holds its icon and, behind a thin divider, the count of pages with a text
-   layer over all pages ("4/300"). The count folds away in a short ease while the field is open
-   (the field takes the room) and comes back when it closes. Tabular digits keep it steady. */
+/* The search button holds its icon and, folded away at rest, its details: behind a thin
+   divider the count of pages with a text layer over all pages ("4/300"), roughly how long the
+   waiting pages will take and how many pages are being worked on. Under the pointer and with
+   keyboard focus the button grows to the right for them in a short ease, after a moment's
+   wait so a pointer on its way across the toolbar does not set it off, and folds back at once
+   when the pointer leaves. Folded too while the field is open (the field takes the room).
+   Tabular digits keep the figures steady as they change. The details are in the button and not
+   in its tooltip because they change with every recognised page, and a browser takes a native
+   tooltip away whenever its text changes. */
 .toolbar .toolbar-ocr-search-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.toolbar-ocr-search-count {
+.toolbar-ocr-search-details {
   display: inline-flex;
   align-items: center;
-  max-width: 8em;
-  /* Clear of the status LED in the button's bottom-right corner, in both densities. */
-  margin-right: 0.6em;
+  max-width: 0;
+  margin-right: 0;
   overflow: hidden;
   white-space: nowrap;
   font-size: 0.78rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  line-height: 1;
-  opacity: 1;
-  transition: max-width 150ms ease, margin-right 150ms ease, opacity 150ms ease;
+  line-height: 1.3;
+  opacity: 0;
+  transition: max-width 180ms ease, margin-right 180ms ease, opacity 180ms ease;
 }
 
-.toolbar-ocr-search-count-divider {
+.toolbar-ocr-search:not(.is-open):hover .toolbar-ocr-search-details,
+.toolbar-ocr-search:not(.is-open) .toolbar-ocr-search-toggle:focus-visible .toolbar-ocr-search-details {
+  max-width: 26em;
+  /* Clear of the status LED in the button's bottom-right corner, in both densities. */
+  margin-right: 0.6em;
+  opacity: 1;
+  transition-delay: 120ms;
+}
+
+/* Without a pointer that can rest over the button (a touch screen) the details stay unfolded. */
+@media (hover: none) {
+  .toolbar-ocr-search:not(.is-open) .toolbar-ocr-search-details {
+    max-width: 26em;
+    margin-right: 0.6em;
+    opacity: 1;
+  }
+}
+
+.toolbar-ocr-search-details-divider {
   flex: 0 0 auto;
   width: 1px;
   height: 1.1em;
@@ -212,20 +235,21 @@
   opacity: 0.55;
 }
 
-.toolbar-ocr-search.is-open .toolbar-ocr-search-count {
-  max-width: 0;
-  margin-right: 0;
-  opacity: 0;
+.toolbar-ocr-search-detail + .toolbar-ocr-search-detail::before {
+  content: '\00b7';
+  margin: 0 0.4em;
+  opacity: 0.7;
 }
 
 /* The boost's badge (`ocr.boost`): a small bolt and the number of engines, shown in the button
    while more engines than the cautious count run because the user is idle. It sits between the
-   icon and the count; in the status-only button there is no count, so it clears the LED itself.
-   Gone while the field is open, like the count. */
+   icon and the details, which are folded away at rest, so it clears the LED in the button's
+   bottom-right corner itself. Gone while the field is open, like the details. */
 .toolbar-ocr-boost {
   display: inline-flex;
   align-items: center;
   margin-left: 0.25em;
+  margin-right: 0.6em;
   white-space: nowrap;
   font-size: 0.78rem;
   font-weight: 600;
@@ -236,10 +260,6 @@
 .toolbar .toolbar-ocr-boost .material-icons.toolbar-ocr-boost-icon {
   font-size: 1.25em;
   line-height: 1;
-}
-
-.toolbar-ocr-search.is-status-only .toolbar-ocr-boost {
-  margin-right: 0.6em;
 }
 
 .toolbar-ocr-search.is-open .toolbar-ocr-boost {
@@ -292,7 +312,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toolbar-ocr-search-count,
+  .toolbar-ocr-search-details,
+  .toolbar-ocr-search:not(.is-open):hover .toolbar-ocr-search-details,
+  .toolbar-ocr-search:not(.is-open) .toolbar-ocr-search-toggle:focus-visible .toolbar-ocr-search-details,
   .toolbar-ocr-search-panel,
   .toolbar-ocr-search.is-open .toolbar-ocr-search-panel {
     transition: none;

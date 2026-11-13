@@ -94,6 +94,10 @@ describe('OcrSearchBar', () => {
   const button = () => container.querySelector('[data-odv-ocr="status"]');
   const boostBadge = () => container.querySelector('[data-odv-ocr="boost"]');
   const searchRoot = () => container.querySelector('[data-odv-ocr="search"]');
+  /** One of the details the button unfolds: `count`, `time-left` or `workers`; null when absent. */
+  const detail = (name) => container.querySelector(`[data-odv-ocr="details"] [data-odv-ocr="${name}"]`)?.textContent ?? null;
+  /** The button's description for assistive technology: the details spelt out. */
+  const described = () => container.querySelector('[data-odv-ocr="coverage-text"]')?.textContent ?? null;
   const boost = (overrides = {}) => ({
     state: 'cautious', level: 8, cautious: 8, levels: [12, 16, 20, 24], baselineMs: null, probes: [], settledLevel: null, ...overrides,
   });
@@ -121,66 +125,93 @@ describe('OcrSearchBar', () => {
       window.__ODV_CONFIG__ = { ocr: { enabled: true } };
       render({ allPages: MANY, ocrPages: progress(0) });
       for (const finished of [1, 2, 3, 4, 5, 6]) after(10, finished);
-      expect(button().getAttribute('title')).toMatch(/ · 6 of 40 pages ready$/);
+      expect(detail('count')).toBe('6/40');
+      expect(detail('time-left')).toBeNull();
+      expect(described()).toBe('6 of 40 pages ready');
       expect(vi.getTimerCount()).toBe(0);
     });
 
-    it('says in the tooltip roughly how long the waiting pages will take, once enough pages are finished to tell the pace', () => {
+    it('says in the details roughly how long the waiting pages will take, once enough pages are finished to tell the pace', () => {
       render({ allPages: MANY, ocrPages: progress(0) });
-      expect(button().getAttribute('title')).toMatch(/ · 0 of 40 pages ready$/);
+      expect(detail('count')).toBe('0/40');
+      expect(detail('time-left')).toBeNull();
       // The first finished page is the starting point; two more say too little.
       after(20, 1);
       after(10, 2);
       after(10, 3);
-      expect(button().getAttribute('title')).toMatch(/ · 3 of 40 pages ready$/);
+      expect(detail('time-left')).toBeNull();
+      expect(described()).toBe('3 of 40 pages ready');
       // Three pages in thirty seconds, 36 waiting: six minutes.
       after(10, 4);
-      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready · about 6 min left$/);
+      expect(detail('count')).toBe('4/40');
+      expect(detail('time-left')).toBe('about 6 min');
       // The pace picks up: the estimate follows.
       after(1, 10);
-      expect(button().getAttribute('title')).toMatch(/ · 10 of 40 pages ready · about 2 min left$/);
-      // The count's spelt-out description for assistive technology stays the count alone.
-      expect(container.querySelector('[data-odv-ocr="coverage-text"]').textContent).toBe('10 of 40 pages ready');
+      expect(detail('time-left')).toBe('about 2 min');
+      // Spelt out in the button's description for assistive technology.
+      expect(described()).toBe('10 of 40 pages ready · about 2 min left');
+      // None of it is in the tooltip: a browser takes a native tooltip away when its text changes.
+      expect(button().getAttribute('title')).toBe('Search in the recognised text · Text recognised');
     });
 
-    it('keeps the boost line last, and says it on the status-only button too', () => {
+    it('leaves the tooltip to the status and the boost, and shows the details on the status-only button too', () => {
       const withBoost = { ocrBoost: boost({ state: 'boosted', level: 12, baselineMs: 2000, settledLevel: 12, probes: [{ level: 12, ms: 2100, slow: false }] }) };
       render({ allPages: MANY, ocrPages: progress(0), ...withBoost });
       for (const finished of [1, 2, 3, 4]) after(10, finished, withBoost);
-      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready · about 6 min left · OCR boost: 12 workers$/);
+      expect(button().getAttribute('title')).toBe('Search in the recognised text · Text recognised · OCR boost: 12 workers');
+      expect(detail('time-left')).toBe('about 6 min');
       after(10, 5, { searchEnabled: false });
-      expect(button().getAttribute('title')).toBe('Text recognised · about 6 min left');
+      expect(button().getAttribute('title')).toBe('Text recognised');
+      expect(detail('count')).toBe('5/40');
+      expect(detail('time-left')).toBe('about 6 min');
     });
 
-    it('says under a minute as that, and nothing once every page is done', () => {
+    it('holds the tooltip still while pages are finished: only the details change', () => {
+      render({ allPages: MANY, ocrPages: progress(1) });
+      const title = button().getAttribute('title');
+      for (const finished of [2, 3, 4, 5, 6, 7, 8]) {
+        after(10, finished);
+        expect(button().getAttribute('title')).toBe(title);
+      }
+      expect(detail('count')).toBe('8/40');
+      expect(detail('time-left')).toBe('about 6 min');
+    });
+
+    it('counts seconds under a minute (spelt out as under a minute), and says nothing once every page is done', () => {
       render({ allPages: MANY, ocrPages: progress(30) });
       for (const finished of [31, 32, 33, 34]) after(1, finished);
-      expect(button().getAttribute('title')).toMatch(/ · 34 of 40 pages ready · less than a minute left$/);
+      // Three pages in three seconds, six waiting: six seconds, said in steps of five.
+      expect(detail('time-left')).toBe('about 10 s');
+      expect(described()).toBe('34 of 40 pages ready · less than a minute left');
       after(1, 40);
-      expect(button().getAttribute('title')).toMatch(/ · 40 of 40 pages ready$/);
+      expect(detail('count')).toBe('40/40');
+      expect(detail('time-left')).toBeNull();
+      expect(described()).toBe('40 of 40 pages ready');
     });
 
     it('drops the estimate when no page has been finished for a minute', () => {
       render({ allPages: MANY, ocrPages: progress(0) });
       for (const finished of [1, 2, 3, 4]) after(10, finished);
-      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      expect(detail('time-left')).toBe('about 6 min');
       act(() => { vi.advanceTimersByTime(59999); });
-      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      expect(detail('time-left')).toBe('about 6 min');
       act(() => { vi.advanceTimersByTime(1); });
-      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready$/);
+      expect(detail('time-left')).toBeNull();
+      expect(described()).toBe('4 of 40 pages ready');
       expect(vi.getTimerCount()).toBe(0);
     });
 
     it('goes away a minute after the last finished page even when the waiting pages change meanwhile', () => {
       render({ allPages: MANY, ocrPages: progress(0) });
       for (const finished of [1, 2, 3, 4]) after(10, finished);
-      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      expect(detail('time-left')).toBe('about 6 min');
       // Fifty seconds on a waiting page fails: no page was finished, the clock is not started again.
       act(() => { vi.advanceTimersByTime(50000); });
       render({ allPages: MANY, ocrPages: { ...progress(4), [KEY(39)]: { status: 'failed' } } });
-      expect(button().getAttribute('title')).toMatch(/about 6 min left$/);
+      expect(detail('time-left')).toBe('about 6 min');
       act(() => { vi.advanceTimersByTime(10001); });
-      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready$/);
+      expect(detail('time-left')).toBeNull();
+      expect(described()).toBe('4 of 40 pages ready');
     });
 
     it('takes its pace from the pages the engine recognised: a PDF page with its own text is done at once and is no pace', () => {
@@ -194,13 +225,14 @@ describe('OcrSearchBar', () => {
       // The ten pages with their own text arrive within a second: no pace, no estimate.
       act(() => { vi.advanceTimersByTime(1000); });
       render({ allPages: MANY, ocrPages: mixed(0) });
-      expect(button().getAttribute('title')).toMatch(/ · 10 of 40 pages ready$/);
+      expect(described()).toBe('10 of 40 pages ready');
       for (const finished of [1, 2, 3, 4]) {
         act(() => { vi.advanceTimersByTime(10000); });
         render({ allPages: MANY, ocrPages: mixed(finished) });
       }
       // Three recognised pages in thirty seconds, 26 waiting: four minutes twenty, said as five.
-      expect(button().getAttribute('title')).toMatch(/ · 14 of 40 pages ready · about 5 min left$/);
+      expect(detail('time-left')).toBe('about 5 min');
+      expect(described()).toBe('14 of 40 pages ready · about 5 min left');
     });
 
     it('counts only waiting pages: skipped and failed ones are not waited for', () => {
@@ -215,7 +247,32 @@ describe('OcrSearchBar', () => {
         render({ allPages: MANY, ocrPages: pages(finished) });
       }
       // 34 pages wait (40 less 4 done, one skipped, one failed) at 60/34 × 10 s a page: ten minutes.
-      expect(button().getAttribute('title')).toMatch(/ · 4 of 40 pages ready · about 10 min left$/);
+      expect(detail('time-left')).toBe('about 10 min');
+      expect(described()).toBe('4 of 40 pages ready · about 10 min left');
+    });
+  });
+
+  describe('pages being worked on', () => {
+    it('names them in the details while there are any: probed and recognised pages, not the waiting ones', () => {
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'queued' }, [KEY(2)]: { status: 'queued' } } });
+      expect(detail('workers')).toBeNull();
+      expect(described()).toBe('1 of 3 pages ready');
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'recognizing' }, [KEY(2)]: { status: 'queued' } } });
+      expect(detail('workers')).toBe('1 worker');
+      expect(described()).toBe('1 of 3 pages ready · 1 worker');
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'recognizing' }, [KEY(2)]: { status: 'probing' } } });
+      expect(detail('workers')).toBe('2 workers');
+      // The tooltip does not follow them.
+      expect(button().getAttribute('title')).toBe('Search in the recognised text · Text recognised');
+      render({ ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: done(['Hej']), [KEY(2)]: done(['Hej']) } });
+      expect(detail('workers')).toBeNull();
+    });
+
+    it('names them on the status-only button too', () => {
+      render({ ocrPages: { [KEY(0)]: { status: 'recognizing' }, [KEY(1)]: { status: 'recognizing' } }, searchEnabled: false });
+      expect(detail('count')).toBe('0/3');
+      expect(detail('workers')).toBe('2 workers');
+      expect(button().getAttribute('title')).toBe('Recognising text…');
     });
   });
 
@@ -292,19 +349,22 @@ describe('OcrSearchBar', () => {
     expect(button().disabled).toBe(true);
     expect(container.querySelector('[data-odv-ocr="status-text"]').textContent).toBe('Recognising text…');
     expect(container.querySelector('[data-odv-ocr="status-text"]').getAttribute('aria-live')).toBe('polite');
-    expect(button().title).toBe('Recognising text… · 0 of 3 pages ready');
+    expect(button().title).toBe('Recognising text…');
     expect(container.querySelector('.odv-status-led--pending')).not.toBeNull();
 
     render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
     expect(button().getAttribute('data-ocr-state')).toBe('done');
     expect(button().disabled).toBe(false);
-    expect(button().title).toBe('Search in the recognised text · Text recognised · 1 of 3 pages ready');
+    expect(button().title).toBe('Search in the recognised text · Text recognised');
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
-    // The count on the button: pages with a text layer over all pages, behind a divider.
+    // The count in the button's details: pages with a text layer over all pages, behind a
+    // divider; the details are for the eye only.
     const count = () => container.querySelector('[data-odv-ocr="count"]');
+    const details = () => button().querySelector('[data-odv-ocr="details"]');
     expect(count().textContent).toBe('1/3');
-    expect(count().querySelector('.toolbar-ocr-search-count-divider')).not.toBeNull();
-    expect(count().getAttribute('aria-hidden')).toBe('true');
+    expect(details().contains(count())).toBe(true);
+    expect(details().querySelector('.toolbar-ocr-search-details-divider')).not.toBeNull();
+    expect(details().getAttribute('aria-hidden')).toBe('true');
     // Assistive technology gets the count as the button's description, spelt out.
     const described = document.getElementById(button().getAttribute('aria-describedby'));
     expect(described.textContent).toBe('1 of 3 pages ready');
@@ -330,7 +390,7 @@ describe('OcrSearchBar', () => {
     const pdfText = { ...done(['diarienummer', '2026-4471']), source: 'pdf-text', imageWidth: 595.28, imageHeight: 841.89 };
     const { setOcrSearch } = render({ ocrPages: { [KEY(0)]: pdfText, [KEY(1)]: done(['diarienummer']) } });
     expect(button().getAttribute('data-ocr-state')).toBe('pdfText');
-    expect(button().title).toBe('Search in the recognised text · The page has its own text · 2 of 3 pages ready');
+    expect(button().title).toBe('Search in the recognised text · The page has its own text');
     expect(button().disabled).toBe(false);
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
     act(() => button().click());
@@ -347,7 +407,7 @@ describe('OcrSearchBar', () => {
   it('a text-layer PDF page whose text could not be placed says so; the search opens from it once another page has text', () => {
     render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' } } });
     expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
-    expect(button().title).toBe('Not recognised: the page has its own text · 0 of 3 pages ready');
+    expect(button().title).toBe('Not recognised: the page has its own text');
     expect(button().disabled).toBe(true);
     render({ ocrPages: { [KEY(0)]: { status: 'skipped', reason: 'text-layer' }, [KEY(2)]: done(['hej']) } });
     expect(button().getAttribute('data-ocr-state')).toBe('skippedTextLayer');
@@ -754,6 +814,8 @@ describe('OcrSearchBar', () => {
     // The status is the indicator's own name and tooltip (no "Search in…" label to promise).
     expect(button().getAttribute('aria-label')).toBe('Text recognised');
     expect(button().title).toBe('Text recognised');
+    // The details are in the indicator too: the count of pages with a text layer.
+    expect(detail('count')).toBe('1/3');
     expect(button().hasAttribute('aria-expanded')).toBe(false);
     expect(container.querySelector('.odv-status-led--ready')).not.toBeNull();
     expect(container.querySelector('[data-odv-ocr="status-text"]').textContent).toBe('Text recognised');
@@ -782,12 +844,12 @@ describe('OcrSearchBar', () => {
       render({ ocrPages: { [KEY(0)]: done(['Hej']) } });
       expect(ctrlF(document.body).defaultPrevented).toBe(false);
       expect(input().tabIndex).toBe(-1);
-      expect(button().title).toBe('Search in the recognised text · Text recognised · 1 of 3 pages ready');
+      expect(button().title).toBe('Search in the recognised text · Text recognised');
     });
 
     it('opens the field, says so in the tooltip, and puts the cursor back in the open field with its text selected', () => {
       render({ ocrPages: { [KEY(0)]: done(['Hej']) }, ctrlFOverride: true });
-      expect(button().title).toBe('Search in the recognised text (Ctrl+F) · Text recognised · 1 of 3 pages ready');
+      expect(button().title).toBe('Search in the recognised text (Ctrl+F) · Text recognised');
       expect(button().getAttribute('aria-label')).toBe('Search in the recognised text');
       expect(ctrlF(document.body).defaultPrevented).toBe(true);
       expect(input().tabIndex).toBe(0);

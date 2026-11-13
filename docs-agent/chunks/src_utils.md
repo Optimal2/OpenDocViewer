@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 67. Line count: 24615. JSDoc symbol count: 1024.
+File count: 67. Line count: 24641. JSDoc symbol count: 1026.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -340,9 +340,9 @@ Symbols:
 
 ## src/utils/ocrProgress.js
 
-How long the pages still waiting for OCR will take, for the toolbar's tooltip \(components/DocumentToolbar/OcrSearchBar.jsx\): an estimate from the pace of the pages that were finished lately, and the text that says it \(pu
+How long the pages still waiting for OCR will take, for the toolbar's OCR button \(components/DocumentToolbar/OcrSearchBar.jsx\): an estimate from the pace of the pages that were finished lately, and the text that says it
 
-Exports: `OCR_PROGRESS_WINDOW_MS`, `OCR_PROGRESS_MIN_PAGES`, `OCR_PROGRESS_FALLBACK`, `createOcrProgressEstimator`, `describeOcrTimeLeft`
+Exports: `OCR_PROGRESS_WINDOW_MS`, `OCR_PROGRESS_MIN_PAGES`, `OCR_PROGRESS_FALLBACK`, `createOcrProgressEstimator`, `describeOcrTimeLeft`, `describeOcrTimeLeftShort`
 
 Symbols:
 
@@ -350,11 +350,13 @@ Symbols:
 - `OCR_PROGRESS_MIN_PAGES` (constant) - Pages that must have been finished since the starting point before a pace is trusted.
 - `MIN_SAMPLES` (constant) - Measurements kept however old they are, so a slow client still gets a pace.
 - `OCR_PROGRESS_FALLBACK` (constant) - Keys of ocr.progress and their English fallbacks.
+- `SHORT_SECONDS_STEP` (constant) - Under a minute the short form counts seconds in steps of this many.
 - `createOcrProgressEstimator` (function) - No description.
 - `record` (function) - Tell the estimator how many pages are finished now.
 - `remainingMs` (function) - No description.
 - `expiresInMs` (function) - No description.
 - `describeOcrTimeLeft` (function) - The words for an estimate: which ocr.progress key, and its figures.
+- `describeOcrTimeLeftShort` (function) - The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures.
 
 ## src/utils/ocrSearch.js
 

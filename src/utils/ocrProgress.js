@@ -1,9 +1,10 @@
 // File: src/utils/ocrProgress.js
 /**
- * How long the pages still waiting for OCR will take, for the toolbar's tooltip
+ * How long the pages still waiting for OCR will take, for the toolbar's OCR button
  * (components/DocumentToolbar/OcrSearchBar.jsx): an estimate from the pace of the pages that
  * were finished lately, and the text that says it (public/locales/<lng>/common.json,
- * `ocr.progress`).
+ * `ocr.progress`): spelt out for the button's description, and short for the details the
+ * button unfolds under the pointer, where the pages being worked on are named too.
  *
  * The pace is measured between finished pages only. The first page seen to finish is the
  * starting point, so the time before it (the document loading, the engine starting) is not
@@ -36,7 +37,15 @@ export const OCR_PROGRESS_FALLBACK = Object.freeze({
   underMinute: 'less than a minute left',
   minutes: 'about {minutes} min left',
   hours: 'about {hours} h {minutes} min left',
+  shortSeconds: 'about {seconds} s',
+  shortMinutes: 'about {minutes} min',
+  shortHours: 'about {hours} h {minutes} min',
+  workers: '{workers} workers',
+  workerOne: '1 worker',
 });
+
+/** Under a minute the short form counts seconds in steps of this many. */
+const SHORT_SECONDS_STEP = 5;
 
 /**
  * @param {Object=} options
@@ -113,4 +122,21 @@ export function describeOcrTimeLeft(remainingMs) {
   const minutes = Math.ceil(remainingMs / 60000);
   if (minutes < 60) return { key: 'minutes', minutes };
   return { key: 'hours', hours: Math.floor(minutes / 60), minutes: minutes % 60 };
+}
+
+/**
+ * The short words for an estimate, for the details the button unfolds: which `ocr.progress` key,
+ * and its figures. Under a minute it counts seconds, rounded up to whole steps so the figure
+ * does not flicker with every page; from a minute on it is `describeOcrTimeLeft` without "left".
+ *
+ * @param {(number|null)} remainingMs
+ * @returns {({ key: string, seconds: (number|undefined), minutes: (number|undefined), hours: (number|undefined) }|null)}
+ */
+export function describeOcrTimeLeftShort(remainingMs) {
+  const long = describeOcrTimeLeft(remainingMs);
+  if (!long) return null;
+  if (long.key === 'hours') return { key: 'shortHours', hours: long.hours, minutes: long.minutes };
+  if (long.key === 'minutes') return { key: 'shortMinutes', minutes: long.minutes };
+  const seconds = Math.max(1, Math.ceil(remainingMs / (SHORT_SECONDS_STEP * 1000))) * SHORT_SECONDS_STEP;
+  return seconds < 60 ? { key: 'shortSeconds', seconds } : { key: 'shortMinutes', minutes: 1 };
 }

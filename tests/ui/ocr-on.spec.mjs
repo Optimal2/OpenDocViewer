@@ -476,11 +476,15 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   // The root and panel drift together, preserving the frozen offset and a correct contained layout.
   await page.setViewportSize({ width: 1100, height: 900 });
   await settleToolbarLayout();
-  const countWidth = () => page.locator('.toolbar-ocr-search-count').evaluate((count) => ({
+  // The button's details (the count) unfold under the pointer and fold away as the field opens.
+  const countWidth = () => page.locator('.toolbar-ocr-search-details').evaluate((count) => ({
     width: count.getBoundingClientRect().width,
     maxWidth: getComputedStyle(count).maxWidth,
   }));
-  await expect.poll(async () => (await countWidth()).width).toBeGreaterThan(0);
+  await status.hover();
+  await expect.poll(async () => (await countWidth()).maxWidth).not.toBe('0px');
+  await settleToolbarLayout();
+  expect((await countWidth()).width).toBeGreaterThan(0);
   const expandedCount = await countWidth();
   const expandedAnchorRight = (await measureToolbar()).anchorRight;
   const driftViewport = Math.ceil(expandedAnchorRight);

@@ -5,29 +5,29 @@ Token counts are rough estimates using one token per four characters. Use this f
 ## Source Estimate
 
 - Source files: 208
-- Source lines: 74207
+- Source lines: 74265
 - Estimated source-map tokens: 7380
 
 ## Generated Output Estimate
 
 - Output files measured: 33 (excluding this budget file)
-- Output lines: 203202
-- Output characters: 5825159
-- Estimated output tokens: 1456301
+- Output lines: 203373
+- Output characters: 5831097
+- Estimated output tokens: 1457786
 
 ## Largest Output Files
 
 | File | Lines | Characters | Estimated tokens |
 | --- | ---: | ---: | ---: |
-| `agent-map.json` | 143055 | 3924951 | 981238 |
-| `symbol-index.json` | 53675 | 1294943 | 323736 |
-| `SYMBOL_INDEX.md` | 2172 | 329179 | 82295 |
-| `chunks/src_utils.md` | 1206 | 72743 | 18186 |
-| `FILE_MAP.md` | 219 | 38672 | 9668 |
+| `agent-map.json` | 143169 | 3928491 | 982123 |
+| `symbol-index.json` | 53726 | 1296351 | 324088 |
+| `SYMBOL_INDEX.md` | 2175 | 329760 | 82440 |
+| `chunks/src_utils.md` | 1208 | 73025 | 18257 |
+| `FILE_MAP.md` | 219 | 38671 | 9668 |
 | `chunks/src_ocr.md` | 379 | 25832 | 6458 |
 | `chunks/src_components_DocumentViewer.md` | 287 | 17266 | 4317 |
 | `MODULES.md` | 213 | 16650 | 4163 |
-| `chunks/src_components_DocumentToolbar.md` | 325 | 15632 | 3908 |
+| `chunks/src_components_DocumentToolbar.md` | 326 | 15760 | 3940 |
 | `chunks/src_components.md` | 321 | 13144 | 3286 |
 | `chunks/src_integrations.md` | 169 | 9475 | 2369 |
 | `chunks/src_components_DocumentLoader.md` | 150 | 8600 | 2150 |

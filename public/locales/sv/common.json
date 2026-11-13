@@ -463,7 +463,12 @@
     "progress": {
       "underMinute": "mindre än en minut kvar",
       "minutes": "ungefär {minutes} min kvar",
-      "hours": "ungefär {hours} h {minutes} min kvar"
+      "hours": "ungefär {hours} h {minutes} min kvar",
+      "shortSeconds": "ca {seconds} s",
+      "shortMinutes": "ca {minutes} min",
+      "shortHours": "ca {hours} h {minutes} min",
+      "workers": "{workers} arbetare",
+      "workerOne": "1 arbetare"
     },
     "search": {
       "open": "Sök i tolkad text",

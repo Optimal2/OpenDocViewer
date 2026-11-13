@@ -76,13 +76,20 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
     };
   });
   expect(order).toEqual({ afterEditing: true, beforeSpacer: true, separatorFirst: true, display: 'contents' });
-  // The button counts the pages the search can cover ("1/1"), behind a divider; the count folds
-  // away while the field is open and comes back when it closes.
+  // The button's details count the pages the search can cover ("1/1"), behind a divider. They
+  // are folded away at rest, unfold under the pointer, fold away while the field is open and
+  // come back when it closes. The tooltip holds what does not change with every page; the
+  // count is spelt out as the button's description.
   const count = status.locator('[data-odv-ocr="count"]');
   await expect(count).toHaveText('1/1');
-  await expect(status).toHaveAttribute('title', /1 (of|av) 1 (pages ready|sidor klara)/);
-  const countWidth = () => count.evaluate((element) => element.getBoundingClientRect().width);
-  expect(await countWidth()).toBeGreaterThan(10);
+  await expect(status).toHaveAttribute('title', /^(Sök i tolkad text|Search in the recognised text) · (Sidan har egen text|The page has its own text)$/);
+  await expect(page.locator('[data-odv-ocr="coverage-text"]')).toHaveText(/^1 (of|av) 1 (pages ready|sidor klara)$/);
+  const details = status.locator('[data-odv-ocr="details"]');
+  const countWidth = () => details.evaluate((element) => element.getBoundingClientRect().width);
+  await page.mouse.move(0, 0);
+  await expect.poll(countWidth).toBe(0);
+  await status.hover();
+  await expect.poll(countWidth).toBeGreaterThan(10);
   await status.click();
   await expect.poll(countWidth).toBe(0);
   await page.keyboard.press('Escape');
@@ -179,7 +186,16 @@ test('ocr on with the search and read-aloud switched off: the status stays, no f
   await expect(status).toBeDisabled();
   await expect(status).toHaveAttribute('aria-label', /Sidan har egen text|The page has its own text/);
   await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
-  await expect(page.locator('.toolbar-ocr-search-panel, .toolbar-ocr-search-input, [data-odv-ocr="count"]')).toHaveCount(0);
+  await expect(page.locator('.toolbar-ocr-search-panel, .toolbar-ocr-search-input')).toHaveCount(0);
+  // The indicator has the button's details (the count of pages with a text layer), folded away
+  // at rest and unfolded under the pointer although the button itself is never enabled.
+  const details = status.locator('[data-odv-ocr="details"]');
+  await expect(details.locator('[data-odv-ocr="count"]')).toHaveText('1/1');
+  const detailsWidth = () => details.evaluate((element) => element.getBoundingClientRect().width);
+  await page.mouse.move(0, 0);
+  await expect.poll(detailsWidth).toBe(0);
+  await status.hover({ force: true });
+  await expect.poll(detailsWidth).toBeGreaterThan(10);
   await status.click({ force: true });
   await expect(page.locator('.toolbar-ocr-search-input')).toHaveCount(0);
 
