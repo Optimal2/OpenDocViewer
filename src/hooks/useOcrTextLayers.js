@@ -88,8 +88,8 @@ export const OCR_BOOST_POINTER_SLOP_PX = 16;
  * @returns {function(*): boolean}  True when the move is input.
  */
 export function createPointerTravelFilter(slopPx = OCR_BOOST_POINTER_SLOP_PX) {
-  const given = Number(slopPx);
-  const slop = Number.isFinite(given) ? Math.max(0, given) : OCR_BOOST_POINTER_SLOP_PX;
+  // Read as runtimeConfig.js reads the key: a finite number, or the default.
+  const slop = typeof slopPx === 'number' && Number.isFinite(slopPx) ? Math.max(0, slopPx) : OCR_BOOST_POINTER_SLOP_PX;
   /** Resting place per pointer type: a handful of entries at most. */
   const resting = new Map();
   return (event) => {

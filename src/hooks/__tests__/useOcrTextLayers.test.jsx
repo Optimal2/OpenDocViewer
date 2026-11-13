@@ -15,6 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import useOcrTextLayers, { OCR_BOOST_POINTER_SLOP_PX, OCR_IDLE_SHUTDOWN_MS, createPointerTravelFilter } from '../useOcrTextLayers.js';
+import { OCR_BOOST_DEFAULTS } from '../../utils/runtimeConfig.js';
 import { createOcrResultCache } from '../../ocr/resultCache.js';
 import { createOcrQueue } from '../../ocr/queue.js';
 import { planOcrWindow } from '../../ocr/window.js';
@@ -701,8 +702,11 @@ describe('useOcrTextLayers boost', () => {
 
   it('counts pointer travel from where the pointer last rested, and a move without a position as travel', () => {
     expect(OCR_BOOST_POINTER_SLOP_PX).toBe(16);
-    // No threshold given, or one that is no number: the default.
-    for (const filter of [createPointerTravelFilter(), createPointerTravelFilter(undefined), createPointerTravelFilter('wide')]) {
+    // The site setting's default is this constant.
+    expect(OCR_BOOST_DEFAULTS.pointerTravelPx).toBe(OCR_BOOST_POINTER_SLOP_PX);
+    // No threshold given, or one that is no number (as the site setting reads it): the default.
+    for (const given of [[], [undefined], ['wide'], ['40'], [null], [NaN], [Infinity]]) {
+      const filter = createPointerTravelFilter(...given);
       expect(filter({ clientX: 0, clientY: 0 })).toBe(false);
       expect(filter({ clientX: 15, clientY: 0 })).toBe(false);
       expect(filter({ clientX: 16, clientY: 0 })).toBe(true);

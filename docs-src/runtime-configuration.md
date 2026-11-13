@@ -770,8 +770,9 @@ under way is ignored. The end of the work ends it too.
 A pointer that rests on the page is not input. A hand on a mouse or a finger on a trackpad
 moves the pointer by a few pixels without the user doing anything, and a browser may report
 a move without travel when the content under the pointer changes. So a pointer move counts
-only once the pointer has travelled `pointerTravelPx` CSS pixels (`16`, 0 to 200; `0` counts
-every move) from where it last rested (mouse, pen and touch each rest in a place of their
+only once the pointer has travelled `pointerTravelPx` CSS pixels (`16`, 0 to 200; with `0`
+every move counts but the first, which only says where the pointer is) from where it last
+rested (mouse, pen and touch each rest in a place of their
 own); a press, a key, the wheel and a touch always count. Moving the pointer on purpose ends
 the boost within those few pixels, as before.
 
