@@ -49,13 +49,13 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8146. JSDoc symbol count: 115.
+File count: 21. Line count: 8172. JSDoc symbol count: 117.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
-- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button, the status in its tooltip and in a visually hidden live
+- `src/components/DocumentToolbar/OcrSearchBar.jsx` - Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button and the status in a visually hidden live region; the but
 - `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/components/DocumentToolbar/LanguageMenuButton.jsx` - Compact language selector for the toolbar.
@@ -160,7 +160,7 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 22. Line count: 4731. JSDoc symbol count: 198.
+File count: 22. Line count: 4837. JSDoc symbol count: 205.
 
 - `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/prepareImageCore.js` - The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de
@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 67. Line count: 24715. JSDoc symbol count: 1030.
+File count: 67. Line count: 24716. JSDoc symbol count: 1030.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 21. Line count: 8146. JSDoc symbol count: 115.
+File count: 21. Line count: 8172. JSDoc symbol count: 117.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -109,7 +109,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/OcrSearchBar.jsx
 
-Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button, the status in its tooltip and in a visually hidden live
+Search in the recognised text, from the toolbar: a search button right after the image\-adjustment group that doubles as the page's OCR status \(an LED on the button and the status in a visually hidden live region; the but
 
 Exports: `OcrSearchBar`
 
@@ -119,6 +119,8 @@ Symbols:
 
 - `OCR_PENDING_STATUSES` (constant) - Statuses \(src/ocr/queue.js OCR\_PAGE\_STATUS\) of a page still waiting for OCR.
 - `OCR_ACTIVE_STATUSES` (constant) - Statuses of a page being worked on right now: one for each of the queue's pages in flight.
+- `OCR_FINAL_STATUSES` (constant) - Statuses of a page whose outcome is final: nothing more will be done about it.
+- `OCR_TOOLTIP_STATUS_KEYS` (constant) - Status keys \(utils/ocrStatus.js\) of a displayed page without text to search, for a reason that stands still: said in the search button's tooltip, which otherwise only names the bu...
 - `matchIdOf` (function) - No description.
 - `module.exports` (function) - No description.
 - `OcrSearchBar~goToMatch` (constant) - No description.

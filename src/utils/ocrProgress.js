@@ -40,6 +40,7 @@ export const OCR_PROGRESS_FALLBACK = Object.freeze({
   shortSeconds: 'about {seconds} s',
   shortMinutes: 'about {minutes} min',
   shortHours: 'about {hours} h {minutes} min',
+  shortPending: 'about \u2013 min',
   workers: '{workers} workers',
   workerOne: '1 worker',
 });

@@ -467,6 +467,7 @@
       "shortSeconds": "about {seconds} s",
       "shortMinutes": "about {minutes} min",
       "shortHours": "about {hours} h {minutes} min",
+      "shortPending": "about – min",
       "workers": "{workers} workers",
       "workerOne": "1 worker"
     },

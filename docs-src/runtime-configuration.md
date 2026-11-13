@@ -553,8 +553,19 @@ Which pages are recognised, and when:
   so a step that never answers fails that page instead of blocking the queue; a recognition that
   times out also drops the worker, and the next page starts a fresh one. After a minute without
   work the worker is terminated to free its WebAssembly memory; the next page starts it again,
-  which costs the model load once more. An engine that cannot start at all (see CSP below) stops
-  the queue for the session and releases the worker and the probed documents the same way.
+  which costs the model load once more. A page that fails is the page's own failure and the
+  queue goes on to the next. Only when no engine has ever started in the session (see CSP below)
+  does the queue stop for the session, and it releases the worker and the probed documents the
+  same way. Once an engine has started, an engine that cannot start after it (a language model
+  that did not arrive over a slow link, a start that timed out on a loaded machine, memory that
+  ran out for one more worker) is dropped: its page is recognised on another engine and OCR
+  carries on with the engines it has, starting no further one until the worker count changes
+  (the boost) or the idle shutdown has stopped them; with no engine left that one page fails and
+  the next page starts a fresh engine.
+- A PDF page's own text is read from a pdf.js document opened from the bytes the viewer holds;
+  two such documents are kept open for neighbouring pages. A document is never closed while a
+  page of it is being read: several pages are read at a time, in a session of many small PDF
+  files each from a file of its own, and more than two are then open until those pages are done.
 
 Ruled tables. Tesseract reads the body of a ruled table badly: the cell borders are taken for
 glyphs or column separators and the text between them comes out garbled or missing. Before a
@@ -804,7 +815,7 @@ src/ocr/referencePage.js, and the triggers live in the hook that owns the OCR qu
 cautious count applies throughout. The state (cautious, rising, boosted; the level; the probes)
 is logged at debug level and shown on the toolbar's OCR status button: while more engines than
 the cautious count run, a small badge (a bolt and the engine count) sits in the button, and the
-button's tooltip ends with a line about the boost: ready, measuring the starting point, the
+button's description for assistive technology ends with a line about the boost: ready, measuring the starting point, the
 level being tried, the level kept, too few pages left for a climb, a measurement that failed,
 a climb that input interrupted (with the last level that held up), or what the last climb
 found, with the step that proved too slow ("16 workers took 31 % longer"). The badge is the live part, since reaching for the button
@@ -857,15 +868,21 @@ The toolbar gets an OCR group right after the image-adjustment group (the one th
 loose buttons. It holds the search (`ocr.search.enabled`); read-aloud (`ocr.speech.enabled`) is
 not a toolbar button, see below:
 
-- A search button that doubles as the page's OCR status: a small LED on the button and the
-  status in its tooltip ("Recognising text…", "Text recognised", "The page has its own text",
-  "No text found", "Not recognised: the page has its own text", "The text could not be
-  recognised" or "Text recognition is unavailable", the last when the engine could not start; see
-  CSP below). Under the pointer, and with keyboard focus, the button grows to the right in a
+- A search button that doubles as the page's OCR status: a small LED on the button, and the
+  status for assistive technology ("Recognising text…", "Text recognised", "The page has its
+  own text", "No text found", "Not recognised: the page has its own text", "The text could not
+  be recognised" or "Text recognition is unavailable", the last when no engine could start; see
+  CSP below). The button's tooltip says what it does ("Search in the recognised text") and
+  nothing that changes while pages are recognised; when the displayed page has no text to
+  search, the tooltip adds why (the last four statuses and "Not recognised"). Under the pointer, and with keyboard focus, the button grows to the right in a
   short ease and shows its details: behind a thin divider the count of pages the search can
   cover over all pages ("4/300"), then, while there are any, roughly how long the waiting pages
   will take ("about 6 min", "about 40 s") and how many pages are being worked on right now
-  ("4 workers", the pages in flight: a PDF page whose own text is being read counts too). The
+  ("4 workers", the pages in flight: a PDF page whose own text is being read counts too).
+  While pages are still to be recognised the time and the workers keep their places from the
+  start, with "about – min" until the pace is known and "0 workers" while nothing runs, so
+  nothing pops in or out as the work starts, pauses and goes on; they go once, when every page
+  has its outcome. The
   button grows only into the room the toolbar's spacer leaves: with too little room the details
   are dropped whole from the end, down to the count, which always shows (as it did when it
   stood in the button at all times), so the toolbar's end is not pushed out for more than the

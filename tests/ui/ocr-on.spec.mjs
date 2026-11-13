@@ -104,7 +104,9 @@ test('ocr on: the synthetic scan gets a selectable text layer from the self-host
   await expect(status).toBeDisabled();
   await expect(page.locator('.ocr-status')).toHaveCount(0);
   await expect(status).toHaveAttribute('data-ocr-state', 'done', { timeout: 120000 });
-  await expect(status).toHaveAttribute('title', /Text tolkad|Text recognised/);
+  // The tooltip names the button and nothing that changes; the status is in the live region.
+  await expect(status).toHaveAttribute('title', /^(Sök i tolkad text|Search in the recognised text)$/);
+  await expect(page.locator('[data-odv-ocr="status-text"]')).toHaveText(/Text tolkad|Text recognised/);
   await expect(status).toBeEnabled();
   await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
 

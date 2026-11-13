@@ -1,8 +1,8 @@
 // File: src/components/DocumentToolbar/OcrSearchBar.jsx
 /**
  * Search in the recognised text, from the toolbar: a search button right after the
- * image-adjustment group that doubles as the page's OCR status (an LED on the button, the status
- * in its tooltip and in a visually hidden live region; the button is enabled once the displayed
+ * image-adjustment group that doubles as the page's OCR status (an LED on the button and the
+ * status in a visually hidden live region; the button is enabled once the displayed
  * page's text is recognised, or any page's when the displayed page has none), and a field that
  * grows out of it to the right (a short width transition, styles/ocr.css) with the match
  * position, previous/next and close. The field takes only the room the toolbar's spacer leaves
@@ -27,9 +27,14 @@
  * Under the pointer, and with keyboard focus, the button grows to the right in a short ease
  * (styles/ocr.css) and shows its details: the count of pages with a text layer over all pages
  * ("4/300"), roughly how long the waiting pages will take, and how many pages are being worked
- * on right now. They live in the button and not in its tooltip because they change with every
- * recognised page, and a browser takes a native tooltip away whenever its text changes: the
- * tooltip holds only what rarely changes (what the button does, the page's status, the boost).
+ * on right now. While pages are still to be recognised the time and the workers keep their
+ * places from the start, with a placeholder for a time that cannot be told yet ("about \u2013 min")
+ * and "0 workers" while nothing runs, so nothing pops in or out as the work goes on; they go
+ * once, when every page has its outcome. They live in the button and not in its tooltip because
+ * they change with every recognised page, and a browser takes a native tooltip away whenever
+ * its text changes: the tooltip says what the button does ("Search in the recognised text") and
+ * nothing that changes, except the reason when the displayed page has no text to search (not
+ * recognised, no text found, failed, OCR unavailable), which stands still for that page.
  * The button grows only into the room the toolbar's spacer leaves (measured when the pointer or
  * the focus arrives and while it stays, utils/ocrSearchPlacement.js): with too little room the
  * details are dropped whole from the end and only the count is left, so the toolbar's end is
@@ -40,7 +45,8 @@
  *
  * With `ocr.boost` on, the button also shows the boost (utils/ocrBoostStatus.js): a small badge
  * with the engine count while more engines than the cautious count run, and a line at the end of
- * the tooltip saying what the last climb found. Without a boost (the default) neither exists.
+ * the button's description saying what the last climb found. Without a boost (the default)
+ * neither exists.
  *
  * With `ocr.recognizeWholeDocument` on, while pages wait for OCR and enough of them have been
  * recognised to tell the pace, the details say roughly how long the rest will take
@@ -48,7 +54,7 @@
  * and a time for those next to the count of all pages would mislead.
  *
  * With `searchEnabled` false (`ocr.search.enabled: false`) only the status remains: the button
- * stays a never-enabled, status-only indicator with its LED, the status as its name and in its
+ * stays a never-enabled, status-only indicator with its LED, the status as its name and
  * tooltip, the details and the live region, and no field exists, so no term is ever published
  * and the layers mark nothing.
  */
@@ -70,6 +76,13 @@ import { isOcrWholeDocumentEnabled } from '../../utils/runtimeConfig.js';
 const OCR_PENDING_STATUSES = new Set(['queued', 'probing', 'recognizing']);
 /** Statuses of a page being worked on right now: one for each of the queue's pages in flight. */
 const OCR_ACTIVE_STATUSES = new Set(['probing', 'recognizing']);
+/** Statuses of a page whose outcome is final: nothing more will be done about it. */
+const OCR_FINAL_STATUSES = new Set(['done', 'skipped', 'failed']);
+/**
+ * Status keys (utils/ocrStatus.js) of a displayed page without text to search, for a reason
+ * that stands still: said in the search button's tooltip, which otherwise only names the button.
+ */
+const OCR_TOOLTIP_STATUS_KEYS = new Set(['noText', 'skipped', 'skippedTextLayer', 'failed', 'unavailable']);
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -122,9 +135,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const statusText = statusKey
     ? t(`ocr.status.${statusKey}`, { defaultValue: OCR_STATUS_FALLBACK[statusKey] })
     : t('ocr.status.notStarted', { defaultValue: 'Text recognition has not started on this page' });
-  // The boost (`ocr.boost`), when there is one: a line in the tooltip saying what the last climb
-  // found, and a badge with the engine count while it runs. The badge is the live part: reaching
-  // for the button is input, and input ends the boost.
+  // The boost (`ocr.boost`), when there is one: a line in the button's description saying what
+  // the last climb found, and a badge with the engine count while it runs. The badge is the
+  // live part: reaching for the button is input, and input ends the boost.
   const boostInfo = describeOcrBoost(ocrBoost);
   let boostText = '';
   if (boostInfo) {
@@ -134,8 +147,6 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     }
   }
   const boostState = boostInfo ? String(ocrBoost.state) : undefined;
-  // The boost's line comes last in the tooltip; what goes before it is `head`.
-  const withBoost = (head) => (boostText ? `${head} · ${boostText}` : head);
   const boostBadge = boostInfo?.badge ? (
     <span className="toolbar-ocr-boost" data-odv-ocr="boost" aria-hidden="true">
       <span className="material-icons toolbar-ocr-boost-icon">bolt</span>
@@ -153,7 +164,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     () => searchablePages.filter((page) => page.outcome?.status === 'done').length,
     [searchablePages]
   );
-  // The pages being worked on right now (the queue's pages in flight), whatever the mode. And
+  // The pages being worked on right now (the queue's pages in flight) and the pages without a
+  // final outcome yet, whatever the mode. And
   // with the whole document asked for: the pages still waiting for OCR, and roughly how long
   // they will take at the pace of the pages the engine recognised lately (utils/ocrProgress.js;
   // a PDF page's own text is done without the engine and is no pace). The estimate is dropped
@@ -161,18 +173,20 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // pace that no longer holds is worse than none, and without a new page nothing else would
   // take it away.
   const wholeDocument = isOcrWholeDocumentEnabled();
-  const [pendingPages, enginePages, activePages] = useMemo(() => {
+  const [pendingPages, enginePages, activePages, unfinishedPages] = useMemo(() => {
     let pending = 0;
     let engine = 0;
     let active = 0;
+    let unfinished = 0;
     for (const page of searchablePages) {
       const outcome = page.outcome;
       if (OCR_ACTIVE_STATUSES.has(outcome?.status)) active += 1;
+      if (!OCR_FINAL_STATUSES.has(outcome?.status)) unfinished += 1;
       if (!wholeDocument) continue;
       if (OCR_PENDING_STATUSES.has(outcome?.status)) pending += 1;
       else if (outcome?.status === 'done' && outcome.source !== 'pdf-text') engine += 1;
     }
-    return [pending, engine, active];
+    return [pending, engine, active, unfinished];
   }, [searchablePages, wholeDocument]);
   const progressRef = useRef(/** @type {*} */ (null));
   const [timeLeftMs, setTimeLeftMs] = useState(/** @type {(number|null)} */ (null));
@@ -190,15 +204,24 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const timeLeftText = timeLeft
     ? t(`ocr.progress.${timeLeft.key}`, { minutes: timeLeft.minutes, hours: timeLeft.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeft.key] })
     : '';
+  // While pages are still to be recognised (and an engine can do it) the time and the workers
+  // keep their places in the details, so nothing pops in or out as the work starts, pauses and
+  // goes on: a time that cannot be told yet is a placeholder, and no page in flight is "0
+  // workers". They go, once, when every page has its outcome. The time is said only with the
+  // whole document asked for, as above.
+  const progressShown = unfinishedPages > 0 && !ocrEngineFailure;
   const timeLeftShort = describeOcrTimeLeftShort(timeLeftMs);
-  const timeLeftShortText = timeLeftShort
-    ? t(`ocr.progress.${timeLeftShort.key}`, {
+  let timeLeftShortText = '';
+  if (timeLeftShort) {
+    timeLeftShortText = t(`ocr.progress.${timeLeftShort.key}`, {
       seconds: timeLeftShort.seconds, minutes: timeLeftShort.minutes, hours: timeLeftShort.hours, defaultValue: OCR_PROGRESS_FALLBACK[timeLeftShort.key],
-    })
-    : '';
+    });
+  } else if (wholeDocument && progressShown) {
+    timeLeftShortText = t('ocr.progress.shortPending', { defaultValue: OCR_PROGRESS_FALLBACK.shortPending });
+  }
   let workersText = '';
   if (activePages === 1) workersText = t('ocr.progress.workerOne', { defaultValue: OCR_PROGRESS_FALLBACK.workerOne });
-  else if (activePages > 1) workersText = t('ocr.progress.workers', { workers: activePages, defaultValue: OCR_PROGRESS_FALLBACK.workers });
+  else if (activePages > 1 || progressShown) workersText = t('ocr.progress.workers', { workers: activePages, defaultValue: OCR_PROGRESS_FALLBACK.workers });
   // How wide the details may unfold: into the room the toolbar's spacer leaves and no further,
   // dropped whole from the end when it is too small (utils/ocrSearchPlacement.js). The unfolding
   // itself is CSS (`:hover`, `:focus-visible`); the pointer and the focus are followed here only
@@ -258,7 +281,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // the count behind a thin divider, then the time left and the pages being worked on while
   // there are any. For the eye only: the button's description spells them out.
   const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
-  const describedText = [coverageTitle, timeLeftText, workersText].filter(Boolean).join(' · ');
+  // Spelt out for assistive technology: what is known (no placeholder, no "0 workers"), and
+  // last the boost's line.
+  const describedText = [coverageTitle, timeLeftText, activePages > 0 ? workersText : '', boostText].filter(Boolean).join(' · ');
   const details = (
     <span
       className="toolbar-ocr-search-details"
@@ -475,7 +500,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
           data-ocr-state={statusKey || 'notStarted'}
           aria-label={statusText}
           aria-describedby={coverageId}
-          title={withBoost(statusText)}
+          title={statusText}
           disabled
         >
           <span className="material-icons" aria-hidden="true">text_fields</span>
@@ -492,8 +517,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
 
   const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
-  // The tooltip holds only what rarely changes; what changes with every page is in the details.
-  const buttonTitle = withBoost(ready || open ? `${openTitle} · ${statusText}` : statusText);
+  // The tooltip says what the button does and nothing that changes (what changes is in the
+  // details), except why there is nothing to search on the displayed page when that is so.
+  const buttonTitle = OCR_TOOLTIP_STATUS_KEYS.has(statusKey) ? `${openTitle} · ${statusText}` : openTitle;
   const pageOnlyLabel = t('ocr.search.pageOnly', { defaultValue: 'Search only on this page' });
   const pageOnlyShort = t('ocr.search.pageOnlyShort', { defaultValue: 'This page' });
   let statusLine = '';

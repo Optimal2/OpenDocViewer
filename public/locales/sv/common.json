@@ -467,6 +467,7 @@
       "shortSeconds": "ca {seconds} s",
       "shortMinutes": "ca {minutes} min",
       "shortHours": "ca {hours} h {minutes} min",
+      "shortPending": "ca – min",
       "workers": "{workers} arbetare",
       "workerOne": "1 arbetare"
     },

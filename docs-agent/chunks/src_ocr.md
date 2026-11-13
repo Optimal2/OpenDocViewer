@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4731. JSDoc symbol count: 198.
+File count: 22. Line count: 4837. JSDoc symbol count: 205.
 
 ## src/ocr/assetUrls.js
 
@@ -149,11 +149,14 @@ A pool of OCR engines \(engine.js\) behind the one\-engine interface the queue \
 
 Exports: `createOcrEnginePool`
 
+Local imports: `src/logging/systemLogger.js`
+
 Symbols:
 
 - `TERMINATED_MESSAGE` (constant) - Rejection for callers waiting on a free engine when the pool is terminated.
 - `OcrEnginePool` (typedef) - No description.
 - `createOcrEnginePool` (function) - No description.
+- `createOcrEnginePool~firstFailure` (function) - The failure that ends OCR for the session: an engine's, while none has ever started.
 - `createOcrEnginePool~takeIdle` (function) - A free entry now, a new one while under the limit, else null.
 - `createOcrEnginePool~shrink` (function) - Terminate idle engines above the ceiling, newest first; the busy ones go as they finish.
 - `createOcrEnginePool~drop` (function) - Terminate one engine and forget it; the next acquisition creates a fresh one in its place.
@@ -230,10 +233,16 @@ Local imports: `src/utils/pdfjsDocumentOptions.js`, `src/ocr/classify.js`, `src/
 
 Symbols:
 
-- `DEFAULT_OPEN_PDF_DOCUMENTS` (constant) - Open pdf.js documents kept for neighbouring pages before the least recently used is closed.
+- `DEFAULT_OPEN_PDF_DOCUMENTS` (constant) - Open pdf.js documents kept for neighbouring pages before the least recently used idle one is closed.
 - `defaultGetDocument` (function) - pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\).
 - `PdfTextProber` (typedef) - No description.
 - `createPdfTextProber` (function) - No description.
+- `createPdfTextProber~open` (constant) - users : probes reading the document now.
+- `createPdfTextProber~close` (function) - Close a document now, or, while probes read it, as soon as the last of them ends.
+- `createPdfTextProber~trim` (function) - Close the least recently used idle documents above the bound; the ones in use stay.
+- `createPdfTextProber~holdDocument` (function) - The document's entry, opened if need be, with one more probe reading it.
+- `createPdfTextProber~releaseDocument` (function) - One probe has stopped reading the document.
+- `createPdfTextProber~probeDocument` (function) - No description.
 
 ## src/ocr/pdfTextWords.js
 

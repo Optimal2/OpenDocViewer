@@ -237,14 +237,16 @@
 | <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:71</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
 | <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:29</code> | Ids the dialog renders around the manual view. |
 | <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:23</code> | Id of the dialog title. |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:90</code> |  |
-| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:414</code> |  |
-| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:451</code> |  |
-| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:459</code> | Escape closes the field from any of its controls. |
-| <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:75</code> |  |
-| <code>OCR_ACTIVE_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:72</code> | Statuses of a page being worked on right now: one for each of the queue&#39;s pages in flight. |
-| <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:70</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
-| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:435</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:103</code> |  |
+| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:439</code> |  |
+| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:476</code> |  |
+| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:484</code> | Escape closes the field from any of its controls. |
+| <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:88</code> |  |
+| <code>OCR_ACTIVE_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:78</code> | Statuses of a page being worked on right now: one for each of the queue&#39;s pages in flight. |
+| <code>OCR_FINAL_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:80</code> | Statuses of a page whose outcome is final: nothing more will be done about it. |
+| <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:76</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
+| <code>OCR_TOOLTIP_STATUS_KEYS</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:85</code> | Status keys \(utils/ocrStatus.js\) of a displayed page without text to search, for a reason that stands still: said in the search button&#39;s tooltip, which otherwise only names the bu... |
+| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:460</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx:36</code> |  |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |
@@ -999,12 +1001,13 @@
 | <code>TIMEOUT</code> | member | <code>src/ocr/engine.js:52</code> | The worker gave no answer within the start timeout. |
 | <code>toError</code> | function | <code>src/ocr/engine.js:134</code> |  |
 | <code>UNKNOWN</code> | member | <code>src/ocr/engine.js:54</code> | Anything else. |
-| <code>createOcrEnginePool</code> | function | <code>src/ocr/enginePool.js:51</code> |  |
-| <code>createOcrEnginePool~drop</code> | function | <code>src/ocr/enginePool.js:120</code> | Terminate one engine and forget it; the next acquisition creates a fresh one in its place. |
-| <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:29</code> |  |
-| <code>createOcrEnginePool~shrink</code> | function | <code>src/ocr/enginePool.js:102</code> | Terminate idle engines above the ceiling, newest first; the busy ones go as they finish. |
-| <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:76</code> | A free entry now, a new one while under the limit, else null. |
-| <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:27</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
+| <code>createOcrEnginePool</code> | function | <code>src/ocr/enginePool.js:63</code> |  |
+| <code>createOcrEnginePool~drop</code> | function | <code>src/ocr/enginePool.js:144</code> | Terminate one engine and forget it; the next acquisition creates a fresh one in its place. |
+| <code>createOcrEnginePool~firstFailure</code> | function | <code>src/ocr/enginePool.js:83</code> | The failure that ends OCR for the session: an engine&#39;s, while none has ever started. |
+| <code>OcrEnginePool</code> | typedef | <code>src/ocr/enginePool.js:38</code> |  |
+| <code>createOcrEnginePool~shrink</code> | function | <code>src/ocr/enginePool.js:126</code> | Terminate idle engines above the ceiling, newest first; the busy ones go as they finish. |
+| <code>createOcrEnginePool~takeIdle</code> | function | <code>src/ocr/enginePool.js:99</code> | A free entry now, a new one while under the limit, else null. |
+| <code>TERMINATED_MESSAGE</code> | constant | <code>src/ocr/enginePool.js:36</code> | Rejection for callers waiting on a free engine when the pool is terminated. |
 | <code>createOcrImagePreparer~armReplyTimer</code> | function | <code>src/ocr/imagePreparer.js:132</code> | Start the reply clock for the oldest pending request; nothing pending clears it. |
 | <code>createOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:76</code> |  |
 | <code>disposeOcrImagePreparer</code> | function | <code>src/ocr/imagePreparer.js:279</code> | End the shared preparer&#39;s worker \(useOcrTextLayers.js on unmount\); the next use makes a new one. |
@@ -1034,10 +1037,16 @@
 | <code>thinnestHorizontal</code> | function | <code>src/ocr/lineRemoval.js:83</code> | Thinnest thickness of a horizontal run \(dark rows through it\) sampled along its length. |
 | <code>thinnestVertical</code> | function | <code>src/ocr/lineRemoval.js:106</code> | Thinnest thickness of a vertical run \(dark columns through it\) sampled along its length. |
 | <code>yieldToEventLoop</code> | constant | <code>src/ocr/lineRemoval.js:272</code> | The default yield between bands \(see createEventLoopYield\). |
-| <code>createPdfTextProber</code> | function | <code>src/ocr/pdfTextProbe.js:59</code> |  |
-| <code>DEFAULT_OPEN_PDF_DOCUMENTS</code> | constant | <code>src/ocr/pdfTextProbe.js:20</code> | Open pdf.js documents kept for neighbouring pages before the least recently used is closed. |
-| <code>defaultGetDocument</code> | function | <code>src/ocr/pdfTextProbe.js:28</code> | pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\). |
-| <code>PdfTextProber</code> | typedef | <code>src/ocr/pdfTextProbe.js:39</code> |  |
+| <code>createPdfTextProber~close</code> | function | <code>src/ocr/pdfTextProbe.js:78</code> | Close a document now, or, while probes read it, as soon as the last of them ends. |
+| <code>createPdfTextProber</code> | function | <code>src/ocr/pdfTextProbe.js:64</code> |  |
+| <code>DEFAULT_OPEN_PDF_DOCUMENTS</code> | constant | <code>src/ocr/pdfTextProbe.js:25</code> | Open pdf.js documents kept for neighbouring pages before the least recently used idle one is closed. |
+| <code>defaultGetDocument</code> | function | <code>src/ocr/pdfTextProbe.js:33</code> | pdf.js loading task for a copy of the bytes \(pdf.js takes ownership of the buffer it is given\). |
+| <code>createPdfTextProber~holdDocument</code> | function | <code>src/ocr/pdfTextProbe.js:109</code> | The document&#39;s entry, opened if need be, with one more probe reading it. |
+| <code>createPdfTextProber~open</code> | constant | <code>src/ocr/pdfTextProbe.js:75</code> | users : probes reading the document now. |
+| <code>PdfTextProber</code> | typedef | <code>src/ocr/pdfTextProbe.js:44</code> |  |
+| <code>createPdfTextProber~probeDocument</code> | function | <code>src/ocr/pdfTextProbe.js:146</code> |  |
+| <code>createPdfTextProber~releaseDocument</code> | function | <code>src/ocr/pdfTextProbe.js:135</code> | One probe has stopped reading the document. |
+| <code>createPdfTextProber~trim</code> | function | <code>src/ocr/pdfTextProbe.js:100</code> | Close the least recently used idle documents above the bound; the ones in use stay. |
 | <code>multiplyTransforms</code> | function | <code>src/ocr/pdfTextWords.js:81</code> | pdf.js Util.transform : the product of two affine matrices \[a, b, c, d, e, f\]. |
 | <code>PDF_TEXT_DEFAULT_ASCENT</code> | constant | <code>src/ocr/pdfTextWords.js:40</code> | pdf.js&#39;s own fallbacks for a font without metrics \(TextLayer: ascent 0.8, descent -0.2\). |
 | <code>pdfTextAdvanceWeight</code> | function | <code>src/ocr/pdfTextWords.js:66</code> | Rough advance of a character relative to a typical lowercase letter, used to share an item&#39;s width among its characters. |
@@ -1062,7 +1071,7 @@
 | <code>handlePrepareRequest</code> | function | <code>src/ocr/prepareWorker.js:52</code> |  |
 | <code>createOcrQueue~abortJob</code> | function | <code>src/ocr/queue.js:186</code> | Abort one job&#39;s recognition: its worker on a pool, the engine as a whole otherwise. |
 | <code>createOcrQueue</code> | function | <code>src/ocr/queue.js:131</code> |  |
-| <code>createOcrQueue~finish</code> | function | <code>src/ocr/queue.js:321</code> | Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped. |
+| <code>createOcrQueue~finish</code> | function | <code>src/ocr/queue.js:327</code> | Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped. |
 | <code>OCR_OUTCOME_SOURCE</code> | constant | <code>src/ocr/queue.js:68</code> | Where a done outcome&#39;s words come from \( source \). |
 | <code>OCR_STEP_TIMEOUTS_MS</code> | constant | <code>src/ocr/queue.js:30</code> | Upper bounds per step, so a promise that never settles \(a pdf.js document that hangs, a page image that never arrives, a worker that stops answering\) fails the page instead of blo... |
 | <code>OcrQueue</code> | typedef | <code>src/ocr/queue.js:91</code> |  |
@@ -1321,17 +1330,17 @@
 | <code>makeOcrPageKey</code> | function | <code>src/utils/ocrPageKey.js:18</code> |  |
 | <code>ocrPageKeyOf</code> | function | <code>src/utils/ocrPageKey.js:29</code> |  |
 | <code>SEPARATOR</code> | constant | <code>src/utils/ocrPageKey.js:11</code> | Key of one document page in the OCR result map \( ocrPages on the viewer context\). |
-| <code>createOcrProgressEstimator</code> | function | <code>src/utils/ocrProgress.js:57</code> |  |
-| <code>describeOcrTimeLeft</code> | function | <code>src/utils/ocrProgress.js:119</code> | The words for an estimate: which ocr.progress key, and its figures. |
-| <code>describeOcrTimeLeftShort</code> | function | <code>src/utils/ocrProgress.js:135</code> | The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures. |
-| <code>expiresInMs</code> | function | <code>src/utils/ocrProgress.js:105</code> |  |
+| <code>createOcrProgressEstimator</code> | function | <code>src/utils/ocrProgress.js:58</code> |  |
+| <code>describeOcrTimeLeft</code> | function | <code>src/utils/ocrProgress.js:120</code> | The words for an estimate: which ocr.progress key, and its figures. |
+| <code>describeOcrTimeLeftShort</code> | function | <code>src/utils/ocrProgress.js:136</code> | The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures. |
+| <code>expiresInMs</code> | function | <code>src/utils/ocrProgress.js:106</code> |  |
 | <code>MIN_SAMPLES</code> | constant | <code>src/utils/ocrProgress.js:33</code> | Measurements kept however old they are, so a slow client still gets a pace. |
 | <code>OCR_PROGRESS_FALLBACK</code> | constant | <code>src/utils/ocrProgress.js:36</code> | Keys of ocr.progress and their English fallbacks. |
 | <code>OCR_PROGRESS_MIN_PAGES</code> | constant | <code>src/utils/ocrProgress.js:31</code> | Pages that must have been finished since the starting point before a pace is trusted. |
 | <code>OCR_PROGRESS_WINDOW_MS</code> | constant | <code>src/utils/ocrProgress.js:29</code> | Finished pages older than this say nothing about the pace now. |
-| <code>record</code> | function | <code>src/utils/ocrProgress.js:69</code> | Tell the estimator how many pages are finished now. |
-| <code>remainingMs</code> | function | <code>src/utils/ocrProgress.js:90</code> |  |
-| <code>SHORT_SECONDS_STEP</code> | constant | <code>src/utils/ocrProgress.js:48</code> | Under a minute the short form counts seconds in steps of this many. |
+| <code>record</code> | function | <code>src/utils/ocrProgress.js:70</code> | Tell the estimator how many pages are finished now. |
+| <code>remainingMs</code> | function | <code>src/utils/ocrProgress.js:91</code> |  |
+| <code>SHORT_SECONDS_STEP</code> | constant | <code>src/utils/ocrProgress.js:49</code> | Under a minute the short form counts seconds in steps of this many. |
 | <code>findOcrMatches</code> | function | <code>src/utils/ocrSearch.js:73</code> | All matches of a term in an index, in reading order, without overlaps. |
 | <code>findOcrMatchesInOutcome</code> | function | <code>src/utils/ocrSearch.js:102</code> | Matches of a term in one outcome \(the index is built on first use\). |
 | <code>indexes</code> | constant | <code>src/utils/ocrSearch.js:32</code> | Index per outcome; outcomes are immutable objects from the result cache. |

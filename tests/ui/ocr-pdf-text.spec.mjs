@@ -58,7 +58,8 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   // ever runs (no "Recognising text…" and no engine files requested).
   const status = page.locator('.toolbar [data-odv-ocr="status"]');
   await expect(status).toHaveAttribute('data-ocr-state', 'pdfText', { timeout: 60000 });
-  await expect(status).toHaveAttribute('title', /Sidan har egen text|The page has its own text/);
+  await expect(status).toHaveAttribute('title', /^(Sök i tolkad text|Search in the recognised text)$/);
+  await expect(page.locator('[data-odv-ocr="status-text"]')).toHaveText(/Sidan har egen text|The page has its own text/);
   await expect(status).toBeEnabled();
   await expect(status.locator('.odv-status-led--ready')).toHaveCount(1);
   // The OCR group sits right after the image-adjustment group (the one ending with "Reset
@@ -78,11 +79,11 @@ test('ocr on: a PDF page with its own text layer is searchable without the engin
   expect(order).toEqual({ afterEditing: true, beforeSpacer: true, separatorFirst: true, display: 'contents' });
   // The button's details count the pages the search can cover ("1/1"), behind a divider. They
   // are folded away at rest, unfold under the pointer, fold away while the field is open and
-  // come back when it closes. The tooltip holds what does not change with every page; the
-  // count is spelt out as the button's description.
+  // come back when it closes. The tooltip only names the button; the count is spelt out as
+  // the button's description.
   const count = status.locator('[data-odv-ocr="count"]');
   await expect(count).toHaveText('1/1');
-  await expect(status).toHaveAttribute('title', /^(Sök i tolkad text|Search in the recognised text) · (Sidan har egen text|The page has its own text)$/);
+  await expect(status).toHaveAttribute('title', /^(Sök i tolkad text|Search in the recognised text)$/);
   await expect(page.locator('[data-odv-ocr="coverage-text"]')).toHaveText(/^1 (of|av) 1 (pages ready|sidor klara)$/);
   const details = status.locator('[data-odv-ocr="details"]');
   const countWidth = () => details.evaluate((element) => element.getBoundingClientRect().width);
