@@ -233,10 +233,10 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:66</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:93</code> |  |
 | <code>resolveLanguageLabel</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:28</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:39</code> |  |
-| <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:71</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
-| <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:29</code> | Ids the dialog renders around the manual view. |
-| <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:23</code> | Id of the dialog title. |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:40</code> |  |
+| <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:72</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
+| <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:30</code> | Ids the dialog renders around the manual view. |
+| <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:24</code> | Id of the dialog title. |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:106</code> |  |
 | <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:446</code> |  |
 | <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:483</code> |  |
@@ -487,20 +487,21 @@
 | <code>LoadingSpinner</code> | function | <code>src/components/LoadingSpinner.jsx:55</code> | LoadingSpinner component. |
 | <code>LoadingSpinner.propTypes.size</code> | member | <code>src/components/LoadingSpinner.jsx:83</code> | Optional width/height; if omitted, CSS controls dimensions. |
 | <code>srOnlyStyle</code> | constant | <code>src/components/LoadingSpinner.jsx:33</code> | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:93</code> |  |
-| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:343</code> |  |
-| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:110</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
-| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:127</code> | Copy only settings used by the selected source. |
-| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:215</code> |  |
-| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:190</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
-| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:387</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
-| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:153</code> | Load the preferred generated standard manual. |
-| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:359</code> |  |
-| <code>resolveManualPageUrl</code> | function | <code>src/components/Manual/manualDocument.js:78</code> | Absolute URL of the stand-alone manual page \( &amp;lt;ODV base&amp;gt;/manual/ \), optionally opened at a section. |
-| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:48</code> | The ODV base URL relative manual paths \(and the stand-alone manual page\) belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the base src/app/boo... |
-| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:297</code> |  |
-| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:234</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
-| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:283</code> |  |
+| <code>absoluteManualUrl</code> | function | <code>src/components/Manual/manualDocument.js:98</code> |  |
+| <code>appendManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:348</code> |  |
+| <code>candidateFromOdvBase</code> | function | <code>src/components/Manual/manualDocument.js:115</code> | A relative candidate path \(a default template, or a relative configured one\) is fetched from the ODV base. |
+| <code>copyManualConfig</code> | function | <code>src/components/Manual/manualDocument.js:132</code> | Copy only settings used by the selected source. |
+| <code>isRewritableRelativeUrl</code> | function | <code>src/components/Manual/manualDocument.js:220</code> |  |
+| <code>loadAutoManual</code> | function | <code>src/components/Manual/manualDocument.js:195</code> | Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback. |
+| <code>loadManualDocument</code> | function | <code>src/components/Manual/manualDocument.js:392</code> | Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering. |
+| <code>loadStandardManual</code> | function | <code>src/components/Manual/manualDocument.js:158</code> | Load the preferred generated standard manual. |
+| <code>MANUAL_PAGE_PATH</code> | constant | <code>src/components/Manual/manualDocument.js:22</code> | The stand-alone manual page, relative to the ODV base. |
+| <code>removeManualRefreshToken</code> | function | <code>src/components/Manual/manualDocument.js:364</code> |  |
+| <code>resolveManualPageUrl</code> | function | <code>src/components/Manual/manualDocument.js:83</code> | Absolute URL of the stand-alone manual page \( &amp;lt;ODV base&amp;gt;/manual/index.html \), optionally opened at a section. |
+| <code>resolveOdvBaseUrl</code> | function | <code>src/components/Manual/manualDocument.js:51</code> | The ODV base URL relative manual paths \(and the stand-alone manual page\) belong to: runtime config baseHref \(set by odv.config.js from its own location\), else the base src/app/boo... |
+| <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:302</code> |  |
+| <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:239</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
+| <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:288</code> |  |
 | <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:92</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
 | <code>findManualElementById</code> | function | <code>src/components/Manual/manualNavigation.js:51</code> |  |
 | <code>isHiddenInManual</code> | function | <code>src/components/Manual/manualNavigation.js:74</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
@@ -555,18 +556,20 @@
 | <code>Resizer</code> | constant | <code>src/components/Resizer.jsx:61</code> | Resizer component. |
 | <code>ResizerProps</code> | typedef | <code>src/components/Resizer.jsx:43</code> | Props for . |
 | <code>ResizeStartHandler</code> | typedef | <code>src/components/Resizer.jsx:36</code> | Handler invoked when a resize interaction is initiated. |
-| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:194</code> |  |
-| <code>getInformationLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:127</code> | Information lines after the always-on line: the integrity code of an intact or not-checked signature \(problems are explained next to the status instead\) and a signing-time check t... |
-| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:49</code> |  |
-| <code>getPassedChecks</code> | function | <code>src/components/SignatureDetailsDialog.jsx:107</code> | What was checked and passed for one signature, in display order. |
-| <code>getProblemLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:157</code> | Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning. |
-| <code>getSignerSourceNote</code> | function | <code>src/components/SignatureDetailsDialog.jsx:88</code> | Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify. |
-| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:66</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:235</code> |  |
-| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:261</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
-| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:277</code> | Keep Tab navigation inside the dialog while it is open. |
-| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureDetailsDialog.jsx:173</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
-| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:317</code> |  |
+| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:234</code> |  |
+| <code>getInformationLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:129</code> | Information lines after the always-on line: the integrity code of an intact or not-checked signature \(problems are explained next to the status instead\) and a signing-time check t... |
+| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:51</code> |  |
+| <code>getPassedChecks</code> | function | <code>src/components/SignatureDetailsDialog.jsx:109</code> | What was checked and passed for one signature, in display order. |
+| <code>getProblemLines</code> | function | <code>src/components/SignatureDetailsDialog.jsx:159</code> | Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning. |
+| <code>getSignerSourceNote</code> | function | <code>src/components/SignatureDetailsDialog.jsx:90</code> | Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify. |
+| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:68</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:277</code> |  |
+| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:349</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
+| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:365</code> | Keep Tab navigation inside the dialog while it is open. |
+| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureDetailsDialog.jsx:175</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
+| <code>measureCommonDialogHeight</code> | function | <code>src/components/SignatureDetailsDialog.jsx:193</code> | The dialog height that suits every file tab: the natural height of the tallest file group that fits under the dialog&#39;s CSS max-height. |
+| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:405</code> |  |
+| <code>SignatureDetailsDialog~renderFileGroup</code> | function | <code>src/components/SignatureDetailsDialog.jsx:416</code> | The content of one file&#39;s group: its heading \(with file tabs\) and its signatures. |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewButton.jsx:32</code> |  |
 | <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureOverviewButton.jsx:19</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewDialog.jsx:57</code> |  |

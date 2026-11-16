@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 22. Line count: 8526. JSDoc symbol count: 119.
+File count: 22. Line count: 8637. JSDoc symbol count: 121.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -248,11 +248,11 @@ Symbols:
 - `getInformationLines` (function) - Information lines after the always\-on line: the integrity code of an intact or not\-checked signature \(problems are explained next to the status instead\) and a signing\-time check t...
 - `getProblemLines` (function) - Problem explanation shown next to the status: the integrity code of a warning or error, then a signing\-time warning.
 - `ICON_BY_SEVERITY` (constant) - Material Icons ligature per severity \(same as SignatureStatusBadge\).
+- `measureCommonDialogHeight` (function) - The dialog height that suits every file tab: the natural height of the tallest file group that fits under the dialog's CSS max\-height.
 - `module.exports` (function) - No description.
 - `<anonymous>~handleEscape` (function) - No description.
 - `SignatureDetailsDialog~handleTabKeyDown` (function) - Arrow keys, Home and End move between file tabs \(automatic activation\).
 - `SignatureDetailsDialog~handleTabTrap` (function) - Keep Tab navigation inside the dialog while it is open.
-- `SignatureDetailsDialog~orEmpty` (function) - No description.
 
 ## src/components/SignatureOverviewButton.jsx
 

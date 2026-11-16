@@ -182,6 +182,97 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
   await expect(fromPage.locator('.odv-signature-info').first()).toContainText('Not checked in the viewer: issuer trust and revocation status');
 });
 
+/**
+ * Height of the details dialog and whether its body scrolls, with the room left under the file
+ * group (0 when the dialog is exactly as tall as its content).
+ * @param {import('@playwright/test').Locator} dialog `.odv-signature-dialog`
+ */
+async function measureDetailsDialog(dialog) {
+  return dialog.evaluate((node) => {
+    const body = node.querySelector('.odv-signature-body');
+    const group = node.querySelector('.odv-signature-file-group');
+    const bodyRect = body.getBoundingClientRect();
+    const style = getComputedStyle(node);
+    // The rectangle includes the borders; max-height only does with border-box sizing.
+    const borders = style.boxSizing === 'border-box' ? 0 : Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.borderBottomWidth);
+    return {
+      height: node.getBoundingClientRect().height,
+      maxHeight: Number.parseFloat(style.maxHeight) + borders,
+      scrolls: body.scrollHeight > body.clientHeight,
+      roomUnderGroup: bodyRect.bottom - Number.parseFloat(getComputedStyle(body).paddingBottom) - group.getBoundingClientRect().bottom,
+      measureNodes: node.querySelectorAll('.odv-signature-file-measure').length,
+    };
+  });
+}
+
+test('the details dialog keeps one height across the file tabs: the file that fits sets it, the taller one scrolls', async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 1000 });
+  await openSession(page);
+  // DOK 1: valid-rsa.pdf has one signature and fits; two-signatures.pdf has two and does not.
+  await page.locator('.thumbnail-document-boundary.start .odv-signature-badge--document').first().click();
+  const dialog = page.locator('.odv-signature-dialog');
+  const tabs = dialog.getByRole('tab');
+  await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+  await expect(dialog.locator('.odv-signature-entry')).toHaveCount(1);
+  const first = await measureDetailsDialog(dialog);
+  // The file that fits: no scrollbar, and the dialog is exactly as tall as that file needs.
+  expect(first.scrolls).toBe(false);
+  expect(first.height).toBeLessThan(first.maxHeight);
+  expect(Math.abs(first.roomUnderGroup)).toBeLessThanOrEqual(1);
+  expect(first.measureNodes).toBe(0);
+
+  await tabs.nth(1).click();
+  await expect(dialog.locator('.odv-signature-entry')).toHaveCount(2);
+  const second = await measureDetailsDialog(dialog);
+  // Same height; the taller file scrolls inside it instead of growing the dialog to its max-height.
+  expect(second.height).toBe(first.height);
+  expect(second.scrolls).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+
+  // A first opening on the taller file (its page symbol, in a freshly loaded viewer): the file
+  // that sets the height is then one of the hidden groups. The same height, in both tabs.
+  await openSession(page);
+  await page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail').click();
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  const reopened = await measureDetailsDialog(dialog);
+  expect(reopened.height).toBe(first.height);
+  expect(reopened.scrolls).toBe(true);
+  expect(reopened.measureNodes).toBe(0);
+  await tabs.nth(0).click();
+  await expect(dialog.locator('.odv-signature-entry')).toHaveCount(1);
+  const back = await measureDetailsDialog(dialog);
+  expect(back.height).toBe(first.height);
+  expect(back.scrolls).toBe(false);
+
+  // A window too low for either file: both tabs take the max-height and scroll, still one height.
+  await page.setViewportSize({ width: 1400, height: 520 });
+  await expect.poll(async () => (await measureDetailsDialog(dialog)).scrolls).toBe(true);
+  const low = await measureDetailsDialog(dialog);
+  expect(Math.abs(low.height - low.maxHeight)).toBeLessThanOrEqual(1);
+  await tabs.nth(1).click();
+  await expect(dialog.locator('.odv-signature-entry')).toHaveCount(2);
+  const lowSecond = await measureDetailsDialog(dialog);
+  expect(lowSecond.height).toBe(low.height);
+  expect(lowSecond.scrolls).toBe(true);
+
+  // Back to a window with room: the height follows the window again.
+  await page.setViewportSize({ width: 1400, height: 1000 });
+  await expect.poll(async () => (await measureDetailsDialog(dialog)).height).toBe(first.height);
+
+  // The window changes while the dialog is closed (here to the narrow layout, where the fields
+  // stack and no file fits): the next opening measures again instead of keeping the old height.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await page.setViewportSize({ width: 700, height: 1000 });
+  await page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail').click();
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  const narrow = await measureDetailsDialog(dialog);
+  expect(narrow.height).toBeGreaterThan(first.height);
+  expect(Math.abs(narrow.height - narrow.maxHeight)).toBeLessThanOrEqual(1);
+  expect(narrow.measureNodes).toBe(0);
+});
+
 test('D3 toolbar overview lists signed documents and navigates without closing', async ({ page }) => {
   await openSession(page);
   const button = page.locator('.odv-signature-overview-button');

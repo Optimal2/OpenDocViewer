@@ -18,14 +18,16 @@
  * with signatures, a file selector (tabs) sits above the groups and the
  * selected file gets a heading ("File k of m: name") and its page range inside
  * the document, followed by its own signatures. A document with one signed
- * file looks like a plain signature list.
+ * file looks like a plain signature list. With file tabs the dialog keeps one
+ * height whichever tab is selected: the height of the tallest file that fits
+ * without scrolling; a taller file scrolls inside it.
  *
  * Accessibility mirrors DocumentMetadataOverlayDialog: modal dialog semantics,
  * focus moves into the dialog on open, Tab is trapped inside, Escape closes,
  * and focus returns to the symbol that opened it.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
@@ -177,6 +179,44 @@ const ICON_BY_SEVERITY = {
 };
 
 /**
+ * The dialog height that suits every file tab: the natural height of the tallest file group that
+ * fits under the dialog's CSS max-height. Called while every file's group is laid out (the
+ * selected one in place, the others in zero-height `.odv-signature-file-measure` wrappers) and
+ * the dialog has no height of its own.
+ *
+ * @param {(HTMLElement|null)} dialogNode
+ * @param {(HTMLElement|null)} bodyNode Scrolling body of the dialog.
+ * @param {(HTMLElement|null)} groupNode Group of the selected file.
+ * @returns {(number|null)} Height in CSS pixels, or null when no group fits (every tab then
+ *   takes the max-height and scrolls) or nothing can be measured.
+ */
+function measureCommonDialogHeight(dialogNode, bodyNode, groupNode) {
+  if (!dialogNode || !bodyNode || !groupNode || typeof window === 'undefined') return null;
+  const dialogStyle = window.getComputedStyle(dialogNode);
+  const maxHeight = Number.parseFloat(dialogStyle.maxHeight);
+  // `height` and `max-height` count the dialog's borders only with border-box sizing.
+  const borders = dialogStyle.boxSizing === 'border-box'
+    ? 0
+    : (Number.parseFloat(dialogStyle.borderTopWidth) || 0) + (Number.parseFloat(dialogStyle.borderBottomWidth) || 0);
+  const dialogRect = dialogNode.getBoundingClientRect();
+  const bodyRect = bodyNode.getBoundingClientRect();
+  const groupRect = groupNode.getBoundingClientRect();
+  // Everything that is not the group: title bar and footer, then the tabs and the body's padding
+  // above and below the group.
+  const paddingBottom = Number.parseFloat(window.getComputedStyle(bodyNode).paddingBottom) || 0;
+  const chrome = (dialogRect.height - borders - bodyRect.height)
+    + (groupRect.top - bodyRect.top + bodyNode.scrollTop)
+    + paddingBottom;
+  if (!(maxHeight > 0) || !(chrome > 0) || !(groupRect.height > 0)) return null;
+  const groupHeights = [groupRect.height];
+  bodyNode.querySelectorAll('.odv-signature-file-measure > .odv-signature-file-group').forEach((node) => {
+    groupHeights.push(node.getBoundingClientRect().height);
+  });
+  const fitting = groupHeights.map((height) => chrome + height).filter((total) => total <= maxHeight + 0.01);
+  return fitting.length > 0 ? Math.ceil(Math.max(...fitting)) : null;
+}
+
+/**
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
@@ -202,8 +242,10 @@ export default function SignatureDetailsDialog({
   returnFocusRef = undefined,
   uncheckedSeverity = 'ok',
 }) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const bodyRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const groupRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const tabRefs = useRef(/** @type {Object<string, (HTMLButtonElement|null)>} */ ({}));
   const wasOpenRef = useRef(false);
   const signedFiles = Array.isArray(signatureDocument?.signedFiles) ? signatureDocument.signedFiles : [];
@@ -247,11 +289,57 @@ export default function SignatureDetailsDialog({
     };
   }, [isOpen, onClose, returnFocusRef]);
 
+  // One dialog height for every file tab. It is measured at every opening, and again while open
+  // when the signatures, the language or the window size change: for that one render the other
+  // files' groups are laid out too (zero-height, hidden), and the layout effect below picks the
+  // height before the browser paints. Closing forgets the height, since the window can change
+  // while the dialog is closed. Without file tabs nothing is measured or set.
+  const showFileTabs = signedFiles.length > 1;
+  const [resizeCount, setResizeCount] = useState(0);
+  const [fitted, setFitted] = useState({ key: '', height: /** @type {(number|null)} */ (null) });
+  const measureKey = isOpen && showFileTabs
+    ? [
+        String(signatureDocument?.key || ''),
+        String(i18n?.language || ''),
+        resizeCount,
+        // Everything of a file that can change the height of its group.
+        ...signedFiles.map((file) => JSON.stringify([
+          file.sourceKey,
+          file.fileName,
+          (file.report?.signatures || []).map((signature) => [
+            signature?.integrity, signature?.integrityCode, signature?.integrityReason,
+            signature?.signingTimeCheck, signature?.signingTimeSource, signature?.signer,
+            signature?.signerOrganization, signature?.issuer, signature?.reason, signature?.location,
+            signature?.subFilter,
+          ]),
+        ])),
+      ].join('|')
+    : '';
+  const measuring = measureKey !== '' && fitted.key !== measureKey;
+
+  useEffect(() => {
+    if (!isOpen || !showFileTabs) return undefined;
+    const handleResize = () => setResizeCount((count) => count + 1);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isOpen, showFileTabs]);
+
+  useLayoutEffect(() => {
+    if (measureKey === '') {
+      setFitted((current) => (current.key === '' ? current : { key: '', height: null }));
+      return;
+    }
+    if (!measuring) return;
+    setFitted({
+      key: measureKey,
+      height: measureCommonDialogHeight(dialogRef.current, bodyRef.current, groupRef.current),
+    });
+  }, [measuring, measureKey]);
+
   const signatures = signatureDocument
     ? signedFiles.flatMap((file) => file.report?.signatures || [])
     : (Array.isArray(report?.signatures) ? report.signatures : []);
   if (!isOpen || signatures.length <= 0) return null;
-  const showFileTabs = signedFiles.length > 1;
   const selectedFile = signedFiles.find((file) => file.sourceKey === selectedSourceKey) || signedFiles[0] || null;
   const listedSignatures = showFileTabs ? (selectedFile?.report?.signatures || []) : signatures;
   const positionNumber = Number(signatureDocument?.documentNumber ?? documentNumber);
@@ -319,6 +407,152 @@ export default function SignatureDetailsDialog({
     return text || emptyValue;
   };
 
+  /**
+   * The content of one file's group: its heading (with file tabs) and its signatures.
+   * @param {*} file Signed file of the document, or null without file tabs.
+   * @param {Array<*>} list Signatures to list.
+   * @returns {React.ReactElement}
+   */
+  const renderFileGroup = (file, list) => (
+    <>
+      {showFileTabs && file ? (
+        <div className="odv-signature-file-header">
+          <h3 className="odv-signature-file-heading">{getSignatureFileHeading(t, file)}</h3>
+          {getSignatureFilePages(t, file) ? (
+            <p className="odv-signature-file-pages">{getSignatureFilePages(t, file)}</p>
+          ) : null}
+        </div>
+      ) : null}
+      {list.map((signature, index) => {
+        const integrityLabel = getIntegrityLabel(t, signature?.integrity);
+        const severity = getSignatureSeverity(signature, { uncheckedSeverity });
+        const passedChecks = getPassedChecks(t, signature);
+        const informationLines = getInformationLines(t, signature);
+        const problemLines = getProblemLines(t, signature);
+        const signerNote = getSignerSourceNote(t, signature);
+        return (
+          <section
+            className="odv-signature-entry"
+            key={`signature-${index}`}
+            aria-label={t('signatures.dialog.signatureHeading', {
+              index: index + 1,
+              defaultValue: `Signature ${index + 1}`,
+            })}
+          >
+            <EntryHeading className="odv-signature-entry-title">
+              {t('signatures.dialog.signatureHeading', {
+                index: index + 1,
+                defaultValue: `Signature ${index + 1}`,
+              })}
+            </EntryHeading>
+            {passedChecks.length > 0 ? (
+              <div className="odv-signature-checks">
+                <p className="odv-signature-checks-heading">
+                  {t('signatures.checks.heading', { defaultValue: 'Checked and passed' })}
+                </p>
+                <ul>
+                  {passedChecks.map((text) => (
+                    <li key={text}>
+                      <span className="material-icons" aria-hidden="true">check</span>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <div className="odv-signature-info" role="note">
+              <p>{t('signatures.notCheckedInViewer', {
+                defaultValue: 'Not checked in the viewer: issuer trust and revocation status',
+              })}</p>
+              {informationLines.map((text) => <p key={text}>{text}</p>)}
+            </div>
+            <dl className="odv-signature-fields">
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.signer', { defaultValue: 'Signer' })}</dt>
+                <dd>
+                  {orEmpty(signature?.signer)}
+                  {signerNote ? (
+                    <span className="odv-signature-secondary odv-signature-signer-note">{signerNote}</span>
+                  ) : null}
+                </dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.organization', { defaultValue: 'Organisation' })}</dt>
+                <dd>{orEmpty(signature?.signerOrganization)}</dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.issuer', { defaultValue: 'Issuer' })}</dt>
+                <dd>{orEmpty(signature?.issuer)}</dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.signingTime', { defaultValue: 'Signing time' })}</dt>
+                <dd>
+                  <SignatureTime value={signature?.signingTime} fallback={emptyValue} />
+                  <span className="odv-signature-secondary">
+                    {getSigningTimeSourceLabel(t, signature?.signingTimeSource)}
+                  </span>
+                </dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.reason', { defaultValue: 'Reason' })}</dt>
+                <dd>{orEmpty(signature?.reason)}</dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.location', { defaultValue: 'Location' })}</dt>
+                <dd>{orEmpty(signature?.location)}</dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.kind', { defaultValue: 'Kind' })}</dt>
+                <dd>{getKindLabel(t, signature?.kind)}</dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.integrity', { defaultValue: 'Integrity' })}</dt>
+                <dd className={`odv-signature-status odv-signature-status--${severity}`}>
+                  <span className="material-icons" aria-hidden="true">{ICON_BY_SEVERITY[severity]}</span>
+                  {integrityLabel}
+                  {problemLines.map((text) => (
+                    <span key={text} className="odv-signature-secondary odv-signature-problem">{text}</span>
+                  ))}
+                  {signature?.integrityReason ? (
+                    <span className="odv-signature-secondary">{String(signature.integrityReason)}</span>
+                  ) : null}
+                </dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.coversWholeFile', { defaultValue: 'Covers the whole document' })}</dt>
+                <dd>
+                  {signature?.coversWholeFile === true
+                    ? t('signatures.coversWhole.yes', { defaultValue: 'Yes' })
+                    : signature?.coversWholeFile === false
+                      ? t('signatures.coversWhole.no', { defaultValue: 'No' })
+                      : emptyValue}
+                </dd>
+              </div>
+              <div className="odv-signature-field">
+                <dt>{t('signatures.fields.certificateValidity', { defaultValue: 'Certificate valid' })}</dt>
+                <dd>
+                  {signature?.notBefore || signature?.notAfter ? (
+                    <>
+                      <SignatureTime value={signature?.notBefore} fallback={emptyValue} />
+                      {' – '}
+                      <SignatureTime value={signature?.notAfter} fallback={emptyValue} />
+                    </>
+                  ) : emptyValue}
+                </dd>
+              </div>
+              {String(signature?.subFilter || '').trim() ? (
+                <div className="odv-signature-field">
+                  <dt>{t('signatures.fields.format', { defaultValue: 'Format' })}</dt>
+                  <dd><code className="odv-signature-code">{String(signature.subFilter)}</code></dd>
+                </div>
+              ) : null}
+            </dl>
+          </section>
+        );
+      })}
+    </>
+  );
+
   return (
     <div
       className="odv-signature-backdrop"
@@ -340,6 +574,7 @@ export default function SignatureDetailsDialog({
       <div
         ref={dialogRef}
         className="odv-signature-dialog"
+        style={!measuring && showFileTabs && fitted.height ? { height: `${fitted.height}px` } : undefined}
         tabIndex={-1}
         data-odv-shortcuts="off"
         onMouseDown={(event) => event.stopPropagation()}
@@ -363,7 +598,7 @@ export default function SignatureDetailsDialog({
           </button>
         </div>
 
-        <div className="odv-signature-body">
+        <div ref={bodyRef} className={`odv-signature-body${measuring ? ' is-measuring' : ''}`}>
           {showFileTabs ? (
             <div
               className="odv-signature-file-tabs"
@@ -397,6 +632,7 @@ export default function SignatureDetailsDialog({
             </div>
           ) : null}
           <div
+            ref={groupRef}
             className="odv-signature-file-group"
             {...(showFileTabs ? {
               id: 'odv-signature-file-panel',
@@ -404,142 +640,17 @@ export default function SignatureDetailsDialog({
               'aria-labelledby': `odv-signature-tab-${selectedFile?.fileNumber}`,
             } : {})}
           >
-            {showFileTabs && selectedFile ? (
-              <div className="odv-signature-file-header">
-                <h3 className="odv-signature-file-heading">{getSignatureFileHeading(t, selectedFile)}</h3>
-                {getSignatureFilePages(t, selectedFile) ? (
-                  <p className="odv-signature-file-pages">{getSignatureFilePages(t, selectedFile)}</p>
-                ) : null}
-              </div>
-            ) : null}
-            {listedSignatures.map((signature, index) => {
-              const integrityLabel = getIntegrityLabel(t, signature?.integrity);
-              const severity = getSignatureSeverity(signature, { uncheckedSeverity });
-              const passedChecks = getPassedChecks(t, signature);
-              const informationLines = getInformationLines(t, signature);
-              const problemLines = getProblemLines(t, signature);
-              const signerNote = getSignerSourceNote(t, signature);
-              return (
-                <section
-                  className="odv-signature-entry"
-                  key={`signature-${index}`}
-                  aria-label={t('signatures.dialog.signatureHeading', {
-                    index: index + 1,
-                    defaultValue: `Signature ${index + 1}`,
-                  })}
-                >
-                  <EntryHeading className="odv-signature-entry-title">
-                    {t('signatures.dialog.signatureHeading', {
-                      index: index + 1,
-                      defaultValue: `Signature ${index + 1}`,
-                    })}
-                  </EntryHeading>
-                  {passedChecks.length > 0 ? (
-                    <div className="odv-signature-checks">
-                      <p className="odv-signature-checks-heading">
-                        {t('signatures.checks.heading', { defaultValue: 'Checked and passed' })}
-                      </p>
-                      <ul>
-                        {passedChecks.map((text) => (
-                          <li key={text}>
-                            <span className="material-icons" aria-hidden="true">check</span>
-                            {text}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  <div className="odv-signature-info" role="note">
-                    <p>{t('signatures.notCheckedInViewer', {
-                      defaultValue: 'Not checked in the viewer: issuer trust and revocation status',
-                    })}</p>
-                    {informationLines.map((text) => <p key={text}>{text}</p>)}
-                  </div>
-                  <dl className="odv-signature-fields">
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.signer', { defaultValue: 'Signer' })}</dt>
-                      <dd>
-                        {orEmpty(signature?.signer)}
-                        {signerNote ? (
-                          <span className="odv-signature-secondary odv-signature-signer-note">{signerNote}</span>
-                        ) : null}
-                      </dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.organization', { defaultValue: 'Organisation' })}</dt>
-                      <dd>{orEmpty(signature?.signerOrganization)}</dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.issuer', { defaultValue: 'Issuer' })}</dt>
-                      <dd>{orEmpty(signature?.issuer)}</dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.signingTime', { defaultValue: 'Signing time' })}</dt>
-                      <dd>
-                        <SignatureTime value={signature?.signingTime} fallback={emptyValue} />
-                        <span className="odv-signature-secondary">
-                          {getSigningTimeSourceLabel(t, signature?.signingTimeSource)}
-                        </span>
-                      </dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.reason', { defaultValue: 'Reason' })}</dt>
-                      <dd>{orEmpty(signature?.reason)}</dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.location', { defaultValue: 'Location' })}</dt>
-                      <dd>{orEmpty(signature?.location)}</dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.kind', { defaultValue: 'Kind' })}</dt>
-                      <dd>{getKindLabel(t, signature?.kind)}</dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.integrity', { defaultValue: 'Integrity' })}</dt>
-                      <dd className={`odv-signature-status odv-signature-status--${severity}`}>
-                        <span className="material-icons" aria-hidden="true">{ICON_BY_SEVERITY[severity]}</span>
-                        {integrityLabel}
-                        {problemLines.map((text) => (
-                          <span key={text} className="odv-signature-secondary odv-signature-problem">{text}</span>
-                        ))}
-                        {signature?.integrityReason ? (
-                          <span className="odv-signature-secondary">{String(signature.integrityReason)}</span>
-                        ) : null}
-                      </dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.coversWholeFile', { defaultValue: 'Covers the whole document' })}</dt>
-                      <dd>
-                        {signature?.coversWholeFile === true
-                          ? t('signatures.coversWhole.yes', { defaultValue: 'Yes' })
-                          : signature?.coversWholeFile === false
-                            ? t('signatures.coversWhole.no', { defaultValue: 'No' })
-                            : emptyValue}
-                      </dd>
-                    </div>
-                    <div className="odv-signature-field">
-                      <dt>{t('signatures.fields.certificateValidity', { defaultValue: 'Certificate valid' })}</dt>
-                      <dd>
-                        {signature?.notBefore || signature?.notAfter ? (
-                          <>
-                            <SignatureTime value={signature?.notBefore} fallback={emptyValue} />
-                            {' – '}
-                            <SignatureTime value={signature?.notAfter} fallback={emptyValue} />
-                          </>
-                        ) : emptyValue}
-                      </dd>
-                    </div>
-                    {String(signature?.subFilter || '').trim() ? (
-                      <div className="odv-signature-field">
-                        <dt>{t('signatures.fields.format', { defaultValue: 'Format' })}</dt>
-                        <dd><code className="odv-signature-code">{String(signature.subFilter)}</code></dd>
-                      </div>
-                    ) : null}
-                  </dl>
-                </section>
-              );
-            })}
+            {renderFileGroup(showFileTabs ? selectedFile : null, listedSignatures)}
           </div>
+          {measuring ? signedFiles
+            .filter((file) => file.sourceKey !== selectedFile?.sourceKey)
+            .map((file) => (
+              <div key={file.sourceKey} className="odv-signature-file-measure" aria-hidden="true">
+                <div className="odv-signature-file-group">
+                  {renderFileGroup(file, file.report?.signatures || [])}
+                </div>
+              </div>
+            )) : null}
         </div>
 
         <div className="odv-signature-footer">

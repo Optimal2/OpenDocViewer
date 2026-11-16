@@ -18,6 +18,9 @@ import { filterStandardManual } from '../../utils/standardManual.js';
 
 const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
 
+/** The stand-alone manual page, relative to the ODV base. */
+const MANUAL_PAGE_PATH = 'manual/index.html';
+
 // Static loader keys let Vite create one lazy chunk per generated language without executing any
 // script contained in the source HTML. Only these two generated modules exist; other UI languages
 // follow help.manual.fallbackLanguage exactly as the fetched source path does.
@@ -68,15 +71,17 @@ export function resolveOdvBaseUrl(runtimeConfig) {
 }
 
 /**
- * Absolute URL of the stand-alone manual page (`<ODV base>/manual/`), optionally opened at a
- * section. Built from the ODV base, so it is right whatever page the viewer runs on.
+ * Absolute URL of the stand-alone manual page (`<ODV base>/manual/index.html`), optionally opened
+ * at a section. Built from the ODV base, so it is right whatever page the viewer runs on. The file
+ * is named, not only its folder: a host that serves the ODV files as plain static files, without a
+ * directory default document, answers `manual/` with 404 while the file itself is there.
  *
  * @param {Object=} runtimeConfig Runtime configuration (reads `baseHref`).
  * @param {string=} sectionId Element id for the fragment; empty for none.
  * @returns {string}
  */
 export function resolveManualPageUrl(runtimeConfig, sectionId = '') {
-  const path = sectionId ? `manual/#${encodeURIComponent(sectionId)}` : 'manual/';
+  const path = sectionId ? `${MANUAL_PAGE_PATH}#${encodeURIComponent(sectionId)}` : MANUAL_PAGE_PATH;
   const baseUrl = resolveOdvBaseUrl(runtimeConfig);
   try {
     return baseUrl ? new URL(path, baseUrl).toString() : path;

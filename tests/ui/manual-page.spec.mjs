@@ -268,14 +268,20 @@ test('overlay open-in-new-tab link lands on the current section', async ({ page,
   await dialog.locator('nav.odv-manual-toc a[href="#jmf-curtain"]').click();
   const link = dialog.getByRole('link', { name: 'Open in new tab' });
   // Built from the ODV base (runtime config baseHref), so it does not depend on the viewer URL.
-  await expect(link).toHaveAttribute('href', /\/manual\/#jmf-curtain$/);
+  // It names the page file, not only its folder.
+  await expect(link).toHaveAttribute('href', /\/manual\/index\.html#jmf-curtain$/);
   const href = new URL(String(await link.getAttribute('href')));
   expect(href.origin).toBe(new URL(page.url()).origin);
-  expect(href.pathname).toBe(`${BASE}/manual/`);
+  expect(href.pathname).toBe(`${BASE}/manual/index.html`);
   expect(href.hash).toBe('#jmf-curtain');
   await expect(link).toHaveAttribute('target', '_blank');
   expect(await link.getAttribute('rel')).toContain('noopener');
 
+  // A host that serves the ODV files as plain static files has no directory default document:
+  // the folder URL is a 404 there. The link still lands, since it asks for the file.
+  await context.route((url) => url.pathname === `${BASE}/manual/`, (route) => route.fulfill({
+    status: 404, contentType: 'text/plain', body: 'no default document',
+  }));
   const [popup] = await Promise.all([
     context.waitForEvent('page'),
     link.click(),
@@ -283,7 +289,7 @@ test('overlay open-in-new-tab link lands on the current section', async ({ page,
   await expect(popup.locator('h1#odv-manual-page-title')).toBeVisible();
   // Landing proof: the popup opens at the linked section and focuses it.
   await expect(popup.locator('.odv-manual-content #jmf-curtain')).toBeFocused();
-  expect(new URL(popup.url()).pathname).toBe(`${BASE}/manual/`);
+  expect(new URL(popup.url()).pathname).toBe(`${BASE}/manual/index.html`);
   // Manual images stream in after the landing and shift the layout, which moves the
   // section being read. Stabilize first (every image settled), then re-anchor through
   // the popup's own contents tree and assert the fragment follows.

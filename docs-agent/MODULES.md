@@ -17,7 +17,7 @@ File count: 3. Line count: 822. JSDoc symbol count: 21.
 
 ## src/components
 
-File count: 22. Line count: 8526. JSDoc symbol count: 119.
+File count: 22. Line count: 8637. JSDoc symbol count: 121.
 
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4133. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8179. JSDoc symbol count: 117.
+File count: 21. Line count: 8180. JSDoc symbol count: 117.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -75,7 +75,7 @@ File count: 17. Line count: 7787. JSDoc symbol count: 157.
 
 ## src/components/Manual
 
-File count: 4. Line count: 1746. JSDoc symbol count: 49.
+File count: 4. Line count: 1751. JSDoc symbol count: 50.
 
 - `src/components/Manual/manualSearch.js` - In\-manual text search: locale\-aware case folding, match collection over the rendered manual and highlighting through the CSS Custom Highlight API with a \`&lt;mark&gt;\` fallback.
 - `src/components/Manual/manualNavigation.js` - Scrolling, focus and URL\-fragment helpers for navigating inside a rendered manual.

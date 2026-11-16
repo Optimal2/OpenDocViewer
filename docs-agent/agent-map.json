@@ -98,8 +98,8 @@
   },
   "stats": {
     "fileCount": 210,
-    "sourceLineCount": 74862,
-    "docletCount": 2192,
+    "sourceLineCount": 74979,
+    "docletCount": 2195,
     "documentedFileCount": 206,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -964,9 +964,9 @@
           {
             "path": "src/components/Manual/manualDocument.js",
             "lines": [
-              332,
-              333,
-              334
+              337,
+              338,
+              339
             ],
             "summary": "Manual source loading and HTML preparation shared by every manual host (the overlay dialog and a full-page view)."
           },
@@ -1053,8 +1053,8 @@
     {
       "name": "src/components",
       "fileCount": 22,
-      "lineCount": 8526,
-      "docletCount": 119,
+      "lineCount": 8637,
+      "docletCount": 121,
       "importantFiles": [
         {
           "path": "src/components/DocumentRender.jsx",
@@ -1094,10 +1094,10 @@
         },
         {
           "path": "src/components/SignatureDetailsDialog.jsx",
-          "score": 41,
-          "lines": 573,
+          "score": 42,
+          "lines": 684,
           "incomingLocalImports": 1,
-          "doclets": 12,
+          "doclets": 14,
           "summary": "Signature details dialog (browser integrity).",
           "summaryConfidence": "high"
         },
@@ -1230,7 +1230,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8179,
+      "lineCount": 8180,
       "docletCount": 117,
       "importantFiles": [
         {
@@ -1390,8 +1390,8 @@
     {
       "name": "src/components/Manual",
       "fileCount": 4,
-      "lineCount": 1746,
-      "docletCount": 49,
+      "lineCount": 1751,
+      "docletCount": 50,
       "importantFiles": [
         {
           "path": "src/components/Manual/manualSearch.js",
@@ -1423,9 +1423,9 @@
         {
           "path": "src/components/Manual/manualDocument.js",
           "score": 58,
-          "lines": 410,
+          "lines": 415,
           "incomingLocalImports": 2,
-          "doclets": 14,
+          "doclets": 15,
           "summary": "Manual source loading and HTML preparation shared by every manual host (the overlay dialog and a full-page view).",
           "summaryConfidence": "high"
         }
@@ -13618,7 +13618,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "lines": 262,
+      "lines": 263,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
       "sourceSummary": "Manual overlay: modal dialog chrome (title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads, filters, searches and navigates the",
@@ -13632,7 +13632,7 @@
             "useRef",
             "useState"
           ],
-          "line": 12,
+          "line": 13,
           "kind": "static"
         },
         {
@@ -13640,7 +13640,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 13,
+          "line": 14,
           "kind": "static"
         },
         {
@@ -13648,7 +13648,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 14,
+          "line": 15,
           "kind": "static"
         },
         {
@@ -13656,7 +13656,7 @@
           "specifiers": [
             "ManualView"
           ],
-          "line": 15,
+          "line": 16,
           "kind": "static"
         },
         {
@@ -13664,7 +13664,7 @@
           "specifiers": [
             "resolveManualPageUrl"
           ],
-          "line": 16,
+          "line": 17,
           "kind": "static"
         },
         {
@@ -13672,7 +13672,7 @@
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 17,
+          "line": 18,
           "kind": "static"
         }
       ],
@@ -13680,19 +13680,19 @@
         {
           "name": "ManualOverlayDialog",
           "kind": "default",
-          "line": 39
+          "line": 40
         }
       ],
       "declarations": [
         {
           "name": "ManualOverlayDialog",
           "kind": "component",
-          "line": 39
+          "line": 40
         },
         {
           "name": "handleManualTabTrap",
           "kind": "function",
-          "line": 71
+          "line": 72
         }
       ],
       "parseError": null,
@@ -13708,7 +13708,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 23,
+          "line": 24,
           "description": "Id of the dialog title.",
           "params": [],
           "returns": [],
@@ -13721,7 +13721,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 29,
+          "line": 30,
           "description": "Ids the dialog renders around the manual view.",
           "params": [],
           "returns": [],
@@ -13734,7 +13734,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 39,
+          "line": 40,
           "description": "",
           "params": [
             {
@@ -13777,7 +13777,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-          "line": 71,
+          "line": 72,
           "description": "Keep forward and reverse Tab navigation inside the open modal dialog.",
           "params": [],
           "returns": [],
@@ -13791,7 +13791,7 @@
           "specifiers": [
             "ManualView"
           ],
-          "line": 15,
+          "line": 16,
           "kind": "static",
           "resolved": "src/components/Manual/ManualView.jsx"
         },
@@ -13800,7 +13800,7 @@
           "specifiers": [
             "resolveManualPageUrl"
           ],
-          "line": 16,
+          "line": 17,
           "kind": "static",
           "resolved": "src/components/Manual/manualDocument.js"
         },
@@ -13809,7 +13809,7 @@
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 17,
+          "line": 18,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
@@ -13824,7 +13824,7 @@
             "useRef",
             "useState"
           ],
-          "line": 12,
+          "line": 13,
           "kind": "static"
         },
         {
@@ -13832,7 +13832,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 13,
+          "line": 14,
           "kind": "static"
         },
         {
@@ -13840,7 +13840,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 14,
+          "line": 15,
           "kind": "static"
         }
       ],
@@ -26648,9 +26648,9 @@
     },
     {
       "path": "src/components/Manual/manualDocument.js",
-      "lines": 410,
+      "lines": 415,
       "extension": ".js",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 16,
       "sourceSummary": "Manual source loading and HTML preparation shared by every manual host (the overlay dialog and a full-page view).",
       "imports": [
         {
@@ -26685,13 +26685,13 @@
         {
           "source": "../../generated/standard-manual/manual.sv.js",
           "specifiers": [],
-          "line": 25,
+          "line": 28,
           "kind": "dynamic"
         },
         {
           "source": "../../generated/standard-manual/manual.en.js",
           "specifiers": [],
-          "line": 26,
+          "line": 29,
           "kind": "dynamic"
         }
       ],
@@ -26699,109 +26699,109 @@
         {
           "name": "resolveOdvBaseUrl",
           "kind": "function",
-          "line": 48
+          "line": 51
         },
         {
           "name": "resolveManualPageUrl",
           "kind": "function",
-          "line": 78
+          "line": 83
         },
         {
           "name": "loadManualDocument",
           "kind": "function",
-          "line": 387
+          "line": 392
         }
       ],
       "declarations": [
         {
           "name": "resolveOdvBaseUrl",
           "kind": "function",
-          "line": 48
+          "line": 51
         },
         {
           "name": "resolveManualPageUrl",
           "kind": "function",
-          "line": 78
+          "line": 83
         },
         {
           "name": "absoluteManualUrl",
           "kind": "function",
-          "line": 93
+          "line": 98
         },
         {
           "name": "candidateFromOdvBase",
           "kind": "function",
-          "line": 110
+          "line": 115
         },
         {
           "name": "copyManualConfig",
           "kind": "function",
-          "line": 127
+          "line": 132
         },
         {
           "name": "config",
           "kind": "object",
-          "line": 128
+          "line": 133
         },
         {
           "name": "loadStandardManual",
           "kind": "function",
-          "line": 153
+          "line": 158
         },
         {
           "name": "loadAutoManual",
           "kind": "function",
-          "line": 190
+          "line": 195
         },
         {
           "name": "languageConfig",
           "kind": "object",
-          "line": 195
+          "line": 200
         },
         {
           "name": "isRewritableRelativeUrl",
           "kind": "function",
-          "line": 215
+          "line": 220
         },
         {
           "name": "rewriteManualSrcset",
           "kind": "function",
-          "line": 234
+          "line": 239
         },
         {
           "name": "isWhitespace",
           "kind": "function",
-          "line": 238
+          "line": 243
         },
         {
           "name": "sanitizeManualHtml",
           "kind": "function",
-          "line": 283
+          "line": 288
         },
         {
           "name": "rewriteManualHtml",
           "kind": "function",
-          "line": 297
+          "line": 302
         },
         {
           "name": "appendManualRefreshToken",
           "kind": "function",
-          "line": 343
+          "line": 348
         },
         {
           "name": "removeManualRefreshToken",
           "kind": "function",
-          "line": 359
+          "line": 364
         },
         {
           "name": "loadManualDocument",
           "kind": "function",
-          "line": 387
+          "line": 392
         },
         {
           "name": "fetchCandidate",
           "kind": "function",
-          "line": 391
+          "line": 396
         }
       ],
       "parseError": null,
@@ -26812,14 +26812,27 @@
             "key": "innerHTML",
             "description": "Direct DOM HTML assignment or access",
             "lines": [
-              332,
-              333,
-              334
+              337,
+              338,
+              339
             ]
           }
         ]
       },
       "doclets": [
+        {
+          "id": "MANUAL_PAGE_PATH",
+          "name": "MANUAL_PAGE_PATH",
+          "longname": "MANUAL_PAGE_PATH",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/Manual/manualDocument.js",
+          "line": 22,
+          "description": "The stand-alone manual page, relative to the ODV base.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
         {
           "id": "resolveOdvBaseUrl",
           "name": "resolveOdvBaseUrl",
@@ -26827,7 +26840,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 48,
+          "line": 51,
           "description": "The ODV base URL relative manual paths (and the stand-alone manual page) belong to: runtime config baseHref (set by odv.config.js from its own location), else the base src/app/boo...",
           "params": [
             {
@@ -26852,8 +26865,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 78,
-          "description": "Absolute URL of the stand-alone manual page ( &lt;ODV base&gt;/manual/ ), optionally opened at a section.",
+          "line": 83,
+          "description": "Absolute URL of the stand-alone manual page ( &lt;ODV base&gt;/manual/index.html ), optionally opened at a section.",
           "params": [
             {
               "name": "runtimeConfig",
@@ -26883,7 +26896,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 93,
+          "line": 98,
           "description": "",
           "params": [
             {
@@ -26914,7 +26927,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 110,
+          "line": 115,
           "description": "A relative candidate path (a default template, or a relative configured one) is fetched from the ODV base.",
           "params": [
             {
@@ -26945,7 +26958,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 127,
+          "line": 132,
           "description": "Copy only settings used by the selected source.",
           "params": [
             {
@@ -26976,7 +26989,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 153,
+          "line": 158,
           "description": "Load the preferred generated standard manual.",
           "params": [
             {
@@ -27025,7 +27038,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 190,
+          "line": 195,
           "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
           "params": [
             {
@@ -27074,7 +27087,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 215,
+          "line": 220,
           "description": "",
           "params": [
             {
@@ -27099,7 +27112,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 234,
+          "line": 239,
           "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
           "params": [
             {
@@ -27130,7 +27143,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 283,
+          "line": 288,
           "description": "",
           "params": [
             {
@@ -27155,7 +27168,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 297,
+          "line": 302,
           "description": "",
           "params": [
             {
@@ -27186,7 +27199,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 343,
+          "line": 348,
           "description": "",
           "params": [
             {
@@ -27217,7 +27230,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 359,
+          "line": 364,
           "description": "",
           "params": [
             {
@@ -27242,7 +27255,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/Manual/manualDocument.js",
-          "line": 387,
+          "line": 392,
           "description": "Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.",
           "params": [
             {
@@ -27313,14 +27326,14 @@
         {
           "source": "../../generated/standard-manual/manual.sv.js",
           "specifiers": [],
-          "line": 25,
+          "line": 28,
           "kind": "dynamic",
           "resolved": "src/generated/standard-manual/manual.sv.js"
         },
         {
           "source": "../../generated/standard-manual/manual.en.js",
           "specifiers": [],
-          "line": 26,
+          "line": 29,
           "kind": "dynamic",
           "resolved": "src/generated/standard-manual/manual.en.js"
         }
@@ -30016,9 +30029,9 @@
     },
     {
       "path": "src/components/SignatureDetailsDialog.jsx",
-      "lines": 573,
+      "lines": 684,
       "extension": ".jsx",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 20,
       "sourceSummary": "Signature details dialog (browser integrity).",
       "imports": [
         {
@@ -30026,10 +30039,11 @@
           "specifiers": [
             "React",
             "useEffect",
+            "useLayoutEffect",
             "useRef",
             "useState"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -30037,7 +30051,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -30045,7 +30059,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -30058,7 +30072,7 @@
             "normalizeSignatureIntegrity",
             "normalizeSigningTimeCheck"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -30067,7 +30081,7 @@
             "getSignatureFileHeading",
             "getSignatureFilePages"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -30075,7 +30089,7 @@
           "specifiers": [
             "SignatureTime"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static"
         }
       ],
@@ -30083,69 +30097,84 @@
         {
           "name": "SignatureDetailsDialog",
           "kind": "default",
-          "line": 194
+          "line": 234
         }
       ],
       "declarations": [
         {
           "name": "getKindLabel",
           "kind": "function",
-          "line": 49
+          "line": 51
         },
         {
           "name": "getSigningTimeSourceLabel",
           "kind": "function",
-          "line": 66
+          "line": 68
         },
         {
           "name": "getSignerSourceNote",
           "kind": "function",
-          "line": 88
+          "line": 90
         },
         {
           "name": "getPassedChecks",
           "kind": "function",
-          "line": 107
+          "line": 109
         },
         {
           "name": "getInformationLines",
           "kind": "function",
-          "line": 127
+          "line": 129
         },
         {
           "name": "getProblemLines",
           "kind": "function",
-          "line": 157
+          "line": 159
         },
         {
           "name": "ICON_BY_SEVERITY",
           "kind": "object",
-          "line": 173
+          "line": 175
+        },
+        {
+          "name": "measureCommonDialogHeight",
+          "kind": "function",
+          "line": 193
         },
         {
           "name": "SignatureDetailsDialog",
           "kind": "component",
-          "line": 194
+          "line": 234
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 235
+          "line": 277
+        },
+        {
+          "name": "handleResize",
+          "kind": "function",
+          "line": 322
         },
         {
           "name": "handleTabKeyDown",
           "kind": "function",
-          "line": 261
+          "line": 349
         },
         {
           "name": "handleTabTrap",
           "kind": "function",
-          "line": 277
+          "line": 365
         },
         {
           "name": "orEmpty",
           "kind": "function",
-          "line": 317
+          "line": 405
+        },
+        {
+          "name": "renderFileGroup",
+          "kind": "component",
+          "line": 416
         }
       ],
       "parseError": null,
@@ -30161,7 +30190,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 49,
+          "line": 51,
           "description": "",
           "params": [
             {
@@ -30192,7 +30221,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 66,
+          "line": 68,
           "description": "",
           "params": [
             {
@@ -30223,7 +30252,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 88,
+          "line": 90,
           "description": "Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify.",
           "params": [
             {
@@ -30254,7 +30283,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 107,
+          "line": 109,
           "description": "What was checked and passed for one signature, in display order.",
           "params": [
             {
@@ -30285,7 +30314,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 127,
+          "line": 129,
           "description": "Information lines after the always-on line: the integrity code of an intact or not-checked signature (problems are explained next to the status instead) and a signing-time check t...",
           "params": [
             {
@@ -30316,7 +30345,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 157,
+          "line": 159,
           "description": "Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning.",
           "params": [
             {
@@ -30347,10 +30376,47 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 173,
+          "line": 175,
           "description": "Material Icons ligature per severity (same as SignatureStatusBadge).",
           "params": [],
           "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "measureCommonDialogHeight",
+          "name": "measureCommonDialogHeight",
+          "longname": "measureCommonDialogHeight",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/SignatureDetailsDialog.jsx",
+          "line": 193,
+          "description": "The dialog height that suits every file tab: the natural height of the tallest file group that fits under the dialog's CSS max-height.",
+          "params": [
+            {
+              "name": "dialogNode",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "bodyNode",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": "Scrolling body of the dialog."
+            },
+            {
+              "name": "groupNode",
+              "type": "HTMLElement|null",
+              "optional": false,
+              "description": "Group of the selected file."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number|null",
+              "description": "Height in CSS pixels, or null when no group fits (every tab then takes the max-height and scrolls) or nothing can be measured."
+            }
+          ],
           "examples": 0
         },
         {
@@ -30360,7 +30426,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 194,
+          "line": 234,
           "description": "",
           "params": [
             {
@@ -30439,7 +30505,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 235,
+          "line": 277,
           "description": "",
           "params": [
             {
@@ -30459,7 +30525,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 261,
+          "line": 349,
           "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
           "params": [],
           "returns": [],
@@ -30472,7 +30538,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 277,
+          "line": 365,
           "description": "Keep Tab navigation inside the dialog while it is open.",
           "params": [],
           "returns": [],
@@ -30485,7 +30551,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 317,
+          "line": 405,
           "description": "",
           "params": [
             {
@@ -30496,6 +30562,37 @@
             }
           ],
           "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "SignatureDetailsDialog~renderFileGroup",
+          "name": "renderFileGroup",
+          "longname": "SignatureDetailsDialog~renderFileGroup",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/SignatureDetailsDialog.jsx",
+          "line": 416,
+          "description": "The content of one file's group: its heading (with file tabs) and its signatures.",
+          "params": [
+            {
+              "name": "file",
+              "type": "*",
+              "optional": false,
+              "description": "Signed file of the document, or null without file tabs."
+            },
+            {
+              "name": "list",
+              "type": "Array.<*>",
+              "optional": false,
+              "description": "Signatures to list."
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement",
+              "description": ""
+            }
+          ],
           "examples": 0
         }
       ],
@@ -30511,7 +30608,7 @@
             "normalizeSignatureIntegrity",
             "normalizeSigningTimeCheck"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureStatus.js"
         },
@@ -30521,7 +30618,7 @@
             "getSignatureFileHeading",
             "getSignatureFilePages"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
         },
@@ -30530,7 +30627,7 @@
           "specifiers": [
             "SignatureTime"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static",
           "resolved": "src/components/SignatureTime.jsx"
         }
@@ -30541,10 +30638,11 @@
           "specifiers": [
             "React",
             "useEffect",
+            "useLayoutEffect",
             "useRef",
             "useState"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -30552,7 +30650,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -30560,12 +30658,12 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 41,
+      "importanceScore": 42,
       "summary": "Signature details dialog (browser integrity).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -96553,7 +96651,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 39,
+      "line": 40,
       "description": "",
       "params": [
         {
@@ -96596,7 +96694,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 71,
+      "line": 72,
       "description": "Keep forward and reverse Tab navigation inside the open modal dialog.",
       "params": [],
       "returns": [],
@@ -96609,7 +96707,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 29,
+      "line": 30,
       "description": "Ids the dialog renders around the manual view.",
       "params": [],
       "returns": [],
@@ -96622,7 +96720,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-      "line": 23,
+      "line": 24,
       "description": "Id of the dialog title.",
       "params": [],
       "returns": [],
@@ -103477,7 +103575,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 93,
+      "line": 98,
       "description": "",
       "params": [
         {
@@ -103508,7 +103606,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 343,
+      "line": 348,
       "description": "",
       "params": [
         {
@@ -103539,7 +103637,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 110,
+      "line": 115,
       "description": "A relative candidate path (a default template, or a relative configured one) is fetched from the ODV base.",
       "params": [
         {
@@ -103570,7 +103668,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 127,
+      "line": 132,
       "description": "Copy only settings used by the selected source.",
       "params": [
         {
@@ -103601,7 +103699,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 215,
+      "line": 220,
       "description": "",
       "params": [
         {
@@ -103626,7 +103724,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 190,
+      "line": 195,
       "description": "Resolve auto mode per language: site HTML first, then generated standard content or its emergency HTML fallback.",
       "params": [
         {
@@ -103675,7 +103773,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 387,
+      "line": 392,
       "description": "Load the manual for one UI language exactly as the configured source mode prescribes, apply feature filtering to standard content and return sanitised HTML ready for rendering.",
       "params": [
         {
@@ -103724,7 +103822,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 153,
+      "line": 158,
       "description": "Load the preferred generated standard manual.",
       "params": [
         {
@@ -103767,13 +103865,26 @@
       "examples": 0
     },
     {
+      "id": "MANUAL_PAGE_PATH",
+      "name": "MANUAL_PAGE_PATH",
+      "longname": "MANUAL_PAGE_PATH",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/Manual/manualDocument.js",
+      "line": 22,
+      "description": "The stand-alone manual page, relative to the ODV base.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "removeManualRefreshToken",
       "name": "removeManualRefreshToken",
       "longname": "removeManualRefreshToken",
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 359,
+      "line": 364,
       "description": "",
       "params": [
         {
@@ -103798,8 +103909,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 78,
-      "description": "Absolute URL of the stand-alone manual page ( &lt;ODV base&gt;/manual/ ), optionally opened at a section.",
+      "line": 83,
+      "description": "Absolute URL of the stand-alone manual page ( &lt;ODV base&gt;/manual/index.html ), optionally opened at a section.",
       "params": [
         {
           "name": "runtimeConfig",
@@ -103829,7 +103940,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 48,
+      "line": 51,
       "description": "The ODV base URL relative manual paths (and the stand-alone manual page) belong to: runtime config baseHref (set by odv.config.js from its own location), else the base src/app/boo...",
       "params": [
         {
@@ -103854,7 +103965,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 297,
+      "line": 302,
       "description": "",
       "params": [
         {
@@ -103885,7 +103996,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 234,
+      "line": 239,
       "description": "Rewrite the URL in each srcset candidate while retaining its width or density descriptor.",
       "params": [
         {
@@ -103916,7 +104027,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/Manual/manualDocument.js",
-      "line": 283,
+      "line": 288,
       "description": "",
       "params": [
         {
@@ -105152,7 +105263,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 194,
+      "line": 234,
       "description": "",
       "params": [
         {
@@ -105231,7 +105342,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 127,
+      "line": 129,
       "description": "Information lines after the always-on line: the integrity code of an intact or not-checked signature (problems are explained next to the status instead) and a signing-time check t...",
       "params": [
         {
@@ -105262,7 +105373,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 49,
+      "line": 51,
       "description": "",
       "params": [
         {
@@ -105293,7 +105404,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 107,
+      "line": 109,
       "description": "What was checked and passed for one signature, in display order.",
       "params": [
         {
@@ -105324,7 +105435,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 157,
+      "line": 159,
       "description": "Problem explanation shown next to the status: the integrity code of a warning or error, then a signing-time warning.",
       "params": [
         {
@@ -105355,7 +105466,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 88,
+      "line": 90,
       "description": "Note for a signer name that is not backed by a verified signature: a name from the self-declared PDF /Name, or a certificate name on a signature that did not verify.",
       "params": [
         {
@@ -105386,7 +105497,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 66,
+      "line": 68,
       "description": "",
       "params": [
         {
@@ -105417,7 +105528,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 235,
+      "line": 277,
       "description": "",
       "params": [
         {
@@ -105437,7 +105548,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 261,
+      "line": 349,
       "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
       "params": [],
       "returns": [],
@@ -105450,7 +105561,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 277,
+      "line": 365,
       "description": "Keep Tab navigation inside the dialog while it is open.",
       "params": [],
       "returns": [],
@@ -105463,10 +105574,47 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 173,
+      "line": 175,
       "description": "Material Icons ligature per severity (same as SignatureStatusBadge).",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "measureCommonDialogHeight",
+      "name": "measureCommonDialogHeight",
+      "longname": "measureCommonDialogHeight",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/SignatureDetailsDialog.jsx",
+      "line": 193,
+      "description": "The dialog height that suits every file tab: the natural height of the tallest file group that fits under the dialog's CSS max-height.",
+      "params": [
+        {
+          "name": "dialogNode",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "bodyNode",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": "Scrolling body of the dialog."
+        },
+        {
+          "name": "groupNode",
+          "type": "HTMLElement|null",
+          "optional": false,
+          "description": "Group of the selected file."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number|null",
+          "description": "Height in CSS pixels, or null when no group fits (every tab then takes the max-height and scrolls) or nothing can be measured."
+        }
+      ],
       "examples": 0
     },
     {
@@ -105476,7 +105624,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 317,
+      "line": 405,
       "description": "",
       "params": [
         {
@@ -105487,6 +105635,37 @@
         }
       ],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "SignatureDetailsDialog~renderFileGroup",
+      "name": "renderFileGroup",
+      "longname": "SignatureDetailsDialog~renderFileGroup",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/SignatureDetailsDialog.jsx",
+      "line": 416,
+      "description": "The content of one file's group: its heading (with file tabs) and its signatures.",
+      "params": [
+        {
+          "name": "file",
+          "type": "*",
+          "optional": false,
+          "description": "Signed file of the document, or null without file tabs."
+        },
+        {
+          "name": "list",
+          "type": "Array.<*>",
+          "optional": false,
+          "description": "Signatures to list."
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {

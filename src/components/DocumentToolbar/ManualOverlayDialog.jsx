@@ -3,7 +3,8 @@
  * Manual overlay: modal dialog chrome (title bar, reload, open-in-new-tab and close buttons,
  * focus trap, Escape and backdrop handling) around the shared {@link ManualView}, which loads,
  * filters, searches and navigates the manual. The open-in-new-tab link points at the stand-alone
- * manual page (`manual/` next to the viewer bundle) with the current section as the fragment.
+ * manual page (`manual/index.html` next to the viewer bundle) with the current section as the
+ * fragment.
  *
  * Manual text and linked assets stay out of the compiled React bundle (site HTML under help/site/)
  * or in lazily loaded generated chunks (the standard manual).
@@ -149,7 +150,7 @@ export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = 
     }
   };
 
-  // Stand-alone manual page at <ODV base>/manual/, built from the ODV base (runtime config
+  // Stand-alone manual page at <ODV base>/manual/index.html, built from the ODV base (runtime config
   // `baseHref`, as the manual loader resolves it), so it is right under a subpath such as
   // /OpenDocViewer/ and when the viewer page is not the ODV folder itself. The current section
   // rides along as the fragment.

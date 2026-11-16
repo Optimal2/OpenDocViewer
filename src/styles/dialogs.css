@@ -2190,6 +2190,19 @@ a.odv-help-close-icon {
   padding: 12px 20px 12px;
 }
 
+/* One dialog height across the file tabs (SignatureDetailsDialog.jsx): for the one render that
+   measures, the other files' groups are laid out without taking room or being seen, and the
+   body shows no scrollbar so every group is measured at the same width. Never painted. */
+.odv-signature-body.is-measuring {
+  overflow: hidden;
+}
+
+.odv-signature-file-measure {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
 .odv-signature-entry {
   padding: 10px 0 14px;
   border-bottom: 1px solid var(--odv-border, #d5dae1);

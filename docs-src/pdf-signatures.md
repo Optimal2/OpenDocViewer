@@ -808,7 +808,12 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   tabs look like tabs on a rail: the active tab is filled with inverted text/surface colours,
   and every tab shows the file's page range inside the document. The selected file is repeated
   in the group heading ("File k of m: name", or "File k of m" without a name) with its page
-  range ("Pages 19–24", the thumbnail "S" numbers), followed by its signatures. With one signed
+  range ("Pages 19–24", the thumbnail "S" numbers), followed by its signatures. With file tabs
+  the dialog keeps one height whichever tab is selected: the height of the tallest file that
+  fits under the dialog's max-height without scrolling, and a taller file scrolls inside it
+  (when no file fits, every tab takes the max-height). The height is measured at every
+  opening, before the first paint, and again while the dialog is open when the window is
+  resized. With one signed
   file it is a plain list. Each signature first lists what was checked and passed (for an
   intact signature: the content is unchanged and the signature matches the certificate; plus
   a signing time within the certificate validity when the parser reports it), then the
