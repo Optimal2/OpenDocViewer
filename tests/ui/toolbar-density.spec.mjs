@@ -24,6 +24,12 @@ import { loadSession } from './fixtureSession.mjs';
  */
 const WIDTH_EXCEPTIONS = ['.toolbar-split-arrow', '.odv-signature-overview-button'];
 
+/**
+ * The split-menu arrow under a mouse or a pen: the floor of the touch-target policy
+ * (WCAG 2.2 AA 2.5.8, docs-src/runtime-configuration.md). Under a finger it is a full button.
+ */
+const SPLIT_ARROW_WIDTH = 24;
+
 /** @param {import('@playwright/test').Page} page */
 function measureToolbar(page) {
   return page.evaluate((widthExceptions) => {
@@ -106,7 +112,17 @@ function measureToolbar(page) {
       frameGaps,
       unframedOuterHeights: [...new Set(unframed.map(marginBoxHeight))],
       buttonHeights: [...new Set(buttons.map((button) => Math.round(rect(button).height)))],
-      minButtonWidth: Math.min(...buttons.map((button) => Math.round(rect(button).width))),
+      // The split-menu arrow is the narrow half of its button (see splitArrows).
+      minButtonWidth: Math.min(...buttons.filter((button) => !button.matches('.toolbar-split-arrow')).map((button) => Math.round(rect(button).width))),
+      splitArrows: buttons.filter((button) => button.matches('.toolbar-split-arrow')).map((button) => ({
+        width: Math.round(rect(button).width * 10) / 10,
+        height: Math.round(rect(button).height),
+        mainWidth: Math.round(rect(button.parentElement.querySelector('.toolbar-split-main')).width),
+        // The icon's own size against the room inside the arrow (the glyph box is as wide as
+        // its font size); read from the styles, so it holds whether or not the icon font loaded.
+        iconSize: parseFloat(getComputedStyle(button.querySelector('.material-icons')).fontSize),
+        innerWidth: button.clientWidth,
+      })),
       iconSizes: [...new Set(Array.from(toolbar.querySelectorAll('button > .material-icons'))
         .filter((icon) => !icon.closest('.toolbar-split-arrow, .toolbar-popup-menu'))
         .map((icon) => getComputedStyle(icon).fontSize))],
@@ -155,7 +171,16 @@ for (const density of DENSITIES) {
       expect(Math.round(metrics.toolbarHeight)).toBe(density.toolbarHeight);
       expect(metrics.buttonHeights).toEqual([density.buttonHeight]);
       expect(metrics.groupHeights).toEqual([density.groupHeight, density.groupHeight, density.groupHeight]);
-      expect(metrics.minButtonWidth).toBeGreaterThanOrEqual(density.buttonHeight); // split-menu arrows included
+      expect(metrics.minButtonWidth).toBeGreaterThanOrEqual(density.buttonHeight);
+      // Under a mouse the split-menu arrow is narrower than its button, never under the 24px
+      // floor, and as tall as the button.
+      expect(metrics.splitArrows.length).toBeGreaterThanOrEqual(1);
+      for (const arrow of metrics.splitArrows) {
+        expect(arrow.width).toBe(SPLIT_ARROW_WIDTH);
+        expect(arrow.width).toBeLessThan(arrow.mainWidth);
+        expect(arrow.height).toBe(density.buttonHeight);
+        expect(arrow.iconSize).toBeLessThanOrEqual(arrow.innerWidth);
+      }
       expect(metrics.iconSizes).toEqual([density.iconSize]);
       expect(Math.round(metrics.overview.height)).toBe(density.buttonHeight);
       expect(metrics.endButtons).toEqual([density.buttonHeight, density.buttonHeight, density.buttonHeight]);
@@ -205,9 +230,15 @@ for (const density of DENSITIES) {
     test(`toolbar buttons keep at least ${density.buttonHeight}px touch targets, 4.5:1 contrast and a visible keyboard focus ring`, async ({ page }) => {
       await loadSession(page, { siteConfig: density.siteConfig });
       await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
-      const sizes = await page.locator('.toolbar button:visible').evaluateAll((buttons) => buttons
+      // The split-menu arrow is narrower under a mouse, at the 24px floor; under a finger it is
+      // a full target (below).
+      const sizes = await page.locator('.toolbar button:visible:not(.toolbar-split-arrow)').evaluateAll((buttons) => buttons
         .map((button) => { const box = button.getBoundingClientRect(); return Math.min(box.width, box.height); }));
       expect(Math.min(...sizes)).toBeGreaterThanOrEqual(density.buttonHeight);
+      const arrowSizes = await page.locator('.toolbar button.toolbar-split-arrow:visible').evaluateAll((buttons) => buttons
+        .map((button) => { const box = button.getBoundingClientRect(); return Math.min(box.width, box.height); }));
+      expect(arrowSizes.length).toBeGreaterThanOrEqual(1);
+      expect(Math.min(...arrowSizes)).toBeGreaterThanOrEqual(24);
 
       const contrasts = await page.locator('.toolbar button:visible:enabled').evaluateAll((buttons) => {
         const luminance = (color) => color.match(/[\d.]+/g).slice(0, 3).map(Number)
@@ -238,6 +269,25 @@ for (const density of DENSITIES) {
     });
   });
 }
+
+test.describe('under a coarse pointer (touch)', () => {
+  test.use({ hasTouch: true, isMobile: true });
+
+  for (const density of DENSITIES) {
+    test(`${density.name}: every toolbar button, the split-menu arrow included, is at least ${density.buttonHeight}px both ways`, async ({ page }) => {
+      await loadSession(page, { siteConfig: density.siteConfig });
+      await expect(page.locator('.toolbar button.toolbar-split-arrow').first()).toBeVisible();
+      expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true);
+      const sizes = await page.locator('.toolbar button:visible').evaluateAll((buttons) => buttons
+        .map((button) => { const box = button.getBoundingClientRect(); return Math.min(box.width, box.height); }));
+      expect(Math.min(...sizes)).toBeGreaterThanOrEqual(density.buttonHeight);
+      const arrowWidths = await page.locator('.toolbar button.toolbar-split-arrow:visible').evaluateAll((buttons) => buttons
+        .map((button) => Math.round(button.getBoundingClientRect().width)));
+      expect(arrowWidths.length).toBeGreaterThanOrEqual(1);
+      expect([...new Set(arrowWidths)]).toEqual([density.buttonHeight]);
+    });
+  }
+});
 
 test('the theme-menu checkbox switches the toolbar density and the choice survives a reload', async ({ page }) => {
   await loadSession(page);

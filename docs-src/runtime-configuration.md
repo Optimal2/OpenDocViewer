@@ -989,6 +989,9 @@ overview button (a status badge with a count, outside the groups).
 ### Touch-target policy
 
 - Compact toolbar: every button is at least 26 x 26 px. Large toolbar: at least 32 x 32 px.
+- The split-menu arrow is the one control at the floor: 24 px wide (and as tall as its button)
+  under a mouse or a pen, in both densities. Under a coarse pointer (`@media (pointer: coarse)`,
+  a touch screen as the primary pointer) it is a full button, 26 or 32 px wide.
 - Both are above the WCAG 2.2 AA minimum target size of 24 x 24 px (success criterion 2.5.8), which
   is the floor for any new toolbar control; do not add exceptions below it.
 - Text on buttons keeps at least 4.5:1 contrast against the button colour in both densities.

@@ -470,15 +470,25 @@
   border-bottom-right-radius: 0;
 }
 
-/* The split-menu arrow is a full touch target in both densities (26px compact, 32px large). */
+/* The split-menu arrow is the narrow half of its button under a mouse or a pen: 24px wide in both
+   densities, the floor of the touch-target policy (docs-src/runtime-configuration.md), and as
+   tall as the button. */
 .toolbar .toolbar-split-arrow {
-  min-width: var(--odv-toolbar-button-size);
-  width: var(--odv-toolbar-button-size);
+  min-width: 24px;
+  width: 24px;
   padding-inline: 0;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: 1px solid rgba(255, 255, 255, 0.26);
   box-shadow: var(--box-shadow);
+}
+
+/* Under a finger it stays a full touch target in both densities (26px compact, 32px large). */
+@media (pointer: coarse) {
+  .toolbar .toolbar-split-arrow {
+    min-width: var(--odv-toolbar-button-size);
+    width: var(--odv-toolbar-button-size);
+  }
 }
 
 .toolbar .toolbar-split-arrow .material-icons {
