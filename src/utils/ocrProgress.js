@@ -43,6 +43,8 @@ export const OCR_PROGRESS_FALLBACK = Object.freeze({
   shortPending: 'about \u2013 min',
   workers: '{workers} workers',
   workerOne: '1 worker',
+  notRecognised: '{pages} not recognised',
+  notRecognisedOne: '1 not recognised',
 });
 
 /** Under a minute the short form counts seconds in steps of this many. */

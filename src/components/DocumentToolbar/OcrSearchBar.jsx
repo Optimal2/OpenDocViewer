@@ -51,6 +51,12 @@
  * the button's description saying what the last climb found. Without a boost (the default)
  * neither exists.
  *
+ * Pages that were skipped or failed (not loaded, not a format OCR reads, own text that could not
+ * be placed, a recognition that failed) never join the count, so the details say how many they
+ * are right after it ("5 not recognised"): a document with such pages would otherwise look as
+ * if recognition had stopped short of the end. A page that was recognised and holds no words
+ * ("No text found") is done and is counted as ready, as it always was.
+ *
  * With `ocr.recognizeWholeDocument` on, while pages wait for OCR and enough of them have been
  * recognised to tell the pace, the details say roughly how long the rest will take
  * (utils/ocrProgress.js). Without it only the few pages around the shown one are ever queued,
@@ -176,14 +182,18 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // pace that no longer holds is worse than none, and without a new page nothing else would
   // take it away.
   const wholeDocument = isOcrWholeDocumentEnabled();
-  const [pendingPages, enginePages, activePages, unfinishedPages, queuedPages] = useMemo(() => {
+  const [pendingPages, enginePages, activePages, unfinishedPages, queuedPages, endedWithoutTextPages] = useMemo(() => {
     let pending = 0;
     let engine = 0;
     let active = 0;
     let unfinished = 0;
     let queued = 0;
+    let endedWithoutText = 0;
     for (const page of searchablePages) {
       const outcome = page.outcome;
+      // Final and not done, except the page that met an engine that cannot start: that is the
+      // session's failure, which the status says, not this page's.
+      if (OCR_FINAL_STATUSES.has(outcome?.status) && outcome.status !== 'done' && !String(outcome.reason || '').startsWith('engine:')) endedWithoutText += 1;
       if (OCR_ACTIVE_STATUSES.has(outcome?.status)) active += 1;
       if (OCR_PENDING_STATUSES.has(outcome?.status)) queued += 1;
       if (!OCR_FINAL_STATUSES.has(outcome?.status)) unfinished += 1;
@@ -191,8 +201,23 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
       if (OCR_PENDING_STATUSES.has(outcome?.status)) pending += 1;
       else if (outcome?.status === 'done' && outcome.source !== 'pdf-text') engine += 1;
     }
-    return [pending, engine, active, unfinished, queued];
+    return [pending, engine, active, unfinished, queued, endedWithoutText];
   }, [searchablePages, wholeDocument]);
+  // Pages whose outcome is final and is not `done`: skipped (the page did not load, is not a
+  // format OCR reads, or has own text that could not be placed) or failed. They never join the
+  // count, so a document with such pages ends on "45/50" and, without a word about them, looks
+  // as if recognition had stopped. A page that failed because no engine could start is left
+  // out above; pages skipped for reasons of their own are named whatever the engine does.
+  const notRecognisedPages = endedWithoutTextPages;
+  let notRecognisedText = '';
+  let notRecognisedLongText = '';
+  if (notRecognisedPages === 1) {
+    notRecognisedText = t('ocr.progress.notRecognisedOne', { defaultValue: OCR_PROGRESS_FALLBACK.notRecognisedOne });
+    notRecognisedLongText = t('ocr.search.notRecognisedLongOne', { defaultValue: '1 page was not recognised' });
+  } else if (notRecognisedPages > 1) {
+    notRecognisedText = t('ocr.progress.notRecognised', { pages: notRecognisedPages, defaultValue: OCR_PROGRESS_FALLBACK.notRecognised });
+    notRecognisedLongText = t('ocr.search.notRecognisedLong', { pages: notRecognisedPages, defaultValue: `${notRecognisedPages} pages were not recognised` });
+  }
   const progressRef = useRef(/** @type {*} */ (null));
   const [timeLeftMs, setTimeLeftMs] = useState(/** @type {(number|null)} */ (null));
   useEffect(() => {
@@ -255,7 +280,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     sizes.observe(toolbar);
     sizes.observe(spacer);
     return () => sizes.disconnect();
-  }, [detailsShown, fitDetails, recognisedPages, pages.length, timeLeftShortText, workersText, boostInfo?.badge]);
+  }, [detailsShown, fitDetails, recognisedPages, pages.length, notRecognisedText, timeLeftShortText, workersText, boostInfo?.badge]);
   // The boost's badge leaves at the first input, and the move that brings the pointer onto the
   // button is input: the button would lose the badge's width at once, before the details have
   // begun to unfold, and a pointer that came in over the badge would be left outside a button
@@ -285,12 +310,13 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   if (detailsWidth !== null) detailsStyle['--odv-ocr-details-max'] = `${detailsWidth}px`;
   if (detailsHold !== null && !boostBadge && !open) detailsStyle.minWidth = `${detailsHold}px`;
   // The details the button unfolds under the pointer and with keyboard focus (styles/ocr.css):
-  // the count behind a thin divider, then the time left and the pages being worked on while
-  // there are any. For the eye only: the button's description spells them out.
+  // the count behind a thin divider, then the pages that were not recognised when there are
+  // any, then the time left and the pages being worked on while there are any. For the eye
+  // only: the button's description spells them out.
   const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
   // Spelt out for assistive technology: what is known (no placeholder, no "0 workers"), and
   // last the boost's line.
-  const describedText = [coverageTitle, timeLeftText, activePages > 0 ? workersText : '', boostText].filter(Boolean).join(' · ');
+  const describedText = [coverageTitle, notRecognisedLongText, timeLeftText, activePages > 0 ? workersText : '', boostText].filter(Boolean).join(' · ');
   const details = (
     <span
       className="toolbar-ocr-search-details"
@@ -300,6 +326,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     >
       <span className="toolbar-ocr-search-details-divider" />
       <span className="toolbar-ocr-search-detail" data-odv-ocr="count">{`${recognisedPages}/${pages.length}`}</span>
+      {notRecognisedText ? <span className="toolbar-ocr-search-detail" data-odv-ocr="not-recognised">{notRecognisedText}</span> : null}
       {timeLeftShortText ? <span className="toolbar-ocr-search-detail" data-odv-ocr="time-left">{timeLeftShortText}</span> : null}
       {workersText ? <span className="toolbar-ocr-search-detail" data-odv-ocr="workers">{workersText}</span> : null}
     </span>

@@ -179,7 +179,8 @@
 }
 
 /* The search button holds its icon and, folded away at rest, its details: behind a thin
-   divider the count of pages with a text layer over all pages ("4/300"), roughly how long the
+   divider the count of pages with a text layer over all pages ("4/300"), the pages that were
+   not recognised when there are any ("5 not recognised"), roughly how long the
    waiting pages will take and how many pages are being worked on. Under the pointer and with
    keyboard focus the button grows to the right for them in a short ease, after a moment's
    wait so a pointer on its way across the toolbar does not set it off, and folds back at once

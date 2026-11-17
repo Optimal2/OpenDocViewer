@@ -469,13 +469,17 @@
       "shortHours": "about {hours} h {minutes} min",
       "shortPending": "about – min",
       "workers": "{workers} workers",
-      "workerOne": "1 worker"
+      "workerOne": "1 worker",
+      "notRecognised": "{pages} not recognised",
+      "notRecognisedOne": "1 not recognised"
     },
     "search": {
       "open": "Search in the recognised text",
       "placeholder": "Search",
       "position": "{current}/{total}",
       "coverageLong": "{done} of {pages} pages ready",
+      "notRecognisedLong": "{pages} pages were not recognised",
+      "notRecognisedLongOne": "1 page was not recognised",
       "positionLong": "Match {current} of {total}",
       "none": "No matches",
       "coverage": "{done}/{pages} pages searched",

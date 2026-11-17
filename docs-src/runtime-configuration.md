@@ -884,7 +884,13 @@ not a toolbar button, see below:
   nothing that changes while pages are recognised; when the displayed page has no text to
   search, the tooltip adds why (the last four statuses and "Not recognised"). Under the pointer, and with keyboard focus, the button grows to the right in a
   short ease and shows its details: behind a thin divider the count of pages the search can
-  cover over all pages ("4/300"), then, while there are any, roughly how long the waiting pages
+  cover over all pages ("4/300"), then how many pages were skipped or failed when there are
+  any ("5 not recognised": pages that did not load, formats OCR does not read, own text that
+  could not be placed, and pages whose recognition failed; they never join the count, so with
+  `ocr.recognizeWholeDocument` a document with such pages ends below "300/300", and this is
+  what says why; a page that was recognised and holds no words is ready and is in the count;
+  a page that failed because no engine could start is not named, the status says that), then,
+  while there are any, roughly how long the waiting pages
   will take ("about 6 min", "about 40 s") and how many pages are being worked on right now
   ("4 workers", the pages in flight: a PDF page whose own text is being read counts too).
   With `ocr.recognizeWholeDocument` on, while pages are still to be recognised the time and

@@ -237,16 +237,16 @@
 | <code>ManualOverlayDialog~handleManualTabTrap</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:72</code> | Keep forward and reverse Tab navigation inside the open modal dialog. |
 | <code>MANUAL_DIALOG_IDS</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:30</code> | Ids the dialog renders around the manual view. |
 | <code>MANUAL_TITLE_ID</code> | constant | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:24</code> | Id of the dialog title. |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:106</code> |  |
-| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:446</code> |  |
-| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:483</code> |  |
-| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:491</code> | Escape closes the field from any of its controls. |
-| <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:91</code> |  |
-| <code>OCR_ACTIVE_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:81</code> | Statuses of a page being worked on right now: one for each of the queue&#39;s pages in flight. |
-| <code>OCR_FINAL_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:83</code> | Statuses of a page whose outcome is final: nothing more will be done about it. |
-| <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:79</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
-| <code>OCR_TOOLTIP_STATUS_KEYS</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:88</code> | Status keys \(utils/ocrStatus.js\) of a displayed page without text to search, for a reason that stands still: said in the search button&#39;s tooltip, which otherwise only names the bu... |
-| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:467</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:112</code> |  |
+| <code>OcrSearchBar~goToMatch</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:473</code> |  |
+| <code>OcrSearchBar~handleInputKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:510</code> |  |
+| <code>OcrSearchBar~handlePanelKeyDown</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:518</code> | Escape closes the field from any of its controls. |
+| <code>matchIdOf</code> | function | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:97</code> |  |
+| <code>OCR_ACTIVE_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:87</code> | Statuses of a page being worked on right now: one for each of the queue&#39;s pages in flight. |
+| <code>OCR_FINAL_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:89</code> | Statuses of a page whose outcome is final: nothing more will be done about it. |
+| <code>OCR_PENDING_STATUSES</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:85</code> | Statuses \(src/ocr/queue.js OCR_PAGE_STATUS\) of a page still waiting for OCR. |
+| <code>OCR_TOOLTIP_STATUS_KEYS</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:94</code> | Status keys \(utils/ocrStatus.js\) of a displayed page without text to search, for a reason that stands still: said in the search button&#39;s tooltip, which otherwise only names the bu... |
+| <code>OcrSearchBar~step</code> | constant | <code>src/components/DocumentToolbar/OcrSearchBar.jsx:494</code> | Enter / the arrows: a current match on another page is shown first \(the position does not move\), unless its page was already asked for \(a hidden page lands on the nearest shown on... |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/OcrToolbarActions.jsx:36</code> |  |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>resolvePrintFieldLabel</code> | function | <code>src/components/DocumentToolbar/printFieldLabels.js:17</code> |  |
@@ -1342,17 +1342,17 @@
 | <code>makeOcrPageKey</code> | function | <code>src/utils/ocrPageKey.js:18</code> |  |
 | <code>ocrPageKeyOf</code> | function | <code>src/utils/ocrPageKey.js:29</code> |  |
 | <code>SEPARATOR</code> | constant | <code>src/utils/ocrPageKey.js:11</code> | Key of one document page in the OCR result map \( ocrPages on the viewer context\). |
-| <code>createOcrProgressEstimator</code> | function | <code>src/utils/ocrProgress.js:58</code> |  |
-| <code>describeOcrTimeLeft</code> | function | <code>src/utils/ocrProgress.js:120</code> | The words for an estimate: which ocr.progress key, and its figures. |
-| <code>describeOcrTimeLeftShort</code> | function | <code>src/utils/ocrProgress.js:136</code> | The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures. |
-| <code>expiresInMs</code> | function | <code>src/utils/ocrProgress.js:106</code> |  |
+| <code>createOcrProgressEstimator</code> | function | <code>src/utils/ocrProgress.js:60</code> |  |
+| <code>describeOcrTimeLeft</code> | function | <code>src/utils/ocrProgress.js:122</code> | The words for an estimate: which ocr.progress key, and its figures. |
+| <code>describeOcrTimeLeftShort</code> | function | <code>src/utils/ocrProgress.js:138</code> | The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures. |
+| <code>expiresInMs</code> | function | <code>src/utils/ocrProgress.js:108</code> |  |
 | <code>MIN_SAMPLES</code> | constant | <code>src/utils/ocrProgress.js:33</code> | Measurements kept however old they are, so a slow client still gets a pace. |
 | <code>OCR_PROGRESS_FALLBACK</code> | constant | <code>src/utils/ocrProgress.js:36</code> | Keys of ocr.progress and their English fallbacks. |
 | <code>OCR_PROGRESS_MIN_PAGES</code> | constant | <code>src/utils/ocrProgress.js:31</code> | Pages that must have been finished since the starting point before a pace is trusted. |
 | <code>OCR_PROGRESS_WINDOW_MS</code> | constant | <code>src/utils/ocrProgress.js:29</code> | Finished pages older than this say nothing about the pace now. |
-| <code>record</code> | function | <code>src/utils/ocrProgress.js:70</code> | Tell the estimator how many pages are finished now. |
-| <code>remainingMs</code> | function | <code>src/utils/ocrProgress.js:91</code> |  |
-| <code>SHORT_SECONDS_STEP</code> | constant | <code>src/utils/ocrProgress.js:49</code> | Under a minute the short form counts seconds in steps of this many. |
+| <code>record</code> | function | <code>src/utils/ocrProgress.js:72</code> | Tell the estimator how many pages are finished now. |
+| <code>remainingMs</code> | function | <code>src/utils/ocrProgress.js:93</code> |  |
+| <code>SHORT_SECONDS_STEP</code> | constant | <code>src/utils/ocrProgress.js:51</code> | Under a minute the short form counts seconds in steps of this many. |
 | <code>findOcrMatches</code> | function | <code>src/utils/ocrSearch.js:73</code> | All matches of a term in an index, in reading order, without overlaps. |
 | <code>findOcrMatchesInOutcome</code> | function | <code>src/utils/ocrSearch.js:102</code> | Matches of a term in one outcome \(the index is built on first use\). |
 | <code>indexes</code> | constant | <code>src/utils/ocrSearch.js:32</code> | Index per outcome; outcomes are immutable objects from the result cache. |

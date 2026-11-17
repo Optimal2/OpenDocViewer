@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 106,
+    "line": 112,
     "description": "",
     "params": [
       {
@@ -6468,7 +6468,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 446,
+    "line": 473,
     "description": "",
     "params": [
       {
@@ -6488,7 +6488,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 483,
+    "line": 510,
     "description": "",
     "params": [
       {
@@ -6508,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 491,
+    "line": 518,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 91,
+    "line": 97,
     "description": "",
     "params": [
       {
@@ -6541,7 +6541,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 81,
+    "line": 87,
     "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
     "params": [],
     "returns": [],
@@ -6554,7 +6554,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 83,
+    "line": 89,
     "description": "Statuses of a page whose outcome is final: nothing more will be done about it.",
     "params": [],
     "returns": [],
@@ -6567,7 +6567,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 79,
+    "line": 85,
     "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
     "params": [],
     "returns": [],
@@ -6580,7 +6580,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 88,
+    "line": 94,
     "description": "Status keys (utils/ocrStatus.js) of a displayed page without text to search, for a reason that stands still: said in the search button's tooltip, which otherwise only names the bu...",
     "params": [],
     "returns": [],
@@ -6593,7 +6593,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 467,
+    "line": 494,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -32725,7 +32725,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 58,
+    "line": 60,
     "description": "",
     "params": [
       {
@@ -32768,7 +32768,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 120,
+    "line": 122,
     "description": "The words for an estimate: which ocr.progress key, and its figures.",
     "params": [
       {
@@ -32793,7 +32793,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 136,
+    "line": 138,
     "description": "The short words for an estimate, for the details the button unfolds: which ocr.progress key, and its figures.",
     "params": [
       {
@@ -32818,7 +32818,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 106,
+    "line": 108,
     "description": "",
     "params": [],
     "returns": [
@@ -32888,7 +32888,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 70,
+    "line": 72,
     "description": "Tell the estimator how many pages are finished now.",
     "params": [
       {
@@ -32908,7 +32908,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 91,
+    "line": 93,
     "description": "",
     "params": [
       {
@@ -32933,7 +32933,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrProgress.js",
-    "line": 49,
+    "line": 51,
     "description": "Under a minute the short form counts seconds in steps of this many.",
     "params": [],
     "returns": [],

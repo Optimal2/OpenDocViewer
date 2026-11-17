@@ -213,7 +213,7 @@ describe('OcrSearchBar', () => {
       expect(detail('time-left')).toBe('about 6 min');
       act(() => { vi.advanceTimersByTime(10001); });
       expect(detail('time-left')).toBe('about \u2013 min');
-      expect(described()).toBe('4 of 40 pages ready');
+      expect(described()).toBe('4 of 40 pages ready · 1 page was not recognised');
     });
 
     it('takes its pace from the pages the engine recognised: a PDF page with its own text is done at once and is no pace', () => {
@@ -250,7 +250,7 @@ describe('OcrSearchBar', () => {
       }
       // 34 pages wait (40 less 4 done, one skipped, one failed) at 60/34 × 10 s a page: ten minutes.
       expect(detail('time-left')).toBe('about 10 min');
-      expect(described()).toBe('4 of 40 pages ready · about 10 min left');
+      expect(described()).toBe('4 of 40 pages ready · 2 pages were not recognised · about 10 min left');
     });
   });
 
@@ -476,6 +476,72 @@ describe('OcrSearchBar', () => {
       withAllDetails({ searchEnabled: false });
       pointer('pointerover');
       expect(detailsMax()).toBe('220px');
+    });
+  });
+
+  describe('pages that were not recognised', () => {
+    const FIVE = Array.from({ length: 5 }, (_, index) => ({ sourceKey: 'doc', pageIndex: index }));
+
+    it('says nothing while every page with an outcome is done, with words or without ("No text found" is ready)', () => {
+      render({ allPages: FIVE, ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: done([]), [KEY(2)]: { status: 'queued' } } });
+      expect(detail('count')).toBe('2/5');
+      expect(detail('not-recognised')).toBeNull();
+      expect(described()).toBe('2 of 5 pages ready');
+    });
+
+    it('names them right after the count, skipped and failed alike, so a count that ends below the page count says why', () => {
+      render({ allPages: FIVE, ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'skipped', reason: 'failed-page' } } });
+      expect(detail('count')).toBe('1/5');
+      expect(detail('not-recognised')).toBe('1 not recognised');
+      expect(described()).toBe('1 of 5 pages ready · 1 page was not recognised');
+
+      render({
+        allPages: FIVE,
+        ocrPages: {
+          [KEY(0)]: done(['Hej']),
+          [KEY(1)]: { status: 'skipped', reason: 'failed-page' },
+          [KEY(2)]: { status: 'failed', reason: 'RuntimeError: Aborted(OOM)' },
+          [KEY(3)]: { status: 'skipped', reason: 'text-layer' },
+          [KEY(4)]: done(['Då']),
+        },
+      });
+      expect(detail('count')).toBe('2/5');
+      expect(detail('not-recognised')).toBe('3 not recognised');
+      expect(described()).toBe('2 of 5 pages ready · 3 pages were not recognised');
+      // Right after the count: with too little room the details go from the end, and this one last.
+      const details = Array.from(container.querySelectorAll('[data-odv-ocr="details"] .toolbar-ocr-search-detail'), (node) => node.getAttribute('data-odv-ocr'));
+      expect(details).toEqual(['count', 'not-recognised']);
+      // For the eye only, like the other details; the tooltip stays what it was.
+      expect(container.querySelector('[data-odv-ocr="not-recognised"]').closest('[aria-hidden="true"]')).not.toBeNull();
+    });
+
+    it('stands before the time and the workers while the whole document is still being recognised', () => {
+      window.__ODV_CONFIG__ = { ocr: { enabled: true, recognizeWholeDocument: true } };
+      try {
+        render({
+          allPages: FIVE,
+          ocrPages: { [KEY(0)]: done(['Hej']), [KEY(1)]: { status: 'failed', reason: 'x' }, [KEY(2)]: { status: 'recognizing' }, [KEY(3)]: { status: 'queued' } },
+        });
+        expect([detail('count'), detail('not-recognised'), detail('time-left'), detail('workers')]).toEqual(['1/5', '1 not recognised', 'about \u2013 min', '1 worker']);
+        expect(described()).toBe('1 of 5 pages ready · 1 page was not recognised · 1 worker');
+      } finally {
+        delete window.__ODV_CONFIG__;
+      }
+    });
+
+    it('leaves out the page that met an engine that cannot start (the status says that), and still names pages skipped for reasons of their own', () => {
+      render({ allPages: FIVE, ocrPages: { [KEY(0)]: { status: 'failed', reason: 'engine:csp' } }, ocrEngineFailure: 'csp' });
+      expect(button().getAttribute('data-ocr-state')).toBe('unavailable');
+      expect(detail('not-recognised')).toBeNull();
+      expect(described()).toBe('0 of 5 pages ready');
+
+      render({
+        allPages: FIVE,
+        ocrPages: { [KEY(0)]: { status: 'failed', reason: 'engine:csp' }, [KEY(1)]: { status: 'skipped', reason: 'failed-page' }, [KEY(2)]: { status: 'skipped', reason: 'unsupported' } },
+        ocrEngineFailure: 'csp',
+      });
+      expect(detail('not-recognised')).toBe('2 not recognised');
+      expect(described()).toBe('0 of 5 pages ready · 2 pages were not recognised');
     });
   });
 
