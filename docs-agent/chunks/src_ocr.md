@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4881. JSDoc symbol count: 208.
+File count: 22. Line count: 4910. JSDoc symbol count: 208.
 
 ## src/ocr/assetUrls.js
 

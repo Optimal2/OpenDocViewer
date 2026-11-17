@@ -27,6 +27,15 @@
  * every later call rejects with the same error and no second worker is started, so a
  * misconfigured site pays for one attempt per session.
  *
+ * A recognition that the worker rejects is another matter: the page fails, and the worker is
+ * replaced. tesseract.js reports a recognition that threw inside the worker (its WebAssembly
+ * module aborted because memory ran out on a large page, say) as a rejection and keeps the
+ * worker, whose module then rejects every recognition after it at once. An engine that kept such
+ * a worker would fail page after page for the rest of the session, and in a pool it would take
+ * most of the pages, since it is free again at once while the healthy engines are busy. So the
+ * engine terminates the worker after a rejected recognition and starts a fresh one for the next
+ * page. The cost is one worker start for a page that could not be read anyway.
+ *
  * The worker is created with Tesseract's page segmentation mode set to automatic layout analysis
  * (`OCR_PAGE_SEGMENTATION_MODE`), through the `config` argument of `createWorker`, which
  * tesseract.js writes to the worker's Tesseract configuration before `Init`. The Tesseract API
@@ -272,6 +281,30 @@ export function createOcrEngine({
     await workerPromise;
   }
 
+  async function terminate() {
+    generation += 1;
+    const pending = workerPromise;
+    const wasStarted = started;
+    workerPromise = null;
+    started = false;
+    const waiting = releaseInFlight;
+    releaseInFlight = [];
+    for (const reject of waiting) reject(new Error('OCR engine was terminated'));
+    if (!pending) return;
+    if (!wasStarted) {
+      // Still starting: the generation check in ensureStarted terminates the worker when (if)
+      // it arrives. Waiting here would block the caller for as long as the start takes.
+      pending.catch(() => {});
+      return;
+    }
+    try {
+      const worker = await pending;
+      await worker.terminate();
+    } catch (error) {
+      log.debug('OCR worker terminate after a failed start', { error: String(error?.message || error) });
+    }
+  }
+
   return {
     ensureStarted,
     async recognize(image) {
@@ -289,33 +322,21 @@ export function createOcrEngine({
         const { data } = await Promise.race([worker.recognize(image, {}, { text: true, blocks: true }), released]);
         const recognizeMs = Math.max(0, Math.round(now() - startedAt));
         return { text: String(data?.text ?? ''), confidence: Number(data?.confidence) || 0, words: flattenOcrWords(data), recognizeMs };
+      } catch (error) {
+        // The worker rejected the page (after terminate() the generation has moved on, and the
+        // worker is gone already). What state that leaves the worker in is unknown: an aborted
+        // WebAssembly module rejects everything after it. The worker goes; the next recognition
+        // starts a fresh one.
+        if (callGeneration === generation) {
+          log.warn('OCR worker rejected a recognition and is replaced', { error: String(error?.message || error) });
+          void terminate();
+        }
+        throw error;
       } finally {
         releaseInFlight = releaseInFlight.filter((entry) => entry !== release);
       }
     },
-    async terminate() {
-      generation += 1;
-      const pending = workerPromise;
-      const wasStarted = started;
-      workerPromise = null;
-      started = false;
-      const waiting = releaseInFlight;
-      releaseInFlight = [];
-      for (const reject of waiting) reject(new Error('OCR engine was terminated'));
-      if (!pending) return;
-      if (!wasStarted) {
-        // Still starting: the generation check in ensureStarted terminates the worker when (if)
-        // it arrives. Waiting here would block the caller for as long as the start takes.
-        pending.catch(() => {});
-        return;
-      }
-      try {
-        const worker = await pending;
-        await worker.terminate();
-      } catch (error) {
-        log.debug('OCR worker terminate after a failed start', { error: String(error?.message || error) });
-      }
-    },
+    terminate,
     getFailure: () => failure,
     isStarted: () => started && workerPromise !== null,
   };

@@ -260,6 +260,14 @@ export function createOcrEnginePool({ size, createEngine, log = logger }) {
             }
             if (callGeneration !== generation || dropped) throw new Error(TERMINATED_MESSAGE);
           }
+          // The engine's own start, apart from its page: once an engine has started, the files
+          // and the policy are in order whatever becomes of the page, and an engine that cannot
+          // start after that is dropped instead of ending OCR for the session (a pool of one
+          // never comes through ensureStarted() above).
+          await entry.engine.ensureStarted();
+          everStarted = true;
+          barrenStarts = 0;
+          if (callGeneration !== generation || dropped) throw new Error(TERMINATED_MESSAGE);
           const result = await entry.engine.recognize(image);
           everStarted = true;
           barrenStarts = 0;

@@ -551,7 +551,11 @@ Which pages are recognised, and when:
   200 pages, least recently used first. A page that failed is not retried in the same session.
   Each step is bounded (30 s for the text-layer probe and the page image, 180 s for recognition),
   so a step that never answers fails that page instead of blocking the queue; a recognition that
-  times out also drops the worker, and the next page starts a fresh one. After a minute without
+  times out also drops the worker, and the next page starts a fresh one. So does a recognition
+  the worker rejects: a worker whose WebAssembly module has aborted (memory that ran out on a
+  very large page, say) stays alive and rejects every page after it at once, and would otherwise
+  fail the rest of the document, so the engine replaces its worker after any rejected page; the
+  page that was rejected fails, the pages after it are recognised. After a minute without
   work the worker is terminated to free its WebAssembly memory; the next page starts it again,
   which costs the model load once more. A page that fails is the page's own failure and the
   queue goes on to the next. Only when no engine has ever started in the session (see CSP below)

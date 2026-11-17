@@ -286,6 +286,48 @@ describe('createOcrEngine', () => {
     await expect(inFlight).rejects.toThrow(/terminated/);
     expect(second.terminate).toHaveBeenCalledTimes(1);
   });
+
+  it('replaces a worker that rejects a recognition: the page fails, the next page gets a fresh worker', async () => {
+    // What tesseract.js hands back when the recognition threw inside the worker: the worker
+    // lives on, and an aborted WebAssembly module rejects everything after it.
+    const broken = makeWorker();
+    broken.recognize = vi.fn(async () => { throw 'RuntimeError: Aborted(OOM)'; });
+    const fresh = makeWorker();
+    const workers = [broken, fresh];
+    const createWorker = vi.fn(async () => workers[createWorker.mock.calls.length - 1]);
+    const log = makeLog();
+    const engine = makeEngine({ createWorker, log });
+
+    await expect(engine.recognize('page-1.png')).rejects.toBe('RuntimeError: Aborted(OOM)');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(broken.terminate).toHaveBeenCalledTimes(1);
+    expect(engine.isStarted()).toBe(false);
+    // Not a start-up failure: the engine is not given up, and the session keeps its OCR.
+    expect(engine.getFailure()).toBeNull();
+    expect(log.warn).toHaveBeenCalledWith('OCR worker rejected a recognition and is replaced', { error: 'RuntimeError: Aborted(OOM)' });
+
+    const result = await engine.recognize('page-2.png');
+    expect(result.text).toBe('Hej världen\n');
+    expect(createWorker).toHaveBeenCalledTimes(2);
+    expect(broken.recognize).toHaveBeenCalledTimes(1);
+    expect(fresh.recognize).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not start a worker in place of one that terminate() took: only a rejected page replaces it', async () => {
+    const worker = makeWorker();
+    worker.recognize = vi.fn(() => new Promise(() => {}));
+    const createWorker = vi.fn(async () => worker);
+    const log = makeLog();
+    const engine = makeEngine({ createWorker, log });
+
+    const inFlight = engine.recognize('page-1.png');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await engine.terminate();
+    await expect(inFlight).rejects.toThrow(/terminated/);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+    expect(log.warn).not.toHaveBeenCalled();
+    expect(createWorker).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('probeWebAssemblyCompilation', () => {
