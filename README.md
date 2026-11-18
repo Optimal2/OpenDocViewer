@@ -48,7 +48,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 
 - Not a document management system, archive, or search engine.
 - Not an authentication or authorization layer — hosts own permissions, workflow state, and audit rules; the viewer only displays what it is given (`docs-src/integrations.md`).
-- Not a PDF editor or conversion service. Optional in-browser OCR of scanned pages exists behind a switch that is off by default (`ocr.enabled`): with it on, recognised pages get a selectable, searchable text layer, and PDF pages that already have one get the same layer from their own text; there is no server-side OCR.
+- Not a PDF editor or conversion service. Optional in-browser OCR of scanned pages exists behind a switch that is off by default (`ocr.enabled`): with it on, recognised pages get a selectable, searchable text layer, and PDF pages that already have one get the same layer from their own text; there is no server-side OCR. A second switch, also off by default (`pdfTextLayer.enabled`), gives PDF pages that have text of their own that text layer without OCR: nothing is recognised and no OCR engine is loaded.
 - Not dependent on any server at runtime — the frontend is fully static; the log servers are opt-in.
 
 ## Screenshots
@@ -298,6 +298,7 @@ The config covers areas such as:
 - application base path / base href
 - optional integration-adapter metadata alias mappings
 - large-document loading (`documentLoading`) for warnings, temp storage, lazy rendering, and cache limits
+- optional text layer from a PDF page's own text without OCR (`pdfTextLayer.enabled`, off by default; see "PDF text layer without OCR" in `docs-src/runtime-configuration.md`): selectable, searchable and readable by a screen reader, with no OCR engine loaded and no CSP change
 - optional in-browser OCR of scanned pages (`ocr.enabled`, off by default; see the OCR section in `docs-src/runtime-configuration.md`, including the CSP token a site must add); with it on, the toolbar's search in the text layers (`ocr.search.enabled`) and read-aloud (`ocr.speech.enabled`: an entry in the page's context menu, its reading language in the language menu) can each be turned off on their own
 
 For the full reference, deployment notes, and precedence rules, see `docs-src/runtime-configuration.md` and `odv.site.config.sample.js`.

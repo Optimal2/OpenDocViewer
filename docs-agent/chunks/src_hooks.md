@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 10. Line count: 1777. JSDoc symbol count: 55.
+File count: 10. Line count: 1813. JSDoc symbol count: 56.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -62,7 +62,7 @@ Symbols:
 
 ## src/hooks/useOcrModule.js
 
-Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true.
+Loads the OCR module once a page can have a text layer: \`ocr.enabled\` is the literal true, or \`pdfTextLayer.enabled\` is \(a PDF page's own text without OCR\).
 
 Exports: `useOcrModule`
 
@@ -76,13 +76,14 @@ Symbols:
 
 Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 
-Exports: `OCR_IDLE_SHUTDOWN_MS`, `OCR_BOOST_ACTIVITY_EVENTS`, `OCR_BOOST_POINTER_SLOP_PX`, `createPointerTravelFilter`, `useOcrTextLayers`
+Exports: `OCR_IDLE_SHUTDOWN_MS`, `PDF_TEXT_ONLY_CONCURRENCY`, `OCR_BOOST_ACTIVITY_EVENTS`, `OCR_BOOST_POINTER_SLOP_PX`, `createPointerTravelFilter`, `useOcrTextLayers`
 
 Local imports: `src/logging/systemLogger.js`, `src/utils/ocrPageKey.js`, `src/utils/runtimeConfig.js`, `src/utils/ocrLanguageCodes.js`
 
 Symbols:
 
 - `OCR_IDLE_SHUTDOWN_MS` (constant) - Idle time after which the OCR worker is terminated to free its memory.
+- `PDF_TEXT_ONLY_CONCURRENCY` (constant) - PDF pages read at a time while nothing is recognised \( pdfTextLayer.enabled with OCR off\).
 - `OCR_BOOST_ACTIVITY_EVENTS` (constant) - Window events that count as input for the boost: they end the boosted state and restart the idle clock.
 - `OCR_BOOST_POINTER_SLOP_PX` (constant) - How far \(CSS pixels\) the pointer must travel before a pointer move counts as input for the boost, where the site says nothing else \( ocr.boost.pointerTravelPx , whose default this...
 - `createPointerTravelFilter` (function) - Tell pointer moves that travel from those that do not.
@@ -93,7 +94,6 @@ Symbols:
 - `module.exports` (function) - No description.
 - `useOcrTextLayers~boostRef` (constant) - The boost control and its triggers while the boost is on: \{ controller, onPlanned, detach \} .
 - `useOcrTextLayers~planRef` (constant) - What the last window plan decided for the pages in flight, for the boost to restore.
-- `useOcrTextLayers~windowIndexesRef` (constant) - Viewer indexes of the current window \(focus pages and neighbours\): never released.
 
 ## src/hooks/usePageNavigation.js
 

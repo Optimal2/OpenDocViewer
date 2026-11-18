@@ -16,7 +16,7 @@
  * (`ocr.speech.autoDetectLanguage`, the text flow's `lang`) when it has a voice, else the
  * viewer's UI language when it has one, else the first language that has one. Escape stops a
  * reading. Used only by ReadAloudProvider,
- * which is mounted while `ocr.enabled` is the literal true and `ocr.speech.enabled` is not the
+ * which is mounted while `ocr.enabled` or `pdfTextLayer.enabled` is the literal true and `ocr.speech.enabled` is not the
  * literal false; on the default code path this hook never runs.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';

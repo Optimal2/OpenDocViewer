@@ -446,7 +446,12 @@
       "skippedTextLayer": "Not recognised: the page has its own text",
       "skipped": "Not recognised: nothing to recognise on this page",
       "failed": "The text could not be recognised",
-      "unavailable": "Text recognition is unavailable"
+      "unavailable": "Text recognition is unavailable",
+      "textNotRead": "The page’s text has not been read yet",
+      "readingText": "Reading the page’s text…",
+      "noOwnText": "The page has no text of its own",
+      "textNotShown": "The page’s text cannot be shown as a text layer",
+      "textUnreadable": "The page’s text could not be read"
     },
     "boost": {
       "ready": "OCR boost: ready",
@@ -475,9 +480,11 @@
     },
     "search": {
       "open": "Search in the recognised text",
+      "openOwnText": "Search in the document’s text",
       "placeholder": "Search",
       "position": "{current}/{total}",
       "coverageLong": "{done} of {pages} pages ready",
+      "coverageOwnTextLong": "{done} of {pages} pages have text",
       "notRecognisedLong": "{pages} pages were not recognised",
       "notRecognisedLongOne": "1 page was not recognised",
       "positionLong": "Match {current} of {total}",

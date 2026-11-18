@@ -18,7 +18,7 @@
  * (Italian, say) can still pass as the candidate it resembles most, and a candidate language
  * without a list can never be guessed. Danish and Norwegian share nearly all their function
  * words and stay unsure between each other. One pass over the words, one Set lookup per list
- * each: well under a millisecond for a dense page. Part of the lazy OCR chunk; the candidates
+ * each: well under a millisecond for a dense page. Part of the text-only entry; the candidates
  * come from the viewer's OCR languages (hooks/useOcrTextLayers.js), so only languages the
  * viewer recognises can be guessed.
  */

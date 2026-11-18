@@ -1085,8 +1085,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   const displayedUrl = displayedAsset.url;
 
-  // OCR outcome of the displayed page (empty map while ocr.enabled is not the literal true, so
-  // nothing below mounts on the default code path). The page's status is shown by the toolbar's
+  // OCR outcome of the displayed page (empty map while neither ocr.enabled nor
+  // pdfTextLayer.enabled is the literal true, so nothing below mounts on the default code path). The page's status is shown by the toolbar's
   // search button (DocumentToolbar/OcrSearchBar.jsx, utils/ocrStatus.js).
   const displayedPage = (Array.isArray(allPages) && allPages[displayedAsset.pageIndex]) || null;
   const displayedPageKey = displayedPage ? ocrPageKeyOf(displayedPage) : '';

@@ -33,7 +33,7 @@
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 - `src/manual-page/main.jsx` - Entry of the stand\-alone manual page \(manual/index.html\).
-- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+- `src/ocr/index.js` - Entry point of the OCR module: the file the viewer imports while OCR is on, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
 ## Import Hubs
 

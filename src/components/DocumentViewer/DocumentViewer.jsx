@@ -55,7 +55,7 @@ import {
   getViewerEdgeScrollPageTurnConfig,
   isDocumentMetadataUiEnabled,
   isFineTuneEnabled,
-  isOcrEnabled,
+  isPageTextEnabled,
   isReadAloudEnabled,
 } from '../../utils/runtimeConfig.js';
 
@@ -523,10 +523,10 @@ const DocumentViewer = () => {
     };
   }, []);
 
-  // Read-aloud state for the page's context menu and the language menu, only while OCR and
-  // read-aloud are on; otherwise the children render as they are and nothing follows the
+  // Read-aloud state for the page's context menu and the language menu, only while pages can
+  // have a text layer (OCR, or a PDF page's own text without it) and read-aloud is on; otherwise the children render as they are and nothing follows the
   // selection or touches speech synthesis.
-  const ReadAloudScope = isOcrEnabled() && isReadAloudEnabled() ? ReadAloudProvider : React.Fragment;
+  const ReadAloudScope = isPageTextEnabled() && isReadAloudEnabled() ? ReadAloudProvider : React.Fragment;
 
   return (
     <ReadAloudScope>

@@ -33,7 +33,7 @@
  * below the current one (a footer drawn before the body becomes its own line). Only upright
  * text gets boxes: an item whose baseline is rotated in the viewport (a stamp along the margin),
  * or set in a vertical font, is left out of the layer but kept in the page text. Part of the
- * lazy OCR chunk.
+ * text-only entry (pdfText.js), which the full OCR module re-exports.
  */
 
 /** pdf.js's own fallbacks for a font without metrics (TextLayer: ascent 0.8, descent -0.2). */

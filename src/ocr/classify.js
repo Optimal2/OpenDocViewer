@@ -8,7 +8,7 @@
  * layer becomes the page's text layer as it is (queue.js, source `pdf-text`), and the page is
  * recognised only when that layer is empty or garbled (a scanned page wrapped in a PDF, or text
  * drawn with a font that has no usable ToUnicode map). Everything else is skipped. Part of the
- * lazy OCR chunk.
+ * text-only entry (pdfText.js), which the full OCR module re-exports.
  */
 
 export const OCR_PAGE_DECISION = Object.freeze({
@@ -31,6 +31,12 @@ export const OCR_SKIP_REASON = Object.freeze({
   UNSUPPORTED: 'unsupported',
   /** The page failed to load; there is no image to recognise. */
   FAILED_PAGE: 'failed-page',
+  /**
+   * Nothing is recognised in this session (`pdfTextLayer.enabled` with `ocr.enabled` off) and
+   * the page has no usable text of its own: a raster page, or a PDF page whose text layer is
+   * empty or garbled. The page stays an image.
+   */
+  RECOGNITION_OFF: 'recognition-off',
 });
 
 /** The image formats the viewer rasterises (utils/documentLoadingConfig.js isRasterImageExtension). */

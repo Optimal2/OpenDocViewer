@@ -1,6 +1,6 @@
 # OpenDocViewer / src/ocr
 
-File count: 22. Line count: 4910. JSDoc symbol count: 208.
+File count: 23. Line count: 4963. JSDoc symbol count: 209.
 
 ## src/ocr/assetUrls.js
 
@@ -97,11 +97,11 @@ Symbols:
 - `TEXT_LAYER` (member) - The PDF page has a usable text layer that could not be placed as words \(none of its text is upright, or the page has no size\); the viewer's own text wins.
 - `UNSUPPORTED` (member) - A format the viewer does not rasterise into a page image.
 - `FAILED_PAGE` (member) - The page failed to load; there is no image to recognise.
+- `RECOGNITION_OFF` (member) - Nothing is recognised in this session \( pdfTextLayer.enabled with ocr.enabled off\) and the page has no usable text of its own: a raster page, or a PDF page whose text layer is emp...
 - `RASTER_EXTENSIONS` (constant) - The image formats the viewer rasterises \(utils/documentLoadingConfig.js isRasterImageExtension\).
 - `PDF_TEXT_LAYER_THRESHOLDS` (constant) - Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.
 - `minCharacters` (member) - Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page.
 - `minLetterShare` (member) - Below this share of letters and digits among visible characters the layer is garbled.
-- `maxPrivateUseShare` (member) - Above this share of private\-use or replacement characters the layer is garbled.
 
 ## src/ocr/detectLanguage.js
 
@@ -188,9 +188,9 @@ Symbols:
 
 ## src/ocr/index.js
 
-Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+Entry point of the OCR module: the file the viewer imports while OCR is on, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 
-Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `OCR_BOOST_STEPS`, `OCR_BOOST_STOP`, `createOcrBoostController`, `planOcrBoostLevels`, `OCR_REFERENCE_PAGE_LINES`, `OCR_REFERENCE_PAGE_SIZE`, `createOcrReferencePage`
+Exports: `createOcrEngine`, `classifyOcrStartupError`, `flattenOcrWords`, `OCR_STARTUP_FAILURE`, `createOcrEnginePool`, `OCR_BENCHMARK_DEFAULTS`, `OCR_BENCHMARK_SCHEMA`, `downscaleOcrImage`, `expandOcrBenchmarkWorkerCounts`, `normalizeOcrBenchmarkConfig`, `planOcrBenchmarkScenarios`, `resolveOcrBenchmarkLanguages`, `runOcrBenchmark`, `selectOcrBenchmarkPages`, `startMainThreadLagSampler`, `summarizeDurations`, `loadOcrBoostBenchmark`, `readOcrAssetManifest`, `resolveOcrAssetUrls`, `KNOWN_OCR_LANGUAGES`, `partitionOcrLanguages`, `createConfiguredOcrEngine`, `describeOcrSetup`, `resolveOcrConcurrency`, `RULING_LINE_DILATE_PX`, `createEventLoopYield`, `removeRulingLines`, `removeRulingLinesAsync`, `rulingLineMinRunPx`, `OCR_LINE_REMOVAL_MAX_PIXELS`, `prepareOcrImage`, `canPrepareImagesHere`, `prepareOcrImageCore`, `OCR_IMAGE_PREPARER_IDLE_MS`, `OCR_IMAGE_PREPARER_MAX_FAILURES`, `createOcrImagePreparer`, `disposeOcrImagePreparer`, `getOcrImagePreparer`, `DEFAULT_OCR_BOOST_SLOWDOWN_FRACTION`, `OCR_BOOST_STATE`, `OCR_BOOST_STEPS`, `OCR_BOOST_STOP`, `createOcrBoostController`, `planOcrBoostLevels`, `OCR_REFERENCE_PAGE_LINES`, `OCR_REFERENCE_PAGE_SIZE`, `createOcrReferencePage`
 
 Local imports: `src/ocr/boostBenchmark.js`
 
@@ -225,6 +225,12 @@ Symbols:
 - `thinnestHorizontal` (function) - Thinnest thickness of a horizontal run \(dark rows through it\) sampled along its length.
 - `thinnestVertical` (function) - Thinnest thickness of a vertical run \(dark columns through it\) sampled along its length.
 - `rulingLineRemovalSteps` (function) - Remove the ruling lines of an RGBA image in place, as a generator: each next\(\) processes one band of rows and the final value is the number of pixels painted white \(0 when the pag...
+
+## src/ocr/pdfText.js
+
+Entry point of the text\-only part of the OCR module: everything a page's text layer needs when the text is a PDF page's own and nothing is recognised \(\`pdfTextLayer.enabled\` with \`ocr.enabled\` off\).
+
+Exports: `OCR_PAGE_DECISION`, `OCR_SKIP_REASON`, `PDF_TEXT_LAYER_THRESHOLDS`, `assessPdfTextLayer`, `classifyPageSource`, `DEFAULT_OPEN_PDF_DOCUMENTS`, `createPdfTextProber`, `PDF_TEXT_DEFAULT_ASCENT`, `PDF_TEXT_DEFAULT_DESCENT`, `pdfTextLayerWords`, `DEFAULT_OCR_CACHE_LIMIT`, `createOcrResultCache`, `OCR_WINDOW_AHEAD`, `OCR_WINDOW_BEHIND`, `maxOcrWindowSize`, `planOcrWindow`, `OCR_OUTCOME_SOURCE`, `OCR_PAGE_STATUS`, `createOcrQueue`, `DETECTABLE_LANGUAGES`, `MIN_HITS`, `RUNNER_UP_RATIO`, `detectTextLanguage`
 
 ## src/ocr/pdfTextProbe.js
 

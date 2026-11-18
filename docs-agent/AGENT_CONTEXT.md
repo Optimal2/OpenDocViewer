@@ -23,16 +23,16 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 210
-- Source lines: 75037
-- JSDoc symbols: 2195
+- Source files: 211
+- Source lines: 75249
+- JSDoc symbols: 2202
 - Files with JSDoc: 206
 - Low-confidence summaries: 2
 - Parse errors: 0
 
 ## High-Signal Files
 
-- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+- `src/ocr/index.js` - Entry point of the OCR module: the file the viewer imports while OCR is on, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
@@ -47,6 +47,6 @@ Source commit: not embedded
 
 ## Agent Notes
 
-- 4 files have no JSDoc doclets; AgentDocMap uses source\-derived summaries for them.
+- 5 files have no JSDoc doclets; AgentDocMap uses source\-derived summaries for them.
 - 2 files have low\-confidence summaries; inspect REPORT.md before relying on them for task planning.
 - Use AGENT\_CONTEXT.md first, then SYMBOL\_INDEX.md by file path to avoid loading the whole symbol JSON.

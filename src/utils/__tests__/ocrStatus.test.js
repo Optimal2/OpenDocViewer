@@ -45,6 +45,46 @@ describe('ocrStatusKeyOf', () => {
   });
 });
 
+describe('ocrStatusKeyOf without recognition', () => {
+  const textOnly = { recognition: false };
+
+  it('speaks of reading a page\'s own text, never of recognising', () => {
+    expect(ocrStatusKeyOf(null, null, textOnly)).toBe('');
+    expect(ocrStatusKeyOf({ status: 'queued' }, null, textOnly)).toBe('readingText');
+    expect(ocrStatusKeyOf({ status: 'probing' }, null, textOnly)).toBe('readingText');
+    expect(ocrStatusKeyOf({ status: 'done', source: 'pdf-text', words: [{ text: 'a' }] }, null, textOnly)).toBe('pdfText');
+    expect(ocrStatusKeyOf({ status: 'done', source: 'pdf-text', words: [] }, null, textOnly)).toBe('noOwnText');
+    expect(ocrStatusKeyOf({ status: 'skipped', reason: 'recognition-off' }, null, textOnly)).toBe('noOwnText');
+    expect(ocrStatusKeyOf({ status: 'skipped', reason: 'unsupported' }, null, textOnly)).toBe('noOwnText');
+    expect(ocrStatusKeyOf({ status: 'skipped', reason: 'failed-page' }, null, textOnly)).toBe('noOwnText');
+    // Read, but not placeable as words: the text is there, so it is not "could not be read".
+    expect(ocrStatusKeyOf({ status: 'skipped', reason: 'text-layer' }, null, textOnly)).toBe('textNotShown');
+    expect(ocrStatusKeyOf({ status: 'failed' }, null, textOnly)).toBe('textUnreadable');
+  });
+
+  it('has no engine to be unavailable', () => {
+    expect(ocrStatusKeyOf({ status: 'skipped', reason: 'recognition-off' }, 'csp', textOnly)).toBe('noOwnText');
+    expect(ocrStatusKeyOf(null, 'csp', textOnly)).toBe('');
+  });
+
+  it('leaves the keys as they were when recognition is on or not said', () => {
+    expect(ocrStatusKeyOf({ status: 'skipped', reason: 'recognition-off' }, null)).toBe('skipped');
+    expect(ocrStatusKeyOf({ status: 'probing' }, null, {})).toBe('working');
+    expect(ocrStatusKeyOf({ status: 'failed' }, null, { recognition: true })).toBe('failed');
+  });
+
+  it('has a fallback text and an LED state for each of its keys', () => {
+    for (const key of ['readingText', 'noOwnText', 'textNotShown', 'textUnreadable']) {
+      expect(typeof OCR_STATUS_FALLBACK[key]).toBe('string');
+      expect(['off', 'pending', 'ready', 'active', 'warning', 'error']).toContain(OCR_STATUS_LED[key]);
+    }
+    expect(OCR_STATUS_LED.readingText).toBe('pending');
+    expect(OCR_STATUS_LED.noOwnText).toBe('off');
+    expect(OCR_STATUS_LED.textNotShown).toBe('off');
+    expect(OCR_STATUS_LED.textUnreadable).toBe('error');
+  });
+});
+
 describe('hasSearchableOcrText', () => {
   it('is true only for a done outcome with words', () => {
     expect(hasSearchableOcrText({ status: 'done', words: [{ text: 'a' }] })).toBe(true);

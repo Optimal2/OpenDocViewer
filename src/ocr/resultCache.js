@@ -5,7 +5,7 @@
  * The cache is the only place recognised text is kept: it lives in the page's JavaScript heap for
  * the session, is bounded (least recently used entries go first), drops a document's entries
  * when that document leaves the viewer, and is never written to localStorage, IndexedDB or any
- * server. Part of the lazy OCR chunk.
+ * server. Part of the text-only entry (pdfText.js).
  */
 
 /** Pages kept per session before the least recently used outcome is dropped. */

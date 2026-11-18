@@ -3,7 +3,9 @@
  * analyzeDist must pass a build where the OCR code sits in a dynamically imported ocr chunk and
  * dist/ocr/ matches the installed packages, and must fail for every way that contract can break:
  * tesseract in an eager chunk, a static import of the ocr chunk, a preload of it, a missing
- * chunk, a missing or altered engine file, or a folder that should have been skipped.
+ * chunk, a missing or altered engine file, or a folder that should have been skipped. The
+ * text-only chunk (assets/pdfText-*.js) must exist on its own, hold no engine code, stay out of
+ * index.html and be imported statically by ocr chunks alone.
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -42,9 +44,10 @@ function fakeDist({ main, extra = {}, html = INDEX_HTML, withAssets = true } = {
     fs.writeFileSync(full, content);
   };
   write('index.html', html);
-  write('assets/main-AAA.js', main ?? 'import{a}from"./bootConfig-BBB.js";a(()=>import("./ocr-CCC.js"));');
+  write('assets/main-AAA.js', main ?? 'import{a}from"./bootConfig-BBB.js";a(()=>import("./ocr-CCC.js"));a(()=>import(`./pdfText-DDD.js`));');
   write('assets/bootConfig-BBB.js', 'export const a=(f)=>f();');
-  write('assets/ocr-CCC.js', 'const t="tesseract";export{t};');
+  write('assets/ocr-CCC.js', 'import{q}from"./pdfText-DDD.js";const t="tesseract";export{t,q};');
+  write('assets/pdfText-DDD.js', 'export const q="queue";');
   write('odv.config.js', '// Tesseract language codes live here legitimately');
   for (const [rel, content] of Object.entries(extra)) write(rel, content);
 
@@ -67,8 +70,39 @@ test('a lazy ocr chunk with matching engine files passes and is measured', () =>
   assert.ok(result.summary.ocrAssetBytes > 0);
   assert.ok(result.summary.distBytes > result.summary.ocrAssetBytes);
   assert.equal(result.summary.ocrChunkBytes, fs.statSync(path.join(distDir, 'assets/ocr-CCC.js')).size);
-  const otherBytes = fs.statSync(path.join(distDir, 'assets/main-AAA.js')).size + fs.statSync(path.join(distDir, 'assets/bootConfig-BBB.js')).size;
+  assert.deepEqual(result.summary.pdfTextChunks, ['assets/pdfText-DDD.js']);
+  const textBytes = fs.statSync(path.join(distDir, 'assets/pdfText-DDD.js')).size;
+  assert.equal(result.summary.pdfTextChunkBytes, textBytes);
+  const otherBytes = fs.statSync(path.join(distDir, 'assets/main-AAA.js')).size + fs.statSync(path.join(distDir, 'assets/bootConfig-BBB.js')).size + textBytes;
   assert.equal(result.summary.otherChunkBytes, otherBytes);
+});
+
+test('a build without the text-only chunk fails', () => {
+  const { distDir, nodeModulesUrl } = fakeDist();
+  fs.rmSync(path.join(distDir, 'assets/pdfText-DDD.js'));
+  fs.writeFileSync(path.join(distDir, 'assets/ocr-CCC.js'), 'const t="tesseract";export{t};');
+  const result = analyzeDist(distDir, { nodeModulesUrl, skipAssets: false });
+  assert.deepEqual(result.problems, ['no text-only chunk (assets/pdfText-*.js) in dist: the text-only entry was not built on its own']);
+});
+
+test('engine code in the text-only chunk fails, and so does the text-only chunk importing the ocr chunk', () => {
+  const withEngine = fakeDist({ extra: { 'assets/pdfText-DDD.js': 'export const q="createWorker of tesseract";' } });
+  assert.deepEqual(analyzeDist(withEngine.distDir, { nodeModulesUrl: withEngine.nodeModulesUrl, skipAssets: false }).problems, ['assets/pdfText-DDD.js mentions tesseract but is not an ocr chunk']);
+
+  const importing = fakeDist({ extra: {
+    'assets/pdfText-DDD.js': 'import{t}from"./ocr-CCC.js";export const q=t;',
+    'assets/ocr-CCC.js': 'const t="tesseract";export{t};',
+  } });
+  assert.deepEqual(analyzeDist(importing.distDir, { nodeModulesUrl: importing.nodeModulesUrl, skipAssets: false }).problems, ['assets/pdfText-DDD.js imports assets/ocr-CCC.js statically']);
+});
+
+test('the text-only chunk in index.html, or imported statically by another chunk than an ocr chunk, fails', () => {
+  const html = `${INDEX_HTML}\n<link rel="modulepreload" href="./assets/pdfText-DDD.js">`;
+  const preloaded = fakeDist({ html });
+  assert.deepEqual(analyzeDist(preloaded.distDir, { nodeModulesUrl: preloaded.nodeModulesUrl, skipAssets: false }).problems, ['assets/pdfText-DDD.js is loaded by dist/index.html']);
+
+  const eager = fakeDist({ main: 'import{q}from"./pdfText-DDD.js";import("./ocr-CCC.js");console.log(q);' });
+  assert.deepEqual(analyzeDist(eager.distDir, { nodeModulesUrl: eager.nodeModulesUrl, skipAssets: false }).problems, ['assets/main-AAA.js imports assets/pdfText-DDD.js statically']);
 });
 
 test('tesseract in a chunk that is not an ocr chunk fails', () => {

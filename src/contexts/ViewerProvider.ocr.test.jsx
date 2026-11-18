@@ -8,6 +8,10 @@
  * the focus page is recognised from its rendered image, the outcome is exposed per page key, and
  * recognition pauses while a print flow holds page URLs. The module is replaced by a counting
  * mock that keeps the real cache, window and queue but a fake engine, so no tesseract.js runs.
+ *
+ * The text-only entry (src/ocr/pdfText.js) is counted the same way: never evaluated with the
+ * shipped configuration, and with `pdfTextLayer.enabled: true` alone it is the only one
+ * evaluated, no engine is built, no page image is fetched and a raster page is left an image.
  */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { act, createElement, useContext, useEffect } from 'react';
@@ -17,7 +21,36 @@ import ViewerContext from './viewerContext.js';
 import { isOcrModuleRequested, resetOcrModuleForTests } from '../utils/ocrLoader.js';
 import { makeOcrPageKey } from '../utils/ocrPageKey.js';
 
-const ocrModule = vi.hoisted(() => ({ evaluations: 0, engines: [], recognitions: [] }));
+const ocrModule = vi.hoisted(() => ({ evaluations: 0, textEvaluations: 0, probes: [], engines: [], recognitions: [] }));
+
+vi.mock('../ocr/pdfText.js', async () => {
+  ocrModule.textEvaluations += 1;
+  const { createOcrResultCache } = await import('../ocr/resultCache.js');
+  const { planOcrWindow } = await import('../ocr/window.js');
+  const { createOcrQueue } = await import('../ocr/queue.js');
+  const { detectTextLanguage } = await import('../ocr/detectLanguage.js');
+  return {
+    createOcrResultCache,
+    planOcrWindow,
+    createOcrQueue,
+    detectTextLanguage,
+    // The real entry has no engine factory, which is how the hook tells there is nothing to
+    // recognise with. Named here as undefined because a vitest mock throws on reading an
+    // export its factory did not return, where a real module namespace answers undefined.
+    createConfiguredOcrEngine: undefined,
+    resolveOcrConcurrency: undefined,
+    createOcrBoostController: undefined,
+    disposeOcrImagePreparer: undefined,
+    createPdfTextProber: () => ({
+      probe: async (sourceKey, pageIndex) => {
+        ocrModule.probes.push(`${sourceKey}:${pageIndex}`);
+        return { usable: false, verdict: 'empty' };
+      },
+      retainSources: async () => {},
+      releaseAll: async () => {},
+    }),
+  };
+});
 
 vi.mock('../ocr/index.js', async () => {
   ocrModule.evaluations += 1;
@@ -82,6 +115,8 @@ beforeEach(() => {
   // again on the next dynamic import instead of being served from the registry.
   vi.resetModules();
   ocrModule.evaluations = 0;
+  ocrModule.textEvaluations = 0;
+  ocrModule.probes.length = 0;
   ocrModule.engines.length = 0;
   ocrModule.recognitions.length = 0;
   resetOcrModuleForTests();
@@ -153,6 +188,7 @@ async function renderProviderWithOnePage({ focus = null } = {}) {
 it('never evaluates the OCR module, starts no worker, fetches no page and adds no OCR element with the shipped configuration', async () => {
   const api = await renderProviderWithOnePage({ focus: [0] });
   expect(ocrModule.evaluations).toBe(0);
+  expect(ocrModule.textEvaluations).toBe(0);
   expect(workerConstructions.filter((url) => /ocr|tesseract|blob:/i.test(url))).toEqual([]);
   expect(fetchedUrls).toEqual([]);
   expect(api().ocrPages).toEqual({});
@@ -164,13 +200,33 @@ it.each([
   ['enabled false', { ocr: { enabled: false } }],
   ['the string "true"', { ocr: { enabled: 'true', languages: ['swe'] } }],
   ['the number 1', { ocr: { enabled: 1 } }],
+  ['pdfTextLayer.enabled as the string "true"', { pdfTextLayer: { enabled: 'true' } }],
+  ['pdfTextLayer.enabled false', { ocr: { enabled: false }, pdfTextLayer: { enabled: false } }],
 ])('keeps the module out when a site file sets %s', async (_label, config) => {
   vi.stubGlobal('__ODV_CONFIG__', config);
   const api = await renderProviderWithOnePage({ focus: [0] });
   expect(ocrModule.evaluations).toBe(0);
+  expect(ocrModule.textEvaluations).toBe(0);
   expect(workerConstructions.filter((url) => /ocr|tesseract|blob:/i.test(url))).toEqual([]);
   expect(fetchedUrls).toEqual([]);
   expect(api().ocrPages).toEqual({});
+});
+
+it('imports only the text-only entry with pdfTextLayer.enabled alone: no engine, no page image, a raster page stays an image', async () => {
+  vi.stubGlobal('__ODV_CONFIG__', { ocr: { enabled: false }, pdfTextLayer: { enabled: true } });
+  const api = await renderProviderWithOnePage({ focus: [0] });
+  await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'skipped');
+  expect(ocrModule.textEvaluations).toBe(1);
+  expect(ocrModule.evaluations).toBe(0);
+  expect(isOcrModuleRequested()).toBe(false);
+  expect(ocrModule.engines).toEqual([]);
+  expect(ocrModule.recognitions).toEqual([]);
+  // The raster page is neither read nor fetched.
+  expect(ocrModule.probes).toEqual([]);
+  expect(fetchedUrls).toEqual([]);
+  expect(api().ocrPages[PAGE_KEY]).toEqual({ status: 'skipped', reason: 'recognition-off' });
+  expect(api().ocrEngineFailure).toBeNull();
+  expect(workerConstructions.filter((url) => /ocr|tesseract|blob:/i.test(url))).toEqual([]);
 });
 
 it('imports the module once and recognises the focus page from its rendered image when enabled is the literal true', async () => {
@@ -178,6 +234,8 @@ it('imports the module once and recognises the focus page from its rendered imag
   const api = await renderProviderWithOnePage({ focus: [0] });
   await waitFor(() => api().ocrPages[PAGE_KEY]?.status === 'done');
   expect(ocrModule.evaluations).toBe(1);
+  // The loader hands over the full module alone; the text-only entry is not asked for.
+  expect(ocrModule.textEvaluations).toBe(0);
   expect(ocrModule.engines).toHaveLength(1);
   expect(fetchedUrls).toEqual([PAGE_URL]);
   expect(ocrModule.recognitions).toHaveLength(1);

@@ -2,7 +2,7 @@
 /**
  * Provides the read-aloud state (hooks/useReadAloud.js) to the page's context menu and the
  * toolbar's language menu (contexts/readAloudContext.js). Mounted by DocumentViewer only while
- * `ocr.enabled` is the literal true and `ocr.speech.enabled` is not the literal false; with
+ * `ocr.enabled` or `pdfTextLayer.enabled` is the literal true and `ocr.speech.enabled` is not the literal false; with
  * either off the viewer renders its children without this provider, so nothing follows the
  * selection and speech synthesis is never touched.
  */

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 69. Line count: 24898. JSDoc symbol count: 1036.
+File count: 69. Line count: 24993. JSDoc symbol count: 1041.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -342,15 +342,18 @@ Symbols:
 
 The only door into the OCR module.
 
-Exports: `loadOcrModule`, `isOcrModuleRequested`, `resetOcrModuleForTests`
+Exports: `loadOcrModule`, `isOcrModuleRequested`, `isPdfTextModuleRequested`, `resetOcrModuleForTests`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/ocr/index.js`
+Local imports: `src/utils/runtimeConfig.js`, `src/ocr/index.js`, `src/ocr/pdfText.js`
 
 Symbols:
 
+- `modulePromise` (member) - The full module \(OCR on\).
+- `textModulePromise` (member) - The text\-only entry \(only a PDF page's own text\).
 - `loadOcrModule` (function) - No description.
-- `isOcrModuleRequested` (function) - True once the module import has been requested in this session.
-- `resetOcrModuleForTests` (function) - Test hook: forget the cached import so the next call imports again.
+- `isOcrModuleRequested` (function) - True once the full module's import has been requested in this session.
+- `isPdfTextModuleRequested` (function) - True once the text\-only entry's import has been requested in this session.
+- `resetOcrModuleForTests` (function) - Test hook: forget the cached imports so the next call imports again.
 
 ## src/utils/ocrPageKey.js
 
@@ -1050,7 +1053,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `OCR_LANGUAGE_PRESETS`, `isOcrEnabled`, `isOcrLineRemovalEnabled`, `isOcrWholeDocumentEnabled`, `isOcrBenchmarkEnabled`, `isOcrBoostBenchmarkEnabled`, `OCR_BOOST_HARD_MAX_WORKER_COUNT`, `OCR_BOOST_DEFAULTS`, `isOcrBoostEnabled`, `normalizeOcrBoostConfig`, `DEFAULT_OCR_WORKER_COUNT`, `MAX_OCR_WORKER_COUNT`, `OCR_WORKER_POLICY_DEFAULTS`, `describeOcrWorkerCount`, `normalizeOcrWorkerPolicy`, `resolveOcrWorkerPlan`, `resolveOcrWorkerCount`, `isSpeechLanguageAutoDetectEnabled`, `isOcrSearchEnabled`, `isOcrSearchCtrlFOverrideEnabled`, `isReadAloudEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `COMPARE_ADJUST_TOOLBAR_MODES`, `PDF_SIGNATURE_UNCHECKED_SEVERITIES`, `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isFineTuneEnabled`, `isCompareOverlayEnabled`, `isCompareOverlayPrintEnabled`, `isCompareCurtainEnabled`, `isCompareCurtainPrintEnabled`, `getCompareAdjustToolbarMode`, `isSignatureThumbnailPageBadgeEnabled`, `isPdfSignatureInspectionEnabled`, `getPdfSignatureInspectionStart`, `getPdfSignatureUncheckedSeverity`, `DEFAULT_OCR_LANGUAGES`, `OCR_LANGUAGE_PRESETS`, `isOcrEnabled`, `isPdfTextLayerEnabled`, `isPageTextEnabled`, `isOcrLineRemovalEnabled`, `isOcrWholeDocumentEnabled`, `isOcrBenchmarkEnabled`, `isOcrBoostBenchmarkEnabled`, `OCR_BOOST_HARD_MAX_WORKER_COUNT`, `OCR_BOOST_DEFAULTS`, `isOcrBoostEnabled`, `normalizeOcrBoostConfig`, `DEFAULT_OCR_WORKER_COUNT`, `MAX_OCR_WORKER_COUNT`, `OCR_WORKER_POLICY_DEFAULTS`, `describeOcrWorkerCount`, `normalizeOcrWorkerPolicy`, `resolveOcrWorkerPlan`, `resolveOcrWorkerCount`, `isSpeechLanguageAutoDetectEnabled`, `isOcrSearchEnabled`, `isOcrSearchCtrlFOverrideEnabled`, `isReadAloudEnabled`, `describeOcrLanguages`, `getOcrLanguages`, `OCR_ASSET_BASE_URL_REJECTIONS`, `describeOcrAssetBaseUrl`, `getOcrAssetBaseUrl`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getThemeDefaultMode`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 

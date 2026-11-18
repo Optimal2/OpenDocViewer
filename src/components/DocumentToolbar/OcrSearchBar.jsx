@@ -22,7 +22,7 @@
  * every page has an outcome yet, the status says how many pages the search covers. Page
  * numbers here are original session page numbers (they index `allPages` and are what
  * `setPageNumber` takes), not ordinals among the visible pages. Mounted by OcrToolbarActions
- * (from DocumentToolbar) only while `ocr.enabled` is the literal true.
+ * (from DocumentToolbar) only while `ocr.enabled` or `pdfTextLayer.enabled` is the literal true.
  *
  * Under the pointer, and with keyboard focus, the button grows to the right in a short ease
  * (styles/ocr.css) and shows its details: the count of pages with a text layer over all pages
@@ -66,6 +66,12 @@
  * stays a never-enabled, status-only indicator with its LED, the status as its name and
  * tooltip, the details and the live region, and no field exists, so no term is ever published
  * and the layers mark nothing.
+ *
+ * With `recognition` false (`pdfTextLayer.enabled` with `ocr.enabled` off) nothing is recognised:
+ * the text is the PDF pages' own, and the button says so. Its name is "Search in the document's
+ * text", the status speaks of reading ("The page has no text of its own" for a page without),
+ * the count is the pages that have text over all pages ("12 of 50 pages have text"), and the
+ * details name no pages "not recognised", no time left and no workers, since there are none.
  */
 import React, { useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -91,7 +97,7 @@ const OCR_FINAL_STATUSES = new Set(['done', 'skipped', 'failed']);
  * Status keys (utils/ocrStatus.js) of a displayed page without text to search, for a reason
  * that stands still: said in the search button's tooltip, which otherwise only names the button.
  */
-const OCR_TOOLTIP_STATUS_KEYS = new Set(['noText', 'skipped', 'skippedTextLayer', 'failed', 'unavailable']);
+const OCR_TOOLTIP_STATUS_KEYS = new Set(['noText', 'skipped', 'skippedTextLayer', 'failed', 'unavailable', 'noOwnText', 'textNotShown', 'textUnreadable']);
 
 /** @param {{ pageKey:string, ordinal:number }} match */
 const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
@@ -103,13 +109,15 @@ const matchIdOf = (match) => `${match.pageKey}\u001f${match.ordinal}`;
  * @param {function(number): void} props.setPageNumber  Takes an original session page number.
  * @param {Array<Object>} props.allPages  The viewer's pages.
  * @param {boolean} [props.searchEnabled=true]  False keeps only the status indicator.
+ * @param {boolean} [props.recognition=true]  False while nothing is recognised and only a PDF
+ *   page's own text is read: the words of the button follow (see above).
  * @param {boolean} [props.ctrlFOverride=false]  True lets Ctrl+F (Cmd+F) open the field instead
  *   of the browser's find (`ocr.search.overridesCtrlF`); Ctrl+F stays the browser's in a modal
  *   dialog, in other text fields and in the toolbar's other menus (every `data-odv-shortcuts="off"`
  *   area, such as the language menu), and with Shift or Alt held.
  * @returns {React.ReactElement}
  */
-export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true, ctrlFOverride = false }) {
+export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, searchEnabled = true, ctrlFOverride = false, recognition = true }) {
   const { t } = useTranslation('common');
   const { ocrPages, ocrEngineFailure, ocrBoost = null, setOcrSearch } = useContext(ViewerContext);
   const [open, setOpen] = useState(false);
@@ -140,10 +148,12 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   const displayedPage = pages[displayedIndex] || null;
   const displayedKey = displayedPage ? ocrPageKeyOf(displayedPage) : '';
   const displayedEntry = displayedKey && ocrPages ? ocrPages[displayedKey] || null : null;
-  const statusKey = ocrStatusKeyOf(displayedEntry, ocrEngineFailure);
-  const statusText = statusKey
-    ? t(`ocr.status.${statusKey}`, { defaultValue: OCR_STATUS_FALLBACK[statusKey] })
-    : t('ocr.status.notStarted', { defaultValue: 'Text recognition has not started on this page' });
+  const recognizes = recognition !== false;
+  const statusKey = ocrStatusKeyOf(displayedEntry, ocrEngineFailure, { recognition: recognizes });
+  let statusText;
+  if (statusKey) statusText = t(`ocr.status.${statusKey}`, { defaultValue: OCR_STATUS_FALLBACK[statusKey] });
+  else if (recognizes) statusText = t('ocr.status.notStarted', { defaultValue: 'Text recognition has not started on this page' });
+  else statusText = t('ocr.status.textNotRead', { defaultValue: 'The page’s text has not been read yet' });
   // The boost (`ocr.boost`), when there is one: a line in the button's description saying what
   // the last climb found, and a badge with the engine count while it runs. The badge is the
   // live part: reaching for the button is input, and input ends the boost.
@@ -181,7 +191,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // a window after the last recognised page, whatever else changes meanwhile: a figure from a
   // pace that no longer holds is worse than none, and without a new page nothing else would
   // take it away.
-  const wholeDocument = isOcrWholeDocumentEnabled();
+  // Without recognition there is no pace to tell and no worker to name.
+  const wholeDocument = recognizes && isOcrWholeDocumentEnabled();
   const [pendingPages, enginePages, activePages, unfinishedPages, queuedPages, endedWithoutTextPages] = useMemo(() => {
     let pending = 0;
     let engine = 0;
@@ -208,7 +219,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // count, so a document with such pages ends on "45/50" and, without a word about them, looks
   // as if recognition had stopped. A page that failed because no engine could start is left
   // out above; pages skipped for reasons of their own are named whatever the engine does.
-  const notRecognisedPages = endedWithoutTextPages;
+  // Without recognition no page is "not recognised": a page without text of its own is just that.
+  const notRecognisedPages = recognizes ? endedWithoutTextPages : 0;
   let notRecognisedText = '';
   let notRecognisedLongText = '';
   if (notRecognisedPages === 1) {
@@ -241,7 +253,7 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // outcome. Without the whole document most pages never get one, and places kept "until the
   // document is done" would stay for good: the workers are named while pages are queued or in
   // flight, and the time is not said, as above.
-  const progressShown = !ocrEngineFailure && (wholeDocument ? unfinishedPages > 0 : queuedPages > 0);
+  const progressShown = recognizes && !ocrEngineFailure && (wholeDocument ? unfinishedPages > 0 : queuedPages > 0);
   const timeLeftShort = describeOcrTimeLeftShort(timeLeftMs);
   let timeLeftShortText = '';
   if (timeLeftShort) {
@@ -252,7 +264,8 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     timeLeftShortText = t('ocr.progress.shortPending', { defaultValue: OCR_PROGRESS_FALLBACK.shortPending });
   }
   let workersText = '';
-  if (activePages === 1) workersText = t('ocr.progress.workerOne', { defaultValue: OCR_PROGRESS_FALLBACK.workerOne });
+  if (!recognizes) workersText = '';
+  else if (activePages === 1) workersText = t('ocr.progress.workerOne', { defaultValue: OCR_PROGRESS_FALLBACK.workerOne });
   else if (activePages > 1 || progressShown) workersText = t('ocr.progress.workers', { workers: activePages, defaultValue: OCR_PROGRESS_FALLBACK.workers });
   // How wide the details may unfold: into the room the toolbar's spacer leaves and no further,
   // dropped whole from the end when it is too small (utils/ocrSearchPlacement.js). The unfolding
@@ -313,7 +326,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
   // the count behind a thin divider, then the pages that were not recognised when there are
   // any, then the time left and the pages being worked on while there are any. For the eye
   // only: the button's description spells them out.
-  const coverageTitle = t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` });
+  const coverageTitle = recognizes
+    ? t('ocr.search.coverageLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages ready` })
+    : t('ocr.search.coverageOwnTextLong', { done: recognisedPages, pages: pages.length, defaultValue: `${recognisedPages} of ${pages.length} pages have text` });
   // Spelt out for assistive technology: what is known (no placeholder, no "0 workers"), and
   // last the boost's line.
   const describedText = [coverageTitle, notRecognisedLongText, timeLeftText, activePages > 0 ? workersText : '', boostText].filter(Boolean).join(' · ');
@@ -549,7 +564,9 @@ export default function OcrSearchBar({ pageNumber, setPageNumber, allPages, sear
     );
   }
 
-  const openLabel = t('ocr.search.open', { defaultValue: 'Search in the recognised text' });
+  const openLabel = recognizes
+    ? t('ocr.search.open', { defaultValue: 'Search in the recognised text' })
+    : t('ocr.search.openOwnText', { defaultValue: 'Search in the document’s text' });
   const openTitle = ctrlFOverride ? `${openLabel} (Ctrl+F)` : openLabel;
   // The tooltip says what the button does and nothing that changes (what changes is in the
   // details), except why there is nothing to search on the displayed page when that is so.
@@ -710,4 +727,5 @@ OcrSearchBar.propTypes = {
   allPages: PropTypes.array,
   searchEnabled: PropTypes.bool,
   ctrlFOverride: PropTypes.bool,
+  recognition: PropTypes.bool,
 };

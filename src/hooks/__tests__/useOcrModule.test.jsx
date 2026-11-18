@@ -67,6 +67,22 @@ describe('useOcrModule', () => {
     expect(mocks.loadOcrModule).not.toHaveBeenCalled();
   });
 
+  it('asks the loader with only pdfTextLayer.enabled on, and hands over what it gives', async () => {
+    const textOnly = { marker: 'text-only entry' };
+    mocks.loadOcrModule.mockResolvedValue(textOnly);
+    window.__ODV_CONFIG__ = { ocr: { enabled: false }, pdfTextLayer: { enabled: true } };
+    await mount();
+    expect(mocks.loadOcrModule).toHaveBeenCalledTimes(1);
+    expect(probe.value).toBe(textOnly);
+  });
+
+  it('treats anything but the literal true as off for pdfTextLayer.enabled too', async () => {
+    window.__ODV_CONFIG__ = { pdfTextLayer: { enabled: 'true' } };
+    await mount();
+    expect(probe.value).toBeNull();
+    expect(mocks.loadOcrModule).not.toHaveBeenCalled();
+  });
+
   it('treats anything but the literal true as off', async () => {
     window.__ODV_CONFIG__ = { ocr: { enabled: 'true' } };
     await mount();

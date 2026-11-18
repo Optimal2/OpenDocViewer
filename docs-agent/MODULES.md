@@ -49,7 +49,7 @@ File count: 8. Line count: 4133. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8207. JSDoc symbol count: 117.
+File count: 21. Line count: 8229. JSDoc symbol count: 117.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -84,7 +84,7 @@ File count: 4. Line count: 1751. JSDoc symbol count: 50.
 
 ## src/contexts
 
-File count: 5. Line count: 3641. JSDoc symbol count: 101.
+File count: 5. Line count: 3647. JSDoc symbol count: 101.
 
 - `src/contexts/viewerContext.js` - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -107,7 +107,7 @@ File count: 2. Line count: 4. JSDoc symbol count: 0.
 
 ## src/hooks
 
-File count: 10. Line count: 1777. JSDoc symbol count: 55.
+File count: 10. Line count: 1813. JSDoc symbol count: 56.
 
 - `src/hooks/useOcrTextLayers.js` - Runs OCR for the pages near the viewer's focus and exposes the outcomes per page.
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
@@ -160,9 +160,9 @@ File count: 3. Line count: 178. JSDoc symbol count: 4.
 
 ## src/ocr
 
-File count: 22. Line count: 4910. JSDoc symbol count: 208.
+File count: 23. Line count: 4963. JSDoc symbol count: 209.
 
-- `src/ocr/index.js` - Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
+- `src/ocr/index.js` - Entry point of the OCR module: the file the viewer imports while OCR is on, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.
 - `src/ocr/prepareImageCore.js` - The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de
 - `src/ocr/classify.js` - Decides, per page, whether OCR is worth running.
 - `src/ocr/lineRemoval.js` - Ruling\-line removal before recognition: the pre\-processing step for ruled tables and forms.
@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 69. Line count: 24898. JSDoc symbol count: 1036.
+File count: 69. Line count: 24993. JSDoc symbol count: 1041.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

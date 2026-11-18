@@ -6413,7 +6413,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 112,
+    "line": 120,
     "description": "",
     "params": [
       {
@@ -6447,6 +6447,12 @@
         "description": "False keeps only the status indicator."
       },
       {
+        "name": "props.recognition",
+        "type": "boolean",
+        "optional": true,
+        "description": "False while nothing is recognised and only a PDF page's own text is read: the words of the button follow (see above)."
+      },
+      {
         "name": "props.ctrlFOverride",
         "type": "boolean",
         "optional": true,
@@ -6468,7 +6474,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 473,
+    "line": 488,
     "description": "",
     "params": [
       {
@@ -6488,7 +6494,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 510,
+    "line": 525,
     "description": "",
     "params": [
       {
@@ -6508,7 +6514,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 518,
+    "line": 533,
     "description": "Escape closes the field from any of its controls.",
     "params": [],
     "returns": [],
@@ -6521,7 +6527,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 97,
+    "line": 103,
     "description": "",
     "params": [
       {
@@ -6541,7 +6547,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 87,
+    "line": 93,
     "description": "Statuses of a page being worked on right now: one for each of the queue's pages in flight.",
     "params": [],
     "returns": [],
@@ -6554,7 +6560,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 89,
+    "line": 95,
     "description": "Statuses of a page whose outcome is final: nothing more will be done about it.",
     "params": [],
     "returns": [],
@@ -6567,7 +6573,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 85,
+    "line": 91,
     "description": "Statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still waiting for OCR.",
     "params": [],
     "returns": [],
@@ -6580,7 +6586,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 94,
+    "line": 100,
     "description": "Status keys (utils/ocrStatus.js) of a displayed page without text to search, for a reason that stands still: said in the search button's tooltip, which otherwise only names the bu...",
     "params": [],
     "returns": [],
@@ -6593,7 +6599,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/OcrSearchBar.jsx",
-    "line": 494,
+    "line": 509,
     "description": "Enter / the arrows: a current match on another page is shown first (the position does not move), unless its page was already asked for (a hidden page lands on the nearest shown on...",
     "params": [
       {
@@ -6613,7 +6619,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/OcrToolbarActions.jsx",
-    "line": 36,
+    "line": 38,
     "description": "",
     "params": [
       {
@@ -16111,7 +16117,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 249,
+    "line": 250,
     "description": "",
     "params": [],
     "returns": [],
@@ -16124,7 +16130,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 239,
+    "line": 240,
     "description": "Per-page compare transform (utils/compareTransform.js): scale multiplies the base zoom (1 = 100 %), dx / dy are CSS px at transform scale 1, rotation is degrees in [0, 360).",
     "params": [],
     "returns": [],
@@ -16137,7 +16143,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/viewerContext.js",
-    "line": 256,
+    "line": 257,
     "description": "",
     "params": [],
     "returns": [],
@@ -16267,7 +16273,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1066,
+    "line": 1067,
     "description": "",
     "params": [
       {
@@ -16292,7 +16298,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1392,
+    "line": 1393,
     "description": "",
     "params": [],
     "returns": [
@@ -16310,7 +16316,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1081,
+    "line": 1082,
     "description": "",
     "params": [
       {
@@ -16347,7 +16353,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1543,
+    "line": 1544,
     "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
     "params": [
       {
@@ -16384,7 +16390,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1108,
+    "line": 1109,
     "description": "",
     "params": [],
     "returns": [
@@ -16445,7 +16451,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2827,
+    "line": 2832,
     "description": "",
     "params": [
       {
@@ -16465,7 +16471,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2813,
+    "line": 2818,
     "description": "",
     "params": [
       {
@@ -16485,7 +16491,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1180,
+    "line": 1181,
     "description": "",
     "params": [
       {
@@ -16536,7 +16542,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1641,
+    "line": 1642,
     "description": "",
     "params": [
       {
@@ -16561,7 +16567,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2062,
+    "line": 2063,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -16586,7 +16592,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1869,
+    "line": 1870,
     "description": "",
     "params": [
       {
@@ -16636,7 +16642,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2832,
+    "line": 2837,
     "description": "",
     "params": [
       {
@@ -16687,7 +16693,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2459,
+    "line": 2460,
     "description": "",
     "params": [
       {
@@ -16712,7 +16718,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1521,
+    "line": 1522,
     "description": "",
     "params": [
       {
@@ -16737,7 +16743,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1617,
+    "line": 1618,
     "description": "",
     "params": [
       {
@@ -16762,7 +16768,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1117,
+    "line": 1118,
     "description": "",
     "params": [
       {
@@ -16874,7 +16880,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 967,
+    "line": 968,
     "description": "",
     "params": [
       {
@@ -16974,7 +16980,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 947,
+    "line": 948,
     "description": "",
     "params": [
       {
@@ -17055,7 +17061,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 956,
+    "line": 957,
     "description": "",
     "params": [
       {
@@ -17216,7 +17222,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1404,
+    "line": 1405,
     "description": "",
     "params": [
       {
@@ -17316,7 +17322,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1016,
+    "line": 1017,
     "description": "",
     "params": [
       {
@@ -17347,7 +17353,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1451,
+    "line": 1452,
     "description": "",
     "params": [
       {
@@ -17384,7 +17390,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1595,
+    "line": 1596,
     "description": "",
     "params": [
       {
@@ -17415,7 +17421,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2325,
+    "line": 2326,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -17433,7 +17439,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1375,
+    "line": 1376,
     "description": "",
     "params": [
       {
@@ -17458,7 +17464,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1384,
+    "line": 1385,
     "description": "",
     "params": [
       {
@@ -17483,7 +17489,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2144,
+    "line": 2145,
     "description": "",
     "params": [
       {
@@ -17514,7 +17520,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1332,
+    "line": 1333,
     "description": "",
     "params": [
       {
@@ -17539,7 +17545,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2756,
+    "line": 2759,
     "description": "Drop a page render made only for OCR (the whole document asked for) once its bytes are read.",
     "params": [],
     "returns": [],
@@ -17552,7 +17558,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 991,
+    "line": 992,
     "description": "Release print leases previously acquired through getPrintablePageUrls .",
     "params": [
       {
@@ -17577,7 +17583,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1775,
+    "line": 1776,
     "description": "",
     "params": [
       {
@@ -17663,7 +17669,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1701,
+    "line": 1702,
     "description": "",
     "params": [
       {
@@ -17718,7 +17724,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2416,
+    "line": 2417,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -17749,7 +17755,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2822,
+    "line": 2827,
     "description": "Write one page's transform: a partial transform or current =&gt; partial .",
     "params": [
       {
@@ -17775,14 +17781,14 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2787,
+    "line": 2791,
     "description": "",
     "params": [
       {
         "name": "indexes",
         "type": "Array.<number>",
         "optional": false,
-        "description": "Indexes into allPages of the displayed page(s), primary first. A no-op while OCR is off, so page changes write no provider state on the def..."
+        "description": "Indexes into allPages of the displayed page(s), primary first. A no-op while pages have no text layer (OCR and pdfTextLayer both off), so p..."
       }
     ],
     "returns": [],
@@ -17795,14 +17801,14 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2800,
+    "line": 2805,
     "description": "",
     "params": [
       {
         "name": "next",
         "type": "Object|null",
         "optional": false,
-        "description": "{ term, current: ({ pageKey, ordinal }|null), onlyPageKey: (string|null) } , or null when the search is closed. A no-op while OCR is off; a..."
+        "description": "{ term, current: ({ pageKey, ordinal }|null), onlyPageKey: (string|null) } , or null when the search is closed. A no-op while pages have no..."
       }
     ],
     "returns": [],
@@ -17815,7 +17821,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1688,
+    "line": 1689,
     "description": "",
     "params": [
       {
@@ -17840,7 +17846,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1351,
+    "line": 1352,
     "description": "",
     "params": [
       {
@@ -17878,7 +17884,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 938,
+    "line": 939,
     "description": "Recompute the OCR pause signal from outstanding leases and print PDF assemblies.",
     "params": [],
     "returns": [],
@@ -17922,7 +17928,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1530,
+    "line": 1531,
     "description": "",
     "params": [
       {
@@ -17953,7 +17959,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2166,
+    "line": 2167,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {
@@ -17978,7 +17984,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1606,
+    "line": 1607,
     "description": "",
     "params": [
       {
@@ -18721,13 +18727,13 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrModule.js",
-    "line": 21,
+    "line": 24,
     "description": "",
     "params": [],
     "returns": [
       {
         "type": "Object|null",
-        "description": "The OCR module (src/ocr/index.js) once loaded, otherwise null."
+        "description": "The OCR module (src/ocr/index.js), or its text-only entry (src/ocr/pdfText.js) while only pdfTextLayer.enabled is on, once loaded; otherwis..."
       }
     ],
     "examples": 0
@@ -18739,7 +18745,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 424,
+    "line": 457,
     "description": "Create the boost control and its triggers for one runtime.",
     "params": [
       {
@@ -18764,7 +18770,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 184,
+    "line": 208,
     "description": "The boost control and its triggers while the boost is on: { controller, onPlanned, detach } .",
     "params": [],
     "returns": [],
@@ -18777,7 +18783,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 90,
+    "line": 107,
     "description": "Tell pointer moves that travel from those that do not.",
     "params": [
       {
@@ -18802,7 +18808,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 162,
+    "line": 182,
     "description": "",
     "params": [
       {
@@ -18894,6 +18900,12 @@
         "type": "number",
         "optional": true,
         "description": "Logical threads the boost may plan with; default navigator.hardwareConcurrency ."
+      },
+      {
+        "name": "options.recognition",
+        "type": "boolean",
+        "optional": true,
+        "description": "Default true: pages are recognised when the module can (the full module; its text-only entry never can). False reads PDF pages' own text on..."
       }
     ],
     "returns": [
@@ -18911,7 +18923,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 65,
+    "line": 82,
     "description": "Window events that count as input for the boost: they end the boosted state and restart the idle clock.",
     "params": [],
     "returns": [],
@@ -18924,7 +18936,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 113,
+    "line": 130,
     "description": "Queue statuses (src/ocr/queue.js OCR_PAGE_STATUS) of a page still to do.",
     "params": [],
     "returns": [],
@@ -18937,7 +18949,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 76,
+    "line": 93,
     "description": "How far (CSS pixels) the pointer must travel before a pointer move counts as input for the boost, where the site says nothing else ( ocr.boost.pointerTravelPx , whose default this...",
     "params": [],
     "returns": [],
@@ -18950,7 +18962,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 58,
+    "line": 67,
     "description": "Idle time after which the OCR worker is terminated to free its memory.",
     "params": [],
     "returns": [],
@@ -18963,8 +18975,21 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 505,
+    "line": 538,
     "description": "After a window plan (or a search opening).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "PDF_TEXT_ONLY_CONCURRENCY",
+    "name": "PDF_TEXT_ONLY_CONCURRENCY",
+    "longname": "PDF_TEXT_ONLY_CONCURRENCY",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/hooks/useOcrTextLayers.js",
+    "line": 75,
+    "description": "PDF pages read at a time while nothing is recognised ( pdfTextLayer.enabled with OCR off).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -18976,7 +19001,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 186,
+    "line": 210,
     "description": "What the last window plan decided for the pages in flight, for the boost to restore.",
     "params": [],
     "returns": [],
@@ -18989,7 +19014,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 116,
+    "line": 133,
     "description": "",
     "params": [],
     "returns": [
@@ -19007,7 +19032,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 121,
+    "line": 138,
     "description": "",
     "params": [],
     "returns": [
@@ -19025,7 +19050,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 94,
+    "line": 111,
     "description": "Resting place per pointer type: a handful of entries at most.",
     "params": [],
     "returns": [],
@@ -19038,7 +19063,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/hooks/useOcrTextLayers.js",
-    "line": 202,
+    "line": 226,
     "description": "Viewer indexes of the current window (focus pages and neighbours): never released.",
     "params": [],
     "returns": [],
@@ -24352,7 +24377,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 87,
+    "line": 93,
     "description": "Judge the text pdf.js extracted from one page.",
     "params": [
       {
@@ -24383,7 +24408,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 57,
+    "line": 63,
     "description": "",
     "params": [
       {
@@ -24421,7 +24446,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 50,
+    "line": 56,
     "description": "Above this share of private-use or replacement characters the layer is garbled.",
     "params": [],
     "returns": [],
@@ -24434,7 +24459,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 46,
+    "line": 52,
     "description": "Fewer visible characters than this counts as an empty layer: page numbers, a stray header, or a short stamp on an otherwise scanned page.",
     "params": [],
     "returns": [],
@@ -24447,7 +24472,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 48,
+    "line": 54,
     "description": "Below this share of letters and digits among visible characters the layer is garbled.",
     "params": [],
     "returns": [],
@@ -24473,7 +24498,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 40,
+    "line": 46,
     "description": "Thresholds of assessPdfTextLayer; exported so the documentation and tests state the same numbers.",
     "params": [],
     "returns": [],
@@ -24486,7 +24511,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 71,
+    "line": 77,
     "description": "",
     "params": [],
     "returns": [],
@@ -24512,8 +24537,21 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/classify.js",
-    "line": 37,
+    "line": 43,
     "description": "The image formats the viewer rasterises (utils/documentLoadingConfig.js isRasterImageExtension).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "RECOGNITION_OFF",
+    "name": "RECOGNITION_OFF",
+    "longname": "RECOGNITION_OFF",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/ocr/classify.js",
+    "line": 39,
+    "description": "Nothing is recognised in this session ( pdfTextLayer.enabled with ocr.enabled off) and the page has no usable text of its own: a raster page, or a PDF page whose text layer is emp...",
     "params": [],
     "returns": [],
     "examples": 0
@@ -26539,7 +26577,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 186,
+    "line": 200,
     "description": "Abort one job's recognition: its worker on a pool, the engine as a whole otherwise.",
     "params": [],
     "returns": [],
@@ -26552,7 +26590,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 131,
+    "line": 142,
     "description": "",
     "params": [
       {
@@ -26563,9 +26601,15 @@
       },
       {
         "name": "options.engine",
-        "type": "Object",
+        "type": "Object|null",
         "optional": false,
         "description": "An OcrEngine (engine.js) or an OcrEnginePool (enginePool.js). A pool (recognised by its numeric size ) takes a control object as the second..."
+      },
+      {
+        "name": "options.recognition",
+        "type": "boolean",
+        "optional": true,
+        "description": "Default true. False reads a PDF page's own text and recognises nothing ( pdfTextLayer.enabled with OCR off): a raster page, and a PDF page..."
       },
       {
         "name": "options.concurrency",
@@ -26649,7 +26693,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 327,
+    "line": 352,
     "description": "Close a job: out of flight, its outcome cached when the page is still wanted, the queue pumped.",
     "params": [],
     "returns": [],
@@ -26662,7 +26706,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 68,
+    "line": 74,
     "description": "Where a done outcome's words come from ( source ).",
     "params": [],
     "returns": [],
@@ -26675,7 +26719,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 30,
+    "line": 36,
     "description": "Upper bounds per step, so a promise that never settles (a pdf.js document that hangs, a page image that never arrives, a worker that stops answering) fails the page instead of blo...",
     "params": [],
     "returns": [],
@@ -26688,7 +26732,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 91,
+    "line": 97,
     "description": "",
     "params": [],
     "returns": [],
@@ -26701,7 +26745,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 75,
+    "line": 81,
     "description": "",
     "params": [],
     "returns": [],
@@ -26714,7 +26758,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 84,
+    "line": 90,
     "description": "",
     "params": [],
     "returns": [],
@@ -26727,7 +26771,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 72,
+    "line": 78,
     "description": "The PDF page's own text layer, read through pdf.js; the engine never ran.",
     "params": [],
     "returns": [],
@@ -26740,7 +26784,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 70,
+    "line": 76,
     "description": "The engine recognised the page image.",
     "params": [],
     "returns": [],
@@ -26753,7 +26797,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/ocr/queue.js",
-    "line": 150,
+    "line": 162,
     "description": "null until retainSources is called: every source is retained.",
     "params": [],
     "returns": [],
@@ -26766,7 +26810,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 37,
+    "line": 43,
     "description": "Marker on the error of a step that exceeded its bound.",
     "params": [],
     "returns": [],
@@ -26779,7 +26823,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/ocr/queue.js",
-    "line": 45,
+    "line": 51,
     "description": "",
     "params": [
       {
@@ -32605,8 +32649,21 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrLoader.js",
-    "line": 33,
-    "description": "True once the module import has been requested in this session.",
+    "line": 53,
+    "description": "True once the full module's import has been requested in this session.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "isPdfTextModuleRequested",
+    "name": "isPdfTextModuleRequested",
+    "longname": "isPdfTextModuleRequested",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ocrLoader.js",
+    "line": 58,
+    "description": "True once the text-only entry's import has been requested in this session.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -32618,7 +32675,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrLoader.js",
-    "line": 20,
+    "line": 30,
     "description": "",
     "params": [
       {
@@ -32631,9 +32688,22 @@
     "returns": [
       {
         "type": "Promise.<(Object|null)>",
-        "description": "The OCR module (src/ocr/index.js) or null while OCR is off."
+        "description": "The OCR module (src/ocr/index.js) while OCR is on, its text-only entry (src/ocr/pdfText.js) while only pdfTextLayer.enabled is, otherwise n..."
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "modulePromise",
+    "name": "modulePromise",
+    "longname": "modulePromise",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/utils/ocrLoader.js",
+    "line": 21,
+    "description": "The full module (OCR on).",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -32643,8 +32713,21 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrLoader.js",
-    "line": 38,
-    "description": "Test hook: forget the cached import so the next call imports again.",
+    "line": 63,
+    "description": "Test hook: forget the cached imports so the next call imports again.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "textModulePromise",
+    "name": "textModulePromise",
+    "longname": "textModulePromise",
+    "kind": "member",
+    "scope": "global",
+    "file": "src/utils/ocrLoader.js",
+    "line": 23,
+    "description": "The text-only entry (only a PDF page's own text).",
     "params": [],
     "returns": [],
     "examples": 0
@@ -33547,7 +33630,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 70,
+    "line": 105,
     "description": "Whether a page's recognised text can be searched: the outcome is final and holds words.",
     "params": [
       {
@@ -33572,7 +33655,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 9,
+    "line": 13,
     "description": "Status keys and their English fallbacks.",
     "params": [],
     "returns": [],
@@ -33585,7 +33668,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 24,
+    "line": 33,
     "description": "LED state (components/common/StatusLed.jsx) per status key; '' (no outcome yet) is off.",
     "params": [],
     "returns": [],
@@ -33598,7 +33681,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ocrStatus.js",
-    "line": 46,
+    "line": 62,
     "description": "Status key of a page's OCR outcome.",
     "params": [
       {
@@ -33612,11 +33695,17 @@
         "type": "string|null|undefined",
         "optional": false,
         "description": "Set when the engine cannot serve this session; a page that is already done keeps its own status (its text is there, and a PDF page's own te..."
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": "recognition false: nothing is recognised in this session, only a PDF page's own text is read (the keys readingText , pdfText , noOwnText ,..."
       }
     ],
     "returns": [
       {
-        "type": "'working'|'done'|'pdfText'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|''",
+        "type": "'working'|'done'|'pdfText'|'noText'|'skippedTextLayer'|'skipped'|'failed'|'unavailable'|'readingText'|'noOwnText'|'textNotShown'|'textUnreadable'|''",
         "description": ""
       }
     ],
@@ -48173,7 +48262,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 560,
+    "line": 590,
     "description": "",
     "params": [
       {
@@ -48222,7 +48311,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 888,
+    "line": 922,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -48304,7 +48393,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 453,
+    "line": 483,
     "description": "ocr.workerCount when the key is missing: 0, the automatic choice of resolveOcrWorkerPlan.",
     "params": [],
     "returns": [],
@@ -48330,7 +48419,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 811,
+    "line": 845,
     "description": "Describe how ocr.assetBaseUrl resolves.",
     "params": [
       {
@@ -48355,7 +48444,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 731,
+    "line": 765,
     "description": "Describe how ocr.languages resolves: the usable codes, the entries that were ignored and whether the default list stood in.",
     "params": [
       {
@@ -48380,7 +48469,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 539,
+    "line": 569,
     "description": "Describe ocr.workerCount (how many tesseract.js workers recognise pages at the same time) without resolving the automatic choice, so the caller can report a rejected or clamped va...",
     "params": [
       {
@@ -48455,7 +48544,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 836,
+    "line": 870,
     "description": "Resolve where the OCR engine, worker and language files are served from ( ocr.assetBaseUrl ): the url of describeOcrAssetBaseUrl, so null both for the default and for an ignored v...",
     "params": [
       {
@@ -48480,7 +48569,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 780,
+    "line": 814,
     "description": "Resolve the OCR languages ( ocr.languages ): the languages of describeOcrLanguages.",
     "params": [
       {
@@ -48505,7 +48594,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1265,
+    "line": 1299,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -48580,7 +48669,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1140,
+    "line": 1174,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -48605,7 +48694,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1165,
+    "line": 1199,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -48648,7 +48737,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1248,
+    "line": 1282,
     "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
     "params": [
       {
@@ -48673,7 +48762,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 848,
+    "line": 882,
     "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
     "params": [
       {
@@ -48698,7 +48787,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1116,
+    "line": 1150,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -48723,7 +48812,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1102,
+    "line": 1136,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -48748,7 +48837,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1089,
+    "line": 1123,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -48773,7 +48862,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1189,
+    "line": 1223,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -48798,7 +48887,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1207,
+    "line": 1241,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -48823,7 +48912,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 791,
+    "line": 825,
     "description": "The value contains whitespace or a control character; the URL parser would strip them, which could hide a scheme.",
     "params": [],
     "returns": [],
@@ -48986,7 +49075,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 369,
+    "line": 399,
     "description": "Resolve whether the opt-in OCR benchmark is offered under About -&gt; Diagnostics ( ocr.benchmark.enabled ).",
     "params": [
       {
@@ -49011,7 +49100,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 382,
+    "line": 412,
     "description": "Resolve whether the opt-in OCR boost benchmark is offered under About -&gt; Diagnostics ( ocr.boostBenchmark.enabled ).",
     "params": [
       {
@@ -49036,7 +49125,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 423,
+    "line": 453,
     "description": "Resolve whether the OCR boost runs ( ocr.boost.enabled ): only the boolean literal true , and only while OCR itself is on.",
     "params": [
       {
@@ -49086,7 +49175,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 342,
+    "line": 372,
     "description": "Resolve whether the ruling lines of tables and forms are removed from a copy of the page image before recognition ( ocr.removeRulingLines ).",
     "params": [
       {
@@ -49111,7 +49200,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 689,
+    "line": 722,
     "description": "Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead of the browser's own find ( ocr.search.overridesCtrlF ).",
     "params": [
       {
@@ -49136,7 +49225,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 676,
+    "line": 708,
     "description": "Resolve whether the toolbar's search in the text layers is offered ( ocr.search.enabled ).",
     "params": [
       {
@@ -49161,12 +49250,37 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 356,
+    "line": 386,
     "description": "Resolve whether the OCR queue works through the whole document in the background ( ocr.recognizeWholeDocument ): after the window around the shown page, the remaining pages in rea...",
     "params": [
       {
         "name": "cfg",
         "type": "RuntimeConfig",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isPageTextEnabled",
+    "name": "isPageTextEnabled",
+    "longname": "isPageTextEnabled",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 359,
+    "description": "Resolve whether pages can have a text layer at all: OCR is on ( ocr.enabled ), or a PDF page's own text is read without it ( pdfTextLayer.enabled ).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
         "optional": true,
         "description": ""
       }
@@ -49205,13 +49319,38 @@
     "examples": 0
   },
   {
+    "id": "isPdfTextLayerEnabled",
+    "name": "isPdfTextLayerEnabled",
+    "longname": "isPdfTextLayerEnabled",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 345,
+    "description": "Resolve whether a PDF page's own text is shown as a text layer while OCR is off ( pdfTextLayer.enabled ).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "isReadAloudEnabled",
     "name": "isReadAloudEnabled",
     "longname": "isReadAloudEnabled",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 704,
+    "line": 738,
     "description": "Resolve whether read-aloud is offered ( ocr.speech.enabled ): the entry in the page's context menu and the &quot;Reading language&quot; section in the language menu.",
     "params": [
       {
@@ -49261,7 +49400,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 662,
+    "line": 693,
     "description": "Resolve whether the language of a page's text is guessed among the OCR languages, for the read-aloud language and the text layer's lang ( ocr.speech.autoDetectLanguage ).",
     "params": [
       {
@@ -49312,7 +49451,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 455,
+    "line": 485,
     "description": "Most workers a site may ask for with an explicit ocr.workerCount ; larger values are clamped.",
     "params": [],
     "returns": [],
@@ -49325,7 +49464,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 866,
+    "line": 900,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -49356,7 +49495,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1063,
+    "line": 1097,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -49381,7 +49520,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1034,
+    "line": 1068,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -49412,7 +49551,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1002,
+    "line": 1036,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -49443,7 +49582,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 934,
+    "line": 968,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -49486,7 +49625,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 913,
+    "line": 947,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -49529,7 +49668,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 435,
+    "line": 465,
     "description": "Read ocr.boost : a number out of range is clamped to the nearest bound, whatever is missing or not a finite number gets the default, and a trigger is open unless it is the literal...",
     "params": [
       {
@@ -49554,7 +49693,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 575,
+    "line": 605,
     "description": "Read ocr.workerPolicy : a number out of range is clamped to the nearest bound, and whatever is missing or not a finite number (a numeric string included) gets the default.",
     "params": [
       {
@@ -49579,7 +49718,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1045,
+    "line": 1079,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -49610,7 +49749,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 1017,
+    "line": 1051,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -49641,7 +49780,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 963,
+    "line": 997,
     "description": "Resolve the configured reset-session fallback target.",
     "params": [
       {
@@ -49666,7 +49805,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 951,
+    "line": 985,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -49697,7 +49836,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 977,
+    "line": 1011,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -49722,7 +49861,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 785,
+    "line": 819,
     "description": "Why describeOcrAssetBaseUrl ignores a value; the OCR module logs the reason once.",
     "params": [],
     "returns": [],
@@ -49735,7 +49874,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 406,
+    "line": 436,
     "description": "Defaults of ocr.boost .",
     "params": [],
     "returns": [],
@@ -49748,7 +49887,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 387,
+    "line": 417,
     "description": "Most workers the boost may ever use, whatever a client reports ( ocr.boost.maxWorkerCount is clamped to it).",
     "params": [],
     "returns": [],
@@ -49787,7 +49926,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 509,
+    "line": 539,
     "description": "Defaults of ocr.workerPolicy , set from the OCR benchmark (About -&gt; Diagnostics) on a 4-core, 16 GB client (Chromium, 2026-11-10): 40 evenly spaced pages of a 300-page scanned...",
     "params": [],
     "returns": [],
@@ -49800,7 +49939,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 389,
+    "line": 419,
     "description": "ocr.boost : more workers while the user is idle (src/ocr/boost.js).",
     "params": [],
     "returns": [],
@@ -49813,7 +49952,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 519,
+    "line": 549,
     "description": "",
     "params": [],
     "returns": [],
@@ -49826,7 +49965,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 589,
+    "line": 619,
     "description": "",
     "params": [],
     "returns": [],
@@ -49839,7 +49978,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 457,
+    "line": 487,
     "description": "The thresholds the automatic worker count is made from ( ocr.workerPolicy ).",
     "params": [],
     "returns": [],
@@ -49917,7 +50056,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 787,
+    "line": 821,
     "description": "The value carries ?",
     "params": [],
     "returns": [],
@@ -49987,7 +50126,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 988,
+    "line": 1022,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -50012,7 +50151,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 650,
+    "line": 680,
     "description": "The workerCount of resolveOcrWorkerPlan.",
     "params": [
       {
@@ -50043,7 +50182,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 623,
+    "line": 653,
     "description": "Resolve how many OCR workers to run.",
     "params": [
       {
@@ -50098,7 +50237,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 789,
+    "line": 823,
     "description": "The value has a scheme other than http or https (javascript:, data:, blob:, file:, a drive letter).",
     "params": [],
     "returns": [],

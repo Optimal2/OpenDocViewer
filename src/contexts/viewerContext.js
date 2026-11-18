@@ -212,7 +212,8 @@ import { createContext } from 'react';
  *   OCR outcome per page key (utils/ocrPageKey.js): `status` done (text, words with boxes,
  *   imageWidth/imageHeight, `source` recognition or pdf-text for a PDF page's own text layer),
  *   skipped (reason), failed (reason), or a transient queued/probing/recognizing state. Empty
- *   while `ocr.enabled` is not the literal true.
+ *   while neither `ocr.enabled` nor `pdfTextLayer.enabled` is the literal true; with only the
+ *   latter, PDF pages' own text and `skipped` (reason `recognition-off`) for every other page.
  * @property {(string|null)} ocrEngineFailure
  *   Why the OCR engine cannot start in this session (src/ocr/engine.js failure codes), else null.
  * @property {(Object|null)} ocrBoost

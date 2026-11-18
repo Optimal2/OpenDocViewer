@@ -8,7 +8,7 @@ import {
   getPrintSelectionWorkspaceConfig,
   isDocumentMetadataUiEnabled,
   isFineTuneEnabled,
-  isOcrEnabled,
+  isPageTextEnabled,
   isOcrSearchEnabled,
   isPdfSignatureInspectionEnabled,
   isReadAloudEnabled,
@@ -210,7 +210,7 @@ export function resolveStandardManualRuleStates(runtimeConfig) {
       && runtimeConfig?.print?.pdf?.orientation?.showOption !== false),
     metadata: failOpen(() => isDocumentMetadataUiEnabled(runtimeConfig)),
     pdfSignatures: failOpen(() => isPdfSignatureInspectionEnabled(runtimeConfig)),
-    ocrSearch: failOpen(() => isOcrEnabled(runtimeConfig) && isOcrSearchEnabled(runtimeConfig)),
-    ocrSpeech: failOpen(() => isOcrEnabled(runtimeConfig) && isReadAloudEnabled(runtimeConfig)),
+    ocrSearch: failOpen(() => isPageTextEnabled(runtimeConfig) && isOcrSearchEnabled(runtimeConfig)),
+    ocrSpeech: failOpen(() => isPageTextEnabled(runtimeConfig) && isReadAloudEnabled(runtimeConfig)),
   });
 }

@@ -331,6 +331,36 @@ export function isOcrEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether a PDF page's own text is shown as a text layer while OCR is off
+ * (`pdfTextLayer.enabled`). Only the boolean literal `true` turns it on, as with `ocr.enabled`.
+ * With it on and OCR off, the viewer reads the text a PDF page already carries through pdf.js
+ * and gives the page the same text layer, search and read-aloud a recognised page has; nothing
+ * is recognised, so no OCR engine, worker, WebAssembly or language file is ever requested, and
+ * a page without usable text of its own stays an image. With OCR on the key adds nothing: a
+ * PDF page's own text is always read then.
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isPdfTextLayerEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.pdfTextLayer?.enabled === true;
+}
+
+/**
+ * Resolve whether pages can have a text layer at all: OCR is on (`ocr.enabled`), or a PDF
+ * page's own text is read without it (`pdfTextLayer.enabled`). This is the gate of everything
+ * that works on a page's text (the layer over the page, the toolbar's search, read-aloud);
+ * `isOcrEnabled` alone says whether anything is recognised. While both are off, none of it
+ * exists and nothing is imported for it.
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isPageTextEnabled(cfg = getRuntimeConfig()) {
+  return isOcrEnabled(cfg) || isPdfTextLayerEnabled(cfg);
+}
+
+/**
  * Resolve whether the ruling lines of tables and forms are removed from a copy of the page
  * image before recognition (`ocr.removeRulingLines`). On by default; only the boolean literal
  * `false` turns it off, so a missing key keeps the step. Meaningless while OCR is off: the step
@@ -654,7 +684,8 @@ export function resolveOcrWorkerCount(cfg = getRuntimeConfig(), options = {}) {
 /**
  * Resolve whether the language of a page's text is guessed among the OCR languages, for the
  * read-aloud language and the text layer's `lang` (`ocr.speech.autoDetectLanguage`). On by
- * default; only the boolean literal `false` turns it off. Means nothing while OCR is off.
+ * default; only the boolean literal `false` turns it off. Applies to a PDF page's own text
+ * read without OCR (`pdfTextLayer.enabled`) as well; means nothing while both are off.
  *
  * @param {RuntimeConfig} [cfg]
  * @returns {boolean}
@@ -668,7 +699,8 @@ export function isSpeechLanguageAutoDetectEnabled(cfg = getRuntimeConfig()) {
  * by default; only the boolean literal `false` turns it off. With it off, the toolbar keeps a
  * status-only indicator of the page's recognition in the search button's place (no field ever
  * opens, so the layers mark nothing), while the layers themselves and the browser's own find
- * stay. Means nothing while OCR is off.
+ * stay. Applies whenever pages can have a text layer: with OCR on, and with only a PDF page's
+ * own text read (`pdfTextLayer.enabled`); means nothing while both are off.
  *
  * @param {RuntimeConfig} [cfg]
  * @returns {boolean}
@@ -681,7 +713,8 @@ export function isOcrSearchEnabled(cfg = getRuntimeConfig()) {
  * Resolve whether Ctrl+F (Cmd+F on a Mac) opens the toolbar's search in the text layers instead
  * of the browser's own find (`ocr.search.overridesCtrlF`). Off by default: only the boolean
  * literal `true` hands the shortcut over, as the portal's page search does with its user
- * setting. Means nothing while OCR or the search is off.
+ * setting. Means nothing while pages have no text layer (OCR and `pdfTextLayer` both off) or
+ * the search is off.
  *
  * @param {RuntimeConfig} [cfg]
  * @returns {boolean}
@@ -696,7 +729,8 @@ export function isOcrSearchCtrlFOverrideEnabled(cfg = getRuntimeConfig()) {
  * literal `false` turns it off. With it off, the read-aloud state is never provided, so the
  * viewer neither follows the selection nor touches speech synthesis; the language guess
  * (`ocr.speech.autoDetectLanguage`) is independent and still sets the text flow's `lang` for
- * screen readers. Means nothing while OCR is off.
+ * screen readers. Applies whenever pages can have a text layer: with OCR on, and with only a PDF
+ * page's own text read (`pdfTextLayer.enabled`); means nothing while both are off.
  *
  * @param {RuntimeConfig} [cfg]
  * @returns {boolean}

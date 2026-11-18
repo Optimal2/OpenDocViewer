@@ -9,7 +9,7 @@
  * most `focus × (1 + ahead + behind)` pages however long the document is, and pages outside the
  * window are not recognised until they come into it. With `wholeDocument` the window keeps its
  * priority and every other page follows it: the pages after the first focus page in reading
- * order, then the pages before it from the start of the document. Part of the lazy OCR chunk.
+ * order, then the pages before it from the start of the document. Part of the text-only entry.
  */
 
 /** Pages queued after each focus page. */

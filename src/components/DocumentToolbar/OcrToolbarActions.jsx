@@ -18,13 +18,15 @@
  * The wrapper is laid out as `display: contents` (styles/ocr.css), so the separator and the
  * search are the toolbar's own flex items and take the toolbar's spacing like every other loose
  * button and separator; the wrapper itself remains the print rule's and the tests' hook.
- * Mounted by DocumentToolbar only while `ocr.enabled` is the literal true: with OCR off this
- * module's switches are never read and the group does not exist.
+ * Mounted by DocumentToolbar only while pages can have a text layer: `ocr.enabled` is the
+ * literal true, or `pdfTextLayer.enabled` is (a PDF page's own text, nothing recognised; the
+ * search bar is then told so and words its status accordingly). With both off this module's
+ * switches are never read and the group does not exist.
  */
 import React from 'react';
 import PropTypes from 'prop-types';
 import OcrSearchBar from './OcrSearchBar.jsx';
-import { isOcrSearchCtrlFOverrideEnabled, isOcrSearchEnabled } from '../../utils/runtimeConfig.js';
+import { isOcrEnabled, isOcrSearchCtrlFOverrideEnabled, isOcrSearchEnabled } from '../../utils/runtimeConfig.js';
 
 /**
  * @param {Object} props
@@ -36,10 +38,12 @@ import { isOcrSearchCtrlFOverrideEnabled, isOcrSearchEnabled } from '../../utils
 export default function OcrToolbarActions({ pageNumber, setPageNumber, allPages }) {
   const search = isOcrSearchEnabled();
   const ctrlF = search && isOcrSearchCtrlFOverrideEnabled();
+  // False while only a PDF page's own text is read (`pdfTextLayer.enabled` with OCR off).
+  const recognition = isOcrEnabled();
   return (
-    <div className="toolbar-ocr-actions" data-odv-ocr="actions" data-ocr-search={search ? 'on' : 'off'} data-ocr-search-ctrl-f={ctrlF ? 'on' : 'off'}>
+    <div className="toolbar-ocr-actions" data-odv-ocr="actions" data-ocr-search={search ? 'on' : 'off'} data-ocr-search-ctrl-f={ctrlF ? 'on' : 'off'} data-ocr-recognition={recognition ? 'on' : 'off'}>
       <div className="separator" />
-      <OcrSearchBar pageNumber={pageNumber} setPageNumber={setPageNumber} allPages={allPages} searchEnabled={search} ctrlFOverride={ctrlF} />
+      <OcrSearchBar pageNumber={pageNumber} setPageNumber={setPageNumber} allPages={allPages} searchEnabled={search} ctrlFOverride={ctrlF} recognition={recognition} />
     </div>
   );
 }

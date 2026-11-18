@@ -446,7 +446,12 @@
       "skippedTextLayer": "Tolkas inte: sidan har egen text",
       "skipped": "Tolkas inte: inget att tolka på sidan",
       "failed": "Texten kunde inte tolkas",
-      "unavailable": "Texttolkning är inte tillgänglig"
+      "unavailable": "Texttolkning är inte tillgänglig",
+      "textNotRead": "Sidans text har inte lästs in än",
+      "readingText": "Sidans text läses in…",
+      "noOwnText": "Sidan har ingen egen text",
+      "textNotShown": "Sidans text kan inte visas som textlager",
+      "textUnreadable": "Sidans text kunde inte läsas in"
     },
     "boost": {
       "ready": "OCR-boost: redo",
@@ -475,9 +480,11 @@
     },
     "search": {
       "open": "Sök i tolkad text",
+      "openOwnText": "Sök i dokumentets text",
       "placeholder": "Sök",
       "position": "{current}/{total}",
       "coverageLong": "{done} av {pages} sidor klara",
+      "coverageOwnTextLong": "{done} av {pages} sidor har text",
       "notRecognisedLong": "{pages} sidor tolkades inte",
       "notRecognisedLongOne": "1 sida tolkades inte",
       "positionLong": "Träff {current} av {total}",

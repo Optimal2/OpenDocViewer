@@ -259,6 +259,58 @@ pdfSignatures: {
 modified, damaged or invalid signatures keep their own severity, and unknown statuses stay
 errors. Unknown values fall back to `'ok'`. See "Status model" in `docs-src/pdf-signatures.md`.
 
+## PDF text layer without OCR (off by default)
+
+A PDF page that carries text of its own can get a text layer without OCR being on:
+
+```js
+pdfTextLayer: {
+  enabled: false   // only the literal true turns it on
+}
+```
+
+- **What it does.** With `pdfTextLayer.enabled: true` and `ocr.enabled` off, the viewer reads the
+  text each PDF page already has, through the pdf.js copy it ships for rendering and from the
+  bytes it already holds, and lays it over the page as the same invisible, selectable text layer
+  a recognised page gets. The page can then be selected, copied, found with the browser's own
+  find, searched from the toolbar and read by a screen reader or read aloud. The rules for a
+  usable layer are the ones described under OCR below (at least 50 visible characters, at
+  least half of them letters or digits, at most 20 % private-use or replacement characters).
+- **What it never does.** Nothing is recognised. A raster page (TIFF, JPG, PNG and the other
+  image formats) and a PDF page whose own text is empty or garbled stays an image; its outcome
+  is `skipped` with the reason `recognition-off`, and the search button says "The page has no
+  text of its own". A page whose own text is usable but cannot be placed as words (none of it
+  upright, or a page without a size) keeps the reason `text-layer`, as with OCR on, and the
+  button says "The page's text cannot be shown as a text layer". No OCR engine, worker, WebAssembly core or language file is requested, and
+  tesseract.js itself is not downloaded: this mode loads the text-only entry of the OCR module
+  (`src/ocr/pdfText.js`, its own lazy chunk), not the `ocr` chunk. No Content-Security-Policy
+  change is needed, since there is no WebAssembly. No page image is fetched or copied for it.
+- **Together with OCR.** With `ocr.enabled: true` the key adds nothing and changes nothing: a
+  PDF page's own text is always read first then, and only a page without usable text goes on to
+  the engine. The two never work on the same page, so they cannot disagree about one.
+- **Which pages.** The whole document, in reading order from the shown page, whatever
+  `ocr.recognizeWholeDocument` says: reading a page's text takes milliseconds, and a search over
+  a handful of pages is of little use. Two pages are read at a time. As with OCR, nothing is
+  read until the document's load is settled, and reading pauses while a print PDF is prepared
+  and under hard memory pressure. The outcomes live in memory for the session only.
+- **The toolbar.** The search button appears as with OCR, behind `ocr.search.enabled` and
+  `ocr.search.overridesCtrlF`, and read-aloud behind `ocr.speech.enabled` and
+  `ocr.speech.autoDetectLanguage`; those keys keep their names and defaults in this mode. The
+  button is named "Search in the document's text", its count is the pages that have text over
+  all pages ("12/50", described as "12 of 50 pages have text"), and it names no pages "not
+  recognised", no time left and no workers. The engine keys (`ocr.languages`, `ocr.workerCount`,
+  `ocr.workerPolicy`, `ocr.removeRulingLines`, `ocr.boost`, the benchmarks, `ocr.assetBaseUrl`)
+  mean nothing in this mode, except that the language guess chooses among `ocr.languages`.
+- **What to expect of the text.** It is the text the PDF's producer put there. A scanner that
+  adds its own hidden text layer delivers its own recognition, of whatever quality, and that is
+  what is shown. A page that mixes real text with a scanned picture counts as a text page, and
+  the picture's text is not read. Both also hold with OCR on.
+- **Off by default.** With both `pdfTextLayer.enabled` and `ocr.enabled` off nothing of the
+  above exists: no module is imported, no request is made and no element is added
+  (`tests/ui/ocr-off.spec.mjs`, `tests/ui/pdf-text-only.spec.mjs`), and the provider keeps an
+  empty outcome map and builds nothing (`src/contexts/ViewerProvider.ocr.test.jsx`,
+  `src/utils/__tests__/ocrLoader.test.js`).
+
 ## OCR (in-browser, off by default)
 
 Enable OCR with `ocr: { enabled: true }` in the site configuration (`languages: 'auto'`, Swedish

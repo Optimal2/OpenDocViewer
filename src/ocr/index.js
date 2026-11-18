@@ -1,10 +1,12 @@
 // File: src/ocr/index.js
 /**
- * Entry point of the OCR module: the one file the viewer imports, and only through
+ * Entry point of the OCR module: the file the viewer imports while OCR is on, and only through
  * `src/utils/ocrLoader.js` with `import()` after `isOcrEnabled()` returned true. Code splitting
- * therefore places everything under src/ocr/, tesseract.js and the asset manifest in one lazy
+ * therefore places the engine side of src/ocr/, tesseract.js and the asset manifest in one lazy
  * chunk, `ocr-<hash>.js` (named after this folder), which scripts/verify-ocr-lazy-chunk.mjs
- * checks after every build. Nothing in this folder may be imported statically from outside it.
+ * checks after every build. The text-only part has an entry and a chunk of its own
+ * (pdfText.js), which this file re-exports. Nothing in this folder may be imported statically
+ * from outside it.
  */
 export { createOcrEngine, classifyOcrStartupError, flattenOcrWords, OCR_STARTUP_FAILURE } from './engine.js';
 export { createOcrEnginePool } from './enginePool.js';
@@ -19,13 +21,10 @@ export const loadOcrBoostBenchmark = () => import('./boostBenchmark.js');
 export { readOcrAssetManifest, resolveOcrAssetUrls } from './assetUrls.js';
 export { KNOWN_OCR_LANGUAGES, partitionOcrLanguages } from './languages.js';
 export { createConfiguredOcrEngine, describeOcrSetup, resolveOcrConcurrency } from './setup.js';
-export { OCR_PAGE_DECISION, OCR_SKIP_REASON, PDF_TEXT_LAYER_THRESHOLDS, assessPdfTextLayer, classifyPageSource } from './classify.js';
-export { DEFAULT_OPEN_PDF_DOCUMENTS, createPdfTextProber } from './pdfTextProbe.js';
-export { PDF_TEXT_DEFAULT_ASCENT, PDF_TEXT_DEFAULT_DESCENT, pdfTextLayerWords } from './pdfTextWords.js';
-export { DEFAULT_OCR_CACHE_LIMIT, createOcrResultCache } from './resultCache.js';
-export { OCR_WINDOW_AHEAD, OCR_WINDOW_BEHIND, maxOcrWindowSize, planOcrWindow } from './window.js';
-export { OCR_OUTCOME_SOURCE, OCR_PAGE_STATUS, createOcrQueue } from './queue.js';
-export { DETECTABLE_LANGUAGES, MIN_HITS, RUNNER_UP_RATIO, detectTextLanguage } from './detectLanguage.js';
+// The text-only part (the queue, its cache, the window plan, the PDF text prober, the language
+// guess): one entry of its own, src/ocr/pdfText.js, which the viewer loads alone when only a PDF
+// page's own text is read (`pdfTextLayer.enabled` with OCR off).
+export * from './pdfText.js';
 export { RULING_LINE_DILATE_PX, createEventLoopYield, removeRulingLines, removeRulingLinesAsync, rulingLineMinRunPx } from './lineRemoval.js';
 export { OCR_LINE_REMOVAL_MAX_PIXELS, prepareOcrImage } from './prepareImage.js';
 export { canPrepareImagesHere, prepareOcrImageCore } from './prepareImageCore.js';

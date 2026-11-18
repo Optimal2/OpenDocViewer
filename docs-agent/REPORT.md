@@ -2,10 +2,10 @@
 
 ## Coverage
 
-- Files: 210
-- Source lines: 75037
-- JSDoc symbols: 2195
-- Files without JSDoc doclets: 4
+- Files: 211
+- Source lines: 75249
+- JSDoc symbols: 2202
+- Files without JSDoc doclets: 5
 - Low-confidence summaries: 2
 - Parse errors: 0
 
@@ -29,7 +29,7 @@
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2951 lines
+- `src/contexts/ViewerProvider.jsx`: 2956 lines
 - `src/utils/printPdf.js`: 2530 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2196 lines
@@ -39,7 +39,7 @@
 - `src/utils/pdfSignatures.js`: 1560 lines
 - `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1413 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
-- `src/utils/runtimeConfig.js`: 1277 lines
+- `src/utils/runtimeConfig.js`: 1311 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
 - `src/components/DocumentRender.jsx`: 1211 lines
 - `src/utils/documentLoadingConfig.js`: 1100 lines
@@ -54,6 +54,7 @@ Files without JSDoc doclets:
 - `src/generated/standard-manual/manual.sv.js`
 - `src/manual-page/main.jsx`
 - `src/ocr/index.js`
+- `src/ocr/pdfText.js`
 
 - Low-confidence summaries are generated from source shape rather than primary JSDoc.
 

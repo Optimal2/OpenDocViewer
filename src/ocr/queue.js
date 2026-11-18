@@ -16,8 +16,14 @@
  * page of that document is abandoned by terminating its worker (on a pool, that worker alone;
  * a single engine as a whole); the next page starts a fresh one. `setPaused(true)` lets the
  * pages in flight finish and starts nothing new (the viewer pauses OCR while a print PDF is
- * prepared and under hard memory pressure). Part of the lazy OCR
- * chunk.
+ * prepared and under hard memory pressure).
+ *
+ * With `recognition` false (`pdfTextLayer.enabled` with `ocr.enabled` off) the queue has no
+ * engine and recognises nothing: a PDF page's usable own text is its outcome as above, and every
+ * other page (a raster page, a PDF page whose text is empty or garbled) is skipped with the
+ * reason `recognition-off`, without its image ever being asked for.
+ *
+ * Part of the text-only entry (src/ocr/pdfText.js), which the full OCR module re-exports.
  */
 import { OCR_PAGE_DECISION, OCR_SKIP_REASON, classifyPageSource } from './classify.js';
 
@@ -106,9 +112,14 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
 
 /**
  * @param {Object} options
- * @param {Object} options.engine  An OcrEngine (engine.js) or an OcrEnginePool (enginePool.js).
- *   A pool (recognised by its numeric `size`) takes a control object as the second argument of
- *   `recognize`, through which the queue aborts that one recognition.
+ * @param {(Object|null)} options.engine  An OcrEngine (engine.js) or an OcrEnginePool
+ *   (enginePool.js). A pool (recognised by its numeric `size`) takes a control object as the
+ *   second argument of `recognize`, through which the queue aborts that one recognition. Null
+ *   with `recognition` false: there is no engine then.
+ * @param {boolean=} options.recognition  Default true. False reads a PDF page's own text and
+ *   recognises nothing (`pdfTextLayer.enabled` with OCR off): a raster page, and a PDF page
+ *   whose own text is not usable, is skipped with the reason `recognition-off`, no page image
+ *   is ever asked for and the engine is never called.
  * @param {number=} options.concurrency  Pages in flight at most; default 1. More than one is
  *   only useful with a pool of at least that many engines.
  * @param {Object} options.cache  An OcrResultCache (resultCache.js).
@@ -130,6 +141,7 @@ export const OCR_OUTCOME_SOURCE = Object.freeze({
  */
 export function createOcrQueue({
   engine,
+  recognition = true,
   concurrency = 1,
   cache,
   probeTextLayer,
@@ -154,6 +166,8 @@ export function createOcrQueue({
   // A pool aborts one recognition through its control object; a single engine can only be
   // terminated as a whole (which is what happened before pools existed).
   const pooled = typeof engine?.size === 'number';
+  // Only the literal false turns recognition off; without an engine nothing can be recognised.
+  const recognizes = recognition !== false && Boolean(engine);
   let paused = false;
   let disposed = false;
   /** @type {(string|null)} */
@@ -185,7 +199,7 @@ export function createOcrQueue({
   /** Abort one job's recognition: its worker on a pool, the engine as a whole otherwise. */
   function abortJob(job) {
     if (typeof job.control.abort === 'function') job.control.abort();
-    else if (!pooled) void engine.terminate();
+    else if (!pooled) void engine?.terminate();
   }
 
   function nextCandidate() {
@@ -212,7 +226,7 @@ export function createOcrQueue({
       }
       // A pool that cannot start all its engines takes fewer pages at a time: a page beyond
       // them would spend its recognition bound waiting for an engine.
-      const capacity = typeof engine.capacity === 'function' ? Math.max(1, Math.floor(Number(engine.capacity())) || 1) : Infinity;
+      const capacity = typeof engine?.capacity === 'function' ? Math.max(1, Math.floor(Number(engine.capacity())) || 1) : Infinity;
       while (inFlight.size < Math.min(limit, capacity)) {
         const candidate = nextCandidate();
         if (!candidate) break;
@@ -235,6 +249,9 @@ export function createOcrQueue({
       const { decision, reason } = classify(candidate.page);
       if (decision === OCR_PAGE_DECISION.SKIP) {
         outcome = { status: OCR_PAGE_STATUS.SKIPPED, reason };
+      } else if (decision === OCR_PAGE_DECISION.RECOGNIZE && !recognizes) {
+        // Pixels only, and nothing is recognised in this session: the page stays an image.
+        outcome = { status: OCR_PAGE_STATUS.SKIPPED, reason: OCR_SKIP_REASON.RECOGNITION_OFF };
       } else {
         if (decision === OCR_PAGE_DECISION.PROBE_TEXT) {
           setTransient(job.key, job.sourceKey, OCR_PAGE_STATUS.PROBING);
@@ -268,9 +285,17 @@ export function createOcrQueue({
                 assessment: { usable, verdict, characters, letters, privateUse },
               };
             }
+          } else if (!recognizes && !job.abandoned) {
+            // No usable text of its own (empty or garbled), and nothing is recognised in this
+            // session: the page stays an image. The verdict is kept for whoever reads the outcome.
+            outcome = {
+              status: OCR_PAGE_STATUS.SKIPPED,
+              reason: OCR_SKIP_REASON.RECOGNITION_OFF,
+              ...(assessment ? { assessment: { usable: false, verdict: assessment.verdict, characters: assessment.characters, letters: assessment.letters, privateUse: assessment.privateUse } } : {}),
+            };
           }
         }
-        if (!outcome && !job.abandoned) {
+        if (!outcome && !job.abandoned && recognizes) {
           setTransient(job.key, job.sourceKey, OCR_PAGE_STATUS.RECOGNIZING);
           const image = await withTimeout(getPageImage(candidate), timeouts.image, 'page image');
           // Abandoned (its document left, or the queue was disposed) while the image was fetched:
@@ -291,7 +316,7 @@ export function createOcrQueue({
         }
       }
     } catch (error) {
-      const failure = typeof engine.getFailure === 'function' ? engine.getFailure() : null;
+      const failure = typeof engine?.getFailure === 'function' ? engine.getFailure() : null;
       if (failure) {
         // The engine cannot start in this session (CSP, missing files, timeout; no engine has
         // ever started, enginePool.js); engine.js has logged the cause. Stop the queue instead
@@ -381,7 +406,7 @@ export function createOcrQueue({
     },
     async releaseEngineIfIdle() {
       if (disposed || inFlight.size > 0) return false;
-      await engine.terminate();
+      await engine?.terminate();
       return true;
     },
     dispose() {
@@ -390,7 +415,7 @@ export function createOcrQueue({
       plan = [];
       transient.clear();
       for (const job of inFlight.values()) job.abandoned = true;
-      void engine.terminate();
+      void engine?.terminate();
     },
   };
 }

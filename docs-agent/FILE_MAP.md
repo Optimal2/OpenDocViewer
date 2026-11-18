@@ -32,8 +32,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 165 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 219 | 2 | 5 | high | Compact language selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 263 | 1 | 4 | high | Manual overlay: modal dialog chrome \(title bar, reload, open-in-new-tab and close buttons, focus trap, Escape and backdrop handling\) around the shared {@link ManualView}, which loads, filters, searches and navigates the |
-| <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 714 | 1 | 10 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button and the status in a visually hidden live region; the but |
-| <code>src/components/DocumentToolbar/OcrToolbarActions.jsx</code> | 52 | 1 | 1 | high | The toolbar&#39;s OCR group, right after the image-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: - \`ocr.search.enabled\` \(default true; only the literal false |
+| <code>src/components/DocumentToolbar/OcrSearchBar.jsx</code> | 732 | 1 | 10 | high | Search in the recognised text, from the toolbar: a search button right after the image-adjustment group that doubles as the page&#39;s OCR status \(an LED on the button and the status in a visually hidden live region; the but |
+| <code>src/components/DocumentToolbar/OcrToolbarActions.jsx</code> | 56 | 1 | 1 | high | The toolbar&#39;s OCR group, right after the image-adjustment group: a separator and the search in the text layers \(OcrSearchBar.jsx\), behind its runtime switches: - \`ocr.search.enabled\` \(default true; only the literal false |
 | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 333 | 1 | 1 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
 | <code>src/components/DocumentToolbar/printFieldLabels.js</code> | 22 | 1 | 1 | high | Visible label for an optional/required print-dialog field. |
 | <code>src/components/DocumentToolbar/PrintPipelineDialogs.jsx</code> | 220 | 2 | 3 | high | The dialogs of the ONE print pipeline \(usePrintPipeline.js\): the print dialog and the generated-PDF progress \(modal, or a dock while working in the background\). |
@@ -85,8 +85,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/readAloudContext.js</code> | 41 | 4 | 1 | high | The read-aloud state shared by the page&#39;s context menu \(&quot;Read the selection aloud&quot; / &quot;Stop reading aloud&quot;, components/ReadAloudMenuItem.jsx\) and the toolbar&#39;s language menu \(the &quot;Reading language&quot; section, DocumentToolba |
 | <code>src/contexts/themeContext.js</code> | 41 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 343 | 2 | 14 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
-| <code>src/contexts/viewerContext.js</code> | 265 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2951 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/viewerContext.js</code> | 266 | 13 | 12 | medium | Per-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 = 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\). |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2956 | 1 | 71 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/generated/standard-manual/manual.en.js</code> | 2 | 1 | 0 | low | Default export for manual.en. |
 | <code>src/generated/standard-manual/manual.sv.js</code> | 2 | 1 | 0 | low | Default export for manual.sv. |
@@ -94,8 +94,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/useDocumentLoadSettled.js</code> | 135 | 1 | 6 | high | OpenDocViewer — has the document finished loading, as far as OCR is concerned? |
 | <code>src/hooks/useKeyTipsHeld.js</code> | 67 | 1 | 3 | high | Whether the key tips key \(\`?\`\) is held: the one piece of the key tips \(components/KeyTips.jsx\) that lives while the viewer runs. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
-| <code>src/hooks/useOcrModule.js</code> | 44 | 1 | 1 | high | Loads the OCR module once the runtime switch \(\`ocr.enabled\`\) is the literal true. |
-| <code>src/hooks/useOcrTextLayers.js</code> | 520 | 1 | 14 | high | Runs OCR for the pages near the viewer&#39;s focus and exposes the outcomes per page. |
+| <code>src/hooks/useOcrModule.js</code> | 47 | 1 | 1 | high | Loads the OCR module once a page can have a text layer: \`ocr.enabled\` is the literal true, or \`pdfTextLayer.enabled\` is \(a PDF page&#39;s own text without OCR\). |
+| <code>src/hooks/useOcrTextLayers.js</code> | 553 | 1 | 15 | high | Runs OCR for the pages near the viewer&#39;s focus and exposes the outcomes per page. |
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |
@@ -120,20 +120,21 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/ocr/benchmark.js</code> | 661 | 0 | 20 | high | Opt-in OCR benchmark \(\`ocr.benchmark.enabled\`\): recognises a sample of the loaded document&#39;s pages once per scenario and reports what each scenario cost, so a site can measure how many workers \(\`ocr.workerCount\`\), which |
 | <code>src/ocr/boost.js</code> | 270 | 0 | 19 | high | OpenDocViewer — the OCR boost control: full throttle while the user is idle. |
 | <code>src/ocr/boostBenchmark.js</code> | 811 | 1 | 26 | high | Opt-in OCR *boost* benchmark \(\`ocr.boostBenchmark.enabled\`\): the same measurement as benchmark.js, but at and above the ceiling of the viewer&#39;s own worker policy. |
-| <code>src/ocr/classify.js</code> | 106 | 3 | 15 | high | Decides, per page, whether OCR is worth running. |
+| <code>src/ocr/classify.js</code> | 112 | 3 | 16 | high | Decides, per page, whether OCR is worth running. |
 | <code>src/ocr/detectLanguage.js</code> | 132 | 0 | 8 | high | Guess the language of a page&#39;s text among a few candidate languages, from its words alone. |
 | <code>src/ocr/engine.js</code> | 344 | 1 | 15 | high | Thin wrapper around a tesseract.js worker. |
 | <code>src/ocr/enginePool.js</code> | 305 | 1 | 10 | high | A pool of OCR engines \(engine.js\) behind the one-engine interface the queue \(queue.js\) uses, so that several pages \(the worker count, see setup.js\) can be recognised at the same time. |
 | <code>src/ocr/imagePreparer.js</code> | 286 | 1 | 11 | high | Hands page images to the preparation worker \(src/ocr/prepareWorker.js\) and falls back to the main thread where it cannot. |
-| <code>src/ocr/index.js</code> | 37 | 2 | 0 | high | Entry point of the OCR module: the one file the viewer imports, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
+| <code>src/ocr/index.js</code> | 36 | 2 | 0 | high | Entry point of the OCR module: the file the viewer imports while OCR is on, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true. |
 | <code>src/ocr/languages.js</code> | 29 | 2 | 2 | high | Membership check for OCR language codes against the models tesseract.js knows. |
 | <code>src/ocr/lineRemoval.js</code> | 292 | 2 | 16 | high | Ruling-line removal before recognition: the pre-processing step for ruled tables and forms. |
+| <code>src/ocr/pdfText.js</code> | 23 | 1 | 0 | high | Entry point of the text-only part of the OCR module: everything a page&#39;s text layer needs when the text is a PDF page&#39;s own and nothing is recognised \(\`pdfTextLayer.enabled\` with \`ocr.enabled\` off\). |
 | <code>src/ocr/pdfTextProbe.js</code> | 193 | 0 | 10 | high | Reads a PDF page&#39;s own text layer through pdf.js so classify.js can decide whether OCR is needed at all, and, when the layer is usable, hands it over as words with boxes \(pdfTextWords.js\) so the page gets the same text l |
 | <code>src/ocr/pdfTextWords.js</code> | 229 | 1 | 9 | high | Word boxes from a PDF page&#39;s own text layer, in the shape the recognised words have, so that a page with real text gets the same text layer, search and read-aloud as a recognised page \(components/OcrTextLayer.jsx, utils/ |
 | <code>src/ocr/prepareImage.js</code> | 50 | 1 | 1 | high | Turns the viewer&#39;s rendered page image into the image the OCR engine receives: measures it and, when \`ocr.removeRulingLines\` is on \(the default\), removes the ruling lines of tables and forms on a private copy. |
 | <code>src/ocr/prepareImageCore.js</code> | 181 | 3 | 10 | high | The image preparation itself, written for both threads: the dedicated worker \(src/ocr/prepareWorker.js\) runs it off the main thread, and prepareImage.js runs it on the main thread where the browser gives the worker no de |
 | <code>src/ocr/prepareWorker.js</code> | 85 | 0 | 2 | high | OpenDocViewer — OCR image preparation worker. |
-| <code>src/ocr/queue.js</code> | 397 | 0 | 13 | high | The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in-memory cache \(resultCache.js\). |
+| <code>src/ocr/queue.js</code> | 422 | 0 | 13 | high | The OCR page queue: \`concurrency\` pages at a time \(one by default\), bounded by the window \(window.js\), results in the in-memory cache \(resultCache.js\). |
 | <code>src/ocr/referencePage.js</code> | 79 | 0 | 4 | high | The reference page of the OCR boost control \(boost.js\): a small synthetic image, always the same, that the control has an engine recognise to measure whether the engines still get the cores they need. |
 | <code>src/ocr/resultCache.js</code> | 96 | 0 | 3 | high | In-memory cache of OCR outcomes, one entry per document page. |
 | <code>src/ocr/setup.js</code> | 172 | 1 | 6 | high | Builds an OCR engine from the runtime configuration and reports configuration problems once. |
@@ -162,12 +163,12 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/objectUrlRegistry.js</code> | 106 | 4 | 8 | high | Centralized helpers for object/blob URL lifecycle management. |
 | <code>src/utils/ocrBoostStatus.js</code> | 88 | 1 | 3 | high | What the toolbar says about the OCR boost \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per situation with its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.boost\`\), the number of engines to name |
 | <code>src/utils/ocrLanguageCodes.js</code> | 31 | 2 | 1 | high | Tesseract language codes \(\`ocr.languages\`\) and the ISO 639-1 language each one reads: what the read-aloud menu offers and the language guess chooses among. |
-| <code>src/utils/ocrLoader.js</code> | 41 | 2 | 3 | high | The only door into the OCR module. |
+| <code>src/utils/ocrLoader.js</code> | 67 | 2 | 6 | high | The only door into the OCR module. |
 | <code>src/utils/ocrPageKey.js</code> | 32 | 3 | 3 | high | Key of one document page in the OCR result map \(\`ocrPages\` on the viewer context\). |
 | <code>src/utils/ocrProgress.js</code> | 146 | 1 | 11 | high | How long the pages still waiting for OCR will take, for the toolbar&#39;s OCR button \(components/DocumentToolbar/OcrSearchBar.jsx\): an estimate from the pace of the pages that were finished lately, and the text that says it |
 | <code>src/utils/ocrSearch.js</code> | 143 | 2 | 9 | high | Search in recognised text: the toolbar&#39;s OCR search \(components/DocumentToolbar/OcrSearchBar.jsx\) and the text layer&#39;s match marks \(components/OcrTextLayer.jsx\) both go through these functions, on the same outcomes, so t |
 | <code>src/utils/ocrSearchPlacement.js</code> | 258 | 1 | 16 | high | Where the toolbar&#39;s OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar&#39;s spacer leaves, or, when |
-| <code>src/utils/ocrStatus.js</code> | 73 | 1 | 4 | high | The per-page OCR status the toolbar&#39;s search button shows \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per outcome state, its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.status\`\) and the LED s |
+| <code>src/utils/ocrStatus.js</code> | 108 | 1 | 4 | high | The per-page OCR status the toolbar&#39;s search button shows \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per outcome state, its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.status\`\) and the LED s |
 | <code>src/utils/ocrTextLayout.js</code> | 283 | 3 | 13 | high | Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes. |
 | <code>src/utils/ompThemePreference.js</code> | 390 | 4 | 22 | high | Shared OMP theme preference adapter \(OMP_THEME_PREFERENCE\). |
 | <code>src/utils/pageAssetRenderer.js</code> | 929 | 2 | 6 | high | OpenDocViewer — hybrid page-asset renderer. |
@@ -201,7 +202,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 1277 | 37 | 89 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 1311 | 37 | 91 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |

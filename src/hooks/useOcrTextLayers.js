@@ -45,6 +45,15 @@
  * reference page (src/ocr/referencePage.js), drawn once; where none can be drawn, or where
  * `ocr.workerCount` is set by hand, or where the client has no room above the cautious count,
  * there is no boost and nothing listens. The state is exposed as `ocrBoost`.
+ *
+ * Without recognition (`pdfTextLayer.enabled` with `ocr.enabled` off: the module is then its
+ * text-only entry, src/ocr/pdfText.js, which has no engine to build, and that is how the hook
+ * tells; `recognition` false says the same by hand) the hook builds no engine and no boost,
+ * and asks for no page image: the queue only reads the text a PDF page already carries and
+ * skips every other page (reason `recognition-off`). Reading is cheap, so the whole document is
+ * always planned then, whatever `ocr.recognizeWholeDocument` says, and the search covers every
+ * page that has text; a page joins as soon as it is loaded, since its text does not need the
+ * page's render. Loading still comes first, and the pauses apply as above.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import logger from '../logging/systemLogger.js';
@@ -56,6 +65,14 @@ import { speechLanguagesForOcr } from '../utils/ocrLanguageCodes.js';
 
 /** Idle time after which the OCR worker is terminated to free its memory. */
 export const OCR_IDLE_SHUTDOWN_MS = 60000;
+
+/**
+ * PDF pages read at a time while nothing is recognised (`pdfTextLayer.enabled` with OCR off).
+ * Reading a page's own text is pdf.js work of milliseconds, so two at a time keeps the queue
+ * moving without a burst on the main thread; the prober keeps as many documents open
+ * (src/ocr/pdfTextProbe.js DEFAULT_OPEN_PDF_DOCUMENTS).
+ */
+export const PDF_TEXT_ONLY_CONCURRENCY = 2;
 
 /**
  * Window events that count as input for the boost: they end the boosted state and restart the
@@ -154,6 +171,9 @@ const EMPTY_PAGES = Object.freeze({});
  *   configuration once (a fresh object every render would restart the runtime every render).
  * @param {number=} options.hardwareThreads  Logical threads the boost may plan with; default
  *   `navigator.hardwareConcurrency`.
+ * @param {boolean=} options.recognition  Default true: pages are recognised when the module
+ *   can (the full module; its text-only entry never can). False reads PDF pages' own text only
+ *   whatever the module is: no engine, no boost.
  * @returns {{ ocrPages: Object<string, Object>, ocrEngineFailure: (string|null), ocrBoost: (Object|null) }}
  *   `ocrPages` maps utils/ocrPageKey.js keys to outcomes (`status` done/skipped/failed with
  *   text, words and image size, or a transient queued/probing/recognizing state). `ocrBoost`
@@ -174,7 +194,11 @@ export default function useOcrTextLayers({
   loading = false,
   boost: boostOption,
   hardwareThreads = reportedThreads(),
+  recognition = true,
 }) {
+  // Recognition needs the full module; its text-only entry (src/ocr/pdfText.js, what the loader
+  // hands over while only `pdfTextLayer.enabled` is on) has no engine to build.
+  const recognizes = recognition !== false && typeof ocrModule?.createConfiguredOcrEngine === 'function';
   // Read once: the runtime effect depends on it, and the accessors hand out a new object every call.
   const boost = useMemo(() => (boostOption === undefined ? readBoostConfig() : boostOption), [boostOption]);
   const [snapshot, setSnapshot] = useState({ pages: EMPTY_PAGES, engineFailure: null });
@@ -220,8 +244,11 @@ export default function useOcrTextLayers({
     // window is planned (resolveOcrConcurrency), since an engine the queue never reaches is
     // never started.
     // With the boost on the engine is always a pool, which the boost control resizes.
-    const boostWanted = Boolean(boost?.enabled) && typeof ocrModule.createOcrBoostController === 'function';
-    const { engine, setup, workerCount } = ocrModule.createConfiguredOcrEngine(undefined, boostWanted ? { pool: true } : {});
+    // Without recognition there is no engine at all: the queue reads PDF pages' own text only.
+    const boostWanted = recognizes && Boolean(boost?.enabled) && typeof ocrModule.createOcrBoostController === 'function';
+    const { engine, setup, workerCount } = recognizes
+      ? ocrModule.createConfiguredOcrEngine(undefined, boostWanted ? { pool: true } : {})
+      : { engine: null, setup: null, workerCount: PDF_TEXT_ONLY_CONCURRENCY };
     const prober = ocrModule.createPdfTextProber({
       readSourceArrayBuffer: (sourceKey) => readSourceRef.current(sourceKey),
     });
@@ -256,6 +283,7 @@ export default function useOcrTextLayers({
       : null;
     const queue = ocrModule.createOcrQueue({
       engine,
+      recognition: recognizes,
       concurrency: Math.max(1, Math.floor(Number(workerCount)) || 1),
       cache,
       probeTextLayer: (sourceKey, pageIndex) => prober.probe(sourceKey, pageIndex),
@@ -324,7 +352,7 @@ export default function useOcrTextLayers({
       ocrModule.disposeOcrImagePreparer?.();
       setSnapshot({ pages: EMPTY_PAGES, engineFailure: null });
     };
-  }, [boost, clearIdleTimer, hardwareThreads, idleShutdownMs, ocrModule]);
+  }, [boost, clearIdleTimer, hardwareThreads, idleShutdownMs, ocrModule, recognizes]);
 
   // The search over the whole document is one of the ways in; it also ends when the search closes.
   useEffect(() => {
@@ -369,12 +397,15 @@ export default function useOcrTextLayers({
     if (!ready) return;
     const windowOrder = ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length });
     windowIndexesRef.current = new Set(windowOrder);
-    const order = wholeDocument
+    // Without recognition the whole document is always planned: reading a page's own text costs
+    // milliseconds, and the search is of little use over a handful of pages.
+    const whole = wholeDocument || !recognizes;
+    const order = whole
       ? ocrModule.planOcrWindow({ focusIndexes: focusPageIndexes, pageCount: pages.length, wholeDocument: true })
       : windowOrder;
     // With the whole document planned, every page's outcome must stay cached while it is
     // planned, or the queue would recognise an evicted page again, without end.
-    if (wholeDocument && typeof runtime.cache?.setLimit === 'function') runtime.cache.setLimit(pages.length);
+    if (whole && typeof runtime.cache?.setLimit === 'function') runtime.cache.setLimit(pages.length);
     const candidates = [];
     for (const [position, viewerIndex] of order.entries()) {
       const page = pages[viewerIndex];
@@ -385,7 +416,9 @@ export default function useOcrTextLayers({
       // it rendered on demand through ensurePageAsset, like a page the viewer has not shown, and
       // released again once its bytes are read (`renderedForOcr`).
       const inWindow = position < windowOrder.length;
-      if (Number(page.status) !== -1 && (inWindow ? Number(page.fullSizeStatus) !== 1 : Number(page.status) !== 1)) continue;
+      // Without recognition no page image is ever read, so the page's render is not waited for.
+      const needsRender = inWindow && recognizes;
+      if (Number(page.status) !== -1 && (needsRender ? Number(page.fullSizeStatus) !== 1 : Number(page.status) !== 1)) continue;
       const key = ocrPageKeyOf(page);
       if (!key) continue;
       candidates.push({
@@ -394,7 +427,7 @@ export default function useOcrTextLayers({
         pageIndex: Number(page.pageIndex) || 0,
         viewerIndex,
         page,
-        renderedForOcr: !inWindow && Number(page.fullSizeStatus) !== 1,
+        renderedForOcr: recognizes && !inWindow && Number(page.fullSizeStatus) !== 1,
       });
     }
     // Pages in flight for what is still to do: a short window does not start engines it cannot
@@ -410,7 +443,7 @@ export default function useOcrTextLayers({
     const level = boostRef.current?.controller.level() ?? 0;
     runtime.queue.setWindow(candidates, { concurrency: level > runtime.workerCount ? level : concurrency });
     boostRef.current?.onPlanned();
-  }, [allPages, focusPageIndexes, ocrModule, ready, wholeDocument]);
+  }, [allPages, focusPageIndexes, ocrModule, ready, recognizes, wholeDocument]);
 
   return { ocrPages: snapshot.pages, ocrEngineFailure: snapshot.engineFailure, ocrBoost: boostState };
 }

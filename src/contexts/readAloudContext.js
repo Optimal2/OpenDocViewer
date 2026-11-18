@@ -3,7 +3,7 @@
  * The read-aloud state shared by the page's context menu ("Read the selection aloud" /
  * "Stop reading aloud", components/ReadAloudMenuItem.jsx) and the toolbar's language menu
  * (the "Reading language" section, DocumentToolbar/LanguageMenuButton.jsx). Provided by
- * components/ReadAloudProvider.jsx only while `ocr.enabled` is the literal true and
+ * components/ReadAloudProvider.jsx only while `ocr.enabled` or `pdfTextLayer.enabled` is the literal true and
  * `ocr.speech.enabled` is not the literal false; everywhere else the value is null and the
  * consumers render nothing, so the default code path neither follows the selection nor
  * touches speech synthesis.

@@ -122,6 +122,17 @@
       // problems are never shown as less severe. Unknown values fall back to 'ok'.
       uncheckedSeverity: 'ok'
     },
+    pdfTextLayer: {
+      // Opt-in: show the text a PDF page already carries as a selectable text layer over the
+      // page while OCR is off, so the page can be selected, copied, searched and read by a
+      // screen reader or read aloud. Only the literal value true turns it on; anything else
+      // keeps it off. Nothing is recognised: no OCR engine, worker, WebAssembly or language
+      // file is requested and no Content-Security-Policy change is needed. A page without
+      // usable text of its own (a scanned page, an image) stays an image. The toolbar's
+      // search and read-aloud follow ocr.search and ocr.speech below. With ocr.enabled on
+      // this key adds nothing: a PDF page's own text is always read then.
+      enabled: false
+    },
     ocr: {
       // Opt-in in-browser OCR for scanned pages (TIFF, JPG, PNG and PDF pages without a usable
       // text layer). Only the literal value true turns it on; anything else keeps it off. While

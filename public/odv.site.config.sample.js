@@ -87,6 +87,12 @@
       // check itself ("Not checked in the viewer"). Problems are never shown as less severe.
       uncheckedSeverity: 'ok'
     },
+    pdfTextLayer: {
+      // Show a PDF page's own text as a selectable, searchable text layer while OCR is off.
+      // Off by default; only the literal value true turns it on. Nothing is recognised and no
+      // OCR engine file is requested, so no Content-Security-Policy change is needed.
+      // enabled: true
+    },
     ocr: {
       // In-browser OCR for scanned pages. Off by default; only the literal value true turns it on.
       // Turning it on also needs 'wasm-unsafe-eval' in the script-src of this site's

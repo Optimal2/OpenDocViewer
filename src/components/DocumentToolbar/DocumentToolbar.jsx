@@ -38,7 +38,7 @@ import {
   isFineTuneEnabled,
   isOcrBenchmarkEnabled,
   isOcrBoostBenchmarkEnabled,
-  isOcrEnabled,
+  isPageTextEnabled,
 } from '../../utils/runtimeConfig.js';
 import { hasImageAdjustment } from '../../utils/imageAdjustments.js';
 import { isIdentityCompareTransform, selectCompareTransform } from '../../utils/compareTransform.js';
@@ -1433,13 +1433,13 @@ const DocumentToolbar = ({
         </>)}
       </div>
 
-      {/* OCR (only while `ocr.enabled` is the literal true), right after the image-adjustment
-          group: a separator and the search in the recognised text whose
-          button doubles as the page's OCR status; each behind its own switch
+      {/* The pages' text (only while `ocr.enabled` or `pdfTextLayer.enabled` is the literal
+          true), right after the image-adjustment group: a separator and the search in the
+          pages' text whose button doubles as the page's text status; each behind its own switch
           (OcrToolbarActions.jsx). Original session page numbers: `pageNumberDisplay` indexes
           allPages and is what setPageNumber takes; `pageNumber` is the ordinal among the visible
           pages. */}
-      {isOcrEnabled() ? (
+      {isPageTextEnabled() ? (
         <OcrToolbarActions pageNumber={pageNumberDisplay} setPageNumber={setPageNumber} allPages={allPages} />
       ) : null}
 

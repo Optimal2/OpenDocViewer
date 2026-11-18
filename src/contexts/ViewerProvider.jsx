@@ -10,7 +10,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { isPdfSignatureInspectionEnabled, getPdfSignatureInspectionStart, isOcrEnabled } from '../utils/runtimeConfig.js';
+import { isPdfSignatureInspectionEnabled, getPdfSignatureInspectionStart, isPageTextEnabled } from '../utils/runtimeConfig.js';
 import logger from '../logging/systemLogger.js';
 import ViewerContext from './viewerContext.js';
 import {
@@ -731,7 +731,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pinnedAssetsRef.current.clear();
     ephemeralPrintUrlsRef.current.clear();
     printLeasedUrlsRef.current.clear();
-    if (isOcrEnabled()) setPrintActivity(printPreparationsRef.current > 0);
+    if (isPageTextEnabled()) setPrintActivity(printPreparationsRef.current > 0);
   }, []);
 
   /**
@@ -932,11 +932,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [updateAllPages]);
 
   /**
-   * Recompute the OCR pause signal from outstanding leases and print PDF assemblies. Only OCR
-   * reads it, so while the switch is off no state is written and print flows render as before.
+   * Recompute the OCR pause signal from outstanding leases and print PDF assemblies. Only the
+   * text-layer queue reads it, so while it does not exist (OCR and `pdfTextLayer` both off) no
+   * state is written and print flows render as before.
    */
   const syncPrintActivity = useCallback(() => {
-    if (!isOcrEnabled()) return;
+    if (!isPageTextEnabled()) return;
     setPrintActivity(printPreparationsRef.current > 0 || printLeasedUrlsRef.current.size > 0);
   }, []);
 
@@ -2745,8 +2746,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     readSourceArrayBuffer,
   });
 
-  // The OCR module (src/ocr/) is imported only after `ocr.enabled` is the literal true; while
-  // off useOcrModule is a no-op (src/utils/ocrLoader.js) and useOcrTextLayers holds an empty map.
+  // The OCR module (src/ocr/) is imported only after `ocr.enabled` is the literal true, and its
+  // text-only entry only after `pdfTextLayer.enabled` is (a PDF page's own text, nothing
+  // recognised); while both are off useOcrModule is a no-op (src/utils/ocrLoader.js) and
+  // useOcrTextLayers holds an empty map.
   // With the module, recognition runs for the displayed page(s) and a fixed number of
   // neighbours, after the first page is shown, never while a print flow holds page URLs or a
   // print PDF is assembled, and not under hard memory pressure. Outcomes are keyed per page
@@ -2757,8 +2760,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     clearPageAssetReference(pageIndex, 'full', url);
   }, [clearPageAssetReference]);
   // The load, as OCR has to respect it: the loader's run and the first rendering of every
-  // page after it (hooks/useDocumentLoadSettled.js). Inert while OCR is off.
-  const ocrLoadSettled = useDocumentLoadSettled({ enabled: isOcrEnabled(), pages: allPages, loadingRunActive });
+  // page after it (hooks/useDocumentLoadSettled.js). Inert while pages have no text layer.
+  const ocrLoadSettled = useDocumentLoadSettled({ enabled: isPageTextEnabled(), pages: allPages, loadingRunActive });
   const { ocrPages, ocrEngineFailure, ocrBoost } = useOcrTextLayers({
     ocrModule,
     allPages,
@@ -2782,10 +2785,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   });
   /**
    * @param {Array<number>} indexes Indexes into allPages of the displayed page(s), primary first.
-   *   A no-op while OCR is off, so page changes write no provider state on the default path.
+   *   A no-op while pages have no text layer (OCR and `pdfTextLayer` both off), so page changes
+   *   write no provider state on the default path.
    */
   const setOcrFocusPageIndexes = useCallback((indexes) => {
-    if (!isOcrEnabled()) return;
+    if (!isPageTextEnabled()) return;
     const next = (Array.isArray(indexes) ? indexes : [])
       .map((value) => Number(value))
       .filter((value) => Number.isInteger(value) && value >= 0);
@@ -2795,10 +2799,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, []);
   /**
    * @param {(Object|null)} next `{ term, current: ({ pageKey, ordinal }|null), onlyPageKey: (string|null) }`,
-   *   or null when the search is closed. A no-op while OCR is off; an unchanged value writes no state.
+   *   or null when the search is closed. A no-op while pages have no text layer; an unchanged
+   *   value writes no state.
    */
   const setOcrSearch = useCallback((next) => {
-    if (!isOcrEnabled()) return;
+    if (!isPageTextEnabled()) return;
     setOcrSearchState((current) => (isSameOcrSearch(current, next) ? current : (next || null)));
   }, []);
 

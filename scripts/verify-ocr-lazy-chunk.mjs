@@ -15,6 +15,11 @@
  *  3. At least one ocr chunk exists, otherwise the check would pass on a broken build.
  *  4. dist/ocr/ holds exactly the files scripts/ocr-assets.mjs describes, byte for byte, unless
  *     the build ran with ODV_OCR_ASSETS=skip, in which case the folder must be absent.
+ *  5. The text-only entry (src/ocr/pdfText.js, loaded alone when `pdfTextLayer.enabled` is on
+ *     with OCR off) has a chunk of its own, `assets/pdfText-<hash>.js`: it exists, it is not
+ *     referenced by dist/index.html, and only ocr chunks import it statically (the full module
+ *     re-exports it). Rules 1 and 2 already say the rest about it: it does not mention
+ *     tesseract and does not import an ocr chunk, so the text-only mode downloads no engine code.
  *
  * Limit: a dynamic `import("./ocr-...js")` that runs unconditionally at the top level of an
  * eager chunk looks the same as the gated one in ocrLoader.js. That case is covered at runtime:
@@ -31,6 +36,8 @@ import { describeOcrAssets, isOcrAssetCopySkipped } from './ocr-assets.mjs';
 
 const OCR_MARKER = /tesseract/i;
 const OCR_CHUNK_PATTERN = /^assets\/ocr-[^/]+\.js$/;
+/** The chunk of the text-only entry, named after src/ocr/pdfText.js. */
+const PDF_TEXT_CHUNK_PATTERN = /^assets\/pdfText-[^/]+\.js$/;
 
 /**
  * @param {string} dir
@@ -137,6 +144,17 @@ export function analyzeDist(distDir, { nodeModulesUrl = new URL('../node_modules
     }
   }
 
+  const pdfTextChunks = jsFiles.filter((name) => PDF_TEXT_CHUNK_PATTERN.test(name));
+  if (!pdfTextChunks.length) problems.push('no text-only chunk (assets/pdfText-*.js) in dist: the text-only entry was not built on its own');
+  for (const name of pdfTextChunks) {
+    if (eager.includes(name)) problems.push(`${name} is loaded by dist/index.html`);
+    for (const [importer, source] of code) {
+      if (importer === name || OCR_CHUNK_PATTERN.test(importer)) continue;
+      const { staticImports } = importsOfChunk(importer, source);
+      if (staticImports.includes(name)) problems.push(`${importer} imports ${name} statically`);
+    }
+  }
+
   const { files: expectedFiles } = describeOcrAssets(nodeModulesUrl);
   const present = files.filter((name) => name.startsWith('ocr/'));
   if (skipAssets) {
@@ -159,11 +177,13 @@ export function analyzeDist(distDir, { nodeModulesUrl = new URL('../node_modules
     distBytes: sum(files),
     ocrAssetBytes: sum(present),
     ocrChunkBytes: sum(ocrChunks),
+    pdfTextChunkBytes: sum(pdfTextChunks),
     // Every bundled script except the ocr chunk: the weight of the viewer as the default code
     // path can ever load it (index.html's entry scripts alone would understate it, because the
     // bootstrap chunk imports the application dynamically on every start).
     otherChunkBytes: sum(jsFiles.filter((name) => !ocrChunks.includes(name))),
     ocrChunks,
+    pdfTextChunks,
     eagerScripts: eager,
     skipAssets,
   };
@@ -183,11 +203,12 @@ function main() {
     console.log(`  dist total      ${formatSize(summary.distBytes)}`);
     console.log(`  dist/ocr/       ${formatSize(summary.ocrAssetBytes)}${summary.skipAssets ? ' (ODV_OCR_ASSETS=skip)' : ''}`);
     console.log(`  ocr chunk       ${formatSize(summary.ocrChunkBytes)} ${summary.ocrChunks.join(', ')}`);
+    console.log(`  text-only chunk ${formatSize(summary.pdfTextChunkBytes)} ${summary.pdfTextChunks.join(', ')}`);
     console.log(`  other chunks    ${formatSize(summary.otherChunkBytes)} (every bundled script except the ocr chunk)`);
     console.log(`  entry scripts   ${summary.eagerScripts.join(', ')}`);
   }
   if (ok) {
-    console.log('  OK: OCR code is confined to the lazy ocr chunk and the engine files match their sources');
+    console.log('  OK: OCR code is confined to the lazy ocr chunk, the text-only chunk holds no engine code and the engine files match their sources');
     process.exitCode = 0;
     return;
   }

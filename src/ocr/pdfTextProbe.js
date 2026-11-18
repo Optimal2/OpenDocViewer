@@ -16,7 +16,7 @@
  * queue has given those pages up by then, and a probe that never answers must not keep its
  * document open for good. pdf.js itself is the copy
  * the viewer already ships for rendering; this module adds no second one.
- * Part of the lazy OCR chunk.
+ * Part of the text-only entry (pdfText.js), which the full OCR module re-exports.
  */
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
