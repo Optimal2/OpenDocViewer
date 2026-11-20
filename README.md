@@ -1,6 +1,6 @@
 # OpenDocViewer
 
-OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and common raster image formats (JPG/PNG), built with **React 19 + Vite 8**, deployed as static files, and integrable into host applications through a documented JSON bundle contract.
+OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, common raster image formats (JPG/PNG), **JPEG XL**, and **AVIF**, built with **React 19 + Vite 8**, deployed as static files, and integrable into host applications through a documented JSON bundle contract.
 
 [![CI](https://github.com/Optimal2/OpenDocViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Optimal2/OpenDocViewer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -37,7 +37,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 **What it is**
 
 - A static single-page application: build it once (`npm run build`), host `dist/` on any static server (IIS, Nginx, Apache, S3/CloudFront).
-- A viewer for PDF (via `pdfjs-dist` pinned to 6.5.438), TIFF (via `utif2` 4.1), and raster images (JPG/PNG).
+- A viewer for PDF (via `pdfjs-dist` pinned to 6.5.438), TIFF (via `utif2` 4.1), raster images (JPG/PNG), JPEG XL (via `jxl-oxide-wasm` 0.12.6), and AVIF (through the browser decoder).
 - Embeddable: a host application (or an optional backend such as ODVGateway) can hand over documents as a **Portable Document Bundle v1** JSON payload through several documented startup modes.
 - Localized in English and Swedish (`public/locales/`, ICU messages via `i18next-icu`).
 - Learnable from the keyboard: hold `?` and every toolbar button shows its name under it (`src/components/KeyTips.jsx`); release the key and the labels go.
@@ -320,7 +320,7 @@ Key design points:
 - The active page prints the rendered canvas (image adjustments included); every other scope uses the archived page image without adjustments.
 - Current page, all pages, ranges, and explicit page sequences are supported, with configurable/user-default page scope.
 - Optional headers, footers, watermarks, orientation controls, and print/export button labels are controlled by runtime configuration.
-- While the document is still loading, the print dialog intentionally stays in an active-page-only mode to avoid unstable page-range UI.
+- Printing stays unavailable until every page has reached a terminal loaded/failed state, so the print dialog and page ranges do not change while the document is loading.
 
 See `docs-src/printing.md` for the full pipeline design.
 
@@ -395,6 +395,7 @@ Use the following files depending on what you are trying to understand:
 - `docs-src/deploy-ops.md` — IIS hosting, proxy deployment, cache rules, and operational checklists
 - `docs-src/printing.md` — print pipeline design and the responsibilities of the print helper modules
 - `docs-src/pdf-signatures.md` — level-1 PDF signature inspection: handled formats, integrity rules, data contract, fixtures
+- `docs-src/modern-image-input.md` — JPEG XL and AVIF detection, decoding, metadata, deployment and fixtures
 - `docs-src/compare-transform.md` — compare view per-page transform (stepless zoom, free pan and 0.1° rotation, context API, rendering), the overlay view and the curtain view
 - `docs-src/help-manuals.md` — the bundled manual under `public/help/default/`: generated copies, the build chain in the source repository, and the rule never to hand-edit them
 - `docs-src/omp-component-manifest.md` — OMP artifact component manifest and version-bump helper usage

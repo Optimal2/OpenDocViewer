@@ -96,9 +96,9 @@ Key pieces:
 
 - `src/utils/pageAssetRenderer.js`
   - hybrid renderer: raster images and TIFF go through `pageAssetWorkerPool.js`
-    (`src/workers/imageWorker.js`), PDF stays on the main-thread pdf.js path by default with an
-    opt-in `pdfPageWorkerPool.js` (`src/workers/pdfPageWorker.js`); every pool falls back to the
-    main thread
+    (`src/workers/imageWorker.js`). PDF uses the automatic `pdfPageWorkerPool.js`
+    (`src/workers/pdfPageWorker.js`) policy by default, with `pdfToImageMode: 'main-thread'` as an
+    explicit override; every pool falls back to the main thread
 - `src/utils/pdfResolution.js`
   - pure per-page PDF resolution policy shared by browser and worker renderers: auto mode targets a
     physical resolution (300 dpi by default) bounded by scale and pixel caps; the one-shot boost
@@ -130,6 +130,29 @@ Rendering responsibilities are split further:
   compare-mode post-zoom
 - `DocumentToolbar/*` manages toolbar UI, the print dialog, help/manual/about dialogs, language and
   theme menus
+
+## Modern image input
+
+Byte detection, not a file-name or MIME hint, authorizes JPEG XL and AVIF input. JPEG XL is decoded
+lazily by `jxl-oxide-wasm` in the image worker or its main-thread fallback and converted to PNG without
+losing alpha or 16-bit samples. AVIF uses the browser decoder and is also converted to PNG for page
+assets and lossless generated-PDF embedding. Only the first displayed frame of an animated JPEG XL
+becomes a viewer page. Deploy the hashed WASM asset and keep the shipped `'wasm-unsafe-eval'` CSP
+token. See `docs-src/modern-image-input.md` for the metadata and test contract.
+
+## Text layers and PDF signatures
+
+PDF text and OCR are separate opt-in paths. `pdfTextLayer.enabled` reads a PDF page's existing text
+without loading the OCR engine. `ocr.enabled` lazily loads the self-hosted Tesseract engine for scanned
+pages, while PDF pages with usable text still use their own text first. The resulting text layer supports
+selection, browser find, toolbar search, screen readers and local-voice read-aloud. Recognition waits for
+the document load, remains session-local, and pauses for PDF printing and hard memory pressure. The full
+configuration and operational limits are in `docs-src/runtime-configuration.md`.
+
+PDF signature inspection uses the source bytes already held by the loader. It starts after the first page
+by default, runs one PDF at a time in `src/workers/pdfSignatureWorker.js`, and checks integrity, signing
+times and RFC 3161 timestamps without a network request. It does not establish certificate-chain trust or
+revocation status. `docs-src/pdf-signatures.md` defines the status and UI contract.
 
 ## State ownership
 

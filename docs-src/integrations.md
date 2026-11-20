@@ -107,7 +107,7 @@ For hosted browser integrations, each file entry should provide a browser-reacha
 File reference rules:
 
 - `url` should be an absolute URL or a same-origin relative URL.
-- `ext` should be supplied when known: `pdf`, `tif`, `tiff`, `png`, `jpg`, or `jpeg`.
+- `ext` should be supplied when known: `pdf`, `tif`, `tiff`, `png`, `jpg`, `jpeg`, `jxl`, or `avif`.
 - `id` should be stable for the physical file or file ticket.
 - File order must be deterministic because the loader preserves document order and file order.
 - Avoid raw Windows file paths in browser payloads.
@@ -356,8 +356,8 @@ The implementation is `src/integrations/integrationSettings.js`.
 
 `bootstrapRuntime.js` probes startup sources in this order:
 
-1. Parent page bridge (`parent-page`)
-2. Session URL (`session-url`)
+1. Session URL (`session-url`)
+2. Parent page bridge (`parent-page`)
 3. Session token (`session-token`)
 4. URL parameters (`url-params`)
 5. JavaScript API (`js-api`)

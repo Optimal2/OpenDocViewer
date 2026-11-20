@@ -1300,6 +1300,11 @@ successfully, OpenDocViewer treats the whole source session as expired or invali
 hundreds of identical failed requests and lets the viewer-level notice show the site-specific
 recovery instruction.
 
+`documentLoading.fetch.maxSourceSizeMiB` limits each original source to 512 MiB by default. The
+loader checks `Content-Length` when it is available and also counts streamed bytes, so a missing or
+incorrect header does not bypass the cap. Normalization accepts 16–4096 MiB; invalid values use the
+default. Raise it only for known legitimate sources that need more room.
+
 `showResetSessionButton` adds a stronger recovery action than a plain viewer reload. The reset
 button dispatches `odv:session-reset-requested`, posts the same message to the parent window, and
 then follows `resetSessionTarget`:

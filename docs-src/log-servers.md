@@ -6,7 +6,7 @@ This document describes the two optional Node/Express services that accompany th
 
 - `server/system-log-server.js`
   - accepts structured frontend/system diagnostics
-  - token-gated in production
+  - token-gated on every ingestion request; production startup requires a configured token
   - writes NDJSON lines to daily rotated files
 - `server/user-log-server.js`
   - accepts user-facing print intent metadata
@@ -22,7 +22,7 @@ This document describes the two optional Node/Express services that accompany th
 - `POST /log`
   - request headers:
     - `Content-Type: application/json`
-    - `x-log-token: <token>` in production
+    - `x-log-token: <token>` on every request; production startup also requires `LOG_TOKEN`
   - request body shape:
 
 ```json
@@ -56,6 +56,7 @@ This document describes the two optional Node/Express services that accompany th
     - `forWhom`
   - response on success: JSON literal `true` with HTTP `200`
   - failures:
+    - `400` when `forWhom` contains `$` or `#`
     - `403` for failed same-origin checks
     - `415` for unsupported content type
     - `429` when the rate limit is exceeded
@@ -63,7 +64,9 @@ This document describes the two optional Node/Express services that accompany th
 
 ## File layout and retention
 
-Both services write under `server/logs/` and rotate by UTC date.
+Both services write under `server/logs/` and rotate by UTC date. When both run from this repository,
+they share the `access-*` and `error-*` files; `ingestion-*` belongs to the system log and `print-*`
+to the user log.
 
 ### System log server files
 
@@ -79,6 +82,22 @@ Both services write under `server/logs/` and rotate by UTC date.
 
 Retention is controlled by `LOG_RETENTION_DAYS` and defaults to `14`. Old files are pruned on startup as a best-effort housekeeping step.
 
+## Environment settings
+
+| Variable | Services | Default / rule |
+| --- | --- | --- |
+| `PORT` | Both | `3001` for system log, `3002` for user log. |
+| `NODE_ENV` | Both | `development`; production requires `LOG_TOKEN` for the system service. |
+| `TRUST_PROXY` | Both | `1`; set this deliberately for the actual proxy topology. |
+| `LOG_TOKEN` | System | Required at production startup and matched against `x-log-token` on every `/log` request. |
+| `ALLOWED_ORIGINS` | System | Empty (no CORS); otherwise a comma-separated exact-origin allowlist for `/log`. |
+| `JSON_LIMIT` | System | `64kb`. The user service uses fixed 64 kb JSON and 16 kb form limits. |
+| `LOG_RETENTION_DAYS` | Both | `14`. |
+| `ODV_STRICT_ORIGIN` | User | `false`; set to `true` to reject requests without `Origin`, `Referer` or `Sec-Fetch-Site`. |
+
+The system endpoint allows 120 requests per minute per client. The user endpoint allows 60. Both use
+`helmet()` and daily UTC rotation.
+
 ## Log rotation assumptions
 
 - rotation is date-based, not size-based
@@ -93,7 +112,7 @@ If a deployment needs stricter retention, central aggregation, compression, or a
 ### System log server
 
 - designed for same-origin or explicitly allowed browser callers
-- production access is gated by `x-log-token`
+- every `/log` request is gated by `x-log-token`; production cannot start without `LOG_TOKEN`
 - request bodies are small JSON payloads
 - rate limiting and `helmet()` are always on
 - CORS is opt-in via `ALLOWED_ORIGINS`
@@ -123,7 +142,7 @@ The shipped frontend defaults keep both log channels disabled. Enable them expli
 
 
 ```js
-window.__ODV_CONFIG__ = {
+window.__ODV_SITE_CONFIG__ = {
   systemLog: {
     enabled: true,
     endpoint: '/ODVProxy/log',

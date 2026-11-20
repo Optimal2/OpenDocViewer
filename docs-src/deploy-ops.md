@@ -219,7 +219,7 @@ installed packages, and it prints the sizes of `dist/`, `dist/ocr/` and the chun
 
 ### Prefetch tuning for proxied source endpoints
 
-If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. This customer-focused bundle keeps concurrency moderate at `4`, disables retries, and aborts individual prefetch requests after `10000` ms so one stalled upstream request does not hold the UI for long. The profile assumes the main VPN/proxy timeout issue has been resolved and now optimizes harder for responsiveness.
+If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. The shipped defaults keep concurrency moderate at `4`, disable retries, and abort individual prefetch requests after `10000` ms so one stalled upstream request does not hold the UI for long.
 
 If an environment still shows intermittent `GetStream`-style timeouts, lower concurrency first. Only re-enable retries if you have measured that the backend usually recovers quickly and users prefer waiting over surfacing a failed page faster.
 
