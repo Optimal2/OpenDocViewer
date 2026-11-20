@@ -118,6 +118,14 @@ IIS serving (`public/web.config`, proven by `scripts/web-config-manual.test.mjs`
   in-app manual window strips scripts (DOMPurify) and builds its own contents tree and search; the
   side navigation is hidden by the manual's own CSS unless the HTML is opened as a page of its own.
 
+## Known coverage limit
+
+As of 2026-11-20, the generated copies predate the OCR, toolbar text-search, read-aloud and PDF-text-only features.
+They contain no sections for those features. The standard-manual filter already recognizes the planned
+OCR section ids, but those ids do not occur in the shipped HTML. Do not hand-edit the copies to close
+this gap; add the English and Swedish sections in the private source, rebuild every HTML/PDF copy and
+then update this note.
+
 ## What pins the content here
 
 - `src/__tests__/compareHelp.test.js` — the comparison guide (`manual-jamforelse.<lng>.html`, its

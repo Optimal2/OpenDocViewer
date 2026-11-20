@@ -80,6 +80,10 @@
       enabled: true
     },
     pdfSignatures: {
+      // Only the literal false turns inspection and every signature symbol off.
+      // enabled: false,
+      // 'firstPage' (default) starts after the first page; 'allPages' waits for the settled load.
+      // inspectAfter: 'allPages',
       // false hides the per-page signature symbol on thumbnails; the document symbol and the
       // toolbar signature overview remain.
       thumbnailPageBadge: true,
@@ -132,7 +136,7 @@
       // Support tooling: the OCR benchmark under About -> Diagnostics (only the literal true
       // offers it). It samples the open document and compares worker counts, one language against
       // the configured ones and a downscaled page image; see docs-src/runtime-configuration.md.
-      // benchmark: { enabled: false, pageLimit: 40, workerCounts: [0] },
+      // benchmark: { enabled: false, pageLimit: 40, sampleMode: 'evenly-spaced', workerCounts: [0], languageVariants: ['configured', 'single'], imageScales: [1, 0.75], iterations: 1, pageTimeoutMs: 180000, delayBetweenRunsMs: 500 },
       // Support tooling: the OCR boost benchmark under About -> Diagnostics (only the literal
       // true offers it). It samples the open document and measures maximum throughput, one run
       // per worker count; see docs-src/runtime-configuration.md.
@@ -255,7 +259,10 @@
       curtain: {
         enabled: false,
         print: { enabled: false }
-      }
+      },
+      // 'mirror' (default) keeps the coarse image controls live in compare mode; 'hide' hides them
+      // while any shown page's fine-tuning panel is expanded. No effect outside compare mode.
+      // adjust: { toolbarMode: 'mirror' }
     },
 
     // =========================================================================
@@ -360,9 +367,8 @@
           maxRuns: 40,
           delayBetweenRunsMs: 150
         },
-        // Optional future optimization for common "all pages" PDF prints.
-        // Step 1 only plans cacheable variants; later wiring can generate them
-        // in a background queue after the document has loaded.
+        // Optional background cache for common "all pages" PDF prints. After the document has
+        // loaded, ODV generates the planned variants so a later print can reuse them. Off by default.
         prebuildAllPages: {
           enabled: false,
           // Use explicit languages for deployments that print in a fixed language,
@@ -549,7 +555,11 @@
             type: 'string',
             contexts: ['screen', 'print', 'debug', 'validation']
           }
-        }
+        },
+        // Optional per-session settings supplied by a trusted same-origin bundle. Off by default.
+        // Only the named groups are accepted; currently 'userLog' is the only supported group.
+        // See docs-src/integrations.md before enabling this boundary.
+        // settingsFromBundle: { enabled: false, allow: ['userLog'] }
       }
     },
 
@@ -558,6 +568,8 @@
     // =========================================================================
     help: {
       manual: {
+        // Only the literal false hides the Manual entry and disables the stand-alone manual page.
+        // enabled: false,
         // "auto" prefers site HTML when it exists; "standard" ignores site HTML and uses the bundled
         // manual with runtime capability filtering. Unknown values warn and behave as "auto".
         source: 'auto',
@@ -764,6 +776,10 @@
         // Abort a single prefetch attempt after this many milliseconds so one slow source does not
         // keep the viewer waiting on that spot in the sequence for too long.
         prefetchRequestTimeoutMs: 10000,
+
+        // Refuse a source larger than this many MiB, using Content-Length when present and a
+        // streamed byte cap otherwise. Normalization accepts 16 to 4096; the default is 512.
+        // maxSourceSizeMiB: 512,
 
         // If this many initial source URLs all fail as unavailable and no source has loaded yet,
         // stop early and show the viewer-level problem notice. This catches expired host tickets

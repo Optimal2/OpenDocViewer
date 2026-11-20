@@ -8,10 +8,21 @@ list with licence identifiers is in `package.json` / `package-lock.json`.
 
 | Component | Licence | Used for |
 | --- | --- | --- |
+| `axios` 1.21.0 | MIT | HTTP requests in the system-log client. |
+| `dompurify` 3.4.17 | MPL-2.0 OR Apache-2.0 | Sanitizing manual HTML and configured print markup. |
+| `file-type` 22.3.0 | MIT | Byte-level source-format detection. |
+| `i18next` 27.0.1, `i18next-http-backend` 4.0.10, `i18next-icu` 2.7.0 | MIT | Localized UI text, translation loading and ICU message formatting. |
+| `jspdf` 4.2.1 | MIT | Generated-PDF printing and download. |
 | `jxl-oxide-wasm` 0.12.6 | MIT OR Apache-2.0 (Wonwoo Choi and contributors, github.com/tirr-c/jxl-oxide) | JPEG XL decoding and lossless PNG encoding in Rust/WebAssembly, loaded only for JPEG XL input. The package includes LICENSE-MIT and LICENSE-APACHE. |
-| `pkijs` | BSD-3-Clause (Copyright (c) 2014 GlobalSign, 2015-2019 Peculiar Ventures) | Parsing CMS/PKCS#7 signature payloads in signed PDFs (loaded dynamically only when a document contains signature fields) |
-| `asn1js` | BSD-3-Clause (Copyright (c) 2014 GMO GlobalSign, 2015-2022 Peculiar Ventures) | ASN.1/DER decoding backing `pkijs` |
-| `@noble/hashes` | MIT (Copyright (c) 2022 Paul Miller) | SHA-1 and SHA-2 hashing backing `pkijs`, and SHA-256 conversion provenance for JPEG XL |
+| `material-icons` 1.13.14 | Apache-2.0 | Self-hosted toolbar and dialog icons. |
+| `pdf-lib` 1.17.1 | MIT | PDF signature parsing and generated-PDF merging. |
+| `pdfjs-dist` 6.5.438 | Apache-2.0 | PDF rendering, text extraction and signature differential checks. |
+| `prop-types` 15.8.1 | MIT | React component runtime prop validation. |
+| `react` / `react-dom` 19.3.1, `react-i18next` 18.0.0 | MIT | Application UI and React localization bindings. |
+| `utif2` 4.1.0 | MIT | TIFF decoding. |
+| `pkijs` 4.0.1 | BSD-3-Clause (Copyright (c) 2014 GlobalSign, 2015-2019 Peculiar Ventures) | Parsing CMS/PKCS#7 signature payloads in signed PDFs (loaded dynamically only when a document contains signature fields) |
+| `asn1js` 4.0.0 | BSD-3-Clause (Copyright (c) 2014 GMO GlobalSign, 2015-2022 Peculiar Ventures) | ASN.1/DER decoding backing `pkijs` |
+| `@noble/hashes` 2.4.0 | MIT (Copyright (c) 2022 Paul Miller) | SHA-1 and SHA-2 hashing backing `pkijs`, and SHA-256 conversion provenance for JPEG XL |
 | `@peculiar/utils` | MIT (Copyright (c) 2017-2026 Peculiar Ventures, LLC) | Binary, hex and base64 conversion helpers backing `pkijs` and `asn1js` |
 | `bytestreamjs` | BSD-3-Clause (Copyright (c) 2016-2022 Peculiar Ventures) | Byte-stream reading and writing backing `pkijs` |
 
@@ -25,6 +36,20 @@ Redistribution notice for BSD-3-Clause components: these licences require retent
 copyright notice, this list of conditions and the following disclaimer in redistributions.
 The MIT licences require the copyright and permission notice in all copies or substantial
 portions of the software. The full licence texts are in the installed packages listed above.
+
+## Optional log-server dependencies
+
+These packages are installed for the separately hosted Node services; they are not part of the
+static viewer bundle.
+
+| Component | Licence | Used for |
+| --- | --- | --- |
+| `cors` 2.8.6 | MIT | Opt-in CORS handling for the system-log endpoint. |
+| `dotenv` 18.0.9 | BSD-2-Clause | Loading service environment settings from `.env`. |
+| `express` 5.3.0 | MIT | HTTP routing and request parsing. |
+| `express-rate-limit` 8.7.3 | MIT | Ingestion rate limits. |
+| `helmet` 8.3.0 | MIT | HTTP security headers. |
+| `morgan` 1.12.1 | MIT | HTTP access logs. |
 
 ## OCR engine (opt-in; loaded only when `ocr.enabled` is `true`)
 
