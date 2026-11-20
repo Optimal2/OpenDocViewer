@@ -136,6 +136,122 @@ release that is followed by an OMP deployment must not reuse a pre-release OMP a
 because that package was built before `release.ps1` updated the application version embedded in
 the runtime.
 
+## Versioning and Maintained Lines
+
+This section is the single source for how official OpenDocViewer releases are numbered and how
+released lines are maintained. `AGENTS.md` and the `odv-release` skill point here, and a
+session start prompt should too; do not restate the rules elsewhere. It covers the official
+releases (`package.json`, the `vX.Y.Z` tags) and no other repository. The OMP artifact
+component version keeps its own numbering (`docs-src/omp-component-manifest.md`); it appears
+here only for what applies to it on a release branch. Decided by the maintainer on 2026-11-20.
+
+### Version levels
+
+- **Patch** (`2.12.1`): security fixes and serious bugs. A patch never requires an action at
+  the customer.
+- **Minor** (`2.13.0`): new functionality.
+- **Major** (`3.0.0`): decided by the maintainer.
+
+An action at the customer is judged against the compatibility list: runtime configuration keys
+and their defaults, IIS headers and Content-Security-Policy, the session URL format, browser
+support, and the files in the delivery.
+
+- A change is a major only when a customer who has not touched their configuration notices a
+  difference or has to do something.
+- A new configuration key that is off by default is a minor.
+- An addition to the shipped Content-Security-Policy is a minor when it is needed only for a
+  feature that is off by default.
+- Example: `pdfTextLayer.enabled` shipped off is a minor. Turning it on by default is a major.
+
+### Maintained lines
+
+- All work happens on `main`. Every release is a tag `vX.Y.Z`.
+- An older line lives on a branch `release/X.Y`. `2.12` is the first line maintained this way.
+- At most two lines are maintained at a time. A line counts as maintained once it has been
+  delivered to a customer.
+- The older line receives security patches for six months after the next line has been
+  delivered. The period is extended if a customer approval turns out to take longer than two
+  months.
+- `release/X.Y` is created from the tag `vX.Y.0` at the first fix marked for the line, not
+  earlier. From then on the branch is ahead of the tag with fixes that are not released.
+- A release branch must always be releasable.
+- OMP packages are built from `main` only. The OMP component version is never raised on a
+  release branch.
+- No release and no tag, from any branch, without the maintainer's explicit yes.
+
+### A fix for a maintained line
+
+1. Fix it on `main` first. A fix never travels from a release branch to `main`.
+2. Make it a commit of its own: the fix and its test, and beyond them only what the gate
+   requires to travel with every change to shipped files on `main` (the raised OMP component
+   version and the regenerated `docs-agent/`). No cleanup in the same commit. A dependency
+   update is a commit of its own, one dependency per commit. End the commit message with the
+   trailer line `Backport: 2.12`, naming the line it is meant for. Only security fixes and
+   serious bugs in code that was part of the release are marked.
+3. Carry it over in the same job. Whoever fixes on `main` and marks the commit also transfers
+   it to the release branch:
+   - The commit on the branch names the commit on `main` it comes from: the
+     `(cherry picked from commit <sha>)` line that `git cherry-pick -x` adds to the message.
+   - It is not a clean cherry-pick. The version changes in `omp-components.json` and
+     `opendocviewer.module-definition.json` and the `docs-agent/` of the commit on `main` do not
+     come along: the branch keeps its own version files, and `docs-agent/` is regenerated on
+     the branch. `main` has moved those files since the tag, so the pick is expected to stop
+     on exactly them:
+
+     ```powershell
+     git cherry-pick -x <sha>
+     git checkout HEAD -- omp-components.json opendocviewer.module-definition.json docs-agent
+     npm run doc:agent
+     git add docs-agent
+     git cherry-pick --continue
+     ```
+
+     The message keeps its source line through the stop (measured with git 2.54). If the pick
+     completes without stopping, restore the same paths from the commit before it
+     (`git checkout HEAD~1 -- <paths>`), regenerate `docs-agent/` and run
+     `git commit --amend --no-edit`.
+   - A conflict in any other file stops the transfer: `git cherry-pick --abort`, then report.
+     It is never resolved automatically.
+   - A dependency update is redone on the branch, because `package-lock.json` rarely transfers.
+   - The job is not done until CI is green on the branch. Red CI is reported, never left.
+   - The transfer never produces a release. A release from a release branch is the
+     maintainer's decision.
+4. When a security fix would require an action at the customer (for example a dependency whose
+   new version raises the browser requirement), first establish whether the flaw can be fixed
+   in OpenDocViewer's own code without raising the dependency. Only when that is not possible
+   does it become an explicit exception, which the maintainer decides case by case and which is
+   stated at the top of the release notes.
+
+### Release notes and advisories per line
+
+- `release-notes/vX.Y.Z.md` must be in the tag's tree, so a patch gets its file on the release
+  branch. The file is then copied to `main`.
+- A fix that exists in several lines is published as one GitHub security advisory, with the
+  fixed version per line.
+- `SECURITY.md` on `main` is the one that applies.
+
+### Decided but not in place (2026-11-20)
+
+Check the repository before relying on any of these:
+
+- No `release/*` branch exists. The latest release is `v2.12.0`.
+- The release-branch exemption in the version gate. On `main` a change to shipped files
+  (`src/`, `public/`, the package files) must come with a raised OMP component version. Check
+  13 (LOCKSTEP) of the validator shared with OpenModulePlatform
+  (`scripts/omp/validate-component-versions.ps1`) enforces it. Step 3 of `scripts/local-ci.ps1`,
+  which `.githooks/pre-push` runs, and the `lockstep` job in `.github/workflows/ci.yml` run
+  that check, and `release.ps1` raises the version inside every release commit. On `release/*`
+  the rule is to be reversed: the gate fails when `omp-components.json` differs from the
+  line's tag, and `release.ps1` stops raising the version there. The shared validator is not
+  touched. The maintainer reviews that diff before it lands. Until it has landed:
+  - A transferred fix that touches shipped files fails the gate on a release branch, so a
+    transfer cannot be completed. Prepare it, report, and never bypass the gate.
+  - `release.ps1` must not be run on a release branch. The release instructions above ("For
+    AI-operated official releases") and in `AGENTS.md` describe a release from `main`.
+- Monitoring of maintained branches: a scheduled job that runs `npm audit` against each
+  maintained branch. It only reports and opens no fixes of its own. `release/*` is protected
+  against forced push and deletion.
+
 ## Integration Notes
 
 The canonical host contract is Portable Document Bundle v1. For future manual-review host integrations:

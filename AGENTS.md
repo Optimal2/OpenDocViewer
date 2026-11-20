@@ -33,6 +33,14 @@ Official OpenDocViewer releases go through `release.ps1` only. `release.ps1 -Pub
 
 Do NOT change `.github/workflows/release.yml` back to a `workflow_dispatch`-only / `approve_release` gate: an unintended AI change on 2026-06-28 (commit 964fa3f) did that and broke the "release.ps1 does everything" flow; it was reverted 2026-07-24. Update `SECURITY.md` before releasing (the script does not touch it). The OMP-component version (`omp-components.json`) is versioned separately from `package.json` and is never forced to match it; `release.ps1` bumps it inside the release commit (together with the regenerated `docs-agent/`), because the pre-push gate's lockstep and documentation-freshness checks require both to travel with a `package.json` change. The OMP artifact delivered after a release is therefore built from the release commit itself.
 
+## Versioning and maintained lines
+
+The rules for version levels (patch, minor, major), the `release/X.Y` branches and how a fix is
+carried over to a maintained line are written in one place: `docs-src/CODEX_DEVELOPMENT.md`,
+section "Versioning and Maintained Lines". Read it before a fix that touches code from the
+latest release, before marking a commit `Backport: X.Y`, and before any work on a `release/*`
+branch. Do not restate the rules here or anywhere else.
+
 ## Security / Antivirus Compatibility
 
 This environment uses Bitdefender on Windows. PowerShell-heavy or suspicious command lines may be blocked.
