@@ -71,31 +71,31 @@ must stay equal are the two `definitionVersion` copies.
 
 ## Bumping Versions
 
-Use `scripts/bump-component-version.ps1` to update manifest versions:
+Use the canonical `scripts/omp/bump-version.ps1` helper for artifact-only version changes:
 
 ```powershell
-.\scripts\bump-component-version.ps1 -ComponentKey opendocviewer-web -Part patch
-.\scripts\bump-component-version.ps1 -All -Version 2.0.3
+.\scripts\omp\bump-version.ps1 -ComponentKey opendocviewer-web -Part patch
+.\scripts\omp\bump-version.ps1 -AllComponents -Version 2.0.3
 ```
 
-The script updates `omp-components.json` only. For an actual OpenDocViewer
-release, keep using the normal release process so `package.json`, tags,
-release notes, and `SECURITY.md` describe the official release. Do not bump
-`omp-components.json` during an official release merely to match `package.json`;
-change the component manifest only when the deployable OMP artifact version is
-intended to change.
+The helper updates the component, `repositoryVersion`, the compatible-artifact ceiling and the
+module-definition version together. The older `scripts/bump-component-version.ps1` compatibility
+wrapper is deprecated and refuses to run without an explicit opt-in because it does not maintain
+that whole version matrix.
 
-When an official release is going to be installed through OMP, the order matters:
+For an actual OpenDocViewer release, keep using `release.ps1` so `package.json`, tags, release notes,
+and `SECURITY.md` describe the official release. The two version streams remain independent; the OMP
+version does not have to equal `package.json`.
 
-1. Prepare and commit the release notes and other source changes.
-2. Run `release.ps1`, which updates `package.json` / `package-lock.json`, creates
-   the official version commit, and tags the release.
-3. After that release commit exists, bump the OMP artifact component version.
-4. Export the OMP universal package from the post-release commit.
+When an official release is going to be installed through OMP:
 
-This post-release artifact bump does not mean the OMP artifact version must equal
-the official OpenDocViewer version. It only guarantees that OMP sees a new
-artifact identity and imports files built after the official application version
-changed. Without this step, a local or customer OMP installation can keep serving
-an older artifact-only package, and Help -> About will correctly show the older
-OpenDocViewer version embedded in that package.
+1. Prepare, commit and push the release notes and other source changes.
+2. Run `release.ps1`. It updates `package.json` / `package-lock.json`, regenerates `docs-agent/`,
+   bumps the OMP component and module-definition versions, and includes all of those changes in the
+   official release commit and tag.
+3. Export the OMP universal package from that release commit. Do not make a later artifact-only bump
+   merely to make the two version numbers match.
+
+Building from the release commit ensures that the deployed files and Help -> About carry the official
+application version. An OMP package built from an earlier commit would still contain the older
+application version.

@@ -124,10 +124,10 @@ For AI-operated official releases:
    `workflow_dispatch`-only / `approve_release` gate** — an AI change on 2026-06-28 (commit 964fa3f)
    did that and broke the "release.ps1 does everything" flow; it was reverted 2026-07-24. Just
    verify the pushed commit, the `vX.Y.Z` tag, and the auto-run workflow.
-8. If the official release will be delivered through OMP, bump the OMP artifact component version
-   after the release helper has updated `package.json`, then export/import the OMP package from
-   that post-release commit. This ensures OMP deploys files whose Help -> About version matches
-   the official release.
+8. If the official release will be delivered through OMP, export/import the OMP package from the
+   release commit. The release helper has already bumped the OMP component and module-definition
+   versions inside that commit, together with `package.json` and the regenerated `docs-agent/`.
+   This ensures OMP deploys files whose Help -> About version matches the official release.
 
 Official OpenDocViewer releases and OMP artifact-only component builds are versioned separately.
 Do not force `omp-components.json` to match `package.json`. The OMP artifact version only needs
