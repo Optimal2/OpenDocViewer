@@ -1594,6 +1594,8 @@ const DocumentLoader = ({
         }
       }
 
+      // Defensive only: maxAttempts is at least 1 and the last attempt always returns above, so
+      // this runs only if that clamp is ever removed. It keeps callers from receiving undefined.
       return {
         ok: false,
         error: new Error(`Prefetch exhausted retries for ${entry.url}`),
