@@ -55,15 +55,10 @@
     "page": "Page",
     "compare": {
       "enable": "Enable compare mode",
-      "disable": "Disable compare mode",
-      "shiftHint": "Shift temporarily targets the opposite compare pane."
+      "disable": "Disable compare mode"
     },
     "compareOverlay": {
       "open": "Overlay the two pages (transparency)"
-    },
-    "editing": {
-      "enable": "Enable canvas tools",
-      "disable": "Disable canvas tools"
     },
     "rotateLeft90": "Rotate left 90°",
     "rotateRight90": "Rotate right 90°",
@@ -97,8 +92,6 @@
       "system": "System",
       "largeButtons": "Larger toolbar buttons"
     },
-    "focusWarningTitle": "Shortcuts inactive",
-    "focusWarningAction": "Focus viewer",
     "pageLoadingTitle": "Page indicator (pages are still loading)",
     "navigation": {
       "scopePage": "Page navigation",
@@ -106,8 +99,6 @@
       "targetPrimary": "primary / left pane",
       "targetCompare": "right compare pane",
       "modeTitle": "{scope} · {target}",
-      "shiftHint": "Shift = opposite pane",
-      "ctrlHint": "Ctrl = document mode",
       "groupDescription": "{scope} for {target}.",
       "loadingAnnounce": "Page navigation is still loading pages.",
       "readyAnnounce": "Page navigation is ready.",

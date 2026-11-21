@@ -55,15 +55,10 @@
     "page": "Sida",
     "compare": {
       "enable": "Aktivera jämför-läge",
-      "disable": "Inaktivera jämför-läge",
-      "shiftHint": "Shift styr tillfälligt motsatt jämförelsevy."
+      "disable": "Inaktivera jämför-läge"
     },
     "compareOverlay": {
       "open": "Lägg sidorna på varandra (transparens)"
-    },
-    "editing": {
-      "enable": "Aktivera redigeringsverktyg",
-      "disable": "Inaktivera redigeringsverktyg"
     },
     "rotateLeft90": "Rotera vänster 90°",
     "rotateRight90": "Rotera höger 90°",
@@ -97,8 +92,6 @@
       "system": "System",
       "largeButtons": "Större verktygsknappar"
     },
-    "focusWarningTitle": "Genvägar inaktiva",
-    "focusWarningAction": "Fokusera visaren",
     "pageLoadingTitle": "Sidindikator (sidor läses fortfarande in)",
     "navigation": {
       "scopePage": "Sidnavigering",
@@ -106,8 +99,6 @@
       "targetPrimary": "huvudvy / vänster vy",
       "targetCompare": "höger jämförelsevy",
       "modeTitle": "{scope} · {target}",
-      "shiftHint": "Shift = motsatt vy",
-      "ctrlHint": "Ctrl = dokumentläge",
       "groupDescription": "{scope} för {target}.",
       "loadingAnnounce": "Sidnavigeringen laddar fortfarande sidor.",
       "readyAnnounce": "Sidnavigeringen är redo.",
