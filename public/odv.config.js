@@ -71,6 +71,37 @@
     return out;
   }
 
+  function readConfigPath(root, path) {
+    var value = root;
+    var keys = path.split('.');
+    for (var i = 0; i < keys.length; i += 1) {
+      if (!isObj(value) || value[keys[i]] === undefined) return undefined;
+      value = value[keys[i]];
+    }
+    return value;
+  }
+
+  function writeConfigPath(root, path, value) {
+    var keys = path.split('.');
+    var target = root;
+    for (var i = 0; i < keys.length - 1; i += 1) {
+      if (!isObj(target[keys[i]])) target[keys[i]] = {};
+      target = target[keys[i]];
+    }
+    target[keys[keys.length - 1]] = value;
+  }
+
+  // Runtime readers see the merged configuration, whose canonical defaults would otherwise
+  // mask legacy aliases supplied only by the site file. Promote just those explicit site values.
+  function applySiteAlias(merged, site, canonicalPath, aliasPath) {
+    if (readConfigPath(site, canonicalPath) !== undefined) return;
+    var aliasValue = readConfigPath(site, aliasPath);
+    if (aliasValue === undefined) return;
+    var canonicalValue = readConfigPath(merged, canonicalPath);
+    writeConfigPath(merged, canonicalPath,
+      isObj(canonicalValue) && isObj(aliasValue) ? deepMerge(canonicalValue, aliasValue) : aliasValue);
+  }
+
   // Detect our own script tag to infer base paths (works under virtual directories).
   var scriptEl = d.currentScript || (function () {
     var all = d.getElementsByTagName('script');
@@ -354,7 +385,7 @@
          *
          * NOTE: this only affects keyboard interception. Browser menus / native context menus
          * cannot be reliably overridden by regular web-page code. Runtime validation lives in
-         * getKeyboardPrintShortcutBehavior(), so unknown host values fall back to "browser".
+         * getKeyboardPrintShortcutBehavior(), so unknown host values fall back to "dialog".
          * @type {"browser"|"disable"|"dialog"}
          */
         ctrlOrCmdP: "dialog"
@@ -931,6 +962,8 @@
         // Keep this aligned with the normalized runtime defaults from
         // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6
         // for this setting in the current code path.
+        // Independent from maxConcurrentMainThreadRenders in auto/performance modes (1..8).
+        // Memory-pressure modes may still lower both limits to protect the client.
         maxConcurrentAssetRenders: 3,
         warmupBatchSize: 48,
         loadingOverlayDelayMs: 90,
@@ -1045,6 +1078,27 @@
 
   // Merge site overrides on top of defaults, then freeze & publish.
   var merged = deepMerge(ACTIVE_CONFIG, siteOverrides);
+  var siteAliases = [
+    ['viewer.customFitWidthFactorPercent', 'viewer.customFitWidthPercent'],
+    ['viewer.customFitHeightFactorPercent', 'viewer.customFitHeightPercent'],
+    ['viewer.customFitActualSizeFactorPercent', 'viewer.customFitActualPercent'],
+    ['print.defaultPageMode', 'viewer.print.defaultPageMode'],
+    ['print.defaultPageMode', 'print.defaultPrintMode'],
+    ['print.selectionWorkspace', 'viewer.printSelectionWorkspace'],
+    ['print.selectionWorkspace.documentHeaderTemplate', 'viewer.printSelectionWorkspace.headerTemplate'],
+    ['print.selectionWorkspace.previewInfoTemplate', 'viewer.printSelectionWorkspace.lightboxInfoTemplate'],
+    ['print.selectionWorkspace.documentHeaderTemplate', 'print.selectionWorkspace.headerTemplate'],
+    ['print.selectionWorkspace.previewInfoTemplate', 'print.selectionWorkspace.lightboxInfoTemplate'],
+    ['viewer.edgeScrollPageTurn', 'edgeScrollPageTurn'],
+    ['documentLoading.render.pdfToImageMode', 'documentLoading.render.pdf-to-image-mode'],
+    ['documentLoading.render.pdfWorkerMaxCount', 'documentLoading.render.maxPdfWorkerCount'],
+    ['documentLoading.render.pdfWorkerPagePolicy', 'documentLoading.render.pdfWorkerAutoPolicy'],
+    ['documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency', 'documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowCores'],
+    ['documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency', 'documentLoading.render.pdfWorkerAutoPolicy.mainThreadBelowCores']
+  ];
+  for (var aliasIndex = 0; aliasIndex < siteAliases.length; aliasIndex += 1) {
+    applySiteAlias(merged, siteOverrides, siteAliases[aliasIndex][0], siteAliases[aliasIndex][1]);
+  }
   // Defaults must not mask a legacy site-only fullPageScale override.
   var siteRender = siteOverrides.documentLoading && siteOverrides.documentLoading.render;
   if (siteRender && siteRender.fullPageScale !== undefined &&

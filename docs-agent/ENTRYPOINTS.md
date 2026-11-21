@@ -29,8 +29,11 @@
 
 ## Runtime Entrypoints
 
+- `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
+- `server/userLogOrigin.js` - Evaluate the browser origin signals used by the user print\-log endpoint.
+- `server/userLogPayload.js` - Compatibility reader for form posts and the viewer's JSON print envelope.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 - `src/manual-page/main.jsx` - Entry of the stand\-alone manual page \(manual/index.html\).
 - `src/ocr/index.js` - Entry point of the OCR module: the file the viewer imports while OCR is on, and only through \`src/utils/ocrLoader.js\` with \`import\(\)\` after \`isOcrEnabled\(\)\` returned true.

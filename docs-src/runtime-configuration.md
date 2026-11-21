@@ -1614,7 +1614,7 @@ The runtime config now supports a keyboard-only print policy surface under:
 ```js
 shortcuts: {
   print: {
-    ctrlOrCmdP: "browser" // "browser" | "disable" | "dialog"
+    ctrlOrCmdP: "dialog" // "browser" | "disable" | "dialog"; missing/unknown values use "dialog"
   }
 }
 ```

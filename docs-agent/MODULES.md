@@ -2,9 +2,12 @@
 
 ## server
 
-File count: 2. Line count: 508. JSDoc symbol count: 7.
+File count: 5. Line count: 548. JSDoc symbol count: 11.
 
+- `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
+- `server/userLogOrigin.js` - Evaluate the browser origin signals used by the user print\-log endpoint.
+- `server/userLogPayload.js` - Compatibility reader for form posts and the viewer's JSON print envelope.
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
 ## src/app
@@ -49,7 +52,7 @@ File count: 8. Line count: 4135. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8231. JSDoc symbol count: 117.
+File count: 21. Line count: 8233. JSDoc symbol count: 117.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -62,7 +65,7 @@ File count: 21. Line count: 8231. JSDoc symbol count: 117.
 
 ## src/components/DocumentViewer
 
-File count: 17. Line count: 7787. JSDoc symbol count: 157.
+File count: 17. Line count: 7794. JSDoc symbol count: 158.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
@@ -191,7 +194,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 69. Line count: 25014. JSDoc symbol count: 1042.
+File count: 70. Line count: 25023. JSDoc symbol count: 1043.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
@@ -204,9 +207,9 @@ File count: 69. Line count: 25014. JSDoc symbol count: 1042.
 
 ## src/workers
 
-File count: 4. Line count: 1707. JSDoc symbol count: 5.
+File count: 4. Line count: 1709. JSDoc symbol count: 4.
 
-- `src/workers/pdfWorker.js` - OpenDocViewer \- generated PDF worker.
 - `src/workers/imageWorker.js` - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` - OpenDocViewer \- PDF page image worker.
 - `src/workers/pdfSignatureWorker.js` - Web worker entry for PDF signature inspection.
+- `src/workers/pdfWorker.js` - OpenDocViewer \- generated PDF worker.

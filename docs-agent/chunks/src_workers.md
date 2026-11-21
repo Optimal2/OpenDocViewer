@@ -1,6 +1,6 @@
 # OpenDocViewer / src/workers
 
-File count: 4. Line count: 1707. JSDoc symbol count: 5.
+File count: 4. Line count: 1709. JSDoc symbol count: 4.
 
 ## src/workers/imageWorker.js
 
@@ -37,6 +37,4 @@ Symbols:
 
 OpenDocViewer \- generated PDF worker.
 
-Symbols:
-
-- `workerScope` (constant) - OpenDocViewer \- generated PDF worker.
+Local imports: `src/utils/pdfLayout.js`

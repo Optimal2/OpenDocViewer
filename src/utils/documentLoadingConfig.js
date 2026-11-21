@@ -794,7 +794,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
     next.render.useWorkersForTiff = true;
     next.render.workerCount = resolveRecommendedRasterWorkerCount(next.render.workerCount, 'performance');
     next.render.maxConcurrentMainThreadRenders = Math.max(3, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
-    next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
+    next.render.maxConcurrentAssetRenders = Math.min(8, Math.max(1, next.render.maxConcurrentAssetRenders || next.render.maxConcurrentMainThreadRenders || 1));
     next.render.warmupBatchSize = Math.max(48, next.render.warmupBatchSize || 0);
     next.render.loadingOverlayDelayMs = Math.max(60, next.render.loadingOverlayDelayMs || 0);
     next.render.thumbnailLoadingStrategy = 'eager';
@@ -841,7 +841,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
   next.render.pdfWorkerPagePolicy = normalizePdfWorkerPagePolicy(next.render.pdfWorkerPagePolicy);
   next.render.workerCount = resolveRecommendedRasterWorkerCount(next.render.workerCount, 'auto');
   next.render.maxConcurrentMainThreadRenders = Math.max(1, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
-  next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
+  next.render.maxConcurrentAssetRenders = Math.min(8, Math.max(1, next.render.maxConcurrentAssetRenders || next.render.maxConcurrentMainThreadRenders || 1));
   next.render.warmupBatchSize = Math.max(24, next.render.warmupBatchSize || 24);
   next.render.loadingOverlayDelayMs = Math.max(80, next.render.loadingOverlayDelayMs || 0);
   next.render.thumbnailSourceStrategy = next.render.thumbnailSourceStrategy || 'prefer-full-images';

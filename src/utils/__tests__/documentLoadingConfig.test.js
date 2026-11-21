@@ -143,6 +143,20 @@ describe('documentLoadingConfig', () => {
       expect(DOCUMENT_LOADING_DEFAULTS.mode).toBe('auto');
       expect(applyDocumentLoadingMode(DOCUMENT_LOADING_DEFAULTS, 'nonsense').mode).toBe('auto');
     });
+
+    it.each(['auto', 'performance'])('%s mode preserves the independent asset-render limit and its ceiling', (mode) => {
+      const base = {
+        ...DOCUMENT_LOADING_DEFAULTS,
+        render: {
+          ...DOCUMENT_LOADING_DEFAULTS.render,
+          maxConcurrentMainThreadRenders: 32,
+          maxConcurrentAssetRenders: 8,
+        },
+      };
+      expect(applyDocumentLoadingMode(base, mode).render.maxConcurrentAssetRenders).toBe(8);
+      base.render.maxConcurrentAssetRenders = 99;
+      expect(applyDocumentLoadingMode(base, mode).render.maxConcurrentAssetRenders).toBe(8);
+    });
   });
 
   describe('applyMemoryPressureStage', () => {

@@ -123,8 +123,8 @@ describe('runtimeConfig', () => {
   });
 
   describe('getKeyboardPrintShortcutBehavior', () => {
-    it('defaults to browser', () => {
-      expect(getKeyboardPrintShortcutBehavior({})).toBe('browser');
+    it('defaults to dialog', () => {
+      expect(getKeyboardPrintShortcutBehavior({})).toBe('dialog');
     });
 
     it('accepts valid values case-insensitively', () => {
@@ -132,8 +132,8 @@ describe('runtimeConfig', () => {
       expect(getKeyboardPrintShortcutBehavior({ shortcuts: { print: { ctrlOrCmdP: 'DISABLE' } } })).toBe('disable');
     });
 
-    it('falls back to browser for unknown values', () => {
-      expect(getKeyboardPrintShortcutBehavior({ shortcuts: { print: { ctrlOrCmdP: 'magic' } } })).toBe('browser');
+    it('falls back to dialog for unknown values', () => {
+      expect(getKeyboardPrintShortcutBehavior({ shortcuts: { print: { ctrlOrCmdP: 'magic' } } })).toBe('dialog');
     });
   });
 

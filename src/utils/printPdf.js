@@ -21,6 +21,7 @@ import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
 import { createPdfWithWorkerDispatcher, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
 import { composeCompareCurtainCanvas, composeCompareOverlayCanvas, resolvePrintableSurface } from './printCore.js';
 import { getTrackedObjectUrlSourceFormat } from './objectUrlRegistry.js';
+import { normalizePdfLayoutValue } from './pdfLayout.js';
 
 /**
  * Escape regular-expression metacharacters in literal text.
@@ -1720,9 +1721,9 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
   const pdfCfg = options.pdfCfg || {};
   const pdfOrientationMode = resolvePdfOrientationMode(options);
-  const marginPt = Math.max(0, asNumber(pdfCfg.marginPt) || 8);
-  const headerReservePt = Math.max(0, asNumber(pdfCfg.headerReservePt) || 18);
-  const footerReservePt = Math.max(0, asNumber(pdfCfg.footerReservePt) || 14);
+  const marginPt = normalizePdfLayoutValue(pdfCfg.marginPt, 8);
+  const headerReservePt = normalizePdfLayoutValue(pdfCfg.headerReservePt, 18);
+  const footerReservePt = normalizePdfLayoutValue(pdfCfg.footerReservePt, 14);
   const textFontSize = Math.max(5, asNumber(pdfCfg.textFontSize) || 7);
   const imageFallbackQuality = normalizeQuality(pdfCfg.imageFallbackQuality, JPEG_FALLBACK_DEFAULT_QUALITY);
   const bundle = options.bundle || null;

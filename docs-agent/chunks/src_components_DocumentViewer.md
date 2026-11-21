@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 17. Line count: 7787. JSDoc symbol count: 157.
+File count: 17. Line count: 7794. JSDoc symbol count: 158.
 
 ## src/components/DocumentViewer/CompareCurtainButton.jsx
 
@@ -266,7 +266,7 @@ Symbols:
 
 Primary viewer\-state hook.
 
-Exports: `useDocumentViewer`
+Exports: `normalizeCustomPrintSelectionState`, `useDocumentViewer`
 
 Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/usePaneImageAdjustments.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 

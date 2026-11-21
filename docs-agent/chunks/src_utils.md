@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 69. Line count: 25014. JSDoc symbol count: 1042.
+File count: 70. Line count: 25023. JSDoc symbol count: 1043.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -582,6 +582,16 @@ Symbols:
 - `PDFJS_WASM_BASE_URL` (constant) - Shared pdf.js document\-loading options.
 - `withPdfJsDocumentOptions` (function) - No description.
 
+## src/utils/pdfLayout.js
+
+Normalize a non\-negative PDF layout setting without treating numeric zero as missing.
+
+Exports: `normalizePdfLayoutValue`
+
+Symbols:
+
+- `normalizePdfLayoutValue` (function) - Normalize a non\-negative PDF layout setting without treating numeric zero as missing.
+
 ## src/utils/pdfPageWorkerPool.js
 
 OpenDocViewer \- PDF page\-image worker pool.
@@ -892,7 +902,7 @@ OpenDocViewer — Generated PDF print backend.
 
 Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `releasePrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `handlePdfCompareOverlay`, `handlePdfCompareCurtain`
 
-Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/printCore.js`, `src/utils/objectUrlRegistry.js`
+Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/printCore.js`, `src/utils/objectUrlRegistry.js`, `src/utils/pdfLayout.js`
 
 Symbols:
 

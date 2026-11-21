@@ -8,6 +8,10 @@ import {
   isCompareOverlayEnabled,
   isCompareOverlayPrintEnabled,
   getCompareAdjustToolbarMode,
+  getViewerCustomFitWidthFactorPercent,
+  getPrintDefaultMode,
+  getPrintSelectionWorkspaceConfig,
+  getViewerEdgeScrollPageTurnConfig,
 } from '../runtimeConfig.js';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -115,4 +119,61 @@ it('ships toolbarMode mirror and deep-merges a site file that sets only compare.
 
   // An invalid site value is kept in the merged config but read back fail-safe.
   expect(read({ compare: { adjust: { toolbarMode: 'Hidden' } } }).toolbarMode).toBe('mirror');
+});
+
+
+it('promotes legacy site-only aliases before merged defaults can mask them', () => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    dom.window.__ODV_SITE_CONFIG__ = {
+      viewer: {
+        customFitWidthPercent: 55,
+        printSelectionWorkspace: {
+          enabled: false,
+          headerTemplate: 'legacy header',
+          lightboxInfoTemplate: 'legacy preview',
+        },
+      },
+      print: { defaultPrintMode: 'all' },
+      edgeScrollPageTurn: false,
+      documentLoading: { render: {
+        'pdf-to-image-mode': 'worker',
+        maxPdfWorkerCount: 5,
+        pdfWorkerAutoPolicy: { mainThreadBelowCores: 3 },
+      } },
+    };
+    dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
+    vi.stubGlobal('window', dom.window);
+
+    expect(getViewerCustomFitWidthFactorPercent()).toBe(55);
+    expect(getPrintDefaultMode()).toBe('all');
+    expect(getPrintSelectionWorkspaceConfig()).toEqual({
+      enabled: false,
+      documentHeaderTemplate: 'legacy header',
+      previewInfoTemplate: 'legacy preview',
+    });
+    expect(getViewerEdgeScrollPageTurnConfig().enabled).toBe(false);
+    const render = getDocumentLoadingConfig().render;
+    expect(render.pdfToImageMode).toBe('worker');
+    expect(render.pdfWorkerMaxCount).toBe(5);
+    expect(render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency).toBe(3);
+  } finally {
+    dom.window.close();
+  }
+});
+
+it('keeps an explicit canonical site value ahead of its legacy alias', () => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    dom.window.__ODV_SITE_CONFIG__ = {
+      viewer: { customFitWidthFactorPercent: 65, customFitWidthPercent: 55 },
+      print: { defaultPageMode: 'active', defaultPrintMode: 'all' },
+    };
+    dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
+    vi.stubGlobal('window', dom.window);
+    expect(getViewerCustomFitWidthFactorPercent()).toBe(65);
+    expect(getPrintDefaultMode()).toBe('active');
+  } finally {
+    dom.window.close();
+  }
 });

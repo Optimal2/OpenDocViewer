@@ -140,8 +140,8 @@ export function getRuntimeConfig() {
  * @returns {KeyboardPrintShortcutBehavior}
  */
 export function getKeyboardPrintShortcutBehavior(cfg = getRuntimeConfig()) {
-  const raw = String(cfg?.shortcuts?.print?.ctrlOrCmdP || 'browser').trim().toLowerCase();
-  return KEYBOARD_PRINT_SHORTCUT_BEHAVIORS.includes(raw) ? raw : 'browser';
+  const raw = String(cfg?.shortcuts?.print?.ctrlOrCmdP || 'dialog').trim().toLowerCase();
+  return KEYBOARD_PRINT_SHORTCUT_BEHAVIORS.includes(raw) ? raw : 'dialog';
 }
 
 /**

@@ -23,10 +23,10 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 210
-- Source lines: 74853
-- JSDoc symbols: 2184
-- Files with JSDoc: 205
+- Source files: 214
+- Source lines: 74913
+- JSDoc symbols: 2189
+- Files with JSDoc: 208
 - Low-confidence summaries: 2
 - Parse errors: 0
 
@@ -47,6 +47,6 @@ Source commit: not embedded
 
 ## Agent Notes
 
-- 5 files have no JSDoc doclets; AgentDocMap uses source\-derived summaries for them.
+- 6 files have no JSDoc doclets; AgentDocMap uses source\-derived summaries for them.
 - 2 files have low\-confidence summaries; inspect REPORT.md before relying on them for task planning.
 - Use AGENT\_CONTEXT.md first, then SYMBOL\_INDEX.md by file path to avoid loading the whole symbol JSON.

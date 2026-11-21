@@ -6,6 +6,8 @@
  * can run several instances in parallel and merge the partial PDFs afterward.
  */
 
+import { normalizePdfLayoutValue } from '../utils/pdfLayout.js';
+
 const workerScope = self;
 
 const A4_PORTRAIT = [595.28, 841.89];
@@ -580,9 +582,9 @@ async function createPdf(job) {
   const total = urls.length;
   const pdfCfg = job?.pdfCfg || {};
   const workerPlan = job?.workerPlan || {};
-  const marginPt = Math.max(0, Number(pdfCfg.marginPt) || 8);
-  const headerReservePt = Math.max(0, Number(pdfCfg.headerReservePt) || 18);
-  const footerReservePt = Math.max(0, Number(pdfCfg.footerReservePt) || 14);
+  const marginPt = normalizePdfLayoutValue(pdfCfg.marginPt, 8);
+  const headerReservePt = normalizePdfLayoutValue(pdfCfg.headerReservePt, 18);
+  const footerReservePt = normalizePdfLayoutValue(pdfCfg.footerReservePt, 14);
   const textFontSize = Math.max(5, Number(pdfCfg.textFontSize) || 7);
   const imageFallbackQuality = normalizeQuality(pdfCfg.imageFallbackQuality, JPEG_FALLBACK_DEFAULT_QUALITY);
   const orientationMode = normalizePdfOrientationMode(pdfCfg.orientationMode || pdfCfg.orientation?.mode || 'auto', 'auto');
