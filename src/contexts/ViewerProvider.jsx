@@ -1215,7 +1215,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       try {
         await pageAssetStoreRef.current.cleanup?.();
       } catch (e) {
-        logger.warn('Failed to cleanup page-asset store', { error: String(e?.message || e) });
+        logger.warn('Failed to clean page-asset store during session dispose', { error: String(e?.message || e) });
       }
       pageAssetStoreRef.current = null;
     }
@@ -1224,7 +1224,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       try {
         await tempStoreRef.current.cleanup?.();
       } catch (e) {
-        logger.warn('Failed to cleanup temp store', { error: String(e?.message || e) });
+        logger.warn('Failed to clean temp store during session dispose', { error: String(e?.message || e) });
       }
       tempStoreRef.current = null;
     }
