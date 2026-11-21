@@ -26,7 +26,8 @@ OpenDocViewer should stay a generic viewer:
 - `src/integrations/normalizePortableBundle.js`
   - normalizes host payloads into the Portable Document Bundle shape
 - `src/schemas/portableBundle.js`
-  - documents the schema version and lightweight validation helpers
+  - defines the schema version and the bundle typedefs; the viewer does not validate a bundle
+    against it, and the normalizer generates `session.id` and `documentId` when they are missing
 - `src/components/DocumentLoader/sources/explicitListSource.js`
   - converts a normalized bundle into the ordered file URL list consumed by the loader
 - `src/utils/documentMetadata.js`
