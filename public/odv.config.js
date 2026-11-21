@@ -891,8 +891,8 @@
         // 'lazy-viewport' -> render only what the viewport needs
         strategy: 'eager-nearby',
 
-        // 'hybrid-by-format' keeps the stable PDF path on the main thread by default while raster
-        // + TIFF use workers whenever possible.
+        // 'hybrid-by-format' routes raster + TIFF to workers whenever possible and PDF according to
+        // pdfToImageMode below (default 'auto': PDF workers with main-thread fallback).
         backend: 'hybrid-by-format',
 
         // 0 = choose from navigator.hardwareConcurrency at runtime, using 4 as the minimum/fallback.

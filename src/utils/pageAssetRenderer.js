@@ -3,8 +3,10 @@
  * OpenDocViewer — hybrid page-asset renderer.
  *
  * The renderer keeps the modern temp-store / placeholder architecture from `main`, but routes raster
- * and TIFF work through dedicated workers when that is beneficial and supported. PDF rendering stays
- * on the stable main-thread pdf.js path by default, with an opt-in page-image worker mode.
+ * and TIFF work through dedicated workers when that is beneficial and supported. PDF rendering uses
+ * page-image workers by default (`pdfToImageMode: 'auto'`, sized to the client and the page count,
+ * see `resolvePdfWorkerPlanForPageCount`), with the main-thread pdf.js path as the fallback and as
+ * the explicit `pdfToImageMode: 'main-thread'` option.
  */
 
 import { decode as decodeUTIF, decodeImage as decodeUTIFImage, toRGBA8 } from 'utif2';
