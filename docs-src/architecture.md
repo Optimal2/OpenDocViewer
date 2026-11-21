@@ -275,8 +275,11 @@ Settings live in three places. A later source overrides an earlier one only wher
    `docs-src/integrations.md`, "Per-Integration Settings In The Bundle"). Off by default.
 
 User preferences (`src/utils/viewerPreferences.js`) then decide the user's own choices, such as theme,
-language and default zoom, within what the configuration allows. All code reads configuration through
-`getRuntimeConfig()` in `src/utils/runtimeConfig.js`.
+language and default zoom, within what the configuration allows. Most code reads configuration through
+`getRuntimeConfig()` in `src/utils/runtimeConfig.js`. Some modules read the same
+`window.__ODV_GET_CONFIG__()` / `window.__ODV_CONFIG__` globals directly, among them `src/i18n.js`,
+`src/logging/systemLogger.js`, `src/logging/userLogger.js`, `src/utils/printCore.js` and
+`src/utils/publicAssetUrl.js`. Both routes see the same merged configuration.
 
 The settings that change behaviour most:
 
