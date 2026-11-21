@@ -232,7 +232,23 @@ Assert-CleanWorkingTree $repoRoot 'before release validation'
 
 $localHead = (Exec 'git' @('rev-parse', 'HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
 $remoteHead = (Exec 'git' @('rev-parse', "origin/$branch") -Cwd $repoRoot -Quiet).Out.Trim()
-if ($localHead -ne $remoteHead) {
+$preparedRelease = $false
+if ($Publish -and $localHead -ne $remoteHead) {
+  # A previous non-publish run may already have created exactly one release commit/tag.
+  # Recognize that state so -Publish publishes it instead of demanding equality or bumping again.
+  $preparedVersion = Get-PackageVersion $repoRoot
+  $preparedTag = "v$preparedVersion"
+  $parentCheck = Exec 'git' @('rev-parse', 'HEAD^') -Cwd $repoRoot -AllowNonZero -Quiet
+  $tagCheck = Exec 'git' @('rev-parse', "$preparedTag^{commit}") -Cwd $repoRoot -AllowNonZero -Quiet
+  $subjectCheck = Exec 'git' @('log', '-1', '--format=%s') -Cwd $repoRoot -AllowNonZero -Quiet
+  if ($parentCheck.Code -eq 0 -and $tagCheck.Code -eq 0 -and $subjectCheck.Code -eq 0 `
+      -and $parentCheck.Out.Trim() -eq $remoteHead `
+      -and $tagCheck.Out.Trim() -eq $localHead `
+      -and $subjectCheck.Out.Trim() -eq "chore(release): $preparedVersion") {
+    $preparedRelease = $true
+  }
+}
+if ($localHead -ne $remoteHead -and -not $preparedRelease) {
   throw @"
 Local branch does not match origin/$branch.
 
@@ -244,6 +260,7 @@ Remote HEAD: $remoteHead
 "@
 }
 
+if (-not $preparedRelease) {
 Write-Host "=== OpenDocViewer Release Helper ===`n"
 Write-Host 'Release-only mode: application code must already be committed and pushed.' -ForegroundColor Yellow
 Write-Host 'This script will not run git add, will not commit application changes, and will not stash.' -ForegroundColor Yellow
@@ -326,7 +343,14 @@ if (-not $Publish) {
   Write-Host "`nDone. Local release commit/tag created for $tagName." -ForegroundColor Green
   Write-Host 'The release was NOT pushed. To publish this official release, run:' -ForegroundColor Yellow
   Write-Host "  .\release.ps1 -ReleaseType $ReleaseType -Yes -Publish" -ForegroundColor Yellow
+  Write-Host 'The second run recognizes the prepared release and publishes it without another version bump.' -ForegroundColor Yellow
   exit 0
+}
+} else {
+  $newVersion = Get-PackageVersion $repoRoot
+  $tagName = "v$newVersion"
+  $prevHead = $remoteHead
+  Write-Host "Publishing the release commit/tag already prepared for $tagName (no second version bump)." -ForegroundColor Yellow
 }
 
 try {
