@@ -11,7 +11,8 @@
  *
  * Security posture (no client changes required):
  *   - No cookies are read or set (cookie-based auth removed to avoid CSRF lint).
- *   - Same-origin guard: Origin/Referer/Sec-Fetch-Site must indicate same-origin/site.
+ *   - Same-origin guard: Origin/Referer must match Host; Sec-Fetch-Site must be same-origin.
+ *     Requests with none of these signals are accepted by default for compatibility.
  *   - Rate limited; accepts only form or JSON content types.
  *
  * Runtime env (optional):
@@ -33,6 +34,9 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
+import { readPrintLogFields } from './userLogPayload.js';
+import { isAllowedUserLogOrigin } from './userLogOrigin.js';
 
 dotenv.config();
 
@@ -45,6 +49,12 @@ const LOG_DIR = path.join(__dirname, 'logs');
 try { fs.mkdirSync(LOG_DIR, { recursive: true }); } catch {}
 
 const RETENTION_DAYS = Number(process.env.LOG_RETENTION_DAYS || 14);
+const ROTATED_LOG_FILE_PATTERN = /^(access|print|error)-\d{4}-\d{2}-\d{2}\.log$/;
+const pruneOldLogs = () => pruneRotatedLogs({
+  logDir: LOG_DIR,
+  retentionDays: RETENTION_DAYS,
+  filePattern: ROTATED_LOG_FILE_PATTERN,
+});
 
 /** @type {Map<string, { date: string, stream: fs.WriteStream }>} */
 const streams = new Map();
@@ -55,22 +65,7 @@ async function initOnce() {
   initStarted = true;
 
   await fsp.mkdir(LOG_DIR, { recursive: true });
-  // Prune rotated files (best effort)
-  try {
-    const files = await fsp.readdir(LOG_DIR);
-    const now = Date.now();
-    const maxAgeMs = RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    const re = /^(access|print|error)-\d{4}-\d{2}-\d{2}\.log$/;
-    await Promise.all(
-      files.filter((f) => re.test(f)).map(async (f) => {
-        const p = path.join(LOG_DIR, f);
-        try {
-          const st = await fsp.stat(p);
-          if (now - st.mtimeMs > maxAgeMs) await fsp.unlink(p);
-        } catch {}
-      })
-    );
-  } catch {}
+  await pruneOldLogs();
 }
 
 function ymd(d = new Date()) { return d.toISOString().slice(0, 10); }
@@ -134,35 +129,21 @@ function resolveUser(req) {
  */
 function sameOriginGuard(req, res, next) {
   const strict = String(process.env.ODV_STRICT_ORIGIN || '').toLowerCase() === 'true';
-  const host = req.get('host') || '';
-  const origin = req.get('origin') || '';
-  const referer = req.get('referer') || '';
-  const sfs = (req.get('sec-fetch-site') || '').toLowerCase();
-
-  const hostOf = (u) => {
-    try { return new URL(u).host; } catch { return ''; }
-  };
-
-  if (origin) {
-    if (hostOf(origin) !== host) return res.status(403).send('Forbidden');
-    return next();
-  }
-  if (referer) {
-    if (hostOf(referer) !== host) return res.status(403).send('Forbidden');
-    return next();
-  }
-  if (sfs) {
-    if (sfs === 'same-origin' || sfs === 'same-site') return next();
-    return res.status(403).send('Forbidden');
-  }
-  // If no signals at all: allow by default for compatibility, or require env flag.
-  if (strict) return res.status(403).send('Forbidden');
+  const allowed = isAllowedUserLogOrigin({
+    host: req.get('host') || '',
+    origin: req.get('origin') || '',
+    referer: req.get('referer') || '',
+    secFetchSite: req.get('sec-fetch-site') || '',
+    strict,
+  });
+  if (!allowed) return res.status(403).send('Forbidden');
   next();
 }
 
 /* ------------------------------- Express app ------------------------------ */
 
 await initOnce();
+scheduleLogRetention(pruneOldLogs);
 
 const app = express();
 const PORT = Number(process.env.PORT || 3002);
@@ -209,8 +190,7 @@ app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
       return res.status(415).send('Unsupported Media Type');
     }
 
-    const reason = (req.body?.reason ?? null);
-    const forWhom = (req.body?.forWhom ?? null);
+    const { reason, forWhom } = readPrintLogFields(req.body);
 
     const rec = {
       ts: new Date().toISOString(),

@@ -51,9 +51,9 @@ This document describes the two optional Node/Express services that accompany th
   - request content types:
     - `application/x-www-form-urlencoded`
     - `application/json`
-  - supported fields:
-    - `reason`
-    - `forWhom`
+  - supported JSON fields:
+    - `meta.reason` and `meta.forWhom` from the bundled viewer's JSON envelope
+    - top-level `reason` and `forWhom` remain accepted for compatibility with form posts and older callers
   - response on success: JSON literal `true` with HTTP `200`
   - failures:
     - `400` when `forWhom` contains `$` or `#`
@@ -80,7 +80,7 @@ to the user log.
 - `print-YYYY-MM-DD.log`
 - `error-YYYY-MM-DD.log`
 
-Retention is controlled by `LOG_RETENTION_DAYS` and defaults to `14`. Old files are pruned on startup as a best-effort housekeeping step.
+Retention is controlled by `LOG_RETENTION_DAYS` and defaults to `14`. Old files are pruned on startup and once every 24 hours while the service remains running, as a best-effort housekeeping step.
 
 ## Environment settings
 
@@ -122,7 +122,8 @@ This token is a lightweight ingestion guard, not high-assurance authentication. 
 ### User log server
 
 - intentionally avoids cookie-based auth to keep CSRF handling simple
-- relies on same-origin style checks using `Origin`, `Referer`, and `Sec-Fetch-Site`
+- relies on same-origin style checks using `Origin`, `Referer`, and `Sec-Fetch-Site`; `Sec-Fetch-Site: same-site` is not sufficient
+- intentionally allows requests with none of those signals by default for non-browser compatibility; set `ODV_STRICT_ORIGIN=true` to reject them
 - intended for frontend print-intent data, not privileged server commands
 
 ## Reverse proxy examples
@@ -134,7 +135,7 @@ Use the dedicated IIS proxy app described in `IIS-ODVProxyApp/README.md`. The in
 - `POST /ODVProxy/log` -> `http://localhost:3001/log`
 - `POST /ODVProxy/userlog/record` -> `http://localhost:3002/userlog/record`
 
-This keeps the browser talking to a same-origin path even though the Node services live on localhost ports behind IIS.
+This keeps the browser talking to a same-origin path even though the Node services live on localhost ports behind IIS. ARR must preserve the original Host header (`preserveHostHeader=true`); the repository setup script enables it because the user-log origin check compares Host with Origin/Referer.
 
 ### Runtime config example
 

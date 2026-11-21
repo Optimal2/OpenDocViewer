@@ -6,7 +6,7 @@
     - Robust npm resolution: use (Get-Command npm).Path with fallbacks; never pass a bogus "npmCmd".
     - Clear echo of the npm path before running commands.
     - Auto-fix lockfile drift: try `npm ci`, then fall back to `npm install`.
-    - Secure token auto-generation (Base64URL) when left blank; copy to clipboard; save to token file.
+    - Secure token auto-generation (Base64URL) when left blank; copy to clipboard without writing a plaintext token file.
     - On service start failure, show tail of service logs.
 
   Run as Administrator.
@@ -36,7 +36,7 @@ $Script:SERVICE_USR = 'ODV-UserLog'
 
 $Script:DEF_PORT_SYS   = 3001
 $Script:DEF_PORT_USR   = 3002
-$Script:RETENTION_DAYS = 30
+$Script:RETENTION_DAYS = 14
 $Script:NODE_ENV       = 'production'
 $Script:TRUST_PROXY    = 1
 
@@ -420,9 +420,8 @@ function Install-Flow {
     $token = New-RandomToken 32
     Write-Host "Generated System Log token (copied to clipboard):" -ForegroundColor Green
     Write-Host "  $token" -ForegroundColor Yellow
+    Write-Host "Store it in your deployment secret store; no plaintext token file was written." -ForegroundColor Yellow
     try { Set-Clipboard -Value $token } catch {}
-    $tokenFile = Join-Path $SVC_LOG_DIR 'ODV-SystemLog.token.txt'
-    try { $token | Out-File -FilePath $tokenFile -Encoding UTF8 -Force } catch {}
   }
 
   $envSys = @{

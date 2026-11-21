@@ -76,7 +76,11 @@ if ($EnableSystemLog -or $EnableUserLog) {
     # Enabling proxy requires ARR; this will fail if ARR is missing
     Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
       -filter 'system.webServer/proxy' -name 'enabled' -value 'True' -ErrorAction Stop
-    Write-Ok "ARR proxying is enabled at server level."
+    # The user-log origin check compares Origin/Referer with Host. ARR otherwise
+    # replaces Host with the localhost upstream and rejects legitimate browser posts.
+    Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
+      -filter 'system.webServer/proxy' -name 'preserveHostHeader' -value 'True' -ErrorAction Stop
+    Write-Ok "ARR proxying is enabled at server level and preserves the original Host header."
   } catch {
     Write-Err "Failed to enable ARR proxy. Ensure 'Application Request Routing' is installed and proxying is enabled."
     throw

@@ -32,6 +32,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import morgan from 'morgan';
+import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
 
 dotenv.config();
 
@@ -44,6 +45,12 @@ const LOG_DIR = path.join(__dirname, 'logs');
 try { fs.mkdirSync(LOG_DIR, { recursive: true }); } catch {}
 
 const RETENTION_DAYS = Number(process.env.LOG_RETENTION_DAYS || 14);
+const ROTATED_LOG_FILE_PATTERN = /^(access|ingestion|error)-\d{4}-\d{2}-\d{2}\.log$/;
+const pruneOldLogs = () => pruneRotatedLogs({
+  logDir: LOG_DIR,
+  retentionDays: RETENTION_DAYS,
+  filePattern: ROTATED_LOG_FILE_PATTERN,
+});
 
 /** @type {Map<string, { date: string, stream: fs.WriteStream }>} */
 const streams = new Map();
@@ -54,22 +61,7 @@ async function initOnce() {
   initStarted = true;
 
   await fsp.mkdir(LOG_DIR, { recursive: true });
-  // Sweep old files (best effort)
-  try {
-    const files = await fsp.readdir(LOG_DIR);
-    const now = Date.now();
-    const maxAgeMs = RETENTION_DAYS * 24 * 60 * 60 * 1000;
-    const re = /^(access|ingestion|error)-\d{4}-\d{2}-\d{2}\.log$/;
-    await Promise.all(
-      files.filter((f) => re.test(f)).map(async (f) => {
-        const p = path.join(LOG_DIR, f);
-        try {
-          const st = await fsp.stat(p);
-          if (now - st.mtimeMs > maxAgeMs) await fsp.unlink(p);
-        } catch {}
-      })
-    );
-  } catch {}
+  await pruneOldLogs();
 }
 
 function ymd(d = new Date()) { return d.toISOString().slice(0, 10); }
@@ -117,6 +109,7 @@ function safeJson(obj) {
 /* ------------------------------- Express app ------------------------------ */
 
 await initOnce();
+scheduleLogRetention(pruneOldLogs);
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);

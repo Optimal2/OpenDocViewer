@@ -39,6 +39,7 @@ describe('userLogger JSON envelope', () => {
     const body = sentEnvelope(fetchMock);
     expect(body.session.id).toBe('session-42');
     expect(body.user).toEqual({ id: 'user-7', name: null });
+    expect(body.meta).toMatchObject({ reason: 'r', forWhom: 'f' });
   });
 
   it('keeps null when the bundle has no session id or user id', async () => {

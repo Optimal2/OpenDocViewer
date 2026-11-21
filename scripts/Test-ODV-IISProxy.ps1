@@ -12,11 +12,10 @@
 
 .PARAMETER Token
   Optional system-log token to send as x-log-token. If not provided, the script
-  tries to read it from -TokenFile (defaults to ..\server\logs\service\ODV-SystemLog.token.txt).
+  can read it from an explicitly supplied -TokenFile.
 
 .PARAMETER TokenFile
-  Optional path to a text file containing the token (one line). Defaults to:
-    ..\server\logs\service\ODV-SystemLog.token.txt
+  Optional path to a text file containing the token (one line). No file is read by default.
 
 .OUTPUTS
   Exit code 0 when both requests return HTTP 2xx, otherwise 1.
@@ -42,14 +41,8 @@ function Write-Warn($m){ Write-Host "[!] $m" -ForegroundColor Yellow }
 # Normalize base URL to have exactly one trailing slash
 if (-not $BaseUrl.EndsWith('/')) { $BaseUrl = "$BaseUrl/" }
 
-# Default token file path (repo-relative: scripts -> ../server/logs/service/ODV-SystemLog.token.txt)
-if (-not $TokenFile -or $TokenFile.Trim() -eq '') {
-  $scriptDir = Split-Path -Parent $PSCommandPath
-  $TokenFile = Join-Path $scriptDir "..\server\logs\service\ODV-SystemLog.token.txt"
-}
-
-# If no token provided, try to read it
-if (-not $Token -and (Test-Path -Path $TokenFile)) {
+# If no token provided, read it only from an explicitly supplied file.
+if (-not $Token -and $TokenFile -and (Test-Path -Path $TokenFile)) {
   try {
     $Token = (Get-Content -Path $TokenFile -Raw).Trim()
     if (-not $Token) { Write-Warn "Token file exists but is empty: $TokenFile" }
