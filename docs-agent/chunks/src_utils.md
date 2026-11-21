@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 69. Line count: 24993. JSDoc symbol count: 1041.
+File count: 69. Line count: 25012. JSDoc symbol count: 1042.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -602,7 +602,7 @@ OpenDocViewer \- generated\-PDF prebuild planning.
 
 Exports: `normalizePdfPrebuildAllPagesConfig`, `getPdfPrebuildAllPagesLanguageDependency`, `createPdfPrebuildAllPagesVariants`, `createPdfPrebuildVariantKey`
 
-Local imports: `src/utils/localizedValue.js`, `src/utils/pdfPrintCacheKey.js`
+Local imports: `src/utils/localizedValue.js`, `src/utils/pdfPrintCacheKey.js`, `src/integrations/integrationSettings.js`
 
 Symbols:
 
@@ -616,8 +616,8 @@ Symbols:
 - `buildSelectedOptionDetails` (function) - No description.
 - `normalizePdfPrebuildAllPagesConfig` (function) - No description.
 - `getReasonOptions` (function) - No description.
+- `isReasonFieldShown` (function) - Whether the print dialog shows the reason field; mirrors usePrintRangeConfig .
 - `createReasonVariants` (function) - No description.
-- `createPrintFormatVariant` (function) - No description.
 
 ## src/utils/pdfPrintCacheKey.js
 

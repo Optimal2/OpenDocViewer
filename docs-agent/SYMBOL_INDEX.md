@@ -282,15 +282,15 @@
 | <code>module:usePrintPipeline~canPrintComposedView</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:47</code> | Read capability at use time, including delayed submits from a stale dialog. |
 | <code>module:usePrintPipeline~COMPOSED_VIEW_PRINTERS</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:41</code> | Compare views that print as one composed page, with their print helpers. |
 | <code>module:usePrintPipeline~ComposedPrintTarget</code> | typedef | <code>src/components/DocumentToolbar/usePrintPipeline.js:106</code> | A compare view asking the shared dialog to print it as one page. |
-| <code>module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:523</code> | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
-| <code>module:usePrintPipeline~usePrintPipeline~handlePrintSubmit</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:719</code> | Handle the dialog submit event and dispatch the correct print action. |
+| <code>module:usePrintPipeline~usePrintPipeline~dispatchPrintRequest</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:525</code> | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
+| <code>module:usePrintPipeline~usePrintPipeline~handlePrintSubmit</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:721</code> | Handle the dialog submit event and dispatch the correct print action. |
 | <code>module:usePrintPipeline.isComposedCompareDetail</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:66</code> | True for the dialog detail of a compare-view print \( activeScope compare-overlay / compare-curtain \): both compared pages composed onto one page. |
 | <code>module:usePrintPipeline~isPdfAbortError</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:56</code> |  |
 | <code>module:usePrintPipeline~usePrintPipeline~makePrintOptions</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:301</code> |  |
 | <code>module:usePrintPipeline</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:149</code> | The single print pipeline shared by the toolbar and the compare views. |
 | <code>module:usePrintPipeline.normalizeToolbarPageNumber</code> | function | <code>src/components/DocumentToolbar/usePrintPipeline.js:78</code> | Clamp a page number to the visible page range. |
-| <code>module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:749</code> | Compare-view entry: the same dialog, printing the view as one composed page. |
-| <code>module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:739</code> | Toolbar entry: the dialog for the viewer&#39;s own pages. |
+| <code>module:usePrintPipeline~usePrintPipeline~openComposedPrintDialog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:751</code> | Compare-view entry: the same dialog, printing the view as one composed page. |
+| <code>module:usePrintPipeline~usePrintPipeline~openToolbarPrintDialog</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:741</code> | Toolbar entry: the dialog for the viewer&#39;s own pages. |
 | <code>module:usePrintPipeline~PrintPipelineParams</code> | typedef | <code>src/components/DocumentToolbar/usePrintPipeline.js:115</code> |  |
 | <code>module:usePrintPipeline~PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/usePrintPipeline.js:86</code> | Detail payload emitted by the print dialog. |
 | <code>module:usePrintPipeline~usePrintPipeline~resolvePrintPageContexts</code> | constant | <code>src/components/DocumentToolbar/usePrintPipeline.js:251</code> | Resolve page metadata objects aligned with the printed page sequence. |
@@ -831,8 +831,9 @@
 | <code>SessionTokenResult</code> | typedef | <code>src/integrations/sessionToken.js:38</code> | Session token read result. |
 | <code>ALLOWED_PROTOCOLS</code> | constant | <code>src/integrations/sessionUrl.js:52</code> | Protocols a session URL may use. |
 | <code>MAX_RESPONSE_TEXT_LEN</code> | constant | <code>src/integrations/sessionUrl.js:10</code> | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
-| <code>readFromSessionUrl</code> | function | <code>src/integrations/sessionUrl.js:94</code> | Read and fetch a session payload URL from the viewer query string. |
+| <code>readFromSessionUrl</code> | function | <code>src/integrations/sessionUrl.js:118</code> | Read and fetch a session payload URL from the viewer query string. |
 | <code>SessionUrlResult</code> | typedef | <code>src/integrations/sessionUrl.js:13</code> |  |
+| <code>utf8ByteLength</code> | function | <code>src/integrations/sessionUrl.js:74</code> | UTF-8 byte length of a string, without allocating an encoded copy. |
 | <code>parsePositiveInt</code> | function | <code>src/integrations/urlParams.js:64</code> | Parse a positive integer from a string. |
 | <code>pick</code> | function | <code>src/integrations/urlParams.js:51</code> | Pick the first non-empty value among a list of candidate query keys. |
 | <code>readFromUrlParams</code> | function | <code>src/integrations/urlParams.js:83</code> | Reads common query params used by the demo and other hosts. |
@@ -877,23 +878,24 @@
 | <code>shouldEnableBackendLogging</code> | function | <code>src/logging/systemLogger.js:234</code> | Decide whether backend log forwarding may be enabled. |
 | <code>LogController#shouldLog</code> | member | <code>src/logging/systemLogger.js:363</code> | Internal: should this level be logged at all \(console or backend\)? |
 | <code>LogController#warn</code> | member | <code>src/logging/systemLogger.js:462</code> |  |
-| <code>__DEV__</code> | constant | <code>src/logging/userLogger.js:61</code> | True when running in dev \(for debug logging only\). |
-| <code>UserLogController#_captureCookieFingerprint</code> | function | <code>src/logging/userLogger.js:170</code> | Internal: hash document.cookie once \(non-blocking\). |
-| <code>abToBase64</code> | function | <code>src/logging/userLogger.js:112</code> | Base64 from ArrayBuffer \(for cookie fingerprint\). |
-| <code>BootContext</code> | typedef | <code>src/logging/userLogger.js:37</code> |  |
-| <code>debug</code> | function | <code>src/logging/userLogger.js:64</code> | Dev-only logger. |
-| <code>getRuntimeConfig</code> | function | <code>src/logging/userLogger.js:73</code> | Safely read runtime config from window. |
-| <code>UserLogController#initContext</code> | function | <code>src/logging/userLogger.js:162</code> | Initialize context near iframe/viewer creation. |
-| <code>isSameOrigin</code> | function | <code>src/logging/userLogger.js:93</code> | Determine if the target URL is same-origin with current document. |
-| <code>PrintLogPayload</code> | typedef | <code>src/logging/userLogger.js:43</code> |  |
-| <code>UserLogController#setUserResolver</code> | function | <code>src/logging/userLogger.js:144</code> | Optional identity resolver supplied by host app. |
-| <code>UserLogController#setViewerVersion</code> | function | <code>src/logging/userLogger.js:152</code> | Optional viewer version to add in meta.viewerVersion. |
-| <code>sha256Base64</code> | function | <code>src/logging/userLogger.js:122</code> | Async SHA-256 of a string → &amp;quot;sha256- &amp;quot; \(or null\). |
-| <code>UserLogController#submitPrint</code> | function | <code>src/logging/userLogger.js:191</code> | Submit a &amp;quot;print&amp;quot; user-log event. |
-| <code>toAbsoluteUrl</code> | function | <code>src/logging/userLogger.js:84</code> | Make absolute using document.baseURI when available. |
-| <code>tzOffset</code> | function | <code>src/logging/userLogger.js:102</code> | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
-| <code>UserIdentity</code> | typedef | <code>src/logging/userLogger.js:31</code> |  |
-| <code>userLog</code> | constant | <code>src/logging/userLogger.js:309</code> | Export singleton instance. |
+| <code>__DEV__</code> | constant | <code>src/logging/userLogger.js:68</code> | True when running in dev \(for debug logging only\). |
+| <code>UserLogController#_captureCookieFingerprint</code> | function | <code>src/logging/userLogger.js:184</code> | Internal: hash document.cookie once \(non-blocking\). |
+| <code>abToBase64</code> | function | <code>src/logging/userLogger.js:126</code> | Base64 from ArrayBuffer \(for cookie fingerprint\). |
+| <code>BootContext</code> | typedef | <code>src/logging/userLogger.js:42</code> |  |
+| <code>debug</code> | function | <code>src/logging/userLogger.js:71</code> | Dev-only logger. |
+| <code>getRuntimeConfig</code> | function | <code>src/logging/userLogger.js:80</code> | Safely read runtime config from window. |
+| <code>UserLogController#initContext</code> | function | <code>src/logging/userLogger.js:176</code> | Initialize context near iframe/viewer creation. |
+| <code>isSameOrigin</code> | function | <code>src/logging/userLogger.js:100</code> | Determine if the target URL is same-origin with current document. |
+| <code>nonEmptyString</code> | function | <code>src/logging/userLogger.js:119</code> | Trimmed non-empty string, or null. |
+| <code>PrintLogPayload</code> | typedef | <code>src/logging/userLogger.js:48</code> |  |
+| <code>UserLogController#setUserResolver</code> | function | <code>src/logging/userLogger.js:158</code> | Optional identity resolver supplied by host app. |
+| <code>UserLogController#setViewerVersion</code> | function | <code>src/logging/userLogger.js:166</code> | Optional viewer version to add in meta.viewerVersion. |
+| <code>sha256Base64</code> | function | <code>src/logging/userLogger.js:136</code> | Async SHA-256 of a string → &amp;quot;sha256- &amp;quot; \(or null\). |
+| <code>UserLogController#submitPrint</code> | function | <code>src/logging/userLogger.js:205</code> | Submit a &amp;quot;print&amp;quot; user-log event. |
+| <code>toAbsoluteUrl</code> | function | <code>src/logging/userLogger.js:91</code> | Make absolute using document.baseURI when available. |
+| <code>tzOffset</code> | function | <code>src/logging/userLogger.js:109</code> | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
+| <code>UserIdentity</code> | typedef | <code>src/logging/userLogger.js:36</code> |  |
+| <code>userLog</code> | constant | <code>src/logging/userLogger.js:325</code> | Export singleton instance. |
 | <code>module.exports</code> | function | <code>src/manual-page/ManualPage.jsx:67</code> |  |
 | <code>readUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:35</code> |  |
 | <code>syncUrlFragment</code> | function | <code>src/manual-page/ManualPage.jsx:50</code> | Put the section being read into the URL fragment without adding a history entry. |
@@ -1517,23 +1519,24 @@
 | <code>PdfPageWorkerEntry</code> | typedef | <code>src/utils/pdfPageWorkerPool.js:50</code> |  |
 | <code>PdfPageWorkerPool#PdfPageWorkerPool</code> | class | <code>src/utils/pdfPageWorkerPool.js:66</code> |  |
 | <code>PdfPageWorkerPoolOptions</code> | typedef | <code>src/utils/pdfPageWorkerPool.js:43</code> |  |
-| <code>buildSelectedOptionDetails</code> | function | <code>src/utils/pdfPrebuildPlan.js:138</code> |  |
-| <code>clampInteger</code> | function | <code>src/utils/pdfPrebuildPlan.js:28</code> |  |
-| <code>createPdfPrebuildAllPagesVariants</code> | function | <code>src/utils/pdfPrebuildPlan.js:289</code> | Create all cacheable all-pages PDF variant descriptors for a runtime config. |
-| <code>createPdfPrebuildVariantKey</code> | function | <code>src/utils/pdfPrebuildPlan.js:334</code> |  |
-| <code>createPrintFormatVariant</code> | function | <code>src/utils/pdfPrebuildPlan.js:214</code> |  |
-| <code>createReasonVariants</code> | function | <code>src/utils/pdfPrebuildPlan.js:189</code> |  |
-| <code>getActiveLanguageKey</code> | function | <code>src/utils/pdfPrebuildPlan.js:254</code> |  |
-| <code>getPdfPrebuildAllPagesLanguageDependency</code> | function | <code>src/utils/pdfPrebuildPlan.js:269</code> | Return the language dependency that should invalidate an all-pages prebuild run. |
-| <code>getReasonOptions</code> | function | <code>src/utils/pdfPrebuildPlan.js:178</code> |  |
-| <code>isNonEmptyObject</code> | function | <code>src/utils/pdfPrebuildPlan.js:38</code> |  |
-| <code>normalizeCopyMarkerStates</code> | function | <code>src/utils/pdfPrebuildPlan.js:64</code> |  |
-| <code>normalizeLanguageList</code> | function | <code>src/utils/pdfPrebuildPlan.js:46</code> |  |
-| <code>normalizePdfOrientationMode</code> | function | <code>src/utils/pdfPrebuildPlan.js:88</code> |  |
-| <code>normalizePdfPrebuildAllPagesConfig</code> | function | <code>src/utils/pdfPrebuildPlan.js:156</code> |  |
-| <code>resolveOptionPrintText</code> | function | <code>src/utils/pdfPrebuildPlan.js:116</code> | Resolve the string that should be used on physical print output for an option. |
-| <code>resolvePrebuildPdfOrientation</code> | function | <code>src/utils/pdfPrebuildPlan.js:98</code> |  |
-| <code>resolveVariantLanguageContext</code> | function | <code>src/utils/pdfPrebuildPlan.js:245</code> |  |
+| <code>buildSelectedOptionDetails</code> | function | <code>src/utils/pdfPrebuildPlan.js:139</code> |  |
+| <code>clampInteger</code> | function | <code>src/utils/pdfPrebuildPlan.js:29</code> |  |
+| <code>createPdfPrebuildAllPagesVariants</code> | function | <code>src/utils/pdfPrebuildPlan.js:307</code> | Create all cacheable all-pages PDF variant descriptors for a runtime config. |
+| <code>createPdfPrebuildVariantKey</code> | function | <code>src/utils/pdfPrebuildPlan.js:353</code> |  |
+| <code>createPrintFormatVariant</code> | function | <code>src/utils/pdfPrebuildPlan.js:232</code> |  |
+| <code>createReasonVariants</code> | function | <code>src/utils/pdfPrebuildPlan.js:203</code> |  |
+| <code>getActiveLanguageKey</code> | function | <code>src/utils/pdfPrebuildPlan.js:272</code> |  |
+| <code>getPdfPrebuildAllPagesLanguageDependency</code> | function | <code>src/utils/pdfPrebuildPlan.js:287</code> | Return the language dependency that should invalidate an all-pages prebuild run. |
+| <code>getReasonOptions</code> | function | <code>src/utils/pdfPrebuildPlan.js:179</code> |  |
+| <code>isNonEmptyObject</code> | function | <code>src/utils/pdfPrebuildPlan.js:39</code> |  |
+| <code>isReasonFieldShown</code> | function | <code>src/utils/pdfPrebuildPlan.js:189</code> | Whether the print dialog shows the reason field; mirrors usePrintRangeConfig . |
+| <code>normalizeCopyMarkerStates</code> | function | <code>src/utils/pdfPrebuildPlan.js:65</code> |  |
+| <code>normalizeLanguageList</code> | function | <code>src/utils/pdfPrebuildPlan.js:47</code> |  |
+| <code>normalizePdfOrientationMode</code> | function | <code>src/utils/pdfPrebuildPlan.js:89</code> |  |
+| <code>normalizePdfPrebuildAllPagesConfig</code> | function | <code>src/utils/pdfPrebuildPlan.js:157</code> |  |
+| <code>resolveOptionPrintText</code> | function | <code>src/utils/pdfPrebuildPlan.js:117</code> | Resolve the string that should be used on physical print output for an option. |
+| <code>resolvePrebuildPdfOrientation</code> | function | <code>src/utils/pdfPrebuildPlan.js:99</code> |  |
+| <code>resolveVariantLanguageContext</code> | function | <code>src/utils/pdfPrebuildPlan.js:263</code> |  |
 | <code>canReuseGeneratedPdfPrint</code> | function | <code>src/utils/pdfPrintCacheKey.js:101</code> | Active-page PDF output is based on the current rendered surface, including transient client-side edits such as rotation, brightness and contrast. |
 | <code>getPdfPrintCacheKey</code> | function | <code>src/utils/pdfPrintCacheKey.js:75</code> | Compare the content-affecting print settings that determine whether an existing generated PDF can be reused. |
 | <code>getPdfPrintCacheKeyOptions</code> | function | <code>src/utils/pdfPrintCacheKey.js:31</code> |  |

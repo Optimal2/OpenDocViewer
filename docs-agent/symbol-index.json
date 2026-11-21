@@ -7709,7 +7709,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintPipeline.js",
-    "line": 523,
+    "line": 525,
     "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
     "params": [
       {
@@ -7740,7 +7740,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintPipeline.js",
-    "line": 719,
+    "line": 721,
     "description": "Handle the dialog submit event and dispatch the correct print action.",
     "params": [
       {
@@ -7902,7 +7902,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintPipeline.js",
-    "line": 749,
+    "line": 751,
     "description": "Compare-view entry: the same dialog, printing the view as one composed page.",
     "params": [
       {
@@ -7927,7 +7927,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintPipeline.js",
-    "line": 739,
+    "line": 741,
     "description": "Toolbar entry: the dialog for the viewer's own pages.",
     "params": [],
     "returns": [],
@@ -21156,7 +21156,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/sessionUrl.js",
-    "line": 94,
+    "line": 118,
     "description": "Read and fetch a session payload URL from the viewer query string.",
     "params": [],
     "returns": [
@@ -21178,6 +21178,31 @@
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "utf8ByteLength",
+    "name": "utf8ByteLength",
+    "longname": "utf8ByteLength",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/integrations/sessionUrl.js",
+    "line": 74,
+    "description": "UTF-8 byte length of a string, without allocating an encoded copy.",
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -22207,7 +22232,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 61,
+    "line": 68,
     "description": "True when running in dev (for debug logging only).",
     "params": [],
     "returns": [],
@@ -22220,7 +22245,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/logging/userLogger.js",
-    "line": 170,
+    "line": 184,
     "description": "Internal: hash document.cookie once (non-blocking).",
     "params": [],
     "returns": [],
@@ -22233,7 +22258,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 112,
+    "line": 126,
     "description": "Base64 from ArrayBuffer (for cookie fingerprint).",
     "params": [],
     "returns": [],
@@ -22246,7 +22271,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 37,
+    "line": 42,
     "description": "",
     "params": [],
     "returns": [],
@@ -22259,7 +22284,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 64,
+    "line": 71,
     "description": "Dev-only logger.",
     "params": [],
     "returns": [],
@@ -22272,7 +22297,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 73,
+    "line": 80,
     "description": "Safely read runtime config from window.",
     "params": [],
     "returns": [],
@@ -22285,7 +22310,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/logging/userLogger.js",
-    "line": 162,
+    "line": 176,
     "description": "Initialize context near iframe/viewer creation.",
     "params": [
       {
@@ -22310,8 +22335,21 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 93,
+    "line": 100,
     "description": "Determine if the target URL is same-origin with current document.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "nonEmptyString",
+    "name": "nonEmptyString",
+    "longname": "nonEmptyString",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/logging/userLogger.js",
+    "line": 119,
+    "description": "Trimmed non-empty string, or null.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -22323,7 +22361,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 43,
+    "line": 48,
     "description": "",
     "params": [],
     "returns": [],
@@ -22336,7 +22374,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/logging/userLogger.js",
-    "line": 144,
+    "line": 158,
     "description": "Optional identity resolver supplied by host app.",
     "params": [
       {
@@ -22356,7 +22394,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/logging/userLogger.js",
-    "line": 152,
+    "line": 166,
     "description": "Optional viewer version to add in meta.viewerVersion.",
     "params": [
       {
@@ -22376,7 +22414,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 122,
+    "line": 136,
     "description": "Async SHA-256 of a string → &quot;sha256- &quot; (or null).",
     "params": [],
     "returns": [],
@@ -22389,7 +22427,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/logging/userLogger.js",
-    "line": 191,
+    "line": 205,
     "description": "Submit a &quot;print&quot; user-log event.",
     "params": [
       {
@@ -22409,7 +22447,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 84,
+    "line": 91,
     "description": "Make absolute using document.baseURI when available.",
     "params": [],
     "returns": [],
@@ -22422,7 +22460,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 102,
+    "line": 109,
     "description": "Return timezone offset as &quot;+HH:MM&quot; or &quot;-HH:MM&quot;.",
     "params": [],
     "returns": [],
@@ -22435,7 +22473,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 31,
+    "line": 36,
     "description": "",
     "params": [],
     "returns": [],
@@ -22448,7 +22486,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/logging/userLogger.js",
-    "line": 309,
+    "line": 325,
     "description": "Export singleton instance.",
     "params": [],
     "returns": [],
@@ -36804,7 +36842,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 138,
+    "line": 139,
     "description": "",
     "params": [
       {
@@ -36847,7 +36885,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 28,
+    "line": 29,
     "description": "",
     "params": [
       {
@@ -36890,7 +36928,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 289,
+    "line": 307,
     "description": "Create all cacheable all-pages PDF variant descriptors for a runtime config.",
     "params": [
       {
@@ -36921,7 +36959,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 334,
+    "line": 353,
     "description": "",
     "params": [
       {
@@ -36946,7 +36984,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 214,
+    "line": 232,
     "description": "",
     "params": [
       {
@@ -36983,7 +37021,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 189,
+    "line": 203,
     "description": "",
     "params": [
       {
@@ -37003,6 +37041,12 @@
         "type": "string|Object|null",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "reasonShown",
+        "type": "boolean",
+        "optional": true,
+        "description": ""
       }
     ],
     "returns": [
@@ -37020,7 +37064,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 254,
+    "line": 272,
     "description": "",
     "params": [
       {
@@ -37045,7 +37089,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 269,
+    "line": 287,
     "description": "Return the language dependency that should invalidate an all-pages prebuild run.",
     "params": [
       {
@@ -37076,7 +37120,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 178,
+    "line": 179,
     "description": "",
     "params": [
       {
@@ -37101,11 +37145,36 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 38,
+    "line": 39,
     "description": "",
     "params": [
       {
         "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isReasonFieldShown",
+    "name": "isReasonFieldShown",
+    "longname": "isReasonFieldShown",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/pdfPrebuildPlan.js",
+    "line": 189,
+    "description": "Whether the print dialog shows the reason field; mirrors usePrintRangeConfig .",
+    "params": [
+      {
+        "name": "cfg",
         "type": "*",
         "optional": false,
         "description": ""
@@ -37126,7 +37195,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 64,
+    "line": 65,
     "description": "",
     "params": [
       {
@@ -37151,7 +37220,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 46,
+    "line": 47,
     "description": "",
     "params": [
       {
@@ -37176,7 +37245,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 88,
+    "line": 89,
     "description": "",
     "params": [
       {
@@ -37207,7 +37276,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 156,
+    "line": 157,
     "description": "",
     "params": [
       {
@@ -37232,7 +37301,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 116,
+    "line": 117,
     "description": "Resolve the string that should be used on physical print output for an option.",
     "params": [
       {
@@ -37269,7 +37338,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 98,
+    "line": 99,
     "description": "",
     "params": [
       {
@@ -37294,7 +37363,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/pdfPrebuildPlan.js",
-    "line": 245,
+    "line": 263,
     "description": "",
     "params": [
       {

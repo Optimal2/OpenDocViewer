@@ -9,7 +9,7 @@ File count: 2. Line count: 508. JSDoc symbol count: 7.
 
 ## src/app
 
-File count: 3. Line count: 822. JSDoc symbol count: 21.
+File count: 3. Line count: 832. JSDoc symbol count: 21.
 
 - `src/app/AppBootstrap.jsx` - Application bootstrap React component.
 - `src/app/OpenDocViewer.jsx` - src/app/OpenDocViewer.jsx Main application shell for the viewer.
@@ -49,7 +49,7 @@ File count: 8. Line count: 4133. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 21. Line count: 8229. JSDoc symbol count: 117.
+File count: 21. Line count: 8231. JSDoc symbol count: 117.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintPipeline.js` - File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct\-versus\-generated\-PDF...
@@ -132,7 +132,7 @@ File count: 1. Line count: 67. JSDoc symbol count: 2.
 
 ## src/integrations
 
-File count: 9. Line count: 2517. JSDoc symbol count: 72.
+File count: 9. Line count: 2552. JSDoc symbol count: 73.
 
 - `src/integrations/integrationSettings.js` - Per\-integration settings carried by a Portable Document Bundle.
 - `src/integrations/ompThemeBridge.js` - Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
@@ -145,7 +145,7 @@ File count: 9. Line count: 2517. JSDoc symbol count: 72.
 
 ## src/logging
 
-File count: 2. Line count: 782. JSDoc symbol count: 48.
+File count: 2. Line count: 798. JSDoc symbol count: 49.
 
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/logging/userLogger.js` - UserLogController — client\-side controller for \*\*user\*\* print logs \(backend\-agnostic\).
@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 69. Line count: 24993. JSDoc symbol count: 1041.
+File count: 69. Line count: 25012. JSDoc symbol count: 1042.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

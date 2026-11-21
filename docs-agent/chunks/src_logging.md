@@ -1,6 +1,6 @@
 # OpenDocViewer / src/logging
 
-File count: 2. Line count: 782. JSDoc symbol count: 48.
+File count: 2. Line count: 798. JSDoc symbol count: 49.
 
 ## src/logging/systemLogger.js
 
@@ -42,6 +42,6 @@ Symbols:
 - `toAbsoluteUrl` (function) - Make absolute using document.baseURI when available.
 - `isSameOrigin` (function) - Determine if the target URL is same\-origin with current document.
 - `tzOffset` (function) - Return timezone offset as &quot;\+HH:MM&quot; or &quot;\-HH:MM&quot;.
+- `nonEmptyString` (function) - Trimmed non\-empty string, or null.
 - `abToBase64` (function) - Base64 from ArrayBuffer \(for cookie fingerprint\).
 - `sha256Base64` (function) - Async SHA\-256 of a string → &quot;sha256\- &quot; \(or null\).
-- `UserLogController#setUserResolver` (function) - Optional identity resolver supplied by host app.

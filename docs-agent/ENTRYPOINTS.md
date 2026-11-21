@@ -54,6 +54,6 @@
 - `src/utils/supportDiagnostics.js`: 5 incoming local imports
 - `src/components/DocumentViewer/hooks/useViewerEffects.js`: 4 incoming local imports
 - `src/contexts/readAloudContext.js`: 4 incoming local imports
+- `src/integrations/integrationSettings.js`: 4 incoming local imports
 - `src/utils/compareOverlay.js`: 4 incoming local imports
 - `src/utils/objectUrlRegistry.js`: 4 incoming local imports
-- `src/utils/ompThemePreference.js`: 4 incoming local imports

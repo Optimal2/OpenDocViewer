@@ -1,6 +1,6 @@
 # OpenDocViewer / src/app
 
-File count: 3. Line count: 822. JSDoc symbol count: 21.
+File count: 3. Line count: 832. JSDoc symbol count: 21.
 
 ## src/app/AppBootstrap.jsx
 
