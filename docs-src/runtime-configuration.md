@@ -1302,7 +1302,8 @@ recovery instruction.
 
 `documentLoading.fetch.maxSourceSizeMiB` limits each original source to 512 MiB by default. The
 loader checks `Content-Length` when it is available and also counts streamed bytes, so a missing or
-incorrect header does not bypass the cap. Normalization accepts 16–4096 MiB; invalid values use the
+incorrect header does not bypass the cap. Normalization keeps the value within 16–4096 MiB: a number
+out of range is clamped to the nearest bound, and a value that is not a finite number gets the
 default. Raise it only for known legitimate sources that need more room.
 
 `showResetSessionButton` adds a stronger recovery action than a plain viewer reload. The reset

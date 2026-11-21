@@ -75,7 +75,7 @@ Use the canonical `scripts/omp/bump-version.ps1` helper for artifact-only versio
 
 ```powershell
 .\scripts\omp\bump-version.ps1 -ComponentKey opendocviewer-web -Part patch
-.\scripts\omp\bump-version.ps1 -AllComponents -Version 2.0.3
+.\scripts\omp\bump-version.ps1 -AllComponents -Part patch
 ```
 
 The helper updates the component, `repositoryVersion`, the compatible-artifact ceiling and the
