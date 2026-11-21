@@ -196,6 +196,8 @@ describe('usePrintPipeline: side-by-side compare print (unchanged)', () => {
       pageCount: 2,
       pages: '3,7',
       copies: 1,
+      sessionId: null,
+      userId: null,
     });
     await flushPrint();
     expect(printUtils.handlePrintCurrentComparison).toHaveBeenCalledTimes(1);
@@ -207,6 +209,17 @@ describe('usePrintPipeline: side-by-side compare print (unchanged)', () => {
     expect(options.action).toBe('print');
     expect(printUtils.handlePrintCompareOverlay).not.toHaveBeenCalled();
     expect(printUtils.handlePrintCompareCurtain).not.toHaveBeenCalled();
+    await cleanup();
+  });
+
+  it('the print log row carries the loaded bundle\'s session id and user id', async () => {
+    const { state, setOpen, cleanup } = await mountPipeline({
+      bundle: { session: { id: 'session-42', userId: 'user-7' }, documents: [] },
+    });
+    await setOpen(true);
+    await act(() => state.pipeline.handlePrintSubmit({ ...DETAIL, mode: 'active', activeScope: 'compare-both', printBackend: 'html', printAction: 'print' }));
+    expect(submitPrint.mock.calls[0][0]).toMatchObject({ sessionId: 'session-42', userId: 'user-7' });
+    await flushPrint();
     await cleanup();
   });
 
@@ -262,6 +275,8 @@ describe('usePrintPipeline: overlay and curtain views through the same pipeline'
       pageCount: 1,
       pages: '3,7',
       copies: 1,
+      sessionId: null,
+      userId: null,
     });
     await flushPrint();
     expect(printUtils.handlePrintCompareOverlay).toHaveBeenCalledTimes(1);

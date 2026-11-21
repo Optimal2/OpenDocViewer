@@ -24,8 +24,13 @@
  *   await userLog.initContext({ sessionId: 'sess-123', iframeId: 'iframeHolder' }); // optional
  *   userLog.submitPrint({
  *     docId, fileName, pageCount, pages, copies,
- *     reason, forWhom
+ *     reason, forWhom,
+ *     sessionId, userId // session.id / session.userId of the loaded bundle
  *   }); // fire-and-forget
+ *
+ * The viewer itself passes the bundle's `session.id` and `session.userId` with every print, so the
+ * JSON envelope carries them in `session.id` and `user.id`. `setUserResolver` and `initContext`
+ * values take precedence when set. `user.name` stays null unless a resolver supplies it.
  */
 
 /**
@@ -53,6 +58,8 @@
  * @property {?string} [pages]
  * @property {?number} [copies]
  * @property {?string} [ts]         ISO timestamp
+ * @property {?string} [sessionId]  `session.id` of the loaded bundle; fallback for envelope `session.id`.
+ * @property {?string} [userId]     `session.userId` of the loaded bundle; fallback for envelope `user.id`.
  */
 
 import { getEffectiveUserLogConfig } from '../integrations/integrationSettings.js';
@@ -106,6 +113,13 @@ function tzOffset() {
   const hh = String(Math.floor(a / 60)).padStart(2, '0');
   const mm = String(a % 60).padStart(2, '0');
   return s + hh + ':' + mm;
+}
+
+/** Trimmed non-empty string, or null. */
+function nonEmptyString(value) {
+  if (value == null) return null;
+  const text = String(value).trim();
+  return text ? text : null;
 }
 
 /** Base64 from ArrayBuffer (for cookie fingerprint). */
@@ -239,6 +253,8 @@ class UserLogController {
       // JSON envelope
       const nowIso = payload.ts || new Date().toISOString();
       const identity = (typeof this.identityResolver === 'function') ? (this.identityResolver() || null) : null;
+      const bundleUserId = nonEmptyString(payload.userId);
+      const bundleSessionId = nonEmptyString(payload.sessionId);
 
       const bodyObj = {
         event:  { name: 'print', ts: nowIso },
@@ -247,7 +263,7 @@ class UserLogController {
           title: payload.fileName ?? null,
           pageCount: (typeof payload.pageCount === 'number' ? payload.pageCount : (payload.pageCount ?? null))
         },
-        user:   { id: identity?.id ?? null, name: identity?.name ?? null },
+        user:   { id: identity?.id ?? bundleUserId, name: identity?.name ?? null },
         client: {
           userAgent: (typeof navigator !== 'undefined') ? (navigator.userAgent || '') : '',
           language:  (typeof navigator !== 'undefined') ? (navigator.language || '') : '',
@@ -263,7 +279,7 @@ class UserLogController {
           copies: (typeof payload.copies === 'number') ? payload.copies : (payload.copies ?? null)
         },
         session: {
-          id: this.context.sessionId ?? null,
+          id: nonEmptyString(this.context.sessionId) ?? bundleSessionId,
           iframeId: this.context.iframeId ?? null,
           createdAt: this.context.createdAt ?? null,
           cookieFingerprint: this.context.cookieFingerprint ?? null

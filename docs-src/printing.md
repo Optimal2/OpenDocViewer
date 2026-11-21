@@ -100,7 +100,10 @@ composed page with the shared PDF output and progress flow; transient view compo
 reused from the PDF cache. The existing side-by-side two-page print is unchanged.
 
 All targets use the same `userLog.submitPrint` call and row shape: `action`, `reason`, `forWhom`,
-`printFormat`, `printFormatValue`, `docId`, `fileName`, `pageCount`, `pages`, `copies`. For these
+`printFormat`, `printFormatValue`, `docId`, `fileName`, `pageCount`, `pages`, `copies`, `sessionId`,
+`userId`. `sessionId` and `userId` are the loaded bundle's `session.id` and `session.userId`; with
+`userLog.transport: 'json'` they fill the envelope's `session.id` and `user.id` (`user.name` stays
+`null`). The form transport sends only `reason` and `forWhom`. For these
 two views, `pageCount` is **1**, `pages` identifies the compared source pages, `docId` and
 `fileName` are `null`, and `copies` is `1`. The action remains `print`, `print-pdf` or `download-pdf`
 according to the chosen output. Logging never blocks printing.

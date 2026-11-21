@@ -338,10 +338,12 @@ export default function usePrintPipeline({
         fileName: null,
         pageCount: resolvePrintPageCount(detail),
         pages: toPagesString(detail),
-        copies: 1
+        copies: 1,
+        sessionId: bundle?.session?.id ?? null,
+        userId: bundle?.session?.userId ?? null
       });
     } catch { /* never throw */ }
-  }, [resolvePrintPageCount, toPagesString]);
+  }, [bundle, resolvePrintPageCount, toPagesString]);
 
   const pdfPrintSessionKey = useMemo(() => {
     const pages = Array.isArray(allPages) ? allPages : [];
