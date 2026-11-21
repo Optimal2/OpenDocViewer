@@ -22,10 +22,6 @@
 - `dev:user-log`: `cross-env NODE_ENV=development PORT=3002 node server/user-log-server.js`
 - `dev:logs`: `concurrently -n sys,user -c auto "npm run dev:system-log" "npm run dev:user-log"`
 - `dev:both`: `concurrently -n app,logs -c auto "npm run dev" "npm run dev:logs"`
-- `// release helpers`: `Run one of the release:* scripts, then push with --follow-tags.`
-- `release:patch`: `npm version patch -m "chore(release): %s"`
-- `release:minor`: `npm version minor -m "chore(release): %s"`
-- `release:major`: `npm version major -m "chore(release): %s"`
 
 ## Runtime Entrypoints
 

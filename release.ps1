@@ -59,9 +59,9 @@ have already passed on the exact commit being released; otherwise prefer running
 #      commit 964fa3f, did that and broke the flow; reverted 2026-07-24). See AGENTS.md +
 #      docs-src/CODEX_DEVELOPMENT.md ("Release workflow").
 #
-# This script intentionally does NOT run `git add`, does NOT commit application changes,
-# and does NOT stash changes. The working tree must be clean and the current branch must
-# already match origin/<branch> before the release version bump is created.
+# This script intentionally does NOT commit application changes and does NOT stash changes.
+# It stages the generated release outputs with `git add --all` only after validating that the
+# working tree is clean and the current branch already matches origin/<branch>.
 
 param(
   [ValidateSet('patch', 'minor', 'major')]

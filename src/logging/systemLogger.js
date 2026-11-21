@@ -27,7 +27,7 @@
  * DEFAULTS
  *   - Log level defaults to 'debug' in dev (import.meta.env.MODE === 'development'), else 'warn'.
  *   - Backend logging is enabled IFF a backend URL exists (unless explicitly disabled).
- *   - Retries: 3 attempts, 1000 ms between attempts for transient failures.
+ *   - Retries: 3 retries after the initial attempt, 1000 ms between attempts for transient failures.
  *   - Non-recoverable 401/403/404 responses disable backend forwarding for the rest of the session.
  *
  * IMPORTANT (project-wide gotcha retained here for future reviewers):
@@ -390,7 +390,7 @@ class LogController {
       try {
         await this.sendLogToBackend(lvl, String(message), context, 0);
       } catch (error) {
-        // If all retries failed, surface a concise console error
+        // Defensive only: sendLogToBackend handles HTTP errors and retries internally.
         console.error('Failed to send log to backend after retries', error);
       }
     }

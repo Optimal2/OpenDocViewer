@@ -144,7 +144,7 @@
     },
     pdfSignatures: {
       // Show the small signature symbol on every page thumbnail of a signed PDF file. The
-      // document-level symbol next to "DOK n" and the toolbar signature overview stay visible
+      // document-level symbol next to "Dok {document}" and the toolbar signature overview stay visible
       // when this is false.
       thumbnailPageBadge: true,
       // Symbol colour for a signature the viewer could not check itself ("Not checked in the

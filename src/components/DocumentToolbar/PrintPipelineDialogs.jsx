@@ -5,8 +5,8 @@
  * The dialogs of the ONE print pipeline (usePrintPipeline.js): the print dialog and the generated-PDF
  * progress (modal, or a dock while working in the background).
  *
- * DocumentViewer.jsx renders this host once, next to the toolbar and the compare views, so the
- * dialog and the progress stay available while a compare view replaces the toolbar.
+ * DocumentViewer.jsx supplies this host to the compare views, and DocumentToolbar.jsx renders it
+ * for the normal toolbar, so the dialog and progress stay available when a compare view replaces the toolbar.
  */
 
 import React from 'react';

@@ -1,6 +1,6 @@
 // File: src/components/SignatureStatusBadge.jsx
 /**
- * Small signature symbol shown next to a document's "DOK n" label (variant
+ * Small signature symbol shown next to a document's "Dok {document}" label (variant
  * `document`, aggregated over all files of the document) and on every page
  * thumbnail of a signed file (variant `thumbnail`). Colour and icon follow the
  * worst severity of the document's signatures (see utils/pdfSignatureStatus.js):

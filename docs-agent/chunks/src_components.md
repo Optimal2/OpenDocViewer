@@ -281,7 +281,7 @@ Symbols:
 
 ## src/components/SignatureStatusBadge.jsx
 
-Small signature symbol shown next to a document's "DOK n" label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\).
+Small signature symbol shown next to a document's "Dok \{document\}" label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\).
 
 Exports: `SignatureStatusBadge`
 

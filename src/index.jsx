@@ -14,7 +14,7 @@
  *     a compatible `process.env.NODE_ENV`. Either can be used to detect development mode.
  *   - The optional Performance HUD is controlled elsewhere via runtime config (odv.config.js).
  *   - Project-wide gotcha: we import from 'file-type' (root) *not* 'file-type/browser';
- *     v21 does not export that subpath for bundlers and builds will fail if changed.
+ *     v22 does not export that subpath for bundlers and builds will fail if changed.
  */
 
 import React from 'react';

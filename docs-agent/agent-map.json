@@ -25,11 +25,7 @@
       "dev:system-log": "cross-env NODE_ENV=development PORT=3001 LOG_TOKEN=*** node server/system-log-server.js",
       "dev:user-log": "cross-env NODE_ENV=development PORT=3002 node server/user-log-server.js",
       "dev:logs": "concurrently -n sys,user -c auto \"npm run dev:system-log\" \"npm run dev:user-log\"",
-      "dev:both": "concurrently -n app,logs -c auto \"npm run dev\" \"npm run dev:logs\"",
-      "// release helpers": "Run one of the release:* scripts, then push with --follow-tags.",
-      "release:patch": "npm version patch -m \"chore(release): %s\"",
-      "release:minor": "npm version minor -m \"chore(release): %s\"",
-      "release:major": "npm version major -m \"chore(release): %s\""
+      "dev:both": "concurrently -n app,logs -c auto \"npm run dev\" \"npm run dev:logs\""
     },
     "dependencies": {
       "@noble/hashes": "2.4.0",
@@ -105,7 +101,7 @@
     "parseErrorCount": 0,
     "packageDependencyCount": 27,
     "devDependencyCount": 25,
-    "estimatedSourceTokens": 7543
+    "estimatedSourceTokens": 7546
   },
   "recommendations": [
     "6 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -31493,7 +31489,7 @@
       "lines": 110,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
-      "sourceSummary": "Small signature symbol shown next to a document's \"DOK n\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
+      "sourceSummary": "Small signature symbol shown next to a document's \"Dok {document}\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
       "imports": [
         {
           "source": "react",
@@ -31674,7 +31670,7 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 19,
-      "summary": "Small signature symbol shown next to a document's \"DOK n\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
+      "summary": "Small signature symbol shown next to a document's \"Dok {document}\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
