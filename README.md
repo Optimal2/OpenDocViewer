@@ -133,8 +133,8 @@ On startup, `src/integrations/bootstrapRuntime.js` probes the available startup 
 | 2 | Parent page | `window.parent.ODV_BOOTSTRAP` / `window.opener.ODV_BOOTSTRAP`, same-origin only; filtered by `sessiondata.caseIds` when present. | `src/integrations/parentBridge.js` |
 | 3 | Session token | `?sessiondata=` — Base64 JSON with hard size limits (200 000 encoded / 150 000 decoded characters). | `src/integrations/sessionToken.js` |
 | 4 | URL parameters | Legacy pattern mode: `folder` + `extension` + `endNumber`. | `src/integrations/urlParams.js` |
-| 5 | JS API | `window.ODV.start(payload)`, consumed once. | `src/integrations/bootstrapRuntime.js` |
-| 6 | Demo | Fallback launcher built from the sample files in `public/`. | `src/app/AppBootstrap.jsx` |
+| 5 | JS API | `window.ODV.start(payload)`, consumed once. The payload is a bundle, or the pattern form `{ folder, extension, endNumber }`. | `src/integrations/bootstrapRuntime.js` |
+| 6 | Demo | Fallback launcher built from the sample files in `public/`. A host payload that yields no openable file shows a message instead. | `src/app/AppBootstrap.jsx` |
 
 URL payloads deliberately win over the parent bridge: a gateway integration can run inside a host page that still exposes its original bootstrap data, and choosing the parent first would silently bypass the prepared gateway bundle.
 

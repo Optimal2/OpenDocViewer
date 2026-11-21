@@ -331,8 +331,8 @@ export default function AppBootstrap() {
 
   // Build the canonical prop object expected by the application shell.
   const viewerProps = useMemo(() => {
-    // 1) URL params → pattern mode
-    if (mode === ODV_BOOTSTRAP_MODES.URL_PARAMS && urlConfig) {
+    // 1) URL params or the pattern form of window.ODV.start(...) → pattern mode
+    if ((mode === ODV_BOOTSTRAP_MODES.URL_PARAMS || mode === ODV_BOOTSTRAP_MODES.JS_API) && urlConfig) {
       return {
         folder: urlConfig.folder,
         extension: urlConfig.extension,
@@ -381,6 +381,16 @@ export default function AppBootstrap() {
       return (
         <div className="button-container" role="region" aria-busy="true" aria-live="polite">
           Loading...
+        </div>
+      );
+    }
+
+    // A host payload arrived but gave nothing the viewer can open. The demo launcher only works in
+    // demo mode, so say what happened instead of showing buttons that do nothing.
+    if (mode !== ODV_BOOTSTRAP_MODES.DEMO) {
+      return (
+        <div className="button-container" role="alert">
+          {t('bootstrapError.noSources', { defaultValue: 'The document session contains no files that can be opened.' })}
         </div>
       );
     }

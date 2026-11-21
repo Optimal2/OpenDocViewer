@@ -526,8 +526,10 @@ priority order and takes the first source that yields a bundle with at least one
 3. `sessionToken.js` - `?sessiondata=`: Base64 JSON with hard size limits (200 000 encoded /
    150 000 decoded characters), parsed with `JSON.parse` only.
 4. `urlParams.js` - legacy pattern mode (`folder`, `extension`, `endNumber` and their aliases).
-5. `window.ODV.start(payload)` - the JS host API, consumed once from `window.ODV.__pending`.
-6. Demo mode - sample files from `public/`.
+5. `window.ODV.start(payload)` - the JS host API, consumed once from `window.ODV.__pending`. The
+   payload is a bundle, or the pattern form `{ folder, extension, endNumber }`.
+6. Demo mode - sample files from `public/`. A host payload that yields no openable file shows a
+   message instead of the demo launcher.
 
 URL payloads deliberately win over the parent bridge: a gateway integration can run inside a host
 page that still exposes its original bootstrap data, and choosing the parent first would silently
