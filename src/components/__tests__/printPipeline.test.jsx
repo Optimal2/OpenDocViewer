@@ -319,6 +319,25 @@ describe('usePrintPipeline: overlay and curtain views through the same pipeline'
     await cleanup();
   });
 
+  it('a finished PDF download unlocks print output at once, like a finished preview', async () => {
+    printUtils.handlePdfCompareCurtain.mockResolvedValueOnce(new Blob(['%PDF'], { type: 'application/pdf' }));
+    printUtils.handlePdfCompareCurtain.mockResolvedValueOnce(new Blob(['%PDF'], { type: 'application/pdf' }));
+    const { state, cleanup } = await mountPipeline();
+    for (const printAction of ['download', 'print']) {
+      await act(() => state.pipeline.openComposedPrintDialog(curtainTarget()));
+      await act(() => state.pipeline.handlePrintSubmit({ ...DETAIL, mode: 'active', activeScope: 'primary', printBackend: 'pdf', printAction }));
+      // Past the submit and PDF start delays, short of the 1800 ms progress reset.
+      await act(async () => { await vi.advanceTimersByTimeAsync(500); });
+      expect(state.pipeline.pdfProgress.phase).toBe(printAction === 'download' ? 'downloading' : 'opening-preview');
+      expect(state.pipeline.pdfProgress.open).toBe(true);
+      expect(state.pipeline.isPdfOutputLocked).toBe(false);
+      await flushPrint();
+    }
+    expect(printUtils.downloadPdfBlob).toHaveBeenCalledTimes(1);
+    expect(printUtils.printPdfBlob).toHaveBeenCalledTimes(1);
+    await cleanup();
+  });
+
   it('curtain: print-pdf log row for a generated PDF print', async () => {
     printUtils.handlePdfCompareCurtain.mockResolvedValueOnce(new Blob(['%PDF'], { type: 'application/pdf' }));
     const { state, cleanup } = await mountPipeline();

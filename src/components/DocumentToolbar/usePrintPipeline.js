@@ -512,7 +512,7 @@ export default function usePrintPipeline({
 
   const isPdfProgressTerminal = !!pdfProgress.error
     || pdfProgress.phase === 'cancelled'
-    || pdfProgress.phase === 'downloaded'
+    || pdfProgress.phase === 'downloading'
     || pdfProgress.phase === 'opening-preview';
   const isPdfOutputLocked = pdfProgress.open && !isPdfProgressTerminal;
 
