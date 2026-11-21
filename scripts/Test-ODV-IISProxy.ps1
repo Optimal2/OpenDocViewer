@@ -17,6 +17,9 @@
 .PARAMETER TokenFile
   Optional path to a text file containing the token (one line). Defaults to:
     ..\server\logs\service\ODV-SystemLog.token.txt
+
+.OUTPUTS
+  Exit code 0 when both requests return HTTP 2xx, otherwise 1.
 #>
 
 [CmdletBinding()]
@@ -59,7 +62,7 @@ Write-Info "Base URL : $BaseUrl"
 Write-Info "Token    : " -NoNewline
 if ($Token) { Write-Host "(provided or read from file)" -ForegroundColor Gray } else { Write-Host "(none)" -ForegroundColor Yellow }
 
-# Helper: perform POST and show result
+# Helper: perform POST, show the result and return $true for HTTP 2xx.
 function Invoke-Probe {
   param(
     [Parameter(Mandatory=$true)] [string]$Url,
@@ -67,6 +70,7 @@ function Invoke-Probe {
     [string]$Label = ""
   )
 
+  $prefix = if ($Label) { "[$Label] " } else { '' }
   $sw = [System.Diagnostics.Stopwatch]::StartNew()
   try {
     $resp = Invoke-WebRequest -Uri $Url `
@@ -79,20 +83,24 @@ function Invoke-Probe {
     $sw.Stop()
     $code = [int]$resp.StatusCode
     if ($code -ge 200 -and $code -lt 300) {
-      Write-Ok "$Url -> HTTP $code ($($sw.ElapsedMilliseconds) ms)"
-    } else {
-      Write-Err "$Url -> HTTP $code ($($sw.ElapsedMilliseconds) ms)"
+      Write-Ok "$prefix$Url -> HTTP $code ($($sw.ElapsedMilliseconds) ms)"
+      return $true
     }
+    Write-Err "$prefix$Url -> HTTP $code ($($sw.ElapsedMilliseconds) ms)"
+    return $false
   } catch {
     $sw.Stop()
     if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
       $code = [int]$_.Exception.Response.StatusCode
-      Write-Err "$Url -> HTTP $code ($($sw.ElapsedMilliseconds) ms)"
+      Write-Err "$prefix$Url -> HTTP $code ($($sw.ElapsedMilliseconds) ms)"
     } else {
-      Write-Err "$Url -> request failed ($($sw.ElapsedMilliseconds) ms): $($_.Exception.Message)"
+      Write-Err "$prefix$Url -> request failed ($($sw.ElapsedMilliseconds) ms): $($_.Exception.Message)"
     }
+    return $false
   }
 }
+
+$failures = 0
 
 # 1) /log  (requires x-log-token; otherwise 401)
 $logUrl = "${BaseUrl}log"
@@ -109,12 +117,12 @@ $logBodyObj = @{
 }
 $logBodyJson = $logBodyObj | ConvertTo-Json -Depth 4
 
-Invoke-Probe -Url $logUrl -Options @{
+if (-not (Invoke-Probe -Url $logUrl -Options @{
   method      = 'POST'
   headers     = $logHeaders
   contentType = 'application/json'
   body        = $logBodyJson
-} -Label 'system-log'
+} -Label 'system-log')) { $failures++ }
 
 # 2) /userlog/record  (form-encoded)
 $userUrl = "${BaseUrl}userlog/record"
@@ -131,12 +139,17 @@ foreach ($k in $userForm.Keys) {
 }
 $userBody = [string]::Join('&', $kvPairs)
 
-Invoke-Probe -Url $userUrl -Options @{
+if (-not (Invoke-Probe -Url $userUrl -Options @{
   method      = 'POST'
   headers     = @{}
   contentType = 'application/x-www-form-urlencoded'
   body        = $userBody
-} -Label 'user-log'
+} -Label 'user-log')) { $failures++ }
 
 Write-Host ""
+if ($failures -gt 0) {
+  Write-Err "$failures of 2 requests failed."
+  exit 1
+}
 Write-Info "Done."
+exit 0

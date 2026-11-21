@@ -20,4 +20,5 @@ Use the repository-root script `scripts/Setup-IIS-ODVProxy.ps1` (run from the re
 
 ## Test
 
-From the repository root, run `scripts/Test-ODV-IISProxy.ps1 -BaseUrl https://your-host/ODVProxy/`.
+From the repository root, run `scripts/Test-ODV-IISProxy.ps1 -BaseUrl https://your-host/ODVProxy/`. It posts one
+system-log and one user-log request and exits 0 when both return HTTP 2xx, otherwise 1.
