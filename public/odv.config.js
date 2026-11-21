@@ -1019,6 +1019,9 @@
         delayBetweenRunsMs: 150
       },
 
+      // In 'auto' mode, documents of up to adaptiveMemory.performanceWindowPageCount pages stay on
+      // the fast path: the soft/hard thresholds below do not apply to them, only a catastrophic
+      // level (twice hardResidentMiB, at least 2048 MiB, or a heap ratio of at least 0.97).
       memoryPressure: {
         enabled: true,
         sampleIntervalMs: 2000,
