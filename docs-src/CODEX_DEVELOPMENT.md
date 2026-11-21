@@ -17,7 +17,7 @@ Use these files as the main map:
 - `AGENTS.md` - operational rules for Codex and other coding agents.
 - `README.md` - product overview, setup, deployment, and documentation map.
 - `CONTRIBUTING.md` - repository conventions and review checklist.
-- `docs-src/architecture.md` - runtime flow and module responsibilities.
+- `docs-src/architecture.md` - the architecture description: components, runtime flows, data, integrations, configuration, security, build/deployment, operations and trade-offs.
 - `docs-src/integrations.md` - host integration contract for files, metadata, and bootstrap modes.
 - `docs-src/runtime-configuration.md` - runtime config loading order, override rules, and deployment notes.
 - `docs-src/deploy-ops.md` - IIS hosting, proxy deployment, cache rules, and operational checklists.

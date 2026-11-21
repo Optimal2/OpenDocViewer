@@ -65,6 +65,8 @@ All screenshots show the bundled sample files from `public/` (`sample.pdf`, `sam
 
 ## Architecture overview
 
+The full architecture description — components, runtime flows, data, integration points, configuration, security model, build and deployment, operations and known limits — is [`docs-src/architecture.md`](docs-src/architecture.md). This section is a short overview.
+
 The application is a static SPA split into five layers: boot/startup, application shell, document loading/rendering, viewer interaction, and operational support. Deployment-owned files (`odv.site.config.js`, `help/site/`) survive upgrades; everything else is replaced by each release.
 
 ```mermaid
@@ -371,7 +373,7 @@ For IIS hosting, proxy setup, cache guidance, and ops checklists, see `docs-src/
 ## Development workflow
 
 - Validation ladder (narrowest useful check first): `npm run lint` for JS/React changes, `npm run build` for bundling/import changes, `npm run doc` for JSDoc changes, `npm run doc:agent` when source structure, dependencies, or JSDoc-backed APIs change, `git diff --check` for documentation-only changes.
-- CI (`.github/workflows/ci.yml`) runs `npm ci`, lint, tests, build, and JSDoc on every push and pull request.
+- CI (`.github/workflows/ci.yml`) runs `npm ci`, lint, tests, build, Playwright UI tests, JSDoc, the OMP version lockstep check and the portable OMP PowerShell tests on every push and pull request.
 - Official releases go through `release.ps1` only; see [AGENTS.md](AGENTS.md) and the release workflow section in this repository's history for the exact procedure. Do not hand-bump `package.json` or push release tags.
 - Repository conventions (naming, `js`/`jsx` policy, review checklist) are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -388,7 +390,7 @@ Use the following files depending on what you are trying to understand:
 - `AGENTS.md` — operational rules for Codex and other coding agents in this Windows workspace
 - `SECURITY.md` — security policy, supported versions, and reporting
 - `docs-src/CODEX_DEVELOPMENT.md` — agent-friendly repository map, validation ladder, and local workflow notes
-- `docs-src/architecture.md` — module responsibilities and request/data flow through the app
+- `docs-src/architecture.md` — the architecture description: components, runtime flows, data, integrations, configuration, security, build/deployment, operations and trade-offs
 - `docs-src/integrations.md` — Portable Document Bundle contract, host file URLs, metadata guidance, and bootstrap modes
 - `docs-src/runtime-configuration.md` — runtime config loading order, override rules, and deployment notes
 - `docs-src/log-servers.md` — logging endpoint contracts, retention, proxy patterns, and security assumptions
@@ -405,7 +407,7 @@ Use the following files depending on what you are trying to understand:
 
 ## AI agent documentation
 
-OpenDocViewer includes a generated AI-agent documentation packet under `docs-agent/`. It is generated from the existing JSDoc comments and source structure with AgentDocMap, without requiring AgentDocMap-specific annotations in application code. CI validates freshness with `git diff --exit-code -- docs-agent`.
+OpenDocViewer includes a generated AI-agent documentation packet under `docs-agent/`. It is generated from the existing JSDoc comments and source structure with AgentDocMap, without requiring AgentDocMap-specific annotations in application code. CI validates freshness with `node scripts/verify-agent-docs-fresh.mjs` in `.github/workflows/agent-docs.yml`.
 
 ```bash
 npm run doc:agent
