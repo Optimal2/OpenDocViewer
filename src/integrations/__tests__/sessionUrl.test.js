@@ -102,6 +102,42 @@ describe('sessionUrl', () => {
     expect(warnSpy).toHaveBeenCalled();
   });
 
+  it('reports the response size in UTF-8 bytes, not UTF-16 code units', async () => {
+    restoreWindow = installWindowStub('sessionUrl=/bundles/abc.json');
+    const text = JSON.stringify({ title: 'Åäö €', documents: [1], emoji: '\u{1F4C4}' });
+    fetchStub = installFetchStub({ text });
+
+    const result = await readFromSessionUrl();
+
+    expect(result.timing.responseTextBytes).toBe(new TextEncoder().encode(text).length);
+    expect(result.timing.responseTextBytes).not.toBe(text.length);
+  });
+
+  it('applies the time limit to reading the response body too', async () => {
+    vi.useFakeTimers();
+    try {
+      restoreWindow = installWindowStub('sessionUrl=/bundles/slow.json');
+      const previous = globalThis.fetch;
+      globalThis.fetch = vi.fn(async (_url, init) => ({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        // Headers arrive at once; the body only ends when the request is aborted.
+        text: () => new Promise((_resolve, reject) => {
+          init.signal.addEventListener('abort', () => reject(new Error('aborted')));
+        }),
+      }));
+      fetchStub = { restore: () => { globalThis.fetch = previous; } };
+
+      const pending = readFromSessionUrl();
+      await vi.advanceTimersByTimeAsync(180_000);
+      await expect(pending).resolves.toBeNull();
+      expect(warnSpy).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('returns null when no session URL parameter is present', async () => {
     restoreWindow = installWindowStub('other=1');
     fetchStub = installFetchStub({ text: '{}' });

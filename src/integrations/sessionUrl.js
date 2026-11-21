@@ -66,6 +66,30 @@ function resolveHttpUrl(rawUrl) {
   }
 }
 
+/**
+ * UTF-8 byte length of a string, without allocating an encoded copy.
+ * @param {string} text
+ * @returns {number}
+ */
+function utf8ByteLength(text) {
+  let bytes = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    const code = text.charCodeAt(i);
+    if (code < 0x80) bytes += 1;
+    else if (code < 0x800) bytes += 2;
+    else if (code >= 0xd800 && code <= 0xdbff && i + 1 < text.length) {
+      const next = text.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4;
+        i += 1;
+      } else {
+        bytes += 3;
+      }
+    } else bytes += 3;
+  }
+  return bytes;
+}
+
 function warnSessionUrl(message, detail) {
   if (typeof console === 'undefined' || typeof console.warn !== 'function') return;
   if (detail === undefined) {
@@ -104,33 +128,44 @@ export async function readFromSessionUrl() {
     ? setTimeout(() => controller.abort(), SESSION_URL_TIMEOUT_MS)
     : null;
 
+  // The time limit covers the whole transfer: the response headers and the body.
   let response;
+  let fetchMs;
+  let text;
+  let textMs;
   try {
-    response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json'
-      },
-      credentials: 'same-origin',
-      cache: 'no-store',
-      ...(controller ? { signal: controller.signal } : {})
-    });
-  } catch (error) {
-    warnSessionUrl(`Failed to fetch session URL '${url.toString()}'.`, error);
-    return null;
+    try {
+      response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json'
+        },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        ...(controller ? { signal: controller.signal } : {})
+      });
+    } catch (error) {
+      warnSessionUrl(`Failed to fetch session URL '${url.toString()}'.`, error);
+      return null;
+    }
+    fetchMs = nowMs() - startedMs;
+
+    if (!response.ok) {
+      warnSessionUrl(`Session URL returned HTTP ${response.status} ${response.statusText}.`);
+      return null;
+    }
+
+    const textStartedMs = nowMs();
+    try {
+      text = await response.text();
+    } catch (error) {
+      warnSessionUrl(`Failed to read the session URL response from '${url.toString()}'.`, error);
+      return null;
+    }
+    textMs = nowMs() - textStartedMs;
   } finally {
     if (timeoutId) clearTimeout(timeoutId);
   }
-  const fetchMs = nowMs() - startedMs;
-
-  if (!response.ok) {
-    warnSessionUrl(`Session URL returned HTTP ${response.status} ${response.statusText}.`);
-    return null;
-  }
-
-  const textStartedMs = nowMs();
-  const text = await response.text();
-  const textMs = nowMs() - textStartedMs;
   if (!text) {
     warnSessionUrl('Session URL returned an empty response.');
     return null;
@@ -153,7 +188,7 @@ export async function readFromSessionUrl() {
         textMs,
         parseMs,
         totalMs: nowMs() - startedMs,
-        responseTextBytes: text.length
+        responseTextBytes: utf8ByteLength(text)
       }
     };
   } catch (error) {
