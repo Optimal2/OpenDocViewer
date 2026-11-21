@@ -9,6 +9,7 @@
 
 import { resolveLocalizedValue, resolveOptionLabel } from './localizedValue.js';
 import { isPdfPrintCacheLanguageIgnored } from './pdfPrintCacheKey.js';
+import { getEffectiveUserLogConfig } from '../integrations/integrationSettings.js';
 
 const DEFAULT_PREBUILD_MAX_PAGES = 500;
 const DEFAULT_PREBUILD_MAX_VARIANTS = 12;
@@ -181,12 +182,29 @@ function getReasonOptions(reasonCfg) {
 }
 
 /**
+ * Whether the print dialog shows the reason field; mirrors `usePrintRangeConfig`.
+ * @param {*} cfg
+ * @returns {boolean}
+ */
+function isReasonFieldShown(cfg) {
+  const userLogCfg = getEffectiveUserLogConfig(cfg) || {};
+  const showReasonWhen = userLogCfg?.ui?.showReasonWhen || 'auto';
+  return showReasonWhen === 'always'
+    || (showReasonWhen === 'auto' && (!!userLogCfg.enabled || !!cfg?.printHeader?.enabled));
+}
+
+/**
  * @param {*} reasonCfg
  * @param {Object} prebuildCfg
  * @param {(string|Object|null)} languageOrI18n
+ * @param {boolean=} reasonShown
  * @returns {Array<Object>}
  */
-function createReasonVariants(reasonCfg, prebuildCfg, languageOrI18n) {
+function createReasonVariants(reasonCfg, prebuildCfg, languageOrI18n, reasonShown = true) {
+  // Without a reason field every print carries no reason, so that one variant is the one to prebuild.
+  if (!reasonShown) {
+    return [{ reason: null, reasonSelection: buildSelectedOptionDetails(null, languageOrI18n, '') }];
+  }
   if (!prebuildCfg.includeFixedReasons) return [];
   const useValueForOutput = reasonCfg?.useValueForOutput !== false;
   return getReasonOptions(reasonCfg)
@@ -295,10 +313,11 @@ export function createPdfPrebuildAllPagesVariants(runtimeConfig, i18nOrLanguage 
   const reasonCfg = cfg?.userLog?.ui?.fields?.reason || {};
   const printFormatCfg = cfg?.print?.format || {};
   const pdfOrientation = resolvePrebuildPdfOrientation(pdfCfg);
+  const reasonShown = isReasonFieldShown(cfg);
   const variants = [];
   for (const language of prebuildCfg.languages) {
     const languageContext = resolveVariantLanguageContext(language, i18nOrLanguage);
-    const reasons = createReasonVariants(reasonCfg, prebuildCfg, languageContext);
+    const reasons = createReasonVariants(reasonCfg, prebuildCfg, languageContext, reasonShown);
     for (const reason of reasons) {
       for (const copyMarkerState of prebuildCfg.copyMarkerStates) {
         const format = createPrintFormatVariant(printFormatCfg, copyMarkerState, languageContext);
