@@ -36,7 +36,7 @@ File count: 1. Line count: 36. JSDoc symbol count: 1.
 
 ## src/components/DocumentLoader
 
-File count: 8. Line count: 4133. JSDoc symbol count: 106.
+File count: 8. Line count: 4135. JSDoc symbol count: 106.
 
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 - `src/components/DocumentLoader/DocumentLoader.js` - OpenDocViewer — Document loader orchestrator.
@@ -132,16 +132,16 @@ File count: 1. Line count: 67. JSDoc symbol count: 2.
 
 ## src/integrations
 
-File count: 9. Line count: 2552. JSDoc symbol count: 73.
+File count: 8. Line count: 2360. JSDoc symbol count: 65.
 
 - `src/integrations/integrationSettings.js` - Per\-integration settings carried by a Portable Document Bundle.
 - `src/integrations/ompThemeBridge.js` - Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 - `src/integrations/parentBridge.js` - Same\-origin parent\-window bootstrap adapter.
 - `src/integrations/normalizePortableBundle.js` - Normalizes multiple host payload shapes into the project's neutral portable bundle shape.
 - `src/integrations/bootstrapRuntime.js` - Startup mode detection and host\-integration entry point.
-- `src/integrations/viewerEvents.js` - OpenDocViewer — Tiny Event Emitter/Listener Utilities \(Browser\-only\) Lightweight helpers for broadcasting and listening to app\-level DOM events.
 - `src/integrations/sessionToken.js` - OpenDocViewer — Session Token Reader \(Browser\-only\) Decode an optional Base64/URL\-safe Base64 JSON payload provided via the query string: ?sessiondata\=&lt;base64&gt; This enables hosts to pass a compact, self\-contained “portab
 - `src/integrations/sessionUrl.js` - Fetch a host\-prepared Portable Document Bundle from a short URL query value.
+- `src/integrations/urlParams.js` - OpenDocViewer — URL Parameter Reader \(Browser\-only\) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e.
 
 ## src/logging
 
@@ -179,9 +179,9 @@ File count: 1. Line count: 1346. JSDoc symbol count: 20.
 
 ## src/schemas
 
-File count: 1. Line count: 363. JSDoc symbol count: 18.
+File count: 1. Line count: 73. JSDoc symbol count: 5.
 
-- `src/schemas/portableBundle.js` - OpenDocViewer — Portable Document Bundle Schema & Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency\-free helpers to validate and normalize input.
+- `src/schemas/portableBundle.js` - OpenDocViewer — Portable Document Bundle Schema \(ESM\) Define the canonical shape \(JSDoc typedefs\) and the schema version for a portable, serializable set of documents.
 
 ## src/types
 
@@ -191,7 +191,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 69. Line count: 25012. JSDoc symbol count: 1042.
+File count: 69. Line count: 25014. JSDoc symbol count: 1042.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

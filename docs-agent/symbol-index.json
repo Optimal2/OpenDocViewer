@@ -1934,7 +1934,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1608,
+    "line": 1610,
     "description": "",
     "params": [],
     "returns": [],
@@ -21306,218 +21306,6 @@
     "examples": 0
   },
   {
-    "id": "clearTimeoutSafe",
-    "name": "clearTimeoutSafe",
-    "longname": "clearTimeoutSafe",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 187,
-    "description": "Clear a timer if it exists (tiny helper).",
-    "params": [
-      {
-        "name": "t",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "void",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "createCustomEvent",
-    "name": "createCustomEvent",
-    "longname": "createCustomEvent",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 56,
-    "description": "Create a CustomEvent with best-effort fallback for older browsers.",
-    "params": [
-      {
-        "name": "name",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "detail",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "CustomEvent",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "emitODVEvent",
-    "name": "emitODVEvent",
-    "longname": "emitODVEvent",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 79,
-    "description": "Emit a namespaced OpenDocViewer event with an optional detail payload.",
-    "params": [
-      {
-        "name": "name",
-        "type": "string",
-        "optional": false,
-        "description": "Event name (recommend a namespace like &quot;odv:*&quot;)."
-      },
-      {
-        "name": "detail",
-        "type": "Object.<string, *>",
-        "optional": true,
-        "description": "Structured payload for listeners."
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": "True if dispatched, false if window unavailable."
-      }
-    ],
-    "examples": 1
-  },
-  {
-    "id": "ODVEventHandler",
-    "name": "ODVEventHandler",
-    "longname": "ODVEventHandler",
-    "kind": "typedef",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 29,
-    "description": "Listener signature for ODV events.",
-    "params": [
-      {
-        "name": "event",
-        "type": "Event",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "detail",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "void",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "OnceEventResult",
-    "name": "OnceEventResult",
-    "longname": "OnceEventResult",
-    "kind": "typedef",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 43,
-    "description": "Result returned by onceODVEvent when the event fires.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "onceODVEvent",
-    "name": "onceODVEvent",
-    "longname": "onceODVEvent",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 152,
-    "description": "Wait for a single occurrence of an event and resolve with { event, detail } .",
-    "params": [
-      {
-        "name": "name",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "opts",
-        "type": "OnceOptions",
-        "optional": true,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Promise.<OnceEventResult>",
-        "description": ""
-      }
-    ],
-    "examples": 1
-  },
-  {
-    "id": "OnceOptions",
-    "name": "OnceOptions",
-    "longname": "OnceOptions",
-    "kind": "typedef",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 37,
-    "description": "Options for onceODVEvent.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "onODVEvent",
-    "name": "onODVEvent",
-    "longname": "onODVEvent",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/integrations/viewerEvents.js",
-    "line": 110,
-    "description": "Attach a listener for a given OpenDocViewer event.",
-    "params": [
-      {
-        "name": "name",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "handler",
-        "type": "ODVEventHandler",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "options",
-        "type": "*|boolean",
-        "optional": true,
-        "description": "addEventListener options (e.g., { passive: true })"
-      }
-    ],
-    "returns": [
-      {
-        "type": "function",
-        "description": "Unsubscribe function"
-      }
-    ],
-    "examples": 1
-  },
-  {
     "id": "circularReplacer",
     "name": "circularReplacer",
     "longname": "circularReplacer",
@@ -27880,250 +27668,6 @@
     "examples": 0
   },
   {
-    "id": "CreateBundleResult",
-    "name": "CreateBundleResult",
-    "longname": "CreateBundleResult",
-    "kind": "typedef",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 82,
-    "description": "Result object for createPortableBundle",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "createPortableBundle",
-    "name": "createPortableBundle",
-    "longname": "createPortableBundle",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 343,
-    "description": "Convenience constructor: normalize → (optionally validate) → freeze.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "opts",
-        "type": "Object",
-        "optional": true,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "CreateBundleResult",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "extFromString",
-    "name": "extFromString",
-    "longname": "extFromString",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 107,
-    "description": "Extract lowercase file extension from a string (best-effort).",
-    "params": [
-      {
-        "name": "s",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string|undefined",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "freezePortableBundle",
-    "name": "freezePortableBundle",
-    "longname": "freezePortableBundle",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 326,
-    "description": "Create a shallow, immutable copy of a normalized bundle (Object.freeze tree).",
-    "params": [
-      {
-        "name": "bundle",
-        "type": "PortableDocumentBundle",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "PortableDocumentBundle",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizeDocumentEntry",
-    "name": "normalizeDocumentEntry",
-    "longname": "normalizeDocumentEntry",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 225,
-    "description": "Normalize a single document entry.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "PortableDocumentEntry",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizeDocumentFile",
-    "name": "normalizeDocumentFile",
-    "longname": "normalizeDocumentFile",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 197,
-    "description": "Normalize a file entry.",
-    "params": [
-      {
-        "name": "input",
-        "type": "string|PortableDocumentFile",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "PortableDocumentFile",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizeMetadataAliasDetails",
-    "name": "normalizeMetadataAliasDetails",
-    "longname": "normalizeMetadataAliasDetails",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 150,
-    "description": "Preserve a richer semantic alias object map without trying to deeply validate every property.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object<string, Object>|undefined",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizeMetadataAliases",
-    "name": "normalizeMetadataAliases",
-    "longname": "normalizeMetadataAliases",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 126,
-    "description": "Normalize an alias-based metadata object to a predictable string map.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object<string, string>|undefined",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizeMetadataIndex",
-    "name": "normalizeMetadataIndex",
-    "longname": "normalizeMetadataIndex",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 172,
-    "description": "Preserve a raw metadata lookup map without imposing a rigid record schema here.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object<string, Object>|undefined",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "normalizePortableBundle",
-    "name": "normalizePortableBundle",
-    "longname": "normalizePortableBundle",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 253,
-    "description": "Normalize a bundle to a predictable, minimally validated shape: Ensures session.id and stringifies known fields.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "PortableDocumentBundle",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "PORTABLE_BUNDLE_SCHEMA_VERSION",
     "name": "PORTABLE_BUNDLE_SCHEMA_VERSION",
     "longname": "PORTABLE_BUNDLE_SCHEMA_VERSION",
@@ -28184,69 +27728,6 @@
     "file": "src/schemas/portableBundle.js",
     "line": 31,
     "description": "Session context for a bundle.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "toObject",
-    "name": "toObject",
-    "longname": "toObject",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 98,
-    "description": "Coerce unknown input to a plain object (or return null).",
-    "params": [
-      {
-        "name": "v",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Object<string, *>|null",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "validatePortableBundle",
-    "name": "validatePortableBundle",
-    "longname": "validatePortableBundle",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 283,
-    "description": "Validate a normalized (or raw) bundle.",
-    "params": [
-      {
-        "name": "input",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "ValidateReport",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "ValidateReport",
-    "name": "ValidateReport",
-    "longname": "ValidateReport",
-    "kind": "typedef",
-    "scope": "global",
-    "file": "src/schemas/portableBundle.js",
-    "line": 74,
-    "description": "Validation report for a bundle.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -34492,7 +33973,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 36,
+    "line": 38,
     "description": "",
     "params": [],
     "returns": [],
@@ -34505,7 +33986,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 30,
+    "line": 32,
     "description": "",
     "params": [],
     "returns": [],
@@ -34518,7 +33999,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 669,
+    "line": 671,
     "description": "Render one requested page asset.",
     "params": [
       {
@@ -34549,7 +34030,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 44,
+    "line": 46,
     "description": "",
     "params": [],
     "returns": [],
@@ -34562,7 +34043,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 541,
+    "line": 543,
     "description": "Render a PDF page set through the PDF worker pool as one partitioned batch.",
     "params": [
       {
@@ -34593,7 +34074,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 791,
+    "line": 793,
     "description": "Read page geometry only when a persisted asset needs an exact resolution identity.",
     "params": [],
     "returns": [],

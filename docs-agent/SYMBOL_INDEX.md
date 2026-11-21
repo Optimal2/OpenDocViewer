@@ -82,7 +82,7 @@
 | <code>readBlobHeadBytes</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:340</code> |  |
 | <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:910</code> |  |
 | <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:563</code> |  |
-| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1608</code> |  |
+| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1610</code> |  |
 | <code>ResolvedEntry</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:103</code> |  |
 | <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:975</code> | Extract multi-document source context from an entry or placeholder input. |
 | <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1125</code> |  |
@@ -839,14 +839,6 @@
 | <code>readFromUrlParams</code> | function | <code>src/integrations/urlParams.js:83</code> | Reads common query params used by the demo and other hosts. |
 | <code>UrlParamsData</code> | typedef | <code>src/integrations/urlParams.js:32</code> |  |
 | <code>UrlParamsResult</code> | typedef | <code>src/integrations/urlParams.js:39</code> |  |
-| <code>clearTimeoutSafe</code> | function | <code>src/integrations/viewerEvents.js:187</code> | Clear a timer if it exists \(tiny helper\). |
-| <code>createCustomEvent</code> | function | <code>src/integrations/viewerEvents.js:56</code> | Create a CustomEvent with best-effort fallback for older browsers. |
-| <code>emitODVEvent</code> | function | <code>src/integrations/viewerEvents.js:79</code> | Emit a namespaced OpenDocViewer event with an optional detail payload. |
-| <code>ODVEventHandler</code> | typedef | <code>src/integrations/viewerEvents.js:29</code> | Listener signature for ODV events. |
-| <code>OnceEventResult</code> | typedef | <code>src/integrations/viewerEvents.js:43</code> | Result returned by onceODVEvent when the event fires. |
-| <code>onceODVEvent</code> | function | <code>src/integrations/viewerEvents.js:152</code> | Wait for a single occurrence of an event and resolve with { event, detail } . |
-| <code>OnceOptions</code> | typedef | <code>src/integrations/viewerEvents.js:37</code> | Options for onceODVEvent. |
-| <code>onODVEvent</code> | function | <code>src/integrations/viewerEvents.js:110</code> | Attach a listener for a given OpenDocViewer event. |
 | <code>circularReplacer</code> | function | <code>src/logging/systemLogger.js:196</code> | Create a JSON replacer that: prevents circular references leaves values otherwise intact |
 | <code>LogController#debug</code> | member | <code>src/logging/systemLogger.js:456</code> |  |
 | <code>LogController#disableBackendLogging</code> | member | <code>src/logging/systemLogger.js:404</code> | Disable backend forwarding after a non-recoverable configuration/runtime failure. |
@@ -1129,24 +1121,11 @@
 | <code>PerformanceMonitor~tick</code> | constant | <code>src/PerformanceMonitor.jsx:475</code> |  |
 | <code>toMB</code> | function | <code>src/PerformanceMonitor.jsx:37</code> |  |
 | <code>PerformanceMonitor~updateMemory</code> | constant | <code>src/PerformanceMonitor.jsx:494</code> |  |
-| <code>CreateBundleResult</code> | typedef | <code>src/schemas/portableBundle.js:82</code> | Result object for createPortableBundle |
-| <code>createPortableBundle</code> | function | <code>src/schemas/portableBundle.js:343</code> | Convenience constructor: normalize → \(optionally validate\) → freeze. |
-| <code>extFromString</code> | function | <code>src/schemas/portableBundle.js:107</code> | Extract lowercase file extension from a string \(best-effort\). |
-| <code>freezePortableBundle</code> | function | <code>src/schemas/portableBundle.js:326</code> | Create a shallow, immutable copy of a normalized bundle \(Object.freeze tree\). |
-| <code>normalizeDocumentEntry</code> | function | <code>src/schemas/portableBundle.js:225</code> | Normalize a single document entry. |
-| <code>normalizeDocumentFile</code> | function | <code>src/schemas/portableBundle.js:197</code> | Normalize a file entry. |
-| <code>normalizeMetadataAliasDetails</code> | function | <code>src/schemas/portableBundle.js:150</code> | Preserve a richer semantic alias object map without trying to deeply validate every property. |
-| <code>normalizeMetadataAliases</code> | function | <code>src/schemas/portableBundle.js:126</code> | Normalize an alias-based metadata object to a predictable string map. |
-| <code>normalizeMetadataIndex</code> | function | <code>src/schemas/portableBundle.js:172</code> | Preserve a raw metadata lookup map without imposing a rigid record schema here. |
-| <code>normalizePortableBundle</code> | function | <code>src/schemas/portableBundle.js:253</code> | Normalize a bundle to a predictable, minimally validated shape: Ensures session.id and stringifies known fields. |
 | <code>PORTABLE_BUNDLE_SCHEMA_VERSION</code> | constant | <code>src/schemas/portableBundle.js:29</code> | Schema version of this portable bundle definition. |
 | <code>PortableDocumentBundle</code> | typedef | <code>src/schemas/portableBundle.js:65</code> | A portable bundle groups a session and an array of document entries. |
 | <code>PortableDocumentEntry</code> | typedef | <code>src/schemas/portableBundle.js:53</code> | A single document entry containing one or more files. |
 | <code>PortableDocumentFile</code> | typedef | <code>src/schemas/portableBundle.js:39</code> | A single file reference inside a document. |
 | <code>PortableSession</code> | typedef | <code>src/schemas/portableBundle.js:31</code> | Session context for a bundle. |
-| <code>toObject</code> | function | <code>src/schemas/portableBundle.js:98</code> | Coerce unknown input to a plain object \(or return null\). |
-| <code>validatePortableBundle</code> | function | <code>src/schemas/portableBundle.js:283</code> | Validate a normalized \(or raw\) bundle. |
-| <code>ValidateReport</code> | typedef | <code>src/schemas/portableBundle.js:74</code> | Validation report for a bundle. |
 | <code>BumpPostZoom</code> | typedef | <code>src/types/jsdoc-types.js:85</code> | Step the per-pane post-zoom by ±0.1. |
 | <code>DocumentRenderHandle</code> | typedef | <code>src/types/jsdoc-types.js:67</code> | Minimal imperative handle exposed by the page renderer for printing. |
 | <code>FallbackRenderer</code> | typedef | <code>src/types/jsdoc-types.js:58</code> | Render function signature for ErrorBoundary fallbacks. |
@@ -1424,12 +1403,12 @@
 | <code>sharedThemeRevisionTime</code> | function | <code>src/utils/ompThemePreference.js:81</code> | Read the base-36 creation time, matching the OMP preference ordering contract. |
 | <code>writeSharedToCookie</code> | function | <code>src/utils/ompThemePreference.js:150</code> |  |
 | <code>writeSharedToStorage</code> | function | <code>src/utils/ompThemePreference.js:169</code> |  |
-| <code>PageAssetDescriptor</code> | typedef | <code>src/utils/pageAssetRenderer.js:36</code> |  |
-| <code>PageAssetRendererOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:30</code> |  |
-| <code>PageAssetRenderer#renderPageAsset</code> | function | <code>src/utils/pageAssetRenderer.js:669</code> | Render one requested page asset. |
-| <code>RenderPageAssetOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:44</code> |  |
-| <code>PageAssetRenderer#renderPdfPageAssetBatch</code> | function | <code>src/utils/pageAssetRenderer.js:541</code> | Render a PDF page set through the PDF worker pool as one partitioned batch. |
-| <code>PageAssetRenderer#resolvePdfPageResolution</code> | function | <code>src/utils/pageAssetRenderer.js:791</code> | Read page geometry only when a persisted asset needs an exact resolution identity. |
+| <code>PageAssetDescriptor</code> | typedef | <code>src/utils/pageAssetRenderer.js:38</code> |  |
+| <code>PageAssetRendererOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:32</code> |  |
+| <code>PageAssetRenderer#renderPageAsset</code> | function | <code>src/utils/pageAssetRenderer.js:671</code> | Render one requested page asset. |
+| <code>RenderPageAssetOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:46</code> |  |
+| <code>PageAssetRenderer#renderPdfPageAssetBatch</code> | function | <code>src/utils/pageAssetRenderer.js:543</code> | Render a PDF page set through the PDF worker pool as one partitioned batch. |
+| <code>PageAssetRenderer#resolvePdfPageResolution</code> | function | <code>src/utils/pageAssetRenderer.js:793</code> | Read page geometry only when a persisted asset needs an exact resolution identity. |
 | <code>BlobLruCache</code> | class | <code>src/utils/pageAssetStore.js:172</code> |  |
 | <code>PageAssetStore#cleanup</code> | function | <code>src/utils/pageAssetStore.js:458</code> |  |
 | <code>PageAssetStore#cleanupStaleSessions</code> | function | <code>src/utils/pageAssetStore.js:502</code> |  |

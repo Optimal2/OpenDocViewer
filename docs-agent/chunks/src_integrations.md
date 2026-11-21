@@ -1,6 +1,6 @@
 # OpenDocViewer / src/integrations
 
-File count: 9. Line count: 2552. JSDoc symbol count: 73.
+File count: 8. Line count: 2360. JSDoc symbol count: 65.
 
 ## src/integrations/bootstrapRuntime.js
 
@@ -148,22 +148,3 @@ Symbols:
 - `pick` (function) - Pick the first non\-empty value among a list of candidate query keys.
 - `parsePositiveInt` (function) - Parse a positive integer from a string.
 - `readFromUrlParams` (function) - Reads common query params used by the demo and other hosts.
-
-## src/integrations/viewerEvents.js
-
-OpenDocViewer — Tiny Event Emitter/Listener Utilities \(Browser\-only\) Lightweight helpers for broadcasting and listening to app\-level DOM events.
-
-Exports: `emitODVEvent`, `onODVEvent`, `onceODVEvent`, `default`
-
-Local imports: `src/logging/systemLogger.js`
-
-Symbols:
-
-- `ODVEventHandler` (typedef) - Listener signature for ODV events.
-- `OnceOptions` (typedef) - Options for onceODVEvent.
-- `OnceEventResult` (typedef) - Result returned by onceODVEvent when the event fires.
-- `createCustomEvent` (function) - Create a CustomEvent with best\-effort fallback for older browsers.
-- `emitODVEvent` (function) - Emit a namespaced OpenDocViewer event with an optional detail payload.
-- `onODVEvent` (function) - Attach a listener for a given OpenDocViewer event.
-- `onceODVEvent` (function) - Wait for a single occurrence of an event and resolve with \{ event, detail \} .
-- `clearTimeoutSafe` (function) - Clear a timer if it exists \(tiny helper\).

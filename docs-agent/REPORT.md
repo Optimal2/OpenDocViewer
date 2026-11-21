@@ -2,16 +2,16 @@
 
 ## Coverage
 
-- Files: 211
-- Source lines: 75331
-- JSDoc symbols: 2205
+- Files: 210
+- Source lines: 74853
+- JSDoc symbols: 2184
 - Files without JSDoc doclets: 5
 - Low-confidence summaries: 2
 - Parse errors: 0
 
 ## Import Hubs
 
-- `src/logging/systemLogger.js`: 47 incoming local imports
+- `src/logging/systemLogger.js`: 46 incoming local imports
 - `src/utils/runtimeConfig.js`: 37 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 13 incoming local imports
@@ -32,7 +32,7 @@
 - `src/contexts/ViewerProvider.jsx`: 2956 lines
 - `src/utils/printPdf.js`: 2530 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
-- `src/components/DocumentLoader/DocumentLoader.js`: 2196 lines
+- `src/components/DocumentLoader/DocumentLoader.js`: 2198 lines
 - `src/components/DocumentViewer/useDocumentViewer.js`: 1918 lines
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 1641 lines
 - `src/components/DocumentThumbnailList.jsx`: 1604 lines
