@@ -650,10 +650,6 @@
                   }
                 }
               ]
-
-              // Alternative remote-source shape for reasons:
-              // url: '/OpenDocViewer/userlog/reasons.json',
-              // cacheTtlSec: 300
             },
 
             default: null
