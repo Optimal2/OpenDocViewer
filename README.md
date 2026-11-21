@@ -251,16 +251,16 @@ The configuration points Git at the `.githooks` directory in this repository.
 Hooks:
 
 - `pre-commit` — light static checks only (`git diff --cached --check`). Does not build or run tests.
-- `pre-push` — runs `scripts\local-ci.ps1`, which builds the web app, runs the Vitest suite, validates OMP component version lockstep, and checks that the generated agent documentation is fresh.
+- `pre-push` — runs `scripts\local-ci.ps1`, which builds the web app, runs the Vitest suite, validates embedded module SQL and its import rules, validates OMP component version lockstep, and checks that the generated agent documentation is fresh.
 
-The version step runs with `-Strict`, so Check 15 (shared-script drift against the canonical copies in the OpenModulePlatform checkout) fails the gate when it cannot find that checkout. The gate looks for it via `-PlatformRepositoryRoot`, then `OMP_PLATFORM_ROOT`, then `OpenModulePlatformRoot`, then a sibling `OpenModulePlatform` folder. From a git worktree without such a sibling, set `OMP_PLATFORM_ROOT`:
+The local gate requires an OpenModulePlatform checkout for the module SQL validators and Check 15 (shared-script drift). It resolves the checkout once via `-PlatformRepositoryRoot`, then `OpenModulePlatformRoot`, then `OMP_PLATFORM_ROOT`, then a sibling `OpenModulePlatform` folder. The first specified path must exist. From a git worktree without such a sibling, set `OMP_PLATFORM_ROOT`:
 
 ```powershell
 $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'
 .\scripts\local-ci.ps1
 ```
 
-On a machine without any platform checkout, `.\scripts\local-ci.ps1 -AllowUnverifiedSharedScripts` deliberately turns Check 15 back into a "NOT VERIFIED" warning; drift then goes unchecked. `scripts\omp\test-check15-strict.ps1` tests this wiring.
+The module SQL guard builds a tool using the .NET SDK required by the platform checkout. It runs with `-SelfTest` and must report that it checked at least one script. Check 15 runs in strict mode by default. `-AllowUnverifiedSharedScripts` relaxes Check 15 only, and the local gate still requires both module SQL validators.
 
 The push is blocked if the local CI gate fails. Because this is a public repository, also verify that GitHub Actions passed on `main` after pushing:
 

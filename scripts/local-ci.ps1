@@ -5,16 +5,18 @@
 
 .DESCRIPTION
     This is a public repository; CI runs automatically on push, but still run
-    locally before pushing to catch build breaks, test failures and version
-    lockstep issues.
+    locally before pushing to catch build breaks, test failures, module SQL
+    import failures and version lockstep issues.
 
     Steps:
       1. Build the web application: npm run build
       2. Run the Vitest suite: npx vitest run (with a JSON report for the count)
-      3. Validate version lockstep: scripts/omp/validate-component-versions.ps1
+      3. Validate module definitions: check embedded SQL freshness and run the
+         OMP-MODULE-SQL-CONFIG-OWNERSHIP import guard with its self-test
+      4. Validate version lockstep: scripts/omp/validate-component-versions.ps1
          (run with -Strict, so Check 15 - shared-script drift against the
          OpenModulePlatform checkout - fails when it cannot run)
-      4. Verify generated agent documentation is fresh: npm run doc:agent,
+      5. Verify generated agent documentation is fresh: npm run doc:agent,
          then fail unless scripts/verify-agent-docs-fresh.mjs finds docs-agent
          identical in the working tree, the index and HEAD (shared with CI)
 
@@ -26,17 +28,14 @@
     remote-tracking ref is stale and you want to compare against a fresh one.
 
 .PARAMETER PlatformRepositoryRoot
-    OpenModulePlatform checkout that Check 15 compares the shared scripts
-    against. When empty, the validator resolves $env:OMP_PLATFORM_ROOT, then
-    $env:OpenModulePlatformRoot, then a sibling folder named
-    OpenModulePlatform. Set OMP_PLATFORM_ROOT (or pass this parameter) when
-    running from a git worktree that has no sibling platform checkout.
+    OpenModulePlatform checkout for the build environment, module definition
+    validators and Check 15. Defaults to $env:OpenModulePlatformRoot, then
+    $env:OMP_PLATFORM_ROOT, then a sibling folder named OpenModulePlatform.
+    A missing checkout fails the gate.
 
 .PARAMETER AllowUnverifiedSharedScripts
-    Deliberately set OMP_ALLOW_MISSING_PLATFORM=1 so that, when no
-    OpenModulePlatform checkout can be found, Check 15 reports "NOT VERIFIED"
-    instead of failing the gate. Use it only when no platform checkout is
-    available on the machine; drift then goes unchecked.
+    Run Check 15 without -Strict. The module definition validators still
+    require the checkout.
 
 .EXAMPLE
     $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'
@@ -104,13 +103,26 @@ try {
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host ""
 
+    if ([string]::IsNullOrWhiteSpace($PlatformRepositoryRoot)) { $PlatformRepositoryRoot = $env:OpenModulePlatformRoot }
+    if ([string]::IsNullOrWhiteSpace($PlatformRepositoryRoot)) { $PlatformRepositoryRoot = $env:OMP_PLATFORM_ROOT }
+    if ([string]::IsNullOrWhiteSpace($PlatformRepositoryRoot)) {
+        $PlatformRepositoryRoot = Join-Path (Split-Path -Parent $RepoRoot) 'OpenModulePlatform'
+    }
+    $PlatformRepositoryRoot = [System.IO.Path]::Combine($RepoRoot, $PlatformRepositoryRoot)
+    if (-not (Test-Path -LiteralPath $PlatformRepositoryRoot -PathType Container)) {
+        throw "OpenModulePlatform checkout not found at '$PlatformRepositoryRoot'. Set OpenModulePlatformRoot or OMP_PLATFORM_ROOT to the checkout."
+    }
+    $PlatformRepositoryRoot = (Resolve-Path -LiteralPath $PlatformRepositoryRoot).ProviderPath
+
     # --- Step 1: Build web app -------------------------------------------------
     $buildPassed = $false
     $buildStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     try {
-        Write-Host "[1/4] Building web application: npm run build" -ForegroundColor Cyan
+        Write-Host "[1/5] Building web application: npm run build" -ForegroundColor Cyan
+        $savedPlatformRoot = $env:OpenModulePlatformRoot
         Push-Location $RepoRoot
         try {
+            $env:OpenModulePlatformRoot = $PlatformRepositoryRoot
             # npm.cmd sets $LASTEXITCODE, but reset it first so a stale value
             # from an earlier native call can never be mistaken for the build
             # verdict if npm itself fails to launch.
@@ -121,6 +133,7 @@ try {
             }
         }
         finally {
+            $env:OpenModulePlatformRoot = $savedPlatformRoot
             Pop-Location
         }
     }
@@ -141,7 +154,7 @@ try {
     $testPassed = $false
     $testReportPath = Join-Path ([System.IO.Path]::GetTempPath()) ("odv-local-ci-vitest-{0}.json" -f ([guid]::NewGuid().ToString('N')))
     try {
-        Write-Host "[2/4] Running unit tests: npx vitest run" -ForegroundColor Cyan
+        Write-Host "[2/5] Running unit tests: npx vitest run" -ForegroundColor Cyan
         Push-Location $RepoRoot
         try {
             $global:LASTEXITCODE = 0
@@ -190,14 +203,28 @@ try {
     if (-not $testPassed) { $overallSuccess = $false }
     Write-Host ""
 
-    # --- Step 3: Validate component versions -----------------------------------
+    # --- Step 3: Validate module definitions -----------------------------------
+    $moduleDefinitionsPassed = $false
+    try {
+        Write-Host "[3/5] Validating module definitions" -ForegroundColor Cyan
+        & (Join-Path $PSScriptRoot 'validate-module-sql-import.ps1') -RepositoryRoot $RepoRoot -PlatformRepositoryRoot $PlatformRepositoryRoot
+        $moduleDefinitionsPassed = $true
+    }
+    catch {
+        Write-Host "Module definition validation failed: $_" -ForegroundColor Red
+    }
+    Write-StepResult -StepName "Validate module definitions" -Passed $moduleDefinitionsPassed
+    if (-not $moduleDefinitionsPassed) { $overallSuccess = $false }
+    Write-Host ""
+
+    # --- Step 4: Validate component versions -----------------------------------
     $validatePassed = $false
     # The exception is scoped to this step: an ambient OMP_ALLOW_MISSING_PLATFORM
     # from the caller's session is cleared, and the previous value is restored in
     # finally so it never leaks into later steps of this process.
     $savedAllowMissingPlatform = $env:OMP_ALLOW_MISSING_PLATFORM
     try {
-        Write-Host "[3/4] Validating component version lockstep" -ForegroundColor Cyan
+        Write-Host "[4/5] Validating component version lockstep" -ForegroundColor Cyan
         if (-not (Test-Path $Validator)) {
             throw "Validator script not found: $Validator"
         }
@@ -205,13 +232,8 @@ try {
         # $LASTEXITCODE reflects its verdict rather than that of the last
         # native git call it made internally. Reset it first so a stale value
         # from an earlier step can never be mistaken for a validator result.
-        # Strict by default: a Check 15 that cannot find the platform checkout
-        # must fail the gate (the shared Resolve-PlatformCheckScript records it
-        # as an error), otherwise shared-script drift from a worktree without a
-        # sibling OpenModulePlatform folder passes as green. The only escape
-        # hatch is the explicit OMP_ALLOW_MISSING_PLATFORM=1 exception.
         if ($AllowUnverifiedSharedScripts) {
-            Write-Warning 'Check 15 runs with OMP_ALLOW_MISSING_PLATFORM=1 (-AllowUnverifiedSharedScripts): a missing platform checkout is reported NOT VERIFIED instead of failing the gate.'
+            Write-Warning 'Check 15 runs without -Strict (-AllowUnverifiedSharedScripts).'
             $env:OMP_ALLOW_MISSING_PLATFORM = '1'
         }
         else {
@@ -234,7 +256,7 @@ try {
     if (-not $validatePassed) { $overallSuccess = $false }
     Write-Host ""
 
-    # --- Step 4: Agent documentation freshness ---------------------------------
+    # --- Step 5: Agent documentation freshness ---------------------------------
     # The shared generator first checks the known JSDoc exclusions against both
     # path separator forms, then regenerates docs-agent (as in agent-docs.yml).
     # The comparison is scripts/verify-agent-docs-fresh.mjs, the same script
@@ -253,7 +275,7 @@ try {
     # runs the pinned commit from a temporary worktree of it instead.
     $agentDocsPassed = $false
     try {
-        Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan
+        Write-Host "[5/5] Verifying generated agent documentation is fresh" -ForegroundColor Cyan
         Push-Location $RepoRoot
         try {
             & npm run doc:agent
@@ -267,7 +289,7 @@ try {
             # output to the console on both branches: on failure so the drift
             # list, status-letter legend, and the cause-specific match are
             # visible above the remedy line, and on success so the operator
-            # sees the gate's own "is fresh" confirmation instead of step 4
+            # sees the gate's own "is fresh" confirmation instead of this step
             # silently going green. 2>&1 can mix ErrorRecord objects into the
             # captured array; render them as their text so the console never
             # prints PowerShell object noise.

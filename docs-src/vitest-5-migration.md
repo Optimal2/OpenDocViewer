@@ -248,8 +248,9 @@ side and is not reworded.
 ## Validation and rollback
 
 Run `npm test`, `npm run lint`, `npm run build`, `npm run doc:agent`, and
-`scripts/local-ci.ps1`. The local CI script checks build, tests, component versions,
-and generated documentation; it does not run tests. GitHub CI independently
+`scripts/local-ci.ps1`. The local CI script checks the build, runs Vitest, validates
+module SQL embedding and import rules, checks component versions and verifies
+generated documentation. GitHub CI independently
 runs tests, lint, build, and JSDoc after a clean npm install.
 
 Both the Vitest 4 baseline and Vitest 5 full local run passed 91 tests in five

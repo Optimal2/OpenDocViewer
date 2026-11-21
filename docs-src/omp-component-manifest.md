@@ -42,9 +42,14 @@ touched and a fresh row starts with `NULL` until the platform's artifact
 auto-apply fills it. This is the platform ownership rule
 `OMP-MODULE-SQL-CONFIG-OWNERSHIP` (module SQL must not touch the platform's
 configuration layer); the HostAgent import gate and the `ModuleSqlGuard` check in
-the platform's packaging reject a definition whose SQL violates it. Earlier
-versions seeded a bootstrap `@ArtifactVersion` and backfilled `NULL` pointers via
-`COALESCE(target, source)`; that mechanism is gone.
+the platform's packaging reject a definition whose SQL violates it. The local
+pre-push gate also validates embedding with `validate-module-definitions.ps1`
+and runs `Test-ModuleSqlGuards.ps1 -SelfTest` from the OpenModulePlatform checkout.
+The SQL guard must report a positive script count. Run the regression test with
+`./scripts/omp/test-module-sql-import.ps1 -PlatformRepositoryRoot <path>`.
+
+Earlier versions seeded a bootstrap `@ArtifactVersion` and backfilled `NULL`
+pointers via `COALESCE(target, source)`; that mechanism is gone.
 
 Do not mechanically synchronize the independent streams. The only values that
 must stay equal are the two `definitionVersion` copies.

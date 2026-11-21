@@ -395,8 +395,8 @@ Versioning has two independent streams:
 
 Validation gates:
 
-- `.githooks/pre-push` runs `scripts/local-ci.ps1`: build, Vitest, version lockstep and
-  `docs-agent/` freshness.
+- `.githooks/pre-push` runs `scripts/local-ci.ps1` to build the app, run Vitest, check embedded
+  module SQL freshness and import rules, validate version lockstep and verify `docs-agent/` freshness.
 - `.github/workflows/ci.yml` runs on every push and pull request: lint, Vitest, build, Playwright UI
   tests, the manual-page proof, JSDoc, the lockstep job and the portable OMP PowerShell tests.
 - `.github/workflows/agent-docs.yml` regenerates `docs-agent/` and runs

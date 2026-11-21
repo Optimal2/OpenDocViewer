@@ -1,6 +1,6 @@
 // Freshness comparison for the committed docs-agent/ packet. Run it right after
 // `npm run doc:agent`; it is the last step of .github/workflows/agent-docs.yml
-// and of scripts/local-ci.ps1 step 4, so both sides apply the same rule.
+// and of the local CI agent documentation step, so both sides apply the same rule.
 //
 // The rule: after regeneration, docs-agent/ in the working tree, in the index and
 // in HEAD must be the same set of files with the same bytes. Three git queries

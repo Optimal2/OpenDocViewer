@@ -55,7 +55,7 @@ Use the narrowest level that gives real confidence:
 - JSDoc/commented API changes: `npm run doc`
 - Agent map/source-structure/dependency changes: `npm run doc:agent`
 - PowerShell script changes: parse the changed `.ps1` file with `System.Management.Automation.Language.Parser`
-- Pre-push gate: `scripts\local-ci.ps1` (build, tests, component versions, agent docs). Its version step runs strict, so Check 15 (shared-script drift) fails when no OpenModulePlatform checkout is found. In a git worktree without a sibling `OpenModulePlatform` folder, set `OMP_PLATFORM_ROOT` to the platform checkout (or pass `-PlatformRepositoryRoot`). `-AllowUnverifiedSharedScripts` deliberately downgrades Check 15 to a warning; use it only when no platform checkout exists. Wiring test: `scripts\omp\test-check15-strict.ps1`.
+- Pre-push gate: `scripts\local-ci.ps1` (build, Vitest, module definition validation, component version lockstep, agent docs). The module definition step checks embedded SQL freshness and runs the OpenModulePlatform import guard with `-SelfTest`. It requires at least one measured script. In a git worktree without a sibling `OpenModulePlatform` folder, set `OMP_PLATFORM_ROOT` to the platform checkout or pass `-PlatformRepositoryRoot`. `OpenModulePlatformRoot` takes precedence over `OMP_PLATFORM_ROOT`. Check 15 (shared-script drift) runs strict by default. `-AllowUnverifiedSharedScripts` affects Check 15 only.
 - Documentation-only changes: `git diff --check`
 - Local hosted visibility: build `dist/`, update the hosted directory, then verify the relevant localhost URL
 
@@ -238,7 +238,7 @@ Check the repository before relying on any of these:
 - The release-branch exemption in the version gate. On `main` a change to shipped files
   (`src/`, `public/`, the package files) must come with a raised OMP component version. Check
   13 (LOCKSTEP) of the validator shared with OpenModulePlatform
-  (`scripts/omp/validate-component-versions.ps1`) enforces it. Step 3 of `scripts/local-ci.ps1`,
+  (`scripts/omp/validate-component-versions.ps1`) enforces it. The version step of `scripts/local-ci.ps1`,
   which `.githooks/pre-push` runs, and the `lockstep` job in `.github/workflows/ci.yml` run
   that check, and `release.ps1` raises the version inside every release commit. On `release/*`
   the rule is to be reversed: the gate fails when `omp-components.json` differs from the

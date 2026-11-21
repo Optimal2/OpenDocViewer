@@ -1,4 +1,6 @@
 // File: scripts/local-ci-agent-docs-output.test.mjs
+// The agent-docs check is now step 5. The step-4 labels in the test cases and
+// historical evidence refer to the same check.
 // Lock: scripts/local-ci.ps1 step 4 must PRINT the freshness gate's own output
 // (drift rows, status-letter legend, flagged file names) to the console before
 // the cause-specific remedy, not just capture it. Without this, a red step 4
@@ -44,7 +46,7 @@
 // index-bit fault. Both constructions are RED probes below.
 //
 // The step-4 remedy region is anchored to step 4's own structure in the
-// AST: the unique "[4/4] Verifying generated agent documentation is
+// AST: the unique "[5/5] Verifying generated agent documentation is
 // fresh" banner, the single `if ($agentDocsExit -eq 0)` gate-exit test
 // inside the statement block that banner sits in, and that test's bare
 // `else` block. That else block -- and only that block -- is the remedy
@@ -557,11 +559,11 @@ function findBalancedBackward(source, closeAt, closeChar, openChar) {
 }
 
 test('local-ci step 4 echoes the captured gate output before the remedy on failure', () => {
-  // Anchor on the step-4 banner line ("[4/4] Verifying...") which is unique
+  // Anchor on the step-4 banner line ("[5/5] Verifying...") which is unique
   // to step 4 and sits inside the try block. The enclosing block of the
   // banner lands on the try block, which contains BOTH the foreach echo
   // loop and the Write-Host remedy.
-  const step4Block = enclosingBlock(source, '[4/4] Verifying generated agent documentation is fresh');
+  const step4Block = enclosingBlock(source, '[5/5] Verifying generated agent documentation is fresh');
   // The fix adds a `foreach { Write-Host $line ... }` loop BEFORE the
   // remedy branch so the gate's drift list, status-letter legend, and
   // flagged file names reach the console above the remedy. If a refactor
@@ -585,7 +587,7 @@ test('local-ci step 4 echoes the captured gate output before the remedy on failu
 });
 
 test('the captured gate output is rendered as a Write-Host loop, not silently discarded', () => {
-  const step4Block = enclosingBlock(source, '[4/4] Verifying generated agent documentation is fresh');
+  const step4Block = enclosingBlock(source, '[5/5] Verifying generated agent documentation is fresh');
   // The fix renders ErrorRecord objects as their text. Without the loop,
   // PowerShell renders captured ErrorRecord arrays as object noise on the
   // console â€” a different regression from "silently swallow", but the same
@@ -1141,15 +1143,15 @@ function step4Remedies(sourceText) {
       && tree.kids(mainBlock).at(-1) === verdict && topBlock?.type === 'NamedBlockAst'
       && tree.parent(topBlock)?.parentId === 0
       && all.some((b) => b.type === 'StringConstantExpressionAst'
-        && b.value === '[4/4] Verifying generated agent documentation is fresh' && tree.isWithin(b, mainBlock));
+        && b.value === '[5/5] Verifying generated agent documentation is fresh' && tree.isWithin(b, mainBlock));
     if (!ok) violate(`silent termination: constant-zero exit outside the final if ($overallSuccess) success branch: ${describe(n)}`);
   }
   // FINAL-SILENT-TERMINATION-END
   const isRemedyAssign = (n) => n.type === 'AssignmentStatementAst' && tree.kids(n)[0] && isPlainVariable(tree.kids(n)[0], 'remedy');
 
   // --- Anchor: step 4's own banner and gate-exit structure. ---
-  const banners = all.filter((n) => n.type === 'StringConstantExpressionAst' && n.value === '[4/4] Verifying generated agent documentation is fresh');
-  if (banners.length !== 1) violate(`expected exactly one step-4 banner ('[4/4] Verifying generated agent documentation is fresh') anchoring the remedy region, found ${banners.length}`);
+  const banners = all.filter((n) => n.type === 'StringConstantExpressionAst' && n.value === '[5/5] Verifying generated agent documentation is fresh');
+  if (banners.length !== 1) violate(`expected exactly one step-4 banner ('[5/5] Verifying generated agent documentation is fresh') anchoring the remedy region, found ${banners.length}`);
   let step4Block = tree.parent(banners[0]);
   while (step4Block && !['StatementBlockAst', 'NamedBlockAst', 'ScriptBlockAst'].includes(step4Block.type)) step4Block = tree.parent(step4Block);
   if (!step4Block) violate(`the step-4 banner is not inside any block, so no remedy region can be anchored to step 4`);
@@ -1572,7 +1574,7 @@ function step4Remedies(sourceText) {
         if (descendantsOf(n, tree).some((d) => d.id === banners[0].id)) {
           // The banner: the banner string plus an optional
           // -ForegroundColor <constant>, nothing else.
-          if (parts.length < 2 || parts[1].type !== 'StringConstantExpressionAst' || parts[1].value !== '[4/4] Verifying generated agent documentation is fresh') {
+          if (parts.length < 2 || parts[1].type !== 'StringConstantExpressionAst' || parts[1].value !== '[5/5] Verifying generated agent documentation is fresh') {
             violate(`literal output channel: the step-4 banner Write-Host must print exactly the banner string constant, got '${cmdText}'`);
           }
           let i = 2;
@@ -1868,7 +1870,7 @@ const ECHO_LOOP = [
 ].join('\n');
 
 const SYNTHETIC = [
-  `Write-Host "[4/4] Verifying generated agent documentation is fresh"`,
+  `Write-Host "[5/5] Verifying generated agent documentation is fresh"`,
   `$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1`,
   `$agentDocsExit = $global:LASTEXITCODE`,
   ECHO_LOOP,
@@ -2171,7 +2173,7 @@ test('step-4 lock closes the phase-10 bypasses with a positive structural bounda
     // Same positive boundary: uncaptured output of an innocent-looking
     // cmdlet is console output too.
     ['boundary: uncaptured Get-Date -Format wrong advice', SYNTHETIC.replace(afterCapture, `${afterCapture}\nGet-Date -Format "docs-agent is stale: run npm run doc:agent"`), literal],
-    ['boundary: banner Write-Host carrying an extra payload line', SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"', `Write-Host "[4/4] Verifying generated agent documentation is fresh" "docs-agent is stale: run npm run doc:agent"`), literal],
+    ['boundary: banner Write-Host carrying an extra payload line', SYNTHETIC.replace('Write-Host "[5/5] Verifying generated agent documentation is fresh"', `Write-Host "[5/5] Verifying generated agent documentation is fresh" "docs-agent is stale: run npm run doc:agent"`), literal],
     ['boundary: second node invocation', SYNTHETIC.replace(afterCapture, `${afterCapture}\n& node "scripts/print-wrong-remedy.mjs"`), literal],
   ];
   powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
@@ -2282,8 +2284,8 @@ test('step-4 lock closes the phase-12 review follow-up findings (phase 13)', () 
   // -ForegroundColor, Push-Location $RepoRoot, the nested try/finally with
   // Pop-Location, the npm-exit throw guard, the $global:LASTEXITCODE reset,
   // the bound captures and echo loop -- stays green.
-  const realShapes = `${SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"',
-    'Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan\nPush-Location $RepoRoot\ntry {\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }\n$global:LASTEXITCODE = 0')}\n} finally {\nPop-Location\n}`;
+  const realShapes = `${SYNTHETIC.replace('Write-Host "[5/5] Verifying generated agent documentation is fresh"',
+    'Write-Host "[5/5] Verifying generated agent documentation is fresh" -ForegroundColor Cyan\nPush-Location $RepoRoot\ntry {\n& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }\n$global:LASTEXITCODE = 0')}\n} finally {\nPop-Location\n}`;
   assert.equal(step4Remedies(realShapes).cone, 'sparse-checkout reapply');
 });
 
@@ -2307,7 +2309,7 @@ test('step-4 lock closes the phase-13 review follow-up findings (phase 14)', () 
     // Write-Host, so the echo could be discarded while staying "bound".
     ['F3 echo Write-Host $line 6>$null', SYNTHETIC.replace('else { Write-Host $line }', 'else { Write-Host $line 6>$null }'), literal],
     ['F3 echo Write-Host $line.ToString() 6>$null', SYNTHETIC.replace('Write-Host $line.ToString()', 'Write-Host $line.ToString() 6>$null'), literal],
-    ['F3 banner with 6>$null', SYNTHETIC.replace('Write-Host "[4/4] Verifying generated agent documentation is fresh"', 'Write-Host "[4/4] Verifying generated agent documentation is fresh" 6>$null'), literal],
+    ['F3 banner with 6>$null', SYNTHETIC.replace('Write-Host "[5/5] Verifying generated agent documentation is fresh"', 'Write-Host "[5/5] Verifying generated agent documentation is fresh" 6>$null'), literal],
     ['F3 fail-closed: measured-harmless 2>$null is still RED', SYNTHETIC.replace('else { Write-Host $line }', 'else { Write-Host $line 2>$null }'), literal],
   ];
   powerShellParser.prewarm(cases.map(([, snippet]) => snippet));
@@ -2323,7 +2325,7 @@ test('step-4 lock closes the phase-13 review follow-up findings (phase 14)', () 
 
 test('step-4 lock closes the phase-14 review follow-up findings (phase 15)', () => {
   const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
-  const banner = 'Write-Host "[4/4] Verifying generated agent documentation is fresh"';
+  const banner = 'Write-Host "[5/5] Verifying generated agent documentation is fresh"';
   const literal = /literal output channel/;
   const color = /ConsoleColor/;
   // The phase-14 independent review (VERDICT: fail) measured each of these
@@ -2367,7 +2369,7 @@ test('step-4 lock closes the phase-14 review follow-up findings (phase 15)', () 
 
 test('step-4 lock closes the phase-15 review follow-up findings (phase 16)', () => {
   const afterCapture = '$agentDocsExit = $global:LASTEXITCODE';
-  const banner = 'Write-Host "[4/4] Verifying generated agent documentation is fresh"';
+  const banner = 'Write-Host "[5/5] Verifying generated agent documentation is fresh"';
   const capture = '$agentDocsOutput = & node scripts/verify-agent-docs-fresh.mjs 2>&1';
   const npmGuard = '& npm run doc:agent\nif ($LASTEXITCODE -ne 0) { throw "npm run doc:agent exited with code $LASTEXITCODE" }';
   const literal = /literal output channel/;

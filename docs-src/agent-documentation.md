@@ -49,7 +49,7 @@ npm run doc:agent -- --agentdocmap-root <path-to-AgentDocMap>
 The same input must give the same bytes in CI and locally, so
 `scripts/agent-docs-environment.json` pins the three things that otherwise
 change the output. The Agent Documentation and Release workflows read it, and
-`scripts/generate-agent-docs.mjs` (also used by `scripts/local-ci.ps1` step 4)
+`scripts/generate-agent-docs.mjs` (also used by the local CI agent documentation step)
 enforces it before AgentDocMap runs:
 
 - `node`: the exact Node version. CI must run it. Locally a different ambient
@@ -90,7 +90,7 @@ commit the pin together with the regenerated `docs-agent/`.
 - Run `npm run doc:agent` during release preparation.
 - The release helper includes `npm run doc:agent` in pre-release validation.
 - The GitHub "Agent Documentation" workflow regenerates `docs-agent/` and fails
-  if the committed packet is stale. `scripts/local-ci.ps1` step 4 (the pre-push
+  if the committed packet is stale. The agent documentation step in `scripts/local-ci.ps1` (the pre-push
   gate) does the same with the same comparison script.
 
 ## Freshness Comparison
