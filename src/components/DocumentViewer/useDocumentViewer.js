@@ -291,6 +291,21 @@ function isNaturalPrintPageSequence(sequence, total) {
 }
 
 /**
+ * Normalize a custom selection while preserving an explicitly empty selection.
+ * Null means that no custom selection is active; an empty array means that the
+ * user selected a custom sequence and then removed every page from it.
+ *
+ * @param {*} sequence
+ * @param {number} total
+ * @returns {Array<number>|null}
+ */
+export function normalizeCustomPrintSelectionState(sequence, total) {
+  if (!Array.isArray(sequence)) return null;
+  const normalized = normalizePrintPageSequence(sequence, total);
+  return isNaturalPrintPageSequence(normalized, total) ? null : normalized;
+}
+
+/**
  * Resolve the nearest visible page number for a requested original page index.
  * Exact matches win. Otherwise the function prefers the first visible page after the requested
  * original index and falls back to the nearest visible page before it.
@@ -590,14 +605,12 @@ export function useDocumentViewer() {
     () => normalizeSelectionMask(draftSelectionMask, totalSessionPages),
     [draftSelectionMask, totalSessionPages]
   );
-  const normalizedCustomPrintSelectionSequence = useMemo(() => {
-    const normalized = normalizePrintPageSequence(customPrintSelectionSequence, totalSessionPages);
-    return normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
-      ? normalized
-      : null;
-  }, [customPrintSelectionSequence, totalSessionPages]);
-  const customPrintSelectionActive = Array.isArray(normalizedCustomPrintSelectionSequence)
-    && normalizedCustomPrintSelectionSequence.length > 0;
+  const normalizedCustomPrintSelectionSequence = useMemo(
+    () => normalizeCustomPrintSelectionState(customPrintSelectionSequence, totalSessionPages),
+    [customPrintSelectionSequence, totalSessionPages]
+  );
+  // An empty array is an active custom selection with no pages, not the absence of a selection.
+  const customPrintSelectionActive = Array.isArray(normalizedCustomPrintSelectionSequence);
   const selectionActive = useMemo(
     () => customPrintSelectionActive || hasExcludedPages(normalizedAppliedSelectionMask, totalSessionPages),
     [customPrintSelectionActive, normalizedAppliedSelectionMask, totalSessionPages]
@@ -999,9 +1012,7 @@ export function useDocumentViewer() {
       const nextSequence = normalizedCustomPrintSelectionSequence.filter((pageNumber) => pageNumber !== safeOriginalIndex + 1);
       if (nextSequence.length === normalizedCustomPrintSelectionSequence.length) return false;
       setCustomPrintSelectionSequence(
-        nextSequence.length > 0 && !isNaturalPrintPageSequence(nextSequence, totalSessionPages)
-          ? nextSequence
-          : null
+        normalizeCustomPrintSelectionState(nextSequence, totalSessionPages)
       );
       setThumbnailPaneMode('thumbnails');
       return true;
@@ -1048,9 +1059,7 @@ export function useDocumentViewer() {
       });
       if (nextSequence.length === normalizedCustomPrintSelectionSequence.length) return false;
       setCustomPrintSelectionSequence(
-        nextSequence.length > 0 && !isNaturalPrintPageSequence(nextSequence, totalSessionPages)
-          ? nextSequence
-          : null
+        normalizeCustomPrintSelectionState(nextSequence, totalSessionPages)
       );
       setThumbnailPaneMode('thumbnails');
       return true;
@@ -1343,9 +1352,7 @@ export function useDocumentViewer() {
       ? Array(totalSessionPages).fill(true)
       : buildSelectionMaskFromPrintPageSequence(normalized, totalSessionPages);
     setCustomPrintSelectionSequence(
-      normalized.length > 0 && !isNaturalSequence
-        ? normalized
-        : null
+      normalizeCustomPrintSelectionState(normalized, totalSessionPages)
     );
     setAppliedSelectionMask(nextMask);
     setDraftSelectionMask(nextMask);

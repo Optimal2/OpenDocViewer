@@ -55,9 +55,10 @@ describe('PrintRangeDialog recipient label', () => {
     delete window.__ODV_CONFIG__;
   });
 
-  function renderDialog(required, lng) {
+  function renderDialog(required, lng, { config = {}, onSubmit = () => {} } = {}) {
     currentLanguage = lng;
     window.__ODV_CONFIG__ = {
+      ...config,
       userLog: {
         enabled: true,
         ui: { fields: { reason: { required: false }, forWhom: { required } } },
@@ -70,7 +71,7 @@ describe('PrintRangeDialog recipient label', () => {
       root.render(React.createElement(PrintRangeDialog, {
         isOpen: true,
         onClose: () => {},
-        onSubmit: () => {},
+        onSubmit,
         totalPages: 3,
       }));
     });
@@ -101,5 +102,20 @@ describe('PrintRangeDialog recipient label', () => {
     expect(input).not.toBeNull();
     expect(input.getAttribute('placeholder')).toBe(optional);
     expect(input.closest('label').textContent).not.toContain('*');
+  });
+
+  it('does not start HTML printing through form submission when that action is disabled', () => {
+    const onSubmit = vi.fn();
+    renderDialog(false, 'en', {
+      config: { print: { actions: { printHtml: { enabled: false } } } },
+      onSubmit,
+    });
+
+    const form = document.querySelector('form');
+    act(() => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

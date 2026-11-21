@@ -436,6 +436,7 @@ export function usePrintRangeController({
 
     const requestedBackend = backendOverride || printBackend;
     const backend = action === 'download' ? 'pdf' : (printPdfEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
+    if (backend === 'html' && !printHtmlEnabled) return null;
     const common = { ...extras(), pdfOrientation: currentPdfOrientation, printBackend: backend, printAction: action };
 
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
@@ -471,6 +472,7 @@ export function usePrintRangeController({
     currentPdfOrientation,
     isComparing,
     makeDescendingSequence,
+    printHtmlEnabled,
     printPdfEnabled,
     printBackend,
     printMode,
