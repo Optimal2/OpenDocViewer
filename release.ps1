@@ -1,4 +1,7 @@
 # File: release.ps1
+# The script uses ProcessStartInfo.ArgumentList and Process.Kill($true), which Windows PowerShell
+# 5.1 does not have. Stop there with a clear message instead of failing halfway.
+#requires -Version 7.0
 <#
 .SYNOPSIS
 Validates OpenDocViewer and creates the npm version commit/tag locally.
@@ -309,8 +312,9 @@ function Format-PreparedReleaseSummary {
     "  Tag:              $TagName"
     "  Release commit:   $ReleaseCommit"
     "  Base commit:      $BaseCommit (origin/$Branch)"
-    "  Will push:        git push origin $Branch --follow-tags"
-    "                    = the release commit to origin/$Branch, and the tag $TagName"
+    "  Will push:        git $((Get-ReleasePushArguments -Branch $Branch -TagName $TagName) -join ' ')"
+    "                    = the release commit to origin/$Branch and the tag $TagName, both or neither;"
+    "                      no other tag is pushed"
     "  Effect:           the tag push starts the Release workflow, which publishes the GitHub release."
   )
   foreach ($notice in @($Notices)) {
@@ -333,6 +337,21 @@ function Confirm-PreparedReleasePublish {
   if ($Yes) { return $true }
   $answer = & $Prompt
   return ("$answer".Trim().ToUpperInvariant() -eq 'Y')
+}
+
+function Get-ReleasePushArguments {
+  # The one push of a release: exactly the branch and exactly the release tag, atomically.
+  # Naming the tag keeps every other local tag at home; a stray v* tag reaching origin would
+  # start the Release workflow. --atomic makes origin take both refs or neither, so the branch
+  # can never arrive without its tag.
+  param(
+    [string]$Branch,
+    [string]$TagName
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Branch)) { throw 'Cannot push a release without a branch name.' }
+  if ("$TagName" -notmatch '^v\d+\.\d+\.\d+$') { throw "Cannot push a release without a plain vX.Y.Z tag name (got '$TagName')." }
+  return @('push', '--atomic', 'origin', $Branch, "refs/tags/$TagName")
 }
 
 function Get-PushFailureRollback {
@@ -495,8 +514,9 @@ $null = Exec 'git' @('tag', '-a', $tagName, '-m', "chore(release): $newVersion")
 if (-not $Publish) {
   Write-Host "`nDone. Local release commit/tag created for $tagName." -ForegroundColor Green
   Write-Host 'The release was NOT pushed. To publish this official release, run:' -ForegroundColor Yellow
-  Write-Host "  .\release.ps1 -ReleaseType $ReleaseType -Yes -Publish" -ForegroundColor Yellow
-  Write-Host 'The second run recognizes the prepared release and publishes it without another version bump.' -ForegroundColor Yellow
+  Write-Host "  .\release.ps1 -Publish" -ForegroundColor Yellow
+  Write-Host 'The second run recognizes the prepared release, shows what will be pushed and asks before it pushes.' -ForegroundColor Yellow
+  Write-Host 'It publishes the prepared release without another version bump. Adding -Yes skips that question.' -ForegroundColor Yellow
   exit 0
 }
 } else {
@@ -530,7 +550,7 @@ if (-not $Publish) {
 
 try {
   Write-Host "`nPushing release commit and tag..." -ForegroundColor Yellow
-  $null = Exec 'git' @('push', 'origin', $branch, '--follow-tags') -Cwd $repoRoot
+  $null = Exec 'git' (Get-ReleasePushArguments -Branch $branch -TagName $tagName) -Cwd $repoRoot
 } catch {
   $pushError = $_
   $rollback = @(Get-PushFailureRollback -CreatedInThisRun (-not $preparedRelease) -TagName $tagName -PrevHead $prevHead)

@@ -121,7 +121,8 @@ Describe 'Format-PreparedReleaseSummary' {
     $summary | Should -Match 'Branch:\s+main'
     $summary | Should -Match 'aaaa1111'
     $summary | Should -Match 'bbbb2222'
-    $summary | Should -Match 'git push origin main --follow-tags'
+    $summary | Should -Match 'git push --atomic origin main refs/tags/v2\.12\.1'
+    $summary | Should -Match 'no other tag'
     $summary | Should -Match 'Release workflow'
     $summary | Should -Match '-SkipValidation has no effect here\.'
   }
@@ -154,6 +155,21 @@ Describe 'Confirm-PreparedReleasePublish' {
   It 'shows the summary before it asks' {
     $shown = Confirm-PreparedReleasePublish -Summary 'THE-SUMMARY' -Yes $false -Prompt { 'N' } 6>&1
     ($shown | Out-String) | Should -Match 'THE-SUMMARY'
+  }
+}
+
+Describe 'Get-ReleasePushArguments' {
+  It 'pushes exactly the branch and the release tag, atomically' {
+    $arguments = @(Get-ReleasePushArguments -Branch 'main' -TagName 'v2.12.1')
+    ($arguments -join ' ') | Should -Be 'push --atomic origin main refs/tags/v2.12.1'
+  }
+
+  It 'refuses to build a push without <Name>' -ForEach @(
+    @{ Name = 'a tag'; Branch = 'main'; TagName = '' }
+    @{ Name = 'a branch'; Branch = ''; TagName = 'v2.12.1' }
+    @{ Name = 'a plain tag name'; Branch = 'main'; TagName = 'v2.12.1 --follow-tags' }
+  ) {
+    { Get-ReleasePushArguments -Branch $Branch -TagName $TagName } | Should -Throw
   }
 }
 
@@ -208,14 +224,38 @@ Describe 'release.ps1 flow' {
   It 'checks the arguments and asks for confirmation before the push' {
     $check = $script:ReleaseText.IndexOf('$preparedProblem = Get-PreparedReleaseArgumentProblem')
     $confirm = $script:ReleaseText.IndexOf('Confirm-PreparedReleasePublish -Summary')
-    $push = $script:ReleaseText.IndexOf("@('push', 'origin', `$branch, '--follow-tags')")
+    $push = $script:ReleaseText.IndexOf('Exec ''git'' (Get-ReleasePushArguments -Branch $branch -TagName $tagName)')
     $check | Should -BeGreaterThan 0
     $confirm | Should -BeGreaterThan $check
     $push | Should -BeGreaterThan $confirm
   }
 
+  It 'pushes through Get-ReleasePushArguments only, in both modes' {
+    # One push statement serves the same-run and the prepared release. --follow-tags would also
+    # push every other annotated tag reachable from HEAD, and a stray v* tag starts the Release
+    # workflow.
+    $script:ReleaseText | Should -Not -Match 'follow-tags'
+    $pushes = $script:ReleaseAst.FindAll({ param($node)
+        $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $node.Value -eq 'push' }, $true)
+    @($pushes).Count | Should -Be 1
+    $owner = $pushes[0].Parent
+    while ($owner -and $owner -isnot [System.Management.Automation.Language.FunctionDefinitionAst]) { $owner = $owner.Parent }
+    $owner.Name | Should -Be 'Get-ReleasePushArguments'
+  }
+
+  It 'suggests publishing with the confirmation question after a local preparation' {
+    $script:ReleaseText | Should -Match 'Write-Host "  \.\\release\.ps1 -Publish" '
+    $script:ReleaseText | Should -Not -Match 'Write-Host[^\r\n]*-Yes -Publish'
+    $script:ReleaseText | Should -Match 'Write-Host[^\r\n]*-Yes skips'
+  }
+
+  It 'requires PowerShell 7' {
+    $script:ReleaseAst.ScriptRequirements | Should -Not -BeNullOrEmpty
+    $script:ReleaseAst.ScriptRequirements.RequiredPSVersion | Should -Be ([version]'7.0')
+  }
+
   It 'lets the rollback plan decide what a failed push removes' {
-    $catch = $script:ReleaseText.Substring($script:ReleaseText.IndexOf("@('push', 'origin', `$branch, '--follow-tags')"))
+    $catch = $script:ReleaseText.Substring($script:ReleaseText.IndexOf('Exec ''git'' (Get-ReleasePushArguments'))
     $catch | Should -Match 'Get-PushFailureRollback -CreatedInThisRun \(-not \$preparedRelease\)'
     $catch | Should -Not -Match "@\('tag', '-d'"
     $catch | Should -Not -Match "@\('reset', '--hard'"
