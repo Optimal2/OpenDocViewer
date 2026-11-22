@@ -93,15 +93,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 216,
-    "sourceLineCount": 75179,
-    "docletCount": 2202,
-    "documentedFileCount": 210,
+    "fileCount": 217,
+    "sourceLineCount": 75217,
+    "docletCount": 2203,
+    "documentedFileCount": 211,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 27,
     "devDependencyCount": 25,
-    "estimatedSourceTokens": 7599
+    "estimatedSourceTokens": 7625
   },
   "recommendations": [
     "6 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -987,9 +987,9 @@
   "modules": [
     {
       "name": "server",
-      "fileCount": 6,
-      "lineCount": 673,
-      "docletCount": 17,
+      "fileCount": 7,
+      "lineCount": 711,
+      "docletCount": 18,
       "importantFiles": [
         {
           "path": "server/logRetention.js",
@@ -1007,6 +1007,15 @@
           "incomingLocalImports": 2,
           "doclets": 2,
           "summary": "Text of an HTTP header value as the sender wrote it.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/clientAddress.js",
+          "score": 44,
+          "lines": 32,
+          "incomingLocalImports": 2,
+          "doclets": 1,
+          "summary": "The client's address without a port, for the rate limit key and the log records.",
           "summaryConfidence": "high"
         },
         {
@@ -1029,8 +1038,8 @@
         },
         {
           "path": "server/system-log-server.js",
-          "score": 36,
-          "lines": 238,
+          "score": 37,
+          "lines": 241,
           "incomingLocalImports": 0,
           "doclets": 5,
           "summary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -1039,7 +1048,7 @@
         {
           "path": "server/user-log-server.js",
           "score": 28,
-          "lines": 271,
+          "lines": 274,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2072,6 +2081,86 @@
   ],
   "files": [
     {
+      "path": "server/clientAddress.js",
+      "lines": 32,
+      "extension": ".js",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "The client's address without a port, for the rate limit key and the log records.",
+      "imports": [
+        {
+          "source": "node:net",
+          "specifiers": [
+            "net"
+          ],
+          "line": 4,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "normalizeClientAddress",
+          "kind": "function",
+          "line": 19
+        }
+      ],
+      "declarations": [
+        {
+          "name": "normalizeClientAddress",
+          "kind": "function",
+          "line": 19
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "normalizeClientAddress",
+          "name": "normalizeClientAddress",
+          "longname": "normalizeClientAddress",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/clientAddress.js",
+          "line": 19,
+          "description": "A reverse proxy may add the client's source port to the address it forwards (IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;[2001:db8::1]:49152&quot;).",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "*",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "server",
+      "localImports": [],
+      "packageImports": [
+        {
+          "source": "node:net",
+          "specifiers": [
+            "net"
+          ],
+          "line": 4,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 44,
+      "summary": "The client's address without a port, for the rate limit key and the log records.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "server/headerText.js",
       "lines": 35,
       "extension": ".js",
@@ -2343,7 +2432,7 @@
     },
     {
       "path": "server/system-log-server.js",
-      "lines": 238,
+      "lines": 241,
       "extension": ".js",
       "jsdocBlockCount": 11,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2445,6 +2534,14 @@
           ],
           "line": 36,
           "kind": "static"
+        },
+        {
+          "source": "./clientAddress.js",
+          "specifiers": [
+            "normalizeClientAddress"
+          ],
+          "line": 37,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -2452,67 +2549,67 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 50
+          "line": 51
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 60
+          "line": 61
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 68
+          "line": 69
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 70
+          "line": 71
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 83
+          "line": 84
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 87
+          "line": 88
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 91
+          "line": 92
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 97
+          "line": 98
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 100
+          "line": 101
         },
         {
           "name": "requireLogToken",
           "kind": "function",
-          "line": 176
+          "line": 179
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 192
+          "line": 195
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 203
+          "line": 206
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 219
+          "line": 222
         }
       ],
       "parseError": null,
@@ -2528,7 +2625,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 129,
+          "line": 130,
           "description": "Trust proxy for accurate req.ip",
           "params": [],
           "returns": [],
@@ -2541,7 +2638,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 136,
+          "line": 137,
           "description": "Token gate for /log",
           "params": [],
           "returns": [],
@@ -2554,7 +2651,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 142,
+          "line": 143,
           "description": "Optional CORS for /log",
           "params": [],
           "returns": [],
@@ -2567,7 +2664,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 166,
+          "line": 167,
           "description": "Rate limit for ingestion",
           "params": [],
           "returns": [],
@@ -2580,7 +2677,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 176,
+          "line": 179,
           "description": "Token auth middleware",
           "params": [],
           "returns": [],
@@ -2607,6 +2704,15 @@
           "line": 36,
           "kind": "static",
           "resolved": "server/headerText.js"
+        },
+        {
+          "source": "./clientAddress.js",
+          "specifiers": [
+            "normalizeClientAddress"
+          ],
+          "line": 37,
+          "kind": "static",
+          "resolved": "server/clientAddress.js"
         }
       ],
       "packageImports": [
@@ -2693,14 +2799,14 @@
         }
       ],
       "incomingLocalImports": 0,
-      "importanceScore": 36,
+      "importanceScore": 37,
       "summary": "System Log Server — standalone Express endpoint for structured system logs.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 271,
+      "lines": 274,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2812,6 +2918,14 @@
           ],
           "line": 42,
           "kind": "static"
+        },
+        {
+          "source": "./clientAddress.js",
+          "specifiers": [
+            "normalizeClientAddress"
+          ],
+          "line": 43,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -2819,72 +2933,72 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 59
+          "line": 60
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 76
+          "line": 77
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 84
+          "line": 85
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 85
+          "line": 86
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 97
+          "line": 98
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 99
+          "line": 100
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 103
+          "line": 104
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 109
+          "line": 110
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 110
+          "line": 111
         },
         {
           "name": "resolveUser",
           "kind": "function",
-          "line": 132
+          "line": 133
         },
         {
           "name": "sameOriginGuard",
           "kind": "function",
-          "line": 151
+          "line": 152
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 219
+          "line": 222
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 236
+          "line": 239
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 252
+          "line": 255
         }
       ],
       "parseError": null,
@@ -2900,7 +3014,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 132,
+          "line": 133,
           "description": "Resolve user identity without cookies.",
           "params": [],
           "returns": [],
@@ -2913,7 +3027,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 151,
+          "line": 152,
           "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
           "params": [],
           "returns": [],
@@ -2960,6 +3074,15 @@
           "line": 42,
           "kind": "static",
           "resolved": "server/headerText.js"
+        },
+        {
+          "source": "./clientAddress.js",
+          "specifiers": [
+            "normalizeClientAddress"
+          ],
+          "line": 43,
+          "kind": "static",
+          "resolved": "server/clientAddress.js"
         }
       ],
       "packageImports": [
@@ -90861,6 +90984,31 @@
   ],
   "symbols": [
     {
+      "id": "normalizeClientAddress",
+      "name": "normalizeClientAddress",
+      "longname": "normalizeClientAddress",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/clientAddress.js",
+      "line": 19,
+      "description": "A reverse proxy may add the client's source port to the address it forwards (IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;[2001:db8::1]:49152&quot;).",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "*",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "decodeHeaderValue",
       "name": "decodeHeaderValue",
       "longname": "decodeHeaderValue",
@@ -90999,7 +91147,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 142,
+      "line": 143,
       "description": "Optional CORS for /log",
       "params": [],
       "returns": [],
@@ -91012,7 +91160,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 136,
+      "line": 137,
       "description": "Token gate for /log",
       "params": [],
       "returns": [],
@@ -91025,7 +91173,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 166,
+      "line": 167,
       "description": "Rate limit for ingestion",
       "params": [],
       "returns": [],
@@ -91038,7 +91186,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 176,
+      "line": 179,
       "description": "Token auth middleware",
       "params": [],
       "returns": [],
@@ -91051,7 +91199,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 129,
+      "line": 130,
       "description": "Trust proxy for accurate req.ip",
       "params": [],
       "returns": [],
@@ -91064,7 +91212,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 132,
+      "line": 133,
       "description": "Resolve user identity without cookies.",
       "params": [],
       "returns": [],
@@ -91077,7 +91225,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 151,
+      "line": 152,
       "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
       "params": [],
       "returns": [],

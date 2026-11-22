@@ -1,6 +1,16 @@
 # OpenDocViewer / server
 
-File count: 6. Line count: 673. JSDoc symbol count: 17.
+File count: 7. Line count: 711. JSDoc symbol count: 18.
+
+## server/clientAddress.js
+
+The client's address without a port, for the rate limit key and the log records.
+
+Exports: `normalizeClientAddress`
+
+Symbols:
+
+- `normalizeClientAddress` (function) - A reverse proxy may add the client's source port to the address it forwards \(IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;\[2001:db8::1\]:49152&quot;\).
 
 ## server/headerText.js
 
@@ -30,7 +40,7 @@ Symbols:
 
 System Log Server — standalone Express endpoint for structured system logs.
 
-Local imports: `server/logRetention.js`, `server/headerText.js`
+Local imports: `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`
 
 Symbols:
 
@@ -44,7 +54,7 @@ Symbols:
 
 User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
-Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`
+Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`
 
 Symbols:
 

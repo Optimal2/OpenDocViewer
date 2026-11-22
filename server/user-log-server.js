@@ -40,6 +40,7 @@ import { pruneRotatedLogs, resolvePrintLogRetentionDays, scheduleLogRetention } 
 import { neutralizeForWhom, readPrintLogFields } from './userLogPayload.js';
 import { isAllowedUserLogOrigin } from './userLogOrigin.js';
 import { decodeHeaderValue } from './headerText.js';
+import { normalizeClientAddress } from './clientAddress.js';
 
 dotenv.config();
 
@@ -197,7 +198,9 @@ const printLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'Too many requests' },
-  keyGenerator: (req) => ipKeyGenerator(req.ip)
+  // Keyed on the address without a port: a proxy that forwards address:port (IIS ARR)
+  // would otherwise make this a limit per connection.
+  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip))
 });
 
 /**
@@ -219,7 +222,7 @@ app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
     const rec = {
       ts: new Date().toISOString(),
       userId: resolveUser(req),
-      ip: req.ip,
+      ip: normalizeClientAddress(req.ip),
       ua: decodeHeaderValue(req.get('user-agent')) || undefined,
       referer: decodeHeaderValue(req.get('referer')) || undefined,
       action: 'print',

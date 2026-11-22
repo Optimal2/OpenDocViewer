@@ -109,7 +109,13 @@ Old files are pruned on startup and once every 24 hours while the service remain
 | `PRINT_LOG_RETENTION_DAYS` | User | `30`. Print records; without it they follow `LOG_RETENTION_DAYS` but never below 30. |
 | `ODV_STRICT_ORIGIN` | User | `false`; set to `true` to reject requests without `Origin`, `Referer` or `Sec-Fetch-Site`. |
 
-The system endpoint allows 120 requests per minute per client. The user endpoint allows 60. Both use
+The system endpoint allows 120 requests per minute per client. The user endpoint allows 60. A
+client is its address without a port: IIS ARR adds the client's source port to the address it
+puts in `X-Forwarded-For` (`203.0.113.5:49152`, `[2001:db8::1]:49152`), and with `TRUST_PROXY`
+that value becomes the request's address. Both servers remove the port (`server/clientAddress.js`)
+before they use the address as the rate limit key and before they write it to the `ip` field of a
+log record; otherwise the limit would count per connection. With `TRUST_PROXY=1` the address is
+the last entry of `X-Forwarded-For`, the one the proxy added, never an entry the client sent. Both use
 `helmet()` and daily UTC rotation.
 
 ## Log rotation assumptions

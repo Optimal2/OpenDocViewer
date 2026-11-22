@@ -34,6 +34,7 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import morgan from 'morgan';
 import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
 import { decodeHeaderValue } from './headerText.js';
+import { normalizeClientAddress } from './clientAddress.js';
 
 dotenv.config();
 
@@ -169,7 +170,9 @@ const logLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'Too many log requests, please slow down.' },
-  keyGenerator: (req) => ipKeyGenerator(req.ip)
+  // Keyed on the address without a port: a proxy that forwards address:port (IIS ARR)
+  // would otherwise make this a limit per connection.
+  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip))
 });
 
 /** Token auth middleware */
@@ -192,7 +195,7 @@ app.post('/log', corsForLog, logLimiter, requireLogToken, (req, res) => {
     const record = {
       ts: new Date().toISOString(),
       level: levelNorm,
-      ip: req.ip,
+      ip: normalizeClientAddress(req.ip),
       ua: decodeHeaderValue(req.get('user-agent')) || undefined,
       message: safeString(message),
       context: context === undefined ? undefined : context

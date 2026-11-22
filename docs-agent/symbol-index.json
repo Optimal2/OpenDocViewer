@@ -1,5 +1,30 @@
 [
   {
+    "id": "normalizeClientAddress",
+    "name": "normalizeClientAddress",
+    "longname": "normalizeClientAddress",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/clientAddress.js",
+    "line": 19,
+    "description": "A reverse proxy may add the client's source port to the address it forwards (IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;[2001:db8::1]:49152&quot;).",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "*",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "decodeHeaderValue",
     "name": "decodeHeaderValue",
     "longname": "decodeHeaderValue",
@@ -138,7 +163,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 142,
+    "line": 143,
     "description": "Optional CORS for /log",
     "params": [],
     "returns": [],
@@ -151,7 +176,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 136,
+    "line": 137,
     "description": "Token gate for /log",
     "params": [],
     "returns": [],
@@ -164,7 +189,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 166,
+    "line": 167,
     "description": "Rate limit for ingestion",
     "params": [],
     "returns": [],
@@ -177,7 +202,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 176,
+    "line": 179,
     "description": "Token auth middleware",
     "params": [],
     "returns": [],
@@ -190,7 +215,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 129,
+    "line": 130,
     "description": "Trust proxy for accurate req.ip",
     "params": [],
     "returns": [],
@@ -203,7 +228,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 132,
+    "line": 133,
     "description": "Resolve user identity without cookies.",
     "params": [],
     "returns": [],
@@ -216,7 +241,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 151,
+    "line": 152,
     "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
     "params": [],
     "returns": [],
