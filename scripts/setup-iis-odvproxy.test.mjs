@@ -31,7 +31,14 @@ function global:Write-IisCall([string]$Command, $Bound) {
 }
 function global:Import-Module { param($Name, $ErrorAction) }
 function global:Get-WebGlobalModule { param($Name, $ErrorAction) [pscustomobject]@{ Name = $Name } }
-function global:Get-WebConfigurationProperty { param($PSPath, $Location, $Filter, $Name, $ErrorAction) Write-IisCall 'Get-WebConfigurationProperty' $PSBoundParameters }
+function global:Get-WebConfigurationProperty {
+  param($PSPath, $Location, $Filter, $Name, $ErrorAction)
+  Write-IisCall 'Get-WebConfigurationProperty' $PSBoundParameters
+  # ODV_IIS_ALLOWED names the server variables the stand-in reports as already allowed.
+  foreach ($allowedName in @("$env:ODV_IIS_ALLOWED" -split ',' | Where-Object { $_ })) {
+    if ("$Filter".EndsWith("add[@name='$allowedName']")) { return [pscustomobject]@{ Value = $allowedName } }
+  }
+}
 function global:Set-WebConfigurationProperty { param($PSPath, $Location, $Filter, $Name, $Value, $ErrorAction) Write-IisCall 'Set-WebConfigurationProperty' $PSBoundParameters }
 function global:Add-WebConfigurationProperty { param($PSPath, $Location, $Filter, $Name, $Value, $ErrorAction) Write-IisCall 'Add-WebConfigurationProperty' $PSBoundParameters }
 function global:New-WebAppPool { param($Name) Write-IisCall 'New-WebAppPool' $PSBoundParameters }
@@ -83,7 +90,7 @@ const appCmdStub = String.raw`
   Add-Content -LiteralPath $env:ODV_IIS_CALL_LOG -Encoding utf8
 `;
 
-function runSetup(params) {
+function runSetup(params, { alreadyAllowed = [] } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-iis-setup-'));
   const harnessPath = path.join(dir, 'harness.ps1');
   const paramsPath = path.join(dir, 'params.json');
@@ -98,7 +105,7 @@ function runSetup(params) {
     execFile(
       'pwsh',
       ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', harnessPath, '-ScriptPath', script, '-ParamsPath', paramsPath, '-LogPath', logPath, '-AppCmdStub', appCmdStubPath],
-      { encoding: 'utf8', timeout: 90_000, windowsHide: true, env: { ...process.env, NO_COLOR: '1', TERM: 'dumb' } },
+      { encoding: 'utf8', timeout: 90_000, windowsHide: true, env: { ...process.env, NO_COLOR: '1', TERM: 'dumb', ODV_IIS_ALLOWED: alreadyAllowed.join(',') } },
       (error, stdout, stderr) => {
         const calls = fs.readFileSync(logPath, 'utf8').split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
         const configPath = path.join(physicalPath, 'web.config');
@@ -191,6 +198,45 @@ describe.skipIf(process.platform !== 'win32')('Setup-IIS-ODVProxy.ps1', () => {
       ['HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED_PROTO']);
     assert.match(result.webConfig, /<rewriteMap name="OdvProxyScheme" defaultValue="http">/);
   }, 120_000);
+
+  test('puts the server variables before the action in both rules', async () => {
+    const result = await runSetup({ ForwardClientHeaders: true });
+    assert.equal(result.code, 0, result.output);
+    for (const name of ['Proxy_SystemLog', 'Proxy_UserLog']) {
+      const rule = ruleBlock(result.webConfig, name);
+      assert.ok(rule.indexOf('<serverVariables>') > 0, rule);
+      assert.ok(rule.indexOf('</serverVariables>') < rule.indexOf('<action '), rule);
+    }
+  }, 120_000);
+
+  test('never repeats a server variable that is already allowed for the application', async () => {
+    const allowedNames = (webConfig) => {
+      const block = /<allowedServerVariables>([\s\S]*?)<\/allowedServerVariables>/.exec(webConfig);
+      return block ? [...block[1].matchAll(/<add name="(\w+)" \/>/g)].map((match) => match[1]) : null;
+    };
+    const appcmd = (calls) => calls.filter((call) => call.command === 'appcmd').length;
+
+    const one = await runSetup({ ForwardClientHeaders: true }, { alreadyAllowed: ['HTTP_X_FORWARDED_FOR'] });
+    assert.equal(one.code, 0, one.output);
+    assert.deepEqual(allowedNames(one.webConfig), ['HTTP_X_FORWARDED_PROTO']);
+    assert.equal(appcmd(one.calls), 1);
+
+    // Everything allowed already: no section in web.config, nothing to unlock, rules unchanged.
+    const all = await runSetup({ ForwardClientHeaders: true },
+      { alreadyAllowed: ['HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED_PROTO', 'HTTP_X_FORWARDED_HOST'] });
+    assert.equal(all.code, 0, all.output);
+    assert.equal(allowedNames(all.webConfig), null);
+    assert.equal(appcmd(all.calls), 0);
+    assert.deepEqual(writes(all.calls).filter((call) => call.location), []);
+    assert.match(ruleBlock(all.webConfig, 'Proxy_SystemLog'), /HTTP_X_FORWARDED_PROTO/);
+    assert.match(all.webConfig, /<rewriteMap name="OdvProxyScheme"/);
+
+    // Without the user-log rule the host variable is not added for the location, so web.config carries it.
+    const systemOnly = await runSetup({ ForwardClientHeaders: true, EnableUserLog: false });
+    assert.equal(systemOnly.code, 0, systemOnly.output);
+    assert.deepEqual(allowedNames(systemOnly.webConfig),
+      ['HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED_PROTO', 'HTTP_X_FORWARDED_HOST']);
+  }, 240_000);
 
   test('warns when the user-log upstream is not a loopback address', async () => {
     const remote = await runSetup({ UserLogUrl: 'http://logs.example:3002/userlog/record' });

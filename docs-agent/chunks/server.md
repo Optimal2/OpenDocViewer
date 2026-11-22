@@ -1,6 +1,17 @@
 # OpenDocViewer / server
 
-File count: 5. Line count: 623. JSDoc symbol count: 15.
+File count: 6. Line count: 673. JSDoc symbol count: 17.
+
+## server/headerText.js
+
+Text of an HTTP header value as the sender wrote it.
+
+Exports: `decodeHeaderValue`
+
+Symbols:
+
+- `strictUtf8` (constant) - Text of an HTTP header value as the sender wrote it.
+- `decodeHeaderValue` (function) - Node hands header values over decoded as latin1, one character per byte.
 
 ## server/logRetention.js
 
@@ -19,7 +30,7 @@ Symbols:
 
 System Log Server — standalone Express endpoint for structured system logs.
 
-Local imports: `server/logRetention.js`
+Local imports: `server/logRetention.js`, `server/headerText.js`
 
 Symbols:
 
@@ -33,7 +44,7 @@ Symbols:
 
 User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
-Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`
+Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`
 
 Symbols:
 

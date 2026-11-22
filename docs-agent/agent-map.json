@@ -93,15 +93,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 214,
-    "sourceLineCount": 74998,
-    "docletCount": 2193,
-    "documentedFileCount": 208,
+    "fileCount": 215,
+    "sourceLineCount": 75048,
+    "docletCount": 2195,
+    "documentedFileCount": 209,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 27,
     "devDependencyCount": 25,
-    "estimatedSourceTokens": 7546
+    "estimatedSourceTokens": 7564
   },
   "recommendations": [
     "6 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -987,9 +987,9 @@
   "modules": [
     {
       "name": "server",
-      "fileCount": 5,
-      "lineCount": 623,
-      "docletCount": 15,
+      "fileCount": 6,
+      "lineCount": 673,
+      "docletCount": 17,
       "importantFiles": [
         {
           "path": "server/logRetention.js",
@@ -998,6 +998,15 @@
           "incomingLocalImports": 2,
           "doclets": 4,
           "summary": "Shared best-effort retention for the optional standalone log servers.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/headerText.js",
+          "score": 47,
+          "lines": 35,
+          "incomingLocalImports": 2,
+          "doclets": 2,
+          "summary": "Text of an HTTP header value as the sender wrote it.",
           "summaryConfidence": "high"
         },
         {
@@ -1021,7 +1030,7 @@
         {
           "path": "server/system-log-server.js",
           "score": 36,
-          "lines": 231,
+          "lines": 238,
           "incomingLocalImports": 0,
           "doclets": 5,
           "summary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -1030,7 +1039,7 @@
         {
           "path": "server/user-log-server.js",
           "score": 28,
-          "lines": 263,
+          "lines": 271,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2063,6 +2072,81 @@
   ],
   "files": [
     {
+      "path": "server/headerText.js",
+      "lines": 35,
+      "extension": ".js",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "Text of an HTTP header value as the sender wrote it.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "decodeHeaderValue",
+          "kind": "function",
+          "line": 20
+        }
+      ],
+      "declarations": [
+        {
+          "name": "decodeHeaderValue",
+          "kind": "function",
+          "line": 20
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "strictUtf8",
+          "name": "strictUtf8",
+          "longname": "strictUtf8",
+          "kind": "constant",
+          "scope": "global",
+          "file": "server/headerText.js",
+          "line": 4,
+          "description": "Text of an HTTP header value as the sender wrote it.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "decodeHeaderValue",
+          "name": "decodeHeaderValue",
+          "longname": "decodeHeaderValue",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/headerText.js",
+          "line": 20,
+          "description": "Node hands header values over decoded as latin1, one character per byte.",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "*",
+              "description": "The decoded string, or the value unchanged when it is not a string."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "server",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 2,
+      "importanceScore": 47,
+      "summary": "Text of an HTTP header value as the sender wrote it.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "server/logRetention.js",
       "lines": 64,
       "extension": ".js",
@@ -2259,7 +2343,7 @@
     },
     {
       "path": "server/system-log-server.js",
-      "lines": 231,
+      "lines": 238,
       "extension": ".js",
       "jsdocBlockCount": 11,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2353,6 +2437,14 @@
           ],
           "line": 35,
           "kind": "static"
+        },
+        {
+          "source": "./headerText.js",
+          "specifiers": [
+            "decodeHeaderValue"
+          ],
+          "line": 36,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -2360,67 +2452,67 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 49
+          "line": 50
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 59
+          "line": 60
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 67
+          "line": 68
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 69
+          "line": 70
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 82
+          "line": 83
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 86
+          "line": 87
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 90
+          "line": 91
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 96
+          "line": 97
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 99
+          "line": 100
         },
         {
           "name": "requireLogToken",
           "kind": "function",
-          "line": 169
+          "line": 176
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 185
+          "line": 192
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 196
+          "line": 203
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 212
+          "line": 219
         }
       ],
       "parseError": null,
@@ -2436,7 +2528,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 122,
+          "line": 129,
           "description": "Trust proxy for accurate req.ip",
           "params": [],
           "returns": [],
@@ -2449,7 +2541,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 129,
+          "line": 136,
           "description": "Token gate for /log",
           "params": [],
           "returns": [],
@@ -2462,7 +2554,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 135,
+          "line": 142,
           "description": "Optional CORS for /log",
           "params": [],
           "returns": [],
@@ -2475,7 +2567,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 159,
+          "line": 166,
           "description": "Rate limit for ingestion",
           "params": [],
           "returns": [],
@@ -2488,7 +2580,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 169,
+          "line": 176,
           "description": "Token auth middleware",
           "params": [],
           "returns": [],
@@ -2506,6 +2598,15 @@
           "line": 35,
           "kind": "static",
           "resolved": "server/logRetention.js"
+        },
+        {
+          "source": "./headerText.js",
+          "specifiers": [
+            "decodeHeaderValue"
+          ],
+          "line": 36,
+          "kind": "static",
+          "resolved": "server/headerText.js"
         }
       ],
       "packageImports": [
@@ -2599,7 +2700,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 263,
+      "lines": 271,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2703,6 +2804,14 @@
           ],
           "line": 41,
           "kind": "static"
+        },
+        {
+          "source": "./headerText.js",
+          "specifiers": [
+            "decodeHeaderValue"
+          ],
+          "line": 42,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -2710,72 +2819,72 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 58
+          "line": 59
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 75
+          "line": 76
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 83
+          "line": 84
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 84
+          "line": 85
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 96
+          "line": 97
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 98
+          "line": 99
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 102
+          "line": 103
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 108
+          "line": 109
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 109
+          "line": 110
         },
         {
           "name": "resolveUser",
           "kind": "function",
-          "line": 125
+          "line": 132
         },
         {
           "name": "sameOriginGuard",
           "kind": "function",
-          "line": 143
+          "line": 151
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 211
+          "line": 219
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 228
+          "line": 236
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 244
+          "line": 252
         }
       ],
       "parseError": null,
@@ -2791,7 +2900,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 125,
+          "line": 132,
           "description": "Resolve user identity without cookies.",
           "params": [],
           "returns": [],
@@ -2804,7 +2913,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 143,
+          "line": 151,
           "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
           "params": [],
           "returns": [],
@@ -2842,6 +2951,15 @@
           "line": 41,
           "kind": "static",
           "resolved": "server/userLogOrigin.js"
+        },
+        {
+          "source": "./headerText.js",
+          "specifiers": [
+            "decodeHeaderValue"
+          ],
+          "line": 42,
+          "kind": "static",
+          "resolved": "server/headerText.js"
         }
       ],
       "packageImports": [
@@ -90499,6 +90617,44 @@
   ],
   "symbols": [
     {
+      "id": "decodeHeaderValue",
+      "name": "decodeHeaderValue",
+      "longname": "decodeHeaderValue",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/headerText.js",
+      "line": 20,
+      "description": "Node hands header values over decoded as latin1, one character per byte.",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "*",
+          "description": "The decoded string, or the value unchanged when it is not a string."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "strictUtf8",
+      "name": "strictUtf8",
+      "longname": "strictUtf8",
+      "kind": "constant",
+      "scope": "global",
+      "file": "server/headerText.js",
+      "line": 4,
+      "description": "Text of an HTTP header value as the sender wrote it.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
       "name": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
       "longname": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
@@ -90599,7 +90755,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 135,
+      "line": 142,
       "description": "Optional CORS for /log",
       "params": [],
       "returns": [],
@@ -90612,7 +90768,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 129,
+      "line": 136,
       "description": "Token gate for /log",
       "params": [],
       "returns": [],
@@ -90625,7 +90781,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 159,
+      "line": 166,
       "description": "Rate limit for ingestion",
       "params": [],
       "returns": [],
@@ -90638,7 +90794,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 169,
+      "line": 176,
       "description": "Token auth middleware",
       "params": [],
       "returns": [],
@@ -90651,7 +90807,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 122,
+      "line": 129,
       "description": "Trust proxy for accurate req.ip",
       "params": [],
       "returns": [],
@@ -90664,7 +90820,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 125,
+      "line": 132,
       "description": "Resolve user identity without cookies.",
       "params": [],
       "returns": [],
@@ -90677,7 +90833,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 143,
+      "line": 151,
       "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
       "params": [],
       "returns": [],

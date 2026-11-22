@@ -39,6 +39,7 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { pruneRotatedLogs, resolvePrintLogRetentionDays, scheduleLogRetention } from './logRetention.js';
 import { neutralizeForWhom, readPrintLogFields } from './userLogPayload.js';
 import { isAllowedUserLogOrigin } from './userLogOrigin.js';
+import { decodeHeaderValue } from './headerText.js';
 
 dotenv.config();
 
@@ -109,12 +110,18 @@ function safeString(str, max = 4000) { return truncate(sanitizeString(str), max)
 function safeJson(obj) {
   const seen = new WeakSet();
   const MAX_STR = 1000;
-  return JSON.stringify(obj, (k, v) => {
+  const json = JSON.stringify(obj, (k, v) => {
     if (typeof v === 'string') return truncate(sanitizeString(v), MAX_STR);
     if (typeof v === 'bigint') return v.toString();
     if (v && typeof v === 'object') { if (seen.has(v)) return '[Circular]'; seen.add(v); }
     return v;
   });
+  // Object keys do not pass through the replacer. JSON.stringify escapes CR and LF in them
+  // but writes U+0085, U+2028 and U+2029 as they are, so those are escaped here: a record is
+  // one line whatever a key contains, and the key itself is kept.
+  return typeof json === 'string'
+    ? json.replace(/[\u0085\u2028\u2029]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`)
+    : json;
 }
 
 /* ----------------------------- User resolution ---------------------------- */
@@ -129,7 +136,8 @@ function resolveUser(req) {
 
   // 2) Trusted reverse proxy can inject a header
   const headerUser = req.get('x-user-id') || req.get('x-remote-user') || req.get('remote-user');
-  if (headerUser) return sanitizeString(headerUser);
+  // Decoded before sanitising: see decodeHeaderValue.
+  if (headerUser) return sanitizeString(decodeHeaderValue(headerUser));
 
   // 3) Fallback
   return 'anonymous';
@@ -212,8 +220,8 @@ app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
       ts: new Date().toISOString(),
       userId: resolveUser(req),
       ip: req.ip,
-      ua: req.get('user-agent') || undefined,
-      referer: req.get('referer') || undefined,
+      ua: decodeHeaderValue(req.get('user-agent')) || undefined,
+      referer: decodeHeaderValue(req.get('referer')) || undefined,
       action: 'print',
       reason: reason === null ? null : safeString(reason, 500),
       // "$" and "#" are replaced, never rejected: the print record is always written.

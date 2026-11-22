@@ -8,6 +8,7 @@
 
 import http from 'node:http';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { chars, post as rawPost, splitLines, utf8Header } from './logServerHarness.js';
 
 const state = vi.hoisted(() => ({ servers: [], written: [], pruned: [] }));
 
@@ -154,6 +155,62 @@ describe('user log server', () => {
     const record = JSON.parse(lines[0].line);
     expect(record.reason).toBe('first second');
     expect(record.forWhom.startsWith('Ward 3 {')).toBe(true);
+  });
+
+  it('logs header values sent as UTF-8 with their letters', async () => {
+    // Capital A with ring is C3 85 in UTF-8; its second byte is U+0085 once Node has decoded
+    // the header as latin1, and removing that as a line break would damage the name for good.
+    const letters = chars(0xc5, 0xc4, 0xd6, 0xe5, 0xe4, 0xf6);
+    const before = printLines().length;
+    const response = await rawPost(port, '/userlog/record', { reason: 'r', forWhom: 'w' }, {
+      'x-user-id': utf8Header(`${letters} ${chars(0xc5)}ke`),
+      'user-agent': utf8Header(`Agent ${letters}`),
+      referer: utf8Header(`http://127.0.0.1:${port}/${letters}`),
+    });
+    expect(response.status).toBe(200);
+
+    const lines = printLines().slice(before);
+    expect(lines).toHaveLength(1);
+    const record = JSON.parse(lines[0].line);
+    expect(record.userId).toBe(`${letters} ${chars(0xc5)}ke`);
+    expect(record.ua).toBe(`Agent ${letters}`);
+    expect(record.referer).toBe(`http://127.0.0.1:${port}/${letters}`);
+  });
+
+  it('keeps a header that is not valid UTF-8 as latin1 text and does not fail', async () => {
+    const before = printLines().length;
+    const latin1Name = `${chars(0xc5)}ke`; // the single byte C5 followed by ASCII: invalid as UTF-8
+    const response = await rawPost(port, '/userlog/record', { reason: 'r', forWhom: 'w' }, {
+      'x-user-id': latin1Name,
+      'user-agent': chars(0xff, 0xfe, 0x41),
+    });
+    expect(response.status).toBe(200);
+
+    const lines = printLines().slice(before);
+    expect(lines).toHaveLength(1);
+    const record = JSON.parse(lines[0].line);
+    expect(record.userId).toBe(latin1Name);
+    expect(record.ua).toBe(chars(0xff, 0xfe, 0x41));
+  });
+
+  it.each([
+    ['U+2028 sent as UTF-8', utf8Header(`Anna${chars(0x2028)}forged`)],
+    ['U+2029 sent as UTF-8', utf8Header(`Anna${chars(0x2029)}forged`)],
+    ['U+0085 sent as UTF-8', utf8Header(`Anna${chars(0x85)}forged`)],
+    ['the single byte 0x85', `Anna${chars(0x85)}forged`],
+  ])('keeps a line break in header values on one log line (%s)', async (_name, value) => {
+    const before = printLines().length;
+    const response = await rawPost(port, '/userlog/record', { reason: 'r', forWhom: 'w' }, {
+      'x-user-id': value, 'user-agent': value,
+    });
+    expect(response.status).toBe(200);
+
+    const lines = printLines().slice(before);
+    expect(lines).toHaveLength(1);
+    expect(splitLines(lines[0].line)).toHaveLength(1);
+    const record = JSON.parse(lines[0].line);
+    expect(record.userId).toBe('Anna forged');
+    expect(record.ua).toBe('Anna forged');
   });
 
   it('listens on loopback only in this test', () => {

@@ -157,7 +157,7 @@ ARR replaces `Host` with the upstream address, while the user-log origin check n
 What the setup script changes for the whole server depends on its switches:
 
 - Always, when a proxy rule is enabled: it turns ARR proxying on (`system.webServer/proxy`, `enabled`).
-- Only with `-ForwardClientHeaders`: it unlocks the configuration section `system.webServer/rewrite/allowedServerVariables` (`appcmd unlock config`), which lets every site and application on the server define that section in its own `web.config`. With the switch both rules also set `X-Forwarded-For` and `X-Forwarded-Proto`, and the system-log rule sets `X-Forwarded-Host`.
+- Only with `-ForwardClientHeaders`, and only when a forwarded-header variable is not already allowed for the application: it unlocks the configuration section `system.webServer/rewrite/allowedServerVariables` (`appcmd unlock config`), which lets every site and application on the server define that section in its own `web.config`. With the switch both rules also set `X-Forwarded-For` and `X-Forwarded-Proto`, and the system-log rule sets `X-Forwarded-Host`.
 
 Operational notes:
 

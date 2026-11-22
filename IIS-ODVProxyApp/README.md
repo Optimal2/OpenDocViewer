@@ -16,7 +16,7 @@ The user-log server compares the browser's Origin/Referer host with the public h
 What the setup script changes for the whole server:
 
 - Always, when a proxy rule is enabled: it turns ARR proxying on (`system.webServer/proxy`, `enabled`).
-- Only with `-ForwardClientHeaders`: it unlocks the configuration section `system.webServer/rewrite/allowedServerVariables` (`appcmd unlock config`), which lets every site and application on the server define that section in its own `web.config`.
+- Only with `-ForwardClientHeaders`, and only when a forwarded-header variable is not already allowed for the application: it unlocks the configuration section `system.webServer/rewrite/allowedServerVariables` (`appcmd unlock config`), which lets every site and application on the server define that section in its own `web.config`.
 
 Everything else is scoped to this application.
 

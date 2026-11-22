@@ -10,7 +10,8 @@
   Changes for the whole server:
     - Always (when a proxy rule is enabled): turns ARR proxying on
       (system.webServer/proxy enabled).
-    - Only with -ForwardClientHeaders: unlocks the configuration section
+    - Only with -ForwardClientHeaders, and only when a forwarded-header variable is not
+      already allowed for the application: unlocks the configuration section
       system.webServer/rewrite/allowedServerVariables (appcmd unlock config), which lets every
       site and application on the server define that section in its own web.config.
   Everything else is scoped to the proxy application, including the allowedServerVariables
@@ -154,14 +155,15 @@ $enableUserStr   = if ($EnableUserLog)   { "true" } else { "false" }
 $config = $config.Replace("__ENABLE_SYSTEM_LOG__", $enableSystemStr)
 $config = $config.Replace("__ENABLE_USER_LOG__",   $enableUserStr)
 
-# Only inject allowedServerVariables if explicitly requested
-$allowed = @"
-<allowedServerVariables>
-  <add name="HTTP_X_FORWARDED_FOR" />
-  <add name="HTTP_X_FORWARDED_PROTO" />
-  <add name="HTTP_X_FORWARDED_HOST" />
-</allowedServerVariables>
-"@
+# Only inject allowedServerVariables if explicitly requested. A variable that is already allowed
+# for the application's location (inherited from the server, or added above) is left out: a
+# second entry for the same name is a configuration error that takes the whole proxy
+# application down.
+function Test-ServerVariableAllowed([string]$Name) {
+  $entry = Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "$SiteName/$($AppPath.Trim('/'))" `
+    -filter "system.webServer/rewrite/allowedServerVariables/add[@name='$Name']" -name 'name' -ErrorAction SilentlyContinue
+  return [bool]$entry
+}
 
 # The request headers the rules set with -ForwardClientHeaders. The scheme has no server variable
 # of its own, so it is looked up in a rewrite map from {HTTPS} (on/off).
@@ -178,18 +180,22 @@ $schemeMap = @"
 "@
 
 if ($ForwardClientHeaders) {
-  # Best-effort unlock to avoid 500.52 if locked. This changes the section's lock for the
-  # whole server.
-  try {
-    & $AppCmdPath unlock config /section:system.webServer/rewrite/allowedServerVariables | Out-Null
-  } catch {
-    Write-Warn "Could not unlock 'rewrite/allowedServerVariables'. If browsing fails with 500.52, re-run WITHOUT -ForwardClientHeaders."
+  $toAllow = @('HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED_PROTO', 'HTTP_X_FORWARDED_HOST') | Where-Object {
+    # HTTP_X_FORWARDED_HOST was allowed for this application above when the user-log rule is on.
+    -not (($_ -eq 'HTTP_X_FORWARDED_HOST' -and $EnableUserLog) -or (Test-ServerVariableAllowed $_))
   }
-  if ($EnableUserLog) {
-    # Already allowed for this application above; a second entry here would be a duplicate.
-    $allowed = $allowed.Replace('  <add name="HTTP_X_FORWARDED_HOST" />', '')
+  $allowed = ''
+  if ($toAllow) {
+    # Best-effort unlock to avoid 500.52 if locked. This changes the section's lock for the
+    # whole server. Not needed when every variable is already allowed.
+    try {
+      & $AppCmdPath unlock config /section:system.webServer/rewrite/allowedServerVariables | Out-Null
+    } catch {
+      Write-Warn "Could not unlock 'rewrite/allowedServerVariables'. If browsing fails with 500.52, re-run WITHOUT -ForwardClientHeaders."
+    }
+    $allowed = "<allowedServerVariables>`r`n" + (($toAllow | ForEach-Object { "  <add name=`"$_`" />" }) -join "`r`n") + "`r`n</allowedServerVariables>`r`n"
   }
-  $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", ($allowed.Trim() + "`r`n" + $schemeMap.Trim()))
+  $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", ($allowed + $schemeMap.Trim()))
   # The user-log rule always sets X-Forwarded-Host in the template; the others are added to it.
   $config = $config.Replace("<!--__USER_LOG_CLIENT_HEADERS__-->", ($forwardFor + "`r`n" + $forwardProto))
   $config = $config.Replace("<!--__SYSTEM_LOG_CLIENT_HEADERS__-->",

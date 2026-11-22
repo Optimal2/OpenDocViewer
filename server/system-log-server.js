@@ -33,6 +33,7 @@ import dotenv from 'dotenv';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import morgan from 'morgan';
 import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
+import { decodeHeaderValue } from './headerText.js';
 
 dotenv.config();
 
@@ -99,12 +100,18 @@ function safeString(str, max = 4000) {
 function safeJson(obj) {
   const seen = new WeakSet();
   const MAX_STR = 1000;
-  return JSON.stringify(obj, (k, v) => {
+  const json = JSON.stringify(obj, (k, v) => {
     if (typeof v === 'string') return truncate(sanitizeString(v), MAX_STR);
     if (typeof v === 'bigint') return v.toString();
     if (v && typeof v === 'object') { if (seen.has(v)) return '[Circular]'; seen.add(v); }
     return v;
   });
+  // Object keys do not pass through the replacer. JSON.stringify escapes CR and LF in them
+  // but writes U+0085, U+2028 and U+2029 as they are, so those are escaped here: a record is
+  // one line whatever a key contains, and the key itself is kept.
+  return typeof json === 'string'
+    ? json.replace(/[\u0085\u2028\u2029]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`)
+    : json;
 }
 
 /* ------------------------------- Express app ------------------------------ */
@@ -186,7 +193,7 @@ app.post('/log', corsForLog, logLimiter, requireLogToken, (req, res) => {
       ts: new Date().toISOString(),
       level: levelNorm,
       ip: req.ip,
-      ua: req.get('user-agent') || undefined,
+      ua: decodeHeaderValue(req.get('user-agent')) || undefined,
       message: safeString(message),
       context: context === undefined ? undefined : context
     };

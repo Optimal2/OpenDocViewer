@@ -25,6 +25,7 @@
 
 ## Runtime Entrypoints
 
+- `server/headerText.js` - Text of an HTTP header value as the sender wrote it.
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.

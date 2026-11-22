@@ -1,5 +1,43 @@
 [
   {
+    "id": "decodeHeaderValue",
+    "name": "decodeHeaderValue",
+    "longname": "decodeHeaderValue",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/headerText.js",
+    "line": 20,
+    "description": "Node hands header values over decoded as latin1, one character per byte.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "*",
+        "description": "The decoded string, or the value unchanged when it is not a string."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "strictUtf8",
+    "name": "strictUtf8",
+    "longname": "strictUtf8",
+    "kind": "constant",
+    "scope": "global",
+    "file": "server/headerText.js",
+    "line": 4,
+    "description": "Text of an HTTP header value as the sender wrote it.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
     "name": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
     "longname": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
@@ -100,7 +138,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 135,
+    "line": 142,
     "description": "Optional CORS for /log",
     "params": [],
     "returns": [],
@@ -113,7 +151,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 129,
+    "line": 136,
     "description": "Token gate for /log",
     "params": [],
     "returns": [],
@@ -126,7 +164,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 159,
+    "line": 166,
     "description": "Rate limit for ingestion",
     "params": [],
     "returns": [],
@@ -139,7 +177,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 169,
+    "line": 176,
     "description": "Token auth middleware",
     "params": [],
     "returns": [],
@@ -152,7 +190,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 122,
+    "line": 129,
     "description": "Trust proxy for accurate req.ip",
     "params": [],
     "returns": [],
@@ -165,7 +203,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 125,
+    "line": 132,
     "description": "Resolve user identity without cookies.",
     "params": [],
     "returns": [],
@@ -178,7 +216,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 143,
+    "line": 151,
     "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
     "params": [],
     "returns": [],

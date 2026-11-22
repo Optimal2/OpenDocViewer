@@ -29,11 +29,11 @@
           <conditions logicalGrouping="MatchAll">
             <add input="{REQUEST_METHOD}" pattern="POST|OPTIONS" />
           </conditions>
+          <!--__SYSTEM_LOG_CLIENT_HEADERS__-->
           <action type="Rewrite"
                   url="__SYSTEM_LOG_URL__"
                   appendQueryString="true"
                   logRewrittenUrl="true" />
-          <!--__SYSTEM_LOG_CLIENT_HEADERS__-->
         </rule>
 
         <!-- User Log proxy -->
