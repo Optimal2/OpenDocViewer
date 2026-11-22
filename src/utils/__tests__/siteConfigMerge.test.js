@@ -16,6 +16,94 @@ import {
 
 afterEach(() => vi.unstubAllGlobals());
 
+it.each(['__proto__', 'constructor', 'prototype'])('ignores the reserved site key %s at every merge depth', (key) => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    const { window } = dom;
+    const source = readFileSync('public/odv.config.js', 'utf8');
+    const prototypeBefore = Object.getOwnPropertyDescriptors(window.Object.prototype);
+    window.__ODV_SITE_CONFIG__ = window.JSON.parse(JSON.stringify({
+      [key]: 'ignored',
+      compare: { [key]: 'ignored', adjust: { toolbarMode: 'hide' } },
+      viewer: { printSelectionWorkspace: { [key]: 'ignored', enabled: false } },
+      siteExtension: { nested: [{ [key]: 'ignored', enabled: true }] },
+    }));
+    window.eval(source);
+
+    const config = window.__ODV_CONFIG__;
+    const fresh = window.eval('({})');
+    expect(Object.getOwnPropertyDescriptors(Object.getPrototypeOf(fresh))).toEqual(prototypeBefore);
+    for (const object of [config, config.compare, config.viewer.printSelectionWorkspace,
+      config.print.selectionWorkspace, config.siteExtension.nested[0]]) {
+      expect(Object.getPrototypeOf(object)).toBe(window.Object.prototype);
+      expect(Object.getOwnPropertyNames(object)).not.toContain(key);
+    }
+    expect(config.compare.adjust).toEqual({ toolbarMode: 'hide' });
+    expect(config.print.selectionWorkspace.enabled).toBe(false);
+    expect(config.siteExtension).toEqual({ nested: [{ enabled: true }] });
+  } finally {
+    dom.window.close();
+  }
+});
+
+it('merges valid nested overrides, replacement arrays and a legacy alias over the defaults', () => {
+  const source = readFileSync('public/odv.config.js', 'utf8');
+  const read = (siteConfig) => {
+    const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+    try {
+      dom.window.__ODV_SITE_CONFIG__ = siteConfig;
+      dom.window.eval(source);
+      return dom.window.__ODV_CONFIG__;
+    } finally {
+      dom.window.close();
+    }
+  };
+
+  const base = read({});
+  const languages = ['swe', 'eng'];
+  const config = read({
+    compare: { overlay: { print: { enabled: false } } },
+    ocr: { languages },
+    viewer: { customFitWidthPercent: 55 },
+  });
+  expect(config).toEqual({
+    ...base,
+    compare: { ...base.compare, overlay: { ...base.compare.overlay, print: { enabled: false } } },
+    ocr: { ...base.ocr, languages: ['swe', 'eng'] },
+    viewer: { ...base.viewer, customFitWidthPercent: 55, customFitWidthFactorPercent: 55 },
+  });
+  expect(config.ocr.languages).toBe(languages);
+});
+
+it('preserves valid configuration identity and reads or creates ordinary paths', () => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    // Return the private helpers from the test copy of the script.
+    const source = readFileSync('public/odv.config.js', 'utf8').replace(
+      '})(window, document);',
+      '  return { readConfigPath, writeConfigPath, stripReservedConfigKeys };\n})(window, document);',
+    );
+    const { readConfigPath, writeConfigPath, stripReservedConfigKeys } = dom.window.eval(source);
+    const overlay = { enabled: false, print: { enabled: true } };
+    const site = { compare: { overlay }, ocr: { languages: ['swe', 'eng'] } };
+
+    expect(stripReservedConfigKeys(site)).toBe(site);
+    expect(readConfigPath(site, 'compare.overlay.enabled')).toBe(false);
+    expect(readConfigPath(site, 'compare.curtain.enabled')).toBeUndefined();
+    expect(readConfigPath(site, 'compare.overlay.enabled.nested')).toBeUndefined();
+
+    writeConfigPath(site, 'compare.overlay.enabled', true);
+    writeConfigPath(site, 'compare.curtain.print.enabled', false);
+
+    expect(site.compare.overlay).toBe(overlay);
+    expect(site.compare.overlay).toEqual({ enabled: true, print: { enabled: true } });
+    expect(site.compare.curtain).toEqual({ print: { enabled: false } });
+    expect(readConfigPath(site, 'compare.curtain.print.enabled')).toBe(false);
+  } finally {
+    dom.window.close();
+  }
+});
+
 it('preserves the site fullPageScale through the public script and render normalization', () => {
   const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
   try {

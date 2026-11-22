@@ -51,6 +51,29 @@
    */
   function isObj(x){ return x && typeof x === 'object' && !Array.isArray(x); }
 
+  function isReservedConfigKey(key) {
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+  }
+
+  // Site-only objects and replacement arrays can bypass the recursive merge.
+  function stripReservedConfigKeys(value) {
+    if (!value || typeof value !== 'object') return value;
+    var copy = Array.isArray(value) ? new Array(value.length) : {};
+    var changed = false;
+    var keys = Object.keys(value);
+    for (var i = 0; i < keys.length; i += 1) {
+      var key = keys[i];
+      if (isReservedConfigKey(key)) {
+        changed = true;
+        continue;
+      }
+      var child = value[key];
+      copy[key] = stripReservedConfigKeys(child);
+      if (child && typeof child === 'object' && copy[key] !== child) changed = true;
+    }
+    return changed ? copy : value;
+  }
+
   /**
    * Deep-merge two plain objects. Arrays/primitives are replaced.
    * @param {Record<string, any>} dst
@@ -63,8 +86,8 @@
     /** @type {Record<string, any>} */
     var out = {};
     var k;
-    for (k in dst) if (Object.prototype.hasOwnProperty.call(dst, k)) out[k] = dst[k];
-    for (k in src) if (Object.prototype.hasOwnProperty.call(src, k)) {
+    for (k in dst) if (!isReservedConfigKey(k) && Object.prototype.hasOwnProperty.call(dst, k)) out[k] = dst[k];
+    for (k in src) if (!isReservedConfigKey(k) && Object.prototype.hasOwnProperty.call(src, k)) {
       var dv = out[k], sv = src[k];
       out[k] = (isObj(dv) && isObj(sv)) ? deepMerge(dv, sv) : sv;
     }
@@ -75,8 +98,9 @@
     var value = root;
     var keys = path.split('.');
     for (var i = 0; i < keys.length; i += 1) {
-      if (!isObj(value) || value[keys[i]] === undefined) return undefined;
-      value = value[keys[i]];
+      var key = keys[i];
+      if (isReservedConfigKey(key) || !isObj(value)) return undefined;
+      value = value[key];
     }
     return value;
   }
@@ -84,11 +108,16 @@
   function writeConfigPath(root, path, value) {
     var keys = path.split('.');
     var target = root;
-    for (var i = 0; i < keys.length - 1; i += 1) {
-      if (!isObj(target[keys[i]])) target[keys[i]] = {};
-      target = target[keys[i]];
+    for (var i = 0; i < keys.length; i += 1) {
+      var key = keys[i];
+      if (isReservedConfigKey(key)) return;
+      if (i === keys.length - 1) {
+        target[key] = value;
+        return;
+      }
+      if (!Object.prototype.hasOwnProperty.call(target, key) || !isObj(target[key])) target[key] = {};
+      target = target[key];
     }
-    target[keys[keys.length - 1]] = value;
   }
 
   // Runtime readers see the merged configuration, whose canonical defaults would otherwise
@@ -128,7 +157,7 @@
   var basePath = baseHref.replace(/\/$/, '');
 
   var existing = w.__ODV_CONFIG__ || {};
-  var siteOverrides = w.__ODV_SITE_CONFIG__ || {};
+  var siteOverrides = stripReservedConfigKeys(w.__ODV_SITE_CONFIG__ || {});
 
   // ========================= ACTIVE (mode-less) CONFIG =========================
   // Convention: for worker/concurrency/batch-size knobs, 0 means "auto" unless the local
