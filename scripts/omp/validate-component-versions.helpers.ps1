@@ -84,6 +84,157 @@ function Add-ValidationWarning {
 # ---------------------------------------------------------------------------
 # Finding the platform checkout for the cross-repository checks (14 and 15).
 # ---------------------------------------------------------------------------
+function Get-OmpPlatformFullPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$BasePath
+    )
+
+    $combined = $Path
+    if (-not [System.IO.Path]::IsPathRooted($combined)) {
+        $combined = Join-Path $BasePath $combined
+    }
+    $full = [System.IO.Path]::GetFullPath($combined)
+    $pathRoot = [System.IO.Path]::GetPathRoot($full)
+    if ($full.Length -gt $pathRoot.Length) {
+        $full = $full.TrimEnd('\', '/')
+    }
+    return $full
+}
+
+function Get-OmpCanonicalDirectoryPath {
+    <#
+    Returns the final long path of an existing directory on Windows, so aliases
+    such as 8.3 names and junctions compare as the same checkout. Missing paths
+    retain their normalized full form for the caller's configuration error.
+    #>
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $full = [System.IO.Path]::GetFullPath($Path)
+    if (-not (Test-Path -LiteralPath $full -PathType Container)) {
+        return $full
+    }
+    if ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
+        return (Resolve-Path -LiteralPath $full).Path
+    }
+
+    if ($null -eq ('OmpPlatformRootNativeMethods' -as [type])) {
+        Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class OmpPlatformRootNativeMethods
+{
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern IntPtr CreateFile(string name, uint access, uint share,
+        IntPtr security, uint creationDisposition, uint flags, IntPtr template);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern uint GetFinalPathNameByHandle(IntPtr file,
+        StringBuilder path, uint pathLength, uint flags);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool CloseHandle(IntPtr handle);
+}
+'@
+    }
+
+    # FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, OPEN_EXISTING and
+    # FILE_FLAG_BACKUP_SEMANTICS (required to open a directory handle).
+    $handle = [OmpPlatformRootNativeMethods]::CreateFile($full, 0, 7, [IntPtr]::Zero, 3, 0x02000000, [IntPtr]::Zero)
+    if ($handle.ToInt64() -eq -1) {
+        throw "Could not open platform root '$full' to resolve its final path."
+    }
+    try {
+        $buffer = [System.Text.StringBuilder]::new(32768)
+        $length = [OmpPlatformRootNativeMethods]::GetFinalPathNameByHandle($handle, $buffer, [uint32]$buffer.Capacity, 0)
+        if ($length -eq 0 -or $length -ge [uint32]$buffer.Capacity) {
+            throw "Could not resolve the final path of platform root '$full'."
+        }
+        $final = $buffer.ToString()
+        if ($final.StartsWith('\\?\UNC\', [StringComparison]::OrdinalIgnoreCase)) {
+            $final = '\\' + $final.Substring(8)
+        }
+        elseif ($final.StartsWith('\\?\', [StringComparison]::Ordinal)) {
+            $final = $final.Substring(4)
+        }
+        return [System.IO.Path]::GetFullPath($final)
+    }
+    finally {
+        [void][OmpPlatformRootNativeMethods]::CloseHandle($handle)
+    }
+}
+
+function Resolve-OmpPlatformRoot {
+    <#
+    .SYNOPSIS
+    Resolves the platform checkout shared by consumer builds and validators.
+
+    .DESCRIPTION
+    Order: -PlatformRepositoryRoot, OMP_PLATFORM_ROOT, OpenModulePlatformRoot,
+    then the sibling ../OpenModulePlatform. Relative values are anchored at the
+    consumer RepositoryRoot. Setting both environment variables to different
+    checkouts is always an error, including when an explicit parameter is also
+    present: otherwise MSBuild and the validators can silently use different
+    sources. Equivalent case, trailing-separator, junction and 8.3 forms are
+    accepted. A named root that does not exist is an error; a missing sibling is
+    returned so the existing Strict / NOT VERIFIED policy remains with callers.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $false)][string]$PlatformRepositoryRoot = ''
+    )
+
+    $consumerRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
+    $ompEnvironmentRoot = $env:OMP_PLATFORM_ROOT
+    $buildEnvironmentRoot = $env:OpenModulePlatformRoot
+    if (-not [string]::IsNullOrWhiteSpace($ompEnvironmentRoot) -and
+        -not [string]::IsNullOrWhiteSpace($buildEnvironmentRoot)) {
+        $ompFull = Get-OmpPlatformFullPath -Path $ompEnvironmentRoot -BasePath $consumerRoot
+        $buildFull = Get-OmpPlatformFullPath -Path $buildEnvironmentRoot -BasePath $consumerRoot
+        $same = [string]::Equals($ompFull, $buildFull, [StringComparison]::OrdinalIgnoreCase)
+        if (-not $same -and
+            (Test-Path -LiteralPath $ompFull -PathType Container) -and
+            (Test-Path -LiteralPath $buildFull -PathType Container)) {
+            $ompCanonical = Get-OmpCanonicalDirectoryPath -Path $ompFull
+            $buildCanonical = Get-OmpCanonicalDirectoryPath -Path $buildFull
+            $same = [string]::Equals($ompCanonical, $buildCanonical, [StringComparison]::OrdinalIgnoreCase)
+        }
+        if (-not $same) {
+            throw "OMP_PLATFORM_ROOT and OpenModulePlatformRoot name different platform checkouts. OMP_PLATFORM_ROOT='$ompFull'; OpenModulePlatformRoot='$buildFull'. Set both to the same checkout (or clear one) so the build and validators cannot use different sources."
+        }
+    }
+
+    $source = '-PlatformRepositoryRoot'
+    $root = $PlatformRepositoryRoot
+    $named = $true
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        $source = 'OMP_PLATFORM_ROOT'
+        $root = $ompEnvironmentRoot
+    }
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        $source = 'OpenModulePlatformRoot'
+        $root = $buildEnvironmentRoot
+    }
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        $source = 'sibling of the consumer'
+        $root = '..\OpenModulePlatform'
+        $named = $false
+    }
+
+    $root = Get-OmpPlatformFullPath -Path $root -BasePath $consumerRoot
+    if ($named -and -not (Test-Path -LiteralPath $root -PathType Container)) {
+        throw "OpenModulePlatform root named by $source was not found: '$root'. Point $source at an existing OpenModulePlatform checkout or clear it."
+    }
+    if (Test-Path -LiteralPath $root -PathType Container) {
+        $root = Get-OmpCanonicalDirectoryPath -Path $root
+    }
+
+    return [pscustomobject]@{
+        Root = $root
+        Source = $source
+        Named = $named
+    }
+}
+
 # A consumer validator calls Checks 14 and 15 from the OpenModulePlatform
 # checkout. Each consumer used to locate that checkout with its own repo-local
 # code, and when nothing was found it warned and exited 0 -- a green run for a
@@ -119,30 +270,22 @@ function Resolve-PlatformCheckScript {
         [Parameter(Mandatory = $false)][string]$PlatformRepositoryRoot = ''
     )
 
-    $source = '-PlatformRepositoryRoot'
-    $root = $PlatformRepositoryRoot
-    if ([string]::IsNullOrWhiteSpace($root)) {
-        $source = 'OMP_PLATFORM_ROOT'
-        $root = $env:OMP_PLATFORM_ROOT
+    try {
+        $resolvedRoot = Resolve-OmpPlatformRoot -RepositoryRoot $RepositoryRoot -PlatformRepositoryRoot $PlatformRepositoryRoot
     }
-    if ([string]::IsNullOrWhiteSpace($root)) {
-        $source = 'OpenModulePlatformRoot'
-        $root = $env:OpenModulePlatformRoot
+    catch {
+        Add-ValidationError -Errors $Errors -Message "$($CheckLabel): $($_.Exception.Message)"
+        return $null
     }
-    if ([string]::IsNullOrWhiteSpace($root)) {
-        $source = 'sibling of this repository'
-        $root = '..\OpenModulePlatform'
-    }
-
-    $repositoryFullPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
-    $root = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($repositoryFullPath, $root)).TrimEnd('\', '/')
+    $source = $resolvedRoot.Source
+    $root = $resolvedRoot.Root
     $scriptPath = Join-Path $root ($ScriptRelativePath -replace '/', '\')
     if (Test-Path -LiteralPath $scriptPath -PathType Leaf) {
         return [pscustomobject]@{ ScriptPath = $scriptPath; PlatformRoot = $root }
     }
 
     $howToFix = "Set OMP_PLATFORM_ROOT to the root of an OpenModulePlatform checkout (for example `$env:OMP_PLATFORM_ROOT = 'C:\src\OpenModulePlatform'), or clone it beside this repository as ..\OpenModulePlatform."
-    if ($source -ne 'sibling of this repository') {
+    if ($resolvedRoot.Named) {
         Add-ValidationError -Errors $Errors -Message "$($CheckLabel): the platform root '$root' named by $source does not contain '$ScriptRelativePath', so the check could not run. $howToFix"
         return $null
     }
