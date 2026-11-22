@@ -116,7 +116,11 @@ For AI-operated official releases:
 5. Commit and push the release-prep changes.
 6. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes` from a clean branch that matches
    `origin/<branch>` to prepare the release commit/tag locally. To publish the official release,
-   rerun the same command with `-Publish`.
+   run `.\release.ps1 -Publish`: it recognizes the prepared release, shows a summary of what
+   will be pushed and asks for confirmation before it pushes. `-Yes` skips that question, and a
+   `-ReleaseType` that does not match the prepared version stops the run. The push is atomic
+   and names exactly the branch and the release tag
+   (`git push --atomic origin <branch> refs/tags/vX.Y.Z`); no other tag is pushed.
 7. `release.ps1 -Publish` pushes the release commit + tag, and that push IS the release: the
    GitHub Actions **Release** workflow AUTO-runs on the `vX.Y.Z` tag and builds + publishes the
    GitHub release (body from `release-notes/<tag>.md`). The single approval gate is running
