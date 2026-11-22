@@ -572,6 +572,9 @@ test('the proxy template forwards the public host on the user-log rule only', ()
 
 // Every command that changes something has to sit inside an `if ($PSCmdlet.ShouldProcess(...))`
 // of the script itself. Checked on the syntax tree, on every platform that has pwsh.
+// Limits of this check: it knows a list of changing commands. It does not catch a new changing
+// command that is not on the list, an external program started without the call operator, or
+// a write made through .NET. Such a step needs its own ShouldProcess check, and an entry here.
 test('every changing step of the setup script is behind its own ShouldProcess check', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-iis-ast-'));
   try {

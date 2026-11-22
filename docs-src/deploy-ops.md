@@ -267,9 +267,22 @@ Rate limits of the log servers (details in `log-servers.md`, "Rate limits"):
 - A limit counts per client address. Users who share an address (terminal server, NAT, a load
   balancer in front of IIS) share one allowance, and a record over the limit is answered with
   `429` and lost. The server then writes a `rate-limit-rejected` line to `error-*.log`, at most
-  once per address and minute.
+  once per client and minute (a client is one IPv4 address, or one `/56` block of IPv6 addresses).
 - `0` or `off` means no limit. The service script installs the services with the values of its
   two constants of the same names.
+
+Required for the log servers in a deployment (details in `log-servers.md`):
+
+- **`ODV_STRICT_ORIGIN=true` is the standard.** A request to the user log server without
+  `Origin`, `Referer` and `Sec-Fetch-Site` is then rejected. The service script installs the
+  user log service with it. The default in the server code is still `false`, so an
+  installation that starts the server in another way has to set the variable itself. Switch
+  it off only for a caller that is not a browser and cannot send an `Origin` header.
+- **Monitor the free space of the disk that holds `server/logs/`.** The print log has no limit
+  per client address by default, every line is an audit record, and when the disk is full the
+  servers answer `500` and the record is not written.
+- **A record is answered as stored only when it was written.** Both endpoints answer `500`
+  when the write fails and leave a `log-write-failed` line in `error-*.log`.
 
 Main responsibilities of that script:
 

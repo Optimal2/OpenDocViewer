@@ -353,7 +353,8 @@ flowchart LR
   a secret (`docs-src/log-servers.md`, "Security assumptions"). Rate limit: 120 requests per minute
   and client address by default; `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` sets it or switches it off.
 - **User log server.** No token. It accepts same-origin requests only, judged by `Origin`, `Referer`
-  and `Sec-Fetch-Site`. A request with none of them passes unless `ODV_STRICT_ORIGIN=true`.
+  and `Sec-Fetch-Site`. A request with none of them passes unless `ODV_STRICT_ORIGIN=true`, which the recommended
+  deployment sets.
   No rate limit by default, because every record is an audit record and users often share an
   address; `USER_LOG_RATE_LIMIT_PER_MINUTE` sets one per client address
   (`docs-src/log-servers.md`, "Rate limits").

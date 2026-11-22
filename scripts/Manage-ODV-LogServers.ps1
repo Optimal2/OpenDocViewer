@@ -45,6 +45,10 @@ $Script:PRINT_RETENTION_DAYS = 30
 # "Rate limits".
 $Script:USER_LOG_RATE_LIMIT_PER_MINUTE   = 0
 $Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE = 120
+# Reject a request to the user log server that has none of Origin, Referer and Sec-Fetch-Site.
+# Standard in a deployment; set to 'false' only for a caller that is not a browser and cannot
+# send an Origin header. See docs-src/log-servers.md, "Strict origin".
+$Script:STRICT_ORIGIN  = 'true'
 $Script:NODE_ENV       = 'production'
 $Script:TRUST_PROXY    = 1
 
@@ -447,6 +451,7 @@ function Install-Flow {
     LOG_RETENTION_DAYS = $RETENTION_DAYS
     PRINT_LOG_RETENTION_DAYS = $PRINT_RETENTION_DAYS
     USER_LOG_RATE_LIMIT_PER_MINUTE = $USER_LOG_RATE_LIMIT_PER_MINUTE
+    ODV_STRICT_ORIGIN  = $STRICT_ORIGIN
   }
 
   Install-ServiceNodeApp -ServiceName $SERVICE_SYS -NodeExe $node -ScriptPath $SYSTEM_JS -AppDir $SERVER_DIR -EnvVars $envSys -NssmExe $nssm

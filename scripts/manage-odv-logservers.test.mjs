@@ -21,6 +21,14 @@ test('installs the user log service with 30 days of print-record retention', () 
   assert.match(userEnv[1], /LOG_RETENTION_DAYS\s*=\s*\$RETENTION_DAYS/);
 });
 
+test('installs the user log service with strict origin as the standard', () => {
+  assert.match(source, /^\$Script:STRICT_ORIGIN\s*=\s*'true'\s*$/m);
+  const userEnv = /\$envUsr\s*=\s*@\{([^}]*)\}/.exec(source);
+  const systemEnv = /\$envSys\s*=\s*@\{([^}]*)\}/.exec(source);
+  assert.match(userEnv[1], /ODV_STRICT_ORIGIN\s*=\s*\$STRICT_ORIGIN/);
+  assert.doesNotMatch(systemEnv[1], /ODV_STRICT_ORIGIN/);
+});
+
 test('installs the print log without a rate limit and the system log with 120 per minute', () => {
   assert.match(source, /^\$Script:USER_LOG_RATE_LIMIT_PER_MINUTE\s*=\s*0\s*$/m);
   assert.match(source, /^\$Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE\s*=\s*120\s*$/m);

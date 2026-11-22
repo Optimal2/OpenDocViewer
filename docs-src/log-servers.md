@@ -37,11 +37,11 @@ This document describes the two optional Node/Express services that accompany th
 ```
 
   - accepted levels: `debug`, `info`, `warn`, `error`
-  - response on success: HTTP `204 No Content`
+  - response on success: HTTP `204 No Content`, sent only after the record has been written to the file
   - failures:
     - `401` when the token is missing or wrong
     - `429` when the rate limit is exceeded
-    - `500` if the server cannot write the log record
+    - `500` when the record could not be written (a full disk, a log folder that cannot be written). The record is not stored, and the server writes a `log-write-failed` line with the error code to `error-*.log`, or to standard error when that file cannot be written either.
 
 ### User log server
 
@@ -54,7 +54,7 @@ This document describes the two optional Node/Express services that accompany th
   - supported JSON fields:
     - `meta.reason` and `meta.forWhom` from the bundled viewer's JSON envelope
     - top-level `reason` and `forWhom` remain accepted for compatibility with form posts and older callers
-  - response on success: JSON literal `true` with HTTP `200`
+  - response on success: JSON literal `true` with HTTP `200`, sent only after the record has been written to the file
   - `$` and `#` in `forWhom` are stored as `_`. The request is not rejected for them: the viewer
     sends the record without reading the response, so a rejection would lose the print record
     without anyone noticing.
@@ -64,7 +64,7 @@ This document describes the two optional Node/Express services that accompany th
     - `403` for failed same-origin checks
     - `415` for unsupported content type
     - `429` when a rate limit is set and exceeded (none by default)
-    - `500` if the server cannot write the log record
+    - `500` when the record could not be written (a full disk, a log folder that cannot be written). The record is not stored; the server never answers `200` for a record it did not write. It writes a `log-write-failed` line with the error code, not the record, to `error-*.log`, or to standard error when that file cannot be written either. After the fault is remedied the next record is written again without a restart.
 
 ## File layout and retention
 
@@ -115,7 +115,7 @@ Old files are pruned on startup and once every 24 hours while the service remain
 | `PRINT_LOG_RETENTION_DAYS` | User | `30`. Print records; without it they follow `LOG_RETENTION_DAYS` but never below 30. |
 | `USER_LOG_RATE_LIMIT_PER_MINUTE` | User | No limit (`0`). A positive number sets requests per minute and client address. See "Rate limits". |
 | `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` | System | `120` requests per minute and client address; `0` or `off` means no limit. |
-| `ODV_STRICT_ORIGIN` | User | `false`; set to `true` to reject requests without `Origin`, `Referer` or `Sec-Fetch-Site`. |
+| `ODV_STRICT_ORIGIN` | User | `false` in the code; **`true` in the recommended deployment** and in services installed by `scripts/Manage-ODV-LogServers.ps1`. With `true` a request without `Origin`, `Referer` and `Sec-Fetch-Site` is rejected. See "Strict origin". |
 
 Both use `helmet()` and daily UTC rotation.
 
@@ -196,7 +196,7 @@ This token is a lightweight ingestion guard, not high-assurance authentication. 
 - intentionally avoids cookie-based auth to keep CSRF handling simple
 - relies on same-origin style checks using `Origin`, `Referer`, and `Sec-Fetch-Site`; `Sec-Fetch-Site: same-site` is not sufficient
 - compares `Origin`/`Referer` with the request's `Host` and, only when the request arrives over loopback (`127.0.0.1`, `::1`), with the `X-Forwarded-Host` set by the reverse proxy on the same machine; a forwarded host from any other address is ignored
-- intentionally allows requests with none of those signals by default for non-browser compatibility; set `ODV_STRICT_ORIGIN=true` to reject them
+- allows requests with none of those signals unless `ODV_STRICT_ORIGIN=true`, which the recommended deployment sets (see "Strict origin")
 - intended for frontend print-intent data, not privileged server commands
 
 ## Reverse proxy examples
@@ -226,7 +226,7 @@ Operational notes:
 - The user-log upstream (`-UserLogUrl`) must be a loopback address (`localhost`, `127.0.0.1` or `[::1]`), because the forwarded host is trusted from loopback only. The script warns about any other address.
 - What the script does not undo: a server where an earlier version of the script was run with `-ForwardClientHeaders` has the configuration section `system.webServer/rewrite/allowedServerVariables` unlocked for the whole server, and it stays unlocked. The script no longer unlocks it and does not lock it again, since other applications may rely on it by now.
 - If an administrator later allows one of the variables for the whole server or the site, the entry for the application's location becomes a second entry for the same name. IIS treats that as a configuration error and the proxy answers `500.19` until the entry for the application's location is removed.
-- `-WhatIf` shows what would be done and changes nothing; the final check is skipped then.
+- `-WhatIf` shows what would be done and changes nothing; the final check is skipped then. Every changing step in the script is behind its own `ShouldProcess` check, and a test on the script's syntax tree requires that for a list of known changing commands. The test does not catch a new changing command that is not on its list, an external program started without the call operator, or a write made through .NET; such a step needs its own `ShouldProcess` check and an entry in the list when it is added.
 - The allow-list entries for the proxy application's location stay in `applicationHost.config`: the script has no uninstall, so they remain after the application is removed, and after `-ForwardClientHeaders` is switched off, until an administrator deletes them. An allowed variable that no rule sets has no effect.
 
 The setup script does not set ARR's server-wide `preserveHostHeader`, which would change the `Host` header that every other proxied application on the server receives. A server where an earlier version of the script set `preserveHostHeader=true` keeps working, because the `Host` header itself is still accepted; whether to set it back is a decision for the server's administrator, since other applications may rely on it by now.
@@ -250,10 +250,30 @@ window.__ODV_SITE_CONFIG__ = {
 };
 ```
 
+## Strict origin
+
+`ODV_STRICT_ORIGIN=true` is the standard in the recommended deployment.
+
+- **What it does.** The user log server always rejects a request whose `Origin` or `Referer` points to another host, and one whose `Sec-Fetch-Site` is not `same-origin`. A request that carries none of the three headers is a different case: with `ODV_STRICT_ORIGIN=true` it is rejected with `403`, without it the request is accepted. Browsers send `Origin` with the viewer's print record, so the viewer is not affected.
+- **When it may have to be off.** A caller that is not a browser and sends none of the three headers (a script, an older host application that posts the record itself, a monitoring probe) is rejected with strict origin. Either let that caller send an `Origin` header that matches the public host, or set `ODV_STRICT_ORIGIN=false` for that installation.
+- **Where it is set.** `scripts/Manage-ODV-LogServers.ps1` installs the user log service with `ODV_STRICT_ORIGIN=true`, from the constant `$Script:STRICT_ORIGIN` near the top of the script. The default in the server code is unchanged (`false`): changing it would change the behaviour of existing installations that start the server in another way, which then have to set the variable themselves.
+
+## Disk space is a requirement
+
+The free space of the disk that holds `server/logs/` **must be monitored**.
+
+- The print log has no limit per client address by default, and every line is an audit record.
+- When the disk is full the servers answer `500` and the record is **not** written. The viewer does not read the answer, so no user notices.
+- A `log-write-failed` line in `error-*.log` (or on the service's standard error when that file cannot be written either) is the sign that records are being lost.
+- Retention removes files only by age (see "File layout and retention"); it does not react to a full disk.
+
 ## Operational checks
 
 - `GET /healthz` returns success for both services
 - the proxy forwards to the expected localhost port
 - the system log token in runtime config matches the backend environment
 - `server/logs/` is writable by the service identity
+- the free space of the disk that holds `server/logs/` is monitored
+- `ODV_STRICT_ORIGIN=true` is set for the user log service
+- `error-*.log` has no `log-write-failed` or `rate-limit-rejected` lines
 - retention days are appropriate for the environment
