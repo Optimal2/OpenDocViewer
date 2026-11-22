@@ -1,6 +1,6 @@
 # OpenDocViewer / server
 
-File count: 9. Line count: 863. JSDoc symbol count: 21.
+File count: 10. Line count: 1059. JSDoc symbol count: 32.
 
 ## server/accessLog.js
 
@@ -59,14 +59,32 @@ Symbols:
 - `resolveRateLimitPerMinute` (function) - Read a requests\-per\-minute limit from an environment value.
 - `createRejectionReporter` (function) - Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.
 
+## server/rollingLog.js
+
+Daily rotating log files for the log servers, with a write that reports its outcome.
+
+Exports: `createRollingLog`, `describeWriteError`
+
+Symbols:
+
+- `createRollingLog` (function) - No description.
+- `createRollingLog~write` (function) - Append one line to today's file for the prefix.
+- `createRollingLog~toStderr` (function) - Last resort when a log line cannot be written to its file.
+- `createRollingLog~writeOrStderr` (function) - Write a line that must not be lost quietly \(an error\-log line\).
+- `createRollingLog~writeBestEffort` (function) - Write a line whose loss is tolerable \(an access\-log line\).
+- `createRollingLog~closeAll` (function) - Close every open file \(for a clean shutdown and for tests\).
+- `describeWriteError` (function) - What to put in the error log about a failed write: the error code and message, never the record that could not be written.
+
 ## server/system\-log\-server.js
 
 System Log Server — standalone Express endpoint for structured system logs.
 
-Local imports: `server/accessLog.js`, `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
+Local imports: `server/accessLog.js`, `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`, `server/rollingLog.js`
 
 Symbols:
 
+- `writeRolling` (function) - Write a line that must not be lost quietly \(an error\-log line\).
+- `reportWriteFailure` (function) - Error\-log line for a record that could not be written: which log and why, never the record.
 - `TRUST_PROXY_RAW` (constant) - Trust proxy for accurate req.ip
 - `LOG_TOKEN` (constant) - Token gate for /log
 - `ALLOWED_ORIGINS` (constant) - Optional CORS for /log
@@ -77,10 +95,12 @@ Symbols:
 
 User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
-Local imports: `server/accessLog.js`, `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
+Local imports: `server/accessLog.js`, `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`, `server/rollingLog.js`
 
 Symbols:
 
+- `writeRolling` (function) - Write a line that must not be lost quietly \(an error\-log line\).
+- `reportWriteFailure` (function) - Error\-log line for a record that could not be written: which log and why, never the record.
 - `resolveUser` (function) - Resolve user identity without cookies.
 - `sameOriginGuard` (function) - Blocks cross\-site requests using Origin/Referer/Sec\-Fetch\-Site signals.
 

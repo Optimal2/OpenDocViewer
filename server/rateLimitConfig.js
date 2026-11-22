@@ -32,9 +32,11 @@ export function resolveRateLimitPerMinute(name, raw, defaultLimit) {
  *
  * The reporter is called with the same key that the rate limit counts on, so "once per client"
  * means once per counted client (the limiter counts IPv6 per /56 block), and with the address
- * of the rejected request for the line itself. A client is marked as reported only after its
- * line has been written: a write that fails does not silence the client for the window.
- * @param {{ write: function(string): void, windowMs: (number|undefined), now: (function(): number|undefined), maxClients: (number|undefined) }} options
+ * of the rejected request for the line itself. A client counts as reported only when its line
+ * has been written. `write` may return a promise: while it is pending the client is held, so
+ * that concurrent rejections do not each write a line, and when it rejects the client is
+ * released again. A write that fails, at once or later, does not silence the client.
+ * @param {{ write: function(string): (void|Promise<*>), windowMs: (number|undefined), now: (function(): number|undefined), maxClients: (number|undefined) }} options
  * @returns {function(string, string=): boolean} Call with the rate limit key and the client
  *   address (the key when omitted); true when a line was written.
  */
@@ -53,8 +55,14 @@ export function createRejectionReporter({ write, windowMs = 60_000, now = Date.n
       // Still full of clients reported within the window: start over rather than grow.
       if (lastReported.size >= maxClients) lastReported.clear();
     }
-    write(String(address ?? key));
+    const outcome = write(String(address ?? key));
     lastReported.set(key, time);
+    if (outcome && typeof outcome.then === 'function') {
+      outcome.then(undefined, () => {
+        // Only release the mark this call set; a later report may have replaced it.
+        if (lastReported.get(key) === time) lastReported.delete(key);
+      });
+    }
     return true;
   };
 }

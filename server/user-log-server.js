@@ -7,7 +7,8 @@
  *     - Body: application/x-www-form-urlencoded or JSON
  *       - reason: string|null
  *       - forWhom: string|null  ("$" and "#" are stored as "_")
- *     - Response: 200 OK with body: true   (JSON boolean literal)
+ *     - Response: 200 OK with body: true   (JSON boolean literal), sent only after the record
+ *       is written; 500 when the record could not be written
  *
  * Security posture (no client changes required):
  *   - No cookies are read or set (cookie-based auth removed to avoid CSRF lint).
@@ -43,6 +44,7 @@ import { isAllowedUserLogOrigin } from './userLogOrigin.js';
 import { decodeHeaderValue } from './headerText.js';
 import { normalizeClientAddress } from './clientAddress.js';
 import { createRejectionReporter, resolveRateLimitPerMinute } from './rateLimitConfig.js';
+import { createRollingLog, describeWriteError } from './rollingLog.js';
 
 dotenv.config();
 
@@ -72,8 +74,6 @@ const pruneOldLogs = async () => {
   });
 };
 
-/** @type {Map<string, { date: string, stream: fs.WriteStream }>} */
-const streams = new Map();
 let initStarted = false;
 
 async function initOnce() {
@@ -84,20 +84,30 @@ async function initOnce() {
   await pruneOldLogs();
 }
 
-function ymd(d = new Date()) { return d.toISOString().slice(0, 10); }
-function getRollingStream(prefix) {
-  const today = ymd();
-  const entry = streams.get(prefix);
-  if (!entry || entry.date !== today) {
-    try { entry?.stream?.end(); } catch {}
-    const file = path.join(LOG_DIR, `${prefix}-${today}.log`);
-    const stream = fs.createWriteStream(file, { flags: 'a' });
-    stream.on('error', (e) => console.error('Log stream error [%s]: %s', prefix, e?.message || e));
-    streams.set(prefix, { date: today, stream });
-  }
-  return streams.get(prefix).stream;
+const rollingLog = createRollingLog({ logDir: LOG_DIR });
+
+/**
+ * Write a line that must not be lost quietly (an error-log line). When the file cannot be
+ * written the line goes to standard error. Never rejects.
+ */
+function writeRolling(prefix, line) { return rollingLog.writeOrStderr(prefix, line); }
+
+/**
+ * Error-log line for a record that could not be written: which log and why, never the record.
+ * @returns {Promise<boolean>}
+ */
+function reportWriteFailure(log, error) {
+  const { code, message } = describeWriteError(error);
+  return writeRolling('error', safeJson({
+    ts: new Date().toISOString(),
+    level: 'error',
+    event: 'log-write-failed',
+    log,
+    code,
+    message: safeString(message, 500),
+    note: 'A record could not be written and the request was answered with 500. The record is not repeated here.',
+  }) + '\n');
 }
-function writeRolling(prefix, line) { getRollingStream(prefix).write(line); }
 
 function truncate(str, max = 4000) {
   const s = String(str);
@@ -188,7 +198,7 @@ app.set('trust proxy', TRUST_PROXY);
 app.use(helmet());
 app.use(express.urlencoded({ extended: false, limit: '16kb' })); // for form POSTs
 app.use(express.json({ limit: '64kb' }));                         // for JSON POSTs
-app.use(createAccessLogger({ write: (line) => writeRolling('access', line), sanitize: sanitizeString }));
+app.use(createAccessLogger({ write: (line) => rollingLog.writeBestEffort('access', line), sanitize: sanitizeString }));
 
 // Health
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
@@ -201,18 +211,26 @@ app.get('/healthz', (_req, res) => res.json({ ok: true }));
 // load a limit protects against; the same-origin check already restricts who can post here.
 const rateLimitSetting = resolveRateLimitPerMinute('USER_LOG_RATE_LIMIT_PER_MINUTE', process.env.USER_LOG_RATE_LIMIT_PER_MINUTE, 0);
 if (rateLimitSetting.warning) console.warn(`WARNING: ${rateLimitSetting.warning}`);
-// A rejected record is lost: the viewer does not read the response. One line per address and
-// minute in the error log makes the loss visible in operation.
+// A rejected record is lost: the viewer does not read the response. One line per counted client
+// (one IPv4 address, or one /56 block of IPv6 addresses) and minute in the error log makes the
+// loss visible in operation. The client counts as reported only when that line was written;
+// when the error log cannot be written the line goes to standard error and is tried again.
 const rateLimitKey = (req) => ipKeyGenerator(normalizeClientAddress(req.ip));
 const reportRateLimitRejection = createRejectionReporter({
-  write: (address) => writeRolling('error', safeJson({
-    ts: new Date().toISOString(),
-    level: 'warn',
-    event: 'rate-limit-rejected',
-    ip: address,
-    limitPerMinute: rateLimitSetting.limit,
-    message: 'A print record was rejected by the rate limit and not written. Further rejections for this address are not reported for one minute.',
-  }) + '\n'),
+  write: (address) => {
+    const line = safeJson({
+      ts: new Date().toISOString(),
+      level: 'warn',
+      event: 'rate-limit-rejected',
+      ip: address,
+      limitPerMinute: rateLimitSetting.limit,
+      message: 'A print record was rejected by the rate limit and not written. Further rejections for this client are not reported for one minute.',
+    }) + '\n';
+    return rollingLog.write('error', line).catch((error) => {
+      rollingLog.toStderr(`[error log not writable: ${describeWriteError(error).code}] ${line}`);
+      throw error;
+    });
+  },
 });
 const printLimiter = !rateLimitSetting.enabled ? (_req, _res, next) => next() : rateLimit({
   windowMs: 60_000,
@@ -236,7 +254,7 @@ const printLimiter = !rateLimitSetting.enabled ? (_req, _res, next) => next() : 
  * Does NOT take any user identity in body; user is derived server-side.
  * Returns 200 with body "true" to be maximally tolerant of legacy callers.
  */
-app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
+app.post('/userlog/record', sameOriginGuard, printLimiter, async (req, res) => {
   try {
     // Content-type allowlist (be tolerant about charset parameters)
     const ctype = (req.get('content-type') || '').toLowerCase();
@@ -258,7 +276,14 @@ app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
       forWhom: forWhom === null ? null : neutralizeForWhom(safeString(forWhom, 200)),
     };
 
-    writeRolling('print', safeJson(rec) + '\n');
+    // Answer only when the record is in the file. A record that could not be written is never
+    // answered as stored: the caller gets 500 and the error log says why.
+    try {
+      await rollingLog.write('print', safeJson(rec) + '\n');
+    } catch (writeError) {
+      await reportWriteFailure('print', writeError);
+      return res.status(500).send('Failed to log print action');
+    }
 
     // Return literal JSON boolean "true" (works for both fetch and very old callers)
     res.status(200).type('application/json').send('true');

@@ -30,6 +30,7 @@
 - `server/headerText.js` - Text of an HTTP header value as the sender wrote it.
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/rateLimitConfig.js` - Settings and reporting for the per\-client rate limits of the log servers.
+- `server/rollingLog.js` - Daily rotating log files for the log servers, with a write that reports its outcome.
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
 - `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 - `server/userLogOrigin.js` - Evaluate the browser origin signals used by the user print\-log endpoint.

@@ -38,7 +38,10 @@ export function post(port, path, body, headers = {}) {
   );
   return new Promise((resolve, reject) => {
     const chunks = [];
-    const socket = net.connect({ host: '127.0.0.1', port }, () => socket.end(Buffer.concat([head, payload])));
+    // The request says "connection: close", so the server ends the connection after its answer.
+    // The client must not end its side first: the answer may come after the record is written.
+    const socket = net.connect({ host: '127.0.0.1', port }, () => socket.write(Buffer.concat([head, payload])));
+    socket.on('end', () => socket.end());
     socket.on('data', (chunk) => chunks.push(chunk));
     socket.on('error', reject);
     socket.on('close', () => {

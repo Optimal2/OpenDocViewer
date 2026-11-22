@@ -92,6 +92,24 @@ describe('createRejectionReporter', () => {
     expect(written).toEqual(['203.0.113.5']);
   });
 
+  it('does not silence a client whose line fails to be written later', async () => {
+    let fail = true;
+    const written = [];
+    const report = createRejectionReporter({
+      now: () => 0,
+      write: (address) => (fail ? Promise.reject(new Error('disk full')) : Promise.resolve(written.push(address))),
+    });
+    expect(report('203.0.113.5')).toBe(true);
+    // While the write is pending the client is held, so concurrent rejections add no lines.
+    expect(report('203.0.113.5')).toBe(false);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fail = false;
+    expect(report('203.0.113.5')).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(report('203.0.113.5')).toBe(false);
+    expect(written).toEqual(['203.0.113.5']);
+  });
+
   it('does not grow without bound', () => {
     let time = 0;
     const write = vi.fn();

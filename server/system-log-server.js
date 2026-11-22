@@ -37,6 +37,7 @@ import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
 import { decodeHeaderValue } from './headerText.js';
 import { normalizeClientAddress } from './clientAddress.js';
 import { createRejectionReporter, resolveRateLimitPerMinute } from './rateLimitConfig.js';
+import { createRollingLog, describeWriteError } from './rollingLog.js';
 
 dotenv.config();
 
@@ -56,8 +57,6 @@ const pruneOldLogs = () => pruneRotatedLogs({
   filePattern: ROTATED_LOG_FILE_PATTERN,
 });
 
-/** @type {Map<string, { date: string, stream: fs.WriteStream }>} */
-const streams = new Map();
 let initStarted = false;
 
 async function initOnce() {
@@ -68,23 +67,29 @@ async function initOnce() {
   await pruneOldLogs();
 }
 
-function ymd(d = new Date()) { return d.toISOString().slice(0, 10); }
+const rollingLog = createRollingLog({ logDir: LOG_DIR });
 
-function getRollingStream(prefix) {
-  const today = ymd();
-  const entry = streams.get(prefix);
-  if (!entry || entry.date !== today) {
-    try { entry?.stream?.end(); } catch {}
-    const file = path.join(LOG_DIR, `${prefix}-${today}.log`);
-    const stream = fs.createWriteStream(file, { flags: 'a' });
-    stream.on('error', (e) => console.error('Log stream error [%s]: %s', prefix, e?.message || e));
-    streams.set(prefix, { date: today, stream });
-  }
-  return streams.get(prefix).stream;
-}
+/**
+ * Write a line that must not be lost quietly (an error-log line). When the file cannot be
+ * written the line goes to standard error. Never rejects.
+ */
+function writeRolling(prefix, line) { return rollingLog.writeOrStderr(prefix, line); }
 
-function writeRolling(prefix, line) {
-  getRollingStream(prefix).write(line);
+/**
+ * Error-log line for a record that could not be written: which log and why, never the record.
+ * @returns {Promise<boolean>}
+ */
+function reportWriteFailure(log, error) {
+  const { code, message } = describeWriteError(error);
+  return writeRolling('error', safeJson({
+    ts: new Date().toISOString(),
+    level: 'error',
+    event: 'log-write-failed',
+    log,
+    code,
+    message: safeString(message, 500),
+    note: 'A record could not be written and the request was answered with 500. The record is not repeated here.',
+  }) + '\n');
 }
 
 function truncate(str, max = 4000) {
@@ -160,7 +165,7 @@ if (ALLOW_CORS_FOR_LOG) app.options('/log', corsForLog);
 /** Security baseline + parsers + access log */
 app.use(helmet());
 app.use(express.json({ limit: process.env.JSON_LIMIT || '64kb' }));
-app.use(createAccessLogger({ write: (line) => writeRolling('access', line), sanitize: sanitizeString }));
+app.use(createAccessLogger({ write: (line) => rollingLog.writeBestEffort('access', line), sanitize: sanitizeString }));
 
 /** Health */
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
@@ -171,18 +176,26 @@ app.get('/healthz', (_req, res) => res.json({ ok: true }));
 // the proxy) share one allowance, so the value is a decision for each site.
 const rateLimitSetting = resolveRateLimitPerMinute('SYSTEM_LOG_RATE_LIMIT_PER_MINUTE', process.env.SYSTEM_LOG_RATE_LIMIT_PER_MINUTE, 120);
 if (rateLimitSetting.warning) console.warn(`WARNING: ${rateLimitSetting.warning}`);
-// A rejected record is lost: the viewer does not read the response. One line per address and
-// minute in the error log makes the loss visible in operation.
+// A rejected record is lost: the viewer does not read the response. One line per counted client
+// (one IPv4 address, or one /56 block of IPv6 addresses) and minute in the error log makes the
+// loss visible in operation. The client counts as reported only when that line was written;
+// when the error log cannot be written the line goes to standard error and is tried again.
 const rateLimitKey = (req) => ipKeyGenerator(normalizeClientAddress(req.ip));
 const reportRateLimitRejection = createRejectionReporter({
-  write: (address) => writeRolling('error', safeJson({
-    ts: new Date().toISOString(),
-    level: 'warn',
-    event: 'rate-limit-rejected',
-    ip: address,
-    limitPerMinute: rateLimitSetting.limit,
-    message: 'A log record was rejected by the rate limit and not written. Further rejections for this address are not reported for one minute.',
-  }) + '\n'),
+  write: (address) => {
+    const line = safeJson({
+      ts: new Date().toISOString(),
+      level: 'warn',
+      event: 'rate-limit-rejected',
+      ip: address,
+      limitPerMinute: rateLimitSetting.limit,
+      message: 'A log record was rejected by the rate limit and not written. Further rejections for this client are not reported for one minute.',
+    }) + '\n';
+    return rollingLog.write('error', line).catch((error) => {
+      rollingLog.toStderr(`[error log not writable: ${describeWriteError(error).code}] ${line}`);
+      throw error;
+    });
+  },
 });
 const logLimiter = !rateLimitSetting.enabled ? (_req, _res, next) => next() : rateLimit({
   windowMs: 60_000,
@@ -210,7 +223,7 @@ function requireLogToken(req, res, next) {
 }
 
 /** POST /log -> logs/ingestion-YYYY-MM-DD.log */
-app.post('/log', corsForLog, logLimiter, requireLogToken, (req, res) => {
+app.post('/log', corsForLog, logLimiter, requireLogToken, async (req, res) => {
   try {
     const allowed = new Set(['debug', 'info', 'warn', 'error']);
     const { level = 'info', message = '', context = undefined } = req.body || {};
@@ -225,7 +238,13 @@ app.post('/log', corsForLog, logLimiter, requireLogToken, (req, res) => {
       message: safeString(message),
       context: context === undefined ? undefined : context
     };
-    writeRolling('ingestion', safeJson(record) + '\n');
+    // Answer only when the record is in the file; otherwise 500, and the error log says why.
+    try {
+      await rollingLog.write('ingestion', safeJson(record) + '\n');
+    } catch (writeError) {
+      await reportWriteFailure('ingestion', writeError);
+      return res.status(500).send('Failed to write log');
+    }
     res.status(204).end();
   } catch (err) {
     const rec = {

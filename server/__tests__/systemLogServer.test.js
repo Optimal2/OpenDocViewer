@@ -13,7 +13,12 @@ const state = vi.hoisted(() => ({ servers: [], written: [] }));
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal();
   const createWriteStream = (file) => ({
-    write: (line) => { state.written.push({ file: String(file), line: String(line) }); return true; },
+    destroyed: false,
+    write: (line, callback) => {
+      state.written.push({ file: String(file), line: String(line) });
+      if (typeof callback === 'function') setImmediate(callback);
+      return true;
+    },
     end: () => {},
     on: () => {},
   });
