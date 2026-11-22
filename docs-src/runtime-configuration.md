@@ -114,7 +114,7 @@ are listed here so that a site file can be checked for them; do not use them in 
 | Name in the site file | Documented key | When the site file has both |
 |---|---|---|
 | `logEndpoint`, `logToken`, `logEnabled` (top level) | `systemLog.endpoint`, `.token`, `.enabled` | The top-level name wins (`src/logging/systemLogger.js`). |
-| `print.pdf.orientation.mode`, then `print.pdf.orientationMode` | `print.pdf.orientation.defaultAuto` with `.fixedMode` | The `mode` name wins. |
+| `print.pdf.orientation.mode`, `print.pdf.orientationMode` | `print.pdf.orientation.defaultAuto` with `.fixedMode` | Either name wins over the documented keys. The print dialog, the PDF prebuild and the main-thread PDF generator read `orientation.mode` first and then `orientationMode` (`usePrintRangeConfig.js`, `pdfPrebuildPlan.js`, `printPdf.js`). The PDF worker (`src/workers/pdfWorker.js`) reads them in the opposite order, `orientationMode` first, and does not read `defaultAuto`/`fixedMode` at all; when it is started by `printPdf.js` its `orientationMode` has already been replaced by the mode resolved on the main thread, so the site value does not reach it there. |
 | `languageMode`, `cacheLanguageMode` (top level) | `print.pdf.cacheLanguageMode` | The top-level name wins (`src/utils/pdfPrintCacheKey.js`). |
 
 ## Why scripts are probed before injection

@@ -458,3 +458,55 @@ it('merges two cyclic objects without unbounded recursion and keeps the cycle', 
     dom.window.close();
   }
 });
+
+// Plain reference merge: objects merge key by key, everything else is replaced by the site value.
+const referenceMerge = (defaults, site) => {
+  const isPlain = (value) => value && typeof value === 'object' && !Array.isArray(value);
+  if (!isPlain(site)) return site === undefined ? defaults : site;
+  const out = { ...(isPlain(defaults) ? defaults : {}) };
+  for (const key of Object.keys(site)) out[key] = referenceMerge(isPlain(defaults) ? defaults[key] : undefined, site[key]);
+  return out;
+};
+const publish = (prepare) => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    prepare?.(dom.window);
+    const site = dom.window.__ODV_SITE_CONFIG__;
+    dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
+    return { config: dom.window.__ODV_CONFIG__, site };
+  } finally {
+    dom.window.close();
+  }
+};
+
+it.each([
+  ['no site file', undefined],
+  ['an empty site file', (window) => { window.__ODV_SITE_CONFIG__ = {}; }],
+  ['the sample site file', (window) => { window.eval(readFileSync('public/odv.site.config.sample.js', 'utf8')); }],
+])('leaves the configuration exactly as the plain merge gives it with %s', (_name, prepare) => {
+  const defaults = publish().config;
+  const { config, site } = publish(prepare);
+  if (prepare && _name === 'the sample site file') expect(Object.keys(site).length).toBeGreaterThan(3);
+  // No promotion step may add, move or change anything for a site file without older names.
+  expect(config).toEqual(referenceMerge(defaults, site ?? {}));
+});
+
+it.each([
+  ['print.selectionWorkspace', () => ({
+    print: { selectionWorkspace: null },
+    viewer: { printSelectionWorkspace: { enabled: false, headerTemplate: 'OLD header', nested: { keep: true } } },
+  })],
+  ['pdfWorkerPagePolicy', () => ({
+    documentLoading: { render: { pdfWorkerPagePolicy: null, pdfWorkerAutoPolicy: { mainThreadBelowCores: 3 } } },
+  })],
+])('never writes a promoted value into the site object (%s: null with an older object)', (_name, makeSite) => {
+  const { config, site } = publish((window) => { window.__ODV_SITE_CONFIG__ = makeSite(); });
+  expect(site).toEqual(makeSite());
+  if (_name === 'print.selectionWorkspace') {
+    expect(config.print.selectionWorkspace).not.toBe(site.viewer.printSelectionWorkspace);
+    expect(config.print.selectionWorkspace).toMatchObject({ enabled: false, documentHeaderTemplate: 'OLD header' });
+  } else {
+    expect(config.documentLoading.render.pdfWorkerPagePolicy).not.toBe(site.documentLoading.render.pdfWorkerAutoPolicy);
+    expect(config.documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency).toBe(3);
+  }
+});

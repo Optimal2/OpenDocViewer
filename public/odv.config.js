@@ -197,8 +197,29 @@
       if (olderValue === undefined) continue;
       promoted.push({ path: canonicalPath, value: olderValue });
       var canonicalValue = readConfigPath(merged, canonicalPath);
-      writeConfigPath(merged, canonicalPath,
-        isObj(canonicalValue) && isObj(olderValue) ? deepMerge(canonicalValue, olderValue) : olderValue);
+      // The published value is always an object of its own. Where the merged configuration has
+      // no canonical object to merge into (the site set it to null), the older object would
+      // otherwise be published as it is, and a later row would write into the site's own object.
+      writeOwnedPath(merged, canonicalPath,
+        isObj(olderValue) ? deepMerge(isObj(canonicalValue) ? canonicalValue : {}, olderValue) : olderValue);
+    }
+  }
+
+  // Like writeConfigPath, but every object on the way is replaced by a copy first, so nothing
+  // the site file owns is ever written to.
+  function writeOwnedPath(root, path, value) {
+    var keys = path.split('.');
+    var target = root;
+    for (var i = 0; i < keys.length; i += 1) {
+      var key = keys[i];
+      if (isReservedConfigKey(key)) return;
+      if (i === keys.length - 1) {
+        target[key] = value;
+        return;
+      }
+      var existing = Object.prototype.hasOwnProperty.call(target, key) ? target[key] : undefined;
+      target[key] = isObj(existing) ? deepMerge({}, existing) : {};
+      target = target[key];
     }
   }
 

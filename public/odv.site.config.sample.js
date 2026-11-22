@@ -894,7 +894,7 @@
         pdfWorkerWarmupRendersPerWorker: 1,
 
         // Maximum number of main-thread renders allowed when the worker path is unavailable.
-        // This value no longer sets maxConcurrentAssetRenders below: a site that needs fewer
+        // This value does not set maxConcurrentAssetRenders below: a site that needs fewer
         // simultaneous renders sets both.
         maxConcurrentMainThreadRenders: 3,
 
