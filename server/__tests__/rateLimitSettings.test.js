@@ -114,6 +114,19 @@ afterAll(async () => {
 describe.each(Object.keys(SERVERS))('%s log server rate limit', (name) => {
   const { ok, defaultLimit, variable } = SERVERS[name];
 
+  it('reports once per counted client: IPv6 addresses in one /56 block share the limit and the line', async () => {
+    const server = await start(name, '1');
+    expect(await server.statuses(2, '[2001:db8:0:101::1]:40001')).toEqual([ok, 429]);
+    // Other addresses of the same /56 block are the same client for the limit ...
+    expect(await server.statuses(2, '[2001:db8:0:1ff::9]:40001')).toEqual([429, 429]);
+    expect(await server.statuses(1, '[2001:db8:0:102::7]:40001')).toEqual([429]);
+    // ... and another block is another client.
+    expect(await server.statuses(2, '[2001:db8:0:200::1]:40001')).toEqual([ok, 429]);
+
+    const lines = rejections();
+    expect(lines.map((record) => record.ip)).toEqual(['2001:db8:0:101::1', '2001:db8:0:200::1']);
+  });
+
   it('uses the value of its environment variable', async () => {
     const server = await start(name, '3');
     expect(await server.statuses(5)).toEqual([ok, ok, ok, 429, 429]);

@@ -8,9 +8,9 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>server/clientAddress.js</code> | 38 | 3 | 1 | high | The client&#39;s address without a port, for the rate limit key and the log records. |
 | <code>server/headerText.js</code> | 35 | 3 | 2 | high | Text of an HTTP header value as the sender wrote it. |
 | <code>server/logRetention.js</code> | 64 | 2 | 4 | high | Shared best-effort retention for the optional standalone log servers. |
-| <code>server/rateLimitConfig.js</code> | 55 | 2 | 2 | high | Settings and reporting for the per-client rate limits of the log servers. |
-| <code>server/system-log-server.js</code> | 264 | 0 | 5 | high | System Log Server — standalone Express endpoint for structured system logs. |
-| <code>server/user-log-server.js</code> | 299 | 0 | 2 | high | User Action Log Server — standalone Express endpoint for print/user-action audit events. |
+| <code>server/rateLimitConfig.js</code> | 61 | 2 | 2 | high | Settings and reporting for the per-client rate limits of the log servers. |
+| <code>server/system-log-server.js</code> | 266 | 0 | 5 | high | System Log Server — standalone Express endpoint for structured system logs. |
+| <code>server/user-log-server.js</code> | 301 | 0 | 2 | high | User Action Log Server — standalone Express endpoint for print/user-action audit events. |
 | <code>server/userLogOrigin.js</code> | 45 | 1 | 2 | high | Evaluate the browser origin signals used by the user print-log endpoint. |
 | <code>server/userLogPayload.js</code> | 20 | 1 | 2 | high | Compatibility reader for form posts and the viewer&#39;s JSON print envelope. |
 | <code>src/app/AppBootstrap.jsx</code> | 446 | 1 | 10 | high | Application bootstrap React component. |

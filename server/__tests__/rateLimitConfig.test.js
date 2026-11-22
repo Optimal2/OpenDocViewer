@@ -64,6 +64,34 @@ describe('createRejectionReporter', () => {
     expect(write.mock.calls.map((call) => call[0])).toEqual(['203.0.113.5', '203.0.113.9', '203.0.113.5']);
   });
 
+  it('reports once per rate limit key and writes the address of the rejected request', () => {
+    const write = vi.fn();
+    const report = createRejectionReporter({ write, now: () => 0 });
+    // Two addresses that the limiter counts as one client.
+    expect(report('2001:db8:0:100::/56', '2001:db8:0:101::1')).toBe(true);
+    expect(report('2001:db8:0:100::/56', '2001:db8:0:1ff::9')).toBe(false);
+    expect(report('2001:db8:0:200::/56', '2001:db8:0:201::1')).toBe(true);
+    expect(write.mock.calls.map((call) => call[0])).toEqual(['2001:db8:0:101::1', '2001:db8:0:201::1']);
+  });
+
+  it('does not silence a client whose line could not be written', () => {
+    let fail = true;
+    const written = [];
+    const report = createRejectionReporter({
+      now: () => 0,
+      write: (address) => {
+        if (fail) throw new Error('disk full');
+        written.push(address);
+      },
+    });
+    expect(() => report('203.0.113.5')).toThrow('disk full');
+    fail = false;
+    // Still within the same minute: the client has not been reported yet, so it is now.
+    expect(report('203.0.113.5')).toBe(true);
+    expect(report('203.0.113.5')).toBe(false);
+    expect(written).toEqual(['203.0.113.5']);
+  });
+
   it('does not grow without bound', () => {
     let time = 0;
     const write = vi.fn();

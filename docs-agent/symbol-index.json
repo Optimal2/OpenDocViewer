@@ -188,7 +188,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/rateLimitConfig.js",
-    "line": 35,
+    "line": 41,
     "description": "Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.",
     "params": [
       {
@@ -201,7 +201,7 @@
     "returns": [
       {
         "type": "function",
-        "description": "Call with the client address; true when a line was written."
+        "description": "Call with the rate limit key and the client address (the key when omitted); true when a line was written."
       }
     ],
     "examples": 0
@@ -289,7 +289,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 202,
+    "line": 204,
     "description": "Token auth middleware",
     "params": [],
     "returns": [],

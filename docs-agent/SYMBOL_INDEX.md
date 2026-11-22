@@ -10,12 +10,12 @@
 | <code>pruneRotatedLogs</code> | function | <code>server/logRetention.js:36</code> | Delete rotated log files whose modification time is beyond the retention period. |
 | <code>resolvePrintLogRetentionDays</code> | function | <code>server/logRetention.js:20</code> | Retention for the print records of the user log server. |
 | <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:59</code> | Repeat retention while a long-running service stays up. |
-| <code>createRejectionReporter</code> | function | <code>server/rateLimitConfig.js:35</code> | Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request. |
+| <code>createRejectionReporter</code> | function | <code>server/rateLimitConfig.js:41</code> | Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request. |
 | <code>resolveRateLimitPerMinute</code> | function | <code>server/rateLimitConfig.js:19</code> | Read a requests-per-minute limit from an environment value. |
 | <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:145</code> | Optional CORS for /log |
 | <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:139</code> | Token gate for /log |
 | <code>rateLimitSetting</code> | constant | <code>server/system-log-server.js:172</code> | Rate limit for ingestion |
-| <code>requireLogToken</code> | function | <code>server/system-log-server.js:202</code> | Token auth middleware |
+| <code>requireLogToken</code> | function | <code>server/system-log-server.js:204</code> | Token auth middleware |
 | <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:132</code> | Trust proxy for accurate req.ip |
 | <code>resolveUser</code> | function | <code>server/user-log-server.js:135</code> | Resolve user identity without cookies. |
 | <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:154</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |

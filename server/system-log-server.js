@@ -173,6 +173,7 @@ const rateLimitSetting = resolveRateLimitPerMinute('SYSTEM_LOG_RATE_LIMIT_PER_MI
 if (rateLimitSetting.warning) console.warn(`WARNING: ${rateLimitSetting.warning}`);
 // A rejected record is lost: the viewer does not read the response. One line per address and
 // minute in the error log makes the loss visible in operation.
+const rateLimitKey = (req) => ipKeyGenerator(normalizeClientAddress(req.ip));
 const reportRateLimitRejection = createRejectionReporter({
   write: (address) => writeRolling('error', safeJson({
     ts: new Date().toISOString(),
@@ -191,9 +192,10 @@ const logLimiter = !rateLimitSetting.enabled ? (_req, _res, next) => next() : ra
   message: { error: 'Too many log requests, please slow down.' },
   // Keyed on the address without a port: a proxy that forwards address:port (IIS ARR)
   // would otherwise make this a limit per connection.
-  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip)),
+  keyGenerator: rateLimitKey,
   handler: (req, res, _next, options) => {
-    try { reportRateLimitRejection(normalizeClientAddress(req.ip)); } catch { /* reporting must not change the answer */ }
+    // Reported per counted client: the same key as the limit, so one line per IPv6 /56 too.
+    try { reportRateLimitRejection(rateLimitKey(req), normalizeClientAddress(req.ip)); } catch { /* reporting must not change the answer */ }
     res.status(options.statusCode).send(options.message);
   }
 });

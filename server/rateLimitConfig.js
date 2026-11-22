@@ -29,14 +29,20 @@ export function resolveRateLimitPerMinute(name, raw, defaultLimit) {
 /**
  * Report a rejected client at most once per window, so that records lost to the rate limit are
  * visible in the error log without one line per rejected request.
+ *
+ * The reporter is called with the same key that the rate limit counts on, so "once per client"
+ * means once per counted client (the limiter counts IPv6 per /56 block), and with the address
+ * of the rejected request for the line itself. A client is marked as reported only after its
+ * line has been written: a write that fails does not silence the client for the window.
  * @param {{ write: function(string): void, windowMs: (number|undefined), now: (function(): number|undefined), maxClients: (number|undefined) }} options
- * @returns {function(string): boolean} Call with the client address; true when a line was written.
+ * @returns {function(string, string=): boolean} Call with the rate limit key and the client
+ *   address (the key when omitted); true when a line was written.
  */
 export function createRejectionReporter({ write, windowMs = 60_000, now = Date.now, maxClients = 10_000 }) {
   /** @type {Map<string, number>} */
   const lastReported = new Map();
-  return (address) => {
-    const key = String(address ?? 'unknown');
+  return (clientKey, address = clientKey) => {
+    const key = String(clientKey ?? 'unknown');
     const time = now();
     const previous = lastReported.get(key);
     if (previous !== undefined && time - previous < windowMs) return false;
@@ -47,8 +53,8 @@ export function createRejectionReporter({ write, windowMs = 60_000, now = Date.n
       // Still full of clients reported within the window: start over rather than grow.
       if (lastReported.size >= maxClients) lastReported.clear();
     }
+    write(String(address ?? key));
     lastReported.set(key, time);
-    write(key);
     return true;
   };
 }

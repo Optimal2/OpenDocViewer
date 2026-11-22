@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 219,
-    "sourceLineCount": 75377,
+    "sourceLineCount": 75387,
     "docletCount": 2206,
     "documentedFileCount": 213,
     "lowConfidenceSummaryCount": 2,
@@ -987,7 +987,7 @@
     {
       "name": "server",
       "fileCount": 9,
-      "lineCount": 853,
+      "lineCount": 863,
       "docletCount": 21,
       "importantFiles": [
         {
@@ -1020,7 +1020,7 @@
         {
           "path": "server/rateLimitConfig.js",
           "score": 52,
-          "lines": 55,
+          "lines": 61,
           "incomingLocalImports": 2,
           "doclets": 2,
           "summary": "Settings and reporting for the per-client rate limits of the log servers.",
@@ -1056,7 +1056,7 @@
         {
           "path": "server/system-log-server.js",
           "score": 37,
-          "lines": 264,
+          "lines": 266,
           "incomingLocalImports": 0,
           "doclets": 5,
           "summary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2555,7 +2555,7 @@
     },
     {
       "path": "server/rateLimitConfig.js",
-      "lines": 55,
+      "lines": 61,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "Settings and reporting for the per-client rate limits of the log servers.",
@@ -2569,7 +2569,7 @@
         {
           "name": "createRejectionReporter",
           "kind": "function",
-          "line": 35
+          "line": 41
         }
       ],
       "declarations": [
@@ -2586,7 +2586,7 @@
         {
           "name": "createRejectionReporter",
           "kind": "function",
-          "line": 35
+          "line": 41
         }
       ],
       "parseError": null,
@@ -2639,7 +2639,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/rateLimitConfig.js",
-          "line": 35,
+          "line": 41,
           "description": "Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.",
           "params": [
             {
@@ -2652,7 +2652,7 @@
           "returns": [
             {
               "type": "function",
-              "description": "Call with the client address; true when a line was written."
+              "description": "Call with the rate limit key and the client address (the key when omitted); true when a line was written."
             }
           ],
           "examples": 0
@@ -2669,7 +2669,7 @@
     },
     {
       "path": "server/system-log-server.js",
-      "lines": 264,
+      "lines": 266,
       "extension": ".js",
       "jsdocBlockCount": 11,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2838,24 +2838,29 @@
           "line": 103
         },
         {
+          "name": "rateLimitKey",
+          "kind": "function",
+          "line": 176
+        },
+        {
           "name": "requireLogToken",
           "kind": "function",
-          "line": 202
+          "line": 204
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 218
+          "line": 220
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 229
+          "line": 231
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 245
+          "line": 247
         }
       ],
       "parseError": null,
@@ -2923,7 +2928,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 202,
+          "line": 204,
           "description": "Token auth middleware",
           "params": [],
           "returns": [],
@@ -3063,7 +3068,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 299,
+      "lines": 301,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -3252,19 +3257,24 @@
           "line": 154
         },
         {
+          "name": "rateLimitKey",
+          "kind": "function",
+          "line": 206
+        },
+        {
           "name": "rec",
           "kind": "object",
-          "line": 247
+          "line": 249
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 264
+          "line": 266
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 280
+          "line": 282
         }
       ],
       "parseError": null,
@@ -91454,7 +91464,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rateLimitConfig.js",
-      "line": 35,
+      "line": 41,
       "description": "Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.",
       "params": [
         {
@@ -91467,7 +91477,7 @@
       "returns": [
         {
           "type": "function",
-          "description": "Call with the client address; true when a line was written."
+          "description": "Call with the rate limit key and the client address (the key when omitted); true when a line was written."
         }
       ],
       "examples": 0
@@ -91555,7 +91565,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 202,
+      "line": 204,
       "description": "Token auth middleware",
       "params": [],
       "returns": [],

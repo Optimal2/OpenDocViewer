@@ -1,6 +1,6 @@
 # OpenDocViewer / server
 
-File count: 9. Line count: 853. JSDoc symbol count: 21.
+File count: 9. Line count: 863. JSDoc symbol count: 21.
 
 ## server/accessLog.js
 

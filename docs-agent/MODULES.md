@@ -2,7 +2,7 @@
 
 ## server
 
-File count: 9. Line count: 853. JSDoc symbol count: 21.
+File count: 9. Line count: 863. JSDoc symbol count: 21.
 
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/headerText.js` - Text of an HTTP header value as the sender wrote it.
