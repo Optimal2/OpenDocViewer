@@ -118,4 +118,51 @@ describe('PrintRangeDialog recipient label', () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  function submitForm() {
+    const form = document.querySelector('form');
+    act(() => {
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+  }
+
+  it('falls back to PDF printing on form submission when HTML printing is disabled', () => {
+    const onSubmit = vi.fn();
+    renderDialog(false, 'en', {
+      config: { print: { pdf: { enabled: true }, actions: { printHtml: { enabled: false } } } },
+      onSubmit,
+    });
+
+    submitForm();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ printBackend: 'pdf', printAction: 'print' });
+    expect(document.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it.each([
+    ['en', 'No print method is enabled. Contact your administrator.'],
+    ['sv', 'Ingen utskriftsmetod är aktiverad. Kontakta administratören.'],
+  ])('%s: says why nothing happens on form submission when no print method is enabled', (lng, message) => {
+    const onSubmit = vi.fn();
+    renderDialog(false, lng, {
+      config: { print: { actions: { printHtml: { enabled: false } } } },
+      onSubmit,
+    });
+
+    submitForm();
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(document.querySelector('[role="alert"]')?.textContent).toBe(message);
+  });
+
+  it('keeps HTML printing on form submission when both methods are enabled', () => {
+    const onSubmit = vi.fn();
+    renderDialog(false, 'en', { config: { print: { pdf: { enabled: true } } }, onSubmit });
+
+    submitForm();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0][0]).toMatchObject({ printBackend: 'html', printAction: 'print' });
+  });
 });

@@ -435,8 +435,18 @@ export function usePrintRangeController({
     }
 
     const requestedBackend = backendOverride || printBackend;
-    const backend = action === 'download' ? 'pdf' : (printPdfEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
-    if (backend === 'html' && !printHtmlEnabled) return null;
+    let backend = action === 'download' ? 'pdf' : (printPdfEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
+    if (backend === 'html' && !printHtmlEnabled) {
+      // The form's own submit (Enter) always asks for HTML. With HTML printing switched off it
+      // uses the print method that is allowed, and says so when there is none.
+      if (!printPdfEnabled) {
+        setError(t('printDialog.errors.noPrintMethod', {
+          defaultValue: 'No print method is enabled. Contact your administrator.',
+        }));
+        return null;
+      }
+      backend = 'pdf';
+    }
     const common = { ...extras(), pdfOrientation: currentPdfOrientation, printBackend: backend, printAction: action };
 
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };

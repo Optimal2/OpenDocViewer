@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 214,
-    "sourceLineCount": 74986,
+    "sourceLineCount": 74996,
     "docletCount": 2193,
     "documentedFileCount": 208,
     "lowConfidenceSummaryCount": 2,
@@ -778,7 +778,7 @@
           {
             "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
             "score": 57,
-            "lines": 673,
+            "lines": 683,
             "summary": "Hook + helpers for PrintRangeDialog."
           },
           {
@@ -1253,7 +1253,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 21,
-      "lineCount": 8233,
+      "lineCount": 8243,
       "docletCount": 117,
       "importantFiles": [
         {
@@ -1277,7 +1277,7 @@
         {
           "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
           "score": 57,
-          "lines": 673,
+          "lines": 683,
           "incomingLocalImports": 1,
           "doclets": 15,
           "summary": "Hook + helpers for PrintRangeDialog.",
@@ -17819,7 +17819,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "lines": 673,
+      "lines": 683,
       "extension": ".js",
       "jsdocBlockCount": 22,
       "sourceSummary": "Hook + helpers for PrintRangeDialog.",
@@ -17928,7 +17928,7 @@
         {
           "name": "common",
           "kind": "object",
-          "line": 440
+          "line": 450
         }
       ],
       "parseError": null,
@@ -18234,7 +18234,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 491,
+          "line": 501,
           "description": "",
           "params": [
             {
@@ -18259,7 +18259,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 504,
+          "line": 514,
           "description": "",
           "params": [],
           "returns": [
@@ -18277,7 +18277,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 507,
+          "line": 517,
           "description": "",
           "params": [],
           "returns": [
@@ -18295,7 +18295,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 512,
+          "line": 522,
           "description": "",
           "params": [],
           "returns": [
@@ -18313,7 +18313,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 523,
+          "line": 533,
           "description": "Restore the dialog state from the latest successfully prepared print.",
           "params": [
             {
@@ -98921,7 +98921,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 523,
+      "line": 533,
       "description": "Restore the dialog state from the latest successfully prepared print.",
       "params": [
         {
@@ -98946,7 +98946,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 512,
+      "line": 522,
       "description": "",
       "params": [],
       "returns": [
@@ -98964,7 +98964,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 504,
+      "line": 514,
       "description": "",
       "params": [],
       "returns": [
@@ -98982,7 +98982,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 507,
+      "line": 517,
       "description": "",
       "params": [],
       "returns": [
@@ -99000,7 +99000,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 491,
+      "line": 501,
       "description": "",
       "params": [
         {

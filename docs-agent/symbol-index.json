@@ -8422,7 +8422,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-    "line": 523,
+    "line": 533,
     "description": "Restore the dialog state from the latest successfully prepared print.",
     "params": [
       {
@@ -8447,7 +8447,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-    "line": 512,
+    "line": 522,
     "description": "",
     "params": [],
     "returns": [
@@ -8465,7 +8465,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-    "line": 504,
+    "line": 514,
     "description": "",
     "params": [],
     "returns": [
@@ -8483,7 +8483,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-    "line": 507,
+    "line": 517,
     "description": "",
     "params": [],
     "returns": [
@@ -8501,7 +8501,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-    "line": 491,
+    "line": 501,
     "description": "",
     "params": [
       {

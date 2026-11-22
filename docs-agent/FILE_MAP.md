@@ -47,7 +47,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/ThemeToggleButton.jsx</code> | 61 | 0 | 1 | high | Small button that toggles between light/dark themes using the ThemeContext. |
 | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js</code> | 367 | 1 | 8 | high | Background prebuild/cache for configured &quot;all pages&quot; generated-PDF variants. |
 | <code>src/components/DocumentToolbar/usePrintPipeline.js</code> | 802 | 2 | 20 | high | File: src/components/DocumentToolbar/usePrintPipeline.js The ONE print pipeline of the viewer: print dialog target, print options, user print log, the direct-versus-generated-PDF... |
-| <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 673 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
+| <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 683 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 566 | 1 | 3 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
 | <code>src/components/DocumentViewer/CompareCurtainButton.jsx</code> | 55 | 2 | 1 | high | Entry to the curtain view \(CompareCurtainView.jsx\), shown in the compare toolbar and in the overlay view&#39;s toolbar. |
 | <code>src/components/DocumentViewer/CompareCurtainView.jsx</code> | 445 | 1 | 5 | high | Curtain view of the compare mode: the two calibrated pages in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, page B clipped to one side of a draggable border. |

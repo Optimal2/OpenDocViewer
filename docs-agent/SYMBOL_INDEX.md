@@ -314,11 +314,11 @@
 | <code>usePrintRangeController~makeDescendingSequence</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:282</code> |  |
 | <code>usePrintRangeController~onDialogKeyDown</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:270</code> |  |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:27</code> | Structured payload returned to the caller on submit. |
-| <code>usePrintRangeController~restoreFromDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:523</code> | Restore the dialog state from the latest successfully prepared print. |
-| <code>usePrintRangeController~submitPdfDownload</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:512</code> |  |
-| <code>usePrintRangeController~submitPrintDirect</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:504</code> |  |
-| <code>usePrintRangeController~submitPrintPdf</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:507</code> |  |
-| <code>usePrintRangeController~submitWithBackend</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:491</code> |  |
+| <code>usePrintRangeController~restoreFromDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:533</code> | Restore the dialog state from the latest successfully prepared print. |
+| <code>usePrintRangeController~submitPdfDownload</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:522</code> |  |
+| <code>usePrintRangeController~submitPrintDirect</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:514</code> |  |
+| <code>usePrintRangeController~submitPrintPdf</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:517</code> |  |
+| <code>usePrintRangeController~submitWithBackend</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:501</code> |  |
 | <code>usePrintRangeController</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:64</code> | Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog. |
 | <code>usePrintRangeController~validateRange</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:291</code> |  |
 | <code>usePrintRangeController~validateUserFields</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:303</code> |  |

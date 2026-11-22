@@ -212,6 +212,7 @@
       "forWhomFormat": "Formatet på ”Mottagare” är inte tillåtet.",
       "invalidCustom": "Ogiltig inmatning av egna sidor.",
       "review": "Kontrollera obligatoriska fält.",
+      "noPrintMethod": "Ingen utskriftsmetod är aktiverad. Kontakta administratören.",
       "enterAtLeastOne": "Ange minst en sida eller ett intervall.",
       "invalidToken": "Ogiltig post \"{token}\".",
       "invalidRange": "Ogiltigt intervall \"{range}\".",
