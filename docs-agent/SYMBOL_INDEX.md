@@ -2,16 +2,20 @@
 
 | Symbol | Kind | File | Summary |
 | --- | --- | --- | --- |
-| <code>pruneRotatedLogs</code> | function | <code>server/logRetention.js:14</code> | Delete rotated log files whose modification time is beyond the retention period. |
-| <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:37</code> | Repeat retention while a long-running service stays up. |
+| <code>PRINT_LOG_RETENTION_DEFAULT_DAYS</code> | constant | <code>server/logRetention.js:10</code> | Print records \( print-*.log \) are the audit trail of who printed what, and for whom. |
+| <code>pruneRotatedLogs</code> | function | <code>server/logRetention.js:36</code> | Delete rotated log files whose modification time is beyond the retention period. |
+| <code>resolvePrintLogRetentionDays</code> | function | <code>server/logRetention.js:20</code> | Retention for the print records of the user log server. |
+| <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:59</code> | Repeat retention while a long-running service stays up. |
 | <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:134</code> | Optional CORS for /log |
 | <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:128</code> | Token gate for /log |
 | <code>logLimiter</code> | constant | <code>server/system-log-server.js:158</code> | Rate limit for ingestion |
 | <code>requireLogToken</code> | function | <code>server/system-log-server.js:168</code> | Token auth middleware |
 | <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:121</code> | Trust proxy for accurate req.ip |
-| <code>resolveUser</code> | function | <code>server/user-log-server.js:112</code> | Resolve user identity without cookies. |
-| <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:130</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
-| <code>isAllowedUserLogOrigin</code> | function | <code>server/userLogOrigin.js:4</code> | Evaluate the browser origin signals used by the user print-log endpoint. |
+| <code>resolveUser</code> | function | <code>server/user-log-server.js:124</code> | Resolve user identity without cookies. |
+| <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:142</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
+| <code>LOOPBACK_ADDRESSES</code> | constant | <code>server/userLogOrigin.js:4</code> | Evaluate the browser origin signals used by the user print-log endpoint. |
+| <code>resolveUserLogHosts</code> | function | <code>server/userLogOrigin.js:15</code> | The hosts the browser may have addressed: the request&#39;s own Host header and, only when the request arrives over loopback, the X-Forwarded-Host that the reverse proxy on the same m... |
+| <code>neutralizeForWhom</code> | function | <code>server/userLogPayload.js:17</code> | The print log has never carried &amp;quot;$&amp;quot; or &amp;quot;#&amp;quot; in the recipient. |
 | <code>readPrintLogFields</code> | function | <code>server/userLogPayload.js:4</code> | Compatibility reader for form posts and the viewer&#39;s JSON print envelope. |
 | <code>BootstrapDebugInfo</code> | typedef | <code>src/app/AppBootstrap.jsx:63</code> | Diagnostics-only bootstrap metadata. |
 | <code>buildDemoSourceList</code> | function | <code>src/app/AppBootstrap.jsx:228</code> | Build a demo source list from the /public sample files. |

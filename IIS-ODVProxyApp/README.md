@@ -8,9 +8,10 @@ Minimal IIS application that only reverse-proxies ODV log endpoints:
 ## Requirements
 
 - IIS URL Rewrite module
-- IIS Application Request Routing (ARR) with proxying and `preserveHostHeader` enabled
+- IIS Application Request Routing (ARR) with proxying enabled
+- `HTTP_X_FORWARDED_HOST` in `allowedServerVariables` for this application
 
-The setup script enables both ARR settings at server level. Preserving Host is required because the user-log server compares the browser's Origin/Referer host with the forwarded request's Host header.
+The setup script turns ARR proxying on at server level; that is its only server-wide change. The user-log server compares the browser's Origin/Referer host with the public host, and ARR replaces `Host` with the upstream address, so the user-log rule forwards the public host in `X-Forwarded-Host`. The setup script allows that server variable for this application's location only. ARR's server-wide `preserveHostHeader` is not changed.
 
 ## Deploy
 

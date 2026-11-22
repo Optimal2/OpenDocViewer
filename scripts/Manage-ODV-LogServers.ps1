@@ -37,6 +37,8 @@ $Script:SERVICE_USR = 'ODV-UserLog'
 $Script:DEF_PORT_SYS   = 3001
 $Script:DEF_PORT_USR   = 3002
 $Script:RETENTION_DAYS = 14
+# Print records (print-*.log) are the audit trail and are kept longer than the other logs.
+$Script:PRINT_RETENTION_DAYS = 30
 $Script:NODE_ENV       = 'production'
 $Script:TRUST_PROXY    = 1
 
@@ -436,6 +438,7 @@ function Install-Flow {
     PORT               = $portUsr
     TRUST_PROXY        = $TRUST_PROXY
     LOG_RETENTION_DAYS = $RETENTION_DAYS
+    PRINT_LOG_RETENTION_DAYS = $PRINT_RETENTION_DAYS
   }
 
   Install-ServiceNodeApp -ServiceName $SERVICE_SYS -NodeExe $node -ScriptPath $SYSTEM_JS -AppDir $SERVER_DIR -EnvVars $envSys -NssmExe $nssm

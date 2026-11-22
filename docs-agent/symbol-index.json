@@ -1,12 +1,25 @@
 [
   {
+    "id": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+    "name": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+    "longname": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "server/logRetention.js",
+    "line": 10,
+    "description": "Print records ( print-*.log ) are the audit trail of who printed what, and for whom.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "pruneRotatedLogs",
     "name": "pruneRotatedLogs",
     "longname": "pruneRotatedLogs",
     "kind": "function",
     "scope": "global",
     "file": "server/logRetention.js",
-    "line": 14,
+    "line": 36,
     "description": "Delete rotated log files whose modification time is beyond the retention period.",
     "params": [
       {
@@ -25,13 +38,38 @@
     "examples": 0
   },
   {
+    "id": "resolvePrintLogRetentionDays",
+    "name": "resolvePrintLogRetentionDays",
+    "longname": "resolvePrintLogRetentionDays",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/logRetention.js",
+    "line": 20,
+    "description": "Retention for the print records of the user log server.",
+    "params": [
+      {
+        "name": "env",
+        "type": "Record.<string, (string|undefined)>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "scheduleLogRetention",
     "name": "scheduleLogRetention",
     "longname": "scheduleLogRetention",
     "kind": "function",
     "scope": "global",
     "file": "server/logRetention.js",
-    "line": 37,
+    "line": 59,
     "description": "Repeat retention while a long-running service stays up.",
     "params": [
       {
@@ -127,7 +165,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 112,
+    "line": 124,
     "description": "Resolve user identity without cookies.",
     "params": [],
     "returns": [],
@@ -140,23 +178,73 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 130,
+    "line": 142,
     "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
     "params": [],
     "returns": [],
     "examples": 0
   },
   {
-    "id": "isAllowedUserLogOrigin",
-    "name": "isAllowedUserLogOrigin",
-    "longname": "isAllowedUserLogOrigin",
-    "kind": "function",
+    "id": "LOOPBACK_ADDRESSES",
+    "name": "LOOPBACK_ADDRESSES",
+    "longname": "LOOPBACK_ADDRESSES",
+    "kind": "constant",
     "scope": "global",
     "file": "server/userLogOrigin.js",
     "line": 4,
     "description": "Evaluate the browser origin signals used by the user print-log endpoint.",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "resolveUserLogHosts",
+    "name": "resolveUserLogHosts",
+    "longname": "resolveUserLogHosts",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/userLogOrigin.js",
+    "line": 15,
+    "description": "The hosts the browser may have addressed: the request's own Host header and, only when the request arrives over loopback, the X-Forwarded-Host that the reverse proxy on the same m...",
+    "params": [
+      {
+        "name": "request",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "neutralizeForWhom",
+    "name": "neutralizeForWhom",
+    "longname": "neutralizeForWhom",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/userLogPayload.js",
+    "line": 17,
+    "description": "The print log has never carried &quot;$&quot; or &quot;#&quot; in the recipient.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {

@@ -55,8 +55,12 @@ This document describes the two optional Node/Express services that accompany th
     - `meta.reason` and `meta.forWhom` from the bundled viewer's JSON envelope
     - top-level `reason` and `forWhom` remain accepted for compatibility with form posts and older callers
   - response on success: JSON literal `true` with HTTP `200`
+  - `$` and `#` in `forWhom` are stored as `_`. The request is not rejected for them: the viewer
+    sends the record without reading the response, so a rejection would lose the print record
+    without anyone noticing.
+  - line breaks and control characters in `reason` and `forWhom` are removed before the record
+    is written as one JSON line
   - failures:
-    - `400` when `forWhom` contains `$` or `#`
     - `403` for failed same-origin checks
     - `415` for unsupported content type
     - `429` when the rate limit is exceeded
@@ -80,7 +84,16 @@ to the user log.
 - `print-YYYY-MM-DD.log`
 - `error-YYYY-MM-DD.log`
 
-Retention is controlled by `LOG_RETENTION_DAYS` and defaults to `14`. Old files are pruned on startup and once every 24 hours while the service remains running, as a best-effort housekeeping step.
+Retention of the access, ingestion and error logs is controlled by `LOG_RETENTION_DAYS` and defaults to `14`.
+
+The print records (`print-*.log`) are the audit trail and are kept for `30` days by default:
+
+- `PRINT_LOG_RETENTION_DAYS`, when set to a positive number, decides.
+- Otherwise they follow `LOG_RETENTION_DAYS` when it is higher than 30, and are never pruned earlier than 30 days. A service installed with `LOG_RETENTION_DAYS=14` therefore still keeps its print records for 30 days.
+
+`scripts/Manage-ODV-LogServers.ps1` installs both services with `LOG_RETENTION_DAYS=14` and the user log service with `PRINT_LOG_RETENTION_DAYS=30`.
+
+Old files are pruned on startup and once every 24 hours while the service remains running, as a best-effort housekeeping step. Pruning deletes the files; it cannot be undone.
 
 ## Environment settings
 
@@ -92,7 +105,8 @@ Retention is controlled by `LOG_RETENTION_DAYS` and defaults to `14`. Old files 
 | `LOG_TOKEN` | System | Required at production startup and matched against `x-log-token` on every `/log` request. |
 | `ALLOWED_ORIGINS` | System | Empty (no CORS); otherwise a comma-separated exact-origin allowlist for `/log`. |
 | `JSON_LIMIT` | System | `64kb`. The user service uses fixed 64 kb JSON and 16 kb form limits. |
-| `LOG_RETENTION_DAYS` | Both | `14`. |
+| `LOG_RETENTION_DAYS` | Both | `14`. Access, ingestion and error logs. |
+| `PRINT_LOG_RETENTION_DAYS` | User | `30`. Print records; without it they follow `LOG_RETENTION_DAYS` but never below 30. |
 | `ODV_STRICT_ORIGIN` | User | `false`; set to `true` to reject requests without `Origin`, `Referer` or `Sec-Fetch-Site`. |
 
 The system endpoint allows 120 requests per minute per client. The user endpoint allows 60. Both use
@@ -123,6 +137,7 @@ This token is a lightweight ingestion guard, not high-assurance authentication. 
 
 - intentionally avoids cookie-based auth to keep CSRF handling simple
 - relies on same-origin style checks using `Origin`, `Referer`, and `Sec-Fetch-Site`; `Sec-Fetch-Site: same-site` is not sufficient
+- compares `Origin`/`Referer` with the request's `Host` and, only when the request arrives over loopback (`127.0.0.1`, `::1`), with the `X-Forwarded-Host` set by the reverse proxy on the same machine; a forwarded host from any other address is ignored
 - intentionally allows requests with none of those signals by default for non-browser compatibility; set `ODV_STRICT_ORIGIN=true` to reject them
 - intended for frontend print-intent data, not privileged server commands
 
@@ -135,7 +150,11 @@ Use the dedicated IIS proxy app described in `IIS-ODVProxyApp/README.md`. The in
 - `POST /ODVProxy/log` -> `http://localhost:3001/log`
 - `POST /ODVProxy/userlog/record` -> `http://localhost:3002/userlog/record`
 
-This keeps the browser talking to a same-origin path even though the Node services live on localhost ports behind IIS. ARR must preserve the original Host header (`preserveHostHeader=true`); the repository setup script enables it because the user-log origin check compares Host with Origin/Referer.
+This keeps the browser talking to a same-origin path even though the Node services live on localhost ports behind IIS.
+
+ARR replaces `Host` with the upstream address, while the user-log origin check needs the public host. The user-log rule therefore sets `X-Forwarded-Host` to the public host (overwriting any value the client sent), and the user log server trusts that header only from loopback. URL Rewrite sets a request header only when its server variable is allowed, so `scripts/Setup-IIS-ODVProxy.ps1` adds `HTTP_X_FORWARDED_HOST` to `allowedServerVariables` for the proxy application's location only.
+
+The setup script changes one setting for the whole server: it turns ARR proxying on (`system.webServer/proxy`, `enabled`). It does not set ARR's server-wide `preserveHostHeader`, which would change the `Host` header that every other proxied application on the server receives. A server where an earlier version of the script set `preserveHostHeader=true` keeps working, because the `Host` header itself is still accepted; whether to set it back is a decision for the server's administrator, since other applications may rely on it by now.
 
 ### Runtime config example
 

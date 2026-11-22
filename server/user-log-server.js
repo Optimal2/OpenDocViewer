@@ -6,12 +6,13 @@
  *   POST /userlog/record
  *     - Body: application/x-www-form-urlencoded or JSON
  *       - reason: string|null
- *       - forWhom: string|null
+ *       - forWhom: string|null  ("$" and "#" are stored as "_")
  *     - Response: 200 OK with body: true   (JSON boolean literal)
  *
  * Security posture (no client changes required):
  *   - No cookies are read or set (cookie-based auth removed to avoid CSRF lint).
- *   - Same-origin guard: Origin/Referer must match Host; Sec-Fetch-Site must be same-origin.
+ *   - Same-origin guard: Origin/Referer must match Host, or the X-Forwarded-Host set by a
+ *     reverse proxy on loopback; Sec-Fetch-Site must be same-origin.
  *     Requests with none of these signals are accepted by default for compatibility.
  *   - Rate limited; accepts only form or JSON content types.
  *
@@ -19,7 +20,8 @@
  *   - PORT=3002
  *   - NODE_ENV=production|development
  *   - TRUST_PROXY=1
- *   - LOG_RETENTION_DAYS=14
+ *   - LOG_RETENTION_DAYS=14        (access and error logs)
+ *   - PRINT_LOG_RETENTION_DAYS=30  (print records; never below 30 unless set here)
  *   - ODV_STRICT_ORIGIN=true  (if set, requests missing Origin/Referer/Sec-Fetch-Site are rejected)
  * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
  */
@@ -34,8 +36,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
-import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
-import { readPrintLogFields } from './userLogPayload.js';
+import { pruneRotatedLogs, resolvePrintLogRetentionDays, scheduleLogRetention } from './logRetention.js';
+import { neutralizeForWhom, readPrintLogFields } from './userLogPayload.js';
 import { isAllowedUserLogOrigin } from './userLogOrigin.js';
 
 dotenv.config();
@@ -49,12 +51,22 @@ const LOG_DIR = path.join(__dirname, 'logs');
 try { fs.mkdirSync(LOG_DIR, { recursive: true }); } catch {}
 
 const RETENTION_DAYS = Number(process.env.LOG_RETENTION_DAYS || 14);
-const ROTATED_LOG_FILE_PATTERN = /^(access|print|error)-\d{4}-\d{2}-\d{2}\.log$/;
-const pruneOldLogs = () => pruneRotatedLogs({
-  logDir: LOG_DIR,
-  retentionDays: RETENTION_DAYS,
-  filePattern: ROTATED_LOG_FILE_PATTERN,
-});
+// The print records are the audit trail and are kept longer than the access and error logs.
+const PRINT_RETENTION_DAYS = resolvePrintLogRetentionDays(process.env);
+const GENERAL_LOG_FILE_PATTERN = /^(access|error)-\d{4}-\d{2}-\d{2}\.log$/;
+const PRINT_LOG_FILE_PATTERN = /^print-\d{4}-\d{2}-\d{2}\.log$/;
+const pruneOldLogs = async () => {
+  await pruneRotatedLogs({
+    logDir: LOG_DIR,
+    retentionDays: RETENTION_DAYS,
+    filePattern: GENERAL_LOG_FILE_PATTERN,
+  });
+  await pruneRotatedLogs({
+    logDir: LOG_DIR,
+    retentionDays: PRINT_RETENTION_DAYS,
+    filePattern: PRINT_LOG_FILE_PATTERN,
+  });
+};
 
 /** @type {Map<string, { date: string, stream: fs.WriteStream }>} */
 const streams = new Map();
@@ -131,6 +143,9 @@ function sameOriginGuard(req, res, next) {
   const strict = String(process.env.ODV_STRICT_ORIGIN || '').toLowerCase() === 'true';
   const allowed = isAllowedUserLogOrigin({
     host: req.get('host') || '',
+    // Trusted only when the request arrives over loopback; see resolveUserLogHosts.
+    forwardedHost: req.get('x-forwarded-host') || '',
+    remoteAddress: req.socket?.remoteAddress || '',
     origin: req.get('origin') || '',
     referer: req.get('referer') || '',
     secFetchSite: req.get('sec-fetch-site') || '',
@@ -200,13 +215,9 @@ app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
       referer: req.get('referer') || undefined,
       action: 'print',
       reason: reason === null ? null : safeString(reason, 500),
-      forWhom: forWhom === null ? null : safeString(forWhom, 200),
+      // "$" and "#" are replaced, never rejected: the print record is always written.
+      forWhom: forWhom === null ? null : neutralizeForWhom(safeString(forWhom, 200)),
     };
-
-    // Optional server-side input policy (example): block "$" and "#" in forWhom
-    if (typeof rec.forWhom === 'string' && /[$#]/.test(rec.forWhom)) {
-      return res.status(400).send('Invalid characters in forWhom');
-    }
 
     writeRolling('print', safeJson(rec) + '\n');
 

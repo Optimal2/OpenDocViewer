@@ -42,6 +42,14 @@
           <conditions logicalGrouping="MatchAll">
             <add input="{REQUEST_METHOD}" pattern="POST|OPTIONS" />
           </conditions>
+          <!-- ARR replaces Host with the upstream address. The user-log server compares
+               Origin/Referer with the public host, so it is forwarded in X-Forwarded-Host
+               (overwriting any value the client sent). HTTP_X_FORWARDED_HOST must be in the
+               allowedServerVariables of this application; scripts/Setup-IIS-ODVProxy.ps1
+               adds it for this application only. -->
+          <serverVariables>
+            <set name="HTTP_X_FORWARDED_HOST" value="{HTTP_HOST}" />
+          </serverVariables>
           <action type="Rewrite"
                   url="__USER_LOG_URL__"
                   appendQueryString="true"

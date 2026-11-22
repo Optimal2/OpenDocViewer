@@ -7,3 +7,13 @@ export function readPrintLogFields(body) {
     forWhom: body?.forWhom ?? body?.meta?.forWhom ?? null,
   };
 }
+
+/**
+ * The print log has never carried "$" or "#" in the recipient. They are replaced with "_"
+ * instead of rejecting the request, so that the print record is always written.
+ * @param {*} value
+ * @returns {string}
+ */
+export function neutralizeForWhom(value) {
+  return String(value).replace(/[$#]/g, '_');
+}

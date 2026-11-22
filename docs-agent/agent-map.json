@@ -94,8 +94,8 @@
   },
   "stats": {
     "fileCount": 214,
-    "sourceLineCount": 74913,
-    "docletCount": 2189,
+    "sourceLineCount": 74986,
+    "docletCount": 2193,
     "documentedFileCount": 208,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -988,16 +988,34 @@
     {
       "name": "server",
       "fileCount": 5,
-      "lineCount": 548,
-      "docletCount": 11,
+      "lineCount": 621,
+      "docletCount": 15,
       "importantFiles": [
         {
           "path": "server/logRetention.js",
-          "score": 57,
-          "lines": 42,
+          "score": 73,
+          "lines": 64,
           "incomingLocalImports": 2,
-          "doclets": 2,
+          "doclets": 4,
           "summary": "Shared best-effort retention for the optional standalone log servers.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/userLogOrigin.js",
+          "score": 44,
+          "lines": 45,
+          "incomingLocalImports": 1,
+          "doclets": 2,
+          "summary": "Evaluate the browser origin signals used by the user print-log endpoint.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/userLogPayload.js",
+          "score": 44,
+          "lines": 20,
+          "incomingLocalImports": 1,
+          "doclets": 2,
+          "summary": "Compatibility reader for form posts and the viewer's JSON print envelope.",
           "summaryConfidence": "high"
         },
         {
@@ -1010,27 +1028,9 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "server/userLogOrigin.js",
-          "score": 36,
-          "lines": 15,
-          "incomingLocalImports": 1,
-          "doclets": 1,
-          "summary": "Evaluate the browser origin signals used by the user print-log endpoint.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "server/userLogPayload.js",
-          "score": 36,
-          "lines": 10,
-          "incomingLocalImports": 1,
-          "doclets": 1,
-          "summary": "Compatibility reader for form posts and the viewer's JSON print envelope.",
-          "summaryConfidence": "high"
-        },
-        {
           "path": "server/user-log-server.js",
           "score": 28,
-          "lines": 251,
+          "lines": 262,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2064,9 +2064,9 @@
   "files": [
     {
       "path": "server/logRetention.js",
-      "lines": 42,
+      "lines": 64,
       "extension": ".js",
-      "jsdocBlockCount": 3,
+      "jsdocBlockCount": 5,
       "sourceSummary": "Shared best-effort retention for the optional standalone log servers.",
       "imports": [
         {
@@ -2093,26 +2093,41 @@
           "line": 7
         },
         {
+          "name": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+          "kind": "variable",
+          "line": 10
+        },
+        {
+          "name": "resolvePrintLogRetentionDays",
+          "kind": "function",
+          "line": 20
+        },
+        {
           "name": "pruneRotatedLogs",
           "kind": "function",
-          "line": 14
+          "line": 36
         },
         {
           "name": "scheduleLogRetention",
           "kind": "function",
-          "line": 37
+          "line": 59
         }
       ],
       "declarations": [
         {
+          "name": "resolvePrintLogRetentionDays",
+          "kind": "function",
+          "line": 20
+        },
+        {
           "name": "pruneRotatedLogs",
           "kind": "function",
-          "line": 14
+          "line": 36
         },
         {
           "name": "scheduleLogRetention",
           "kind": "function",
-          "line": 37
+          "line": 59
         }
       ],
       "parseError": null,
@@ -2122,13 +2137,51 @@
       },
       "doclets": [
         {
+          "id": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+          "name": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+          "longname": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "server/logRetention.js",
+          "line": 10,
+          "description": "Print records ( print-*.log ) are the audit trail of who printed what, and for whom.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "resolvePrintLogRetentionDays",
+          "name": "resolvePrintLogRetentionDays",
+          "longname": "resolvePrintLogRetentionDays",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/logRetention.js",
+          "line": 20,
+          "description": "Retention for the print records of the user log server.",
+          "params": [
+            {
+              "name": "env",
+              "type": "Record.<string, (string|undefined)>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "pruneRotatedLogs",
           "name": "pruneRotatedLogs",
           "longname": "pruneRotatedLogs",
           "kind": "function",
           "scope": "global",
           "file": "server/logRetention.js",
-          "line": 14,
+          "line": 36,
           "description": "Delete rotated log files whose modification time is beyond the retention period.",
           "params": [
             {
@@ -2153,7 +2206,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/logRetention.js",
-          "line": 37,
+          "line": 59,
           "description": "Repeat retention while a long-running service stays up.",
           "params": [
             {
@@ -2199,7 +2252,7 @@
         }
       ],
       "incomingLocalImports": 2,
-      "importanceScore": 57,
+      "importanceScore": 73,
       "summary": "Shared best-effort retention for the optional standalone log servers.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -2546,7 +2599,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 251,
+      "lines": 262,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2556,7 +2609,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 27,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -2564,7 +2617,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2572,7 +2625,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -2580,7 +2633,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -2588,7 +2641,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -2596,7 +2649,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -2604,7 +2657,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 34,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -2612,7 +2665,7 @@
           "specifiers": [
             "morgan"
           ],
-          "line": 35,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -2621,24 +2674,26 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static"
         },
         {
           "source": "./logRetention.js",
           "specifiers": [
             "pruneRotatedLogs",
+            "resolvePrintLogRetentionDays",
             "scheduleLogRetention"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static"
         },
         {
           "source": "./userLogPayload.js",
           "specifiers": [
+            "neutralizeForWhom",
             "readPrintLogFields"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -2646,7 +2701,7 @@
           "specifiers": [
             "isAllowedUserLogOrigin"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static"
         }
       ],
@@ -2655,72 +2710,72 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 53
+          "line": 58
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 63
+          "line": 75
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 71
+          "line": 83
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 72
+          "line": 84
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 84
+          "line": 96
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 86
+          "line": 98
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 90
+          "line": 102
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 95
+          "line": 107
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 96
+          "line": 108
         },
         {
           "name": "resolveUser",
           "kind": "function",
-          "line": 112
+          "line": 124
         },
         {
           "name": "sameOriginGuard",
           "kind": "function",
-          "line": 130
+          "line": 142
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 195
+          "line": 210
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 216
+          "line": 227
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 232
+          "line": 243
         }
       ],
       "parseError": null,
@@ -2736,7 +2791,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 112,
+          "line": 124,
           "description": "Resolve user identity without cookies.",
           "params": [],
           "returns": [],
@@ -2749,7 +2804,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 130,
+          "line": 142,
           "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
           "params": [],
           "returns": [],
@@ -2762,18 +2817,20 @@
           "source": "./logRetention.js",
           "specifiers": [
             "pruneRotatedLogs",
+            "resolvePrintLogRetentionDays",
             "scheduleLogRetention"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static",
           "resolved": "server/logRetention.js"
         },
         {
           "source": "./userLogPayload.js",
           "specifiers": [
+            "neutralizeForWhom",
             "readPrintLogFields"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static",
           "resolved": "server/userLogPayload.js"
         },
@@ -2782,7 +2839,7 @@
           "specifiers": [
             "isAllowedUserLogOrigin"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static",
           "resolved": "server/userLogOrigin.js"
         }
@@ -2793,7 +2850,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 27,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -2801,7 +2858,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2809,7 +2866,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -2817,7 +2874,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -2825,7 +2882,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -2833,7 +2890,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -2841,7 +2898,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 34,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -2849,7 +2906,7 @@
           "specifiers": [
             "morgan"
           ],
-          "line": 35,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -2858,7 +2915,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static"
         }
       ],
@@ -2870,28 +2927,43 @@
     },
     {
       "path": "server/userLogOrigin.js",
-      "lines": 15,
+      "lines": 45,
       "extension": ".js",
-      "jsdocBlockCount": 1,
+      "jsdocBlockCount": 2,
       "sourceSummary": "Evaluate the browser origin signals used by the user print-log endpoint.",
       "imports": [],
       "exports": [
         {
+          "name": "resolveUserLogHosts",
+          "kind": "function",
+          "line": 15
+        },
+        {
           "name": "isAllowedUserLogOrigin",
           "kind": "function",
-          "line": 4
+          "line": 27
         }
       ],
       "declarations": [
         {
+          "name": "resolveUserLogHosts",
+          "kind": "function",
+          "line": 15
+        },
+        {
           "name": "isAllowedUserLogOrigin",
           "kind": "function",
-          "line": 4
+          "line": 27
         },
         {
           "name": "hostOf",
           "kind": "function",
-          "line": 5
+          "line": 30
+        },
+        {
+          "name": "matches",
+          "kind": "function",
+          "line": 34
         }
       ],
       "parseError": null,
@@ -2901,10 +2973,10 @@
       },
       "doclets": [
         {
-          "id": "isAllowedUserLogOrigin",
-          "name": "isAllowedUserLogOrigin",
-          "longname": "isAllowedUserLogOrigin",
-          "kind": "function",
+          "id": "LOOPBACK_ADDRESSES",
+          "name": "LOOPBACK_ADDRESSES",
+          "longname": "LOOPBACK_ADDRESSES",
+          "kind": "constant",
           "scope": "global",
           "file": "server/userLogOrigin.js",
           "line": 4,
@@ -2912,22 +2984,47 @@
           "params": [],
           "returns": [],
           "examples": 0
+        },
+        {
+          "id": "resolveUserLogHosts",
+          "name": "resolveUserLogHosts",
+          "longname": "resolveUserLogHosts",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/userLogOrigin.js",
+          "line": 15,
+          "description": "The hosts the browser may have addressed: the request's own Host header and, only when the request arrives over loopback, the X-Forwarded-Host that the reverse proxy on the same m...",
+          "params": [
+            {
+              "name": "request",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<string>",
+              "description": ""
+            }
+          ],
+          "examples": 0
         }
       ],
       "moduleKey": "server",
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 36,
+      "importanceScore": 44,
       "summary": "Evaluate the browser origin signals used by the user print-log endpoint.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
     {
       "path": "server/userLogPayload.js",
-      "lines": 10,
+      "lines": 20,
       "extension": ".js",
-      "jsdocBlockCount": 1,
+      "jsdocBlockCount": 2,
       "sourceSummary": "Compatibility reader for form posts and the viewer's JSON print envelope.",
       "imports": [],
       "exports": [
@@ -2935,6 +3032,11 @@
           "name": "readPrintLogFields",
           "kind": "function",
           "line": 4
+        },
+        {
+          "name": "neutralizeForWhom",
+          "kind": "function",
+          "line": 17
         }
       ],
       "declarations": [
@@ -2942,6 +3044,11 @@
           "name": "readPrintLogFields",
           "kind": "function",
           "line": 4
+        },
+        {
+          "name": "neutralizeForWhom",
+          "kind": "function",
+          "line": 17
         }
       ],
       "parseError": null,
@@ -2962,13 +3069,38 @@
           "params": [],
           "returns": [],
           "examples": 0
+        },
+        {
+          "id": "neutralizeForWhom",
+          "name": "neutralizeForWhom",
+          "longname": "neutralizeForWhom",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/userLogPayload.js",
+          "line": 17,
+          "description": "The print log has never carried &quot;$&quot; or &quot;#&quot; in the recipient.",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
         }
       ],
       "moduleKey": "server",
       "localImports": [],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 36,
+      "importanceScore": 44,
       "summary": "Compatibility reader for form posts and the viewer's JSON print envelope.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -90367,13 +90499,26 @@
   ],
   "symbols": [
     {
+      "id": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+      "name": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+      "longname": "PRINT_LOG_RETENTION_DEFAULT_DAYS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "server/logRetention.js",
+      "line": 10,
+      "description": "Print records ( print-*.log ) are the audit trail of who printed what, and for whom.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "pruneRotatedLogs",
       "name": "pruneRotatedLogs",
       "longname": "pruneRotatedLogs",
       "kind": "function",
       "scope": "global",
       "file": "server/logRetention.js",
-      "line": 14,
+      "line": 36,
       "description": "Delete rotated log files whose modification time is beyond the retention period.",
       "params": [
         {
@@ -90392,13 +90537,38 @@
       "examples": 0
     },
     {
+      "id": "resolvePrintLogRetentionDays",
+      "name": "resolvePrintLogRetentionDays",
+      "longname": "resolvePrintLogRetentionDays",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/logRetention.js",
+      "line": 20,
+      "description": "Retention for the print records of the user log server.",
+      "params": [
+        {
+          "name": "env",
+          "type": "Record.<string, (string|undefined)>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "scheduleLogRetention",
       "name": "scheduleLogRetention",
       "longname": "scheduleLogRetention",
       "kind": "function",
       "scope": "global",
       "file": "server/logRetention.js",
-      "line": 37,
+      "line": 59,
       "description": "Repeat retention while a long-running service stays up.",
       "params": [
         {
@@ -90494,7 +90664,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 112,
+      "line": 124,
       "description": "Resolve user identity without cookies.",
       "params": [],
       "returns": [],
@@ -90507,23 +90677,73 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 130,
+      "line": 142,
       "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
       "params": [],
       "returns": [],
       "examples": 0
     },
     {
-      "id": "isAllowedUserLogOrigin",
-      "name": "isAllowedUserLogOrigin",
-      "longname": "isAllowedUserLogOrigin",
-      "kind": "function",
+      "id": "LOOPBACK_ADDRESSES",
+      "name": "LOOPBACK_ADDRESSES",
+      "longname": "LOOPBACK_ADDRESSES",
+      "kind": "constant",
       "scope": "global",
       "file": "server/userLogOrigin.js",
       "line": 4,
       "description": "Evaluate the browser origin signals used by the user print-log endpoint.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "resolveUserLogHosts",
+      "name": "resolveUserLogHosts",
+      "longname": "resolveUserLogHosts",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/userLogOrigin.js",
+      "line": 15,
+      "description": "The hosts the browser may have addressed: the request's own Host header and, only when the request arrives over loopback, the X-Forwarded-Host that the reverse proxy on the same m...",
+      "params": [
+        {
+          "name": "request",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<string>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "neutralizeForWhom",
+      "name": "neutralizeForWhom",
+      "longname": "neutralizeForWhom",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/userLogPayload.js",
+      "line": 17,
+      "description": "The print log has never carried &quot;$&quot; or &quot;#&quot; in the recipient.",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {

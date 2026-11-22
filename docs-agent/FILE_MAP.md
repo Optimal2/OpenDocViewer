@@ -4,11 +4,11 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 
 | File | Lines | In | JSDoc | Confidence | Summary |
 | --- | ---: | ---: | ---: | --- | --- |
-| <code>server/logRetention.js</code> | 42 | 2 | 2 | high | Shared best-effort retention for the optional standalone log servers. |
+| <code>server/logRetention.js</code> | 64 | 2 | 4 | high | Shared best-effort retention for the optional standalone log servers. |
 | <code>server/system-log-server.js</code> | 230 | 0 | 5 | high | System Log Server — standalone Express endpoint for structured system logs. |
-| <code>server/user-log-server.js</code> | 251 | 0 | 2 | high | User Action Log Server — standalone Express endpoint for print/user-action audit events. |
-| <code>server/userLogOrigin.js</code> | 15 | 1 | 1 | high | Evaluate the browser origin signals used by the user print-log endpoint. |
-| <code>server/userLogPayload.js</code> | 10 | 1 | 1 | high | Compatibility reader for form posts and the viewer&#39;s JSON print envelope. |
+| <code>server/user-log-server.js</code> | 262 | 0 | 2 | high | User Action Log Server — standalone Express endpoint for print/user-action audit events. |
+| <code>server/userLogOrigin.js</code> | 45 | 1 | 2 | high | Evaluate the browser origin signals used by the user print-log endpoint. |
+| <code>server/userLogPayload.js</code> | 20 | 1 | 2 | high | Compatibility reader for form posts and the viewer&#39;s JSON print envelope. |
 | <code>src/app/AppBootstrap.jsx</code> | 446 | 1 | 10 | high | Application bootstrap React component. |
 | <code>src/app/bootConfig.js</code> | 193 | 0 | 6 | high | Runtime boot loader that resolves configuration scripts before React starts. |
 | <code>src/app/OpenDocViewer.jsx</code> | 193 | 1 | 5 | high | src/app/OpenDocViewer.jsx Main application shell for the viewer. |

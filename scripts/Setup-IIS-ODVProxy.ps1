@@ -7,6 +7,11 @@
   IIS-ODVProxyApp folder. Generates web.config from the template, toggling and
   pointing the two reverse-proxy rules.
 
+  Server-wide effect: the script turns ARR proxying on (system.webServer/proxy enabled).
+  Everything else is scoped to the proxy application, including the allowedServerVariables
+  entry for HTTP_X_FORWARDED_HOST that the user-log rule needs. ARR's server-wide
+  preserveHostHeader is not changed.
+
 .PARAMETER SiteName
   IIS site to host the application. Default: "Default Web Site"
 
@@ -76,13 +81,35 @@ if ($EnableSystemLog -or $EnableUserLog) {
     # Enabling proxy requires ARR; this will fail if ARR is missing
     Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
       -filter 'system.webServer/proxy' -name 'enabled' -value 'True' -ErrorAction Stop
-    # The user-log origin check compares Origin/Referer with Host. ARR otherwise
-    # replaces Host with the localhost upstream and rejects legitimate browser posts.
-    Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
-      -filter 'system.webServer/proxy' -name 'preserveHostHeader' -value 'True' -ErrorAction Stop
-    Write-Ok "ARR proxying is enabled at server level and preserves the original Host header."
+    Write-Ok "ARR proxying is enabled at server level."
   } catch {
     Write-Err "Failed to enable ARR proxy. Ensure 'Application Request Routing' is installed and proxying is enabled."
+    throw
+  }
+}
+
+# The user-log origin check compares Origin/Referer with the public host, while ARR replaces
+# Host with the localhost upstream. The user-log rule therefore forwards the public host in
+# X-Forwarded-Host, which the user-log server trusts only from loopback. URL Rewrite sets a
+# request header only when its server variable is in allowedServerVariables. The entry is added
+# for this application's location only: no other site or application on the server is affected,
+# and ARR's server-wide preserveHostHeader is deliberately left as it is.
+if ($EnableUserLog) {
+  $AppLocation = "$SiteName/$($AppPath.Trim('/'))"
+  $allowFilter = 'system.webServer/rewrite/allowedServerVariables'
+  try {
+    # Reads the effective list at the location, so an entry inherited from the server counts.
+    $allowedEntry = Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
+      -filter "$allowFilter/add[@name='HTTP_X_FORWARDED_HOST']" -name 'name' -ErrorAction SilentlyContinue
+    if ($allowedEntry) {
+      Write-Ok "HTTP_X_FORWARDED_HOST is already allowed for '$AppLocation'."
+    } else {
+      Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
+        -filter $allowFilter -name '.' -value @{ name = 'HTTP_X_FORWARDED_HOST' } -ErrorAction Stop
+      Write-Ok "Allowed HTTP_X_FORWARDED_HOST for '$AppLocation' only."
+    }
+  } catch {
+    Write-Err "Failed to allow HTTP_X_FORWARDED_HOST for '$AppLocation'. The user-log rule needs it; without it IIS answers 500.50."
     throw
   }
 }
@@ -120,6 +147,10 @@ if ($ForwardClientHeaders) {
     & "$env:windir\system32\inetsrv\appcmd.exe" unlock config /section:system.webServer/rewrite/allowedServerVariables | Out-Null
   } catch {
     Write-Warn "Could not unlock 'rewrite/allowedServerVariables'. If browsing fails with 500.52, re-run WITHOUT -ForwardClientHeaders."
+  }
+  if ($EnableUserLog) {
+    # Already allowed for this application above; a second entry here would be a duplicate.
+    $allowed = $allowed.Replace('  <add name="HTTP_X_FORWARDED_HOST" />', '')
   }
   $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", $allowed.Trim())
 } else {
