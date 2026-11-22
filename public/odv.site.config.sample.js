@@ -894,13 +894,19 @@
         pdfWorkerWarmupRendersPerWorker: 1,
 
         // Maximum number of main-thread renders allowed when the worker path is unavailable.
+        // This value no longer sets maxConcurrentAssetRenders below: a site that needs fewer
+        // simultaneous renders sets both.
         maxConcurrentMainThreadRenders: 3,
 
-        // Maximum number of concurrent page-asset renders allowed in the lazy renderer.
+        // Maximum number of concurrent page-asset renders allowed in the lazy renderer; the
+        // thumbnail list also renders in batches of this size.
         // This pipeline renders page assets in the main thread, so keep this value moderate.
         // Keep this aligned with the normalized runtime defaults from
         // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6
         // for this setting in the current code path.
+        // Independent from maxConcurrentMainThreadRenders in auto/performance modes (1..8): a
+        // site file that sets only maxConcurrentMainThreadRenders keeps the default here.
+        // Memory-pressure modes may still lower both limits to protect the client.
         maxConcurrentAssetRenders: 3,
 
         // How many page assets to queue per warm-up batch, and how long to wait before the

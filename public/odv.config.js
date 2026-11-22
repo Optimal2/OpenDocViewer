@@ -1058,6 +1058,8 @@
         pdfWorkerWarmupBatchMode: 'off',
         pdfWorkerWarmupBatchSize: 0,
         pdfWorkerWarmupRendersPerWorker: 1,
+        // Does not set maxConcurrentAssetRenders below; a site that needs fewer simultaneous
+        // renders sets both.
         maxConcurrentMainThreadRenders: 3,
         // Keep this aligned with the normalized runtime defaults from
         // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6
