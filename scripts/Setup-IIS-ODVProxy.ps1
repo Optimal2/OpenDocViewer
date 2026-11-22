@@ -7,17 +7,23 @@
   IIS-ODVProxyApp folder. Generates web.config from the template, toggling and
   pointing the two reverse-proxy rules.
 
-  Changes for the whole server:
-    - Always (when a proxy rule is enabled): turns ARR proxying on
-      (system.webServer/proxy enabled).
-    - Only with -ForwardClientHeaders, and only when a forwarded-header variable is not
-      already allowed for the application: unlocks the configuration section
-      system.webServer/rewrite/allowedServerVariables (appcmd unlock config), which lets every
-      site and application on the server define that section in its own web.config.
-  Everything else is scoped to the proxy application, including the allowedServerVariables
-  entry for HTTP_X_FORWARDED_HOST that the user-log rule needs. That entry is written for the
-  application's location in applicationHost.config and stays there; the script has no
-  uninstall. ARR's server-wide preserveHostHeader is not changed.
+  Runs in Windows PowerShell 5.1 (powershell.exe) as administrator. It uses the IIS: drive of
+  the WebAdministration module, which PowerShell 7 does not provide, so the script refuses to
+  start there instead of stopping halfway.
+
+  The one change for the whole server: when a proxy rule is enabled, ARR proxying is turned on
+  (system.webServer/proxy enabled). Everything else is scoped to the proxy application. No
+  configuration section is unlocked, and ARR's server-wide preserveHostHeader is not changed.
+
+  A request header that a proxy rule sets needs its server variable in allowedServerVariables.
+  The script allows exactly the variables that the enabled rules set, for the application's
+  location in applicationHost.config, and never in the application's own web.config. A
+  variable that the server or the site already allows is left alone. Those entries stay after
+  the application is removed; the script has no uninstall.
+
+  The script can be run any number of times: the same switches give the same web.config and the
+  same allow list. It ends by reading the allow list back and fails if a variable that a rule
+  sets is not allowed, since IIS would then answer every proxied request with 500.
 
   Run the script again after an upgrade: the user-log rule has to forward X-Forwarded-Host,
   otherwise the user log server answers browser posts with 403. The user-log upstream
@@ -46,15 +52,11 @@
   Upstream URL for user log. Default: "http://localhost:3002/userlog/record"
 
 .PARAMETER ForwardClientHeaders
-  Optional. If set, both proxy rules also forward X-Forwarded-For and X-Forwarded-Proto (and the
-  system-log rule X-Forwarded-Host), and <allowedServerVariables> is injected into web.config.
-  That requires the section to be unlocked, which the script does for the whole server.
-  Default: off (prevents IIS 500.52 when section is locked).
-
-.PARAMETER AppCmdPath
-  Path to appcmd.exe, used only with -ForwardClientHeaders.
-  Default: "%windir%\system32\inetsrv\appcmd.exe"
+  Optional. If set, both proxy rules also forward X-Forwarded-For and X-Forwarded-Proto, and
+  the system-log rule X-Forwarded-Host. Default: off.
 #>
+
+#requires -PSEdition Desktop
 
 [CmdletBinding(SupportsShouldProcess)]
 param(
@@ -65,8 +67,7 @@ param(
   [bool]  $EnableUserLog    = $true,
   [string]$SystemLogUrl     = "http://localhost:3001/log",
   [string]$UserLogUrl       = "http://localhost:3002/userlog/record",
-  [switch]$ForwardClientHeaders,
-  [string]$AppCmdPath       = "$env:windir\system32\inetsrv\appcmd.exe"
+  [switch]$ForwardClientHeaders
 )
 
 $ErrorActionPreference = 'Stop'
@@ -109,32 +110,34 @@ if ($EnableSystemLog -or $EnableUserLog) {
 
 # The user-log origin check compares Origin/Referer with the public host, while ARR replaces
 # Host with the localhost upstream. The user-log rule therefore forwards the public host in
-# X-Forwarded-Host, which the user-log server trusts only from loopback. URL Rewrite sets a
-# request header only when its server variable is in allowedServerVariables. The entry is added
-# for this application's location only: no other site or application on the server is affected,
-# and ARR's server-wide preserveHostHeader is deliberately left as it is.
+# X-Forwarded-Host, which the user-log server trusts only from loopback.
 if ($EnableUserLog) {
-  $userLogHost = try { ([uri]$UserLogUrl).Host.Trim('[', ']') } catch { '' }
-  if (@('localhost', '127.0.0.1', '::1') -notcontains $userLogHost) {
+  $userLogIsLoopback = $false
+  try { $userLogIsLoopback = ([uri]$UserLogUrl).IsLoopback } catch { $userLogIsLoopback = $false }
+  if (-not $userLogIsLoopback) {
     Write-Warn "-UserLogUrl '$UserLogUrl' is not a loopback address. The user log server trusts X-Forwarded-Host from loopback only, so browser posts through this proxy will be answered with 403."
   }
-  $AppLocation = "$SiteName/$($AppPath.Trim('/'))"
-  $allowFilter = 'system.webServer/rewrite/allowedServerVariables'
-  try {
-    # Reads the effective list at the location, so an entry inherited from the server counts.
-    $allowedEntry = Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
-      -filter "$allowFilter/add[@name='HTTP_X_FORWARDED_HOST']" -name 'name' -ErrorAction SilentlyContinue
-    if ($allowedEntry) {
-      Write-Ok "HTTP_X_FORWARDED_HOST is already allowed for '$AppLocation'."
-    } else {
-      Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
-        -filter $allowFilter -name '.' -value @{ name = 'HTTP_X_FORWARDED_HOST' } -ErrorAction Stop
-      Write-Ok "Allowed HTTP_X_FORWARDED_HOST for '$AppLocation' only."
-    }
-  } catch {
-    Write-Err "Failed to allow HTTP_X_FORWARDED_HOST for '$AppLocation'. The user-log rule needs it; without it IIS answers 500.50."
-    throw
+}
+
+$AppLocation = "$SiteName/$($AppPath.Trim('/'))"
+$allowFilter = 'system.webServer/rewrite/allowedServerVariables'
+
+# Whether a server variable is in the effective allowedServerVariables of the application: what
+# the server and the site allow, the entries for the application's location, and the
+# application's own web.config.
+function Test-ServerVariableAllowed([string]$Name) {
+  $entry = Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
+    -filter "$allowFilter/add[@name='$Name']" -name 'name' -ErrorAction SilentlyContinue
+  return [bool]$entry
+}
+
+# The server variables that the enabled rules of a web.config set.
+function Get-RuleServerVariables([string]$WebConfigText) {
+  $names = @()
+  foreach ($node in ([xml]$WebConfigText).SelectNodes("//rule[not(@enabled='false')]/serverVariables/set/@name")) {
+    if ($names -notcontains $node.Value) { $names += $node.Value }
   }
+  return $names
 }
 
 # Prepare physical folder
@@ -155,16 +158,6 @@ $enableUserStr   = if ($EnableUserLog)   { "true" } else { "false" }
 $config = $config.Replace("__ENABLE_SYSTEM_LOG__", $enableSystemStr)
 $config = $config.Replace("__ENABLE_USER_LOG__",   $enableUserStr)
 
-# Only inject allowedServerVariables if explicitly requested. A variable that is already allowed
-# for the application's location (inherited from the server, or added above) is left out: a
-# second entry for the same name is a configuration error that takes the whole proxy
-# application down.
-function Test-ServerVariableAllowed([string]$Name) {
-  $entry = Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location "$SiteName/$($AppPath.Trim('/'))" `
-    -filter "system.webServer/rewrite/allowedServerVariables/add[@name='$Name']" -name 'name' -ErrorAction SilentlyContinue
-  return [bool]$entry
-}
-
 # The request headers the rules set with -ForwardClientHeaders. The scheme has no server variable
 # of its own, so it is looked up in a rewrite map from {HTTPS} (on/off).
 $forwardFor   = '<set name="HTTP_X_FORWARDED_FOR" value="{REMOTE_ADDR}" />'
@@ -179,23 +172,10 @@ $schemeMap = @"
 </rewriteMaps>
 "@
 
+# web.config never declares allowedServerVariables itself (see below), so that placeholder is
+# always replaced by the rewrite map or by nothing.
 if ($ForwardClientHeaders) {
-  $toAllow = @('HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED_PROTO', 'HTTP_X_FORWARDED_HOST') | Where-Object {
-    # HTTP_X_FORWARDED_HOST was allowed for this application above when the user-log rule is on.
-    -not (($_ -eq 'HTTP_X_FORWARDED_HOST' -and $EnableUserLog) -or (Test-ServerVariableAllowed $_))
-  }
-  $allowed = ''
-  if ($toAllow) {
-    # Best-effort unlock to avoid 500.52 if locked. This changes the section's lock for the
-    # whole server. Not needed when every variable is already allowed.
-    try {
-      & $AppCmdPath unlock config /section:system.webServer/rewrite/allowedServerVariables | Out-Null
-    } catch {
-      Write-Warn "Could not unlock 'rewrite/allowedServerVariables'. If browsing fails with 500.52, re-run WITHOUT -ForwardClientHeaders."
-    }
-    $allowed = "<allowedServerVariables>`r`n" + (($toAllow | ForEach-Object { "  <add name=`"$_`" />" }) -join "`r`n") + "`r`n</allowedServerVariables>`r`n"
-  }
-  $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", ($allowed + $schemeMap.Trim()))
+  $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", $schemeMap.Trim())
   # The user-log rule always sets X-Forwarded-Host in the template; the others are added to it.
   $config = $config.Replace("<!--__USER_LOG_CLIENT_HEADERS__-->", ($forwardFor + "`r`n" + $forwardProto))
   $config = $config.Replace("<!--__SYSTEM_LOG_CLIENT_HEADERS__-->",
@@ -208,12 +188,35 @@ if ($ForwardClientHeaders) {
 if ($config -cmatch '__[A-Z][A-Z_]*__') {
   throw "web.config.template has a placeholder that this script does not replace: $($Matches[0])"
 }
+$neededVariables = @(Get-RuleServerVariables $config)
 
 $configPath = Join-Path $PhysicalPath "web.config"
 Set-Content -Path $configPath -Value $config -Encoding UTF8
 Copy-Item -Path $IdxFile -Destination (Join-Path $PhysicalPath "index.html") -Force
 
 Write-Ok "Wrote $(Split-Path -Leaf $configPath) and index.html"
+
+# Allow the server variables that the enabled rules set, for this application's location only.
+# This comes AFTER web.config is written, and web.config never declares the section itself. The
+# effective list read here therefore holds nothing that this script is about to overwrite: an
+# earlier version read it first, counted the entries of the previous web.config as already
+# allowed, and then wrote the file without them, so every second run left the proxy answering
+# 500. A variable that the server or the site already allows is not added again, because a
+# second entry for the same name is a configuration error.
+foreach ($variable in $neededVariables) {
+  try {
+    if (Test-ServerVariableAllowed $variable) {
+      Write-Ok "$variable is already allowed for '$AppLocation'."
+    } else {
+      Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
+        -filter $allowFilter -name '.' -value @{ name = $variable } -ErrorAction Stop
+      Write-Ok "Allowed $variable for '$AppLocation' only."
+    }
+  } catch {
+    Write-Err "Failed to allow $variable for '$AppLocation'. A proxy rule sets it; without it IIS answers 500."
+    throw
+  }
+}
 
 # Create app pool (No Managed Code)
 $appPoolName = "ODVProxyAppPool"
@@ -237,6 +240,23 @@ if (Test-Path ("IIS:\Sites\$SiteName\$AppVDir")) {
 
 # Recycle pool to pick up changes
 Restart-WebAppPool $appPoolName
+
+# Final check: every server variable that an enabled rule sets must be allowed for the
+# application now. If one is missing IIS answers every request to that rule with 500, so the
+# script must not end as if all were well.
+$notAllowed = @()
+foreach ($variable in $neededVariables) {
+  $allowedNow = $false
+  try { $allowedNow = Test-ServerVariableAllowed $variable } catch { $allowedNow = $false }
+  if (-not $allowedNow) { $notAllowed += $variable }
+}
+if ($notAllowed.Count -gt 0) {
+  $list = $notAllowed -join ', '
+  Write-Err "Setup check failed: not allowed for '$AppLocation': $list"
+  throw "Setup check failed. The proxy rules set server variables that are not allowed for '$AppLocation': $list. IIS answers every proxied request with 500 until they are in system.webServer/rewrite/allowedServerVariables for that application. web.config has been written; nothing was rolled back."
+}
+Write-Ok "Checked: every server variable the proxy rules set is allowed for '$AppLocation'."
+
 Write-Ok "Deployment complete. Proxy base URL: /$AppVDir/"
 Write-Host ""
 Write-Host "Next steps:"

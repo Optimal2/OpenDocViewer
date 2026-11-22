@@ -154,16 +154,19 @@ This keeps the browser talking to a same-origin path even though the Node servic
 
 ARR replaces `Host` with the upstream address, while the user-log origin check needs the public host. The user-log rule therefore sets `X-Forwarded-Host` to the public host (overwriting any value the client sent), and the user log server trusts that header only from loopback. URL Rewrite sets a request header only when its server variable is allowed, so `scripts/Setup-IIS-ODVProxy.ps1` adds `HTTP_X_FORWARDED_HOST` to `allowedServerVariables` for the proxy application's location only.
 
-What the setup script changes for the whole server depends on its switches:
+What the setup script changes:
 
-- Always, when a proxy rule is enabled: it turns ARR proxying on (`system.webServer/proxy`, `enabled`).
-- Only with `-ForwardClientHeaders`, and only when a forwarded-header variable is not already allowed for the application: it unlocks the configuration section `system.webServer/rewrite/allowedServerVariables` (`appcmd unlock config`), which lets every site and application on the server define that section in its own `web.config`. With the switch both rules also set `X-Forwarded-For` and `X-Forwarded-Proto`, and the system-log rule sets `X-Forwarded-Host`.
+- For the whole server, one thing: when a proxy rule is enabled it turns ARR proxying on (`system.webServer/proxy`, `enabled`). It unlocks no configuration section.
+- For the proxy application only: it allows exactly the server variables that the enabled rules set, as entries for the application's location in `applicationHost.config`. The application's own `web.config` never declares `allowedServerVariables`, and a variable that the server or the site already allows is left alone. With `-ForwardClientHeaders` both rules also set `X-Forwarded-For` and `X-Forwarded-Proto`, and the system-log rule sets `X-Forwarded-Host`.
 
 Operational notes:
 
-- Run `scripts/Setup-IIS-ODVProxy.ps1` again after an upgrade, so that the generated `web.config` gets the user-log rule that forwards `X-Forwarded-Host`. Without it the user log server answers browser posts with `403`, as it did before the forwarded host existed, unless ARR's `preserveHostHeader` is on.
+- The script runs in Windows PowerShell 5.1 (`powershell.exe`) as administrator. It uses the `IIS:` drive of the WebAdministration module, carries `#requires -PSEdition Desktop`, and refuses to start in PowerShell 7 before it has changed anything.
+- The script is idempotent: the same switches give the same `web.config`, byte for byte, and the same allow list, however often it runs. Switching `-ForwardClientHeaders` on or off rewrites the rules to match.
+- The script ends with a check: it reads the allow list back and fails if a server variable that a rule sets is not allowed, because IIS would then answer every proxied request with `500`.
+- Run `scripts/Setup-IIS-ODVProxy.ps1` again after an upgrade, so that the generated `web.config` gets the user-log rule that forwards `X-Forwarded-Host`. Without it the user log server answers browser posts with `403`, as it did before the forwarded host existed, unless ARR's `preserveHostHeader` is on. A rerun also repairs an installation where an earlier version had written `web.config` without the variables its rules set.
 - The user-log upstream (`-UserLogUrl`) must be a loopback address (`localhost`, `127.0.0.1` or `[::1]`), because the forwarded host is trusted from loopback only. The script warns about any other address.
-- The `allowedServerVariables` entry for the proxy application's location is written to `applicationHost.config` and stays there: the script has no uninstall, so the entry remains after the application is removed until an administrator deletes it.
+- The allow-list entries for the proxy application's location stay in `applicationHost.config`: the script has no uninstall, so they remain after the application is removed, and after `-ForwardClientHeaders` is switched off, until an administrator deletes them. An allowed variable that no rule sets has no effect.
 
 The setup script does not set ARR's server-wide `preserveHostHeader`, which would change the `Host` header that every other proxied application on the server receives. A server where an earlier version of the script set `preserveHostHeader=true` keeps working, because the `Host` header itself is still accepted; whether to set it back is a decision for the server's administrator, since other applications may rely on it by now.
 
