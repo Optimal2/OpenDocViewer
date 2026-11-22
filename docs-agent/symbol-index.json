@@ -20199,7 +20199,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/index.jsx",
-    "line": 52,
+    "line": 58,
     "description": "Mount the app into #root.",
     "params": [],
     "returns": [],
@@ -20212,7 +20212,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/index.jsx",
-    "line": 42,
+    "line": 44,
     "description": "Determine environment and set a sensible client-side log level.",
     "params": [],
     "returns": [],
@@ -33744,6 +33744,139 @@
     "description": "",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "findOlderConfigNamesInUse",
+    "name": "findOlderConfigNamesInUse",
+    "longname": "findOlderConfigNamesInUse",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 68,
+    "description": "The older names that are in use in a runtime configuration.",
+    "params": [
+      {
+        "name": "runtimeConfig",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<OlderConfigName>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "formatOlderConfigNameWarning",
+    "name": "formatOlderConfigNameWarning",
+    "longname": "formatOlderConfigNameWarning",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 89,
+    "description": "",
+    "params": [
+      {
+        "name": "name",
+        "type": "OlderConfigName",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OLDER_NAMES",
+    "name": "OLDER_NAMES",
+    "longname": "OLDER_NAMES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 32,
+    "description": "Each entry answers whether its older name is set to a value that the reader accepts, which is exactly when the older name decides the result.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OlderConfigName",
+    "name": "OlderConfigName",
+    "longname": "OlderConfigName",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 17,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "reported",
+    "name": "reported",
+    "longname": "reported",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 95,
+    "description": "Older names already reported during this page load.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "resetOlderConfigNameWarnings",
+    "name": "resetOlderConfigNameWarnings",
+    "longname": "resetOlderConfigNameWarnings",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 122,
+    "description": "For tests: forget what has been reported, as a new page load would.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "warnAboutOlderConfigNames",
+    "name": "warnAboutOlderConfigNames",
+    "longname": "warnAboutOlderConfigNames",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/olderConfigNameWarnings.js",
+    "line": 104,
+    "description": "Warn in the browser console about each older name in use, once per page load and per name.",
+    "params": [
+      {
+        "name": "runtimeConfig",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "warn",
+        "type": "function",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<OlderConfigName>",
+        "description": "The names reported by this call."
+      }
+    ],
     "examples": 0
   },
   {

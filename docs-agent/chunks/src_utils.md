@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 70. Line count: 25023. JSDoc symbol count: 1043.
+File count: 71. Line count: 25148. JSDoc symbol count: 1050.
 
 ## src/utils/canvasBitmapSize.js
 
@@ -461,6 +461,22 @@ Symbols:
 - `ocrReadingOrder` (function) - The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word'...
 - `layoutOcrLines` (function) - Place the words of an outcome inside an unrotated frame of frameWidth × frameHeight CSS px, grouped into lines.
 - `isOcrLayerSelection` (function) - Whether a selection lies within OCR text layers only \(one or several pages\), so that its text can be read line by line and a copy of it replaced.
+
+## src/utils/olderConfigNameWarnings.js
+
+Console warnings for the older configuration names that still take precedence over the documented key.
+
+Exports: `findOlderConfigNamesInUse`, `formatOlderConfigNameWarning`, `warnAboutOlderConfigNames`, `resetOlderConfigNameWarnings`
+
+Symbols:
+
+- `OlderConfigName` (typedef) - No description.
+- `OLDER_NAMES` (constant) - Each entry answers whether its older name is set to a value that the reader accepts, which is exactly when the older name decides the result.
+- `findOlderConfigNamesInUse` (function) - The older names that are in use in a runtime configuration.
+- `formatOlderConfigNameWarning` (function) - No description.
+- `reported` (constant) - Older names already reported during this page load.
+- `warnAboutOlderConfigNames` (function) - Warn in the browser console about each older name in use, once per page load and per name.
+- `resetOlderConfigNameWarnings` (function) - For tests: forget what has been reported, as a new page load would.
 
 ## src/utils/ompThemePreference.js
 

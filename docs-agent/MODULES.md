@@ -130,7 +130,7 @@ File count: 1. Line count: 567. JSDoc symbol count: 21.
 
 ## src/index.jsx
 
-File count: 1. Line count: 67. JSDoc symbol count: 2.
+File count: 1. Line count: 73. JSDoc symbol count: 2.
 
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 
@@ -195,7 +195,7 @@ File count: 1. Line count: 102. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 70. Line count: 25023. JSDoc symbol count: 1043.
+File count: 71. Line count: 25148. JSDoc symbol count: 1050.
 
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.

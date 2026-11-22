@@ -111,6 +111,23 @@ Removed keys that are accepted and ignored: `print.preparationNoticeThresholdPag
 Three readers outside the promotion still let another name win over the documented key. They
 are listed here so that a site file can be checked for them; do not use them in new files.
 
+This precedence is kept as it is for now. A later major version turns it around, so that the
+documented key wins; a site that still uses one of these names should rename it before then.
+
+Until then the viewer writes a warning to the browser console when one of these names is in
+use, once per page load and per name, for example:
+
+```text
+[ODV] Site config uses the older name "logToken". Use "systemLog.token" instead. The older name still takes precedence in this version; a later major version will let the documented key win.
+```
+
+- The warning is given as soon as the older name is set to a value its reader accepts, also
+  when the documented key is not set at all: the name has to be replaced either way.
+- It names keys only, never a value (`logToken` is a secret).
+- The shipped defaults contain none of these names, so a site without them gets no warning.
+- It is written from the viewer's main thread (`src/utils/olderConfigNameWarnings.js`, called
+  from `src/index.jsx`), never from a worker.
+
 | Name in the site file | Documented key | When the site file has both |
 |---|---|---|
 | `logEndpoint`, `logToken`, `logEnabled` (top level) | `systemLog.endpoint`, `.token`, `.enabled` | The top-level name wins (`src/logging/systemLogger.js`). |

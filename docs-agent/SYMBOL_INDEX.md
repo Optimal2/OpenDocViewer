@@ -783,8 +783,8 @@
 | <code>sanitizeI18nPathSegment</code> | function | <code>src/i18n.js:155</code> | Keep i18n URL template substitutions constrained to plain path segments. |
 | <code>syncDocumentLanguage</code> | function | <code>src/i18n.js:347</code> | Keep the document language synchronized with the active UI language. |
 | <code>WANT_DIAG</code> | constant | <code>src/i18n.js:85</code> | Diagnostics ON only in dev builds. |
-| <code>container</code> | constant | <code>src/index.jsx:52</code> | Mount the app into #root. |
-| <code>isDev</code> | constant | <code>src/index.jsx:42</code> | Determine environment and set a sensible client-side log level. |
+| <code>container</code> | constant | <code>src/index.jsx:58</code> | Mount the app into #root. |
+| <code>isDev</code> | constant | <code>src/index.jsx:44</code> | Determine environment and set a sensible client-side log level. |
 | <code>BootstrapAny</code> | typedef | <code>src/integrations/bootstrapRuntime.js:44</code> |  |
 | <code>BootstrapDebugInfo</code> | typedef | <code>src/integrations/bootstrapRuntime.js:33</code> | Opaque information about how startup data reached the viewer. |
 | <code>bootstrapDetect</code> | function | <code>src/integrations/bootstrapRuntime.js:243</code> | Detect the best available bootstrap mode. |
@@ -1392,6 +1392,13 @@
 | <code>ocrReadingOrder</code> | function | <code>src/utils/ocrTextLayout.js:136</code> | The words of an outcome in reading order, grouped into lines by the rule the text layer lays them out with: a word whose box starts below the vertical middle of the previous word&#39;... |
 | <code>ocrSelectionText</code> | function | <code>src/utils/ocrTextLayout.js:267</code> | The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no-break spaces\) and the lines by newlines... |
 | <code>OcrWordPlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:83</code> |  |
+| <code>findOlderConfigNamesInUse</code> | function | <code>src/utils/olderConfigNameWarnings.js:68</code> | The older names that are in use in a runtime configuration. |
+| <code>formatOlderConfigNameWarning</code> | function | <code>src/utils/olderConfigNameWarnings.js:89</code> |  |
+| <code>OLDER_NAMES</code> | constant | <code>src/utils/olderConfigNameWarnings.js:32</code> | Each entry answers whether its older name is set to a value that the reader accepts, which is exactly when the older name decides the result. |
+| <code>OlderConfigName</code> | typedef | <code>src/utils/olderConfigNameWarnings.js:17</code> |  |
+| <code>reported</code> | constant | <code>src/utils/olderConfigNameWarnings.js:95</code> | Older names already reported during this page load. |
+| <code>resetOlderConfigNameWarnings</code> | function | <code>src/utils/olderConfigNameWarnings.js:122</code> | For tests: forget what has been reported, as a new page load would. |
+| <code>warnAboutOlderConfigNames</code> | function | <code>src/utils/olderConfigNameWarnings.js:104</code> | Warn in the browser console about each older name in use, once per page load and per name. |
 | <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
 | <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |
 | <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:262</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |

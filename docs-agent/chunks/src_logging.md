@@ -6,7 +6,7 @@ File count: 2. Line count: 798. JSDoc symbol count: 49.
 
 src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 
-Exports: `isPlaceholderToken`, `shouldEnableBackendLogging`, `logger`
+Exports: `readRuntimeConfig`, `isPlaceholderToken`, `shouldEnableBackendLogging`, `logger`
 
 Symbols:
 

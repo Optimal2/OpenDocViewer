@@ -28,6 +28,8 @@ import { ThemeProvider } from './contexts/ThemeProvider.jsx';
 import { getEffectiveOdvThemeMode, resolveConcreteTheme, applyOdvThemeToDocument } from './utils/ompThemePreference.js';
 import { getEffectiveToolbarLargeButtons } from './utils/viewerPreferences.js';
 import { applyToolbarDensityToDocument } from './utils/toolbarDensity.js';
+import { getRuntimeConfig } from './utils/runtimeConfig.js';
+import { warnAboutOlderConfigNames } from './utils/olderConfigNameWarnings.js';
 
 // Apply the shared choice before React renders the viewer's first content.
 const initialThemeMode = getEffectiveOdvThemeMode();
@@ -45,6 +47,10 @@ const isDev =
 
 logger.setLogLevel(isDev ? 'debug' : 'warn');
 logger.info('OpenDocViewer entry loaded', { mode: isDev ? 'development' : 'production' });
+
+// Tell the site's administrator, once per page load, about older configuration names that
+// still win over the documented key. This entry runs on the main thread only.
+warnAboutOlderConfigNames(getRuntimeConfig());
 
 /**
  * Mount the app into #root. Fail fast (but safely) if the target is missing.

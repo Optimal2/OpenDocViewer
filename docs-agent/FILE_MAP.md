@@ -105,7 +105,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/usePdfSignatureReports.js</code> | 119 | 1 | 3 | high | Browser PDF signature inspection. |
 | <code>src/hooks/useReadAloud.js</code> | 242 | 1 | 5 | high | Read the selected recognised text aloud: the state behind the page&#39;s context menu entry and the toolbar&#39;s &quot;Reading language&quot; section \(contexts/readAloudContext.js\). |
 | <code>src/i18n.js</code> | 567 | 3 | 21 | high | i18n bootstrap for OpenDocViewer. |
-| <code>src/index.jsx</code> | 67 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
+| <code>src/index.jsx</code> | 73 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
 | <code>src/integrations/bootstrapRuntime.js</code> | 457 | 1 | 12 | high | Startup mode detection and host-integration entry point. |
 | <code>src/integrations/integrationSettings.js</code> | 232 | 4 | 12 | high | Per-integration settings carried by a Portable Document Bundle. |
 | <code>src/integrations/normalizePortableBundle.js</code> | 833 | 1 | 9 | high | Normalizes multiple host payload shapes into the project&#39;s neutral portable bundle shape. |
@@ -173,6 +173,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/ocrSearchPlacement.js</code> | 258 | 1 | 16 | high | Where the toolbar&#39;s OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar&#39;s spacer leaves, or, when |
 | <code>src/utils/ocrStatus.js</code> | 108 | 1 | 4 | high | The per-page OCR status the toolbar&#39;s search button shows \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per outcome state, its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.status\`\) and the LED s |
 | <code>src/utils/ocrTextLayout.js</code> | 283 | 3 | 13 | high | Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes. |
+| <code>src/utils/olderConfigNameWarnings.js</code> | 125 | 1 | 7 | high | Console warnings for the older configuration names that still take precedence over the documented key. |
 | <code>src/utils/ompThemePreference.js</code> | 390 | 4 | 22 | high | Shared OMP theme preference adapter \(OMP_THEME_PREFERENCE\). |
 | <code>src/utils/pageAssetRenderer.js</code> | 931 | 2 | 6 | high | OpenDocViewer — hybrid page-asset renderer. |
 | <code>src/utils/pageAssetStore.js</code> | 751 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |
@@ -206,7 +207,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 158 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1212 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 2 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 1311 | 37 | 91 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 1311 | 38 | 91 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/speech.js</code> | 225 | 1 | 10 | high | Reading text aloud with the browser&#39;s speech synthesis \(Web Speech API, \`window.speechSynthesis\`\). |
 | <code>src/utils/standardManual.js</code> | 569 | 1 | 25 | high | Filter and sanitize the bundled standard manual for a supplied runtime config. |

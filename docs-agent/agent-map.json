@@ -93,15 +93,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 215,
-    "sourceLineCount": 75048,
-    "docletCount": 2195,
-    "documentedFileCount": 209,
+    "fileCount": 216,
+    "sourceLineCount": 75179,
+    "docletCount": 2202,
+    "documentedFileCount": 210,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 27,
     "devDependencyCount": 25,
-    "estimatedSourceTokens": 7564
+    "estimatedSourceTokens": 7599
   },
   "recommendations": [
     "6 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -543,7 +543,7 @@
       "path": "src/utils/runtimeConfig.js",
       "score": 124,
       "lines": 1311,
-      "incomingLocalImports": 37,
+      "incomingLocalImports": 38,
       "doclets": 91,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
@@ -585,21 +585,21 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/logging/systemLogger.js",
+      "score": 107,
+      "lines": 471,
+      "incomingLocalImports": 46,
+      "doclets": 31,
+      "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/utils/pdfSignatureStatus.js",
       "score": 104,
       "lines": 300,
       "incomingLocalImports": 6,
       "doclets": 21,
       "summary": "Signature UI status helpers for browser integrity.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/logging/systemLogger.js",
-      "score": 102,
-      "lines": 471,
-      "incomingLocalImports": 46,
-      "doclets": 31,
-      "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high"
     },
     {
@@ -695,7 +695,7 @@
     {
       "path": "src/index.jsx",
       "score": 86,
-      "lines": 67,
+      "lines": 73,
       "incomingLocalImports": 0,
       "doclets": 2,
       "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
@@ -1659,13 +1659,13 @@
     {
       "name": "src/index.jsx",
       "fileCount": 1,
-      "lineCount": 67,
+      "lineCount": 73,
       "docletCount": 2,
       "importantFiles": [
         {
           "path": "src/index.jsx",
           "score": 86,
-          "lines": 67,
+          "lines": 73,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
@@ -1761,7 +1761,7 @@
       "importantFiles": [
         {
           "path": "src/logging/systemLogger.js",
-          "score": 102,
+          "score": 107,
           "lines": 471,
           "incomingLocalImports": 46,
           "doclets": 31,
@@ -1947,15 +1947,15 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 70,
-      "lineCount": 25023,
-      "docletCount": 1043,
+      "fileCount": 71,
+      "lineCount": 25148,
+      "docletCount": 1050,
       "importantFiles": [
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 124,
           "lines": 1311,
-          "incomingLocalImports": 37,
+          "incomingLocalImports": 38,
           "doclets": 91,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
@@ -39217,7 +39217,7 @@
     },
     {
       "path": "src/index.jsx",
-      "lines": 67,
+      "lines": 73,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
@@ -39305,6 +39305,22 @@
           ],
           "line": 30,
           "kind": "static"
+        },
+        {
+          "source": "./utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig"
+          ],
+          "line": 31,
+          "kind": "static"
+        },
+        {
+          "source": "./utils/olderConfigNameWarnings.js",
+          "specifiers": [
+            "warnAboutOlderConfigNames"
+          ],
+          "line": 32,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -39322,7 +39338,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/index.jsx",
-          "line": 42,
+          "line": 44,
           "description": "Determine environment and set a sensible client-side log level.",
           "params": [],
           "returns": [],
@@ -39335,7 +39351,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/index.jsx",
-          "line": 52,
+          "line": 58,
           "description": "Mount the app into #root.",
           "params": [],
           "returns": [],
@@ -39413,6 +39429,24 @@
           "line": 30,
           "kind": "static",
           "resolved": "src/utils/toolbarDensity.js"
+        },
+        {
+          "source": "./utils/runtimeConfig.js",
+          "specifiers": [
+            "getRuntimeConfig"
+          ],
+          "line": 31,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "./utils/olderConfigNameWarnings.js",
+          "specifiers": [
+            "warnAboutOlderConfigNames"
+          ],
+          "line": 32,
+          "kind": "static",
+          "resolved": "src/utils/olderConfigNameWarnings.js"
         }
       ],
       "packageImports": [
@@ -41887,6 +41921,11 @@
       ],
       "exports": [
         {
+          "name": "readRuntimeConfig",
+          "kind": "function",
+          "line": 81
+        },
+        {
           "name": "isPlaceholderToken",
           "kind": "function",
           "line": 213
@@ -42697,7 +42736,7 @@
         }
       ],
       "incomingLocalImports": 46,
-      "importanceScore": 102,
+      "importanceScore": 107,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -60930,6 +60969,211 @@
       "incomingLocalImports": 3,
       "importanceScore": 80,
       "summary": "Geometry of the OCR text layer (components/OcrTextLayer.jsx): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/olderConfigNameWarnings.js",
+      "lines": 125,
+      "extension": ".js",
+      "jsdocBlockCount": 8,
+      "sourceSummary": "Console warnings for the older configuration names that still take precedence over the documented key.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "findOlderConfigNamesInUse",
+          "kind": "function",
+          "line": 68
+        },
+        {
+          "name": "formatOlderConfigNameWarning",
+          "kind": "function",
+          "line": 89
+        },
+        {
+          "name": "warnAboutOlderConfigNames",
+          "kind": "function",
+          "line": 104
+        },
+        {
+          "name": "resetOlderConfigNameWarnings",
+          "kind": "function",
+          "line": 122
+        }
+      ],
+      "declarations": [
+        {
+          "name": "isObject",
+          "kind": "function",
+          "line": 23
+        },
+        {
+          "name": "findOlderConfigNamesInUse",
+          "kind": "function",
+          "line": 68
+        },
+        {
+          "name": "formatOlderConfigNameWarning",
+          "kind": "function",
+          "line": 89
+        },
+        {
+          "name": "warnAboutOlderConfigNames",
+          "kind": "function",
+          "line": 104
+        },
+        {
+          "name": "resetOlderConfigNameWarnings",
+          "kind": "function",
+          "line": 122
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "OlderConfigName",
+          "name": "OlderConfigName",
+          "longname": "OlderConfigName",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 17,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "OLDER_NAMES",
+          "name": "OLDER_NAMES",
+          "longname": "OLDER_NAMES",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 32,
+          "description": "Each entry answers whether its older name is set to a value that the reader accepts, which is exactly when the older name decides the result.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "findOlderConfigNamesInUse",
+          "name": "findOlderConfigNamesInUse",
+          "longname": "findOlderConfigNamesInUse",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 68,
+          "description": "The older names that are in use in a runtime configuration.",
+          "params": [
+            {
+              "name": "runtimeConfig",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<OlderConfigName>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "formatOlderConfigNameWarning",
+          "name": "formatOlderConfigNameWarning",
+          "longname": "formatOlderConfigNameWarning",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 89,
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "OlderConfigName",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "reported",
+          "name": "reported",
+          "longname": "reported",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 95,
+          "description": "Older names already reported during this page load.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "warnAboutOlderConfigNames",
+          "name": "warnAboutOlderConfigNames",
+          "longname": "warnAboutOlderConfigNames",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 104,
+          "description": "Warn in the browser console about each older name in use, once per page load and per name.",
+          "params": [
+            {
+              "name": "runtimeConfig",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "warn",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Array.<OlderConfigName>",
+              "description": "The names reported by this call."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "resetOlderConfigNameWarnings",
+          "name": "resetOlderConfigNameWarnings",
+          "longname": "resetOlderConfigNameWarnings",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/olderConfigNameWarnings.js",
+          "line": 122,
+          "description": "For tests: forget what has been reported, as a new page load would.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 50,
+      "summary": "Console warnings for the older configuration names that still take precedence over the documented key.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -84327,7 +84571,7 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 37,
+      "incomingLocalImports": 38,
       "importanceScore": 124,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
@@ -110816,7 +111060,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/index.jsx",
-      "line": 52,
+      "line": 58,
       "description": "Mount the app into #root.",
       "params": [],
       "returns": [],
@@ -110829,7 +111073,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/index.jsx",
-      "line": 42,
+      "line": 44,
       "description": "Determine environment and set a sensible client-side log level.",
       "params": [],
       "returns": [],
@@ -124361,6 +124605,139 @@
       "description": "",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "findOlderConfigNamesInUse",
+      "name": "findOlderConfigNamesInUse",
+      "longname": "findOlderConfigNamesInUse",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 68,
+      "description": "The older names that are in use in a runtime configuration.",
+      "params": [
+        {
+          "name": "runtimeConfig",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<OlderConfigName>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "formatOlderConfigNameWarning",
+      "name": "formatOlderConfigNameWarning",
+      "longname": "formatOlderConfigNameWarning",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 89,
+      "description": "",
+      "params": [
+        {
+          "name": "name",
+          "type": "OlderConfigName",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "OLDER_NAMES",
+      "name": "OLDER_NAMES",
+      "longname": "OLDER_NAMES",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 32,
+      "description": "Each entry answers whether its older name is set to a value that the reader accepts, which is exactly when the older name decides the result.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "OlderConfigName",
+      "name": "OlderConfigName",
+      "longname": "OlderConfigName",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 17,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "reported",
+      "name": "reported",
+      "longname": "reported",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 95,
+      "description": "Older names already reported during this page load.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "resetOlderConfigNameWarnings",
+      "name": "resetOlderConfigNameWarnings",
+      "longname": "resetOlderConfigNameWarnings",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 122,
+      "description": "For tests: forget what has been reported, as a new page load would.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "warnAboutOlderConfigNames",
+      "name": "warnAboutOlderConfigNames",
+      "longname": "warnAboutOlderConfigNames",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/olderConfigNameWarnings.js",
+      "line": 104,
+      "description": "Warn in the browser console about each older name in use, once per page load and per name.",
+      "params": [
+        {
+          "name": "runtimeConfig",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "warn",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Array.<OlderConfigName>",
+          "description": "The names reported by this call."
+        }
+      ],
       "examples": 0
     },
     {

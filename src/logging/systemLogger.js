@@ -78,7 +78,7 @@ function readMetaBool(name) {
  * Supports both legacy flat log keys and nested `systemLog` keys from odv.config.js.
  * @returns {{ logEndpoint: (string|undefined), logToken: (string|undefined), logEnabled: (boolean|undefined) }}
  */
-function readRuntimeConfig() {
+export function readRuntimeConfig() {
   try {
     if (typeof window === 'undefined') return {};
 
