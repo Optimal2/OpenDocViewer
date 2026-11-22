@@ -510,3 +510,32 @@ it.each([
     expect(config.documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency).toBe(3);
   }
 });
+
+// A site value that removes or replaces an object on the way to pdfResolution.fixedScale must
+// never stop the configuration from being published: without __ODV_CONFIG__ the viewer does not
+// start. The published configuration gives the reader what the site file alone would give it.
+it.each([
+  ['pdfResolution: null', { documentLoading: { render: { fullPageScale: 4, pdfResolution: null } } }, 4],
+  ['pdfResolution: a string', { documentLoading: { render: { fullPageScale: 4, pdfResolution: 'fixed' } } }, 4],
+  ['pdfResolution: a number', { documentLoading: { render: { fullPageScale: 4, pdfResolution: 3 } } }, 4],
+  ['pdfResolution: an array', { documentLoading: { render: { fullPageScale: 4, pdfResolution: [] } } }, 4],
+  ['pdfResolution: an empty object', { documentLoading: { render: { fullPageScale: 4, pdfResolution: {} } } }, 4],
+  ['render: null', { documentLoading: { render: null } }, 2],
+  ['documentLoading: null', { documentLoading: null }, 2],
+  ['documentLoading: a string', { documentLoading: 'off' }, 2],
+])('publishes the configuration with fullPageScale and %s', (_name, site, expectedScale) => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    dom.window.__ODV_SITE_CONFIG__ = JSON.parse(JSON.stringify(site));
+    expect(() => dom.window.eval(readFileSync('public/odv.config.js', 'utf8'))).not.toThrow();
+    expect(dom.window.__ODV_CONFIG__).toBeDefined();
+    vi.stubGlobal('window', dom.window);
+    const render = getDocumentLoadingConfig().render;
+    expect(render.pdfResolution.fixedScale).toBe(expectedScale);
+    expect(render.fullPageScale).toBe(expectedScale);
+    // The same answer as the reader gives for the site file alone.
+    expect(render.pdfResolution.fixedScale).toBe(getDocumentLoadingConfig(site).render.pdfResolution.fixedScale);
+  } finally {
+    dom.window.close();
+  }
+});

@@ -1221,9 +1221,15 @@
   applySiteAliases(merged, siteOverrides, siteAliases);
   // Defaults must not mask a legacy site-only fullPageScale override.
   var siteRender = siteOverrides.documentLoading && siteOverrides.documentLoading.render;
-  if (siteRender && siteRender.fullPageScale !== undefined &&
-      !(siteRender.pdfResolution && siteRender.pdfResolution.fixedScale !== undefined)) {
-    merged.documentLoading.render.pdfResolution.fixedScale = siteRender.fullPageScale;
+  // The value is written only into a merged pdfResolution object. When the site file replaced
+  // that object with null or another non-object there is no default fixedScale left to mask
+  // anything: the reader then takes fullPageScale itself, and writing here would throw and
+  // leave the viewer without a configuration.
+  var mergedRender = readConfigPath(merged, 'documentLoading.render');
+  if (isObj(siteRender) && siteRender.fullPageScale !== undefined &&
+      !(isObj(siteRender.pdfResolution) && siteRender.pdfResolution.fixedScale !== undefined) &&
+      isObj(mergedRender) && isObj(mergedRender.pdfResolution)) {
+    mergedRender.pdfResolution.fixedScale = siteRender.fullPageScale;
   }
   w.__ODV_SITE_CONFIG_KEYS__ = Object.freeze(Object.keys(siteOverrides));
   var cfg = Object.freeze(merged);
