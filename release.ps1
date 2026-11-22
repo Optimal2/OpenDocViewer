@@ -15,18 +15,27 @@ The script intentionally does not stage or commit normal application changes. Co
 those changes first, then run this helper from a clean working tree.
 
 .PARAMETER ReleaseType
-Version bump type passed to the matching npm release script: patch, minor, or major.
+Version bump type passed to `npm version`: patch, minor, or major. When -Publish finds a release
+that an earlier run already prepared, no new version is created; -ReleaseType may then be
+omitted, and if it is given it must match the prepared version or the script stops without
+pushing.
 
 .PARAMETER Yes
-Confirms the release summary without prompting.
+Confirms the release summary without prompting. This also applies to the summary shown before
+-Publish pushes a release that an earlier run already prepared; without -Yes the script asks
+before that push too.
 
 .PARAMETER Publish
 Pushes the release commit and tag to origin. This is required to publish an official release.
-Without -Publish the release is prepared locally only.
+Without -Publish the release is prepared locally only. If the push fails, a release commit and
+tag created by the same run are rolled back; a release prepared by an earlier run is left
+untouched.
 
 .PARAMETER SkipValidation
 Skips lint/build/JSDoc/agent-doc validation. Use only when those checks have already been run
-for the exact commit being released.
+for the exact commit being released. It has no effect when -Publish pushes a release that an
+earlier run already prepared, because no validation runs in that step; the script says so in
+the summary.
 
 .EXAMPLE
 .\release.ps1 -ReleaseType minor -Yes
@@ -130,9 +139,12 @@ function Exec {
   $e = $stderrTask.GetAwaiter().GetResult()
 
   if (-not $Quiet -and $o) { Write-Host $o.TrimEnd() }
-  if ($p.ExitCode -ne 0 -and $e) { Write-Error $e.TrimEnd() }
+  # With -AllowNonZero the caller reads Code/Err and words its own message. Writing stderr to the
+  # error stream here would end the script (ErrorActionPreference is Stop) with the command's
+  # raw text instead of that message.
   if ($p.ExitCode -ne 0 -and -not $AllowNonZero) {
-    throw "Command failed ($File $as) with exit code $($p.ExitCode)."
+    $detail = if ($e) { "`n" + $e.TrimEnd() } else { '' }
+    throw "Command failed ($File $as) with exit code $($p.ExitCode).$detail"
   }
 
   return @{ Code = $p.ExitCode; Out = $o; Err = $e }
@@ -198,6 +210,149 @@ function Wait-ForRemoteTag([string]$RepoRoot, [string]$TagName) {
   return ''
 }
 
+# --- Decisions for publishing a release that an earlier run prepared -----------------------
+# These functions decide and format only; they run no command and change nothing, so
+# scripts/release.Tests.ps1 can test them without running this script.
+
+function Get-ReleaseTypeBetween([string]$BaseVersion, [string]$NewVersion) {
+  # The `npm version` step that turns BaseVersion into NewVersion: patch, minor or major.
+  # Empty when the two are not exactly one such step apart or are not plain X.Y.Z versions.
+  $pattern = '^(\d+)\.(\d+)\.(\d+)$'
+  $base = [regex]::Match("$BaseVersion".Trim(), $pattern)
+  $new = [regex]::Match("$NewVersion".Trim(), $pattern)
+  if (-not $base.Success -or -not $new.Success) { return '' }
+  $b = @(1, 2, 3 | ForEach-Object { [long]$base.Groups[$_].Value })
+  $n = @(1, 2, 3 | ForEach-Object { [long]$new.Groups[$_].Value })
+  if ($n[0] -eq $b[0] + 1 -and $n[1] -eq 0 -and $n[2] -eq 0) { return 'major' }
+  if ($n[0] -eq $b[0] -and $n[1] -eq $b[1] + 1 -and $n[2] -eq 0) { return 'minor' }
+  if ($n[0] -eq $b[0] -and $n[1] -eq $b[1] -and $n[2] -eq $b[2] + 1) { return 'patch' }
+  return ''
+}
+
+function Test-PreparedRelease {
+  # True only for exactly one release commit on top of origin, carrying its own tag. Pass an
+  # empty string for a value that could not be read.
+  param(
+    [string]$LocalHead,
+    [string]$RemoteHead,
+    [string]$ParentHead,
+    [string]$TagCommit,
+    [string]$Subject,
+    [string]$Version
+  )
+
+  if ([string]::IsNullOrWhiteSpace($LocalHead) -or [string]::IsNullOrWhiteSpace($RemoteHead)) { return $false }
+  if ([string]::IsNullOrWhiteSpace($Version)) { return $false }
+  return ($ParentHead -eq $RemoteHead) -and ($TagCommit -eq $LocalHead) -and ($Subject -eq "chore(release): $Version")
+}
+
+function Get-PreparedReleaseArgumentProblem {
+  # Empty when -ReleaseType is omitted or names the step the prepared release actually is.
+  # Otherwise the message to stop with: the prepared version is what would be published, so a
+  # different -ReleaseType must not be ignored silently.
+  param(
+    [string]$ReleaseType,
+    [string]$BaseVersion,
+    [string]$PreparedVersion
+  )
+
+  if ([string]::IsNullOrWhiteSpace($ReleaseType)) { return '' }
+  $requested = $ReleaseType.Trim().ToLowerInvariant()
+  $actual = Get-ReleaseTypeBetween $BaseVersion $PreparedVersion
+  if ($actual -eq $requested) { return '' }
+
+  $what = if ($actual) { "a $actual release" } else { 'not a single patch, minor or major step, or could not be read' }
+  return @"
+-ReleaseType $ReleaseType does not match the prepared release.
+
+The release commit prepared by an earlier run goes from $BaseVersion -> $PreparedVersion, which is $what.
+Nothing was pushed, and the prepared release commit and tag are unchanged.
+
+To publish the prepared release as it is, rerun with -Publish and without -ReleaseType (or with the
+matching type). To release a different version, remove the prepared commit and tag yourself first.
+"@
+}
+
+function Get-PreparedReleaseNotices {
+  # Arguments that have no effect on a prepared release are reported, never ignored silently.
+  param([bool]$SkipValidation)
+
+  $notices = @()
+  if ($SkipValidation) {
+    $notices += '-SkipValidation has no effect here: a prepared release is pushed exactly as it was prepared, and no validation runs in this step. Validation ran, or was skipped, when the release commit was created.'
+  }
+  return $notices
+}
+
+function Format-PreparedReleaseSummary {
+  param(
+    [string]$RepoRoot,
+    [string]$Branch,
+    [string]$BaseVersion,
+    [string]$Version,
+    [string]$TagName,
+    [string]$ReleaseCommit,
+    [string]$BaseCommit,
+    [string[]]$Notices = @()
+  )
+
+  $step = Get-ReleaseTypeBetween $BaseVersion $Version
+  $stepText = if ($step) { " ($step)" } else { '' }
+  $lines = @(
+    ''
+    'A release prepared by an earlier run was found. Nothing is bumped or validated again.'
+    ''
+    'Summary:'
+    "  Repo root:        $RepoRoot"
+    "  Branch:           $Branch"
+    "  Version:          $BaseVersion -> $Version$stepText"
+    "  Tag:              $TagName"
+    "  Release commit:   $ReleaseCommit"
+    "  Base commit:      $BaseCommit (origin/$Branch)"
+    "  Will push:        git push origin $Branch --follow-tags"
+    "                    = the release commit to origin/$Branch, and the tag $TagName"
+    "  Effect:           the tag push starts the Release workflow, which publishes the GitHub release."
+  )
+  foreach ($notice in @($Notices)) {
+    if ($notice) { $lines += "  Note:             $notice" }
+  }
+  $lines += ''
+  return ($lines -join "`n")
+}
+
+function Confirm-PreparedReleasePublish {
+  # Shows the summary and returns whether the prepared release may be pushed: always with -Yes,
+  # otherwise only when the answer is Y.
+  param(
+    [string]$Summary,
+    [bool]$Yes,
+    [scriptblock]$Prompt = { Read-Host 'Publish this prepared release? (Y/N)' }
+  )
+
+  Write-Host $Summary
+  if ($Yes) { return $true }
+  $answer = & $Prompt
+  return ("$answer".Trim().ToUpperInvariant() -eq 'Y')
+}
+
+function Get-PushFailureRollback {
+  # The git commands that undo a failed publish. Only a release commit and tag created by the
+  # same run are removed. A release prepared by an earlier run is left exactly as it is: this
+  # run did not create it, and deleting the tag or resetting the branch would leave the
+  # prepared release reachable through the reflog only.
+  param(
+    [bool]$CreatedInThisRun,
+    [string]$TagName,
+    [string]$PrevHead
+  )
+
+  $steps = @()
+  if (-not $CreatedInThisRun -or [string]::IsNullOrWhiteSpace($PrevHead)) { return $steps }
+  if ($TagName) { $steps += [pscustomobject]@{ GitArgs = @('tag', '-d', $TagName) } }
+  $steps += [pscustomobject]@{ GitArgs = @('reset', '--hard', $PrevHead) }
+  return $steps
+}
+
 # Resolve repo root from script path; work there regardless of current shell location.
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 try {
@@ -241,12 +396,10 @@ if ($Publish -and $localHead -ne $remoteHead) {
   $parentCheck = Exec 'git' @('rev-parse', 'HEAD^') -Cwd $repoRoot -AllowNonZero -Quiet
   $tagCheck = Exec 'git' @('rev-parse', "$preparedTag^{commit}") -Cwd $repoRoot -AllowNonZero -Quiet
   $subjectCheck = Exec 'git' @('log', '-1', '--format=%s') -Cwd $repoRoot -AllowNonZero -Quiet
-  if ($parentCheck.Code -eq 0 -and $tagCheck.Code -eq 0 -and $subjectCheck.Code -eq 0 `
-      -and $parentCheck.Out.Trim() -eq $remoteHead `
-      -and $tagCheck.Out.Trim() -eq $localHead `
-      -and $subjectCheck.Out.Trim() -eq "chore(release): $preparedVersion") {
-    $preparedRelease = $true
-  }
+  $readOut = { param($check) if ($check.Code -eq 0) { "$($check.Out)".Trim() } else { '' } }
+  $preparedRelease = Test-PreparedRelease -LocalHead $localHead -RemoteHead $remoteHead `
+    -ParentHead (& $readOut $parentCheck) -TagCommit (& $readOut $tagCheck) `
+    -Subject (& $readOut $subjectCheck) -Version $preparedVersion
 }
 if ($localHead -ne $remoteHead -and -not $preparedRelease) {
   throw @"
@@ -349,7 +502,29 @@ if (-not $Publish) {
 } else {
   $newVersion = Get-PackageVersion $repoRoot
   $tagName = "v$newVersion"
-  $prevHead = $remoteHead
+  # This run created neither the commit nor the tag, so it has nothing of its own to roll back.
+  $prevHead = ''
+
+  # The version the prepared release started from: package.json in the commit origin is at.
+  $baseVersion = ''
+  $basePackage = Exec 'git' @('show', "${remoteHead}:package.json") -Cwd $repoRoot -AllowNonZero -Quiet
+  if ($basePackage.Code -eq 0) {
+    try { $baseVersion = [string]($basePackage.Out | ConvertFrom-Json).version } catch { $baseVersion = '' }
+  }
+
+  # A prepared release is published as it is. Arguments that would ask for something else
+  # stop the run or are reported in the summary; none is ignored silently.
+  $preparedProblem = Get-PreparedReleaseArgumentProblem -ReleaseType $ReleaseType -BaseVersion $baseVersion -PreparedVersion $newVersion
+  if ($preparedProblem) { throw $preparedProblem }
+
+  $preparedSummary = Format-PreparedReleaseSummary -RepoRoot $repoRoot -Branch $branch `
+    -BaseVersion $baseVersion -Version $newVersion -TagName $tagName `
+    -ReleaseCommit $localHead -BaseCommit $remoteHead `
+    -Notices (Get-PreparedReleaseNotices -SkipValidation $SkipValidation.IsPresent)
+  if (-not (Confirm-PreparedReleasePublish -Summary $preparedSummary -Yes $Yes.IsPresent)) {
+    Write-Host 'Aborted. Nothing was pushed; the prepared release commit and tag are unchanged.'
+    exit 0
+  }
   Write-Host "Publishing the release commit/tag already prepared for $tagName (no second version bump)." -ForegroundColor Yellow
 }
 
@@ -358,10 +533,15 @@ try {
   $null = Exec 'git' @('push', 'origin', $branch, '--follow-tags') -Cwd $repoRoot
 } catch {
   $pushError = $_
+  $rollback = @(Get-PushFailureRollback -CreatedInThisRun (-not $preparedRelease) -TagName $tagName -PrevHead $prevHead)
+  if ($rollback.Count -eq 0) {
+    Write-Warning "Push failed. The release commit and tag $tagName were not created by this run and are left untouched. Fix the cause of the failure and rerun with -Publish."
+    throw $pushError
+  }
+
   Write-Warning "Push failed. Rolling local release commit/tag back to $prevHead."
   try {
-    if ($tagName) { $null = Exec 'git' @('tag', '-d', $tagName) -Cwd $repoRoot }
-    $null = Exec 'git' @('reset', '--hard', $prevHead) -Cwd $repoRoot
+    foreach ($step in $rollback) { $null = Exec 'git' $step.GitArgs -Cwd $repoRoot }
   } catch {
     throw "Push failed and automatic rollback also failed. Original push error: $($pushError.Exception.Message) Rollback error: $($_.Exception.Message)"
   }
