@@ -2,20 +2,22 @@
 
 | Symbol | Kind | File | Summary |
 | --- | --- | --- | --- |
-| <code>normalizeClientAddress</code> | function | <code>server/clientAddress.js:19</code> | A reverse proxy may add the client&#39;s source port to the address it forwards \(IIS ARR does by default: &amp;quot;203.0.113.5:49152&amp;quot;, &amp;quot;\[2001:db8::1\]:49152&amp;quot;\). |
+| <code>normalizeClientAddress</code> | function | <code>server/clientAddress.js:23</code> | A reverse proxy may add the client&#39;s source port to the address it forwards \(IIS ARR does by default: &amp;quot;203.0.113.5:49152&amp;quot;, &amp;quot;\[2001:db8::1\]:49152&amp;quot;\). |
 | <code>decodeHeaderValue</code> | function | <code>server/headerText.js:20</code> | Node hands header values over decoded as latin1, one character per byte. |
 | <code>strictUtf8</code> | constant | <code>server/headerText.js:4</code> | Text of an HTTP header value as the sender wrote it. |
 | <code>PRINT_LOG_RETENTION_DEFAULT_DAYS</code> | constant | <code>server/logRetention.js:10</code> | Print records \( print-*.log \) are the audit trail of who printed what, and for whom. |
 | <code>pruneRotatedLogs</code> | function | <code>server/logRetention.js:36</code> | Delete rotated log files whose modification time is beyond the retention period. |
 | <code>resolvePrintLogRetentionDays</code> | function | <code>server/logRetention.js:20</code> | Retention for the print records of the user log server. |
 | <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:59</code> | Repeat retention while a long-running service stays up. |
-| <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:143</code> | Optional CORS for /log |
-| <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:137</code> | Token gate for /log |
-| <code>logLimiter</code> | constant | <code>server/system-log-server.js:167</code> | Rate limit for ingestion |
-| <code>requireLogToken</code> | function | <code>server/system-log-server.js:179</code> | Token auth middleware |
-| <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:130</code> | Trust proxy for accurate req.ip |
-| <code>resolveUser</code> | function | <code>server/user-log-server.js:133</code> | Resolve user identity without cookies. |
-| <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:152</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
+| <code>createRejectionReporter</code> | function | <code>server/rateLimitConfig.js:35</code> | Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request. |
+| <code>resolveRateLimitPerMinute</code> | function | <code>server/rateLimitConfig.js:17</code> | Read a requests-per-minute limit from an environment value. |
+| <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:145</code> | Optional CORS for /log |
+| <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:139</code> | Token gate for /log |
+| <code>rateLimitSetting</code> | constant | <code>server/system-log-server.js:172</code> | Rate limit for ingestion |
+| <code>requireLogToken</code> | function | <code>server/system-log-server.js:202</code> | Token auth middleware |
+| <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:132</code> | Trust proxy for accurate req.ip |
+| <code>resolveUser</code> | function | <code>server/user-log-server.js:135</code> | Resolve user identity without cookies. |
+| <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:154</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
 | <code>LOOPBACK_ADDRESSES</code> | constant | <code>server/userLogOrigin.js:4</code> | Evaluate the browser origin signals used by the user print-log endpoint. |
 | <code>resolveUserLogHosts</code> | function | <code>server/userLogOrigin.js:15</code> | The hosts the browser may have addressed: the request&#39;s own Host header and, only when the request arrives over loopback, the X-Forwarded-Host that the reverse proxy on the same m... |
 | <code>neutralizeForWhom</code> | function | <code>server/userLogPayload.js:17</code> | The print log has never carried &amp;quot;$&amp;quot; or &amp;quot;#&amp;quot; in the recipient. |

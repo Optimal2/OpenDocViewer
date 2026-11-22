@@ -20,3 +20,12 @@ test('installs the user log service with 30 days of print-record retention', () 
   assert.match(userEnv[1], /PRINT_LOG_RETENTION_DAYS\s*=\s*\$PRINT_RETENTION_DAYS/);
   assert.match(userEnv[1], /LOG_RETENTION_DAYS\s*=\s*\$RETENTION_DAYS/);
 });
+
+test('installs both services with their rate limit, at the unchanged defaults', () => {
+  assert.match(source, /^\$Script:USER_LOG_RATE_LIMIT_PER_MINUTE\s*=\s*60\s*$/m);
+  assert.match(source, /^\$Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE\s*=\s*120\s*$/m);
+  const userEnv = /\$envUsr\s*=\s*@\{([^}]*)\}/.exec(source);
+  const systemEnv = /\$envSys\s*=\s*@\{([^}]*)\}/.exec(source);
+  assert.match(userEnv[1], /USER_LOG_RATE_LIMIT_PER_MINUTE\s*=\s*\$USER_LOG_RATE_LIMIT_PER_MINUTE/);
+  assert.match(systemEnv[1], /SYSTEM_LOG_RATE_LIMIT_PER_MINUTE\s*=\s*\$SYSTEM_LOG_RATE_LIMIT_PER_MINUTE/);
+});

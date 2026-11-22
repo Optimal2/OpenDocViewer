@@ -39,6 +39,11 @@ $Script:DEF_PORT_USR   = 3002
 $Script:RETENTION_DAYS = 14
 # Print records (print-*.log) are the audit trail and are kept longer than the other logs.
 $Script:PRINT_RETENTION_DAYS = 30
+# Requests per minute and client address; 0 or 'off' switches the limit off. Users who share
+# an address (terminal server, NAT, load balancer) share one allowance, and a print record
+# over the limit is lost. See docs-src/log-servers.md, "Rate limits".
+$Script:USER_LOG_RATE_LIMIT_PER_MINUTE   = 60
+$Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE = 120
 $Script:NODE_ENV       = 'production'
 $Script:TRUST_PROXY    = 1
 
@@ -432,6 +437,7 @@ function Install-Flow {
     LOG_TOKEN          = $token
     TRUST_PROXY        = $TRUST_PROXY
     LOG_RETENTION_DAYS = $RETENTION_DAYS
+    SYSTEM_LOG_RATE_LIMIT_PER_MINUTE = $SYSTEM_LOG_RATE_LIMIT_PER_MINUTE
   }
   $envUsr = @{
     NODE_ENV           = $NODE_ENV
@@ -439,6 +445,7 @@ function Install-Flow {
     TRUST_PROXY        = $TRUST_PROXY
     LOG_RETENTION_DAYS = $RETENTION_DAYS
     PRINT_LOG_RETENTION_DAYS = $PRINT_RETENTION_DAYS
+    USER_LOG_RATE_LIMIT_PER_MINUTE = $USER_LOG_RATE_LIMIT_PER_MINUTE
   }
 
   Install-ServiceNodeApp -ServiceName $SERVICE_SYS -NodeExe $node -ScriptPath $SYSTEM_JS -AppDir $SERVER_DIR -EnvVars $envSys -NssmExe $nssm

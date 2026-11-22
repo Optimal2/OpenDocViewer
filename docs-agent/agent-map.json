@@ -93,15 +93,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 217,
-    "sourceLineCount": 75217,
-    "docletCount": 2203,
-    "documentedFileCount": 211,
+    "fileCount": 218,
+    "sourceLineCount": 75324,
+    "docletCount": 2205,
+    "documentedFileCount": 212,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 27,
     "devDependencyCount": 25,
-    "estimatedSourceTokens": 7625
+    "estimatedSourceTokens": 7650
   },
   "recommendations": [
     "6 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -987,9 +987,9 @@
   "modules": [
     {
       "name": "server",
-      "fileCount": 7,
-      "lineCount": 711,
-      "docletCount": 18,
+      "fileCount": 8,
+      "lineCount": 818,
+      "docletCount": 20,
       "importantFiles": [
         {
           "path": "server/logRetention.js",
@@ -998,6 +998,15 @@
           "incomingLocalImports": 2,
           "doclets": 4,
           "summary": "Shared best-effort retention for the optional standalone log servers.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/rateLimitConfig.js",
+          "score": 52,
+          "lines": 55,
+          "incomingLocalImports": 2,
+          "doclets": 2,
+          "summary": "Settings and reporting for the per-client rate limits of the log servers.",
           "summaryConfidence": "high"
         },
         {
@@ -1012,7 +1021,7 @@
         {
           "path": "server/clientAddress.js",
           "score": 44,
-          "lines": 32,
+          "lines": 38,
           "incomingLocalImports": 2,
           "doclets": 1,
           "summary": "The client's address without a port, for the rate limit key and the log records.",
@@ -1039,7 +1048,7 @@
         {
           "path": "server/system-log-server.js",
           "score": 37,
-          "lines": 241,
+          "lines": 264,
           "incomingLocalImports": 0,
           "doclets": 5,
           "summary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -1048,7 +1057,7 @@
         {
           "path": "server/user-log-server.js",
           "score": 28,
-          "lines": 274,
+          "lines": 297,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2082,7 +2091,7 @@
   "files": [
     {
       "path": "server/clientAddress.js",
-      "lines": 32,
+      "lines": 38,
       "extension": ".js",
       "jsdocBlockCount": 2,
       "sourceSummary": "The client's address without a port, for the rate limit key and the log records.",
@@ -2100,14 +2109,14 @@
         {
           "name": "normalizeClientAddress",
           "kind": "function",
-          "line": 19
+          "line": 23
         }
       ],
       "declarations": [
         {
           "name": "normalizeClientAddress",
           "kind": "function",
-          "line": 19
+          "line": 23
         }
       ],
       "parseError": null,
@@ -2123,7 +2132,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/clientAddress.js",
-          "line": 19,
+          "line": 23,
           "description": "A reverse proxy may add the client's source port to the address it forwards (IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;[2001:db8::1]:49152&quot;).",
           "params": [
             {
@@ -2431,8 +2440,117 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "server/rateLimitConfig.js",
+      "lines": 55,
+      "extension": ".js",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "Settings and reporting for the per-client rate limits of the log servers.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "resolveRateLimitPerMinute",
+          "kind": "function",
+          "line": 17
+        },
+        {
+          "name": "createRejectionReporter",
+          "kind": "function",
+          "line": 35
+        }
+      ],
+      "declarations": [
+        {
+          "name": "resolveRateLimitPerMinute",
+          "kind": "function",
+          "line": 17
+        },
+        {
+          "name": "createRejectionReporter",
+          "kind": "function",
+          "line": 35
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "resolveRateLimitPerMinute",
+          "name": "resolveRateLimitPerMinute",
+          "longname": "resolveRateLimitPerMinute",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/rateLimitConfig.js",
+          "line": 17,
+          "description": "Read a requests-per-minute limit from an environment value.",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "optional": false,
+              "description": "Name of the environment variable, for the warning."
+            },
+            {
+              "name": "raw",
+              "type": "string|undefined",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "defaultLimit",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "createRejectionReporter",
+          "name": "createRejectionReporter",
+          "longname": "createRejectionReporter",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/rateLimitConfig.js",
+          "line": 35,
+          "description": "Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.",
+          "params": [
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "function",
+              "description": "Call with the client address; true when a line was written."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "server",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 2,
+      "importanceScore": 52,
+      "summary": "Settings and reporting for the per-client rate limits of the log servers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "server/system-log-server.js",
-      "lines": 241,
+      "lines": 264,
       "extension": ".js",
       "jsdocBlockCount": 11,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2442,7 +2560,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 24,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -2450,7 +2568,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 25,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -2458,7 +2576,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -2466,7 +2584,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 27,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -2474,7 +2592,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2482,7 +2600,7 @@
           "specifiers": [
             "cors"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -2490,7 +2608,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -2498,7 +2616,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -2507,7 +2625,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 33,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -2515,7 +2633,7 @@
           "specifiers": [
             "morgan"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -2524,7 +2642,7 @@
             "pruneRotatedLogs",
             "scheduleLogRetention"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -2532,7 +2650,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -2540,7 +2658,16 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 37,
+          "line": 38,
+          "kind": "static"
+        },
+        {
+          "source": "./rateLimitConfig.js",
+          "specifiers": [
+            "createRejectionReporter",
+            "resolveRateLimitPerMinute"
+          ],
+          "line": 39,
           "kind": "static"
         }
       ],
@@ -2549,67 +2676,67 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 51
+          "line": 53
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 61
+          "line": 63
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 69
+          "line": 71
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 71
+          "line": 73
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 84
+          "line": 86
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 88
+          "line": 90
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 92
+          "line": 94
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 98
+          "line": 100
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 101
+          "line": 103
         },
         {
           "name": "requireLogToken",
           "kind": "function",
-          "line": 179
+          "line": 202
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 195
+          "line": 218
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 206
+          "line": 229
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 222
+          "line": 245
         }
       ],
       "parseError": null,
@@ -2625,7 +2752,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 130,
+          "line": 132,
           "description": "Trust proxy for accurate req.ip",
           "params": [],
           "returns": [],
@@ -2638,7 +2765,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 137,
+          "line": 139,
           "description": "Token gate for /log",
           "params": [],
           "returns": [],
@@ -2651,20 +2778,20 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 143,
+          "line": 145,
           "description": "Optional CORS for /log",
           "params": [],
           "returns": [],
           "examples": 0
         },
         {
-          "id": "logLimiter",
-          "name": "logLimiter",
-          "longname": "logLimiter",
+          "id": "rateLimitSetting",
+          "name": "rateLimitSetting",
+          "longname": "rateLimitSetting",
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 167,
+          "line": 172,
           "description": "Rate limit for ingestion",
           "params": [],
           "returns": [],
@@ -2677,7 +2804,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 179,
+          "line": 202,
           "description": "Token auth middleware",
           "params": [],
           "returns": [],
@@ -2692,7 +2819,7 @@
             "pruneRotatedLogs",
             "scheduleLogRetention"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static",
           "resolved": "server/logRetention.js"
         },
@@ -2701,7 +2828,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static",
           "resolved": "server/headerText.js"
         },
@@ -2710,9 +2837,19 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static",
           "resolved": "server/clientAddress.js"
+        },
+        {
+          "source": "./rateLimitConfig.js",
+          "specifiers": [
+            "createRejectionReporter",
+            "resolveRateLimitPerMinute"
+          ],
+          "line": 39,
+          "kind": "static",
+          "resolved": "server/rateLimitConfig.js"
         }
       ],
       "packageImports": [
@@ -2721,7 +2858,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 24,
+          "line": 25,
           "kind": "static"
         },
         {
@@ -2729,7 +2866,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 25,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -2737,7 +2874,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -2745,7 +2882,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 27,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -2753,7 +2890,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2761,7 +2898,7 @@
           "specifiers": [
             "cors"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -2769,7 +2906,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -2777,7 +2914,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -2786,7 +2923,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 33,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -2794,7 +2931,7 @@
           "specifiers": [
             "morgan"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         }
       ],
@@ -2806,7 +2943,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 274,
+      "lines": 297,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2816,7 +2953,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2824,7 +2961,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -2832,7 +2969,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -2840,7 +2977,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -2848,7 +2985,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -2856,7 +2993,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -2864,7 +3001,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -2872,7 +3009,7 @@
           "specifiers": [
             "morgan"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -2881,7 +3018,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 38,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -2891,7 +3028,7 @@
             "resolvePrintLogRetentionDays",
             "scheduleLogRetention"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -2900,7 +3037,7 @@
             "neutralizeForWhom",
             "readPrintLogFields"
           ],
-          "line": 40,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -2908,7 +3045,7 @@
           "specifiers": [
             "isAllowedUserLogOrigin"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -2916,7 +3053,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -2924,7 +3061,16 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 43,
+          "line": 44,
+          "kind": "static"
+        },
+        {
+          "source": "./rateLimitConfig.js",
+          "specifiers": [
+            "createRejectionReporter",
+            "resolveRateLimitPerMinute"
+          ],
+          "line": 45,
           "kind": "static"
         }
       ],
@@ -2933,72 +3079,72 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 60
+          "line": 62
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 77
+          "line": 79
         },
         {
           "name": "ymd",
           "kind": "function",
-          "line": 85
+          "line": 87
         },
         {
           "name": "getRollingStream",
           "kind": "function",
-          "line": 86
+          "line": 88
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 98
+          "line": 100
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 100
+          "line": 102
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 104
+          "line": 106
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 110
+          "line": 112
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 111
+          "line": 113
         },
         {
           "name": "resolveUser",
           "kind": "function",
-          "line": 133
+          "line": 135
         },
         {
           "name": "sameOriginGuard",
           "kind": "function",
-          "line": 152
+          "line": 154
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 222
+          "line": 245
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 239
+          "line": 262
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 255
+          "line": 278
         }
       ],
       "parseError": null,
@@ -3014,7 +3160,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 133,
+          "line": 135,
           "description": "Resolve user identity without cookies.",
           "params": [],
           "returns": [],
@@ -3027,7 +3173,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 152,
+          "line": 154,
           "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
           "params": [],
           "returns": [],
@@ -3043,7 +3189,7 @@
             "resolvePrintLogRetentionDays",
             "scheduleLogRetention"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static",
           "resolved": "server/logRetention.js"
         },
@@ -3053,7 +3199,7 @@
             "neutralizeForWhom",
             "readPrintLogFields"
           ],
-          "line": 40,
+          "line": 41,
           "kind": "static",
           "resolved": "server/userLogPayload.js"
         },
@@ -3062,7 +3208,7 @@
           "specifiers": [
             "isAllowedUserLogOrigin"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static",
           "resolved": "server/userLogOrigin.js"
         },
@@ -3071,7 +3217,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static",
           "resolved": "server/headerText.js"
         },
@@ -3080,9 +3226,19 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static",
           "resolved": "server/clientAddress.js"
+        },
+        {
+          "source": "./rateLimitConfig.js",
+          "specifiers": [
+            "createRejectionReporter",
+            "resolveRateLimitPerMinute"
+          ],
+          "line": 45,
+          "kind": "static",
+          "resolved": "server/rateLimitConfig.js"
         }
       ],
       "packageImports": [
@@ -3091,7 +3247,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -3099,7 +3255,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -3107,7 +3263,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -3115,7 +3271,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3123,7 +3279,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -3131,7 +3287,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 35,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -3139,7 +3295,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -3147,7 +3303,7 @@
           "specifiers": [
             "morgan"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -3156,7 +3312,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 38,
+          "line": 39,
           "kind": "static"
         }
       ],
@@ -90990,7 +91146,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/clientAddress.js",
-      "line": 19,
+      "line": 23,
       "description": "A reverse proxy may add the client's source port to the address it forwards (IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;[2001:db8::1]:49152&quot;).",
       "params": [
         {
@@ -91141,13 +91297,75 @@
       "examples": 0
     },
     {
+      "id": "createRejectionReporter",
+      "name": "createRejectionReporter",
+      "longname": "createRejectionReporter",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/rateLimitConfig.js",
+      "line": 35,
+      "description": "Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.",
+      "params": [
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "function",
+          "description": "Call with the client address; true when a line was written."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "resolveRateLimitPerMinute",
+      "name": "resolveRateLimitPerMinute",
+      "longname": "resolveRateLimitPerMinute",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/rateLimitConfig.js",
+      "line": 17,
+      "description": "Read a requests-per-minute limit from an environment value.",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "optional": false,
+          "description": "Name of the environment variable, for the warning."
+        },
+        {
+          "name": "raw",
+          "type": "string|undefined",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "defaultLimit",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "ALLOWED_ORIGINS",
       "name": "ALLOWED_ORIGINS",
       "longname": "ALLOWED_ORIGINS",
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 143,
+      "line": 145,
       "description": "Optional CORS for /log",
       "params": [],
       "returns": [],
@@ -91160,20 +91378,20 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 137,
+      "line": 139,
       "description": "Token gate for /log",
       "params": [],
       "returns": [],
       "examples": 0
     },
     {
-      "id": "logLimiter",
-      "name": "logLimiter",
-      "longname": "logLimiter",
+      "id": "rateLimitSetting",
+      "name": "rateLimitSetting",
+      "longname": "rateLimitSetting",
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 167,
+      "line": 172,
       "description": "Rate limit for ingestion",
       "params": [],
       "returns": [],
@@ -91186,7 +91404,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 179,
+      "line": 202,
       "description": "Token auth middleware",
       "params": [],
       "returns": [],
@@ -91199,7 +91417,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 130,
+      "line": 132,
       "description": "Trust proxy for accurate req.ip",
       "params": [],
       "returns": [],
@@ -91212,7 +91430,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 133,
+      "line": 135,
       "description": "Resolve user identity without cookies.",
       "params": [],
       "returns": [],
@@ -91225,7 +91443,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 152,
+      "line": 154,
       "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
       "params": [],
       "returns": [],

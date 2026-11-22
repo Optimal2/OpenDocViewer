@@ -1,6 +1,6 @@
 # OpenDocViewer / server
 
-File count: 7. Line count: 711. JSDoc symbol count: 18.
+File count: 8. Line count: 818. JSDoc symbol count: 20.
 
 ## server/clientAddress.js
 
@@ -36,25 +36,36 @@ Symbols:
 - `pruneRotatedLogs` (function) - Delete rotated log files whose modification time is beyond the retention period.
 - `scheduleLogRetention` (function) - Repeat retention while a long\-running service stays up.
 
+## server/rateLimitConfig.js
+
+Settings and reporting for the per\-client rate limits of the log servers.
+
+Exports: `resolveRateLimitPerMinute`, `createRejectionReporter`
+
+Symbols:
+
+- `resolveRateLimitPerMinute` (function) - Read a requests\-per\-minute limit from an environment value.
+- `createRejectionReporter` (function) - Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.
+
 ## server/system\-log\-server.js
 
 System Log Server — standalone Express endpoint for structured system logs.
 
-Local imports: `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`
+Local imports: `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
 
 Symbols:
 
 - `TRUST_PROXY_RAW` (constant) - Trust proxy for accurate req.ip
 - `LOG_TOKEN` (constant) - Token gate for /log
 - `ALLOWED_ORIGINS` (constant) - Optional CORS for /log
-- `logLimiter` (constant) - Rate limit for ingestion
+- `rateLimitSetting` (constant) - Rate limit for ingestion
 - `requireLogToken` (function) - Token auth middleware
 
 ## server/user\-log\-server.js
 
 User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
-Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`
+Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
 
 Symbols:
 

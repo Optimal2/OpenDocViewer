@@ -16,6 +16,7 @@
  *  - ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com   (optional CORS for /log)
  *  - JSON_LIMIT=64kb
  *  - LOG_RETENTION_DAYS=14
+ *  - SYSTEM_LOG_RATE_LIMIT_PER_MINUTE=120  (per client address; 0 or off = no limit)
  *
  * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
  * Note: This file is self-contained; no internal imports required.
@@ -35,6 +36,7 @@ import morgan from 'morgan';
 import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
 import { decodeHeaderValue } from './headerText.js';
 import { normalizeClientAddress } from './clientAddress.js';
+import { createRejectionReporter, resolveRateLimitPerMinute } from './rateLimitConfig.js';
 
 dotenv.config();
 
@@ -164,15 +166,36 @@ app.use(morgan('combined', { stream: { write: (s) => writeRolling('access', s) }
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 
 /** Rate limit for ingestion */
-const logLimiter = rateLimit({
+// SYSTEM_LOG_RATE_LIMIT_PER_MINUTE: requests per minute and client address (default 120); "0" or "off" switches
+// the limit off. Clients behind one address (terminal server, NAT, a load balancer in front of
+// the proxy) share one allowance, so the value is a decision for each site.
+const rateLimitSetting = resolveRateLimitPerMinute('SYSTEM_LOG_RATE_LIMIT_PER_MINUTE', process.env.SYSTEM_LOG_RATE_LIMIT_PER_MINUTE, 120);
+if (rateLimitSetting.warning) console.warn(`WARNING: ${rateLimitSetting.warning}`);
+// A rejected record is lost: the viewer does not read the response. One line per address and
+// minute in the error log makes the loss visible in operation.
+const reportRateLimitRejection = createRejectionReporter({
+  write: (address) => writeRolling('error', safeJson({
+    ts: new Date().toISOString(),
+    level: 'warn',
+    event: 'rate-limit-rejected',
+    ip: address,
+    limitPerMinute: rateLimitSetting.limit,
+    message: 'A log record was rejected by the rate limit and not written. Further rejections for this address are not reported for one minute.',
+  }) + '\n'),
+});
+const logLimiter = !rateLimitSetting.enabled ? (_req, _res, next) => next() : rateLimit({
   windowMs: 60_000,
-  max: 120,
+  max: rateLimitSetting.limit,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'Too many log requests, please slow down.' },
   // Keyed on the address without a port: a proxy that forwards address:port (IIS ARR)
   // would otherwise make this a limit per connection.
-  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip))
+  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip)),
+  handler: (req, res, _next, options) => {
+    try { reportRateLimitRejection(normalizeClientAddress(req.ip)); } catch { /* reporting must not change the answer */ }
+    res.status(options.statusCode).send(options.message);
+  }
 });
 
 /** Token auth middleware */

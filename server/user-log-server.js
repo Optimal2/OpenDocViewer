@@ -22,6 +22,7 @@
  *   - TRUST_PROXY=1
  *   - LOG_RETENTION_DAYS=14        (access and error logs)
  *   - PRINT_LOG_RETENTION_DAYS=30  (print records; never below 30 unless set here)
+ *   - USER_LOG_RATE_LIMIT_PER_MINUTE=60  (per client address; 0 or off = no limit)
  *   - ODV_STRICT_ORIGIN=true  (if set, requests missing Origin/Referer/Sec-Fetch-Site are rejected)
  * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
  */
@@ -41,6 +42,7 @@ import { neutralizeForWhom, readPrintLogFields } from './userLogPayload.js';
 import { isAllowedUserLogOrigin } from './userLogOrigin.js';
 import { decodeHeaderValue } from './headerText.js';
 import { normalizeClientAddress } from './clientAddress.js';
+import { createRejectionReporter, resolveRateLimitPerMinute } from './rateLimitConfig.js';
 
 dotenv.config();
 
@@ -192,15 +194,36 @@ app.use(morgan('combined', { stream: { write: (s) => writeRolling('access', s) }
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 
 // Rate limit to keep abuse surface small
-const printLimiter = rateLimit({
+// USER_LOG_RATE_LIMIT_PER_MINUTE: requests per minute and client address (default 60); "0" or "off" switches
+// the limit off. Clients behind one address (terminal server, NAT, a load balancer in front of
+// the proxy) share one allowance, so the value is a decision for each site.
+const rateLimitSetting = resolveRateLimitPerMinute('USER_LOG_RATE_LIMIT_PER_MINUTE', process.env.USER_LOG_RATE_LIMIT_PER_MINUTE, 60);
+if (rateLimitSetting.warning) console.warn(`WARNING: ${rateLimitSetting.warning}`);
+// A rejected record is lost: the viewer does not read the response. One line per address and
+// minute in the error log makes the loss visible in operation.
+const reportRateLimitRejection = createRejectionReporter({
+  write: (address) => writeRolling('error', safeJson({
+    ts: new Date().toISOString(),
+    level: 'warn',
+    event: 'rate-limit-rejected',
+    ip: address,
+    limitPerMinute: rateLimitSetting.limit,
+    message: 'A print record was rejected by the rate limit and not written. Further rejections for this address are not reported for one minute.',
+  }) + '\n'),
+});
+const printLimiter = !rateLimitSetting.enabled ? (_req, _res, next) => next() : rateLimit({
   windowMs: 60_000,
-  max: 60,
+  max: rateLimitSetting.limit,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'Too many requests' },
   // Keyed on the address without a port: a proxy that forwards address:port (IIS ARR)
   // would otherwise make this a limit per connection.
-  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip))
+  keyGenerator: (req) => ipKeyGenerator(normalizeClientAddress(req.ip)),
+  handler: (req, res, _next, options) => {
+    try { reportRateLimitRejection(normalizeClientAddress(req.ip)); } catch { /* reporting must not change the answer */ }
+    res.status(options.statusCode).send(options.message);
+  }
 });
 
 /**

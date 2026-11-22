@@ -6,7 +6,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/clientAddress.js",
-    "line": 19,
+    "line": 23,
     "description": "A reverse proxy may add the client's source port to the address it forwards (IIS ARR does by default: &quot;203.0.113.5:49152&quot;, &quot;[2001:db8::1]:49152&quot;).",
     "params": [
       {
@@ -157,13 +157,75 @@
     "examples": 0
   },
   {
+    "id": "createRejectionReporter",
+    "name": "createRejectionReporter",
+    "longname": "createRejectionReporter",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/rateLimitConfig.js",
+    "line": 35,
+    "description": "Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": "Call with the client address; true when a line was written."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveRateLimitPerMinute",
+    "name": "resolveRateLimitPerMinute",
+    "longname": "resolveRateLimitPerMinute",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/rateLimitConfig.js",
+    "line": 17,
+    "description": "Read a requests-per-minute limit from an environment value.",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "optional": false,
+        "description": "Name of the environment variable, for the warning."
+      },
+      {
+        "name": "raw",
+        "type": "string|undefined",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "defaultLimit",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "ALLOWED_ORIGINS",
     "name": "ALLOWED_ORIGINS",
     "longname": "ALLOWED_ORIGINS",
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 143,
+    "line": 145,
     "description": "Optional CORS for /log",
     "params": [],
     "returns": [],
@@ -176,20 +238,20 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 137,
+    "line": 139,
     "description": "Token gate for /log",
     "params": [],
     "returns": [],
     "examples": 0
   },
   {
-    "id": "logLimiter",
-    "name": "logLimiter",
-    "longname": "logLimiter",
+    "id": "rateLimitSetting",
+    "name": "rateLimitSetting",
+    "longname": "rateLimitSetting",
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 167,
+    "line": 172,
     "description": "Rate limit for ingestion",
     "params": [],
     "returns": [],
@@ -202,7 +264,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 179,
+    "line": 202,
     "description": "Token auth middleware",
     "params": [],
     "returns": [],
@@ -215,7 +277,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 130,
+    "line": 132,
     "description": "Trust proxy for accurate req.ip",
     "params": [],
     "returns": [],
@@ -228,7 +290,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 133,
+    "line": 135,
     "description": "Resolve user identity without cookies.",
     "params": [],
     "returns": [],
@@ -241,7 +303,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 152,
+    "line": 154,
     "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
     "params": [],
     "returns": [],
