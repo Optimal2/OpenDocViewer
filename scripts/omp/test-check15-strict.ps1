@@ -114,25 +114,33 @@ try {
     # 1. Strict + no reachable platform root => exit 1 with the Check 15 error.
     $result = Invoke-Validator -OmpPlatformRoot $missingRoot -OpenModulePlatformRoot '' -Arguments @{ Strict = $true }
     Assert-True ($result.ExitCode -eq 1) 'strict without platform root exits 1' "(exit $($result.ExitCode))"
-    Assert-True ($result.Output -match 'Check 15: the platform root .* named by OMP_PLATFORM_ROOT does not contain .scripts/omp/validate-shared-scripts\.ps1') 'strict without platform root names Check 15'
+    Assert-True ($result.Output -match 'Check 15: OpenModulePlatform root named by OMP_PLATFORM_ROOT was not found') 'strict without platform root names Check 15'
 
     # 2. Non-strict + a named but missing root => still exit 1: a named root
     # that cannot be used is a configuration error. NOT VERIFIED only applies
     # when no root was named at all (sibling fallback + exception env).
     $result = Invoke-Validator -OmpPlatformRoot $missingRoot -OpenModulePlatformRoot '' -Arguments @{}
     Assert-True ($result.ExitCode -eq 1) 'non-strict with a named but missing root exits 1' "(exit $($result.ExitCode))"
-    Assert-True ($result.Output -match 'Check 15: the platform root .* named by OMP_PLATFORM_ROOT does not contain .scripts/omp/validate-shared-scripts\.ps1') 'non-strict with a named but missing root names Check 15'
+    Assert-True ($result.Output -match 'Check 15: OpenModulePlatform root named by OMP_PLATFORM_ROOT was not found') 'non-strict with a named but missing root names Check 15'
 
     # 3. OMP_PLATFORM_ROOT is honoured and forwarded together with Strict.
-    $result = Invoke-Validator -OmpPlatformRoot $passingStub -OpenModulePlatformRoot $missingRoot -Arguments @{ Strict = $true }
+    $result = Invoke-Validator -OmpPlatformRoot $passingStub -OpenModulePlatformRoot '' -Arguments @{ Strict = $true }
     Assert-True ($result.Output -match 'STUB-CHECK15') 'OMP_PLATFORM_ROOT runs the guard'
     Assert-True ($result.Output -match [regex]::Escape("platform=$passingStub strict=True")) 'OMP_PLATFORM_ROOT forwarded with Strict'
     Assert-True ($result.ExitCode -eq 0) 'passing guard via OMP_PLATFORM_ROOT exits 0' "(exit $($result.ExitCode))"
 
-    # 4. OMP_PLATFORM_ROOT wins over OpenModulePlatformRoot.
-    $result = Invoke-Validator -OmpPlatformRoot $failingStub -OpenModulePlatformRoot $passingStub -Arguments @{ Strict = $true }
-    Assert-True ($result.ExitCode -eq 1) 'OMP_PLATFORM_ROOT precedes OpenModulePlatformRoot (failing guard fails)' "(exit $($result.ExitCode))"
+    # 4. A failing guard is a Check 15 failure.
+    $result = Invoke-Validator -OmpPlatformRoot $failingStub -OpenModulePlatformRoot '' -Arguments @{ Strict = $true }
+    Assert-True ($result.ExitCode -eq 1) 'failing guard via OMP_PLATFORM_ROOT exits 1' "(exit $($result.ExitCode))"
     Assert-True ($result.Output -match 'Check 15 \(shared script drift\) failed') 'failing guard reported as Check 15 failure'
+
+    # 4b. The shared resolver (OpenModulePlatform e9e6cf26) refuses two environment
+    # variables that name different checkouts instead of letting one win, so the
+    # build and the validators can never use different sources.
+    $result = Invoke-Validator -OmpPlatformRoot $failingStub -OpenModulePlatformRoot $passingStub -Arguments @{ Strict = $true }
+    Assert-True ($result.ExitCode -eq 1) 'different OMP_PLATFORM_ROOT and OpenModulePlatformRoot exit 1' "(exit $($result.ExitCode))"
+    Assert-True ($result.Output -match 'Check 15: OMP_PLATFORM_ROOT and OpenModulePlatformRoot name different platform checkouts') 'different environment roots reported as Check 15 error'
+    Assert-True ($result.Output -notmatch 'STUB-CHECK15') 'different environment roots run no guard'
 
     # 5. OpenModulePlatformRoot is still honoured when OMP_PLATFORM_ROOT is unset.
     $result = Invoke-Validator -OmpPlatformRoot '' -OpenModulePlatformRoot $passingStub -Arguments @{ Strict = $true }
