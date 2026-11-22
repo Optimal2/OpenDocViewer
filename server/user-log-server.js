@@ -14,7 +14,7 @@
  *   - Same-origin guard: Origin/Referer must match Host, or the X-Forwarded-Host set by a
  *     reverse proxy on loopback; Sec-Fetch-Site must be same-origin.
  *     Requests with none of these signals are accepted by default for compatibility.
- *   - Rate limited; accepts only form or JSON content types.
+ *   - Accepts only form or JSON content types; a rate limit per client address is optional.
  *
  * Runtime env (optional):
  *   - PORT=3002
@@ -22,7 +22,7 @@
  *   - TRUST_PROXY=1
  *   - LOG_RETENTION_DAYS=14        (access and error logs)
  *   - PRINT_LOG_RETENTION_DAYS=30  (print records; never below 30 unless set here)
- *   - USER_LOG_RATE_LIMIT_PER_MINUTE=60  (per client address; 0 or off = no limit)
+ *   - USER_LOG_RATE_LIMIT_PER_MINUTE=0  (no limit by default; a number sets one per client address)
  *   - ODV_STRICT_ORIGIN=true  (if set, requests missing Origin/Referer/Sec-Fetch-Site are rejected)
  * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
  */
@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import morgan from 'morgan';
+import { createAccessLogger } from './accessLog.js';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { pruneRotatedLogs, resolvePrintLogRetentionDays, scheduleLogRetention } from './logRetention.js';
 import { neutralizeForWhom, readPrintLogFields } from './userLogPayload.js';
@@ -188,16 +188,18 @@ app.set('trust proxy', TRUST_PROXY);
 app.use(helmet());
 app.use(express.urlencoded({ extended: false, limit: '16kb' })); // for form POSTs
 app.use(express.json({ limit: '64kb' }));                         // for JSON POSTs
-app.use(morgan('combined', { stream: { write: (s) => writeRolling('access', s) } }));
+app.use(createAccessLogger({ write: (line) => writeRolling('access', line), sanitize: sanitizeString }));
 
 // Health
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
 
-// Rate limit to keep abuse surface small
-// USER_LOG_RATE_LIMIT_PER_MINUTE: requests per minute and client address (default 60); "0" or "off" switches
-// the limit off. Clients behind one address (terminal server, NAT, a load balancer in front of
-// the proxy) share one allowance, so the value is a decision for each site.
-const rateLimitSetting = resolveRateLimitPerMinute('USER_LOG_RATE_LIMIT_PER_MINUTE', process.env.USER_LOG_RATE_LIMIT_PER_MINUTE, 60);
+// Optional rate limit; not mounted at all unless a limit is set.
+// USER_LOG_RATE_LIMIT_PER_MINUTE: requests per minute and client address. The default is no
+// limit ("0" or "off" says the same explicitly). Every print record is an audit record that a
+// document was printed. Users behind one address (terminal server, NAT, a load balancer in front
+// of the proxy) would share one allowance, and a silently lost print record is worse than the
+// load a limit protects against; the same-origin check already restricts who can post here.
+const rateLimitSetting = resolveRateLimitPerMinute('USER_LOG_RATE_LIMIT_PER_MINUTE', process.env.USER_LOG_RATE_LIMIT_PER_MINUTE, 0);
 if (rateLimitSetting.warning) console.warn(`WARNING: ${rateLimitSetting.warning}`);
 // A rejected record is lost: the viewer does not read the response. One line per address and
 // minute in the error log makes the loss visible in operation.

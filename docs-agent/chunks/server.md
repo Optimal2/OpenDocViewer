@@ -1,6 +1,18 @@
 # OpenDocViewer / server
 
-File count: 8. Line count: 818. JSDoc symbol count: 20.
+File count: 9. Line count: 853. JSDoc symbol count: 21.
+
+## server/accessLog.js
+
+HTTP access log of the log servers: the "combined" line, with a clean address and one line.
+
+Exports: `createAccessLogger`
+
+Local imports: `server/clientAddress.js`, `server/headerText.js`
+
+Symbols:
+
+- `createAccessLogger` (function) - No description.
 
 ## server/clientAddress.js
 
@@ -51,7 +63,7 @@ Symbols:
 
 System Log Server — standalone Express endpoint for structured system logs.
 
-Local imports: `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
+Local imports: `server/accessLog.js`, `server/logRetention.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
 
 Symbols:
 
@@ -65,7 +77,7 @@ Symbols:
 
 User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
-Local imports: `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
+Local imports: `server/accessLog.js`, `server/logRetention.js`, `server/userLogPayload.js`, `server/userLogOrigin.js`, `server/headerText.js`, `server/clientAddress.js`, `server/rateLimitConfig.js`
 
 Symbols:
 

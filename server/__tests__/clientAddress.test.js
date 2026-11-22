@@ -9,7 +9,7 @@
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { normalizeClientAddress } from '../clientAddress.js';
-import { post } from './logServerHarness.js';
+import { chars, post, splitLines, utf8Header } from './logServerHarness.js';
 
 const state = vi.hoisted(() => ({ servers: [], written: [] }));
 
@@ -73,6 +73,8 @@ beforeAll(async () => {
   vi.stubEnv('NODE_ENV', 'development');
   vi.stubEnv('LOG_TOKEN', TOKEN);
   vi.stubEnv('PORT', '0');
+  // The print log has no limit unless one is set; set one so that its limiter is mounted.
+  vi.stubEnv('USER_LOG_RATE_LIMIT_PER_MINUTE', '60');
   targets.user = {
     port: await start('../user-log-server.js'),
     path: '/userlog/record',
@@ -134,6 +136,56 @@ describe('normalizeClientAddress', () => {
 
   it('returns anything that is not a string as it is', () => {
     for (const value of [undefined, null, 5, {}]) expect(normalizeClientAddress(value)).toBe(value);
+  });
+});
+
+describe.each(['user', 'system'])('%s log server access log', (name) => {
+  const accessLines = (marker) => state.written
+    .filter((entry) => /access-\d{4}-\d{2}-\d{2}\.log$/.test(entry.file) && entry.line.includes(marker))
+    .map((entry) => entry.line);
+
+  it('writes the client address without the port, in the combined line shape', async () => {
+    const target = targets[name];
+    const marker = `agent-${name}-plain`;
+    await post(target.port, target.path, target.body, {
+      ...target.headers, 'x-forwarded-for': '203.0.113.40:40001', 'user-agent': marker, referer: 'https://viewer.example/page',
+    });
+    const lines = accessLines(marker);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatch(new RegExp(
+      `^203\\.0\\.113\\.40 - - \\[[^\\]]+\\] "POST ${target.path} HTTP/1\\.1" \\d{3} (\\d+|-) "https://viewer\\.example/page" "${marker}"\\n$`,
+    ));
+  });
+
+  it.each([
+    ['U+2028 sent as UTF-8', utf8Header(`forged${chars(0x2028)}line`), '2028'],
+    ['U+2029 sent as UTF-8', utf8Header(`forged${chars(0x2029)}line`), '2029'],
+    ['U+0085 sent as UTF-8', utf8Header(`forged${chars(0x85)}line`), '0085'],
+    ['the single byte 0x85', `forged${chars(0x85)}line`, '0085'],
+  ])('keeps a line break in user agent and referer on one access line (%s)', async (_name, value, code) => {
+    const target = targets[name];
+    const marker = `agent-${name}-${_name.replace(/[^a-z0-9]/gi, '')}`;
+    await post(target.port, target.path, target.body, {
+      ...target.headers, 'x-forwarded-for': '203.0.113.41:40001', 'user-agent': `${marker} ${value}`, referer: `https://viewer.example/${value}`,
+    });
+    const lines = accessLines(marker);
+    expect(lines).toHaveLength(1);
+    expect(splitLines(lines[0])).toHaveLength(1);
+    expect(lines[0].startsWith('203.0.113.41 - ')).toBe(true);
+    // The access logger writes the character as an escape sequence, never as a line break.
+    const escaped = `forged${chars(0x5c)}u${code}line`;
+    expect(lines[0]).toContain(`"${marker} ${escaped}"`);
+    expect(lines[0]).toContain(`"https://viewer.example/${escaped}"`);
+  });
+
+  it('logs a user agent sent as UTF-8 with its letters', async () => {
+    const target = targets[name];
+    const letters = chars(0xc5, 0xc4, 0xd6, 0xe5, 0xe4, 0xf6);
+    const marker = `agent-${name}-letters`;
+    await post(target.port, target.path, target.body, {
+      ...target.headers, 'x-forwarded-for': '203.0.113.42:40001', 'user-agent': utf8Header(`${marker} ${letters}`),
+    });
+    expect(accessLines(marker)[0]).toContain(`"${marker} ${letters}"`);
   });
 });
 

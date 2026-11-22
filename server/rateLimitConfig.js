@@ -9,6 +9,8 @@
  * - a positive whole number: that limit
  * - anything else: the default, with a warning text for the start-up log
  *
+ * A default of 0 means that the server has no limit unless one is set.
+ *
  * @param {string} name Name of the environment variable, for the warning.
  * @param {(string|undefined)} raw
  * @param {number} defaultLimit
@@ -16,14 +18,12 @@
  */
 export function resolveRateLimitPerMinute(name, raw, defaultLimit) {
   const text = String(raw ?? '').trim();
-  if (text === '') return { limit: defaultLimit, enabled: true, warning: null };
+  const fallback = { limit: defaultLimit, enabled: defaultLimit > 0 };
+  if (text === '') return { ...fallback, warning: null };
   if (text === '0' || text.toLowerCase() === 'off') return { limit: 0, enabled: false, warning: null };
   if (/^[0-9]{1,9}$/.test(text) && Number(text) > 0) return { limit: Number(text), enabled: true, warning: null };
-  return {
-    limit: defaultLimit,
-    enabled: true,
-    warning: `${name} is not a positive whole number, "0" or "off". Using the default of ${defaultLimit} requests per minute.`,
-  };
+  const defaultText = defaultLimit > 0 ? `the default of ${defaultLimit} requests per minute` : 'the default, which is no limit';
+  return { ...fallback, warning: `${name} is not a positive whole number, "0" or "off". Using ${defaultText}.` };
 }
 
 /**

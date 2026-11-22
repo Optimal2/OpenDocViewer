@@ -2,6 +2,7 @@
 
 | Symbol | Kind | File | Summary |
 | --- | --- | --- | --- |
+| <code>createAccessLogger</code> | function | <code>server/accessLog.js:26</code> |  |
 | <code>normalizeClientAddress</code> | function | <code>server/clientAddress.js:23</code> | A reverse proxy may add the client&#39;s source port to the address it forwards \(IIS ARR does by default: &amp;quot;203.0.113.5:49152&amp;quot;, &amp;quot;\[2001:db8::1\]:49152&amp;quot;\). |
 | <code>decodeHeaderValue</code> | function | <code>server/headerText.js:20</code> | Node hands header values over decoded as latin1, one character per byte. |
 | <code>strictUtf8</code> | constant | <code>server/headerText.js:4</code> | Text of an HTTP header value as the sender wrote it. |
@@ -10,7 +11,7 @@
 | <code>resolvePrintLogRetentionDays</code> | function | <code>server/logRetention.js:20</code> | Retention for the print records of the user log server. |
 | <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:59</code> | Repeat retention while a long-running service stays up. |
 | <code>createRejectionReporter</code> | function | <code>server/rateLimitConfig.js:35</code> | Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request. |
-| <code>resolveRateLimitPerMinute</code> | function | <code>server/rateLimitConfig.js:17</code> | Read a requests-per-minute limit from an environment value. |
+| <code>resolveRateLimitPerMinute</code> | function | <code>server/rateLimitConfig.js:19</code> | Read a requests-per-minute limit from an environment value. |
 | <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:145</code> | Optional CORS for /log |
 | <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:139</code> | Token gate for /log |
 | <code>rateLimitSetting</code> | constant | <code>server/system-log-server.js:172</code> | Rate limit for ingestion |

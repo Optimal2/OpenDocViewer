@@ -2,16 +2,16 @@
 
 ## server
 
-File count: 8. Line count: 818. JSDoc symbol count: 20.
+File count: 9. Line count: 853. JSDoc symbol count: 21.
 
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
-- `server/rateLimitConfig.js` - Settings and reporting for the per\-client rate limits of the log servers.
 - `server/headerText.js` - Text of an HTTP header value as the sender wrote it.
 - `server/clientAddress.js` - The client's address without a port, for the rate limit key and the log records.
+- `server/rateLimitConfig.js` - Settings and reporting for the per\-client rate limits of the log servers.
+- `server/accessLog.js` - HTTP access log of the log servers: the "combined" line, with a clean address and one line.
 - `server/userLogOrigin.js` - Evaluate the browser origin signals used by the user print\-log endpoint.
 - `server/userLogPayload.js` - Compatibility reader for form posts and the viewer's JSON print envelope.
 - `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
-- `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 
 ## src/app
 

@@ -39,10 +39,11 @@ $Script:DEF_PORT_USR   = 3002
 $Script:RETENTION_DAYS = 14
 # Print records (print-*.log) are the audit trail and are kept longer than the other logs.
 $Script:PRINT_RETENTION_DAYS = 30
-# Requests per minute and client address; 0 or 'off' switches the limit off. Users who share
-# an address (terminal server, NAT, load balancer) share one allowance, and a print record
-# over the limit is lost. See docs-src/log-servers.md, "Rate limits".
-$Script:USER_LOG_RATE_LIMIT_PER_MINUTE   = 60
+# Requests per minute and client address; 0 or 'off' means no limit. The print log has no
+# limit by default: users who share an address (terminal server, NAT, load balancer) would
+# share one allowance, and a print record over the limit is lost. See docs-src/log-servers.md,
+# "Rate limits".
+$Script:USER_LOG_RATE_LIMIT_PER_MINUTE   = 0
 $Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE = 120
 $Script:NODE_ENV       = 'production'
 $Script:TRUST_PROXY    = 1

@@ -31,6 +31,23 @@ describe('resolveRateLimitPerMinute', () => {
   );
 });
 
+describe('resolveRateLimitPerMinute with a default of no limit', () => {
+  it('has no limit when the value is not set', () => {
+    expect(resolveRateLimitPerMinute('X_LIMIT', undefined, 0)).toEqual({ limit: 0, enabled: false, warning: null });
+  });
+
+  it('takes a limit that is set', () => {
+    expect(resolveRateLimitPerMinute('X_LIMIT', '30', 0)).toEqual({ limit: 30, enabled: true, warning: null });
+  });
+
+  it('stays without a limit, with a warning, for a value that is not valid', () => {
+    const result = resolveRateLimitPerMinute('X_LIMIT', 'plenty', 0);
+    expect(result).toMatchObject({ limit: 0, enabled: false });
+    expect(result.warning).toContain('X_LIMIT');
+    expect(result.warning).toContain('no limit');
+  });
+});
+
 describe('createRejectionReporter', () => {
   it('writes one line per client and window', () => {
     let time = 1_000_000;

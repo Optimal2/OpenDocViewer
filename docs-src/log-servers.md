@@ -63,7 +63,7 @@ This document describes the two optional Node/Express services that accompany th
   - failures:
     - `403` for failed same-origin checks
     - `415` for unsupported content type
-    - `429` when the rate limit is exceeded
+    - `429` when a rate limit is set and exceeded (none by default)
     - `500` if the server cannot write the log record
 
 ## File layout and retention
@@ -83,6 +83,12 @@ to the user log.
 - `access-YYYY-MM-DD.log`
 - `print-YYYY-MM-DD.log`
 - `error-YYYY-MM-DD.log`
+
+The access log (`access-*.log`) has one line per HTTP request in the common "combined" shape:
+client address, user, time, request line, status, size, referrer and user agent. The client
+address is written without the source port that IIS ARR adds. Referrer and user agent are
+decoded like the other log fields, and control characters and Unicode line separators in a field
+are written as escape sequences, so one request is always one line.
 
 Retention of the access, ingestion and error logs is controlled by `LOG_RETENTION_DAYS` and defaults to `14`.
 
@@ -107,53 +113,60 @@ Old files are pruned on startup and once every 24 hours while the service remain
 | `JSON_LIMIT` | System | `64kb`. The user service uses fixed 64 kb JSON and 16 kb form limits. |
 | `LOG_RETENTION_DAYS` | Both | `14`. Access, ingestion and error logs. |
 | `PRINT_LOG_RETENTION_DAYS` | User | `30`. Print records; without it they follow `LOG_RETENTION_DAYS` but never below 30. |
-| `USER_LOG_RATE_LIMIT_PER_MINUTE` | User | `60`. Requests per minute and client address; `0` or `off` switches the limit off. See "Rate limits". |
-| `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` | System | `120`. Same rules. |
+| `USER_LOG_RATE_LIMIT_PER_MINUTE` | User | No limit (`0`). A positive number sets requests per minute and client address. See "Rate limits". |
+| `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` | System | `120` requests per minute and client address; `0` or `off` means no limit. |
 | `ODV_STRICT_ORIGIN` | User | `false`; set to `true` to reject requests without `Origin`, `Referer` or `Sec-Fetch-Site`. |
 
 Both use `helmet()` and daily UTC rotation.
 
 ## Rate limits
 
-The user endpoint allows 60 requests per minute per client by default, the system endpoint 120.
-A request over the limit is answered with `429` and its record is not written.
+| Server | Variable | Default |
+| --- | --- | --- |
+| User log (`POST /userlog/record`) | `USER_LOG_RATE_LIMIT_PER_MINUTE` | No limit (`0`). |
+| System log (`POST /log`) | `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` | `120` requests per minute per client address. |
 
-**What a client is.** A
-client is its address without a port: IIS ARR adds the client's source port to the address it
-puts in `X-Forwarded-For` (`203.0.113.5:49152`, `[2001:db8::1]:49152`), and with `TRUST_PROXY`
-that value becomes the request's address. Both servers remove the port (`server/clientAddress.js`)
-before they use the address as the rate limit key and before they write it to the `ip` field of a
-log record; otherwise the limit would count per connection. With `TRUST_PROXY=1` the address is
-the last entry of `X-Forwarded-For`, the one the proxy added, never an entry the client sent.
+A request over a limit is answered with `429` and its record is not written.
 
-**The limits now take effect behind IIS ARR.** While the address still carried the source port,
-every connection was a client of its own and the limits never applied behind ARR. They now
-count per client address.
+**Why the print log has no limit by default.** Every line in the print log is an audit record
+that a document was printed. Sites run many users behind terminal servers or NAT, where they
+share one address and would share one allowance. A print record that is silently lost is worse
+than the load a limit protects against, and the same-origin check already restricts who can post
+to the endpoint. Earlier versions had a fixed limit of 60 per minute, which never applied behind
+IIS ARR (see below).
+
+**What a client is.** A client is its address without a port: IIS ARR adds the client's source
+port to the address it puts in `X-Forwarded-For` (`203.0.113.5:49152`, `[2001:db8::1]:49152`),
+and with `TRUST_PROXY` that value becomes the request's address. Both servers remove the port
+(`server/clientAddress.js`) before they use the address as the rate limit key and before they
+write it to a log line; otherwise a limit would count per connection, which is why the limits
+never applied behind ARR before. With `TRUST_PROXY=1` the address is the last entry of
+`X-Forwarded-For`, the one the proxy added, never an entry the client sent.
 
 **Shared addresses share one allowance.** Users on a terminal server, behind NAT, or behind a
-load balancer in front of IIS reach the log servers with the same address. Together they get
-one allowance per minute. When it is used up, further print records are answered with `429`
-and are lost: the viewer sends the record without reading the response, so no user notices.
+load balancer in front of IIS reach the log servers with the same address. With a limit set they
+get one allowance per minute together. When it is used up, further records are answered with
+`429` and are lost: the viewer sends the record without reading the response, so no user
+notices. This applies to the system log by default, and to the print log as soon as a limit is
+set for it.
 
 **Setting the limits.**
 
-- `USER_LOG_RATE_LIMIT_PER_MINUTE` (user log server, default `60`) and
-  `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` (system log server, default `120`) take a positive whole
-  number of requests per minute and client address.
-- `0` or `off` switches the limit off.
-- Any other value keeps the default, and the server writes a warning line when it starts.
+- Both variables take a positive whole number of requests per minute and client address.
+- `0` or `off` means no limit. The limiter is then not mounted at all.
+- Any other value keeps that server's default (no limit for the user log, `120` for the system
+  log), and the server writes a warning line when it starts.
 - `scripts/Manage-ODV-LogServers.ps1` installs the services with the values of
-  `$Script:USER_LOG_RATE_LIMIT_PER_MINUTE` and `$Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` near the
-  top of the script; edit them there before installing, or change the service environment
-  afterwards.
+  `$Script:USER_LOG_RATE_LIMIT_PER_MINUTE` (`0`) and `$Script:SYSTEM_LOG_RATE_LIMIT_PER_MINUTE`
+  (`120`) near the top of the script; edit them there before installing, or change the service
+  environment afterwards.
 
-**Seeing a loss.** When a record is rejected, the server writes one line to `error-*.log` with
-`"event":"rate-limit-rejected"`, the client address and the limit, at most once per address and
-minute. Such lines mean that records were lost for that address.
+**A limit never loses records silently.** When a record is rejected, the server writes one line
+to `error-*.log` with `"event":"rate-limit-rejected"`, the client address and the limit, at most
+once per address and minute. Such a line means that records were lost for that address.
 
-**A decision for each site.** The defaults are unchanged from earlier versions. Which values to
-use where many users share an address, or whether to switch the user log limit off because a
-lost print record is worse than an unlimited endpoint, has to be decided for each installation.
+**A decision for each site.** Setting a limit for the print log, or changing the one for the
+system log, has to be decided for each installation with its shared addresses in mind.
 
 ## Log rotation assumptions
 

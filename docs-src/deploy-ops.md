@@ -245,7 +245,8 @@ Recommended public paths:
 - `/ODVProxy/log`
 - `/ODVProxy/userlog/record`
 
-The setup script `scripts/Setup-IIS-ODVProxy.ps1` is the main entry point for:
+The setup script `scripts/Setup-IIS-ODVProxy.ps1` runs in Windows PowerShell 5.1 (`powershell.exe`) as
+administrator; it refuses to start in PowerShell 7. It is the main entry point for:
 
 - creating the IIS app
 - generating `web.config` from the template
@@ -255,6 +256,20 @@ The setup script `scripts/Setup-IIS-ODVProxy.ps1` is the main entry point for:
 ## Windows service management
 
 `scripts/Manage-ODV-LogServers.ps1` provides service-oriented helpers for the Node log servers.
+
+Rate limits of the log servers (details in `log-servers.md`, "Rate limits"):
+
+- `USER_LOG_RATE_LIMIT_PER_MINUTE`: the print log (`POST /userlog/record`) has no limit by
+  default. Every line is an audit record that a document was printed, and a silently lost
+  record is worse than the load a limit protects against.
+- `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE`: the system log allows `120` requests per minute per client
+  address by default.
+- A limit counts per client address. Users who share an address (terminal server, NAT, a load
+  balancer in front of IIS) share one allowance, and a record over the limit is answered with
+  `429` and lost. The server then writes a `rate-limit-rejected` line to `error-*.log`, at most
+  once per address and minute.
+- `0` or `off` means no limit. The service script installs the services with the values of its
+  two constants of the same names.
 
 Main responsibilities of that script:
 

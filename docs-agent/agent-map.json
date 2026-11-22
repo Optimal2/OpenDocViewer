@@ -93,15 +93,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 218,
-    "sourceLineCount": 75342,
-    "docletCount": 2205,
-    "documentedFileCount": 212,
+    "fileCount": 219,
+    "sourceLineCount": 75377,
+    "docletCount": 2206,
+    "documentedFileCount": 213,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
     "packageDependencyCount": 27,
     "devDependencyCount": 25,
-    "estimatedSourceTokens": 7650
+    "estimatedSourceTokens": 7678
   },
   "recommendations": [
     "6 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -430,15 +430,6 @@
       ]
     },
     {
-      "packageName": "morgan",
-      "importCount": 2,
-      "dynamicImportCount": 0,
-      "files": [
-        "server/system-log-server.js",
-        "server/user-log-server.js"
-      ]
-    },
-    {
       "packageName": "pdf-lib",
       "importCount": 2,
       "dynamicImportCount": 2,
@@ -510,6 +501,14 @@
       "dynamicImportCount": 0,
       "files": [
         "src/i18n.js"
+      ]
+    },
+    {
+      "packageName": "morgan",
+      "importCount": 1,
+      "dynamicImportCount": 0,
+      "files": [
+        "server/accessLog.js"
       ]
     },
     {
@@ -987,9 +986,9 @@
   "modules": [
     {
       "name": "server",
-      "fileCount": 8,
-      "lineCount": 818,
-      "docletCount": 20,
+      "fileCount": 9,
+      "lineCount": 853,
+      "docletCount": 21,
       "importantFiles": [
         {
           "path": "server/logRetention.js",
@@ -998,6 +997,24 @@
           "incomingLocalImports": 2,
           "doclets": 4,
           "summary": "Shared best-effort retention for the optional standalone log servers.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/headerText.js",
+          "score": 55,
+          "lines": 35,
+          "incomingLocalImports": 3,
+          "doclets": 2,
+          "summary": "Text of an HTTP header value as the sender wrote it.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "server/clientAddress.js",
+          "score": 52,
+          "lines": 38,
+          "incomingLocalImports": 3,
+          "doclets": 1,
+          "summary": "The client's address without a port, for the rate limit key and the log records.",
           "summaryConfidence": "high"
         },
         {
@@ -1010,21 +1027,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "server/headerText.js",
-          "score": 47,
-          "lines": 35,
-          "incomingLocalImports": 2,
-          "doclets": 2,
-          "summary": "Text of an HTTP header value as the sender wrote it.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "server/clientAddress.js",
+          "path": "server/accessLog.js",
           "score": 44,
-          "lines": 38,
+          "lines": 33,
           "incomingLocalImports": 2,
           "doclets": 1,
-          "summary": "The client's address without a port, for the rate limit key and the log records.",
+          "summary": "HTTP access log of the log servers: the \"combined\" line, with a clean address and one line.",
           "summaryConfidence": "high"
         },
         {
@@ -1052,15 +1060,6 @@
           "incomingLocalImports": 0,
           "doclets": 5,
           "summary": "System Log Server — standalone Express endpoint for structured system logs.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "server/user-log-server.js",
-          "score": 28,
-          "lines": 297,
-          "incomingLocalImports": 0,
-          "doclets": 2,
-          "summary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
           "summaryConfidence": "high"
         }
       ]
@@ -2090,6 +2089,121 @@
   ],
   "files": [
     {
+      "path": "server/accessLog.js",
+      "lines": 33,
+      "extension": ".js",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "HTTP access log of the log servers: the \"combined\" line, with a clean address and one line.",
+      "imports": [
+        {
+          "source": "morgan",
+          "specifiers": [
+            "morgan"
+          ],
+          "line": 4,
+          "kind": "static"
+        },
+        {
+          "source": "./clientAddress.js",
+          "specifiers": [
+            "normalizeClientAddress"
+          ],
+          "line": 5,
+          "kind": "static"
+        },
+        {
+          "source": "./headerText.js",
+          "specifiers": [
+            "decodeHeaderValue"
+          ],
+          "line": 6,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "createAccessLogger",
+          "kind": "function",
+          "line": 26
+        }
+      ],
+      "declarations": [
+        {
+          "name": "createAccessLogger",
+          "kind": "function",
+          "line": 26
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "createAccessLogger",
+          "name": "createAccessLogger",
+          "longname": "createAccessLogger",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/accessLog.js",
+          "line": 26,
+          "description": "",
+          "params": [
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": false,
+              "description": "write receives one finished line. morgan already writes control characters and the Unicode line separators in a field as escape sequences;..."
+            }
+          ],
+          "returns": [
+            {
+              "type": "function",
+              "description": "Express middleware."
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "server",
+      "localImports": [
+        {
+          "source": "./clientAddress.js",
+          "specifiers": [
+            "normalizeClientAddress"
+          ],
+          "line": 5,
+          "kind": "static",
+          "resolved": "server/clientAddress.js"
+        },
+        {
+          "source": "./headerText.js",
+          "specifiers": [
+            "decodeHeaderValue"
+          ],
+          "line": 6,
+          "kind": "static",
+          "resolved": "server/headerText.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "morgan",
+          "specifiers": [
+            "morgan"
+          ],
+          "line": 4,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 44,
+      "summary": "HTTP access log of the log servers: the \"combined\" line, with a clean address and one line.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "server/clientAddress.js",
       "lines": 38,
       "extension": ".js",
@@ -2163,8 +2277,8 @@
           "kind": "static"
         }
       ],
-      "incomingLocalImports": 2,
-      "importanceScore": 44,
+      "incomingLocalImports": 3,
+      "importanceScore": 52,
       "summary": "The client's address without a port, for the rate limit key and the log records.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -2238,8 +2352,8 @@
       "moduleKey": "server",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 2,
-      "importanceScore": 47,
+      "incomingLocalImports": 3,
+      "importanceScore": 55,
       "summary": "Text of an HTTP header value as the sender wrote it.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -2450,7 +2564,7 @@
         {
           "name": "resolveRateLimitPerMinute",
           "kind": "function",
-          "line": 17
+          "line": 19
         },
         {
           "name": "createRejectionReporter",
@@ -2462,7 +2576,12 @@
         {
           "name": "resolveRateLimitPerMinute",
           "kind": "function",
-          "line": 17
+          "line": 19
+        },
+        {
+          "name": "fallback",
+          "kind": "object",
+          "line": 21
         },
         {
           "name": "createRejectionReporter",
@@ -2483,7 +2602,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/rateLimitConfig.js",
-          "line": 17,
+          "line": 19,
           "description": "Read a requests-per-minute limit from an environment value.",
           "params": [
             {
@@ -2629,9 +2748,9 @@
           "kind": "static"
         },
         {
-          "source": "morgan",
+          "source": "./accessLog.js",
           "specifiers": [
-            "morgan"
+            "createAccessLogger"
           ],
           "line": 35,
           "kind": "static"
@@ -2814,6 +2933,15 @@
       "moduleKey": "server",
       "localImports": [
         {
+          "source": "./accessLog.js",
+          "specifiers": [
+            "createAccessLogger"
+          ],
+          "line": 35,
+          "kind": "static",
+          "resolved": "server/accessLog.js"
+        },
+        {
           "source": "./logRetention.js",
           "specifiers": [
             "pruneRotatedLogs",
@@ -2925,14 +3053,6 @@
           ],
           "line": 34,
           "kind": "static"
-        },
-        {
-          "source": "morgan",
-          "specifiers": [
-            "morgan"
-          ],
-          "line": 35,
-          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -2943,7 +3063,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 297,
+      "lines": 299,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -3005,9 +3125,9 @@
           "kind": "static"
         },
         {
-          "source": "morgan",
+          "source": "./accessLog.js",
           "specifiers": [
-            "morgan"
+            "createAccessLogger"
           ],
           "line": 38,
           "kind": "static"
@@ -3134,17 +3254,17 @@
         {
           "name": "rec",
           "kind": "object",
-          "line": 245
+          "line": 247
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 262
+          "line": 264
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 278
+          "line": 280
         }
       ],
       "parseError": null,
@@ -3182,6 +3302,15 @@
       ],
       "moduleKey": "server",
       "localImports": [
+        {
+          "source": "./accessLog.js",
+          "specifiers": [
+            "createAccessLogger"
+          ],
+          "line": 38,
+          "kind": "static",
+          "resolved": "server/accessLog.js"
+        },
         {
           "source": "./logRetention.js",
           "specifiers": [
@@ -3296,14 +3425,6 @@
             "dotenv"
           ],
           "line": 37,
-          "kind": "static"
-        },
-        {
-          "source": "morgan",
-          "specifiers": [
-            "morgan"
-          ],
-          "line": 38,
           "kind": "static"
         },
         {
@@ -91145,6 +91266,31 @@
   ],
   "symbols": [
     {
+      "id": "createAccessLogger",
+      "name": "createAccessLogger",
+      "longname": "createAccessLogger",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/accessLog.js",
+      "line": 26,
+      "description": "",
+      "params": [
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": false,
+          "description": "write receives one finished line. morgan already writes control characters and the Unicode line separators in a field as escape sequences;..."
+        }
+      ],
+      "returns": [
+        {
+          "type": "function",
+          "description": "Express middleware."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "normalizeClientAddress",
       "name": "normalizeClientAddress",
       "longname": "normalizeClientAddress",
@@ -91333,7 +91479,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rateLimitConfig.js",
-      "line": 17,
+      "line": 19,
       "description": "Read a requests-per-minute limit from an environment value.",
       "params": [
         {

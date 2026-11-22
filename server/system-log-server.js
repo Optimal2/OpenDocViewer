@@ -32,7 +32,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
-import morgan from 'morgan';
+import { createAccessLogger } from './accessLog.js';
 import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
 import { decodeHeaderValue } from './headerText.js';
 import { normalizeClientAddress } from './clientAddress.js';
@@ -160,7 +160,7 @@ if (ALLOW_CORS_FOR_LOG) app.options('/log', corsForLog);
 /** Security baseline + parsers + access log */
 app.use(helmet());
 app.use(express.json({ limit: process.env.JSON_LIMIT || '64kb' }));
-app.use(morgan('combined', { stream: { write: (s) => writeRolling('access', s) } }));
+app.use(createAccessLogger({ write: (line) => writeRolling('access', line), sanitize: sanitizeString }));
 
 /** Health */
 app.get('/healthz', (_req, res) => res.json({ ok: true }));

@@ -1,5 +1,30 @@
 [
   {
+    "id": "createAccessLogger",
+    "name": "createAccessLogger",
+    "longname": "createAccessLogger",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/accessLog.js",
+    "line": 26,
+    "description": "",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": "write receives one finished line. morgan already writes control characters and the Unicode line separators in a field as escape sequences;..."
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": "Express middleware."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "normalizeClientAddress",
     "name": "normalizeClientAddress",
     "longname": "normalizeClientAddress",
@@ -188,7 +213,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/rateLimitConfig.js",
-    "line": 17,
+    "line": 19,
     "description": "Read a requests-per-minute limit from an environment value.",
     "params": [
       {

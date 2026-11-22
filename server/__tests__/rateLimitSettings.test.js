@@ -51,7 +51,7 @@ const SERVERS = {
   user: {
     module: '../user-log-server.js',
     variable: 'USER_LOG_RATE_LIMIT_PER_MINUTE',
-    defaultLimit: 60,
+    defaultLimit: 0, // no limit unless one is set
     path: '/userlog/record',
     body: { reason: 'r', forWhom: 'w' },
     headers: {},
@@ -119,28 +119,47 @@ describe.each(Object.keys(SERVERS))('%s log server rate limit', (name) => {
     expect(await server.statuses(5)).toEqual([ok, ok, ok, 429, 429]);
   });
 
+  // More requests than either server ever allowed by default.
+  const MANY = 200;
+
+  /** With the server's default: the print log has no limit, the system log allows 120. */
+  const expectDefault = (statuses) => {
+    if (defaultLimit === 0) {
+      expect(statuses.filter((status) => status === ok)).toHaveLength(MANY);
+    } else {
+      expect(statuses.slice(0, defaultLimit).every((status) => status === ok)).toBe(true);
+      expect(statuses.slice(defaultLimit).every((status) => status === 429)).toBe(true);
+    }
+  };
+
   it.each(['0', 'off', 'OFF'])('has no limit when the variable is %s', async (value) => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const server = await start(name, value);
-    const statuses = await server.statuses(defaultLimit + 5);
-    expect(statuses.every((status) => status === ok)).toBe(true);
+    const statuses = await server.statuses(MANY);
+    expect(statuses.filter((status) => status === ok)).toHaveLength(MANY);
+    // No limiter is mounted, so the rate limit library has nothing to validate or warn about.
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    expect(rejections()).toEqual([]);
   });
 
-  it('keeps the default limit when the variable is not set', async () => {
+  it('uses its default when the variable is not set', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const server = await start(name, undefined);
-    const statuses = await server.statuses(defaultLimit + 1);
-    expect(statuses.slice(0, defaultLimit).every((status) => status === ok)).toBe(true);
-    expect(statuses[defaultLimit]).toBe(429);
+    expectDefault(await server.statuses(MANY));
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
   });
 
-  it('keeps the default limit and warns at start when the variable is not valid', async () => {
+  it('uses its default and warns at start when the variable is not valid', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const server = await start(name, 'plenty');
     const messages = warn.mock.calls.map((call) => call.join(' '));
     expect(messages.filter((message) => message.includes(variable))).toHaveLength(1);
-    expect(messages.join('\n')).toContain(`default of ${defaultLimit}`);
-    const statuses = await server.statuses(defaultLimit + 1);
-    expect(statuses[defaultLimit - 1]).toBe(ok);
-    expect(statuses[defaultLimit]).toBe(429);
+    expect(messages.join('\n')).toContain(defaultLimit === 0 ? 'which is no limit' : `default of ${defaultLimit}`);
+    expectDefault(await server.statuses(MANY));
   });
 
   it('writes one error-log line per address and minute when a record is rejected', async () => {

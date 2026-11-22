@@ -25,6 +25,7 @@
 
 ## Runtime Entrypoints
 
+- `server/accessLog.js` - HTTP access log of the log servers: the "combined" line, with a clean address and one line.
 - `server/clientAddress.js` - The client's address without a port, for the rate limit key and the log records.
 - `server/headerText.js` - Text of an HTTP header value as the sender wrote it.
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.

@@ -26,7 +26,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>jspdf</code> | <code>^4.2.1</code> | 2 (dynamic) | <code>src/utils/printPdf.js</code><br><code>src/workers/pdfWorker.js</code> |
 | <code>jxl-oxide-wasm</code> | <code>0.12.6</code> | 2 (dynamic) | <code>src/utils/jxlDecode.js</code><br>(1 file total) |
 | <code>material-icons</code> | <code>^1.13.14</code> | 2 | <code>src/index.jsx</code><br><code>src/manual-page/main.jsx</code> |
-| <code>morgan</code> | <code>^1.12.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
+| <code>morgan</code> | <code>^1.12.1</code> | 1 | <code>server/accessLog.js</code> |
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 2 (dynamic) | <code>src/utils/pdfSignatures.js</code><br><code>src/utils/pdfWorkerDispatcher.js</code> |
 | <code>pdfjs-dist</code> | <code>6.5.438</code> | 13 (2 dynamic) | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/ocr/pdfTextProbe.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/utils/pdfSignatureRenderCheck.js</code><br>... (+2 more, 7 files total) |
 | <code>pkijs</code> | <code>^4.0.1</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
