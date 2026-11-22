@@ -52,3 +52,73 @@ export function post(port, path, body, headers = {}) {
     });
   });
 }
+
+/**
+ * Stand-in for node:fs in the tests that run a log server in-process: log files are kept in
+ * memory, so nothing is written to or removed from server/logs. Use it as the factory result of
+ * `vi.mock('node:fs', ...)` with the test's hoisted state:
+ *
+ *   state.written   every line that was stored, as { file, line }
+ *   state.opened    every file that was opened, in order
+ *   state.failure   optional function(file) returning an Error to fail that write, or null
+ *   state.delayMs   optional delay of each write
+ *   state.hung      when true a write never finishes (a hung disk)
+ *
+ * A file whose write failed must be opened again, as with a real file.
+ */
+export function fakeLogFileSystem(actual, state) {
+  state.written ??= [];
+  state.opened ??= [];
+  let nextFileNumber = 1n;
+  /** @type {Map<string, bigint>} The file number of the file currently at each path. */
+  const atPath = new Map();
+
+  const open = async (file) => {
+    const name = String(file);
+    state.opened.push(name);
+    if (!atPath.has(name)) { atPath.set(name, nextFileNumber); nextFileNumber += 1n; }
+    const ino = atPath.get(name);
+    return {
+      stat: async () => ({ dev: 1n, ino, size: 0n }),
+      read: async () => ({ bytesRead: 0 }),
+      close: async () => {},
+      appendFile: async (text) => {
+        if (state.delayMs > 0) await new Promise((resolve) => setTimeout(resolve, state.delayMs));
+        if (state.hung) await new Promise(() => { /* never */ });
+        const error = typeof state.failure === 'function' ? state.failure(name) : null;
+        if (error) throw error;
+        state.written.push({ file: name, line: String(text) });
+      },
+    };
+  };
+  const stat = async (file) => {
+    const ino = atPath.get(String(file));
+    if (ino === undefined) throw Object.assign(new Error('ENOENT: no such file or directory'), { code: 'ENOENT' });
+    return { dev: 1n, ino, size: 0n };
+  };
+  const mkdirSync = () => undefined;
+  const promises = { ...actual.promises, mkdir: async () => undefined, open, stat };
+  return { ...actual, mkdirSync, promises, default: { ...actual.default, mkdirSync, promises } };
+}
+
+/**
+ * Send a complete POST over a raw socket and close the connection at once, without reading the
+ * answer. This is what the viewer does with a print record.
+ * @returns {Promise<void>} Resolves when the connection is closed.
+ */
+export function postAndHangUp(port, path, body, headers = {}) {
+  const payload = Buffer.from(JSON.stringify(body), 'utf8');
+  const all = { host: `127.0.0.1:${port}`, 'content-type': 'application/json', 'content-length': String(payload.length), ...headers };
+  const head = Buffer.from(
+    `POST ${path} HTTP/1.1\r\n${Object.entries(all).map(([name, value]) => `${name}: ${value}\r\n`).join('')}\r\n`,
+    'latin1',
+  );
+  return new Promise((resolve, reject) => {
+    const socket = net.connect({ host: '127.0.0.1', port }, () => {
+      // Everything is sent, then the connection is closed straight away.
+      socket.end(Buffer.concat([head, payload]), () => socket.destroy());
+    });
+    socket.on('error', reject);
+    socket.on('close', () => resolve());
+  });
+}

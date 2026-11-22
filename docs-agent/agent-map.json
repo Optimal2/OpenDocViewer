@@ -94,8 +94,8 @@
   },
   "stats": {
     "fileCount": 220,
-    "sourceLineCount": 75583,
-    "docletCount": 2217,
+    "sourceLineCount": 75686,
+    "docletCount": 2222,
     "documentedFileCount": 214,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -987,9 +987,18 @@
     {
       "name": "server",
       "fileCount": 10,
-      "lineCount": 1059,
-      "docletCount": 32,
+      "lineCount": 1162,
+      "docletCount": 37,
       "importantFiles": [
+        {
+          "path": "server/rollingLog.js",
+          "score": 81,
+          "lines": 236,
+          "incomingLocalImports": 2,
+          "doclets": 12,
+          "summary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
+          "summaryConfidence": "high"
+        },
         {
           "path": "server/logRetention.js",
           "score": 73,
@@ -997,15 +1006,6 @@
           "incomingLocalImports": 2,
           "doclets": 4,
           "summary": "Shared best-effort retention for the optional standalone log servers.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "server/rollingLog.js",
-          "score": 68,
-          "lines": 144,
-          "incomingLocalImports": 2,
-          "doclets": 7,
-          "summary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
           "summaryConfidence": "high"
         },
         {
@@ -2669,9 +2669,9 @@
     },
     {
       "path": "server/rollingLog.js",
-      "lines": 144,
+      "lines": 236,
       "extension": ".js",
-      "jsdocBlockCount": 10,
+      "jsdocBlockCount": 15,
       "sourceSummary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
       "imports": [
         {
@@ -2679,7 +2679,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 17,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -2687,77 +2687,122 @@
           "specifiers": [
             "path"
           ],
-          "line": 18,
+          "line": 28,
           "kind": "static"
         }
       ],
       "exports": [
         {
+          "name": "DEFAULT_LOG_WRITE_TIMEOUT_MS",
+          "kind": "variable",
+          "line": 30
+        },
+        {
+          "name": "resolveLogWriteTimeoutMs",
+          "kind": "function",
+          "line": 45
+        },
+        {
           "name": "createRollingLog",
           "kind": "function",
-          "line": 25
+          "line": 60
         },
         {
           "name": "describeWriteError",
           "kind": "function",
-          "line": 138
+          "line": 230
         }
       ],
       "declarations": [
         {
           "name": "utcDate",
           "kind": "function",
-          "line": 20
+          "line": 32
+        },
+        {
+          "name": "codedError",
+          "kind": "function",
+          "line": 34
+        },
+        {
+          "name": "resolveLogWriteTimeoutMs",
+          "kind": "function",
+          "line": 45
         },
         {
           "name": "createRollingLog",
           "kind": "function",
-          "line": 25
+          "line": 60
         },
         {
-          "name": "close",
+          "name": "drop",
           "kind": "function",
-          "line": 31
+          "line": 72
         },
         {
           "name": "entryFor",
           "kind": "function",
-          "line": 35
+          "line": 80
         },
         {
           "name": "created",
           "kind": "object",
-          "line": 46
+          "line": 94
         },
         {
-          "name": "write",
-          "kind": "function",
-          "line": 63
-        },
-        {
-          "name": "toStderr",
-          "kind": "function",
-          "line": 87
-        },
-        {
-          "name": "writeOrStderr",
-          "kind": "function",
-          "line": 98
-        },
-        {
-          "name": "writeBestEffort",
+          "name": "isAtPath",
           "kind": "function",
           "line": 114
         },
         {
-          "name": "closeAll",
+          "name": "appendConfirmed",
           "kind": "function",
           "line": 124
         },
         {
+          "name": "write",
+          "kind": "function",
+          "line": 151
+        },
+        {
+          "name": "task",
+          "kind": "function",
+          "line": 153
+        },
+        {
+          "name": "timeoutError",
+          "kind": "function",
+          "line": 155
+        },
+        {
+          "name": "state",
+          "kind": "object",
+          "line": 158
+        },
+        {
+          "name": "toStderr",
+          "kind": "function",
+          "line": 179
+        },
+        {
+          "name": "writeOrStderr",
+          "kind": "function",
+          "line": 191
+        },
+        {
+          "name": "writeBestEffort",
+          "kind": "function",
+          "line": 207
+        },
+        {
+          "name": "closeAll",
+          "kind": "function",
+          "line": 217
+        },
+        {
           "name": "describeWriteError",
           "kind": "function",
-          "line": 138
+          "line": 230
         }
       ],
       "parseError": null,
@@ -2767,13 +2812,38 @@
       },
       "doclets": [
         {
+          "id": "resolveLogWriteTimeoutMs",
+          "name": "resolveLogWriteTimeoutMs",
+          "longname": "resolveLogWriteTimeoutMs",
+          "kind": "function",
+          "scope": "global",
+          "file": "server/rollingLog.js",
+          "line": 45,
+          "description": "Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000.",
+          "params": [
+            {
+              "name": "raw",
+              "type": "string|undefined",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "createRollingLog",
           "name": "createRollingLog",
           "longname": "createRollingLog",
           "kind": "function",
           "scope": "global",
           "file": "server/rollingLog.js",
-          "line": 25,
+          "line": 60,
           "description": "",
           "params": [
             {
@@ -2787,13 +2857,65 @@
           "examples": 0
         },
         {
+          "id": "createRollingLog~tails",
+          "name": "tails",
+          "longname": "createRollingLog~tails",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "server/rollingLog.js",
+          "line": 67,
+          "description": "One chain of writes per file, so that lines keep the order of the calls.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createRollingLog~drop",
+          "name": "drop",
+          "longname": "createRollingLog~drop",
+          "kind": "function",
+          "scope": "inner",
+          "file": "server/rollingLog.js",
+          "line": 72,
+          "description": "Stop using an open file.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createRollingLog~isAtPath",
+          "name": "isAtPath",
+          "longname": "createRollingLog~isAtPath",
+          "kind": "function",
+          "scope": "inner",
+          "file": "server/rollingLog.js",
+          "line": 114,
+          "description": "Whether the file at the path is still the open file.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createRollingLog~appendConfirmed",
+          "name": "appendConfirmed",
+          "longname": "createRollingLog~appendConfirmed",
+          "kind": "function",
+          "scope": "inner",
+          "file": "server/rollingLog.js",
+          "line": 124,
+          "description": "Write one line and confirm that it is in the file at the log file's path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "createRollingLog~write",
           "name": "write",
           "longname": "createRollingLog~write",
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 63,
+          "line": 151,
           "description": "Append one line to today's file for the prefix.",
           "params": [
             {
@@ -2812,7 +2934,7 @@
           "returns": [
             {
               "type": "Promise.<void>",
-              "description": "Resolves when the line was written; rejects with the write error."
+              "description": "Resolves when the line is in the file at the log file's path; rejects with the cause, or with code ELOGTIMEOUT when the timeout runs out fi..."
             }
           ],
           "examples": 0
@@ -2824,7 +2946,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 87,
+          "line": 179,
           "description": "Last resort when a log line cannot be written to its file.",
           "params": [],
           "returns": [],
@@ -2837,7 +2959,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 98,
+          "line": 191,
           "description": "Write a line that must not be lost quietly (an error-log line).",
           "params": [
             {
@@ -2868,7 +2990,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 114,
+          "line": 207,
           "description": "Write a line whose loss is tolerable (an access-log line).",
           "params": [
             {
@@ -2894,7 +3016,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 124,
+          "line": 217,
           "description": "Close every open file (for a clean shutdown and for tests).",
           "params": [],
           "returns": [],
@@ -2907,7 +3029,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/rollingLog.js",
-          "line": 138,
+          "line": 230,
           "description": "What to put in the error log about a failed write: the error code and message, never the record that could not be written.",
           "params": [
             {
@@ -2934,7 +3056,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 17,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -2942,19 +3064,19 @@
           "specifiers": [
             "path"
           ],
-          "line": 18,
+          "line": 28,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
-      "importanceScore": 68,
+      "importanceScore": 81,
       "summary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
     {
       "path": "server/system-log-server.js",
-      "lines": 285,
+      "lines": 291,
       "extension": ".js",
       "jsdocBlockCount": 12,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2964,7 +3086,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -2972,7 +3094,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -2980,7 +3102,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 27,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -2988,7 +3110,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2996,7 +3118,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -3004,7 +3126,7 @@
           "specifiers": [
             "cors"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3012,7 +3134,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -3020,7 +3142,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -3029,7 +3151,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 34,
+          "line": 36,
           "kind": "static"
         },
         {
@@ -3037,7 +3159,7 @@
           "specifiers": [
             "createAccessLogger"
           ],
-          "line": 35,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -3046,7 +3168,7 @@
             "pruneRotatedLogs",
             "scheduleLogRetention"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -3054,7 +3176,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -3062,7 +3184,7 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -3071,16 +3193,17 @@
             "createRejectionReporter",
             "resolveRateLimitPerMinute"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static"
         },
         {
           "source": "./rollingLog.js",
           "specifiers": [
             "createRollingLog",
-            "describeWriteError"
+            "describeWriteError",
+            "resolveLogWriteTimeoutMs"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static"
         }
       ],
@@ -3089,67 +3212,67 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 54
+          "line": 56
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 62
+          "line": 64
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 76
+          "line": 82
         },
         {
           "name": "reportWriteFailure",
           "kind": "function",
-          "line": 82
+          "line": 88
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 95
+          "line": 101
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 99
+          "line": 105
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 105
+          "line": 111
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 108
+          "line": 114
         },
         {
           "name": "rateLimitKey",
           "kind": "function",
-          "line": 183
+          "line": 189
         },
         {
           "name": "requireLogToken",
           "kind": "function",
-          "line": 217
+          "line": 223
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 233
+          "line": 239
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 250
+          "line": 256
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 266
+          "line": 272
         }
       ],
       "parseError": null,
@@ -3165,7 +3288,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 76,
+          "line": 82,
           "description": "Write a line that must not be lost quietly (an error-log line).",
           "params": [],
           "returns": [],
@@ -3178,7 +3301,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 82,
+          "line": 88,
           "description": "Error-log line for a record that could not be written: which log and why, never the record.",
           "params": [],
           "returns": [
@@ -3196,7 +3319,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 137,
+          "line": 143,
           "description": "Trust proxy for accurate req.ip",
           "params": [],
           "returns": [],
@@ -3209,7 +3332,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 144,
+          "line": 150,
           "description": "Token gate for /log",
           "params": [],
           "returns": [],
@@ -3222,7 +3345,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 150,
+          "line": 156,
           "description": "Optional CORS for /log",
           "params": [],
           "returns": [],
@@ -3235,7 +3358,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 177,
+          "line": 183,
           "description": "Rate limit for ingestion",
           "params": [],
           "returns": [],
@@ -3248,7 +3371,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 217,
+          "line": 223,
           "description": "Token auth middleware",
           "params": [],
           "returns": [],
@@ -3262,7 +3385,7 @@
           "specifiers": [
             "createAccessLogger"
           ],
-          "line": 35,
+          "line": 37,
           "kind": "static",
           "resolved": "server/accessLog.js"
         },
@@ -3272,7 +3395,7 @@
             "pruneRotatedLogs",
             "scheduleLogRetention"
           ],
-          "line": 36,
+          "line": 38,
           "kind": "static",
           "resolved": "server/logRetention.js"
         },
@@ -3281,7 +3404,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 37,
+          "line": 39,
           "kind": "static",
           "resolved": "server/headerText.js"
         },
@@ -3290,7 +3413,7 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 38,
+          "line": 40,
           "kind": "static",
           "resolved": "server/clientAddress.js"
         },
@@ -3300,7 +3423,7 @@
             "createRejectionReporter",
             "resolveRateLimitPerMinute"
           ],
-          "line": 39,
+          "line": 41,
           "kind": "static",
           "resolved": "server/rateLimitConfig.js"
         },
@@ -3308,9 +3431,10 @@
           "source": "./rollingLog.js",
           "specifiers": [
             "createRollingLog",
-            "describeWriteError"
+            "describeWriteError",
+            "resolveLogWriteTimeoutMs"
           ],
-          "line": 40,
+          "line": 42,
           "kind": "static",
           "resolved": "server/rollingLog.js"
         }
@@ -3321,7 +3445,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 25,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -3329,7 +3453,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -3337,7 +3461,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 27,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -3345,7 +3469,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 28,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -3353,7 +3477,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -3361,7 +3485,7 @@
           "specifiers": [
             "cors"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3369,7 +3493,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -3377,7 +3501,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -3386,7 +3510,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 34,
+          "line": 36,
           "kind": "static"
         }
       ],
@@ -3398,7 +3522,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 326,
+      "lines": 331,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -3408,7 +3532,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -3416,7 +3540,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3424,7 +3548,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 33,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -3432,7 +3556,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -3440,7 +3564,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -3448,7 +3572,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -3456,7 +3580,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 38,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -3464,7 +3588,7 @@
           "specifiers": [
             "createAccessLogger"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static"
         },
         {
@@ -3473,7 +3597,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 40,
+          "line": 41,
           "kind": "static"
         },
         {
@@ -3483,7 +3607,7 @@
             "resolvePrintLogRetentionDays",
             "scheduleLogRetention"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -3492,7 +3616,7 @@
             "neutralizeForWhom",
             "readPrintLogFields"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -3500,7 +3624,7 @@
           "specifiers": [
             "isAllowedUserLogOrigin"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static"
         },
         {
@@ -3508,7 +3632,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 44,
+          "line": 45,
           "kind": "static"
         },
         {
@@ -3516,7 +3640,7 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 45,
+          "line": 46,
           "kind": "static"
         },
         {
@@ -3525,16 +3649,17 @@
             "createRejectionReporter",
             "resolveRateLimitPerMinute"
           ],
-          "line": 46,
+          "line": 47,
           "kind": "static"
         },
         {
           "source": "./rollingLog.js",
           "specifiers": [
             "createRollingLog",
-            "describeWriteError"
+            "describeWriteError",
+            "resolveLogWriteTimeoutMs"
           ],
-          "line": 47,
+          "line": 48,
           "kind": "static"
         }
       ],
@@ -3543,72 +3668,72 @@
         {
           "name": "pruneOldLogs",
           "kind": "function",
-          "line": 64
+          "line": 65
         },
         {
           "name": "initOnce",
           "kind": "function",
-          "line": 79
+          "line": 80
         },
         {
           "name": "writeRolling",
           "kind": "function",
-          "line": 93
+          "line": 98
         },
         {
           "name": "reportWriteFailure",
           "kind": "function",
-          "line": 99
+          "line": 104
         },
         {
           "name": "truncate",
           "kind": "function",
-          "line": 112
+          "line": 117
         },
         {
           "name": "sanitizeString",
           "kind": "function",
-          "line": 116
+          "line": 121
         },
         {
           "name": "safeString",
           "kind": "function",
-          "line": 122
+          "line": 127
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 123
+          "line": 128
         },
         {
           "name": "resolveUser",
           "kind": "function",
-          "line": 145
+          "line": 150
         },
         {
           "name": "sameOriginGuard",
           "kind": "function",
-          "line": 164
+          "line": 169
         },
         {
           "name": "rateLimitKey",
           "kind": "function",
-          "line": 218
+          "line": 223
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 267
+          "line": 272
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 291
+          "line": 296
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 307
+          "line": 312
         }
       ],
       "parseError": null,
@@ -3624,7 +3749,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 93,
+          "line": 98,
           "description": "Write a line that must not be lost quietly (an error-log line).",
           "params": [],
           "returns": [],
@@ -3637,7 +3762,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 99,
+          "line": 104,
           "description": "Error-log line for a record that could not be written: which log and why, never the record.",
           "params": [],
           "returns": [
@@ -3655,7 +3780,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 145,
+          "line": 150,
           "description": "Resolve user identity without cookies.",
           "params": [],
           "returns": [],
@@ -3668,7 +3793,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 164,
+          "line": 169,
           "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
           "params": [],
           "returns": [],
@@ -3682,7 +3807,7 @@
           "specifiers": [
             "createAccessLogger"
           ],
-          "line": 39,
+          "line": 40,
           "kind": "static",
           "resolved": "server/accessLog.js"
         },
@@ -3693,7 +3818,7 @@
             "resolvePrintLogRetentionDays",
             "scheduleLogRetention"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static",
           "resolved": "server/logRetention.js"
         },
@@ -3703,7 +3828,7 @@
             "neutralizeForWhom",
             "readPrintLogFields"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static",
           "resolved": "server/userLogPayload.js"
         },
@@ -3712,7 +3837,7 @@
           "specifiers": [
             "isAllowedUserLogOrigin"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static",
           "resolved": "server/userLogOrigin.js"
         },
@@ -3721,7 +3846,7 @@
           "specifiers": [
             "decodeHeaderValue"
           ],
-          "line": 44,
+          "line": 45,
           "kind": "static",
           "resolved": "server/headerText.js"
         },
@@ -3730,7 +3855,7 @@
           "specifiers": [
             "normalizeClientAddress"
           ],
-          "line": 45,
+          "line": 46,
           "kind": "static",
           "resolved": "server/clientAddress.js"
         },
@@ -3740,7 +3865,7 @@
             "createRejectionReporter",
             "resolveRateLimitPerMinute"
           ],
-          "line": 46,
+          "line": 47,
           "kind": "static",
           "resolved": "server/rateLimitConfig.js"
         },
@@ -3748,9 +3873,10 @@
           "source": "./rollingLog.js",
           "specifiers": [
             "createRollingLog",
-            "describeWriteError"
+            "describeWriteError",
+            "resolveLogWriteTimeoutMs"
           ],
-          "line": 47,
+          "line": 48,
           "kind": "static",
           "resolved": "server/rollingLog.js"
         }
@@ -3761,7 +3887,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 31,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -3769,7 +3895,7 @@
           "specifiers": [
             "fsp"
           ],
-          "line": 32,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -3777,7 +3903,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 33,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -3785,7 +3911,7 @@
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -3793,7 +3919,7 @@
           "specifiers": [
             "express"
           ],
-          "line": 36,
+          "line": 37,
           "kind": "static"
         },
         {
@@ -3801,7 +3927,7 @@
           "specifiers": [
             "helmet"
           ],
-          "line": 37,
+          "line": 38,
           "kind": "static"
         },
         {
@@ -3809,7 +3935,7 @@
           "specifiers": [
             "dotenv"
           ],
-          "line": 38,
+          "line": 39,
           "kind": "static"
         },
         {
@@ -3818,7 +3944,7 @@
             "rateLimit",
             "ipKeyGenerator"
           ],
-          "line": 40,
+          "line": 41,
           "kind": "static"
         }
       ],
@@ -91895,13 +92021,26 @@
       "examples": 0
     },
     {
+      "id": "createRollingLog~appendConfirmed",
+      "name": "appendConfirmed",
+      "longname": "createRollingLog~appendConfirmed",
+      "kind": "function",
+      "scope": "inner",
+      "file": "server/rollingLog.js",
+      "line": 124,
+      "description": "Write one line and confirm that it is in the file at the log file's path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createRollingLog~closeAll",
       "name": "closeAll",
       "longname": "createRollingLog~closeAll",
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 124,
+      "line": 217,
       "description": "Close every open file (for a clean shutdown and for tests).",
       "params": [],
       "returns": [],
@@ -91914,7 +92053,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rollingLog.js",
-      "line": 25,
+      "line": 60,
       "description": "",
       "params": [
         {
@@ -91934,7 +92073,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rollingLog.js",
-      "line": 138,
+      "line": 230,
       "description": "What to put in the error log about a failed write: the error code and message, never the record that could not be written.",
       "params": [
         {
@@ -91953,13 +92092,77 @@
       "examples": 0
     },
     {
+      "id": "createRollingLog~drop",
+      "name": "drop",
+      "longname": "createRollingLog~drop",
+      "kind": "function",
+      "scope": "inner",
+      "file": "server/rollingLog.js",
+      "line": 72,
+      "description": "Stop using an open file.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createRollingLog~isAtPath",
+      "name": "isAtPath",
+      "longname": "createRollingLog~isAtPath",
+      "kind": "function",
+      "scope": "inner",
+      "file": "server/rollingLog.js",
+      "line": 114,
+      "description": "Whether the file at the path is still the open file.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "resolveLogWriteTimeoutMs",
+      "name": "resolveLogWriteTimeoutMs",
+      "longname": "resolveLogWriteTimeoutMs",
+      "kind": "function",
+      "scope": "global",
+      "file": "server/rollingLog.js",
+      "line": 45,
+      "description": "Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000.",
+      "params": [
+        {
+          "name": "raw",
+          "type": "string|undefined",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "createRollingLog~tails",
+      "name": "tails",
+      "longname": "createRollingLog~tails",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "server/rollingLog.js",
+      "line": 67,
+      "description": "One chain of writes per file, so that lines keep the order of the calls.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "createRollingLog~toStderr",
       "name": "toStderr",
       "longname": "createRollingLog~toStderr",
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 87,
+      "line": 179,
       "description": "Last resort when a log line cannot be written to its file.",
       "params": [],
       "returns": [],
@@ -91972,7 +92175,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 63,
+      "line": 151,
       "description": "Append one line to today's file for the prefix.",
       "params": [
         {
@@ -91991,7 +92194,7 @@
       "returns": [
         {
           "type": "Promise.<void>",
-          "description": "Resolves when the line was written; rejects with the write error."
+          "description": "Resolves when the line is in the file at the log file's path; rejects with the cause, or with code ELOGTIMEOUT when the timeout runs out fi..."
         }
       ],
       "examples": 0
@@ -92003,7 +92206,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 114,
+      "line": 207,
       "description": "Write a line whose loss is tolerable (an access-log line).",
       "params": [
         {
@@ -92029,7 +92232,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 98,
+      "line": 191,
       "description": "Write a line that must not be lost quietly (an error-log line).",
       "params": [
         {
@@ -92060,7 +92263,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 150,
+      "line": 156,
       "description": "Optional CORS for /log",
       "params": [],
       "returns": [],
@@ -92073,7 +92276,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 144,
+      "line": 150,
       "description": "Token gate for /log",
       "params": [],
       "returns": [],
@@ -92086,7 +92289,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 177,
+      "line": 183,
       "description": "Rate limit for ingestion",
       "params": [],
       "returns": [],
@@ -92099,7 +92302,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 82,
+      "line": 88,
       "description": "Error-log line for a record that could not be written: which log and why, never the record.",
       "params": [],
       "returns": [
@@ -92117,7 +92320,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 217,
+      "line": 223,
       "description": "Token auth middleware",
       "params": [],
       "returns": [],
@@ -92130,7 +92333,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 137,
+      "line": 143,
       "description": "Trust proxy for accurate req.ip",
       "params": [],
       "returns": [],
@@ -92143,7 +92346,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 76,
+      "line": 82,
       "description": "Write a line that must not be lost quietly (an error-log line).",
       "params": [],
       "returns": [],
@@ -92156,7 +92359,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 99,
+      "line": 104,
       "description": "Error-log line for a record that could not be written: which log and why, never the record.",
       "params": [],
       "returns": [
@@ -92174,7 +92377,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 145,
+      "line": 150,
       "description": "Resolve user identity without cookies.",
       "params": [],
       "returns": [],
@@ -92187,7 +92390,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 164,
+      "line": 169,
       "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
       "params": [],
       "returns": [],
@@ -92200,7 +92403,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 93,
+      "line": 98,
       "description": "Write a line that must not be lost quietly (an error-log line).",
       "params": [],
       "returns": [],

@@ -2,85 +2,177 @@
 /**
  * Daily rotating log files for the log servers, with a write that reports its outcome.
  *
- * A record must never be answered as stored when it was not. `write` therefore resolves only
- * when the line has been handed to the file without an error, and rejects otherwise.
+ * A record must never be answered as stored when it is not in its log file. `write` therefore
+ * resolves only when the line has been written AND the file it was written to is still the file
+ * at the log file's path. It rejects otherwise, at the latest when the write timeout runs out.
  *
- * - No fsync per line: the promise resolves when the operating system has accepted the write,
- *   which is what the servers did before, so a successful write is not slower.
- * - Lines keep their order: each file has one stream, and a stream writes in the order of the
- *   calls, also when several requests write at the same time.
- * - A stream that has failed is dropped. The next write opens the file again, so one error
- *   (a full disk, a removed folder) does not make every later line disappear silently.
+ * - After each write the path is compared with the open file (device and file number). If the
+ *   file was removed, moved or replaced while the service ran (also together with its folder),
+ *   the open file is closed, the file is opened again at the path and the line is written there
+ *   before `write` resolves. A line is never acknowledged from a file that is no longer at the
+ *   path. If an outside tool moved the old file away, the line may exist in both files.
+ * - No fsync per line: a write is complete when the operating system has accepted it, as it
+ *   was before, so a successful write costs one extra `stat`. What the operating system has
+ *   accepted but not yet stored can still be lost in a crash or a power failure, and a file
+ *   removed after the check is not noticed until the next write.
+ * - Lines keep their order: the writes of one file run one after the other, in the order of
+ *   the calls, also when several requests write at the same time.
+ * - A file whose write failed or timed out is dropped and opened again by the next write, so
+ *   one fault (a full disk, a hung share) does not make every later line disappear silently.
+ *   If the file then does not end with a line break, because part of a line reached it, the
+ *   next line starts on a new line.
  * - The file name follows the UTC date; on a new day the next write opens the new file.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 
+export const DEFAULT_LOG_WRITE_TIMEOUT_MS = 10_000;
+
 const utcDate = (date) => date.toISOString().slice(0, 10);
 
+function codedError(code, message) {
+  return Object.assign(new Error(message), { code });
+}
+
 /**
- * @param {{ logDir: string, now: (function(): Date|undefined), stderr: ({write: function(string): *}|undefined), fileSystem: (Object|undefined) }} options
+ * Read the write timeout from an environment value: a whole number of milliseconds from 100 to
+ * 600000. Anything else, or nothing, gives the default; `warning` then says so when a value was
+ * given.
+ * @param {(string|undefined)} raw
+ * @returns {{ timeoutMs: number, warning: (string|null) }}
  */
-export function createRollingLog({ logDir, now = () => new Date(), stderr = process.stderr, fileSystem = fs }) {
-  /** @type {Map<string, { date: string, stream: *, failure: (Error|null) }>} */
+export function resolveLogWriteTimeoutMs(raw) {
+  const text = String(raw ?? '').trim();
+  if (text === '') return { timeoutMs: DEFAULT_LOG_WRITE_TIMEOUT_MS, warning: null };
+  if (/^[0-9]{3,6}$/.test(text) && Number(text) >= 100 && Number(text) <= 600_000) {
+    return { timeoutMs: Number(text), warning: null };
+  }
+  return {
+    timeoutMs: DEFAULT_LOG_WRITE_TIMEOUT_MS,
+    warning: `LOG_WRITE_TIMEOUT_MS is not a whole number of milliseconds from 100 to 600000. Using the default of ${DEFAULT_LOG_WRITE_TIMEOUT_MS}.`,
+  };
+}
+
+/**
+ * @param {{ logDir: string, now: (function(): Date|undefined), stderr: ({write: function(string): *}|undefined), fileSystem: (Object|undefined), writeTimeoutMs: (number|undefined) }} options
+ */
+export function createRollingLog({
+  logDir, now = () => new Date(), stderr = process.stderr, fileSystem = fs, writeTimeoutMs = DEFAULT_LOG_WRITE_TIMEOUT_MS,
+}) {
+  const files = fileSystem.promises;
+  /** @type {Map<string, { date: string, file: string, handle: *, dev: *, ino: *, needsLineBreak: boolean, dropped: boolean }>} */
   const open = new Map();
+  /** One chain of writes per file, so that lines keep the order of the calls. @type {Map<string, Promise<*>>} */
+  const tails = new Map();
   /** @type {Map<string, number>} */
   const lastNoted = new Map();
 
-  function close(entry) {
-    try { entry.stream.end(); } catch { /* already closed */ }
+  /** Stop using an open file. The close is not waited for when the file may be hung. */
+  async function drop(prefix, entry, { waitForClose = true } = {}) {
+    if (!entry || entry.dropped) return;
+    entry.dropped = true;
+    if (open.get(prefix) === entry) open.delete(prefix);
+    const closing = Promise.resolve().then(() => entry.handle.close()).catch(() => { /* already closed or gone */ });
+    if (waitForClose) await closing;
   }
 
-  function entryFor(prefix) {
+  async function entryFor(prefix) {
     const today = utcDate(now());
     let entry = open.get(prefix);
-    if (entry && (entry.date !== today || entry.failure || entry.stream.destroyed)) {
-      close(entry);
-      open.delete(prefix);
+    if (entry && entry.date !== today) {
+      await drop(prefix, entry);
       entry = undefined;
     }
-    if (!entry) {
-      // The folder may have been removed while the service ran; opening the file would then fail.
-      try { fileSystem.mkdirSync(logDir, { recursive: true }); } catch { /* the open below reports it */ }
-      const created = { date: today, stream: null, failure: null };
-      created.stream = fileSystem.createWriteStream(path.join(logDir, `${prefix}-${today}.log`), { flags: 'a' });
-      // Without a listener an 'error' event would end the process. The error is kept so that
-      // writes waiting on this stream are rejected with the real cause.
-      created.stream.on('error', (error) => { created.failure = error || new Error('log stream error'); });
-      open.set(prefix, created);
-      entry = created;
+    if (entry) return entry;
+
+    const file = path.join(logDir, `${prefix}-${today}.log`);
+    // The folder may have been removed while the service ran; opening the file would then fail.
+    try { await files.mkdir(logDir, { recursive: true }); } catch { /* the open below reports it */ }
+    // "a+": append, and allow reading the last byte below.
+    const handle = await files.open(file, 'a+');
+    const created = { date: today, file, handle, dev: null, ino: null, needsLineBreak: false, dropped: false };
+    try {
+      const stat = await handle.stat({ bigint: true });
+      created.dev = stat.dev;
+      created.ino = stat.ino;
+      if (stat.size > 0n) {
+        // Part of a line may have reached the file before an earlier write failed.
+        const last = Buffer.alloc(1);
+        const { bytesRead } = await handle.read(last, 0, 1, stat.size - 1n);
+        created.needsLineBreak = bytesRead === 1 && last[0] !== 0x0a;
+      }
+    } catch (error) {
+      await Promise.resolve().then(() => handle.close()).catch(() => {});
+      throw error;
     }
-    return entry;
+    open.set(prefix, created);
+    return created;
+  }
+
+  /** Whether the file at the path is still the open file. */
+  async function isAtPath(entry) {
+    try {
+      const stat = await files.stat(entry.file, { bigint: true });
+      return stat.dev === entry.dev && stat.ino === entry.ino;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Write one line and confirm that it is in the file at the log file's path. */
+  async function appendConfirmed(prefix, line, state) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const entry = await entryFor(prefix);
+      state.entry = entry;
+      try {
+        await entry.handle.appendFile((entry.needsLineBreak ? '\n' : '') + line, 'utf8');
+        entry.needsLineBreak = false;
+      } catch (error) {
+        await drop(prefix, entry);
+        throw error;
+      }
+      if (await isAtPath(entry)) return;
+      // Removed, moved or replaced while it was open: the line is not in the file at the path.
+      // Close first (a removed file blocks its name on Windows until it is closed), then write
+      // the line to the file at the path.
+      await drop(prefix, entry);
+    }
+    throw codedError('ELOGFILEGONE', 'the log file was removed or replaced while the record was written');
   }
 
   /**
    * Append one line to today's file for the prefix.
    * @param {string} prefix e.g. "print", "ingestion", "access", "error"
    * @param {string} line Complete line including its line break.
-   * @returns {Promise<void>} Resolves when the line was written; rejects with the write error.
+   * @returns {Promise<void>} Resolves when the line is in the file at the log file's path;
+   *   rejects with the cause, or with code ELOGTIMEOUT when the timeout runs out first.
    */
   function write(prefix, line) {
-    return new Promise((resolve, reject) => {
-      let entry;
-      try {
-        entry = entryFor(prefix);
-        entry.stream.write(line, (error) => {
-          // The callback of a write that was waiting on a failed stream may only say that the
-          // stream is gone; the stream itself knows the cause.
-          const failure = entry.failure || entry.stream.errored || error;
-          if (failure) {
-            entry.failure = failure;
-            reject(failure);
-          } else {
-            resolve();
-          }
-        });
-      } catch (error) {
-        if (entry) entry.failure = error;
-        reject(error);
-      }
+    const deadline = Date.now() + writeTimeoutMs;
+    const task = () => new Promise((resolve, reject) => {
+      const remaining = deadline - Date.now();
+      const timeoutError = () => codedError('ELOGTIMEOUT', `the log write was not confirmed within ${writeTimeoutMs} ms`);
+      // Waited too long behind other writes: do not start, the caller has been answered already.
+      if (remaining <= 0) { reject(timeoutError()); return; }
+      const state = { entry: null };
+      let settled = false;
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        // The file may be hung. Leave it; the next write opens the file again. A late result
+        // of this write is ignored below.
+        drop(prefix, state.entry, { waitForClose: false });
+        reject(timeoutError());
+      }, remaining);
+      appendConfirmed(prefix, line, state).then(
+        () => { if (!settled) { settled = true; clearTimeout(timer); resolve(); } },
+        (error) => { if (!settled) { settled = true; clearTimeout(timer); reject(error); } },
+      );
     });
+    const result = (tails.get(prefix) ?? Promise.resolve()).then(task, task);
+    tails.set(prefix, result.catch(() => { /* the caller has the outcome */ }));
+    return result;
   }
 
   /** Last resort when a log line cannot be written to its file. Never throws. */
@@ -90,7 +182,8 @@ export function createRollingLog({ logDir, now = () => new Date(), stderr = proc
 
   /**
    * Write a line that must not be lost quietly (an error-log line). When the file cannot be
-   * written, the line goes to standard error instead. Never rejects and never throws.
+   * written, or not within the timeout, the line goes to standard error instead. Never rejects
+   * and never throws.
    * @param {string} prefix
    * @param {string} line
    * @returns {Promise<boolean>} true when the line reached the file.
@@ -121,9 +214,8 @@ export function createRollingLog({ logDir, now = () => new Date(), stderr = proc
   }
 
   /** Close every open file (for a clean shutdown and for tests). */
-  function closeAll() {
-    for (const entry of open.values()) close(entry);
-    open.clear();
+  async function closeAll() {
+    await Promise.all([...open.entries()].map(([prefix, entry]) => drop(prefix, entry)));
   }
 
   return { write, writeOrStderr, writeBestEffort, toStderr, closeAll };

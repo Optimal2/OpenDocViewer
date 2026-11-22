@@ -12,24 +12,29 @@
 | <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:59</code> | Repeat retention while a long-running service stays up. |
 | <code>createRejectionReporter</code> | function | <code>server/rateLimitConfig.js:43</code> | Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request. |
 | <code>resolveRateLimitPerMinute</code> | function | <code>server/rateLimitConfig.js:19</code> | Read a requests-per-minute limit from an environment value. |
-| <code>createRollingLog~closeAll</code> | function | <code>server/rollingLog.js:124</code> | Close every open file \(for a clean shutdown and for tests\). |
-| <code>createRollingLog</code> | function | <code>server/rollingLog.js:25</code> |  |
-| <code>describeWriteError</code> | function | <code>server/rollingLog.js:138</code> | What to put in the error log about a failed write: the error code and message, never the record that could not be written. |
-| <code>createRollingLog~toStderr</code> | function | <code>server/rollingLog.js:87</code> | Last resort when a log line cannot be written to its file. |
-| <code>createRollingLog~write</code> | function | <code>server/rollingLog.js:63</code> | Append one line to today&#39;s file for the prefix. |
-| <code>createRollingLog~writeBestEffort</code> | function | <code>server/rollingLog.js:114</code> | Write a line whose loss is tolerable \(an access-log line\). |
-| <code>createRollingLog~writeOrStderr</code> | function | <code>server/rollingLog.js:98</code> | Write a line that must not be lost quietly \(an error-log line\). |
-| <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:150</code> | Optional CORS for /log |
-| <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:144</code> | Token gate for /log |
-| <code>rateLimitSetting</code> | constant | <code>server/system-log-server.js:177</code> | Rate limit for ingestion |
-| <code>reportWriteFailure</code> | function | <code>server/system-log-server.js:82</code> | Error-log line for a record that could not be written: which log and why, never the record. |
-| <code>requireLogToken</code> | function | <code>server/system-log-server.js:217</code> | Token auth middleware |
-| <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:137</code> | Trust proxy for accurate req.ip |
-| <code>writeRolling</code> | function | <code>server/system-log-server.js:76</code> | Write a line that must not be lost quietly \(an error-log line\). |
-| <code>reportWriteFailure</code> | function | <code>server/user-log-server.js:99</code> | Error-log line for a record that could not be written: which log and why, never the record. |
-| <code>resolveUser</code> | function | <code>server/user-log-server.js:145</code> | Resolve user identity without cookies. |
-| <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:164</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
-| <code>writeRolling</code> | function | <code>server/user-log-server.js:93</code> | Write a line that must not be lost quietly \(an error-log line\). |
+| <code>createRollingLog~appendConfirmed</code> | function | <code>server/rollingLog.js:124</code> | Write one line and confirm that it is in the file at the log file&#39;s path. |
+| <code>createRollingLog~closeAll</code> | function | <code>server/rollingLog.js:217</code> | Close every open file \(for a clean shutdown and for tests\). |
+| <code>createRollingLog</code> | function | <code>server/rollingLog.js:60</code> |  |
+| <code>describeWriteError</code> | function | <code>server/rollingLog.js:230</code> | What to put in the error log about a failed write: the error code and message, never the record that could not be written. |
+| <code>createRollingLog~drop</code> | function | <code>server/rollingLog.js:72</code> | Stop using an open file. |
+| <code>createRollingLog~isAtPath</code> | function | <code>server/rollingLog.js:114</code> | Whether the file at the path is still the open file. |
+| <code>resolveLogWriteTimeoutMs</code> | function | <code>server/rollingLog.js:45</code> | Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000. |
+| <code>createRollingLog~tails</code> | constant | <code>server/rollingLog.js:67</code> | One chain of writes per file, so that lines keep the order of the calls. |
+| <code>createRollingLog~toStderr</code> | function | <code>server/rollingLog.js:179</code> | Last resort when a log line cannot be written to its file. |
+| <code>createRollingLog~write</code> | function | <code>server/rollingLog.js:151</code> | Append one line to today&#39;s file for the prefix. |
+| <code>createRollingLog~writeBestEffort</code> | function | <code>server/rollingLog.js:207</code> | Write a line whose loss is tolerable \(an access-log line\). |
+| <code>createRollingLog~writeOrStderr</code> | function | <code>server/rollingLog.js:191</code> | Write a line that must not be lost quietly \(an error-log line\). |
+| <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:156</code> | Optional CORS for /log |
+| <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:150</code> | Token gate for /log |
+| <code>rateLimitSetting</code> | constant | <code>server/system-log-server.js:183</code> | Rate limit for ingestion |
+| <code>reportWriteFailure</code> | function | <code>server/system-log-server.js:88</code> | Error-log line for a record that could not be written: which log and why, never the record. |
+| <code>requireLogToken</code> | function | <code>server/system-log-server.js:223</code> | Token auth middleware |
+| <code>TRUST_PROXY_RAW</code> | constant | <code>server/system-log-server.js:143</code> | Trust proxy for accurate req.ip |
+| <code>writeRolling</code> | function | <code>server/system-log-server.js:82</code> | Write a line that must not be lost quietly \(an error-log line\). |
+| <code>reportWriteFailure</code> | function | <code>server/user-log-server.js:104</code> | Error-log line for a record that could not be written: which log and why, never the record. |
+| <code>resolveUser</code> | function | <code>server/user-log-server.js:150</code> | Resolve user identity without cookies. |
+| <code>sameOriginGuard</code> | function | <code>server/user-log-server.js:169</code> | Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals. |
+| <code>writeRolling</code> | function | <code>server/user-log-server.js:98</code> | Write a line that must not be lost quietly \(an error-log line\). |
 | <code>LOOPBACK_ADDRESSES</code> | constant | <code>server/userLogOrigin.js:4</code> | Evaluate the browser origin signals used by the user print-log endpoint. |
 | <code>resolveUserLogHosts</code> | function | <code>server/userLogOrigin.js:15</code> | The hosts the browser may have addressed: the request&#39;s own Host header and, only when the request arrives over loopback, the X-Forwarded-Host that the reverse proxy on the same m... |
 | <code>neutralizeForWhom</code> | function | <code>server/userLogPayload.js:17</code> | The print log has never carried &amp;quot;$&amp;quot; or &amp;quot;#&amp;quot; in the recipient. |

@@ -1,6 +1,6 @@
 # OpenDocViewer / server
 
-File count: 10. Line count: 1059. JSDoc symbol count: 32.
+File count: 10. Line count: 1162. JSDoc symbol count: 37.
 
 ## server/accessLog.js
 
@@ -63,11 +63,16 @@ Symbols:
 
 Daily rotating log files for the log servers, with a write that reports its outcome.
 
-Exports: `createRollingLog`, `describeWriteError`
+Exports: `DEFAULT_LOG_WRITE_TIMEOUT_MS`, `resolveLogWriteTimeoutMs`, `createRollingLog`, `describeWriteError`
 
 Symbols:
 
+- `resolveLogWriteTimeoutMs` (function) - Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000.
 - `createRollingLog` (function) - No description.
+- `createRollingLog~tails` (constant) - One chain of writes per file, so that lines keep the order of the calls.
+- `createRollingLog~drop` (function) - Stop using an open file.
+- `createRollingLog~isAtPath` (function) - Whether the file at the path is still the open file.
+- `createRollingLog~appendConfirmed` (function) - Write one line and confirm that it is in the file at the log file's path.
 - `createRollingLog~write` (function) - Append one line to today's file for the prefix.
 - `createRollingLog~toStderr` (function) - Last resort when a log line cannot be written to its file.
 - `createRollingLog~writeOrStderr` (function) - Write a line that must not be lost quietly \(an error\-log line\).

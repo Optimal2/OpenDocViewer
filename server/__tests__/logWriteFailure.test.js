@@ -8,7 +8,7 @@
  */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { post } from './logServerHarness.js';
+import { post, postAndHangUp } from './logServerHarness.js';
 
 const state = vi.hoisted(() => ({
   servers: [],
@@ -17,46 +17,11 @@ const state = vi.hoisted(() => ({
   /** @type {(null|function(string): (Error|null))} */
   failure: null,
   delayMs: 0,
+  hung: false,
 }));
 
-vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal();
-  const createWriteStream = (file) => {
-    const name = String(file);
-    state.opened.push(name);
-    const listeners = [];
-    const stream = {
-      destroyed: false,
-      errored: null,
-      on: (event, listener) => { if (event === 'error') listeners.push(listener); return stream; },
-      end: () => { stream.destroyed = true; },
-      write: (line, callback) => {
-        const finish = () => {
-          const error = stream.destroyed ? Object.assign(new Error('write after destroy'), { code: 'ERR_STREAM_DESTROYED' })
-            : (state.failure ? state.failure(name) : null);
-          if (error) {
-            // Like a real stream: the first error destroys it and is emitted once.
-            if (!stream.destroyed) {
-              stream.destroyed = true;
-              stream.errored = error;
-              for (const listener of listeners) listener(error);
-            }
-            callback?.(stream.errored || error);
-          } else {
-            state.written.push({ file: name, line: String(line) });
-            callback?.();
-          }
-        };
-        if (state.delayMs > 0) setTimeout(finish, state.delayMs); else setImmediate(finish);
-        return true;
-      },
-    };
-    return stream;
-  };
-  const mkdirSync = () => undefined;
-  const promises = { ...actual.promises, mkdir: async () => undefined };
-  return { ...actual, createWriteStream, mkdirSync, promises, default: { ...actual.default, createWriteStream, mkdirSync, promises } };
-});
+// Log files are kept in memory: see fakeLogFileSystem in logServerHarness.js.
+vi.mock('node:fs', async (importOriginal) => (await import('./logServerHarness.js')).fakeLogFileSystem(await importOriginal(), state));
 
 vi.mock('dotenv', () => ({ default: { config: () => ({}) } }));
 
@@ -107,6 +72,7 @@ beforeAll(async () => {
   vi.stubEnv('LOG_TOKEN', TOKEN);
   vi.stubEnv('PORT', '0');
   vi.stubEnv('USER_LOG_RATE_LIMIT_PER_MINUTE', '2');
+  vi.stubEnv('LOG_WRITE_TIMEOUT_MS', '400');
   targets.user = {
     port: await start('../user-log-server.js'), path: '/userlog/record', record: 'print', ok: 200,
     body: (text) => ({ reason: text, forWhom: 'w' }), headers: {},
@@ -120,6 +86,7 @@ beforeAll(async () => {
 afterEach(() => {
   state.failure = null;
   state.delayMs = 0;
+  state.hung = false;
   state.written.length = 0;
   vi.restoreAllMocks();
 });
@@ -187,6 +154,41 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
     expect(linesOf(targets[name].record)).toHaveLength(1);
     // The failed stream was dropped and the file opened again.
     expect(state.opened.length).toBeGreaterThan(opened);
+  });
+
+  it('answers 500 once when the write is never confirmed, and writes again when the disk answers', async () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    state.hung = true;
+    const started = Date.now();
+    const response = await send(SECRET_TEXT);
+    const waited = Date.now() - started;
+    expect(response.status).toBe(500);
+    // One answer only: the body is the plain 500 text, not two answers on the connection.
+    expect(response.text.match(/HTTP\/1\.1/g)).toBeNull();
+    // LOG_WRITE_TIMEOUT_MS is 400 here; the error report waits at most as long again.
+    expect(waited).toBeGreaterThanOrEqual(380);
+    expect(waited).toBeLessThan(3000);
+    const reported = stderr.mock.calls.map((call) => String(call[0])).join('');
+    expect(reported).toContain('log-write-failed');
+    expect(reported).toContain('ELOGTIMEOUT');
+    expect(reported).not.toContain(SECRET_TEXT);
+
+    state.hung = false;
+    expect((await send('kept')).status).toBe(targets[name].ok);
+    expect(linesOf(targets[name].record)).toHaveLength(1);
+  });
+
+  it('writes the record when the client closes the connection right after sending it', async () => {
+    const target = targets[name];
+    client += 1;
+    const marker = `hang-up-${name}-${client}`;
+    await postAndHangUp(target.port, target.path, target.body(marker), { ...target.headers, 'x-forwarded-for': `198.51.100.${client}` });
+    // The viewer never reads the answer; the record has to be written all the same.
+    const deadline = Date.now() + 5000;
+    while (Date.now() < deadline && !linesOf(target.record).some((line) => line.includes(marker))) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    expect(linesOf(target.record).filter((line) => line.includes(marker))).toHaveLength(1);
   });
 
   it('keeps the order of records written at the same time', async () => {

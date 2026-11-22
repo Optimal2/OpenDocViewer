@@ -11,22 +11,8 @@ import { post } from './logServerHarness.js';
 
 const state = vi.hoisted(() => ({ servers: [], written: [] }));
 
-vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal();
-  const createWriteStream = (file) => ({
-    destroyed: false,
-    write: (line, callback) => {
-      state.written.push({ file: String(file), line: String(line) });
-      if (typeof callback === 'function') setImmediate(callback);
-      return true;
-    },
-    end: () => {},
-    on: () => {},
-  });
-  const mkdirSync = () => undefined;
-  const promises = { ...actual.promises, mkdir: async () => undefined };
-  return { ...actual, createWriteStream, mkdirSync, promises, default: { ...actual.default, createWriteStream, mkdirSync, promises } };
-});
+// Log files are kept in memory: see fakeLogFileSystem in logServerHarness.js.
+vi.mock('node:fs', async (importOriginal) => (await import('./logServerHarness.js')).fakeLogFileSystem(await importOriginal(), state));
 
 vi.mock('dotenv', () => ({ default: { config: () => ({}) } }));
 

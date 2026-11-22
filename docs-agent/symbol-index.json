@@ -244,13 +244,26 @@
     "examples": 0
   },
   {
+    "id": "createRollingLog~appendConfirmed",
+    "name": "appendConfirmed",
+    "longname": "createRollingLog~appendConfirmed",
+    "kind": "function",
+    "scope": "inner",
+    "file": "server/rollingLog.js",
+    "line": 124,
+    "description": "Write one line and confirm that it is in the file at the log file's path.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "createRollingLog~closeAll",
     "name": "closeAll",
     "longname": "createRollingLog~closeAll",
     "kind": "function",
     "scope": "inner",
     "file": "server/rollingLog.js",
-    "line": 124,
+    "line": 217,
     "description": "Close every open file (for a clean shutdown and for tests).",
     "params": [],
     "returns": [],
@@ -263,7 +276,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/rollingLog.js",
-    "line": 25,
+    "line": 60,
     "description": "",
     "params": [
       {
@@ -283,7 +296,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/rollingLog.js",
-    "line": 138,
+    "line": 230,
     "description": "What to put in the error log about a failed write: the error code and message, never the record that could not be written.",
     "params": [
       {
@@ -302,13 +315,77 @@
     "examples": 0
   },
   {
+    "id": "createRollingLog~drop",
+    "name": "drop",
+    "longname": "createRollingLog~drop",
+    "kind": "function",
+    "scope": "inner",
+    "file": "server/rollingLog.js",
+    "line": 72,
+    "description": "Stop using an open file.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "createRollingLog~isAtPath",
+    "name": "isAtPath",
+    "longname": "createRollingLog~isAtPath",
+    "kind": "function",
+    "scope": "inner",
+    "file": "server/rollingLog.js",
+    "line": 114,
+    "description": "Whether the file at the path is still the open file.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "resolveLogWriteTimeoutMs",
+    "name": "resolveLogWriteTimeoutMs",
+    "longname": "resolveLogWriteTimeoutMs",
+    "kind": "function",
+    "scope": "global",
+    "file": "server/rollingLog.js",
+    "line": 45,
+    "description": "Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000.",
+    "params": [
+      {
+        "name": "raw",
+        "type": "string|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "createRollingLog~tails",
+    "name": "tails",
+    "longname": "createRollingLog~tails",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "server/rollingLog.js",
+    "line": 67,
+    "description": "One chain of writes per file, so that lines keep the order of the calls.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "createRollingLog~toStderr",
     "name": "toStderr",
     "longname": "createRollingLog~toStderr",
     "kind": "function",
     "scope": "inner",
     "file": "server/rollingLog.js",
-    "line": 87,
+    "line": 179,
     "description": "Last resort when a log line cannot be written to its file.",
     "params": [],
     "returns": [],
@@ -321,7 +398,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "server/rollingLog.js",
-    "line": 63,
+    "line": 151,
     "description": "Append one line to today's file for the prefix.",
     "params": [
       {
@@ -340,7 +417,7 @@
     "returns": [
       {
         "type": "Promise.<void>",
-        "description": "Resolves when the line was written; rejects with the write error."
+        "description": "Resolves when the line is in the file at the log file's path; rejects with the cause, or with code ELOGTIMEOUT when the timeout runs out fi..."
       }
     ],
     "examples": 0
@@ -352,7 +429,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "server/rollingLog.js",
-    "line": 114,
+    "line": 207,
     "description": "Write a line whose loss is tolerable (an access-log line).",
     "params": [
       {
@@ -378,7 +455,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "server/rollingLog.js",
-    "line": 98,
+    "line": 191,
     "description": "Write a line that must not be lost quietly (an error-log line).",
     "params": [
       {
@@ -409,7 +486,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 150,
+    "line": 156,
     "description": "Optional CORS for /log",
     "params": [],
     "returns": [],
@@ -422,7 +499,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 144,
+    "line": 150,
     "description": "Token gate for /log",
     "params": [],
     "returns": [],
@@ -435,7 +512,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 177,
+    "line": 183,
     "description": "Rate limit for ingestion",
     "params": [],
     "returns": [],
@@ -448,7 +525,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 82,
+    "line": 88,
     "description": "Error-log line for a record that could not be written: which log and why, never the record.",
     "params": [],
     "returns": [
@@ -466,7 +543,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 217,
+    "line": 223,
     "description": "Token auth middleware",
     "params": [],
     "returns": [],
@@ -479,7 +556,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 137,
+    "line": 143,
     "description": "Trust proxy for accurate req.ip",
     "params": [],
     "returns": [],
@@ -492,7 +569,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/system-log-server.js",
-    "line": 76,
+    "line": 82,
     "description": "Write a line that must not be lost quietly (an error-log line).",
     "params": [],
     "returns": [],
@@ -505,7 +582,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 99,
+    "line": 104,
     "description": "Error-log line for a record that could not be written: which log and why, never the record.",
     "params": [],
     "returns": [
@@ -523,7 +600,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 145,
+    "line": 150,
     "description": "Resolve user identity without cookies.",
     "params": [],
     "returns": [],
@@ -536,7 +613,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 164,
+    "line": 169,
     "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
     "params": [],
     "returns": [],
@@ -549,7 +626,7 @@
     "kind": "function",
     "scope": "global",
     "file": "server/user-log-server.js",
-    "line": 93,
+    "line": 98,
     "description": "Write a line that must not be lost quietly (an error-log line).",
     "params": [],
     "returns": [],

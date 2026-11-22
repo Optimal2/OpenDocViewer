@@ -2,10 +2,10 @@
 
 ## server
 
-File count: 10. Line count: 1059. JSDoc symbol count: 32.
+File count: 10. Line count: 1162. JSDoc symbol count: 37.
 
-- `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/rollingLog.js` - Daily rotating log files for the log servers, with a write that reports its outcome.
+- `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/headerText.js` - Text of an HTTP header value as the sender wrote it.
 - `server/clientAddress.js` - The client's address without a port, for the rate limit key and the log records.
 - `server/rateLimitConfig.js` - Settings and reporting for the per\-client rate limits of the log servers.

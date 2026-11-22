@@ -16,10 +16,12 @@
  *  - ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com   (optional CORS for /log)
  *  - JSON_LIMIT=64kb
  *  - LOG_RETENTION_DAYS=14
+ *  - LOG_WRITE_TIMEOUT_MS=10000  (answer 500 when a record is not confirmed in the file in time)
  *  - SYSTEM_LOG_RATE_LIMIT_PER_MINUTE=120  (per client address; 0 or off = no limit)
  *
  * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
- * Note: This file is self-contained; no internal imports required.
+ * The shared pieces (log files, retention, client address, rate limit settings, access log)
+ * are in the modules next to this file.
  */
 
 import fs from 'node:fs';
@@ -37,7 +39,7 @@ import { pruneRotatedLogs, scheduleLogRetention } from './logRetention.js';
 import { decodeHeaderValue } from './headerText.js';
 import { normalizeClientAddress } from './clientAddress.js';
 import { createRejectionReporter, resolveRateLimitPerMinute } from './rateLimitConfig.js';
-import { createRollingLog, describeWriteError } from './rollingLog.js';
+import { createRollingLog, describeWriteError, resolveLogWriteTimeoutMs } from './rollingLog.js';
 
 dotenv.config();
 
@@ -67,7 +69,11 @@ async function initOnce() {
   await pruneOldLogs();
 }
 
-const rollingLog = createRollingLog({ logDir: LOG_DIR });
+// LOG_WRITE_TIMEOUT_MS: how long a request waits for its record to be confirmed in the file
+// before it is answered with 500 (default 10000). A hung disk must not leave requests hanging.
+const writeTimeoutSetting = resolveLogWriteTimeoutMs(process.env.LOG_WRITE_TIMEOUT_MS);
+if (writeTimeoutSetting.warning) console.warn(`WARNING: ${writeTimeoutSetting.warning}`);
+const rollingLog = createRollingLog({ logDir: LOG_DIR, writeTimeoutMs: writeTimeoutSetting.timeoutMs });
 
 /**
  * Write a line that must not be lost quietly (an error-log line). When the file cannot be
