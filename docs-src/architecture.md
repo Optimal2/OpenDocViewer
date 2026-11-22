@@ -350,10 +350,13 @@ flowchart LR
   (`src/components/ViewerProblemNotice.jsx`).
 - **System log server.** Every `POST /log` needs `x-log-token`. Production refuses to start without
   `LOG_TOKEN`. The token is in the browser's runtime configuration, so it is an ingestion guard, not
-  a secret (`docs-src/log-servers.md`, "Security assumptions"). Rate limit: 120 requests per minute.
+  a secret (`docs-src/log-servers.md`, "Security assumptions"). Rate limit: 120 requests per minute
+  and client address by default; `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` sets it or switches it off.
 - **User log server.** No token. It accepts same-origin requests only, judged by `Origin`, `Referer`
   and `Sec-Fetch-Site`. A request with none of them passes unless `ODV_STRICT_ORIGIN=true`.
-  Rate limit: 60 requests per minute.
+  No rate limit by default, because every record is an audit record and users often share an
+  address; `USER_LOG_RATE_LIMIT_PER_MINUTE` sets one per client address
+  (`docs-src/log-servers.md`, "Rate limits").
 
 **Audit trail.** The viewer keeps no audit trail of its own. When enabled, the user log server writes
 one record per print: timestamp, `userId`, IP address, user agent, referer, `action: 'print'`, reason

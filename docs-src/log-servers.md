@@ -163,7 +163,9 @@ set for it.
 
 **A limit never loses records silently.** When a record is rejected, the server writes one line
 to `error-*.log` with `"event":"rate-limit-rejected"`, the client address and the limit, at most
-once per address and minute. Such a line means that records were lost for that address.
+once per client and minute. A client here is what the limit counts: one IPv4 address, or one
+`/56` block of IPv6 addresses. The line names the address of the request that was rejected.
+Such a line means that records were lost for that client.
 
 **A decision for each site.** Setting a limit for the print log, or changing the one for the
 system log, has to be decided for each installation with its shared addresses in mind.
@@ -184,7 +186,7 @@ If a deployment needs stricter retention, central aggregation, compression, or a
 - designed for same-origin or explicitly allowed browser callers
 - every `/log` request is gated by `x-log-token`; production cannot start without `LOG_TOKEN`
 - request bodies are small JSON payloads
-- rate limiting and `helmet()` are always on
+- `helmet()` is always on; the rate limit is on by default (120 per minute and client address) and can be changed or switched off with `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE`
 - CORS is opt-in via `ALLOWED_ORIGINS`
 
 This token is a lightweight ingestion guard, not high-assurance authentication. Do not treat it as a secret equivalent to server credentials.
