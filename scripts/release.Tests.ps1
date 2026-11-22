@@ -255,7 +255,8 @@ Describe 'release.ps1 flow' {
   }
 
   It 'suggests publishing with the confirmation question after a local preparation' {
-    $script:ReleaseText | Should -Match 'Write-Host "  \.\\release\.ps1 -Publish" '
+    # The exact hint line, compared as plain text (case-sensitive).
+    $script:ReleaseText.Contains('Write-Host "  .\release.ps1 -Publish" ') | Should -BeTrue
     $script:ReleaseText | Should -Not -Match 'Write-Host[^\r\n]*-Yes -Publish'
     $script:ReleaseText | Should -Match 'Write-Host[^\r\n]*-Yes skips'
   }
