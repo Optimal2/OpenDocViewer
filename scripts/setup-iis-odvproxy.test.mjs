@@ -164,6 +164,15 @@ const appCmdStub = String.raw`
 `;
 
 /**
+ * Environment for a PowerShell child. PSModulePath is left out: when the suite itself is started
+ * from PowerShell 7 (the local gate), the inherited value makes Windows PowerShell load
+ * PowerShell 7's modules and fail. Each edition then builds its own default.
+ */
+function shellEnvironment() {
+  return Object.fromEntries(Object.entries(process.env).filter(([name]) => name.toLowerCase() !== 'psmodulepath'));
+}
+
+/**
  * One stand-in IIS that lives across several runs of the setup script.
  * serverAllowed / siteWebConfigAllowed: variables already allowed above the application.
  */
@@ -202,7 +211,7 @@ function createIis({ serverAllowed = [], siteWebConfigAllowed = [], dropAdds = f
             timeout: 90_000,
             windowsHide: true,
             env: {
-              ...process.env,
+              ...shellEnvironment(),
               NO_COLOR: '1',
               TERM: 'dumb',
               ODV_IIS_STATE: statePath,
@@ -277,7 +286,7 @@ const windowsPowerShellPolicy = (() => {
   if (process.platform !== 'win32') return 'not Windows';
   try {
     return execFileSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', 'Get-ExecutionPolicy'],
-      { encoding: 'utf8', windowsHide: true, timeout: 60_000 }).trim();
+      { encoding: 'utf8', windowsHide: true, timeout: 60_000, env: shellEnvironment() }).trim();
   } catch {
     return 'unavailable';
   }
