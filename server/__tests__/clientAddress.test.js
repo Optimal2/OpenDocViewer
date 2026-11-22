@@ -104,6 +104,17 @@ describe('normalizeClientAddress', () => {
     ['[2001:db8::1]', '2001:db8::1'],
     ['[::1]:80', '::1'],
     ['[fe80::1%eth0]:443', 'fe80::1%eth0'],
+    // IPv4-mapped IPv6 with a port and no brackets: the dotted tail makes the port unambiguous.
+    ['::ffff:1.2.3.4:5678', '::ffff:1.2.3.4'],
+    ['::FFFF:127.0.0.1:64123', '::FFFF:127.0.0.1'],
+    ['[::ffff:1.2.3.4]:5678', '::ffff:1.2.3.4'],
+    ['::ffff:1.2.3.4', '::ffff:1.2.3.4'],
+    ['::ffff:999.2.3.4:5678', '::ffff:999.2.3.4:5678'],
+    // A zone index must be a name; anything else after % is not accepted.
+    ['[::1%]:80', '[::1%]:80'],
+    ['[::1%eth0%x]:80', '[::1%eth0%x]:80'],
+    ['[::1% ]:80', '[::1% ]:80'],
+    ['[::1%eth0/../x]:80', '[::1%eth0/../x]:80'],
     // Unchanged: plain addresses, and IPv6 without brackets (its last group is not a port).
     ['1.2.3.4', '1.2.3.4'],
     ['2001:db8::1', '2001:db8::1'],
