@@ -58,20 +58,53 @@
   // Site-only objects and replacement arrays can bypass the recursive merge.
   function stripReservedConfigKeys(value) {
     if (!value || typeof value !== 'object') return value;
-    var copy = Array.isArray(value) ? new Array(value.length) : {};
-    var changed = false;
-    var keys = Object.keys(value);
-    for (var i = 0; i < keys.length; i += 1) {
-      var key = keys[i];
-      if (isReservedConfigKey(key)) {
-        changed = true;
-        continue;
+    var inputs = [value];
+    var copies = [];
+    var parents = [[]];
+    var needsCopy = [];
+    var changed = [];
+
+    // Visit each object once and record the references that may need to be updated.
+    for (var i = 0; i < inputs.length; i += 1) {
+      var input = inputs[i];
+      var copy = Array.isArray(input) ? new Array(input.length) : {};
+      copies[i] = copy;
+      var keys = Object.keys(input);
+      for (var j = 0; j < keys.length; j += 1) {
+        var key = keys[j];
+        if (isReservedConfigKey(key)) {
+          needsCopy[i] = true;
+          continue;
+        }
+        var child = input[key];
+        copy[key] = child;
+        if (!child || typeof child !== 'object') continue;
+
+        var childIndex = inputs.indexOf(child);
+        if (childIndex === -1) {
+          childIndex = inputs.length;
+          inputs.push(child);
+          parents.push([]);
+        }
+        parents[childIndex].push({ index: i, key: key });
       }
-      var child = value[key];
-      copy[key] = stripReservedConfigKeys(child);
-      if (child && typeof child === 'object' && copy[key] !== child) changed = true;
+      if (needsCopy[i]) changed.push(i);
     }
-    return changed ? copy : value;
+
+    // Only objects that can reach a removed key need copies, even across a cycle.
+    for (var k = 0; k < changed.length; k += 1) {
+      var index = changed[k];
+      var links = parents[index];
+      for (var linkIndex = 0; linkIndex < links.length; linkIndex += 1) {
+        var link = links[linkIndex];
+        copies[link.index][link.key] = copies[index];
+        if (!needsCopy[link.index]) {
+          needsCopy[link.index] = true;
+          changed.push(link.index);
+        }
+      }
+    }
+    return needsCopy[0] ? copies[0] : value;
   }
 
   /**

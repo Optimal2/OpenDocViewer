@@ -46,6 +46,65 @@ it.each(['__proto__', 'constructor', 'prototype'])('ignores the reserved site ke
   }
 });
 
+it.each(['self reference', 'array element referencing an ancestor'])('publishes a sanitized site configuration (%s)', (kind) => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    const { window } = dom;
+    const source = readFileSync('public/odv.config.js', 'utf8');
+    const prototypeBefore = Object.getOwnPropertyDescriptors(window.Object.prototype);
+    const extension = window.JSON.parse('{"enabled":true,"__proto__":"ignored","constructor":"ignored","prototype":"ignored"}');
+    const clean = { label: 'site' };
+    const site = { compare: { adjust: { toolbarMode: 'hide' } }, siteExtension: extension, clean };
+    if (kind === 'self reference') {
+      site.self = site;
+    } else {
+      extension.items = [extension, { label: 'item' }];
+    }
+    window.__ODV_SITE_CONFIG__ = site;
+
+    expect(() => window.eval(source)).not.toThrow();
+
+    const config = window.__ODV_CONFIG__;
+    expect(config.compare.adjust.toolbarMode).toBe('hide');
+    expect(config.clean).toBe(clean);
+    expect(config.siteExtension.enabled).toBe(true);
+    for (const key of ['__proto__', 'constructor', 'prototype']) {
+      expect(Object.hasOwn(config.siteExtension, key)).toBe(false);
+      expect(Object.hasOwn(extension, key)).toBe(true);
+    }
+    expect(Object.getPrototypeOf(config.siteExtension)).toBe(window.Object.prototype);
+    expect(Object.getOwnPropertyDescriptors(window.Object.prototype)).toEqual(prototypeBefore);
+    if (kind === 'self reference') {
+      expect(config.self.self).toBe(config.self);
+      expect(config.self.siteExtension).toBe(config.siteExtension);
+    } else {
+      expect(config.siteExtension.items[0]).toBe(config.siteExtension);
+      expect(config.siteExtension.items[1].label).toBe('item');
+    }
+  } finally {
+    dom.window.close();
+  }
+});
+
+it('publishes a deeply nested site configuration with its reserved keys removed', () => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    let extension = { enabled: true, prototype: 'ignored' };
+    const depth = 12000;
+    for (let i = 0; i < depth; i += 1) extension = { child: extension };
+    dom.window.__ODV_SITE_CONFIG__ = { siteExtension: extension };
+
+    dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
+
+    let leaf = dom.window.__ODV_CONFIG__.siteExtension;
+    for (let i = 0; i < depth; i += 1) leaf = leaf.child;
+    expect(leaf.enabled).toBe(true);
+    expect(Object.hasOwn(leaf, 'prototype')).toBe(false);
+  } finally {
+    dom.window.close();
+  }
+});
+
 it('merges valid nested overrides, replacement arrays and a legacy alias over the defaults', () => {
   const source = readFileSync('public/odv.config.js', 'utf8');
   const read = (siteConfig) => {
@@ -88,6 +147,9 @@ it('preserves valid configuration identity and reads or creates ordinary paths',
     const site = { compare: { overlay }, ocr: { languages: ['swe', 'eng'] } };
 
     expect(stripReservedConfigKeys(site)).toBe(site);
+    const cyclic = {};
+    cyclic.self = cyclic;
+    expect(stripReservedConfigKeys(cyclic)).toBe(cyclic);
     expect(readConfigPath(site, 'compare.overlay.enabled')).toBe(false);
     expect(readConfigPath(site, 'compare.curtain.enabled')).toBeUndefined();
     expect(readConfigPath(site, 'compare.overlay.enabled.nested')).toBeUndefined();
