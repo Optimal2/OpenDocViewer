@@ -1,6 +1,6 @@
 # OpenDocViewer / server
 
-File count: 10. Line count: 1162. JSDoc symbol count: 37.
+File count: 10. Line count: 1200. JSDoc symbol count: 39.
 
 ## server/accessLog.js
 
@@ -71,14 +71,14 @@ Symbols:
 - `createRollingLog` (function) - No description.
 - `createRollingLog~tails` (constant) - One chain of writes per file, so that lines keep the order of the calls.
 - `createRollingLog~drop` (function) - Stop using an open file.
+- `createRollingLog~givenUp` (function) - Thrown inside a write that was given up; its caller has been answered already.
+- `createRollingLog~entryFor` (function) - The open file for the prefix, opening it when needed.
 - `createRollingLog~isAtPath` (function) - Whether the file at the path is still the open file.
 - `createRollingLog~appendConfirmed` (function) - Write one line and confirm that it is in the file at the log file's path.
 - `createRollingLog~write` (function) - Append one line to today's file for the prefix.
 - `createRollingLog~toStderr` (function) - Last resort when a log line cannot be written to its file.
 - `createRollingLog~writeOrStderr` (function) - Write a line that must not be lost quietly \(an error\-log line\).
 - `createRollingLog~writeBestEffort` (function) - Write a line whose loss is tolerable \(an access\-log line\).
-- `createRollingLog~closeAll` (function) - Close every open file \(for a clean shutdown and for tests\).
-- `describeWriteError` (function) - What to put in the error log about a failed write: the error code and message, never the record that could not be written.
 
 ## server/system\-log\-server.js
 

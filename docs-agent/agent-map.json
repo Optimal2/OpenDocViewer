@@ -94,8 +94,8 @@
   },
   "stats": {
     "fileCount": 220,
-    "sourceLineCount": 75686,
-    "docletCount": 2222,
+    "sourceLineCount": 75724,
+    "docletCount": 2224,
     "documentedFileCount": 214,
     "lowConfidenceSummaryCount": 2,
     "parseErrorCount": 0,
@@ -987,15 +987,15 @@
     {
       "name": "server",
       "fileCount": 10,
-      "lineCount": 1162,
-      "docletCount": 37,
+      "lineCount": 1200,
+      "docletCount": 39,
       "importantFiles": [
         {
           "path": "server/rollingLog.js",
-          "score": 81,
-          "lines": 236,
+          "score": 82,
+          "lines": 268,
           "incomingLocalImports": 2,
-          "doclets": 12,
+          "doclets": 14,
           "summary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
           "summaryConfidence": "high"
         },
@@ -2669,9 +2669,9 @@
     },
     {
       "path": "server/rollingLog.js",
-      "lines": 236,
+      "lines": 268,
       "extension": ".js",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 17,
       "sourceSummary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
       "imports": [
         {
@@ -2679,7 +2679,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 27,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -2687,7 +2687,7 @@
           "specifiers": [
             "path"
           ],
-          "line": 28,
+          "line": 31,
           "kind": "static"
         }
       ],
@@ -2695,114 +2695,124 @@
         {
           "name": "DEFAULT_LOG_WRITE_TIMEOUT_MS",
           "kind": "variable",
-          "line": 30
+          "line": 33
         },
         {
           "name": "resolveLogWriteTimeoutMs",
           "kind": "function",
-          "line": 45
+          "line": 48
         },
         {
           "name": "createRollingLog",
           "kind": "function",
-          "line": 60
+          "line": 63
         },
         {
           "name": "describeWriteError",
           "kind": "function",
-          "line": 230
+          "line": 262
         }
       ],
       "declarations": [
         {
           "name": "utcDate",
           "kind": "function",
-          "line": 32
+          "line": 35
         },
         {
           "name": "codedError",
           "kind": "function",
-          "line": 34
+          "line": 37
         },
         {
           "name": "resolveLogWriteTimeoutMs",
           "kind": "function",
-          "line": 45
+          "line": 48
         },
         {
           "name": "createRollingLog",
           "kind": "function",
-          "line": 60
+          "line": 63
         },
         {
           "name": "drop",
           "kind": "function",
-          "line": 72
+          "line": 75
+        },
+        {
+          "name": "givenUp",
+          "kind": "function",
+          "line": 84
         },
         {
           "name": "entryFor",
           "kind": "function",
-          "line": 80
+          "line": 91
         },
         {
           "name": "created",
           "kind": "object",
-          "line": 94
+          "line": 107
+        },
+        {
+          "name": "closeUnused",
+          "kind": "function",
+          "line": 108
         },
         {
           "name": "isAtPath",
           "kind": "function",
-          "line": 114
+          "line": 137
         },
         {
           "name": "appendConfirmed",
           "kind": "function",
-          "line": 124
+          "line": 147
         },
         {
           "name": "write",
           "kind": "function",
-          "line": 151
+          "line": 178
         },
         {
           "name": "task",
           "kind": "function",
-          "line": 153
+          "line": 180
         },
         {
           "name": "timeoutError",
           "kind": "function",
-          "line": 155
+          "line": 182
         },
         {
           "name": "state",
           "kind": "object",
-          "line": 158
+          "line": 185
         },
         {
           "name": "toStderr",
           "kind": "function",
-          "line": 179
+          "line": 211
         },
         {
           "name": "writeOrStderr",
           "kind": "function",
-          "line": 191
+          "line": 223
         },
         {
           "name": "writeBestEffort",
           "kind": "function",
-          "line": 207
+          "line": 239
         },
         {
           "name": "closeAll",
           "kind": "function",
-          "line": 217
+          "line": 249
         },
         {
           "name": "describeWriteError",
           "kind": "function",
-          "line": 230
+          "line": 262
         }
       ],
       "parseError": null,
@@ -2818,7 +2828,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/rollingLog.js",
-          "line": 45,
+          "line": 48,
           "description": "Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000.",
           "params": [
             {
@@ -2843,7 +2853,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/rollingLog.js",
-          "line": 60,
+          "line": 63,
           "description": "",
           "params": [
             {
@@ -2863,7 +2873,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 67,
+          "line": 70,
           "description": "One chain of writes per file, so that lines keep the order of the calls.",
           "params": [],
           "returns": [],
@@ -2876,8 +2886,34 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 72,
+          "line": 75,
           "description": "Stop using an open file.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createRollingLog~givenUp",
+          "name": "givenUp",
+          "longname": "createRollingLog~givenUp",
+          "kind": "function",
+          "scope": "inner",
+          "file": "server/rollingLog.js",
+          "line": 84,
+          "description": "Thrown inside a write that was given up; its caller has been answered already.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "createRollingLog~entryFor",
+          "name": "entryFor",
+          "longname": "createRollingLog~entryFor",
+          "kind": "function",
+          "scope": "inner",
+          "file": "server/rollingLog.js",
+          "line": 91,
+          "description": "The open file for the prefix, opening it when needed.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -2889,7 +2925,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 114,
+          "line": 137,
           "description": "Whether the file at the path is still the open file.",
           "params": [],
           "returns": [],
@@ -2902,7 +2938,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 124,
+          "line": 147,
           "description": "Write one line and confirm that it is in the file at the log file's path.",
           "params": [],
           "returns": [],
@@ -2915,7 +2951,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 151,
+          "line": 178,
           "description": "Append one line to today's file for the prefix.",
           "params": [
             {
@@ -2946,7 +2982,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 179,
+          "line": 211,
           "description": "Last resort when a log line cannot be written to its file.",
           "params": [],
           "returns": [],
@@ -2959,7 +2995,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 191,
+          "line": 223,
           "description": "Write a line that must not be lost quietly (an error-log line).",
           "params": [
             {
@@ -2990,7 +3026,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 207,
+          "line": 239,
           "description": "Write a line whose loss is tolerable (an access-log line).",
           "params": [
             {
@@ -3016,7 +3052,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "server/rollingLog.js",
-          "line": 217,
+          "line": 249,
           "description": "Close every open file (for a clean shutdown and for tests).",
           "params": [],
           "returns": [],
@@ -3029,7 +3065,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/rollingLog.js",
-          "line": 230,
+          "line": 262,
           "description": "What to put in the error log about a failed write: the error code and message, never the record that could not be written.",
           "params": [
             {
@@ -3056,7 +3092,7 @@
           "specifiers": [
             "fs"
           ],
-          "line": 27,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -3064,19 +3100,19 @@
           "specifiers": [
             "path"
           ],
-          "line": 28,
+          "line": 31,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
-      "importanceScore": 81,
+      "importanceScore": 82,
       "summary": "Daily rotating log files for the log servers, with a write that reports its outcome.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
     {
       "path": "server/system-log-server.js",
-      "lines": 291,
+      "lines": 294,
       "extension": ".js",
       "jsdocBlockCount": 12,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -3267,12 +3303,12 @@
         {
           "name": "rec",
           "kind": "object",
-          "line": 256
+          "line": 259
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 272
+          "line": 275
         }
       ],
       "parseError": null,
@@ -3522,7 +3558,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 331,
+      "lines": 334,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -3728,12 +3764,12 @@
         {
           "name": "e",
           "kind": "object",
-          "line": 296
+          "line": 299
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 312
+          "line": 315
         }
       ],
       "parseError": null,
@@ -92027,7 +92063,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 124,
+      "line": 147,
       "description": "Write one line and confirm that it is in the file at the log file's path.",
       "params": [],
       "returns": [],
@@ -92040,7 +92076,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 217,
+      "line": 249,
       "description": "Close every open file (for a clean shutdown and for tests).",
       "params": [],
       "returns": [],
@@ -92053,7 +92089,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rollingLog.js",
-      "line": 60,
+      "line": 63,
       "description": "",
       "params": [
         {
@@ -92073,7 +92109,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rollingLog.js",
-      "line": 230,
+      "line": 262,
       "description": "What to put in the error log about a failed write: the error code and message, never the record that could not be written.",
       "params": [
         {
@@ -92098,8 +92134,34 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 72,
+      "line": 75,
       "description": "Stop using an open file.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createRollingLog~entryFor",
+      "name": "entryFor",
+      "longname": "createRollingLog~entryFor",
+      "kind": "function",
+      "scope": "inner",
+      "file": "server/rollingLog.js",
+      "line": 91,
+      "description": "The open file for the prefix, opening it when needed.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "createRollingLog~givenUp",
+      "name": "givenUp",
+      "longname": "createRollingLog~givenUp",
+      "kind": "function",
+      "scope": "inner",
+      "file": "server/rollingLog.js",
+      "line": 84,
+      "description": "Thrown inside a write that was given up; its caller has been answered already.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -92111,7 +92173,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 114,
+      "line": 137,
       "description": "Whether the file at the path is still the open file.",
       "params": [],
       "returns": [],
@@ -92124,7 +92186,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/rollingLog.js",
-      "line": 45,
+      "line": 48,
       "description": "Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000.",
       "params": [
         {
@@ -92149,7 +92211,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 67,
+      "line": 70,
       "description": "One chain of writes per file, so that lines keep the order of the calls.",
       "params": [],
       "returns": [],
@@ -92162,7 +92224,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 179,
+      "line": 211,
       "description": "Last resort when a log line cannot be written to its file.",
       "params": [],
       "returns": [],
@@ -92175,7 +92237,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 151,
+      "line": 178,
       "description": "Append one line to today's file for the prefix.",
       "params": [
         {
@@ -92206,7 +92268,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 207,
+      "line": 239,
       "description": "Write a line whose loss is tolerable (an access-log line).",
       "params": [
         {
@@ -92232,7 +92294,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "server/rollingLog.js",
-      "line": 191,
+      "line": 223,
       "description": "Write a line that must not be lost quietly (an error-log line).",
       "params": [
         {

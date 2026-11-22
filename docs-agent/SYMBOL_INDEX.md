@@ -12,18 +12,20 @@
 | <code>scheduleLogRetention</code> | function | <code>server/logRetention.js:59</code> | Repeat retention while a long-running service stays up. |
 | <code>createRejectionReporter</code> | function | <code>server/rateLimitConfig.js:43</code> | Report a rejected client at most once per window, so that records lost to the rate limit are visible in the error log without one line per rejected request. |
 | <code>resolveRateLimitPerMinute</code> | function | <code>server/rateLimitConfig.js:19</code> | Read a requests-per-minute limit from an environment value. |
-| <code>createRollingLog~appendConfirmed</code> | function | <code>server/rollingLog.js:124</code> | Write one line and confirm that it is in the file at the log file&#39;s path. |
-| <code>createRollingLog~closeAll</code> | function | <code>server/rollingLog.js:217</code> | Close every open file \(for a clean shutdown and for tests\). |
-| <code>createRollingLog</code> | function | <code>server/rollingLog.js:60</code> |  |
-| <code>describeWriteError</code> | function | <code>server/rollingLog.js:230</code> | What to put in the error log about a failed write: the error code and message, never the record that could not be written. |
-| <code>createRollingLog~drop</code> | function | <code>server/rollingLog.js:72</code> | Stop using an open file. |
-| <code>createRollingLog~isAtPath</code> | function | <code>server/rollingLog.js:114</code> | Whether the file at the path is still the open file. |
-| <code>resolveLogWriteTimeoutMs</code> | function | <code>server/rollingLog.js:45</code> | Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000. |
-| <code>createRollingLog~tails</code> | constant | <code>server/rollingLog.js:67</code> | One chain of writes per file, so that lines keep the order of the calls. |
-| <code>createRollingLog~toStderr</code> | function | <code>server/rollingLog.js:179</code> | Last resort when a log line cannot be written to its file. |
-| <code>createRollingLog~write</code> | function | <code>server/rollingLog.js:151</code> | Append one line to today&#39;s file for the prefix. |
-| <code>createRollingLog~writeBestEffort</code> | function | <code>server/rollingLog.js:207</code> | Write a line whose loss is tolerable \(an access-log line\). |
-| <code>createRollingLog~writeOrStderr</code> | function | <code>server/rollingLog.js:191</code> | Write a line that must not be lost quietly \(an error-log line\). |
+| <code>createRollingLog~appendConfirmed</code> | function | <code>server/rollingLog.js:147</code> | Write one line and confirm that it is in the file at the log file&#39;s path. |
+| <code>createRollingLog~closeAll</code> | function | <code>server/rollingLog.js:249</code> | Close every open file \(for a clean shutdown and for tests\). |
+| <code>createRollingLog</code> | function | <code>server/rollingLog.js:63</code> |  |
+| <code>describeWriteError</code> | function | <code>server/rollingLog.js:262</code> | What to put in the error log about a failed write: the error code and message, never the record that could not be written. |
+| <code>createRollingLog~drop</code> | function | <code>server/rollingLog.js:75</code> | Stop using an open file. |
+| <code>createRollingLog~entryFor</code> | function | <code>server/rollingLog.js:91</code> | The open file for the prefix, opening it when needed. |
+| <code>createRollingLog~givenUp</code> | function | <code>server/rollingLog.js:84</code> | Thrown inside a write that was given up; its caller has been answered already. |
+| <code>createRollingLog~isAtPath</code> | function | <code>server/rollingLog.js:137</code> | Whether the file at the path is still the open file. |
+| <code>resolveLogWriteTimeoutMs</code> | function | <code>server/rollingLog.js:48</code> | Read the write timeout from an environment value: a whole number of milliseconds from 100 to 600000. |
+| <code>createRollingLog~tails</code> | constant | <code>server/rollingLog.js:70</code> | One chain of writes per file, so that lines keep the order of the calls. |
+| <code>createRollingLog~toStderr</code> | function | <code>server/rollingLog.js:211</code> | Last resort when a log line cannot be written to its file. |
+| <code>createRollingLog~write</code> | function | <code>server/rollingLog.js:178</code> | Append one line to today&#39;s file for the prefix. |
+| <code>createRollingLog~writeBestEffort</code> | function | <code>server/rollingLog.js:239</code> | Write a line whose loss is tolerable \(an access-log line\). |
+| <code>createRollingLog~writeOrStderr</code> | function | <code>server/rollingLog.js:223</code> | Write a line that must not be lost quietly \(an error-log line\). |
 | <code>ALLOWED_ORIGINS</code> | constant | <code>server/system-log-server.js:156</code> | Optional CORS for /log |
 | <code>LOG_TOKEN</code> | constant | <code>server/system-log-server.js:150</code> | Token gate for /log |
 | <code>rateLimitSetting</code> | constant | <code>server/system-log-server.js:183</code> | Rate limit for ingestion |

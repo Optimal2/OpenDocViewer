@@ -286,8 +286,11 @@ app.post('/userlog/record', sameOriginGuard, printLimiter, async (req, res) => {
     try {
       await rollingLog.write('print', safeJson(rec) + '\n');
     } catch (writeError) {
-      await reportWriteFailure('print', writeError);
-      return res.status(500).send('Failed to log print action');
+      // Answer first. The error report is not waited for: on a hung disk it takes its own
+      // timeout, and the caller must not wait twice. It never rejects.
+      res.status(500).send('Failed to log print action');
+      void reportWriteFailure('print', writeError);
+      return;
     }
 
     // Return literal JSON boolean "true" (works for both fetch and very old callers)

@@ -266,12 +266,14 @@ window.__ODV_SITE_CONFIG__ = {
 Both endpoints answer success only when the record is in its log file, and `500` otherwise.
 
 - **Written and still at the path.** After each write the server compares the log file's path with the file it has open. If the file was removed, moved or replaced while the service ran, also together with the whole log folder, the server opens the file again at the path (creating the folder) and writes the record there before it answers. A record is not acknowledged from a file that is no longer at the path. This costs one `stat` per record.
-- **Time limit.** If the write is not confirmed within `LOG_WRITE_TIMEOUT_MS` (default 10 seconds), for example on a hung disk or network share, the request is answered with `500` and a `log-write-failed` line with the code `ELOGTIMEOUT` is written, to standard error if the error log is on the same hung disk. The file is opened again by the next record.
+- **Time limit.** If the write is not confirmed within `LOG_WRITE_TIMEOUT_MS` (default 10 seconds), for example on a hung disk or network share, the request is answered with `500` when that time is up. The `log-write-failed` line with the code `ELOGTIMEOUT` is written after the answer and is not waited for; on the same hung disk it takes up to the time limit once more before it ends up on standard error instead. The file is opened again by the next record. A write that was given up starts nothing more, and a file it was still opening is closed when that open returns.
 - **After a fault.** A file whose write failed is opened again by the next record, without a restart. If part of a line reached the file before the fault, the next record starts on a new line, so it stays a valid line of its own; the incomplete line before it is left as it is.
 - **A caller that does not wait.** A caller that closes its connection, or its sending side, right after sending the request gets no answer, but the record is written. The viewer works this way: it sends the print record without reading the response.
 
 Remaining limitations:
 
+- A write that timed out cannot be taken back once the operating system has it. If the disk recovers, that record can still land in the file, although its request was answered with `500`, and after records that were written later.
+- The check that the file at the path is the file that was written compares the device and file numbers that the volume reports. On a volume that reports `0` for them (some network and virtual file systems) a file that was *replaced* is not noticed; a file that was *removed* still is.
 - There is no `fsync` per record. A record is acknowledged when the operating system has accepted it; a crash of the machine or a power failure right after can still lose it.
 - A file that is removed or replaced *after* the check of a record is not noticed until the next record is written, and that next record then goes to the file at the path. The record before it was in the file at the path when it was acknowledged.
 - If an outside tool moves the log file away at the very moment a record is written, the record may be in both the moved file and the new one.

@@ -2,7 +2,7 @@
 
 ## server
 
-File count: 10. Line count: 1162. JSDoc symbol count: 37.
+File count: 10. Line count: 1200. JSDoc symbol count: 39.
 
 - `server/rollingLog.js` - Daily rotating log files for the log servers, with a write that reports its outcome.
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.

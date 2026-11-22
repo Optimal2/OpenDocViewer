@@ -229,6 +229,82 @@ describe('a write that is never confirmed', () => {
   });
 });
 
+describe('an open that hangs', () => {
+  /**
+   * A file system whose `open` hangs while `control.hung` is true, and that counts the handles
+   * it has handed out and not yet seen closed.
+   */
+  function countingFileSystem(control) {
+    control.openHandles = 0;
+    control.pending = [];
+    const track = async (args) => {
+      const handle = await fs.promises.open(...args);
+      control.openHandles += 1;
+      const close = handle.close.bind(handle);
+      let closed = false;
+      handle.close = async () => {
+        if (!closed) { closed = true; control.openHandles -= 1; }
+        return close();
+      };
+      return handle;
+    };
+    return {
+      ...fs,
+      promises: {
+        ...fs.promises,
+        open: (...args) => (control.hung
+          ? new Promise((resolve, reject) => { control.pending.push(() => track(args).then(resolve, reject)); })
+          : track(args)),
+      },
+    };
+  }
+
+  it('closes a file that opens after its write was given up, and never uses it', async () => {
+    const control = { hung: true };
+    log = createRollingLog({ logDir: dir, now: at, fileSystem: countingFileSystem(control), writeTimeoutMs: 100 });
+
+    const abandoned = 12;
+    for (let index = 0; index < abandoned; index += 1) {
+      await expect(log.write('print', `given up ${index}\n`)).rejects.toMatchObject({ code: 'ELOGTIMEOUT' });
+    }
+    expect(control.pending).toHaveLength(abandoned);
+
+    // The disk answers again: every open that was waiting completes now, long after its write
+    // was given up.
+    control.hung = false;
+    for (const release of control.pending) release();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    // None of them is kept open, and none of them wrote the line that was answered as failed.
+    expect(control.openHandles).toBe(0);
+
+    await log.write('print', 'kept 1\n');
+    await log.write('print', 'kept 2\n');
+    expect(control.openHandles).toBe(1);
+    expect(read(`print-${DAY}.log`)).toBe('kept 1\nkept 2\n');
+
+    await log.closeAll();
+    expect(control.openHandles).toBe(0);
+  });
+
+  it('does not let a late open take the place of the file in use', async () => {
+    const control = { hung: true };
+    log = createRollingLog({ logDir: dir, now: at, fileSystem: countingFileSystem(control), writeTimeoutMs: 100 });
+    await expect(log.write('print', 'given up\n')).rejects.toMatchObject({ code: 'ELOGTIMEOUT' });
+
+    control.hung = false;
+    await log.write('print', 'first\n');
+    expect(control.openHandles).toBe(1);
+    // The old open completes while another file is in use.
+    for (const release of control.pending) release();
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(control.openHandles).toBe(1);
+    await log.write('print', 'second\n');
+    expect(read(`print-${DAY}.log`)).toBe('first\nsecond\n');
+    await log.closeAll();
+    expect(control.openHandles).toBe(0);
+  });
+});
+
 describe('resolveLogWriteTimeoutMs', () => {
   it.each([[undefined], [''], ['  ']])('uses the default of ten seconds for %j', (raw) => {
     expect(DEFAULT_LOG_WRITE_TIMEOUT_MS).toBe(10_000);

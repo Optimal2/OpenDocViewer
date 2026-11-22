@@ -19,6 +19,9 @@
  *   the calls, also when several requests write at the same time.
  * - A file whose write failed or timed out is dropped and opened again by the next write, so
  *   one fault (a full disk, a hung share) does not make every later line disappear silently.
+ *   A write that timed out starts nothing more, and a file it was still opening is closed when
+ *   that open returns. Only an append that the operating system already has cannot be taken
+ *   back: it may still land, after lines written since.
  *   If the file then does not end with a line break, because part of a line reached it, the
  *   next line starts on a new line.
  * - The file name follows the UTC date; on a new day the next write opens the new file.
@@ -77,21 +80,37 @@ export function createRollingLog({
     if (waitForClose) await closing;
   }
 
-  async function entryFor(prefix) {
+  /** Thrown inside a write that was given up; its caller has been answered already. */
+  const givenUp = () => codedError('ELOGTIMEOUT', 'the log write was given up');
+
+  /**
+   * The open file for the prefix, opening it when needed. `state.abandoned` is checked after
+   * every step that waits: a write that was given up never makes its file the one in use, and
+   * a file that opens after that is closed again at once.
+   */
+  async function entryFor(prefix, state) {
     const today = utcDate(now());
     let entry = open.get(prefix);
     if (entry && entry.date !== today) {
       await drop(prefix, entry);
       entry = undefined;
     }
+    if (state.abandoned) throw givenUp();
     if (entry) return entry;
 
     const file = path.join(logDir, `${prefix}-${today}.log`);
     // The folder may have been removed while the service ran; opening the file would then fail.
     try { await files.mkdir(logDir, { recursive: true }); } catch { /* the open below reports it */ }
+    if (state.abandoned) throw givenUp();
     // "a+": append, and allow reading the last byte below.
     const handle = await files.open(file, 'a+');
     const created = { date: today, file, handle, dev: null, ino: null, needsLineBreak: false, dropped: false };
+    const closeUnused = () => Promise.resolve().then(() => handle.close()).catch(() => { /* already closed or gone */ });
+    if (state.abandoned) {
+      // The open came back after the write was given up (a disk that hung and recovered).
+      await closeUnused();
+      throw givenUp();
+    }
     try {
       const stat = await handle.stat({ bigint: true });
       created.dev = stat.dev;
@@ -103,8 +122,12 @@ export function createRollingLog({
         created.needsLineBreak = bytesRead === 1 && last[0] !== 0x0a;
       }
     } catch (error) {
-      await Promise.resolve().then(() => handle.close()).catch(() => {});
+      await closeUnused();
       throw error;
+    }
+    if (state.abandoned) {
+      await closeUnused();
+      throw givenUp();
     }
     open.set(prefix, created);
     return created;
@@ -123,8 +146,10 @@ export function createRollingLog({
   /** Write one line and confirm that it is in the file at the log file's path. */
   async function appendConfirmed(prefix, line, state) {
     for (let attempt = 0; attempt < 2; attempt += 1) {
-      const entry = await entryFor(prefix);
+      const entry = await entryFor(prefix, state);
       state.entry = entry;
+      // Given up while the file was being opened: do not start writing.
+      if (state.abandoned) throw givenUp();
       try {
         await entry.handle.appendFile((entry.needsLineBreak ? '\n' : '') + line, 'utf8');
         entry.needsLineBreak = false;
@@ -137,6 +162,8 @@ export function createRollingLog({
       // Close first (a removed file blocks its name on Windows until it is closed), then write
       // the line to the file at the path.
       await drop(prefix, entry);
+      // Given up in the meantime: no second attempt.
+      if (state.abandoned) throw givenUp();
     }
     throw codedError('ELOGFILEGONE', 'the log file was removed or replaced while the record was written');
   }
@@ -155,13 +182,18 @@ export function createRollingLog({
       const timeoutError = () => codedError('ELOGTIMEOUT', `the log write was not confirmed within ${writeTimeoutMs} ms`);
       // Waited too long behind other writes: do not start, the caller has been answered already.
       if (remaining <= 0) { reject(timeoutError()); return; }
-      const state = { entry: null };
+      const state = { entry: null, abandoned: false };
       let settled = false;
       const timer = setTimeout(() => {
         if (settled) return;
         settled = true;
-        // The file may be hung. Leave it; the next write opens the file again. A late result
-        // of this write is ignored below.
+        // The file may be hung. The write is given up: it starts no further step (no open, no
+        // write, no second attempt), a file it is still opening is closed when the open
+        // returns, and the file it had in use is dropped so that the next write opens the file
+        // again. One thing cannot be taken back: an append that the operating system already
+        // has. If that append completes later, its line is in the file although the caller
+        // was answered with a failure, and it may come after lines written since.
+        state.abandoned = true;
         drop(prefix, state.entry, { waitForClose: false });
         reject(timeoutError());
       }, remaining);

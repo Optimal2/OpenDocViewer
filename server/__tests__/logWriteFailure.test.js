@@ -46,6 +46,12 @@ vi.mock('express', async (importOriginal) => {
   return { ...actual, default: Object.assign(createApp, actual.default) };
 });
 
+/** Wait until the condition holds; the error report is written after the answer. */
+async function eventually(condition, timeoutMs = 3000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline && !condition()) await new Promise((resolve) => setTimeout(resolve, 10));
+}
+
 const TOKEN = 'test-token';
 const SECRET_TEXT = 'RECORD-CONTENT-THAT-MUST-NOT-BE-IN-THE-ERROR-LOG';
 const targets = {};
@@ -117,7 +123,9 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
     expect(response.status).toBe(500);
     expect(linesOf(targets[name].record)).toEqual([]);
 
-    const errors = linesOf('error').map((line) => JSON.parse(line)).filter((record) => record.event === 'log-write-failed');
+    const failures = () => linesOf('error').map((line) => JSON.parse(line)).filter((record) => record.event === 'log-write-failed');
+    await eventually(() => failures().length > 0);
+    const errors = failures();
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({ level: 'error', log: targets[name].record, code: 'ENOSPC' });
     expect(errors[0].message).toMatch(/no space left/);
@@ -137,7 +145,9 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
     state.failure = failing(targets[name].record, 'error');
     const response = await send(SECRET_TEXT);
     expect(response.status).toBe(500);
-    const text = stderr.mock.calls.map((call) => String(call[0])).join('');
+    const reportedText = () => stderr.mock.calls.map((call) => String(call[0])).join('');
+    await eventually(() => reportedText().includes('log-write-failed'));
+    const text = reportedText();
     expect(text).toContain('log-write-failed');
     expect(text).toContain('ENOSPC');
     expect(text).not.toContain(SECRET_TEXT);
@@ -165,10 +175,13 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
     expect(response.status).toBe(500);
     // One answer only: the body is the plain 500 text, not two answers on the connection.
     expect(response.text.match(/HTTP\/1\.1/g)).toBeNull();
-    // LOG_WRITE_TIMEOUT_MS is 400 here; the error report waits at most as long again.
+    // LOG_WRITE_TIMEOUT_MS is 400 here. The answer comes when that time is up; it does not
+    // also wait for the error report, which on a hung disk takes as long again.
     expect(waited).toBeGreaterThanOrEqual(380);
-    expect(waited).toBeLessThan(3000);
-    const reported = stderr.mock.calls.map((call) => String(call[0])).join('');
+    expect(waited).toBeLessThan(700);
+    const reportedText = () => stderr.mock.calls.map((call) => String(call[0])).join('');
+    await eventually(() => reportedText().includes('log-write-failed'));
+    const reported = reportedText();
     expect(reported).toContain('log-write-failed');
     expect(reported).toContain('ELOGTIMEOUT');
     expect(reported).not.toContain(SECRET_TEXT);

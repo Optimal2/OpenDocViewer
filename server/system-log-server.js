@@ -248,8 +248,11 @@ app.post('/log', corsForLog, logLimiter, requireLogToken, async (req, res) => {
     try {
       await rollingLog.write('ingestion', safeJson(record) + '\n');
     } catch (writeError) {
-      await reportWriteFailure('ingestion', writeError);
-      return res.status(500).send('Failed to write log');
+      // Answer first. The error report is not waited for: on a hung disk it takes its own
+      // timeout, and the caller must not wait twice. It never rejects.
+      res.status(500).send('Failed to write log');
+      void reportWriteFailure('ingestion', writeError);
+      return;
     }
     res.status(204).end();
   } catch (err) {
