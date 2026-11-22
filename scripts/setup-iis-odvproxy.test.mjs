@@ -54,7 +54,7 @@ function global:Get-IisFacts([string]$Kind, [string]$Key) {
   return $facts
 }
 function global:Add-IisFact([string]$Kind, [string]$Key, [string]$Value) {
-  ($Kind, $Key, $Value -join [char]9) | Add-Content -LiteralPath $env:ODV_IIS_STATE -Encoding Ascii
+  ($Kind, $Key, $Value -join [char]9) | Add-Content -LiteralPath $env:ODV_IIS_STATE -Encoding Ascii -WhatIf:$false
 }
 # The layers that make up the allowed server variables of a location, outermost first.
 function global:Get-IisAllowedLayers([string]$Location) {
@@ -101,12 +101,14 @@ function global:Get-WebConfigurationProperty {
   }
   if ($names -contains $wanted.Groups[1].Value) { return [pscustomobject]@{ Value = $wanted.Groups[1].Value } }
 }
-# Like the real cmdlets, the changing stand-ins do nothing under -WhatIf; the call is still recorded.
+# The changing stand-ins change the stand-in IIS also under -WhatIf. That is the worst case of
+# the real cmdlets (Restart-WebAppPool has no ShouldProcess at all), so -WhatIf is only safe if
+# the setup script never calls them then.
 function global:Set-WebConfigurationProperty { param($PSPath, $Location, $Filter, $Name, $Value, $ErrorAction) Write-IisCall 'Set-WebConfigurationProperty' $PSBoundParameters }
 function global:Add-WebConfigurationProperty {
   param($PSPath, $Location, $Filter, $Name, $Value, $ErrorAction)
   Write-IisCall 'Add-WebConfigurationProperty' $PSBoundParameters
-  if ($env:ODV_IIS_DROP_ADDS -eq '1' -or $WhatIfPreference) { return }
+  if ($env:ODV_IIS_DROP_ADDS -eq '1') { return }
   if ($PSPath -ne 'MACHINE/WEBROOT/APPHOST' -or -not $Location -or $Filter -ne 'system.webServer/rewrite/allowedServerVariables') {
     throw "Stand-in IIS: unexpected Add-WebConfigurationProperty target."
   }
@@ -116,15 +118,15 @@ function global:Add-WebConfigurationProperty {
 function global:New-WebAppPool {
   param($Name)
   Write-IisCall 'New-WebAppPool' $PSBoundParameters
-  if (-not $WhatIfPreference) { Add-IisFact 'path' 'IIS' ('IIS:\AppPools\' + $Name) }
+  Add-IisFact 'path' 'IIS' ('IIS:\AppPools\' + $Name)
 }
 function global:New-WebApplication {
   param($Site, $Name, $PhysicalPath, $ApplicationPool)
   Write-IisCall 'New-WebApplication' $PSBoundParameters
-  if (-not $WhatIfPreference) { Add-IisFact 'path' 'IIS' ('IIS:\Sites\' + $Site + '\' + $Name) }
+  Add-IisFact 'path' 'IIS' ('IIS:\Sites\' + $Site + '\' + $Name)
 }
-function global:Restart-WebAppPool { param($Name) Write-IisCall 'Restart-WebAppPool' $PSBoundParameters }
-function global:Set-ItemProperty { param($Path, $Name, $Value) Write-IisCall 'Set-ItemProperty' $PSBoundParameters }
+function global:Restart-WebAppPool { param($Name) Write-IisCall 'Restart-WebAppPool' $PSBoundParameters; Add-IisFact 'recycled' 'pool' "$Name" }
+function global:Set-ItemProperty { param($Path, $Name, $Value) Write-IisCall 'Set-ItemProperty' $PSBoundParameters; Add-IisFact 'property' "$Path" "$Name" }
 function global:Test-Path {
   param($Path)
   if ("$Path" -like 'IIS:*') { return ((Get-IisFacts 'path' 'IIS') -contains "$Path") }
@@ -247,6 +249,11 @@ function createIis({ serverAllowed = [], siteWebConfigAllowed = [], dropAdds = f
     },
     webConfig,
     physicalPathExists: () => fs.existsSync(physicalPath),
+    /** Everything the stand-in IIS has stored, and the deployed files with their content. */
+    state: () => fs.readFileSync(statePath, 'utf8'),
+    files: () => (fs.existsSync(physicalPath)
+      ? Object.fromEntries(fs.readdirSync(physicalPath).sort().map((name) => [name, fs.readFileSync(path.join(physicalPath, name), 'base64')]))
+      : {}),
     /** Variables stored for the application's location in the stand-in applicationHost.config. */
     locationAllowed: () => stored().filter(([kind, key]) => kind === 'allowed' && key === LOCATION).map((fact) => fact[2]),
     /** The merged list IIS would use for the application, and the names declared more than once. */
@@ -324,21 +331,48 @@ describe.skipIf(!onWindows)('Setup-IIS-ODVProxy.ps1', () => {
     }
   }, 120_000);
 
-  test('does nothing under -WhatIf and says that the final check was skipped', async () => {
+  const CHANGING = ['Set-WebConfigurationProperty', 'Add-WebConfigurationProperty', 'New-WebAppPool', 'New-WebApplication',
+    'Restart-WebAppPool', 'Set-ItemProperty', 'appcmd'];
+  const CLAIMS = /Wrote |Created |Allowed |Deployment complete|is enabled at server level|Checked:|updating physical path/;
+
+  test('changes nothing under -WhatIf on a new server, and claims nothing', async () => {
+    for (const params of [{}, { ForwardClientHeaders: true }]) {
+      await withIis({}, async (iis) => {
+        const result = await iis.run({ ...params, WhatIf: true });
+        assert.equal(result.code, 0, result.output);
+        // The stand-ins would have changed the stand-in IIS, so none of them may have been called.
+        assert.deepEqual(result.calls.filter((call) => CHANGING.includes(call.command)), [], JSON.stringify(result.calls));
+        assert.equal(iis.state(), '');
+        assert.equal(result.webConfig, '');
+        assert.equal(iis.physicalPathExists(), false);
+        assert.doesNotMatch(result.output, CLAIMS);
+        assert.doesNotMatch(result.output, /Setup check failed/);
+        // It says what would be done, and that nothing was.
+        assert.match(result.output, /What if: .*Write web\.config/);
+        assert.match(result.output, /What if: .*Recycle/);
+        assert.match(result.output, /WhatIf: nothing was changed/);
+        assert.match(result.output, /final check[^\n]*skipped/i);
+      });
+    }
+  }, 240_000);
+
+  test('changes nothing under -WhatIf on an existing installation, and claims nothing', async () => {
     await withIis({}, async (iis) => {
+      const installed = await iis.run({});
+      assertWorkingProxy(iis, installed);
+      const stateBefore = iis.state();
+      const filesBefore = iis.files();
+
+      // Other switches than the installation has, so that a real run would change the files.
       const result = await iis.run({ ForwardClientHeaders: true, WhatIf: true });
       assert.equal(result.code, 0, result.output);
-      assert.match(result.output, /WhatIf/);
-      assert.match(result.output, /final check[^\n]*skipped/i);
-      assert.doesNotMatch(result.output, /Setup check failed/);
-      // Nothing was written or stored, and every recorded call ran under WhatIf.
-      assert.equal(result.webConfig, '');
-      assert.equal(iis.physicalPathExists(), false);
-      assert.deepEqual(iis.locationAllowed(), []);
-      assert.ok(result.calls.length > 0);
-      assert.ok(result.calls.every((call) => call.whatif === true), JSON.stringify(result.calls));
+      assert.deepEqual(result.calls.filter((call) => CHANGING.includes(call.command)), [], JSON.stringify(result.calls));
+      assert.equal(iis.state(), stateBefore);
+      assert.deepEqual(iis.files(), filesBefore);
+      assert.doesNotMatch(result.output, CLAIMS);
+      assert.match(result.output, /WhatIf: nothing was changed/);
     });
-  }, 120_000);
+  }, 240_000);
 
   test('changes nothing for the whole server except turning the ARR proxy on, with and without -ForwardClientHeaders', async () => {
     for (const params of [{}, { ForwardClientHeaders: true }]) {
@@ -535,3 +569,50 @@ test('the proxy template forwards the public host on the user-log rule only', ()
   // Every placeholder is a comment or an attribute value, so none can end up as raw text.
   assert.doesNotMatch(text.replace(/<!--[\s\S]*?-->/g, '').replace(/"[^"]*"/g, '""'), /__[A-Z][A-Z_]*__/);
 });
+
+// Every command that changes something has to sit inside an `if ($PSCmdlet.ShouldProcess(...))`
+// of the script itself. Checked on the syntax tree, on every platform that has pwsh.
+test('every changing step of the setup script is behind its own ShouldProcess check', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-iis-ast-'));
+  try {
+    const checker = path.join(dir, 'check.ps1');
+    fs.writeFileSync(checker, String.raw`
+param([string]$ScriptPath)
+$tokens = $null; $errors = $null
+$ast = [System.Management.Automation.Language.Parser]::ParseFile($ScriptPath, [ref]$tokens, [ref]$errors)
+$changing = 'Set-WebConfigurationProperty', 'Add-WebConfigurationProperty', 'Remove-WebConfigurationProperty', 'New-Item', 'Set-Content',
+  'Add-Content', 'Out-File', 'Copy-Item', 'Move-Item', 'Remove-Item', 'New-WebAppPool', 'New-WebApplication', 'New-Website',
+  'Remove-WebApplication', 'Remove-WebAppPool', 'Set-ItemProperty', 'Restart-WebAppPool', 'Start-WebAppPool', 'Stop-WebAppPool'
+$found = 0
+$unguarded = @()
+foreach ($command in $ast.FindAll({ param($node) $node -is [System.Management.Automation.Language.CommandAst] }, $true)) {
+  $name = $command.GetCommandName()
+  if (-not $name -or ($changing -notcontains $name -and $command.InvocationOperator -eq 'Unknown')) { continue }
+  $found++
+  $guarded = $false
+  $child = $command
+  $parent = $command.Parent
+  while ($parent) {
+    if ($parent -is [System.Management.Automation.Language.IfStatementAst]) {
+      foreach ($clause in $parent.Clauses) {
+        $inBody = $child -eq $clause.Item2
+        if ($inBody -and $clause.Item1.Extent.Text -match '^\$PSCmdlet\.ShouldProcess\(') { $guarded = $true }
+      }
+    }
+    $child = $parent
+    $parent = $parent.Parent
+  }
+  if (-not $guarded) { $unguarded += ('line ' + $command.Extent.StartLineNumber + ': ' + $name) }
+}
+Write-Output ('changing=' + $found)
+Write-Output ('unguarded=' + ($unguarded -join '; '))
+`, 'ascii');
+    const output = execFileSync('pwsh', ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', checker, '-ScriptPath', script],
+      { encoding: 'utf8', windowsHide: true, timeout: 60_000, env: shellEnvironment() });
+    assert.match(output, /unguarded=\s*$/m, output);
+    const changing = Number(/changing=(\d+)/.exec(output)?.[1] ?? 0);
+    assert.ok(changing >= 9, `only ${changing} changing commands were found:\n${output}`);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}, 120_000);

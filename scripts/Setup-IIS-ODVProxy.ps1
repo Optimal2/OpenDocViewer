@@ -21,7 +21,9 @@
   variable that the server or the site already allows is left alone. Those entries stay after
   the application is removed; the script has no uninstall.
 
-  -WhatIf shows what would be done and changes nothing; the final check is skipped then.
+  -WhatIf shows what would be done and changes nothing. Every step that changes something,
+  on disk or in IIS, sits behind its own ShouldProcess check in this script, so that does not
+  depend on how the IIS cmdlets treat -WhatIf. The final check is skipped then.
 
   The script can be run any number of times: the same switches give the same web.config and the
   same allow list. It ends by reading the allow list back and fails if a variable that a rule
@@ -101,9 +103,11 @@ try {
 if ($EnableSystemLog -or $EnableUserLog) {
   try {
     # Enabling proxy requires ARR; this will fail if ARR is missing
-    Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
-      -filter 'system.webServer/proxy' -name 'enabled' -value 'True' -ErrorAction Stop
-    Write-Ok "ARR proxying is enabled at server level."
+    if ($PSCmdlet.ShouldProcess('IIS server (system.webServer/proxy)', 'Turn ARR proxying on')) {
+      Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' `
+        -filter 'system.webServer/proxy' -name 'enabled' -value 'True' -ErrorAction Stop
+      Write-Ok "ARR proxying is enabled at server level."
+    }
   } catch {
     Write-Err "Failed to enable ARR proxy. Ensure 'Application Request Routing' is installed and proxying is enabled."
     throw
@@ -144,8 +148,10 @@ function Get-RuleServerVariables([string]$WebConfigText) {
 
 # Prepare physical folder
 if (!(Test-Path $PhysicalPath)) {
-  New-Item -ItemType Directory -Path $PhysicalPath | Out-Null
-  Write-Ok "Created folder: $PhysicalPath"
+  if ($PSCmdlet.ShouldProcess($PhysicalPath, 'Create folder')) {
+    New-Item -ItemType Directory -Path $PhysicalPath | Out-Null
+    Write-Ok "Created folder: $PhysicalPath"
+  }
 }
 
 # Generate web.config from template
@@ -193,10 +199,15 @@ if ($config -cmatch '__[A-Z][A-Z_]*__') {
 $neededVariables = @(Get-RuleServerVariables $config)
 
 $configPath = Join-Path $PhysicalPath "web.config"
-Set-Content -Path $configPath -Value $config -Encoding UTF8
-Copy-Item -Path $IdxFile -Destination (Join-Path $PhysicalPath "index.html") -Force
-
-Write-Ok "Wrote $(Split-Path -Leaf $configPath) and index.html"
+if ($PSCmdlet.ShouldProcess($configPath, 'Write web.config')) {
+  Set-Content -Path $configPath -Value $config -Encoding UTF8
+  Write-Ok "Wrote $(Split-Path -Leaf $configPath)"
+}
+$indexPath = Join-Path $PhysicalPath "index.html"
+if ($PSCmdlet.ShouldProcess($indexPath, 'Write index.html')) {
+  Copy-Item -Path $IdxFile -Destination $indexPath -Force
+  Write-Ok "Wrote index.html"
+}
 
 # Allow the server variables that the enabled rules set, for this application's location only.
 # This comes AFTER web.config is written, and web.config never declares the section itself. The
@@ -209,7 +220,7 @@ foreach ($variable in $neededVariables) {
   try {
     if (Test-ServerVariableAllowed $variable) {
       Write-Ok "$variable is already allowed for '$AppLocation'."
-    } else {
+    } elseif ($PSCmdlet.ShouldProcess("allowedServerVariables for '$AppLocation'", "Allow $variable")) {
       Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -location $AppLocation `
         -filter $allowFilter -name '.' -value @{ name = $variable } -ErrorAction Stop
       Write-Ok "Allowed $variable for '$AppLocation' only."
@@ -223,25 +234,31 @@ foreach ($variable in $neededVariables) {
 # Create app pool (No Managed Code)
 $appPoolName = "ODVProxyAppPool"
 if (-not (Test-Path IIS:\AppPools\$appPoolName)) {
-  New-WebAppPool -Name $appPoolName | Out-Null
-  Set-ItemProperty IIS:\AppPools\$appPoolName -Name managedRuntimeVersion -Value ""
-  Write-Ok "Created app pool: $appPoolName (No Managed Code)"
+  if ($PSCmdlet.ShouldProcess("application pool '$appPoolName'", 'Create (No Managed Code)')) {
+    New-WebAppPool -Name $appPoolName | Out-Null
+    Set-ItemProperty IIS:\AppPools\$appPoolName -Name managedRuntimeVersion -Value ""
+    Write-Ok "Created app pool: $appPoolName (No Managed Code)"
+  }
 }
 
 # Create/Update IIS application
 $AppVDir = $AppPath.Trim('/')
 
 if (Test-Path ("IIS:\Sites\$SiteName\$AppVDir")) {
-  Write-Info "Application exists; updating physical path and app pool."
-  Set-ItemProperty ("IIS:\Sites\$SiteName\$AppVDir") -Name physicalPath -Value $PhysicalPath
-  Set-ItemProperty ("IIS:\Sites\$SiteName\$AppVDir") -Name applicationPool -Value $appPoolName
-} else {
+  if ($PSCmdlet.ShouldProcess("IIS application '$AppLocation'", 'Set physical path and application pool')) {
+    Write-Info "Application exists; updating physical path and app pool."
+    Set-ItemProperty ("IIS:\Sites\$SiteName\$AppVDir") -Name physicalPath -Value $PhysicalPath
+    Set-ItemProperty ("IIS:\Sites\$SiteName\$AppVDir") -Name applicationPool -Value $appPoolName
+  }
+} elseif ($PSCmdlet.ShouldProcess("IIS application '$AppLocation'", 'Create')) {
   New-WebApplication -Site $SiteName -Name $AppVDir -PhysicalPath $PhysicalPath -ApplicationPool $appPoolName | Out-Null
   Write-Ok "Created IIS application: /$AppVDir under site '$SiteName'"
 }
 
 # Recycle pool to pick up changes
-Restart-WebAppPool $appPoolName
+if ($PSCmdlet.ShouldProcess("application pool '$appPoolName'", 'Recycle')) {
+  Restart-WebAppPool $appPoolName
+}
 
 # Final check: every server variable that an enabled rule sets must be allowed for the
 # application now. If one is missing IIS answers every request to that rule with 500, so the
@@ -264,6 +281,11 @@ if ($notAllowed.Count -gt 0) {
 }
 if (-not $WhatIfPreference) {
   Write-Ok "Checked: every server variable the proxy rules set is allowed for '$AppLocation'."
+}
+
+if ($WhatIfPreference) {
+  Write-Info "WhatIf: nothing was changed. The steps above marked 'What if' are what a run without -WhatIf would do."
+  return
 }
 
 Write-Ok "Deployment complete. Proxy base URL: /$AppVDir/"
