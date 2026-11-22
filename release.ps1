@@ -350,8 +350,11 @@ function Get-ReleasePushArguments {
   )
 
   if ([string]::IsNullOrWhiteSpace($Branch)) { throw 'Cannot push a release without a branch name.' }
-  if ("$TagName" -notmatch '^v\d+\.\d+\.\d+$') { throw "Cannot push a release without a plain vX.Y.Z tag name (got '$TagName')." }
-  return @('push', '--atomic', 'origin', $Branch, "refs/tags/$TagName")
+  # Case-sensitive, ASCII digits only, anchored to the whole string (\z, not $, so a trailing
+  # line feed does not pass).
+  if ("$TagName" -cnotmatch '\Av[0-9]+\.[0-9]+\.[0-9]+\z') { throw "Cannot push a release without a plain vX.Y.Z tag name (got '$TagName')." }
+  # --no-follow-tags: a user's push.followTags=true must not add other tags to this push.
+  return @('push', '--atomic', '--no-follow-tags', 'origin', $Branch, "refs/tags/$TagName")
 }
 
 function Get-PushFailureRollback {

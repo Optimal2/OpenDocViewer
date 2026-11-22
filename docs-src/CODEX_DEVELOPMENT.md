@@ -120,7 +120,8 @@ For AI-operated official releases:
    will be pushed and asks for confirmation before it pushes. `-Yes` skips that question, and a
    `-ReleaseType` that does not match the prepared version stops the run. The push is atomic
    and names exactly the branch and the release tag
-   (`git push --atomic origin <branch> refs/tags/vX.Y.Z`); no other tag is pushed.
+   (`git push --atomic --no-follow-tags origin <branch> refs/tags/vX.Y.Z`); no other tag is
+   pushed.
 7. `release.ps1 -Publish` pushes the release commit + tag, and that push IS the release: the
    GitHub Actions **Release** workflow AUTO-runs on the `vX.Y.Z` tag and builds + publishes the
    GitHub release (body from `release-notes/<tag>.md`). The single approval gate is running

@@ -121,7 +121,7 @@ Describe 'Format-PreparedReleaseSummary' {
     $summary | Should -Match 'Branch:\s+main'
     $summary | Should -Match 'aaaa1111'
     $summary | Should -Match 'bbbb2222'
-    $summary | Should -Match 'git push --atomic origin main refs/tags/v2\.12\.1'
+    $summary | Should -Match 'git push --atomic --no-follow-tags origin main refs/tags/v2\.12\.1'
     $summary | Should -Match 'no other tag'
     $summary | Should -Match 'Release workflow'
     $summary | Should -Match '-SkipValidation has no effect here\.'
@@ -161,7 +161,18 @@ Describe 'Confirm-PreparedReleasePublish' {
 Describe 'Get-ReleasePushArguments' {
   It 'pushes exactly the branch and the release tag, atomically' {
     $arguments = @(Get-ReleasePushArguments -Branch 'main' -TagName 'v2.12.1')
-    ($arguments -join ' ') | Should -Be 'push --atomic origin main refs/tags/v2.12.1'
+    # --no-follow-tags overrides a user's push.followTags=true, which would add other tags.
+    ($arguments -join ' ') | Should -Be 'push --atomic --no-follow-tags origin main refs/tags/v2.12.1'
+  }
+
+  It 'refuses a tag name that is not exactly vX.Y.Z: <Name>' -ForEach @(
+    @{ Name = 'a trailing line feed'; TagName = "v2.12.1`n" }
+    @{ Name = 'a capital V'; TagName = 'V2.12.1' }
+    @{ Name = 'a leading space'; TagName = ' v2.12.1' }
+    @{ Name = 'non-ASCII digits'; TagName = "v2.12.$([char]0x0661)" }
+    @{ Name = 'a prerelease suffix'; TagName = 'v2.12.1-rc.1' }
+  ) {
+    { Get-ReleasePushArguments -Branch 'main' -TagName $TagName } | Should -Throw
   }
 
   It 'refuses to build a push without <Name>' -ForEach @(
@@ -234,7 +245,7 @@ Describe 'release.ps1 flow' {
     # One push statement serves the same-run and the prepared release. --follow-tags would also
     # push every other annotated tag reachable from HEAD, and a stray v* tag starts the Release
     # workflow.
-    $script:ReleaseText | Should -Not -Match 'follow-tags'
+    $script:ReleaseText | Should -Not -Match '(?<!--no-)follow-tags'
     $pushes = $script:ReleaseAst.FindAll({ param($node)
         $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $node.Value -eq 'push' }, $true)
     @($pushes).Count | Should -Be 1
