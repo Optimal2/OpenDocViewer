@@ -55,6 +55,7 @@ This document describes the two optional Node/Express services that accompany th
     - `meta.reason` and `meta.forWhom` from the bundled viewer's JSON envelope
     - top-level `reason` and `forWhom` remain accepted for compatibility with form posts and older callers
   - response on success: JSON literal `true` with HTTP `200`, sent only after the record has been written to the file
+  - a caller that closes its connection or its sending side before the response gets no response, but the record is written
   - `$` and `#` in `forWhom` are stored as `_`. The request is not rejected for them: the viewer
     sends the record without reading the response, so a rejection would lose the print record
     without anyone noticing.
@@ -115,6 +116,7 @@ Old files are pruned on startup and once every 24 hours while the service remain
 | `PRINT_LOG_RETENTION_DAYS` | User | `30`. Print records; without it they follow `LOG_RETENTION_DAYS` but never below 30. |
 | `USER_LOG_RATE_LIMIT_PER_MINUTE` | User | No limit (`0`). A positive number sets requests per minute and client address. See "Rate limits". |
 | `SYSTEM_LOG_RATE_LIMIT_PER_MINUTE` | System | `120` requests per minute and client address; `0` or `off` means no limit. |
+| `LOG_WRITE_TIMEOUT_MS` | Both | `10000`. How long a request waits for its record to be confirmed in the log file before it is answered with `500`; a whole number of milliseconds from 100 to 600000. Any other value keeps the default, with a warning at start. |
 | `ODV_STRICT_ORIGIN` | User | `false` in the code; **`true` in the recommended deployment** and in services installed by `scripts/Manage-ODV-LogServers.ps1`. With `true` a request without `Origin`, `Referer` and `Sec-Fetch-Site` is rejected. See "Strict origin". |
 
 Both use `helmet()` and daily UTC rotation.
@@ -256,7 +258,24 @@ window.__ODV_SITE_CONFIG__ = {
 
 - **What it does.** The user log server always rejects a request whose `Origin` or `Referer` points to another host, and one whose `Sec-Fetch-Site` is not `same-origin`. A request that carries none of the three headers is a different case: with `ODV_STRICT_ORIGIN=true` it is rejected with `403`, without it the request is accepted. Browsers send `Origin` with the viewer's print record, so the viewer is not affected.
 - **When it may have to be off.** A caller that is not a browser and sends none of the three headers (a script, an older host application that posts the record itself, a monitoring probe) is rejected with strict origin. Either let that caller send an `Origin` header that matches the public host, or set `ODV_STRICT_ORIGIN=false` for that installation.
+- **Running the service script again switches it on.** `scripts/Manage-ODV-LogServers.ps1` writes the whole environment of the services each time it installs them. Running it against services that are already installed therefore overwrites their environment variables, and the user log service starts with `ODV_STRICT_ORIGIN=true` the next time. An existing caller that sends none of `Origin`, `Referer` and `Sec-Fetch-Site` is rejected from then on. Check for such callers before the script is run again, or set `$Script:STRICT_ORIGIN` to `'false'` first.
 - **Where it is set.** `scripts/Manage-ODV-LogServers.ps1` installs the user log service with `ODV_STRICT_ORIGIN=true`, from the constant `$Script:STRICT_ORIGIN` near the top of the script. The default in the server code is unchanged (`false`): changing it would change the behaviour of existing installations that start the server in another way, which then have to set the variable themselves.
+
+## When a record counts as written
+
+Both endpoints answer success only when the record is in its log file, and `500` otherwise.
+
+- **Written and still at the path.** After each write the server compares the log file's path with the file it has open. If the file was removed, moved or replaced while the service ran, also together with the whole log folder, the server opens the file again at the path (creating the folder) and writes the record there before it answers. A record is not acknowledged from a file that is no longer at the path. This costs one `stat` per record.
+- **Time limit.** If the write is not confirmed within `LOG_WRITE_TIMEOUT_MS` (default 10 seconds), for example on a hung disk or network share, the request is answered with `500` and a `log-write-failed` line with the code `ELOGTIMEOUT` is written, to standard error if the error log is on the same hung disk. The file is opened again by the next record.
+- **After a fault.** A file whose write failed is opened again by the next record, without a restart. If part of a line reached the file before the fault, the next record starts on a new line, so it stays a valid line of its own; the incomplete line before it is left as it is.
+- **A caller that does not wait.** A caller that closes its connection, or its sending side, right after sending the request gets no answer, but the record is written. The viewer works this way: it sends the print record without reading the response.
+
+Remaining limitations:
+
+- There is no `fsync` per record. A record is acknowledged when the operating system has accepted it; a crash of the machine or a power failure right after can still lose it.
+- A file that is removed or replaced *after* the check of a record is not noticed until the next record is written, and that next record then goes to the file at the path. The record before it was in the file at the path when it was acknowledged.
+- If an outside tool moves the log file away at the very moment a record is written, the record may be in both the moved file and the new one.
+- A tool that rotates or removes the log files from outside is not needed and not recommended; the servers rotate by date and prune by age themselves.
 
 ## Disk space is a requirement
 

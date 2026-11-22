@@ -282,7 +282,13 @@ Required for the log servers in a deployment (details in `log-servers.md`):
   per client address by default, every line is an audit record, and when the disk is full the
   servers answer `500` and the record is not written.
 - **A record is answered as stored only when it was written.** Both endpoints answer `500`
-  when the write fails and leave a `log-write-failed` line in `error-*.log`.
+  when the write fails, or is not confirmed within `LOG_WRITE_TIMEOUT_MS` (default 10 seconds),
+  and leave a `log-write-failed` line in `error-*.log`. Do not let an outside tool rotate or
+  remove the log files; the servers do that themselves.
+- **Running `scripts/Manage-ODV-LogServers.ps1` again overwrites the environment of installed
+  services.** The user log service then starts with `ODV_STRICT_ORIGIN=true` the next time, and
+  an existing caller that sends none of `Origin`, `Referer` and `Sec-Fetch-Site` is rejected.
+  Check for such callers first, or set `$Script:STRICT_ORIGIN` to `'false'` in the script.
 
 Main responsibilities of that script:
 
