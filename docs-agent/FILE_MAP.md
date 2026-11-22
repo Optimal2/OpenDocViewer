@@ -175,7 +175,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/ocrSearchPlacement.js</code> | 258 | 1 | 16 | high | Where the toolbar&#39;s OCR search field goes and how wide it is \(components/DocumentToolbar/OcrSearchBar.jsx\): inline in the toolbar, grown out of the button to the right into the room the toolbar&#39;s spacer leaves, or, when |
 | <code>src/utils/ocrStatus.js</code> | 108 | 1 | 4 | high | The per-page OCR status the toolbar&#39;s search button shows \(components/DocumentToolbar/OcrSearchBar.jsx\): one key per outcome state, its English fallback text \(public/locales/&lt;lng&gt;/common.json, \`ocr.status\`\) and the LED s |
 | <code>src/utils/ocrTextLayout.js</code> | 283 | 3 | 13 | high | Geometry of the OCR text layer \(components/OcrTextLayer.jsx\): the recognised words grouped into lines, where each line and word goes inside the page frame, and how the invisible text is fitted to the recognised boxes. |
-| <code>src/utils/olderConfigNameWarnings.js</code> | 125 | 1 | 7 | high | Console warnings for the older configuration names that still take precedence over the documented key. |
+| <code>src/utils/olderConfigNameWarnings.js</code> | 143 | 1 | 7 | high | Console warnings for the older configuration names that still take precedence over the documented key. |
 | <code>src/utils/ompThemePreference.js</code> | 390 | 4 | 22 | high | Shared OMP theme preference adapter \(OMP_THEME_PREFERENCE\). |
 | <code>src/utils/pageAssetRenderer.js</code> | 931 | 2 | 6 | high | OpenDocViewer — hybrid page-asset renderer. |
 | <code>src/utils/pageAssetStore.js</code> | 751 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |

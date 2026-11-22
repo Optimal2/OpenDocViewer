@@ -66,18 +66,31 @@ const OLDER_NAMES = [
  * @returns {Array<OlderConfigName>}
  */
 export function findOlderConfigNamesInUse(runtimeConfig) {
-  if (!isObject(runtimeConfig)) return [];
-  const pdf = isObject(runtimeConfig.print) && isObject(runtimeConfig.print.pdf) ? runtimeConfig.print.pdf : {};
+  // The configuration object is host-owned: a getter or a Proxy in it can throw on any access.
+  // Nothing here may let such an error out, because this runs before the viewer is mounted.
   const found = [];
-  for (const entry of OLDER_NAMES) {
-    let inUse;
+  try {
+    if (!isObject(runtimeConfig)) return [];
+    let pdf = {};
     try {
-      inUse = entry.inUse(runtimeConfig, pdf);
+      const print = runtimeConfig.print;
+      const candidate = isObject(print) ? print.pdf : undefined;
+      if (isObject(candidate)) pdf = candidate;
     } catch {
-      // A host-owned configuration object can throw from a getter; that is not worth a warning.
-      inUse = false;
+      pdf = {};
     }
-    if (inUse) found.push({ older: entry.older, documented: entry.documented });
+    for (const entry of OLDER_NAMES) {
+      let inUse;
+      try {
+        inUse = entry.inUse(runtimeConfig, pdf);
+      } catch {
+        // A value that cannot be read is not worth a warning.
+        inUse = false;
+      }
+      if (inUse) found.push({ older: entry.older, documented: entry.documented });
+    }
+  } catch {
+    return [];
   }
   return found;
 }
@@ -103,17 +116,22 @@ const reported = new Set();
  */
 export function warnAboutOlderConfigNames(runtimeConfig, warn) {
   if (typeof window === 'undefined') return [];
-  const write = typeof warn === 'function' ? warn : (message) => console.warn(message);
   const fresh = [];
-  for (const name of findOlderConfigNamesInUse(runtimeConfig)) {
-    if (reported.has(name.older)) continue;
-    reported.add(name.older);
-    fresh.push(name);
-    try {
-      write(formatOlderConfigNameWarning(name));
-    } catch {
-      // A console that throws must not stop the viewer from starting.
+  // Whatever goes wrong in here, the warning must never stop the viewer from starting.
+  try {
+    const write = typeof warn === 'function' ? warn : (message) => console.warn(message);
+    for (const name of findOlderConfigNamesInUse(runtimeConfig)) {
+      if (reported.has(name.older)) continue;
+      reported.add(name.older);
+      fresh.push(name);
+      try {
+        write(formatOlderConfigNameWarning(name));
+      } catch {
+        // A console that throws is not a reason to fail.
+      }
     }
+  } catch {
+    // Deliberately silent.
   }
   return fresh;
 }

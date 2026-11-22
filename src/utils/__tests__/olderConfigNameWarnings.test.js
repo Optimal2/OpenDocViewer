@@ -136,6 +136,45 @@ describe('older names: no warning without them', () => {
     for (const value of [undefined, null, 'text', 7, []]) expect(findOlderConfigNamesInUse(value)).toEqual([]);
   });
 
+  it.each([
+    ['a getter on print that throws', () => Object.defineProperty({ logToken: SECRET }, 'print', {
+      enumerable: true, get() { throw new Error('host getter'); },
+    })],
+    ['a getter on print.pdf that throws', () => ({
+      logToken: SECRET,
+      print: Object.defineProperty({}, 'pdf', { enumerable: true, get() { throw new Error('host getter'); } }),
+    })],
+    ['a getter on print.pdf.orientation that throws', () => ({
+      logToken: SECRET,
+      print: { pdf: Object.defineProperty({}, 'orientation', { enumerable: true, get() { throw new Error('host getter'); } }) },
+    })],
+  ])('never throws for a host configuration with %s, and still reports the names it can read', (_name, makeConfig) => {
+    expect(() => findOlderConfigNamesInUse(makeConfig())).not.toThrow();
+    expect(() => warnAboutOlderConfigNames(makeConfig(), warn)).not.toThrow();
+    expect(findOlderConfigNamesInUse(makeConfig())).toEqual([{ older: 'logToken', documented: 'systemLog.token' }]);
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['a Proxy that throws on every access', () => new Proxy({}, {
+      get() { throw new Error('host proxy'); },
+      has() { throw new Error('host proxy'); },
+      ownKeys() { throw new Error('host proxy'); },
+      getOwnPropertyDescriptor() { throw new Error('host proxy'); },
+    })],
+    ['a revoked Proxy', () => {
+      const { proxy, revoke } = Proxy.revocable({}, {});
+      revoke();
+      return proxy;
+    }],
+  ])('never throws for %s and reports nothing', (_name, makeConfig) => {
+    expect(() => findOlderConfigNamesInUse(makeConfig())).not.toThrow();
+    expect(findOlderConfigNamesInUse(makeConfig())).toEqual([]);
+    expect(() => warnAboutOlderConfigNames(makeConfig(), warn)).not.toThrow();
+    expect(warnAboutOlderConfigNames(makeConfig(), warn)).toEqual([]);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it('reports every older name of one site at once, each a single time', () => {
     const config = {
       logEndpoint: ENDPOINT, logToken: SECRET, logEnabled: false, languageMode: 'ignore', cacheLanguageMode: 'strict',

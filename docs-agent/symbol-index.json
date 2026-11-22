@@ -33865,7 +33865,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/olderConfigNameWarnings.js",
-    "line": 89,
+    "line": 102,
     "description": "",
     "params": [
       {
@@ -33916,7 +33916,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/olderConfigNameWarnings.js",
-    "line": 95,
+    "line": 108,
     "description": "Older names already reported during this page load.",
     "params": [],
     "returns": [],
@@ -33929,7 +33929,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/olderConfigNameWarnings.js",
-    "line": 122,
+    "line": 140,
     "description": "For tests: forget what has been reported, as a new page load would.",
     "params": [],
     "returns": [],
@@ -33942,7 +33942,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/olderConfigNameWarnings.js",
-    "line": 104,
+    "line": 117,
     "description": "Warn in the browser console about each older name in use, once per page load and per name.",
     "params": [
       {

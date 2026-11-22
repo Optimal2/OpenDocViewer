@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 218,
-    "sourceLineCount": 75324,
+    "sourceLineCount": 75342,
     "docletCount": 2205,
     "documentedFileCount": 212,
     "lowConfidenceSummaryCount": 2,
@@ -1966,7 +1966,7 @@
     {
       "name": "src/utils",
       "fileCount": 71,
-      "lineCount": 25148,
+      "lineCount": 25166,
       "docletCount": 1050,
       "importantFiles": [
         {
@@ -61253,7 +61253,7 @@
     },
     {
       "path": "src/utils/olderConfigNameWarnings.js",
-      "lines": 125,
+      "lines": 143,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "Console warnings for the older configuration names that still take precedence over the documented key.",
@@ -61267,17 +61267,17 @@
         {
           "name": "formatOlderConfigNameWarning",
           "kind": "function",
-          "line": 89
+          "line": 102
         },
         {
           "name": "warnAboutOlderConfigNames",
           "kind": "function",
-          "line": 104
+          "line": 117
         },
         {
           "name": "resetOlderConfigNameWarnings",
           "kind": "function",
-          "line": 122
+          "line": 140
         }
       ],
       "declarations": [
@@ -61292,19 +61292,24 @@
           "line": 68
         },
         {
+          "name": "pdf",
+          "kind": "object",
+          "line": 74
+        },
+        {
           "name": "formatOlderConfigNameWarning",
           "kind": "function",
-          "line": 89
+          "line": 102
         },
         {
           "name": "warnAboutOlderConfigNames",
           "kind": "function",
-          "line": 104
+          "line": 117
         },
         {
           "name": "resetOlderConfigNameWarnings",
           "kind": "function",
-          "line": 122
+          "line": 140
         }
       ],
       "parseError": null,
@@ -61371,7 +61376,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/olderConfigNameWarnings.js",
-          "line": 89,
+          "line": 102,
           "description": "",
           "params": [
             {
@@ -61396,7 +61401,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/olderConfigNameWarnings.js",
-          "line": 95,
+          "line": 108,
           "description": "Older names already reported during this page load.",
           "params": [],
           "returns": [],
@@ -61409,7 +61414,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/olderConfigNameWarnings.js",
-          "line": 104,
+          "line": 117,
           "description": "Warn in the browser console about each older name in use, once per page load and per name.",
           "params": [
             {
@@ -61440,7 +61445,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/olderConfigNameWarnings.js",
-          "line": 122,
+          "line": 140,
           "description": "For tests: forget what has been reported, as a new page load would.",
           "params": [],
           "returns": [],
@@ -125005,7 +125010,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/olderConfigNameWarnings.js",
-      "line": 89,
+      "line": 102,
       "description": "",
       "params": [
         {
@@ -125056,7 +125061,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/olderConfigNameWarnings.js",
-      "line": 95,
+      "line": 108,
       "description": "Older names already reported during this page load.",
       "params": [],
       "returns": [],
@@ -125069,7 +125074,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/olderConfigNameWarnings.js",
-      "line": 122,
+      "line": 140,
       "description": "For tests: forget what has been reported, as a new page load would.",
       "params": [],
       "returns": [],
@@ -125082,7 +125087,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/olderConfigNameWarnings.js",
-      "line": 104,
+      "line": 117,
       "description": "Warn in the browser console about each older name in use, once per page load and per name.",
       "params": [
         {

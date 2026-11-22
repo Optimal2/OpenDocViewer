@@ -1396,12 +1396,12 @@
 | <code>ocrSelectionText</code> | function | <code>src/utils/ocrTextLayout.js:267</code> | The plain text of a selection inside the layer as it reads on the page: the words of a line separated by spaces \(the DOM joins them with no-break spaces\) and the lines by newlines... |
 | <code>OcrWordPlacement</code> | typedef | <code>src/utils/ocrTextLayout.js:83</code> |  |
 | <code>findOlderConfigNamesInUse</code> | function | <code>src/utils/olderConfigNameWarnings.js:68</code> | The older names that are in use in a runtime configuration. |
-| <code>formatOlderConfigNameWarning</code> | function | <code>src/utils/olderConfigNameWarnings.js:89</code> |  |
+| <code>formatOlderConfigNameWarning</code> | function | <code>src/utils/olderConfigNameWarnings.js:102</code> |  |
 | <code>OLDER_NAMES</code> | constant | <code>src/utils/olderConfigNameWarnings.js:32</code> | Each entry answers whether its older name is set to a value that the reader accepts, which is exactly when the older name decides the result. |
 | <code>OlderConfigName</code> | typedef | <code>src/utils/olderConfigNameWarnings.js:17</code> |  |
-| <code>reported</code> | constant | <code>src/utils/olderConfigNameWarnings.js:95</code> | Older names already reported during this page load. |
-| <code>resetOlderConfigNameWarnings</code> | function | <code>src/utils/olderConfigNameWarnings.js:122</code> | For tests: forget what has been reported, as a new page load would. |
-| <code>warnAboutOlderConfigNames</code> | function | <code>src/utils/olderConfigNameWarnings.js:104</code> | Warn in the browser console about each older name in use, once per page load and per name. |
+| <code>reported</code> | constant | <code>src/utils/olderConfigNameWarnings.js:108</code> | Older names already reported during this page load. |
+| <code>resetOlderConfigNameWarnings</code> | function | <code>src/utils/olderConfigNameWarnings.js:140</code> | For tests: forget what has been reported, as a new page load would. |
+| <code>warnAboutOlderConfigNames</code> | function | <code>src/utils/olderConfigNameWarnings.js:117</code> | Warn in the browser console about each older name in use, once per page load and per name. |
 | <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
 | <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |
 | <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:262</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |
