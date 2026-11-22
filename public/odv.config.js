@@ -113,17 +113,25 @@
    * @param {Record<string, any>} src
    * @returns {Record<string, any>}
    */
-  function deepMerge(dst, src){
+  function deepMerge(dst, src, active){
     if (!isObj(dst)) dst = {};
     if (!isObj(src)) return src === undefined ? dst : src;
+    // A pair of objects that is already being merged further up is answered with that merge's
+    // own result, so two cyclic inputs end in a cyclic result instead of unbounded recursion.
+    active = active || [];
+    for (var i = 0; i < active.length; i += 1) {
+      if (active[i].dst === dst && active[i].src === src) return active[i].out;
+    }
     /** @type {Record<string, any>} */
     var out = {};
+    active.push({ dst: dst, src: src, out: out });
     var k;
     for (k in dst) if (!isReservedConfigKey(k) && Object.prototype.hasOwnProperty.call(dst, k)) out[k] = dst[k];
     for (k in src) if (!isReservedConfigKey(k) && Object.prototype.hasOwnProperty.call(src, k)) {
       var dv = out[k], sv = src[k];
-      out[k] = (isObj(dv) && isObj(sv)) ? deepMerge(dv, sv) : sv;
+      out[k] = (isObj(dv) && isObj(sv)) ? deepMerge(dv, sv, active) : sv;
     }
+    active.pop();
     return out;
   }
 
@@ -154,14 +162,44 @@
   }
 
   // Runtime readers see the merged configuration, whose canonical defaults would otherwise
-  // mask legacy aliases supplied only by the site file. Promote just those explicit site values.
-  function applySiteAlias(merged, site, canonicalPath, aliasPath) {
-    if (readConfigPath(site, canonicalPath) !== undefined) return;
-    var aliasValue = readConfigPath(site, aliasPath);
-    if (aliasValue === undefined) return;
-    var canonicalValue = readConfigPath(merged, canonicalPath);
-    writeConfigPath(merged, canonicalPath,
-      isObj(canonicalValue) && isObj(aliasValue) ? deepMerge(canonicalValue, aliasValue) : aliasValue);
+  // mask older key names supplied only by the site file. Each row [canonicalPath, olderPath] is
+  // therefore resolved against the site file alone, with the readers' own rule (canonical ??
+  // older, see src/utils/runtimeConfig.js and src/utils/documentLoadingConfig.js), and the
+  // winner is published under the canonical name. An older name never wins over the canonical
+  // one: not from another object, and not inside the same object.
+  //
+  // Rows are listed in the readers' priority order, and the first row that supplies a value
+  // settles its canonical path. The row for a whole object comes before the rows for keys
+  // inside it; once an older object has been promoted, its keys are read through the canonical
+  // path, so an older object is ignored entirely when the site has the canonical object.
+  function applySiteAliases(merged, site, aliases) {
+    var promoted = [];
+
+    // The site value at a path, counting what earlier rows promoted. null is absent, as for ??.
+    function readSite(path) {
+      var value = readConfigPath(site, path);
+      if (value !== undefined && value !== null) return value;
+      for (var i = 0; i < promoted.length; i += 1) {
+        var entry = promoted[i];
+        if (path === entry.path) return entry.value;
+        if (path.indexOf(entry.path + '.') === 0) {
+          var nested = readConfigPath(entry.value, path.slice(entry.path.length + 1));
+          if (nested !== undefined && nested !== null) return nested;
+        }
+      }
+      return undefined;
+    }
+
+    for (var index = 0; index < aliases.length; index += 1) {
+      var canonicalPath = aliases[index][0];
+      if (readSite(canonicalPath) !== undefined) continue;
+      var olderValue = readSite(aliases[index][1]);
+      if (olderValue === undefined) continue;
+      promoted.push({ path: canonicalPath, value: olderValue });
+      var canonicalValue = readConfigPath(merged, canonicalPath);
+      writeConfigPath(merged, canonicalPath,
+        isObj(canonicalValue) && isObj(olderValue) ? deepMerge(canonicalValue, olderValue) : olderValue);
+    }
   }
 
   // Detect our own script tag to infer base paths (works under virtual directories).
@@ -1140,27 +1178,24 @@
 
   // Merge site overrides on top of defaults, then freeze & publish.
   var merged = deepMerge(ACTIVE_CONFIG, siteOverrides);
+  // [canonical path, older path], in the readers' priority order; see applySiteAliases and the
+  // list in docs-src/runtime-configuration.md ("Older key names").
   var siteAliases = [
     ['viewer.customFitWidthFactorPercent', 'viewer.customFitWidthPercent'],
     ['viewer.customFitHeightFactorPercent', 'viewer.customFitHeightPercent'],
     ['viewer.customFitActualSizeFactorPercent', 'viewer.customFitActualPercent'],
-    ['print.defaultPageMode', 'viewer.print.defaultPageMode'],
     ['print.defaultPageMode', 'print.defaultPrintMode'],
+    ['print.defaultPageMode', 'viewer.print.defaultPageMode'],
     ['print.selectionWorkspace', 'viewer.printSelectionWorkspace'],
-    ['print.selectionWorkspace.documentHeaderTemplate', 'viewer.printSelectionWorkspace.headerTemplate'],
-    ['print.selectionWorkspace.previewInfoTemplate', 'viewer.printSelectionWorkspace.lightboxInfoTemplate'],
     ['print.selectionWorkspace.documentHeaderTemplate', 'print.selectionWorkspace.headerTemplate'],
     ['print.selectionWorkspace.previewInfoTemplate', 'print.selectionWorkspace.lightboxInfoTemplate'],
     ['viewer.edgeScrollPageTurn', 'edgeScrollPageTurn'],
     ['documentLoading.render.pdfToImageMode', 'documentLoading.render.pdf-to-image-mode'],
     ['documentLoading.render.pdfWorkerMaxCount', 'documentLoading.render.maxPdfWorkerCount'],
     ['documentLoading.render.pdfWorkerPagePolicy', 'documentLoading.render.pdfWorkerAutoPolicy'],
-    ['documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency', 'documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowCores'],
-    ['documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency', 'documentLoading.render.pdfWorkerAutoPolicy.mainThreadBelowCores']
+    ['documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency', 'documentLoading.render.pdfWorkerPagePolicy.mainThreadBelowCores']
   ];
-  for (var aliasIndex = 0; aliasIndex < siteAliases.length; aliasIndex += 1) {
-    applySiteAlias(merged, siteOverrides, siteAliases[aliasIndex][0], siteAliases[aliasIndex][1]);
-  }
+  applySiteAliases(merged, siteOverrides, siteAliases);
   // Defaults must not mask a legacy site-only fullPageScale override.
   var siteRender = siteOverrides.documentLoading && siteOverrides.documentLoading.render;
   if (siteRender && siteRender.fullPageScale !== undefined &&

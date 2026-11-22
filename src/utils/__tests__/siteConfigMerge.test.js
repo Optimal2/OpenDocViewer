@@ -327,3 +327,134 @@ it('keeps an explicit canonical site value ahead of its legacy alias', () => {
     dom.window.close();
   }
 });
+
+// The published configuration must give the readers the same answer as the site file alone
+// would: the canonical name first, the older name only when the canonical one is absent.
+const readPublished = (siteConfig, read) => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    dom.window.__ODV_SITE_CONFIG__ = siteConfig;
+    dom.window.eval(readFileSync('public/odv.config.js', 'utf8'));
+    vi.stubGlobal('window', dom.window);
+    return read(dom.window.__ODV_CONFIG__);
+  } finally {
+    dom.window.close();
+  }
+};
+const readThreshold = (render) => readPublished(
+  { documentLoading: { render } },
+  () => getDocumentLoadingConfig().render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency,
+);
+
+it.each([
+  ['the canonical policy object beats a left-over older policy object',
+    { pdfWorkerPagePolicy: { mainThreadBelowCores: 2 }, pdfWorkerAutoPolicy: { mainThreadBelowCores: 6 } }, 2],
+  ['a canonical policy object without the threshold hides the older object entirely',
+    { pdfWorkerPagePolicy: { enabled: true }, pdfWorkerAutoPolicy: { mainThreadBelowCores: 6 } }, 0],
+  ['the canonical key beats the older key inside the canonical object',
+    { pdfWorkerPagePolicy: { mainThreadBelowHardwareConcurrency: 4, mainThreadBelowCores: 2 } }, 4],
+  ['the canonical key beats the older key inside the older object',
+    { pdfWorkerAutoPolicy: { mainThreadBelowHardwareConcurrency: 4, mainThreadBelowCores: 2 } }, 4],
+  ['the canonical object beats the older object even when both carry the canonical key',
+    { pdfWorkerPagePolicy: { mainThreadBelowHardwareConcurrency: 1 },
+      pdfWorkerAutoPolicy: { mainThreadBelowHardwareConcurrency: 5, mainThreadBelowCores: 6 } }, 1],
+  ['the older key in the older object still works on its own',
+    { pdfWorkerAutoPolicy: { mainThreadBelowCores: 3 } }, 3],
+  ['the older key in the canonical object still works on its own',
+    { pdfWorkerPagePolicy: { mainThreadBelowCores: 3 } }, 3],
+])('PDF worker policy: %s', (_name, render, expected) => {
+  expect(readThreshold(render)).toBe(expected);
+});
+
+it('ignores viewer.printSelectionWorkspace entirely when the site has print.selectionWorkspace', () => {
+  const site = {
+    print: { selectionWorkspace: { enabled: true } },
+    viewer: { printSelectionWorkspace: { enabled: false, headerTemplate: 'OLD', lightboxInfoTemplate: 'OLD' } },
+  };
+  const published = readPublished(site, (config) => ({
+    workspace: JSON.parse(JSON.stringify(config.print.selectionWorkspace)),
+    read: getPrintSelectionWorkspaceConfig(),
+  }));
+  const defaults = readPublished({}, (config) => JSON.parse(JSON.stringify(config.print.selectionWorkspace)));
+  expect(published.workspace).toEqual(defaults);
+  expect(published.read.enabled).toBe(true);
+  expect(published.read.documentHeaderTemplate).toEqual(defaults.documentHeaderTemplate);
+  expect(published.read.previewInfoTemplate).toEqual(defaults.previewInfoTemplate);
+});
+
+it.each(['print.selectionWorkspace', 'viewer.printSelectionWorkspace'])(
+  'keeps the canonical template names ahead of the older names inside %s',
+  (path) => {
+    const workspace = {
+      documentHeaderTemplate: 'NEW header', headerTemplate: 'OLD header',
+      previewInfoTemplate: 'NEW preview', lightboxInfoTemplate: 'OLD preview',
+    };
+    const site = path === 'print.selectionWorkspace'
+      ? { print: { selectionWorkspace: workspace } }
+      : { viewer: { printSelectionWorkspace: workspace } };
+    expect(readPublished(site, () => getPrintSelectionWorkspaceConfig())).toEqual({
+      enabled: true,
+      documentHeaderTemplate: 'NEW header',
+      previewInfoTemplate: 'NEW preview',
+    });
+    // The site file alone gives the reader the same answer.
+    expect(getPrintSelectionWorkspaceConfig(site)).toMatchObject({
+      documentHeaderTemplate: 'NEW header',
+      previewInfoTemplate: 'NEW preview',
+    });
+  },
+);
+
+it('orders the older print default names the way the reader does', () => {
+  const site = { print: { defaultPrintMode: 'all' }, viewer: { print: { defaultPageMode: 'active' } } };
+  expect(readPublished(site, () => getPrintDefaultMode())).toBe('all');
+  expect(getPrintDefaultMode(site)).toBe('all');
+  expect(readPublished({ viewer: { print: { defaultPageMode: 'all' } } }, () => getPrintDefaultMode())).toBe('all');
+});
+
+it('treats a canonical site value of null as absent, as the readers do', () => {
+  const site = { viewer: { customFitWidthFactorPercent: null, customFitWidthPercent: 55 } };
+  expect(readPublished(site, () => getViewerCustomFitWidthFactorPercent())).toBe(55);
+  expect(getViewerCustomFitWidthFactorPercent(site)).toBe(55);
+});
+
+it('publishes a configuration whose older and canonical names share a cyclic object', () => {
+  const cyclic = { en: 'header' };
+  cyclic.self = cyclic;
+  const site = {
+    print: { selectionWorkspace: { headerTemplate: cyclic } },
+    viewer: { printSelectionWorkspace: { headerTemplate: cyclic } },
+  };
+  // Like any site object, the template is merged over the shipped localized default.
+  const template = readPublished(site, (config) => config.print.selectionWorkspace.documentHeaderTemplate);
+  expect(template.en).toBe('header');
+  expect(template.self).toBe(cyclic);
+});
+
+it('merges two cyclic objects without unbounded recursion and keeps the cycle', () => {
+  const dom = new JSDOM('<!doctype html>', { runScripts: 'outside-only' });
+  try {
+    const source = readFileSync('public/odv.config.js', 'utf8').replace(
+      '})(window, document);',
+      '  return { deepMerge };\n})(window, document);',
+    );
+    const { deepMerge } = dom.window.eval(source);
+    const left = { name: 'left', only: { left: true } };
+    left.self = left;
+    left.peer = { back: left };
+    const right = { name: 'right' };
+    right.self = right;
+    right.peer = { back: right };
+
+    const out = deepMerge(left, right);
+
+    expect(out.name).toBe('right');
+    expect(out.only).toEqual({ left: true });
+    expect(out.self).toBe(out);
+    expect(out.peer.back).toBe(out);
+    expect(left.self).toBe(left);
+    expect(right.self).toBe(right);
+  } finally {
+    dom.window.close();
+  }
+});

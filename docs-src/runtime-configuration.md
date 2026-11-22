@@ -30,6 +30,93 @@ This keeps the viewer startup deterministic and avoids partial initialization wi
 Although the optional site file is fetched first, `odv.config.js` owns the default object and applies
 `odv.site.config.js` as overrides with `deepMerge(ACTIVE_CONFIG, siteOverrides)`.
 
+## Older key names
+
+Some keys have been renamed or moved. A site file written for an earlier version may still use
+the older name. Search a site file for the names below before an upgrade.
+
+### The rule
+
+The canonical name always wins. An older name is used only when the site file does not set the
+canonical name (a canonical value of `null` counts as not set). This is the readers' own rule,
+`canonical ?? older`, in `src/utils/runtimeConfig.js` and `src/utils/documentLoadingConfig.js`.
+
+The shipped defaults contain every canonical key, so in the merged configuration an older name
+would always lose to the default. `public/odv.config.js` therefore resolves the names in the
+table below against the site file alone (`applySiteAliases`) and publishes the result under the
+canonical name. Two consequences:
+
+- When the older name is an object that was moved (`viewer.printSelectionWorkspace`,
+  `pdfWorkerAutoPolicy`), the older object is ignored entirely as soon as the site file has the
+  canonical object, even for keys the canonical object does not set.
+- Inside one object the canonical key wins over the older key, whichever object it is in.
+
+### Older names that still work
+
+| Older name in the site file | Canonical name | When the site file has both |
+|---|---|---|
+| `viewer.customFitWidthPercent` | `viewer.customFitWidthFactorPercent` | Canonical wins. |
+| `viewer.customFitHeightPercent` | `viewer.customFitHeightFactorPercent` | Canonical wins. |
+| `viewer.customFitActualPercent` | `viewer.customFitActualSizeFactorPercent` | Canonical wins. |
+| `print.defaultPrintMode` | `print.defaultPageMode` | Canonical wins. |
+| `viewer.print.defaultPageMode` | `print.defaultPageMode` | Canonical wins; `print.defaultPrintMode` also wins over this one. |
+| `viewer.printSelectionWorkspace` (object) | `print.selectionWorkspace` | The canonical object wins; the older object is ignored entirely. |
+| `headerTemplate` inside either workspace object | `documentHeaderTemplate` in the same object | Canonical wins. |
+| `lightboxInfoTemplate` inside either workspace object | `previewInfoTemplate` in the same object | Canonical wins. |
+| `edgeScrollPageTurn` (top level, object or boolean) | `viewer.edgeScrollPageTurn` | Canonical wins. |
+| `documentLoading.render['pdf-to-image-mode']` | `documentLoading.render.pdfToImageMode` | Canonical wins. |
+| `documentLoading.render.maxPdfWorkerCount` | `documentLoading.render.pdfWorkerMaxCount` | Canonical wins. |
+| `documentLoading.render.pdfWorkerAutoPolicy` (object) | `documentLoading.render.pdfWorkerPagePolicy` | The canonical object wins; the older object is ignored entirely. |
+| `mainThreadBelowCores` inside either policy object | `mainThreadBelowHardwareConcurrency` in the same object | Canonical wins. |
+| `documentLoading.render.fullPageScale` | `documentLoading.render.pdfResolution.fixedScale` | Fixed mode: canonical wins. Auto mode: the higher of the two is the floor (see "PDF display resolution"). |
+| `print.format.options[].output`, `[].printLabel` (also the reason options of the user log) | `[].printValue` | `printValue` wins, then `output`, then `printLabel`. |
+
+Before the alias promotion was introduced, an older name in this table had no effect when its
+canonical key has a shipped default, because the default hid it. That is every row except
+`customFitHeightPercent`, `customFitActualPercent`, `fullPageScale` and the print option names.
+A site file that still carries one of the hidden names, alone, gets that value applied after an
+upgrade.
+
+### Older names that have no effect
+
+The code still has a fallback for these names, but the shipped default of the canonical key
+hides them and they are not promoted. Setting them in a site file changes nothing; use the
+canonical name.
+
+| Older name in the site file | Canonical name |
+|---|---|
+| `problemNotice` (top level) | `viewer.problemNotice` |
+| `pdf` (top level) | `print.pdf` |
+| `print.actions.repeatLastPrint` | `print.actions.reuseLastPrintSettings` |
+| `print.actions.<action>.title` | `print.actions.<action>.tooltip` |
+| `print.pdf.orientation.hint` | `print.pdf.orientation.tooltip` |
+| `print.pdf.orientation.label` | `print.pdf.orientation.checkboxLabel` |
+| `print.pdf.orientation.fixed` | `print.pdf.orientation.fixedMode` |
+| `print.pdf.cache.languageMode`, `print.pdf.cache.language` | `print.pdf.cacheLanguageMode` |
+| `print.pdf.prebuildAllPages.watermark`, `.watermarkStates` | `print.pdf.prebuildAllPages.copyMarker` |
+| `print.pdf.prebuildAllPages.language` | `print.pdf.prebuildAllPages.languages` |
+| `print.format.watermark.assetUrls` | `print.format.watermark.assets` |
+| `print.format.watermark.assets.KOPIA`, `.sv`, `.COPY`, `.en` | `print.format.watermark.assets.kopia`, `.copy` |
+| `documentLoading.renderBenchmark.mainThreadConcurrency`, `.mainThreadCounts` | `.mainThreadConcurrencies` |
+| `documentLoading.renderBenchmark.pdfWorkerPagesPerWorker` | `.pdfWorkerPageTargets` |
+| `documentLoading.renderBenchmark.pdfWorkerBenchmarkMode` | `.pdfWorkerBatchMode` |
+| `documentLoading.renderBenchmark.pdfWorkerConcurrentRendersPerWorker` | `.pdfWorkerRendersPerWorker` |
+| `documentLoading.renderBenchmark.pdfToImageMode` | `.pdfToImageModes` |
+
+Removed keys that are accepted and ignored: `print.preparationNoticeThresholdPages`,
+`print.prewarmIframe`, `documentLoading.render.pdfResolution.headroom` and `.dprCap`.
+
+### Names that override the canonical key
+
+Three readers outside the promotion still let another name win over the documented key. They
+are listed here so that a site file can be checked for them; do not use them in new files.
+
+| Name in the site file | Documented key | When the site file has both |
+|---|---|---|
+| `logEndpoint`, `logToken`, `logEnabled` (top level) | `systemLog.endpoint`, `.token`, `.enabled` | The top-level name wins (`src/logging/systemLogger.js`). |
+| `print.pdf.orientation.mode`, then `print.pdf.orientationMode` | `print.pdf.orientation.defaultAuto` with `.fixedMode` | The `mode` name wins. |
+| `languageMode`, `cacheLanguageMode` (top level) | `print.pdf.cacheLanguageMode` | The top-level name wins (`src/utils/pdfPrintCacheKey.js`). |
+
 ## Why scripts are probed before injection
 
 The outcome is published as `window.__ODV_SITE_CONFIG_STATUS__` with `attempted`, `url`, `loaded`
