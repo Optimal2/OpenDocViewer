@@ -89,7 +89,8 @@ function truncate(str, max = 4000) {
 }
 function sanitizeString(str) {
   return String(str)
-    .replace(/[\r\n]+/g, ' ')
+    // U+0085, U+2028 and U+2029 are line breaks too, and JSON.stringify leaves them as they are.
+    .replace(/[\r\n\u0085\u2028\u2029]+/g, ' ')
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
 }
 function safeString(str, max = 4000) {

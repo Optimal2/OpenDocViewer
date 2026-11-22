@@ -45,8 +45,10 @@ vi.mock('express', async (importOriginal) => {
   const createApp = (...args) => {
     const app = actual.default(...args);
     const listen = app.listen.bind(app);
-    app.listen = (...listenArgs) => {
-      const server = listen(...listenArgs);
+    // The server under test asks for every interface; the test binds loopback only, so running
+    // the suite can never raise a firewall prompt. Production keeps its own listen address.
+    app.listen = (port, ...rest) => {
+      const server = listen(port, '127.0.0.1', ...rest.filter((argument) => typeof argument === 'function'));
       state.servers.push(server);
       return server;
     };
@@ -130,6 +132,33 @@ describe('user log server', () => {
     expect(record.reason).toBe('line one line two');
     expect(record.forWhom).not.toMatch(/[\r\n\u0000-\u001f]/);
     expect(record.forWhom.startsWith('Ward 3 {')).toBe(true);
+  });
+
+  it.each([
+    ['U+2028 line separator', '\u2028'],
+    ['U+2029 paragraph separator', '\u2029'],
+    ['U+0085 next line', '\u0085'],
+  ])('keeps %s in recipient and reason on one log line', async (_name, separator) => {
+    const before = printLines().length;
+    const response = await post({
+      reason: `first${separator}second`,
+      forWhom: `Ward 3${separator}{"action":"print","forWhom":"forged"}`,
+    });
+    expect(response.status).toBe(200);
+
+    const lines = printLines().slice(before);
+    expect(lines).toHaveLength(1);
+    // One record is exactly one line for every reader, also one that splits on Unicode breaks.
+    expect(lines[0].line.slice(0, -1)).not.toMatch(/[\r\n\u0085\u2028\u2029]/);
+    expect(lines[0].line.split(/\r\n|[\n\r\u0085\u2028\u2029]/).filter(Boolean)).toHaveLength(1);
+    const record = JSON.parse(lines[0].line);
+    expect(record.reason).toBe('first second');
+    expect(record.forWhom.startsWith('Ward 3 {')).toBe(true);
+  });
+
+  it('listens on loopback only in this test', () => {
+    expect(state.servers).toHaveLength(1);
+    expect(state.servers[0].address().address).toBe('127.0.0.1');
   });
 
   it('accepts the public host that the proxy on loopback forwards, and still rejects other origins', async () => {

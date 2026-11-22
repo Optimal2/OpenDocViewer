@@ -7,10 +7,21 @@
   IIS-ODVProxyApp folder. Generates web.config from the template, toggling and
   pointing the two reverse-proxy rules.
 
-  Server-wide effect: the script turns ARR proxying on (system.webServer/proxy enabled).
+  Changes for the whole server:
+    - Always (when a proxy rule is enabled): turns ARR proxying on
+      (system.webServer/proxy enabled).
+    - Only with -ForwardClientHeaders: unlocks the configuration section
+      system.webServer/rewrite/allowedServerVariables (appcmd unlock config), which lets every
+      site and application on the server define that section in its own web.config.
   Everything else is scoped to the proxy application, including the allowedServerVariables
-  entry for HTTP_X_FORWARDED_HOST that the user-log rule needs. ARR's server-wide
-  preserveHostHeader is not changed.
+  entry for HTTP_X_FORWARDED_HOST that the user-log rule needs. That entry is written for the
+  application's location in applicationHost.config and stays there; the script has no
+  uninstall. ARR's server-wide preserveHostHeader is not changed.
+
+  Run the script again after an upgrade: the user-log rule has to forward X-Forwarded-Host,
+  otherwise the user log server answers browser posts with 403. The user-log upstream
+  (-UserLogUrl) must be a loopback address (localhost, 127.0.0.1 or [::1]), because the user
+  log server trusts X-Forwarded-Host from loopback only.
 
 .PARAMETER SiteName
   IIS site to host the application. Default: "Default Web Site"
@@ -34,8 +45,14 @@
   Upstream URL for user log. Default: "http://localhost:3002/userlog/record"
 
 .PARAMETER ForwardClientHeaders
-  Optional. If set, injects <allowedServerVariables> (requires section unlocked at server level).
+  Optional. If set, both proxy rules also forward X-Forwarded-For and X-Forwarded-Proto (and the
+  system-log rule X-Forwarded-Host), and <allowedServerVariables> is injected into web.config.
+  That requires the section to be unlocked, which the script does for the whole server.
   Default: off (prevents IIS 500.52 when section is locked).
+
+.PARAMETER AppCmdPath
+  Path to appcmd.exe, used only with -ForwardClientHeaders.
+  Default: "%windir%\system32\inetsrv\appcmd.exe"
 #>
 
 [CmdletBinding(SupportsShouldProcess)]
@@ -47,7 +64,8 @@ param(
   [bool]  $EnableUserLog    = $true,
   [string]$SystemLogUrl     = "http://localhost:3001/log",
   [string]$UserLogUrl       = "http://localhost:3002/userlog/record",
-  [switch]$ForwardClientHeaders
+  [switch]$ForwardClientHeaders,
+  [string]$AppCmdPath       = "$env:windir\system32\inetsrv\appcmd.exe"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -95,6 +113,10 @@ if ($EnableSystemLog -or $EnableUserLog) {
 # for this application's location only: no other site or application on the server is affected,
 # and ARR's server-wide preserveHostHeader is deliberately left as it is.
 if ($EnableUserLog) {
+  $userLogHost = try { ([uri]$UserLogUrl).Host.Trim('[', ']') } catch { '' }
+  if (@('localhost', '127.0.0.1', '::1') -notcontains $userLogHost) {
+    Write-Warn "-UserLogUrl '$UserLogUrl' is not a loopback address. The user log server trusts X-Forwarded-Host from loopback only, so browser posts through this proxy will be answered with 403."
+  }
   $AppLocation = "$SiteName/$($AppPath.Trim('/'))"
   $allowFilter = 'system.webServer/rewrite/allowedServerVariables'
   try {
@@ -141,10 +163,25 @@ $allowed = @"
 </allowedServerVariables>
 "@
 
+# The request headers the rules set with -ForwardClientHeaders. The scheme has no server variable
+# of its own, so it is looked up in a rewrite map from {HTTPS} (on/off).
+$forwardFor   = '<set name="HTTP_X_FORWARDED_FOR" value="{REMOTE_ADDR}" />'
+$forwardProto = '<set name="HTTP_X_FORWARDED_PROTO" value="{OdvProxyScheme:{HTTPS}}" />'
+$forwardHost  = '<set name="HTTP_X_FORWARDED_HOST" value="{HTTP_HOST}" />'
+$schemeMap = @"
+<rewriteMaps>
+  <rewriteMap name="OdvProxyScheme" defaultValue="http">
+    <add key="on" value="https" />
+    <add key="off" value="http" />
+  </rewriteMap>
+</rewriteMaps>
+"@
+
 if ($ForwardClientHeaders) {
-  # Best-effort unlock to avoid 500.52 if locked
+  # Best-effort unlock to avoid 500.52 if locked. This changes the section's lock for the
+  # whole server.
   try {
-    & "$env:windir\system32\inetsrv\appcmd.exe" unlock config /section:system.webServer/rewrite/allowedServerVariables | Out-Null
+    & $AppCmdPath unlock config /section:system.webServer/rewrite/allowedServerVariables | Out-Null
   } catch {
     Write-Warn "Could not unlock 'rewrite/allowedServerVariables'. If browsing fails with 500.52, re-run WITHOUT -ForwardClientHeaders."
   }
@@ -152,9 +189,18 @@ if ($ForwardClientHeaders) {
     # Already allowed for this application above; a second entry here would be a duplicate.
     $allowed = $allowed.Replace('  <add name="HTTP_X_FORWARDED_HOST" />', '')
   }
-  $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", $allowed.Trim())
+  $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", ($allowed.Trim() + "`r`n" + $schemeMap.Trim()))
+  # The user-log rule always sets X-Forwarded-Host in the template; the others are added to it.
+  $config = $config.Replace("<!--__USER_LOG_CLIENT_HEADERS__-->", ($forwardFor + "`r`n" + $forwardProto))
+  $config = $config.Replace("<!--__SYSTEM_LOG_CLIENT_HEADERS__-->",
+    ("<serverVariables>`r`n" + $forwardFor + "`r`n" + $forwardProto + "`r`n" + $forwardHost + "`r`n</serverVariables>"))
 } else {
   $config = $config.Replace("<!--__ALLOWED_SERVER_VARIABLES__-->", "")
+  $config = $config.Replace("<!--__USER_LOG_CLIENT_HEADERS__-->", "")
+  $config = $config.Replace("<!--__SYSTEM_LOG_CLIENT_HEADERS__-->", "")
+}
+if ($config -cmatch '__[A-Z][A-Z_]*__') {
+  throw "web.config.template has a placeholder that this script does not replace: $($Matches[0])"
 }
 
 $configPath = Join-Path $PhysicalPath "web.config"

@@ -2,7 +2,7 @@
 
 ## server
 
-File count: 5. Line count: 621. JSDoc symbol count: 15.
+File count: 5. Line count: 623. JSDoc symbol count: 15.
 
 - `server/logRetention.js` - Shared best\-effort retention for the optional standalone log servers.
 - `server/userLogOrigin.js` - Evaluate the browser origin signals used by the user print\-log endpoint.

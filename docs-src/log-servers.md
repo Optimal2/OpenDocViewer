@@ -154,7 +154,18 @@ This keeps the browser talking to a same-origin path even though the Node servic
 
 ARR replaces `Host` with the upstream address, while the user-log origin check needs the public host. The user-log rule therefore sets `X-Forwarded-Host` to the public host (overwriting any value the client sent), and the user log server trusts that header only from loopback. URL Rewrite sets a request header only when its server variable is allowed, so `scripts/Setup-IIS-ODVProxy.ps1` adds `HTTP_X_FORWARDED_HOST` to `allowedServerVariables` for the proxy application's location only.
 
-The setup script changes one setting for the whole server: it turns ARR proxying on (`system.webServer/proxy`, `enabled`). It does not set ARR's server-wide `preserveHostHeader`, which would change the `Host` header that every other proxied application on the server receives. A server where an earlier version of the script set `preserveHostHeader=true` keeps working, because the `Host` header itself is still accepted; whether to set it back is a decision for the server's administrator, since other applications may rely on it by now.
+What the setup script changes for the whole server depends on its switches:
+
+- Always, when a proxy rule is enabled: it turns ARR proxying on (`system.webServer/proxy`, `enabled`).
+- Only with `-ForwardClientHeaders`: it unlocks the configuration section `system.webServer/rewrite/allowedServerVariables` (`appcmd unlock config`), which lets every site and application on the server define that section in its own `web.config`. With the switch both rules also set `X-Forwarded-For` and `X-Forwarded-Proto`, and the system-log rule sets `X-Forwarded-Host`.
+
+Operational notes:
+
+- Run `scripts/Setup-IIS-ODVProxy.ps1` again after an upgrade, so that the generated `web.config` gets the user-log rule that forwards `X-Forwarded-Host`. Without it the user log server answers browser posts with `403`, as it did before the forwarded host existed, unless ARR's `preserveHostHeader` is on.
+- The user-log upstream (`-UserLogUrl`) must be a loopback address (`localhost`, `127.0.0.1` or `[::1]`), because the forwarded host is trusted from loopback only. The script warns about any other address.
+- The `allowedServerVariables` entry for the proxy application's location is written to `applicationHost.config` and stays there: the script has no uninstall, so the entry remains after the application is removed until an administrator deletes it.
+
+The setup script does not set ARR's server-wide `preserveHostHeader`, which would change the `Host` header that every other proxied application on the server receives. A server where an earlier version of the script set `preserveHostHeader=true` keeps working, because the `Host` header itself is still accepted; whether to set it back is a decision for the server's administrator, since other applications may rely on it by now.
 
 ### Runtime config example
 

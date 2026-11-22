@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 214,
-    "sourceLineCount": 74996,
+    "sourceLineCount": 74998,
     "docletCount": 2193,
     "documentedFileCount": 208,
     "lowConfidenceSummaryCount": 2,
@@ -988,7 +988,7 @@
     {
       "name": "server",
       "fileCount": 5,
-      "lineCount": 621,
+      "lineCount": 623,
       "docletCount": 15,
       "importantFiles": [
         {
@@ -1021,7 +1021,7 @@
         {
           "path": "server/system-log-server.js",
           "score": 36,
-          "lines": 230,
+          "lines": 231,
           "incomingLocalImports": 0,
           "doclets": 5,
           "summary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -1030,7 +1030,7 @@
         {
           "path": "server/user-log-server.js",
           "score": 28,
-          "lines": 262,
+          "lines": 263,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2259,7 +2259,7 @@
     },
     {
       "path": "server/system-log-server.js",
-      "lines": 230,
+      "lines": 231,
       "extension": ".js",
       "jsdocBlockCount": 11,
       "sourceSummary": "System Log Server — standalone Express endpoint for structured system logs.",
@@ -2395,32 +2395,32 @@
         {
           "name": "safeString",
           "kind": "function",
-          "line": 95
+          "line": 96
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 98
+          "line": 99
         },
         {
           "name": "requireLogToken",
           "kind": "function",
-          "line": 168
+          "line": 169
         },
         {
           "name": "record",
           "kind": "object",
-          "line": 184
+          "line": 185
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 195
+          "line": 196
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 211
+          "line": 212
         }
       ],
       "parseError": null,
@@ -2436,7 +2436,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 121,
+          "line": 122,
           "description": "Trust proxy for accurate req.ip",
           "params": [],
           "returns": [],
@@ -2449,7 +2449,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 128,
+          "line": 129,
           "description": "Token gate for /log",
           "params": [],
           "returns": [],
@@ -2462,7 +2462,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 134,
+          "line": 135,
           "description": "Optional CORS for /log",
           "params": [],
           "returns": [],
@@ -2475,7 +2475,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 158,
+          "line": 159,
           "description": "Rate limit for ingestion",
           "params": [],
           "returns": [],
@@ -2488,7 +2488,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/system-log-server.js",
-          "line": 168,
+          "line": 169,
           "description": "Token auth middleware",
           "params": [],
           "returns": [],
@@ -2599,7 +2599,7 @@
     },
     {
       "path": "server/user-log-server.js",
-      "lines": 262,
+      "lines": 263,
       "extension": ".js",
       "jsdocBlockCount": 7,
       "sourceSummary": "User Action Log Server — standalone Express endpoint for print/user-action audit events.",
@@ -2745,37 +2745,37 @@
         {
           "name": "safeString",
           "kind": "function",
-          "line": 107
+          "line": 108
         },
         {
           "name": "safeJson",
           "kind": "function",
-          "line": 108
+          "line": 109
         },
         {
           "name": "resolveUser",
           "kind": "function",
-          "line": 124
+          "line": 125
         },
         {
           "name": "sameOriginGuard",
           "kind": "function",
-          "line": 142
+          "line": 143
         },
         {
           "name": "rec",
           "kind": "object",
-          "line": 210
+          "line": 211
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 227
+          "line": 228
         },
         {
           "name": "e",
           "kind": "object",
-          "line": 243
+          "line": 244
         }
       ],
       "parseError": null,
@@ -2791,7 +2791,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 124,
+          "line": 125,
           "description": "Resolve user identity without cookies.",
           "params": [],
           "returns": [],
@@ -2804,7 +2804,7 @@
           "kind": "function",
           "scope": "global",
           "file": "server/user-log-server.js",
-          "line": 142,
+          "line": 143,
           "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
           "params": [],
           "returns": [],
@@ -90599,7 +90599,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 134,
+      "line": 135,
       "description": "Optional CORS for /log",
       "params": [],
       "returns": [],
@@ -90612,7 +90612,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 128,
+      "line": 129,
       "description": "Token gate for /log",
       "params": [],
       "returns": [],
@@ -90625,7 +90625,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 158,
+      "line": 159,
       "description": "Rate limit for ingestion",
       "params": [],
       "returns": [],
@@ -90638,7 +90638,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 168,
+      "line": 169,
       "description": "Token auth middleware",
       "params": [],
       "returns": [],
@@ -90651,7 +90651,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "server/system-log-server.js",
-      "line": 121,
+      "line": 122,
       "description": "Trust proxy for accurate req.ip",
       "params": [],
       "returns": [],
@@ -90664,7 +90664,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 124,
+      "line": 125,
       "description": "Resolve user identity without cookies.",
       "params": [],
       "returns": [],
@@ -90677,7 +90677,7 @@
       "kind": "function",
       "scope": "global",
       "file": "server/user-log-server.js",
-      "line": 142,
+      "line": 143,
       "description": "Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.",
       "params": [],
       "returns": [],

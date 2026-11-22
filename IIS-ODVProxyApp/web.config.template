@@ -33,7 +33,7 @@
                   url="__SYSTEM_LOG_URL__"
                   appendQueryString="true"
                   logRewrittenUrl="true" />
-          __SERVER_VARS_BLOCK__
+          <!--__SYSTEM_LOG_CLIENT_HEADERS__-->
         </rule>
 
         <!-- User Log proxy -->
@@ -49,12 +49,12 @@
                adds it for this application only. -->
           <serverVariables>
             <set name="HTTP_X_FORWARDED_HOST" value="{HTTP_HOST}" />
+            <!--__USER_LOG_CLIENT_HEADERS__-->
           </serverVariables>
           <action type="Rewrite"
                   url="__USER_LOG_URL__"
                   appendQueryString="true"
                   logRewrittenUrl="true" />
-          __SERVER_VARS_BLOCK__
         </rule>
 
         <!-- Landing page (GET / -> /index.html) -->
@@ -64,7 +64,8 @@
         </rule>
       </rules>
 
-      <!-- Placeholder; by default we don't touch server variables -->
+      <!-- Placeholders. Setup-IIS-ODVProxy.ps1 replaces every one of them: with nothing by
+           default, with the client-header variables when -ForwardClientHeaders is given. -->
       <!--__ALLOWED_SERVER_VARIABLES__-->
     </rewrite>
 

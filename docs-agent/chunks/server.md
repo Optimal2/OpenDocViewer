@@ -1,6 +1,6 @@
 # OpenDocViewer / server
 
-File count: 5. Line count: 621. JSDoc symbol count: 15.
+File count: 5. Line count: 623. JSDoc symbol count: 15.
 
 ## server/logRetention.js
 
