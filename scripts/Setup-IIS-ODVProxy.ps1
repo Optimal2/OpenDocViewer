@@ -21,6 +21,8 @@
   variable that the server or the site already allows is left alone. Those entries stay after
   the application is removed; the script has no uninstall.
 
+  -WhatIf shows what would be done and changes nothing; the final check is skipped then.
+
   The script can be run any number of times: the same switches give the same web.config and the
   same allow list. It ends by reading the allow list back and fails if a variable that a rule
   sets is not allowed, since IIS would then answer every proxied request with 500.
@@ -245,17 +247,24 @@ Restart-WebAppPool $appPoolName
 # application now. If one is missing IIS answers every request to that rule with 500, so the
 # script must not end as if all were well.
 $notAllowed = @()
-foreach ($variable in $neededVariables) {
-  $allowedNow = $false
-  try { $allowedNow = Test-ServerVariableAllowed $variable } catch { $allowedNow = $false }
-  if (-not $allowedNow) { $notAllowed += $variable }
+if ($WhatIfPreference) {
+  # Under -WhatIf nothing above was written, so there is nothing to read back.
+  Write-Info "WhatIf: nothing was changed, so the final check of the allow list was skipped."
+} else {
+  foreach ($variable in $neededVariables) {
+    $allowedNow = $false
+    try { $allowedNow = Test-ServerVariableAllowed $variable } catch { $allowedNow = $false }
+    if (-not $allowedNow) { $notAllowed += $variable }
+  }
 }
 if ($notAllowed.Count -gt 0) {
   $list = $notAllowed -join ', '
   Write-Err "Setup check failed: not allowed for '$AppLocation': $list"
   throw "Setup check failed. The proxy rules set server variables that are not allowed for '$AppLocation': $list. IIS answers every proxied request with 500 until they are in system.webServer/rewrite/allowedServerVariables for that application. web.config has been written; nothing was rolled back."
 }
-Write-Ok "Checked: every server variable the proxy rules set is allowed for '$AppLocation'."
+if (-not $WhatIfPreference) {
+  Write-Ok "Checked: every server variable the proxy rules set is allowed for '$AppLocation'."
+}
 
 Write-Ok "Deployment complete. Proxy base URL: /$AppVDir/"
 Write-Host ""

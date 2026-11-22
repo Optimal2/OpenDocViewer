@@ -38,9 +38,10 @@ param([string]$ScriptPath, [string]$ParamsPath, [string]$LogPath, [string]$AppCm
 $ErrorActionPreference = 'Stop'
 
 function global:Write-IisCall([string]$Command, $Bound) {
-  $record = [ordered]@{ command = $Command }
+  $record = [ordered]@{ command = $Command; whatif = [bool]$WhatIfPreference }
   foreach ($key in $Bound.Keys) { $record[$key.ToLowerInvariant()] = $Bound[$key] }
-  ($record | ConvertTo-Json -Compress -Depth 5) | Add-Content -LiteralPath $env:ODV_IIS_CALL_LOG -Encoding Ascii
+  # -WhatIf:$false: the record of the call itself must be written also under -WhatIf.
+  ($record | ConvertTo-Json -Compress -Depth 5) | Add-Content -LiteralPath $env:ODV_IIS_CALL_LOG -Encoding Ascii -WhatIf:$false
 }
 function global:Get-IisFacts([string]$Kind, [string]$Key) {
   $facts = @()
@@ -100,22 +101,27 @@ function global:Get-WebConfigurationProperty {
   }
   if ($names -contains $wanted.Groups[1].Value) { return [pscustomobject]@{ Value = $wanted.Groups[1].Value } }
 }
+# Like the real cmdlets, the changing stand-ins do nothing under -WhatIf; the call is still recorded.
 function global:Set-WebConfigurationProperty { param($PSPath, $Location, $Filter, $Name, $Value, $ErrorAction) Write-IisCall 'Set-WebConfigurationProperty' $PSBoundParameters }
 function global:Add-WebConfigurationProperty {
   param($PSPath, $Location, $Filter, $Name, $Value, $ErrorAction)
   Write-IisCall 'Add-WebConfigurationProperty' $PSBoundParameters
-  if ($env:ODV_IIS_DROP_ADDS -eq '1') { return }
+  if ($env:ODV_IIS_DROP_ADDS -eq '1' -or $WhatIfPreference) { return }
   if ($PSPath -ne 'MACHINE/WEBROOT/APPHOST' -or -not $Location -or $Filter -ne 'system.webServer/rewrite/allowedServerVariables') {
     throw "Stand-in IIS: unexpected Add-WebConfigurationProperty target."
   }
   if ((Get-IisAllowed "$Location") -contains $Value.name) { throw "Stand-in IIS: cannot add duplicate collection entry '$($Value.name)'." }
   Add-IisFact 'allowed' "$Location" $Value.name
 }
-function global:New-WebAppPool { param($Name) Write-IisCall 'New-WebAppPool' $PSBoundParameters; Add-IisFact 'path' 'IIS' ('IIS:\AppPools\' + $Name) }
+function global:New-WebAppPool {
+  param($Name)
+  Write-IisCall 'New-WebAppPool' $PSBoundParameters
+  if (-not $WhatIfPreference) { Add-IisFact 'path' 'IIS' ('IIS:\AppPools\' + $Name) }
+}
 function global:New-WebApplication {
   param($Site, $Name, $PhysicalPath, $ApplicationPool)
   Write-IisCall 'New-WebApplication' $PSBoundParameters
-  Add-IisFact 'path' 'IIS' ('IIS:\Sites\' + $Site + '\' + $Name)
+  if (-not $WhatIfPreference) { Add-IisFact 'path' 'IIS' ('IIS:\Sites\' + $Site + '\' + $Name) }
 }
 function global:Restart-WebAppPool { param($Name) Write-IisCall 'Restart-WebAppPool' $PSBoundParameters }
 function global:Set-ItemProperty { param($Path, $Name, $Value) Write-IisCall 'Set-ItemProperty' $PSBoundParameters }
@@ -130,7 +136,7 @@ $tokens = $null; $errors = $null
 $ast = [System.Management.Automation.Language.Parser]::ParseFile($ScriptPath, [ref]$tokens, [ref]$errors)
 if ($errors.Count) { throw "Setup script does not parse: $($errors[0].Message)" }
 $commands = $ast.FindAll({ param($node) $node -is [System.Management.Automation.Language.CommandAst] }, $true) |
-  ForEach-Object { $_.GetCommandName() } | Where-Object { $_ -match 'Web|AppPool|^Import-Module$' } | Sort-Object -Unique
+  ForEach-Object { $_.GetCommandName() } | Where-Object { $_ -match 'Web|AppPool|IIS|^Import-Module$' } | Sort-Object -Unique
 foreach ($command in $commands) {
   $resolved = Get-Command -Name $command -ErrorAction SilentlyContinue | Select-Object -First 1
   if (-not $resolved -or $resolved.CommandType -ne 'Function') {
@@ -173,6 +179,16 @@ function shellEnvironment() {
 }
 
 /**
+ * Arguments before -File. Windows PowerShell gets a process-scope execution policy that allows
+ * the local, unsigned test script without changing the machine's policy; a policy enforced by
+ * group policy still wins, and the probe test then fails with the reason.
+ */
+function shellArguments(shell) {
+  const common = ['-NoLogo', '-NoProfile', '-NonInteractive'];
+  return shell === 'powershell.exe' ? [...common, '-ExecutionPolicy', 'RemoteSigned'] : common;
+}
+
+/**
  * One stand-in IIS that lives across several runs of the setup script.
  * serverAllowed / siteWebConfigAllowed: variables already allowed above the application.
  */
@@ -204,7 +220,7 @@ function createIis({ serverAllowed = [], siteWebConfigAllowed = [], dropAdds = f
       return new Promise((resolve) => {
         execFile(
           shell,
-          ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', harnessPath, '-ScriptPath', script, '-ParamsPath', paramsPath,
+          [...shellArguments(shell), '-File', harnessPath, '-ScriptPath', script, '-ParamsPath', paramsPath,
             '-LogPath', logPath, '-AppCmdStub', appCmdStubPath],
           {
             encoding: 'utf8',
@@ -280,21 +296,50 @@ function assertWorkingProxy(iis, result) {
   }
 }
 
-// The setup script is for IIS and Windows PowerShell 5.1, which exist on Windows only. A machine
-// whose execution policy does not let Windows PowerShell run local scripts cannot run it either.
-const windowsPowerShellPolicy = (() => {
-  if (process.platform !== 'win32') return 'not Windows';
-  try {
-    return execFileSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', 'Get-ExecutionPolicy'],
-      { encoding: 'utf8', windowsHide: true, timeout: 60_000, env: shellEnvironment() }).trim();
-  } catch {
-    return 'unavailable';
-  }
-})();
-const canRunSetup = ['RemoteSigned', 'Unrestricted', 'Bypass'].includes(windowsPowerShellPolicy);
-if (!canRunSetup) console.warn(`[setup-iis-odvproxy] setup runs skipped: Windows PowerShell policy is "${windowsPowerShellPolicy}".`);
+// The setup script is for IIS and Windows PowerShell 5.1, which exist on Windows only; elsewhere
+// the runs are skipped and say so. On Windows they always run: a machine where Windows
+// PowerShell cannot run the local test script fails the first test below with the reason,
+// instead of letting the suite pass without the IIS tests.
+const onWindows = process.platform === 'win32';
+if (!onWindows) console.warn('[setup-iis-odvproxy] setup runs skipped: not Windows, so there is no Windows PowerShell or IIS.');
 
-describe.skipIf(!canRunSetup)('Setup-IIS-ODVProxy.ps1', () => {
+describe.skipIf(!onWindows)('Setup-IIS-ODVProxy.ps1', () => {
+  test('Windows PowerShell can run the local test script on this machine', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'odv-iis-probe-'));
+    try {
+      const probe = path.join(dir, 'probe.ps1');
+      fs.writeFileSync(probe, "Write-Output ('edition=' + $PSVersionTable.PSEdition + ' version=' + $PSVersionTable.PSVersion.Major)", 'ascii');
+      let output = '';
+      try {
+        output = execFileSync('powershell.exe', [...shellArguments('powershell.exe'), '-File', probe],
+          { encoding: 'utf8', windowsHide: true, timeout: 60_000, env: shellEnvironment(), stdio: ['ignore', 'pipe', 'pipe'] });
+      } catch (error) {
+        output = `${error.stdout ?? ''}${error.stderr ?? ''}${error.message ?? ''}`;
+      }
+      assert.match(output, /edition=Desktop version=5/,
+        'Windows PowerShell 5.1 could not run a local script, so the IIS setup tests cannot run on this machine. '
+        + 'The usual cause is an execution policy enforced by group policy. Output:\n' + output);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }, 120_000);
+
+  test('does nothing under -WhatIf and says that the final check was skipped', async () => {
+    await withIis({}, async (iis) => {
+      const result = await iis.run({ ForwardClientHeaders: true, WhatIf: true });
+      assert.equal(result.code, 0, result.output);
+      assert.match(result.output, /WhatIf/);
+      assert.match(result.output, /final check[^\n]*skipped/i);
+      assert.doesNotMatch(result.output, /Setup check failed/);
+      // Nothing was written or stored, and every recorded call ran under WhatIf.
+      assert.equal(result.webConfig, '');
+      assert.equal(iis.physicalPathExists(), false);
+      assert.deepEqual(iis.locationAllowed(), []);
+      assert.ok(result.calls.length > 0);
+      assert.ok(result.calls.every((call) => call.whatif === true), JSON.stringify(result.calls));
+    });
+  }, 120_000);
+
   test('changes nothing for the whole server except turning the ARR proxy on, with and without -ForwardClientHeaders', async () => {
     for (const params of [{}, { ForwardClientHeaders: true }]) {
       await withIis({}, async (iis) => {
