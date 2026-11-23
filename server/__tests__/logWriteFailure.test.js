@@ -207,7 +207,9 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
   it('keeps the order of records written at the same time', async () => {
     state.delayMs = 20;
     const target = targets[name];
-    const texts = Array.from({ length: 12 }, (_unused, index) => `ordered-${name}-${index}`);
+    // Exercise overlapping writes without using most of the fixture's short write deadline
+    // on deliberate disk delays. The hung-write cases exercise that deadline separately.
+    const texts = Array.from({ length: 4 }, (_unused, index) => `ordered-${name}-${index}`);
     // Sent one after the other on separate connections, without waiting for the answers.
     const pending = [];
     for (const text of texts) {
@@ -216,7 +218,7 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
       await new Promise((resolve) => setTimeout(resolve, 5));
     }
     const responses = await Promise.all(pending);
-    expect(responses.every((response) => response.status === target.ok)).toBe(true);
+    expect(responses.map((response) => response.status)).toEqual(texts.map(() => target.ok));
     const stored = linesOf(target.record).map((line) => /ordered-\w+-\d+/.exec(line)?.[0]);
     expect(stored).toEqual(texts);
   });

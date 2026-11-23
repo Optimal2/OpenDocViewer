@@ -72,12 +72,21 @@ describe('stand-alone manual page', () => {
     vi.restoreAllMocks();
   });
 
+  async function waitForManualPage() {
+    await vi.waitFor(async () => {
+      await flush();
+      expect(container.querySelector(
+        '.odv-help-body-manual.has-contents, [data-odv-manual-page="disabled"]',
+      )).not.toBeNull();
+    }, { timeout: 15_000 });
+  }
+
   async function renderPage(props = {}) {
     root = createRoot(container);
     act(() => {
       root.render(h(ManualPage, props));
     });
-    await flush(50);
+    await waitForManualPage();
   }
 
   it('renders the header with title, theme and language menus, and the manual view', async () => {
@@ -254,7 +263,7 @@ describe('stand-alone manual page', () => {
     act(() => {
       root = mountManualPage(container);
     });
-    await flush(50);
+    await waitForManualPage();
     expect(['light', 'normal', 'dark']).toContain(document.documentElement.getAttribute('data-theme'));
     expect(document.documentElement.getAttribute('data-theme-mode')).toBeTruthy();
     expect(container.querySelector('[data-odv-manual-page="root"] .odv-manual-content h2#utseende')).not.toBeNull();
