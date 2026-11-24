@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_LOG_WRITE_TIMEOUT_MS, createRollingLog, describeWriteError, resolveLogWriteTimeoutMs } from '../rollingLog.js';
 
 const DAY = '2026-03-04';
@@ -23,6 +23,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+  vi.useRealTimers();
   await log?.closeAll();
   log = undefined;
   remove(dir);
@@ -36,6 +37,9 @@ describe('createRollingLog', () => {
   });
 
   it('keeps the order of lines written at the same time', async () => {
+    // This checks call order on a real file, not whether a loaded disk finishes 500 writes within
+    // the production timeout. Freeze the clock so event-loop stalls cannot consume that timeout.
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     log = createRollingLog({ logDir: dir, now: at });
     const lines = Array.from({ length: 500 }, (_unused, index) => `line ${index}\n`);
     await Promise.all(lines.map((line) => log.write('print', line)));
@@ -183,9 +187,18 @@ describe('a write that is never confirmed', () => {
         open: async (...args) => {
           const handle = await fs.promises.open(...args);
           const appendFile = handle.appendFile.bind(handle);
-          handle.appendFile = (text, encoding) => (control.hung
-            ? new Promise((resolve) => { control.release = () => resolve(appendFile(text, encoding)); })
-            : appendFile(text, encoding));
+          handle.appendFile = (text, encoding) => {
+            if (!control.hung) return appendFile(text, encoding);
+            control.onAppend?.();
+            return new Promise((resolve) => {
+              control.release = () => {
+                // The timed-out entry may already be closed. Observe either late outcome so the
+                // test can wait for it without turning an expected closed-handle error into a leak.
+                control.lateWrite = appendFile(text, encoding).catch(() => {});
+                resolve(control.lateWrite);
+              };
+            });
+          };
           return handle;
         },
       },
@@ -193,39 +206,51 @@ describe('a write that is never confirmed', () => {
   }
 
   it('rejects with ELOGTIMEOUT when the timeout runs out, also for the writes waiting behind it', async () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     const control = { hung: true, release: null };
+    control.started = new Promise((resolve) => { control.onAppend = resolve; });
     log = createRollingLog({ logDir: dir, now: at, fileSystem: hangingFileSystem(control), writeTimeoutMs: 300 });
     const started = Date.now();
-    const outcomes = await Promise.all(['a\n', 'b\n', 'c\n'].map((line) => log.write('print', line).then(() => 'resolved', (error) => error.code)));
+    const pending = ['a\n', 'b\n', 'c\n'].map((line) => log.write('print', line).then(() => 'resolved', (error) => error.code));
+    // Do not advance the timeout until the first append really is hung and every caller is queued.
+    await control.started;
+    await vi.advanceTimersByTimeAsync(300);
+    const outcomes = await Promise.all(pending);
     expect(outcomes).toEqual(['ELOGTIMEOUT', 'ELOGTIMEOUT', 'ELOGTIMEOUT']);
-    // Every caller has its answer about when the timeout runs out, not one timeout after the other.
-    expect(Date.now() - started).toBeLessThan(1500);
+    // Every caller has its answer when the common deadline runs out, not one timeout after another.
+    expect(Date.now() - started).toBe(300);
 
     // The disk works again: the next write opens the file anew and is confirmed.
     control.hung = false;
     await log.write('print', 'after\n');
     expect(read(`print-${DAY}.log`)).toContain('after\n');
 
-    // The hung write finishing late changes nothing for anyone.
+    // The hung write finishing late changes nothing for anyone; await that actual late append.
     control.release?.();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await control.lateWrite;
     await log.write('print', 'later\n');
     expect(read(`print-${DAY}.log`)).toContain('later\n');
   });
 
   it('writeOrStderr does not wait longer than the timeout either', async () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     const control = { hung: true, release: null };
+    control.started = new Promise((resolve) => { control.onAppend = resolve; });
     const written = [];
     log = createRollingLog({
       logDir: dir, now: at, fileSystem: hangingFileSystem(control), writeTimeoutMs: 200, stderr: { write: (text) => written.push(text) },
     });
     const started = Date.now();
-    await expect(log.writeOrStderr('error', '{"event":"x"}\n')).resolves.toBe(false);
-    expect(Date.now() - started).toBeLessThan(1500);
+    const pending = log.writeOrStderr('error', '{"event":"x"}\n');
+    await control.started;
+    await vi.advanceTimersByTimeAsync(200);
+    await expect(pending).resolves.toBe(false);
+    expect(Date.now() - started).toBe(200);
     expect(written.join('')).toContain('ELOGTIMEOUT');
     expect(written.join('')).toContain('{"event":"x"}');
     control.hung = false;
     control.release?.();
+    await control.lateWrite;
   });
 });
 
@@ -236,6 +261,7 @@ describe('an open that hangs', () => {
    */
   function countingFileSystem(control) {
     control.openHandles = 0;
+    control.closedHandles = 0;
     control.pending = [];
     const track = async (args) => {
       const handle = await fs.promises.open(...args);
@@ -243,8 +269,9 @@ describe('an open that hangs', () => {
       const close = handle.close.bind(handle);
       let closed = false;
       handle.close = async () => {
-        if (!closed) { closed = true; control.openHandles -= 1; }
-        return close();
+        if (!closed) { closed = true; control.openHandles -= 1; control.closedHandles += 1; }
+        try { return await close(); }
+        finally { control.onClose?.(); }
       };
       return handle;
     };
@@ -252,28 +279,44 @@ describe('an open that hangs', () => {
       ...fs,
       promises: {
         ...fs.promises,
+        // The temporary folder already exists. An immediate mkdir makes the hung-open signal a
+        // microtask, independent of disk and event-loop load; the open itself still uses real fs.
+        mkdir: async () => undefined,
         open: (...args) => (control.hung
-          ? new Promise((resolve, reject) => { control.pending.push(() => track(args).then(resolve, reject)); })
+          ? new Promise((resolve, reject) => {
+            control.pending.push(() => track(args).then(resolve, reject));
+            control.onPending?.();
+          })
           : track(args)),
       },
     };
   }
 
   it('closes a file that opens after its write was given up, and never uses it', async () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     const control = { hung: true };
     log = createRollingLog({ logDir: dir, now: at, fileSystem: countingFileSystem(control), writeTimeoutMs: 100 });
 
     const abandoned = 12;
     for (let index = 0; index < abandoned; index += 1) {
-      await expect(log.write('print', `given up ${index}\n`)).rejects.toMatchObject({ code: 'ELOGTIMEOUT' });
+      control.pendingOpen = new Promise((resolve) => { control.onPending = resolve; });
+      const writing = log.write('print', `given up ${index}\n`);
+      // Each iteration must have started its own open before its timeout is advanced. Otherwise a
+      // stalled event loop can expire a queued write before it starts, which is a different case.
+      await control.pendingOpen;
+      await vi.advanceTimersByTimeAsync(100);
+      await expect(writing).rejects.toMatchObject({ code: 'ELOGTIMEOUT' });
     }
     expect(control.pending).toHaveLength(abandoned);
 
     // The disk answers again: every open that was waiting completes now, long after its write
     // was given up.
+    control.allClosed = new Promise((resolve) => {
+      control.onClose = () => { if (control.openHandles === 0) resolve(); };
+    });
     control.hung = false;
     for (const release of control.pending) release();
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await control.allClosed;
     // None of them is kept open, and none of them wrote the line that was answered as failed.
     expect(control.openHandles).toBe(0);
 
@@ -287,16 +330,25 @@ describe('an open that hangs', () => {
   });
 
   it('does not let a late open take the place of the file in use', async () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     const control = { hung: true };
     log = createRollingLog({ logDir: dir, now: at, fileSystem: countingFileSystem(control), writeTimeoutMs: 100 });
-    await expect(log.write('print', 'given up\n')).rejects.toMatchObject({ code: 'ELOGTIMEOUT' });
+    control.pendingOpen = new Promise((resolve) => { control.onPending = resolve; });
+    const abandoned = log.write('print', 'given up\n');
+    await control.pendingOpen;
+    await vi.advanceTimersByTimeAsync(100);
+    await expect(abandoned).rejects.toMatchObject({ code: 'ELOGTIMEOUT' });
 
     control.hung = false;
     await log.write('print', 'first\n');
     expect(control.openHandles).toBe(1);
-    // The old open completes while another file is in use.
+    // The old open completes while another file is in use. Wait for its actual close, not a
+    // wall-clock delay, so a loaded machine cannot mistake a pending close for a replacement.
+    control.lateClosed = new Promise((resolve) => {
+      control.onClose = () => { if (control.closedHandles === 1) resolve(); };
+    });
     for (const release of control.pending) release();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await control.lateClosed;
     expect(control.openHandles).toBe(1);
     await log.write('print', 'second\n');
     expect(read(`print-${DAY}.log`)).toBe('first\nsecond\n');
@@ -353,15 +405,12 @@ describe('writeOrStderr and writeBestEffort', () => {
     let time = new Date('2026-03-04T10:00:00Z');
     const written = [];
     log = blockedLog({ write: (text) => written.push(text) }, () => time);
-    const settle = () => new Promise((resolve) => setTimeout(resolve, 100));
     log.writeBestEffort('access', 'a\n');
     log.writeBestEffort('access', 'b\n');
-    await settle();
-    expect(written).toHaveLength(1);
+    await vi.waitFor(() => expect(written).toHaveLength(1), { timeout: 10_000, interval: 10 });
     expect(written[0]).not.toContain('a\n');
     time = new Date('2026-03-04T10:01:01Z');
     log.writeBestEffort('access', 'c\n');
-    await settle();
-    expect(written).toHaveLength(2);
+    await vi.waitFor(() => expect(written).toHaveLength(2), { timeout: 10_000, interval: 10 });
   });
 });

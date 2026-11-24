@@ -18,6 +18,8 @@ const state = vi.hoisted(() => ({
   failure: null,
   delayMs: 0,
   hung: false,
+  onAppend: null,
+  onResponse: null,
 }));
 
 // Log files are kept in memory: see fakeLogFileSystem in logServerHarness.js.
@@ -34,6 +36,16 @@ vi.mock('express', async (importOriginal) => {
   const actual = await importOriginal();
   const createApp = (...args) => {
     const app = actual.default(...args);
+    // Observe the server-side send itself. Client arrival can be delayed by a loaded event loop,
+    // so only this event can prove that the answer preceded the asynchronous error report.
+    app.use((_req, res, next) => {
+      const sendResponse = res.send.bind(res);
+      res.send = (...sendArgs) => {
+        state.onResponse?.(res);
+        return sendResponse(...sendArgs);
+      };
+      next();
+    });
     const listen = app.listen.bind(app);
     // Loopback only, so running the suite can never raise a firewall prompt.
     app.listen = (port, ...rest) => {
@@ -78,7 +90,9 @@ beforeAll(async () => {
   vi.stubEnv('LOG_TOKEN', TOKEN);
   vi.stubEnv('PORT', '0');
   vi.stubEnv('USER_LOG_RATE_LIMIT_PER_MINUTE', '2');
-  vi.stubEnv('LOG_WRITE_TIMEOUT_MS', '400');
+  // Leave headroom for event-loop stalls in the full suite. The hung-write tests still exercise
+  // the deadline itself; production's 10 s default and environment parsing are tested separately.
+  vi.stubEnv('LOG_WRITE_TIMEOUT_MS', '2000');
   targets.user = {
     port: await start('../user-log-server.js'), path: '/userlog/record', record: 'print', ok: 200,
     body: (text) => ({ reason: text, forWhom: 'w' }), headers: {},
@@ -93,6 +107,8 @@ afterEach(() => {
   state.failure = null;
   state.delayMs = 0;
   state.hung = false;
+  state.onAppend = null;
+  state.onResponse = null;
   state.written.length = 0;
   vi.restoreAllMocks();
 });
@@ -137,6 +153,7 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
     const started = Date.now();
     const response = await send('slow disk');
     expect(response.status).toBe(targets[name].ok);
+    // A lower bound proves that the response awaited the append. No loaded-machine upper bound.
     expect(Date.now() - started).toBeGreaterThanOrEqual(280);
   });
 
@@ -169,26 +186,34 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
   it('answers 500 once when the write is never confirmed, and writes again when the disk answers', async () => {
     const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
     state.hung = true;
+    const target = targets[name];
+    const events = [];
+    state.onResponse = (res) => { if (res.statusCode === 500) events.push('response'); };
+    state.onAppend = (file) => {
+      if (/error-\d{4}-\d{2}-\d{2}\.log$/.test(file)) events.push('error-report');
+    };
     const started = Date.now();
     const response = await send(SECRET_TEXT);
     const waited = Date.now() - started;
     expect(response.status).toBe(500);
     // One answer only: the body is the plain 500 text, not two answers on the connection.
     expect(response.text.match(/HTTP\/1\.1/g)).toBeNull();
-    // LOG_WRITE_TIMEOUT_MS is 400 here. The answer comes when that time is up; it does not
-    // also wait for the error report, which on a hung disk takes as long again.
-    expect(waited).toBeGreaterThanOrEqual(380);
-    expect(waited).toBeLessThan(700);
+    // The fixture allows 2000 ms. The lower bound proves that the first timeout ran out. Event
+    // order, not a fragile upper wall-time bound, proves that the answer did not await the error
+    // report's own timeout: the server sends its 500 before starting that append.
+    expect(waited).toBeGreaterThanOrEqual(1900);
+    expect(events[0]).toBe('response');
+    expect(events).toContain('error-report');
     const reportedText = () => stderr.mock.calls.map((call) => String(call[0])).join('');
-    await eventually(() => reportedText().includes('log-write-failed'));
+    await eventually(() => reportedText().includes('log-write-failed'), 10_000);
     const reported = reportedText();
     expect(reported).toContain('log-write-failed');
     expect(reported).toContain('ELOGTIMEOUT');
     expect(reported).not.toContain(SECRET_TEXT);
 
     state.hung = false;
-    expect((await send('kept')).status).toBe(targets[name].ok);
-    expect(linesOf(targets[name].record)).toHaveLength(1);
+    expect((await send('kept')).status).toBe(target.ok);
+    expect(linesOf(target.record)).toHaveLength(1);
   });
 
   it('writes the record when the client closes the connection right after sending it', async () => {
@@ -207,15 +232,20 @@ describe.each(['system', 'user'])('%s log server when a record cannot be written
   it('keeps the order of records written at the same time', async () => {
     state.delayMs = 20;
     const target = targets[name];
-    // Exercise overlapping writes without using most of the fixture's short write deadline
-    // on deliberate disk delays. The hung-write cases exercise that deadline separately.
     const texts = Array.from({ length: 4 }, (_unused, index) => `ordered-${name}-${index}`);
-    // Sent one after the other on separate connections, without waiting for the answers.
     const pending = [];
     for (const text of texts) {
+      const appendStarted = new Promise((resolve) => {
+        state.onAppend = (file) => {
+          if (new RegExp(`${target.record}-\\d{4}-\\d{2}-\\d{2}\\.log$`).test(file)) resolve();
+        };
+      });
       client += 1;
       pending.push(post(target.port, target.path, target.body(text), { ...target.headers, 'x-forwarded-for': `198.51.100.${client}` }));
-      await new Promise((resolve) => setTimeout(resolve, 5));
+      // Separate connections do not guarantee server arrival order. Establish the order the
+      // product contract actually covers: each rollingLog.write/append call. The 20 ms append
+      // remains pending, so all four requests still overlap; only their responses are awaited.
+      await appendStarted;
     }
     const responses = await Promise.all(pending);
     expect(responses.map((response) => response.status)).toEqual(texts.map(() => target.ok));
@@ -235,20 +265,23 @@ describe('a record rejected by the rate limit', () => {
 
     state.failure = failing('error');
     expect((await send('203.0.113.77')).status).toBe(429);
-    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(rejections()).toEqual([]);
-    // The line that could not be written went to standard error instead.
-    expect(stderr.mock.calls.map((call) => String(call[0])).join('')).toContain('rate-limit-rejected');
+    // The line that could not be written went to standard error instead. Reporting runs after
+    // the response, so wait for the event rather than assuming it finishes within 50 ms.
+    const reportedText = () => stderr.mock.calls.map((call) => String(call[0])).join('');
+    await eventually(() => reportedText().includes('rate-limit-rejected'));
+    expect(reportedText()).toContain('rate-limit-rejected');
 
     // The error log works again: the client was not marked as reported, so it is reported now.
     state.failure = null;
     expect((await send('203.0.113.77')).status).toBe(429);
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await eventually(() => rejections().length === 1);
     expect(rejections().map((record) => record.ip)).toEqual(['203.0.113.77']);
 
-    // And only once from here on.
+    // And only once from here on. The reporter marks the client synchronously before its async
+    // write, so the next response must not add another record; drain prior work before checking.
     expect((await send('203.0.113.77')).status).toBe(429);
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await eventually(() => rejections().length > 1, 100);
     expect(rejections()).toHaveLength(1);
   });
 });

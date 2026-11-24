@@ -63,6 +63,7 @@ export function post(port, path, body, headers = {}) {
  *   state.failure   optional function(file) returning an Error to fail that write, or null
  *   state.delayMs   optional delay of each write
  *   state.hung      when true a write never finishes (a hung disk)
+ *   state.onAppend  optional observer called with the file when its server's append starts
  *
  * A file whose write failed must be opened again, as with a real file.
  */
@@ -83,6 +84,9 @@ export function fakeLogFileSystem(actual, state) {
       read: async () => ({ bytesRead: 0 }),
       close: async () => {},
       appendFile: async (text) => {
+        // A test can wait for the server's write call before advancing a fake clock or sending the
+        // next overlapping request. This observes server arrival, not client socket send order.
+        state.onAppend?.(name);
         if (state.delayMs > 0) await new Promise((resolve) => setTimeout(resolve, state.delayMs));
         if (state.hung) await new Promise(() => { /* never */ });
         const error = typeof state.failure === 'function' ? state.failure(name) : null;
