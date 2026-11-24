@@ -528,13 +528,13 @@
 <p>The check starts once the first page has been shown and does not get in the way of your reading.</p>
 <p>The color of the symbol summarizes the state of the signature:</p>
 <ul>
-  <li><strong>Green</strong> – the content is intact since it was signed.</li>
-  <li><strong>Orange</strong> – something deserves a closer look: the document was modified after signing, the signature format is not supported, or the trust of the signature is unknown.</li>
+  <li><strong>Green</strong> – no warning. Read the integrity status to see whether the content was checked and found intact.</li>
+  <li><strong>Orange</strong> – something deserves a closer look, such as a change after signing, an inconclusive integrity check or a signing-time warning. Your organization can also choose orange for signatures the viewer cannot check.</li>
   <li><strong>Red</strong> – the signature is invalid, cannot be read, or the content does not match the signature.</li>
 </ul>
 <p>If a document has several signatures, or the session has several signed documents, the symbol shows the most serious state.</p>
 <ol class="steps">
-  <li>Click the signature button in the toolbar – it sits just to the left of the three menus at the far right. The <em>Signatures</em> dialog lists the signed documents with the number of signatures, integrity, trust, signer and time.</li>
+  <li>Click the signature button in the toolbar – it sits just to the left of the three menus at the far right. For each signed document, the <em>Signatures</em> dialog shows the document number, file names, signature count, integrity status and any signing-time warning. It also shows who signed most recently and when.</li>
   <li>Click <strong>Details</strong> next to a document to see each signature on its own.</li>
 </ol>
 <div class="figure-grid">
@@ -543,22 +543,17 @@
     <figcaption><strong>The symbols.</strong> Next to the <em>DOC 1</em> heading (<em>DOK 1</em> in the picture) a green symbol with the number of signatures; on the page thumbnail a fainter symbol.</figcaption>
   </figure>
   <figure class="print">
-    <a href="#lb-signaturer-oversikt"><img src="img/signaturer-oversikt.png" alt="The Signatures dialog with two signed documents, one intact and one modified after signing"></a>
-    <figcaption><strong>Signatures.</strong> One document is intact (green), the other has been modified after signing (orange). Trust has not been checked.</figcaption>
+    <a href="#lb-signaturer-oversikt"><img src="img/signaturer-oversikt.png" alt="The signature overview shows Intact for the first document and Modified after signing for the second"></a>
+    <figcaption><strong>Signatures.</strong> The overview shows the integrity status for each document. Here it shows <em>Intact</em> in green and <em>Modified after signing</em> in orange.</figcaption>
   </figure>
 </div>
 <p>In the <em>Signatures</em> dialog you can also click a row to go to the first page of that document; the dialog stays open. You reach the same details by clicking the symbol next to the document heading or on a page thumbnail.</p>
-<p>The details dialog shows, for each signature: <em>Signer</em>, <em>Organisation</em>, <em>Issuer</em>, <em>Signing time</em>, <em>Reason</em>, <em>Location</em>, <em>Kind</em>, <em>Integrity</em>, <em>Covers the whole document</em>, <em>Certificate valid</em>, <em>Trust</em> and <em>Format</em>. If the document consists of several signed files, each file gets a tab of its own with the file's name, and the heading below the tabs says, for example, <em>File 1 of 2</em>. A dash means that the signature does not carry that piece of information.</p>
+<p>For each signature, the details dialog shows <em>Signer</em>, <em>Organisation</em>, <em>Issuer</em>, <em>Signing time</em>, <em>Reason</em>, <em>Location</em>, <em>Kind</em>, <em>Integrity</em> and <em>Covers the whole document</em>. The <em>Certificate valid</em> row shows the certificate's validity period. <em>Format</em> appears when available. If the document consists of several signed files, each file gets a tab of its own with the file's name, and the heading below the tabs says, for example, <em>File 1 of 2</em>. A dash means that the signature does not carry that piece of information.</p>
 <figure class="print">
-  <a href="#lb-signatur-detaljer"><img src="img/signatur-detaljer.png" alt="The details dialog for a signature with a tab per file, Integrity Intact and Trust Not checked"></a>
-  <figcaption><strong>Details for one signature.</strong> One tab per signed file. At the top the note on why trust has not been checked, further down <em>Integrity</em> and <em>Trust</em>. The names in the example come from a test certificate.</figcaption>
+  <a href="#lb-signatur-detaljer"><img src="img/signatur-detaljer.png" alt="The details dialog with a tab for each signed file and the integrity status Intact for the selected signature"></a>
+  <figcaption><strong>Details for one signature.</strong> Select a file using the tabs and read the result under <em>Integrity</em>. The names in the example come from a test certificate.</figcaption>
 </figure>
-<p>Two lines matter most, and it pays to tell them apart:</p>
-<ul>
-  <li><strong>Integrity</strong> answers whether the content is unchanged since signing (<em>Intact</em>, <em>Modified after signing</em> and so on). It is checked in your browser, and nothing is sent anywhere for it.</li>
-  <li><strong>Trust</strong> answers whether the certificate chain and revocation status have been checked. Only the server can do that, when the document is opened through ODVGateway and your organization has switched the check on. Otherwise it says <em>Not checked</em>, with an explanation at the top of the signature.</li>
-</ul>
-<p><em>Unknown</em> trust does not mean that the signature is invalid. Look at <em>Integrity</em> to see whether the content is unchanged.</p>
+<p><strong>Integrity</strong> shows the result of the check in your browser, such as <em>Intact</em> or <em>Modified after signing</em>. The information line above the fields says that the viewer does not check issuer trust or revocation status.</p>
 <p class="small">Your organization may have switched off the signature display entirely or only the symbols on the page thumbnails.</p>
 <details>
   <summary>For whoever manages the installation: the settings</summary>
@@ -686,7 +681,7 @@
 <h3>Short checklist for more features</h3>
 <ul class="checklist">
   <li>Right-click and choose <em>Show document metadata</em>; <kbd>M</kbd> opens the table with all documents.</li>
-  <li>The signature symbol: green = intact, orange = take a closer look, red = invalid. <em>Trust</em> is only checked when your organization has enabled the check on the server.</li>
+  <li>The signature symbol is green when there is no warning, orange when something deserves a closer look and red when there is an error. Open the details and read <em>Integrity</em> for the result.</li>
   <li><strong>HQ</strong> applies only to PDF pages, only to that page and only in this session.</li>
   <li><strong>1:X</strong> is your own size; <em>Default zoom/size</em> controls how new sessions start.</li>
   <li>For support: version, build id and the diagnostics file – never personal data.</li>

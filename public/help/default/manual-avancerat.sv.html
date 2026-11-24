@@ -528,13 +528,13 @@
 <p>Kontrollen startar när den första sidan har visats och stör inte läsningen.</p>
 <p>Symbolens färg är en sammanfattning av signaturens läge:</p>
 <ul>
-  <li><strong>Grön</strong> – innehållet är intakt sedan signeringen.</li>
-  <li><strong>Orange</strong> – något bör granskas: dokumentet har ändrats efter signeringen, signaturformatet stöds inte, eller signaturens tillit är okänd.</li>
+  <li><strong>Grön</strong> – ingen varning. Läs integritetsstatusen för att se om innehållet har kontrollerats och är intakt.</li>
+  <li><strong>Orange</strong> – något bör granskas, till exempel en ändring efter signering, en integritet som inte kunde fastställas eller en varning om signeringstiden. Din organisation kan också välja orange för signaturer som visaren inte kan kontrollera.</li>
   <li><strong>Röd</strong> – signaturen är ogiltig, kan inte läsas, eller innehållet matchar inte signaturen.</li>
 </ul>
 <p>Har ett dokument flera signaturer, eller sessionen flera signerade dokument, visar symbolen det allvarligaste läget.</p>
 <ol class="steps">
-  <li>Klicka på signaturknappen i verktygsfältet – den sitter till vänster om de tre menyerna längst till höger. Dialogen <em>Signaturer</em> listar de signerade dokumenten med antal signaturer, integritet, tillit, undertecknare och tidpunkt.</li>
+  <li>Klicka på signaturknappen i verktygsfältet – den sitter till vänster om de tre menyerna längst till höger. För varje signerat dokument visar dialogen <em>Signaturer</em> dokumentnummer, filnamn, antal signaturer, integritetsstatus och eventuell varning om signeringstiden. Där står också vem som undertecknade senast och när.</li>
   <li>Klicka på <strong>Detaljer</strong> vid ett dokument för att se varje signatur för sig.</li>
 </ol>
 <div class="figure-grid">
@@ -543,22 +543,17 @@
     <figcaption><strong>Symbolerna.</strong> Vid rubriken <em>DOK 1</em> en grön symbol med antalet signaturer, på sidminiatyren en svagare symbol.</figcaption>
   </figure>
   <figure class="print">
-    <a href="#lb-signaturer-oversikt"><img src="img/signaturer-oversikt.png" alt="Dialogen Signaturer med två signerade dokument, det ena intakt och det andra ändrat efter signering"></a>
-    <figcaption><strong>Signaturer.</strong> Ett dokument är intakt (grönt), det andra har ändrats efter signeringen (orange). Tilliten är inte kontrollerad.</figcaption>
+    <a href="#lb-signaturer-oversikt"><img src="img/signaturer-oversikt.png" alt="Signaturöversikten visar Intakt för det första dokumentet och Ändrat efter signering för det andra"></a>
+    <figcaption><strong>Signaturer.</strong> Översikten visar integritetsstatus per dokument. Här visas <em>Intakt</em> i grönt och <em>Ändrat efter signering</em> i orange.</figcaption>
   </figure>
 </div>
 <p>I dialogen <em>Signaturer</em> kan du också klicka på en rad för att gå till dokumentets första sida; dialogen ligger kvar. Samma detaljer når du genom att klicka på symbolen vid dokumentrubriken eller på en sidminiatyr.</p>
-<p>Detaljdialogen visar per signatur: <em>Undertecknare</em>, <em>Organisation</em>, <em>Utfärdare</em>, <em>Signeringstid</em>, <em>Orsak</em>, <em>Plats</em>, <em>Typ</em>, <em>Integritet</em>, <em>Omfattar hela dokumentet</em>, <em>Certifikatet giltigt</em>, <em>Tillit</em> och <em>Format</em>. Består dokumentet av flera signerade filer får varje fil en egen flik med filens namn, och rubriken under flikarna visar till exempel <em>Fil 1 av 2</em>. Ett streck betyder att uppgiften saknas i signaturen.</p>
+<p>Detaljdialogen visar per signatur <em>Undertecknare</em>, <em>Organisation</em>, <em>Utfärdare</em>, <em>Signeringstid</em>, <em>Orsak</em>, <em>Plats</em>, <em>Typ</em>, <em>Integritet</em> och <em>Omfattar hela dokumentet</em>. Raden <em>Certifikatet giltigt</em> visar certifikatets giltighetsperiod. <em>Format</em> visas om uppgiften finns. Består dokumentet av flera signerade filer får varje fil en egen flik med filens namn, och rubriken under flikarna visar till exempel <em>Fil 1 av 2</em>. Ett streck betyder att uppgiften saknas i signaturen.</p>
 <figure class="print">
-  <a href="#lb-signatur-detaljer"><img src="img/signatur-detaljer.png" alt="Detaljdialogen för en signatur med flikar per fil, Integritet Intakt och Tillit Ej kontrollerad"></a>
-  <figcaption><strong>Detaljer för en signatur.</strong> En flik per signerad fil. Överst förklaringen till varför tilliten inte är kontrollerad, längre ned <em>Integritet</em> och <em>Tillit</em>. Namnen i exemplet kommer från ett testcertifikat.</figcaption>
+  <a href="#lb-signatur-detaljer"><img src="img/signatur-detaljer.png" alt="Detaljdialogen med en flik per signerad fil och integritetsstatusen Intakt för den valda signaturen"></a>
+  <figcaption><strong>Detaljer för en signatur.</strong> Välj fil med flikarna och läs resultatet under <em>Integritet</em>. Namnen i exemplet kommer från ett testcertifikat.</figcaption>
 </figure>
-<p>Två rader är särskilt viktiga att hålla isär:</p>
-<ul>
-  <li><strong>Integritet</strong> svarar på om innehållet är oförändrat sedan signeringen (<em>Intakt</em>, <em>Ändrat efter signering</em> och så vidare). Det kontrolleras i din webbläsare, utan att något skickas iväg.</li>
-  <li><strong>Tillit</strong> svarar på om certifikatkedjan och spärrstatusen har kontrollerats. Det kan bara servern göra, när dokumentet öppnas via ODVGateway och din organisation har slagit på kontrollen. Annars står det <em>Ej kontrollerad</em>, med en förklaring högst upp i signaturen.</li>
-</ul>
-<p><em>Okänd</em> tillit betyder inte att signaturen är ogiltig. Titta på <em>Integritet</em> för att se om innehållet är oförändrat.</p>
+<p><strong>Integritet</strong> visar resultatet av kontrollen i din webbläsare, till exempel <em>Intakt</em> eller <em>Ändrat efter signering</em>. Informationsraden ovanför fälten anger att visaren inte kontrollerar utfärdarens förtroende eller spärrstatus.</p>
 <p class="small">Din organisation kan ha stängt av signaturvisningen helt eller bara symbolerna på sidminiatyrerna.</p>
 <details>
   <summary>För den som sköter installationen: inställningarna</summary>
@@ -686,7 +681,7 @@
 <h3>Kort kontrollista för fler funktioner</h3>
 <ul class="checklist">
   <li>Högerklicka och välj <em>Visa metadata för dokument</em>; <kbd>M</kbd> öppnar tabellen med alla dokument.</li>
-  <li>Signatursymbolen: grön = intakt, orange = granska, röd = ogiltig. <em>Tillit</em> kontrolleras bara när din organisation har slagit på kontrollen på servern.</li>
+  <li>Signatursymbolen är grön när det inte finns någon varning, orange när något bör granskas och röd vid fel. Öppna detaljerna och läs <em>Integritet</em> för kontrollens resultat.</li>
   <li><strong>HQ</strong> gäller bara PDF-sidor, bara den sidan och bara den här sessionen.</li>
   <li><strong>1:X</strong> är din egen storlek; <em>Standard zoom/storlek</em> styr hur nya sessioner börjar.</li>
   <li>Till supporten: version, build-id och diagnostikfilen – aldrig personuppgifter.</li>
