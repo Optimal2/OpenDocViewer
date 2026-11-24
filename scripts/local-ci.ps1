@@ -11,8 +11,9 @@
     Steps:
       1. Build the web application: npm run build
       2. Run the Vitest suite: npx vitest run (with a JSON report for the count)
-      3. Validate module definitions: check embedded SQL freshness and run the
-         OMP-MODULE-SQL-CONFIG-OWNERSHIP import guard with its self-test
+      3. Validate module definitions: check embedded SQL freshness, run the
+         OMP-MODULE-SQL-CONFIG-OWNERSHIP import guard with its self-test, and
+         prove that the import step rejects a forbidden embedded SQL write
       4. Validate version lockstep: scripts/omp/validate-component-versions.ps1
          (run with -Strict, so Check 15 - shared-script drift against the
          OpenModulePlatform checkout - fails when it cannot run)
@@ -208,6 +209,11 @@ try {
     try {
         Write-Host "[3/5] Validating module definitions" -ForegroundColor Cyan
         & (Join-Path $PSScriptRoot 'validate-module-sql-import.ps1') -RepositoryRoot $RepoRoot -PlatformRepositoryRoot $PlatformRepositoryRoot
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot 'omp/test-module-sql-import.ps1') -PlatformRepositoryRoot $PlatformRepositoryRoot
+        if ($LASTEXITCODE -ne 0) {
+            throw "Module SQL import regression test exited with code $LASTEXITCODE."
+        }
         $moduleDefinitionsPassed = $true
     }
     catch {

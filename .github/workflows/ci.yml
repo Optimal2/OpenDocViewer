@@ -190,6 +190,47 @@ jobs:
             throw "Lockstep validator failed with exit code $LASTEXITCODE."
           }
 
+  module-sql-import:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenDocViewer
+        uses: actions/checkout@v6
+        with:
+          path: OpenDocViewer
+
+      # The import regression test uses the real embed tool and static SQL
+      # validator. It needs no SQL Server or sqlcmd: the validator builds with
+      # .NET and inspects a throwaway module definition without connecting to a
+      # database. Sibling checkouts keep the platform tree out of ODV's gates.
+      - name: Checkout OpenModulePlatform
+        uses: actions/checkout@v6
+        with:
+          repository: Optimal2/OpenModulePlatform
+          ref: main
+          path: OpenModulePlatform
+
+      - name: Use .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test forbidden module SQL import rejection
+        shell: pwsh
+        working-directory: OpenDocViewer
+        timeout-minutes: 20
+        run: |
+          $test = 'scripts/omp/test-module-sql-import.ps1'
+          if (-not (Test-Path -LiteralPath $test -PathType Leaf)) {
+            throw "Module SQL import test not found: $test"
+          }
+          $platformRoot = (Resolve-Path -LiteralPath '../OpenModulePlatform').ProviderPath
+          $global:LASTEXITCODE = 0
+          & $test -PlatformRepositoryRoot $platformRoot
+          if ($LASTEXITCODE -ne 0) {
+            throw "Module SQL import test failed with exit code $LASTEXITCODE."
+          }
+
   omp-pwsh-tests:
     runs-on: ubuntu-latest
 

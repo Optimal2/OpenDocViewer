@@ -52,6 +52,9 @@ EXEC (@ownershipProbe);
     if (-not $guardFailed -or -not ($output -match 'OMP-MODULE-SQL-CONFIG-OWNERSHIP:.*dynamic SQL payload cannot be resolved')) {
         throw 'Expected the module definition step to reject the embedded dynamic SQL with OMP-MODULE-SQL-CONFIG-OWNERSHIP.'
     }
+    # The expected guard rejection is a native non-zero exit inside the probe.
+    # Clear it so callers can use LASTEXITCODE as this passing test's verdict.
+    $global:LASTEXITCODE = 0
     Write-Host 'PASS: module SQL import step rejects a forbidden write in embedded dynamic SQL'
 }
 finally {
