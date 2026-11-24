@@ -1,7 +1,5 @@
 {
   "common": {
-    "cancel": "Cancel",
-    "ok": "OK",
     "close": "Close",
     "previous": "Previous",
     "next": "Next"
@@ -139,27 +137,7 @@
   },
   "printDialog": {
     "title": "Print",
-    "mode": {
-      "basic": "Basic mode",
-      "advanced": "Advanced mode"
-    },
-    "modeSwitch": {
-      "to": "Switch to {mode}.",
-      "back": "Back to {mode}."
-    },
-    "desc": "Choose what to print. The default option is {active}.",
-    "headerNote": "A print header will be added according to system configuration. It cannot be disabled here.",
-    "switchToAdvanced": "advanced mode",
-    "switchToBasic": "basic mode",
     "pagesHeader": "Pages and scope",
-    "basic": {
-      "active": "Active page",
-      "all": "All pages"
-    },
-    "advanced": {
-      "range": "Simple range",
-      "custom": "Custom pages"
-    },
     "range": {
       "from": "From",
       "to": "To",
@@ -190,8 +168,6 @@
     },
     "footer": {
       "cancel": "Cancel",
-      "continue": "Start printing",
-      "prepare": "Prepare printing",
       "downloadPdf": "Save PDF",
       "printHtml": "Print via HTML",
       "printPdf": "Print via PDF"
@@ -219,10 +195,7 @@
       "invalidNumber": "Invalid number \"{value}\".",
       "noPagesSelected": "No pages selected."
     },
-    "summary": "You will print {count, plural, =1 {# page} other {# pages}}.",
     "aria": {
-      "basicGroup": "Basic choices",
-      "advancedGroup": "Advanced choices",
       "userLogGroup": "Print details",
       "activeGroup": "Active page options",
       "allGroup": "All pages options",
@@ -234,7 +207,6 @@
       "label": "What should “All pages” include?",
       "selection": "Current selection ({count} pages)",
       "session": "Entire session ({count} pages)",
-      "lockedSelection": "{count} selected pages will be prepared in the chosen order.",
       "hint": "Choose whether printing should follow the current selection or ignore the selection and print the full session."
     },
     "activeScope": {
@@ -243,7 +215,6 @@
       "compareBoth": "Both compare pages",
       "hint": "When compare mode is active, current-page printing can include only the left page or both pages shown side by side."
     },
-    "subtitle": "Choose what to print and how this print job should be described. Current mode: {mode}.",
     "close": "Close",
     "subtitleUnified": "Choose what to print and fill in any print details.",
     "methodHeader": "Print method",
@@ -259,7 +230,6 @@
     "modes": {
       "active": "Active page",
       "all": "All pages",
-      "selectedSequence": "Selected sequence",
       "range": "Simple range",
       "custom": "Custom pages"
     },
@@ -271,45 +241,26 @@
     "summaryAll": "Prepare {count} pages.",
     "summaryRange": "Prepare pages {from}–{to}.",
     "summaryCustom": "Prepare the pages listed in the Pages field under Pages and scope.",
-    "activePageValue": "Active page: {page}",
     "allPagesValue": "All {count} session pages will be prepared.",
     "preparing": {
-      "title": "Preparing print job",
-      "body": "A print request for {count} pages has been sent to the browser. It can take a moment before the browser print preview opens.",
       "dismiss": "Close"
     },
     "printFormat": {
-      "label": "Add copy watermark",
       "hint": "Adds the configured watermark.",
       "checkboxLabel": "Add copy watermark"
     },
     "output": {
-      "header": "Print output",
-      "aria": "Print output mode",
       "direct": {
-        "label": "Direct print",
-        "hint": "Uses the browser print preview. The browser portrait/landscape setting applies to the whole print job.",
         "info": "Direct print uses the browser print preview. The browser portrait/landscape setting applies to the whole print job."
       },
       "safe": {
-        "label": "PDF print",
-        "hint": "Creates a PDF first. Each PDF page gets automatic portrait/landscape orientation.",
         "info": "OpenDocViewer creates the print job as a PDF. Each PDF page gets automatic portrait/landscape orientation from the page image before the PDF is printed in the browser."
-      },
-      "menuLabel": "Choose print output mode"
+      }
     },
     "pdfProgress": {
       "downloadTitle": "Preparing export",
       "printTitle": "Preparing print",
       "percent": "{percent}%",
-      "body": "Generated {current} of {total} pages.",
-      "loadingLibrary": "Preparing output engine…",
-      "loadingImages": "Preparing pages: {current} of {total}.",
-      "generatingPage": "Generated {current} of {total} pages. Processing page {page}.",
-      "finalizing": "Finalizing file…",
-      "merging": "Merging parts: {current} of {total}.",
-      "openingPreview": "Opening print preview…",
-      "downloading": "Preparing download…",
       "backgroundAction": "Continue working",
       "readyPrintBody": "The print file is ready. Open print preview when you are ready.",
       "readyDownloadBody": "The export file is ready. Save it when you are ready.",
@@ -330,10 +281,8 @@
   },
   "printSelectionWorkspace": {
     "title": "Manage selection",
-    "subtitle": "{selected} of {total} pages selected for printing.",
     "availablePages": "Available pages",
     "selectedPages": "Selected pages",
-    "availableCount": "{count} available",
     "sourceCount": "{count, plural, =1 {# page} other {# pages}}",
     "remainingCount": "{count, plural, =1 {# remaining} other {# remaining}}",
     "hideIncludedPages": "Hide added pages",
@@ -353,12 +302,8 @@
     "removeSelected": "Remove selected",
     "addSelected": "Add selected",
     "addAll": "Add all",
-    "undo": "Undo",
     "undoTitle": "Undo the latest print-selection change.",
-    "redo": "Redo",
     "redoTitle": "Redo the latest undone print-selection change.",
-    "resetToDefault": "Reset",
-    "resetToDefaultTitle": "Reset to the default: every page and document in the original order.",
     "modeLabel": "Mode",
     "pageMode": "Pages",
     "documentMode": "Documents",
@@ -371,8 +316,6 @@
     "documentPageCount": "{count, plural, =1 {# page} other {# pages}}",
     "thumbnailSizeLabel": "Thumbnail size",
     "thumbnailSizeValue": "{percent}%",
-    "smallerThumbnails": "Smaller thumbnails",
-    "largerThumbnails": "Larger thumbnails",
     "panelModeLabel": "Panel layout",
     "showBothPanels": "Show both panels",
     "showRightPanel": "Show selected pages",
@@ -389,12 +332,9 @@
     "previewPageNotAdded": "This page is not in the selection",
     "previewContext": "Page {page} of {total} · {document}-{documentPage}",
     "alreadyIncluded": "Page {page} is already included in the print selection.",
-    "pageTitle": "Page {page}",
-    "pageLabel": "Page {page}",
     "sourcePageTitle": "Source page {page}. Document {document}, document page {documentPage}.",
     "printPageTitle": "Print page {printPage}. Source page {sourcePage}, document {document}, document page {documentPage}.",
     "printOrderBadgeTitle": "Print page {page} in the draft output",
-    "cancelConfirm": "Cancel print selection and discard changes? All changes made in this mode will be lost.",
     "emptySelection": "No pages are selected for printing.",
     "noAvailablePages": "There are no remaining source pages.",
     "resizeDivider": "Resize print selection panels"
@@ -502,7 +442,6 @@
       "auto": "Auto ({language})",
       "autoUnknown": "Auto (language not identified, reads in {language})",
       "autoNoVoice": "Auto ({guessed} has no local voice; reads in {language})",
-      "languageNoVoice": "{language} (no local voice installed)",
       "noVoices": "No local voice installed for the recognised languages; online voices are never used",
       "noLocalVoice": "No local voice installed for {language}; online voices are never used"
     }
@@ -585,9 +524,6 @@
     "goToPageLeftPane": "Go to page {page} (left pane)",
     "goToPageRightPane": "Go to page {page} (right pane)",
     "goToPageBothPanes": "Go to page {page} (shown in both panes)",
-    "leftPaneBadge": "Left",
-    "rightPaneBadge": "Right",
-    "panelTitle": "Pages",
     "controls": {
       "groupLabel": "Thumbnail pane controls",
       "narrower": "Make thumbnail pane narrower",
@@ -618,18 +554,12 @@
     "rightPaneBadgeTooltip": "Right pane in compare view",
     "documentBoundaryEndTitle": "End of document bundle",
     "selection": {
-      "thumbnailsTab": "Thumbnails",
-      "selectionTab": "Selection",
-      "tabGroup": "Thumbnail pane content",
       "loadingStatus": "Selection becomes available when all pages are fully loaded ({ready}/{total} ready, {pending} remaining).",
-      "loadingStatusShort": "Selection will be available when all pages are fully loaded.",
       "activeStatus": "{selected} of {total} pages are currently included.",
       "readyStatus": "All {total} pages are currently included.",
       "allPages": "All pages",
-      "documentLabel": "Document {current}/{total}",
       "pagesSummary": "{selected}/{total}",
       "pageLabel": "Page {documentPage}",
-      "pageMeta": "S {documentPage} · T {globalPage}",
       "save": "Save selection",
       "cancel": "Cancel",
       "clearFilter": "Clear the selection filter and show all pages",
@@ -640,10 +570,7 @@
     "contextMenu": {
       "hidePageFromSelection": "Hide this page from the current selection",
       "hidePageFromSelectionLabel": "Hide this page",
-      "hidePageUnavailable": "At least one visible page must remain selected.",
       "hideDocumentFromSelection": "Hide the entire document from the current selection",
-      "hideDocumentFromSelectionLabel": "Hide document {document}",
-      "hideUnavailable": "Selection tools become available when all pages are fully loaded.",
       "hideDocumentFromSelectionLabelPrefix": "Hide document",
       "showToRight": "Show this page in the right compare pane",
       "openCompareFromThumbnail": "Open compare view and show this page on the right",
@@ -752,7 +679,6 @@
     "heapLabel": "Heap:",
     "heapLimit": "(limit {mb} MB)",
     "pagesLabel": "Pages:",
-    "loadedOfTotal": "{loaded} loaded / {total} total",
     "failedSuffix": "· failed {count}",
     "workersLabel": "Workers:",
     "errorPrefix": "Error:",
@@ -816,20 +742,6 @@
     "reloadCacheMissReasonLabel": "Cache miss",
     "errorsShortLabel": "errors"
   },
-  "html": {
-    "title": "OpenDocViewer",
-    "meta": {
-      "description": "OpenDocViewer – React JavaScript Document Viewer"
-    },
-    "og": {
-      "title": "OpenDocViewer",
-      "description": "OpenDocViewer – React JavaScript Document Viewer"
-    },
-    "noscript": {
-      "title": "JavaScript is disabled",
-      "message": "You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page."
-    }
-  },
   "help": {
     "title": "OpenDocViewer help",
     "subtitle": "A short guide to navigation, comparison, thumbnails, selection, image adjustments, and printing.",
@@ -873,6 +785,10 @@
         "compare": "Hold Shift in compare mode to temporarily target the opposite pane.",
         "reset": "Adjustments reset when you move to another page.",
         "shortcut": "Use Ctrl + Arrow Left and Ctrl + Arrow Right to rotate the targeted pane."
+      },
+      "appearance": {
+        "title": "Appearance",
+        "body": "Use the theme menu in the toolbar to switch between Normal, Light, and Dark. Normal is the balanced middle theme. When no explicit theme has been chosen yet, the viewer follows the browser or operating-system preference and falls back to light when that preference is unavailable."
       },
       "printing": {
         "title": "Printing",
@@ -941,7 +857,6 @@
       "close": "Close",
       "signatureHeading": "Signature {index}",
       "notAvailable": "—",
-      "validityRange": "{from} – {to}",
       "filePosition": "File {file} of {total}",
       "fileTabsLabel": "Files with signatures",
       "filePage": "Page {page}",

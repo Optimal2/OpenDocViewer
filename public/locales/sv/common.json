@@ -1,7 +1,5 @@
 {
   "common": {
-    "cancel": "Avbryt",
-    "ok": "OK",
     "close": "Stäng",
     "previous": "Föregående",
     "next": "Nästa"
@@ -139,27 +137,7 @@
   },
   "printDialog": {
     "title": "Skriv ut",
-    "mode": {
-      "basic": "Enkelt läge",
-      "advanced": "Avancerat läge"
-    },
-    "modeSwitch": {
-      "to": "Byt till {mode}.",
-      "back": "Gå tillbaka till {mode}."
-    },
-    "desc": "Välj vad som ska skrivas ut. Standardvalet är {active}.",
-    "headerNote": "Ett sidhuvud läggs på utskriften enligt systemkonfigurationen. Det går inte att slå av här.",
-    "switchToAdvanced": "avancerat läge",
-    "switchToBasic": "enkelt läge",
     "pagesHeader": "Sidor och omfång",
-    "basic": {
-      "active": "Aktuell sida",
-      "all": "Alla sidor"
-    },
-    "advanced": {
-      "range": "Enkelt sidintervall",
-      "custom": "Egna sidor"
-    },
     "range": {
       "from": "Från",
       "to": "Till",
@@ -190,8 +168,6 @@
     },
     "footer": {
       "cancel": "Avbryt",
-      "continue": "Starta utskrift",
-      "prepare": "Förbered utskrift",
       "downloadPdf": "Spara PDF",
       "printHtml": "Skriv ut via HTML",
       "printPdf": "Skriv ut via PDF"
@@ -219,10 +195,7 @@
       "invalidNumber": "Ogiltigt tal \"{value}\".",
       "noPagesSelected": "Inga sidor valda."
     },
-    "summary": "Du kommer att skriva ut {count, plural, =1 {# sida} other {# sidor}}.",
     "aria": {
-      "basicGroup": "Enkla val",
-      "advancedGroup": "Avancerade val",
       "userLogGroup": "Utskriftsuppgifter",
       "activeGroup": "Val för aktiv sida",
       "allGroup": "Val för alla sidor",
@@ -234,7 +207,6 @@
       "label": "Vad ska “Alla sidor” avse?",
       "selection": "Aktuellt urval ({count} sidor)",
       "session": "Hela sessionen ({count} sidor)",
-      "lockedSelection": "{count} valda sidor förbereds i vald ordning.",
       "hint": "Välj om utskriften ska följa aktuellt urval eller ignorera urvalet och skriva ut allt som finns i sessionen."
     },
     "activeScope": {
@@ -243,7 +215,6 @@
       "compareBoth": "Båda jämförelsesidorna",
       "hint": "När jämförelse är aktiv kan aktuell utskrift avse bara vänstersidan eller båda sidorna som visas."
     },
-    "subtitle": "Välj vad som ska skrivas ut och hur utskriften ska beskrivas. Läget just nu: {mode}.",
     "close": "Stäng",
     "subtitleUnified": "Välj vad som ska skrivas ut och fyll i eventuella utskriftsuppgifter.",
     "methodHeader": "Utskriftsmetod",
@@ -259,7 +230,6 @@
     "modes": {
       "active": "Aktiv sida",
       "all": "Alla sidor",
-      "selectedSequence": "Vald sekvens",
       "range": "Enkelt intervall",
       "custom": "Anpassade sidor"
     },
@@ -271,45 +241,26 @@
     "summaryAll": "Förbered {count} sidor.",
     "summaryRange": "Förbered sidorna {from}–{to}.",
     "summaryCustom": "Förbered sidorna som anges i fältet Sidor under Sidor och omfång.",
-    "activePageValue": "Aktiv sida: {page}",
     "allPagesValue": "Alla {count} sidor i sessionen kommer att förberedas.",
     "preparing": {
-      "title": "Förbereder utskrift",
-      "body": "En utskriftsbegäran för {count} sidor har skickats till webbläsaren. Det kan ta en stund innan webbläsarens utskriftsförhandsgranskning öppnas.",
       "dismiss": "Stäng"
     },
     "printFormat": {
-      "label": "Lägg till KOPIA-vattenstämpel",
       "hint": "Lägger till vald vattenstämpel.",
       "checkboxLabel": "Lägg till KOPIA-vattenstämpel"
     },
     "output": {
-      "header": "Utskriftsläge",
-      "aria": "Utskriftsläge",
       "direct": {
-        "label": "Direktutskrift",
-        "hint": "Använder webbläsarens utskriftsförhandsgranskning. Valet stående/liggande i webbläsaren gäller hela utskriften.",
         "info": "Direktutskrift använder webbläsarens utskriftsförhandsgranskning. Webbläsarens val för stående eller liggande format gäller hela utskriften."
       },
       "safe": {
-        "label": "PDF-utskrift",
-        "hint": "Skapar först en PDF. Varje PDF-sida får automatiskt stående eller liggande format.",
         "info": "OpenDocViewer skapar utskriften som en PDF. Varje PDF-sida får automatiskt stående eller liggande format utifrån sidbilden innan PDF-filen skrivs ut i webbläsaren."
-      },
-      "menuLabel": "Välj utskriftsläge"
+      }
     },
     "pdfProgress": {
       "downloadTitle": "Förbereder export",
       "printTitle": "Förbereder utskrift",
       "percent": "{percent}%",
-      "body": "Genererat {current} av {total} sidor.",
-      "loadingLibrary": "Förbereder utskriftsmotor…",
-      "loadingImages": "Förbereder sidor: {current} av {total}.",
-      "generatingPage": "Genererat {current} av {total} sidor. Bearbetar sida {page}.",
-      "finalizing": "Slutför filen…",
-      "merging": "Slår ihop delar: {current} av {total}.",
-      "openingPreview": "Öppnar utskriftsförhandsgranskning…",
-      "downloading": "Förbereder nedladdning…",
       "backgroundAction": "Fortsätt jobba",
       "readyPrintBody": "Utskriftsfilen är klar. Öppna utskriften när du är redo.",
       "readyDownloadBody": "Exportfilen är klar. Spara den när du är redo.",
@@ -330,10 +281,8 @@
   },
   "printSelectionWorkspace": {
     "title": "Hantera urval",
-    "subtitle": "{selected} av {total} sidor valda för utskrift.",
     "availablePages": "Tillgängliga sidor",
     "selectedPages": "Valda sidor",
-    "availableCount": "{count} tillgängliga",
     "sourceCount": "{count, plural, =1 {# sida} other {# sidor}}",
     "remainingCount": "{count, plural, =1 {# kvar} other {# kvar}}",
     "hideIncludedPages": "Dölj tillagda sidor",
@@ -353,12 +302,8 @@
     "removeSelected": "Ta bort valda",
     "addSelected": "Lägg till valda",
     "addAll": "Lägg till alla",
-    "undo": "Ångra",
     "undoTitle": "Ångra den senaste ändringen i utskriftsurvalet.",
-    "redo": "Gör om",
     "redoTitle": "Gör om den senast ångrade ändringen i utskriftsurvalet.",
-    "resetToDefault": "Återställ",
-    "resetToDefaultTitle": "Återställ till standard: alla sidor och dokument i den ursprungliga ordningen.",
     "modeLabel": "Läge",
     "pageMode": "Sidor",
     "documentMode": "Dokument",
@@ -371,8 +316,6 @@
     "documentPageCount": "{count, plural, =1 {# sida} other {# sidor}}",
     "thumbnailSizeLabel": "Miniatyrstorlek",
     "thumbnailSizeValue": "{percent} %",
-    "smallerThumbnails": "Mindre miniatyrer",
-    "largerThumbnails": "Större miniatyrer",
     "panelModeLabel": "Panellayout",
     "showBothPanels": "Visa båda panelerna",
     "showRightPanel": "Visa valda sidor",
@@ -389,12 +332,9 @@
     "previewPageNotAdded": "Den här sidan finns inte i urvalet",
     "previewContext": "Sida {page} av {total} · {document}-{documentPage}",
     "alreadyIncluded": "Sida {page} ingår redan i utskriftsurvalet.",
-    "pageTitle": "Sida {page}",
-    "pageLabel": "Sida {page}",
     "sourcePageTitle": "Källsida {page}. Dokument {document}, dokumentsida {documentPage}.",
     "printPageTitle": "Utskriftssida {printPage}. Källsida {sourcePage}, dokument {document}, dokumentsida {documentPage}.",
     "printOrderBadgeTitle": "Utskriftssida {page} i utkastet",
-    "cancelConfirm": "Avbryt utskriftsurvalet och kasta ändringarna? Alla ändringar du gjort i detta läge försvinner.",
     "emptySelection": "Inga sidor är valda för utskrift.",
     "noAvailablePages": "Det finns inga återstående källsidor.",
     "resizeDivider": "Ändra bredd på urvalspanelerna"
@@ -502,7 +442,6 @@
       "auto": "Auto ({language})",
       "autoUnknown": "Auto (språket kunde inte identifieras, läser på {language})",
       "autoNoVoice": "Auto ({guessed} saknar lokal röst, läser på {language})",
-      "languageNoVoice": "{language} (ingen lokal röst installerad)",
       "noVoices": "Ingen lokal röst installerad för tolkningsspråken; molnröster används aldrig",
       "noLocalVoice": "Ingen lokal röst installerad för {language}; molnröster används aldrig"
     }
@@ -585,9 +524,6 @@
     "goToPageLeftPane": "Gå till sida {page} (vänster vy)",
     "goToPageRightPane": "Gå till sida {page} (höger vy)",
     "goToPageBothPanes": "Gå till sida {page} (visas i båda vyerna)",
-    "leftPaneBadge": "Vänster",
-    "rightPaneBadge": "Höger",
-    "panelTitle": "Sidor",
     "controls": {
       "groupLabel": "Kontroller för miniatyrpanelen",
       "narrower": "Gör miniatyrpanelen smalare",
@@ -618,18 +554,12 @@
     "rightPaneBadgeTooltip": "Höger sida i jämförelsevy",
     "documentBoundaryEndTitle": "Slut på dokumentpaketet",
     "selection": {
-      "thumbnailsTab": "Miniatyrer",
-      "selectionTab": "Urval",
-      "tabGroup": "Miniatyrpanelens innehåll",
       "loadingStatus": "Urval blir tillgängligt när alla sidor är helt inlästa ({ready}/{total} klara, {pending} återstår).",
-      "loadingStatusShort": "Urval blir tillgängligt när alla sidor är helt inlästa.",
       "activeStatus": "{selected} av {total} sidor ingår just nu.",
       "readyStatus": "Alla {total} sidor ingår just nu.",
       "allPages": "Alla sidor",
-      "documentLabel": "Dokument {current}/{total}",
       "pagesSummary": "{selected}/{total}",
       "pageLabel": "Sida {documentPage}",
-      "pageMeta": "S {documentPage} · T {globalPage}",
       "save": "Spara urval",
       "cancel": "Avbryt",
       "clearFilter": "Ta bort urval/filtrering och visa alla sidor",
@@ -640,10 +570,7 @@
     "contextMenu": {
       "hidePageFromSelection": "Dölj denna sida från aktuellt urval",
       "hidePageFromSelectionLabel": "Dölj denna sida",
-      "hidePageUnavailable": "Minst en synlig sida måste vara vald.",
       "hideDocumentFromSelection": "Dölj hela dokumentet från aktuellt urval",
-      "hideDocumentFromSelectionLabel": "Dölj dokument {document}",
-      "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade.",
       "hideDocumentFromSelectionLabelPrefix": "Dölj dokument",
       "showToRight": "Visa denna sida i den högra jämförelsepanelen",
       "openCompareFromThumbnail": "Öppna jämförelsevy och visa denna sida till höger",
@@ -752,7 +679,6 @@
     "heapLabel": "Heap:",
     "heapLimit": "(gräns {mb} MB)",
     "pagesLabel": "Sidor:",
-    "loadedOfTotal": "{loaded} inlästa / {total} totalt",
     "failedSuffix": "· misslyckade {count}",
     "workersLabel": "Arbetstrådar:",
     "errorPrefix": "Fel:",
@@ -816,20 +742,6 @@
     "reloadCacheMissReasonLabel": "Cachemiss",
     "errorsShortLabel": "fel"
   },
-  "html": {
-    "title": "OpenDocViewer",
-    "meta": {
-      "description": "OpenDocViewer – Dokumentvisare för React och JavaScript"
-    },
-    "og": {
-      "title": "OpenDocViewer",
-      "description": "OpenDocViewer – Dokumentvisare för React och JavaScript"
-    },
-    "noscript": {
-      "title": "JavaScript är inaktiverat",
-      "message": "Du måste aktivera JavaScript för att köra appen. Aktivera JavaScript i din webbläsares inställningar och ladda om sidan."
-    }
-  },
   "help": {
     "title": "Hjälp för OpenDocViewer",
     "subtitle": "Kort manual för navigering, jämförelse, miniatyrer, urval, bildjusteringar och utskrift.",
@@ -873,6 +785,10 @@
         "compare": "Håll nere Shift i jämförelsevy för att tillfälligt rikta justeringar mot motsatt vy.",
         "reset": "Justeringar återställs när du byter till en annan sida.",
         "shortcut": "Använd Ctrl + pil vänster och Ctrl + pil höger för att rotera den riktade vyn."
+      },
+      "appearance": {
+        "title": "Utseende",
+        "body": "Använd temamenyn i verktygsfältet för att växla mellan Normal, Ljust och Mörkt. Normal är ett mellanting mellan Ljust och Mörkt. Innan du själv väljer ett tema följer visaren webbläsarens eller operativsystemets inställning. Om ingen sådan inställning finns används Ljust."
       },
       "printing": {
         "title": "Utskrift",
@@ -941,7 +857,6 @@
       "close": "Stäng",
       "signatureHeading": "Signatur {index}",
       "notAvailable": "—",
-      "validityRange": "{from} – {to}",
       "filePosition": "Fil {file} av {total}",
       "fileTabsLabel": "Filer med signaturer",
       "filePage": "Sida {page}",
