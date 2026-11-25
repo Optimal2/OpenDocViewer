@@ -253,7 +253,7 @@ Hooks:
 - `pre-commit` — light static checks only (`git diff --cached --check`). Does not build or run tests.
 - `pre-push` — runs `scripts\local-ci.ps1`, which builds the web app, runs the Vitest suite, validates embedded module SQL and its import rules, validates OMP component version lockstep, and checks that the generated agent documentation is fresh.
 
-The local gate requires an OpenModulePlatform checkout for the module SQL validators and Check 15 (shared-script drift). It resolves the checkout once via `-PlatformRepositoryRoot`, then `OpenModulePlatformRoot`, then `OMP_PLATFORM_ROOT`, then a sibling `OpenModulePlatform` folder. The first specified path must exist. From a git worktree without such a sibling, set `OMP_PLATFORM_ROOT`:
+The local gate requires an OpenModulePlatform checkout for the module SQL validators and Check 15 (shared-script drift). It resolves the checkout once through `scripts/omp/resolve-platform-root.ps1` via `-PlatformRepositoryRoot`, then `OMP_PLATFORM_ROOT`, then `OpenModulePlatformRoot`, then a sibling `OpenModulePlatform` folder. The first specified path must exist, and environment variables that name different checkouts fail the gate. From a git worktree without such a sibling, set `OMP_PLATFORM_ROOT`:
 
 ```powershell
 $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'

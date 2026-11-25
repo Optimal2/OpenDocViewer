@@ -91,7 +91,22 @@ function Get-OmpPlatformFullPath {
     )
 
     $combined = $Path
-    if (-not [System.IO.Path]::IsPathRooted($combined)) {
+    # IsPathRooted also accepts drive-relative (C:folder) and root-relative
+    # (\folder) paths. Both depend on process-wide drive state, so reject them
+    # rather than silently selecting a checkout outside the consumer's contract.
+    # Do not use Path.IsPathFullyQualified: it is unavailable on .NET Framework.
+    $isDriveRelative = $combined -match '^[A-Za-z]:($|[^\\/])'
+    $isUnc = $combined.StartsWith('\\', [StringComparison]::Ordinal) -or
+        $combined.StartsWith('//', [StringComparison]::Ordinal)
+    $isRootRelative = -not $isUnc -and
+        ($combined.StartsWith('\', [StringComparison]::Ordinal) -or
+         $combined.StartsWith('/', [StringComparison]::Ordinal))
+    if ($isDriveRelative -or $isRootRelative) {
+        throw "Platform root path '$Path' is drive-relative or root-relative. Use a fully qualified path (drive letter and separator, or UNC) or a path relative to the consumer repository root."
+    }
+
+    $isDriveAbsolute = $combined -match '^[A-Za-z]:[\\/]'
+    if (-not $isDriveAbsolute -and -not $isUnc) {
         $combined = Join-Path $BasePath $combined
     }
     $full = [System.IO.Path]::GetFullPath($combined)

@@ -159,6 +159,7 @@ try {
     $parameterNames = @($ast.ParamBlock.Parameters | ForEach-Object { $_.Name.VariablePath.UserPath })
     Assert-True ($parameterNames -contains 'AllowUnverifiedSharedScripts') 'local-ci.ps1 declares -AllowUnverifiedSharedScripts'
     Assert-True ($parameterNames -contains 'PlatformRepositoryRoot') 'local-ci.ps1 declares -PlatformRepositoryRoot'
+    Assert-True ($ast.Extent.Text -match [regex]::Escape("Join-Path `$PSScriptRoot 'omp/resolve-platform-root.ps1'")) 'local-ci.ps1 delegates platform-root resolution to the shared resolver'
     $validatorCalls = @($ast.FindAll({
         param($node)
         $node -is [System.Management.Automation.Language.CommandAst] -and

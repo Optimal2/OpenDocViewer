@@ -30,9 +30,10 @@
 
 .PARAMETER PlatformRepositoryRoot
     OpenModulePlatform checkout for the build environment, module definition
-    validators and Check 15. Defaults to $env:OpenModulePlatformRoot, then
-    $env:OMP_PLATFORM_ROOT, then a sibling folder named OpenModulePlatform.
-    A missing checkout fails the gate.
+    validators and Check 15. Resolved through scripts/omp/resolve-platform-root.ps1:
+    this parameter, then $env:OMP_PLATFORM_ROOT, then $env:OpenModulePlatformRoot,
+    then a sibling folder named OpenModulePlatform. A missing checkout or
+    conflicting environment roots fail the gate.
 
 .PARAMETER AllowUnverifiedSharedScripts
     Run Check 15 without -Strict. The module definition validators still
@@ -104,16 +105,8 @@ try {
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host ""
 
-    if ([string]::IsNullOrWhiteSpace($PlatformRepositoryRoot)) { $PlatformRepositoryRoot = $env:OpenModulePlatformRoot }
-    if ([string]::IsNullOrWhiteSpace($PlatformRepositoryRoot)) { $PlatformRepositoryRoot = $env:OMP_PLATFORM_ROOT }
-    if ([string]::IsNullOrWhiteSpace($PlatformRepositoryRoot)) {
-        $PlatformRepositoryRoot = Join-Path (Split-Path -Parent $RepoRoot) 'OpenModulePlatform'
-    }
-    $PlatformRepositoryRoot = [System.IO.Path]::Combine($RepoRoot, $PlatformRepositoryRoot)
-    if (-not (Test-Path -LiteralPath $PlatformRepositoryRoot -PathType Container)) {
-        throw "OpenModulePlatform checkout not found at '$PlatformRepositoryRoot'. Set OpenModulePlatformRoot or OMP_PLATFORM_ROOT to the checkout."
-    }
-    $PlatformRepositoryRoot = (Resolve-Path -LiteralPath $PlatformRepositoryRoot).ProviderPath
+    $PlatformRepositoryRoot = & (Join-Path $PSScriptRoot 'omp/resolve-platform-root.ps1') `
+        -RepositoryRoot $RepoRoot -PlatformRepositoryRoot $PlatformRepositoryRoot
 
     # --- Step 1: Build web app -------------------------------------------------
     $buildPassed = $false

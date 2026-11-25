@@ -76,7 +76,7 @@ function Resolve-FullPath {
 
 $script:MaxVersionCorePart = 2147483647
 
-function Test-VersionText {
+function Assert-VersionText {
     <#
     .SYNOPSIS
     Validate a version against the platform's supported version contract.
@@ -92,36 +92,26 @@ function Test-VersionText {
 
     The core must use ASCII decimal digits without leading zeroes, because
     Version parses '01.2.3' as 1.2.3: the text stored in the manifest would no
-    longer be the text the host compares. Build metadata keeps its leading
-    zeroes ('1.2.3+001'), and so does an alphanumeric prerelease identifier
-    ('1.2.3-01a'); only a NUMERIC prerelease identifier must not have any.
+    longer be the text the host compares.
     #>
-    param([Parameter(Mandatory = $true)][string]$Value)
-
-    $text = $Value.Trim()
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value,
+        [string]$Description = ''
+    )
 
     # [0-9] and not \d: .NET's \d also matches Unicode decimal digits, which
     # System.Version does not parse the same way.
-    if ($text -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
-        throw "Version '$Value' must use simplified SemVer-compatible text such as 1.2.3, 1.2.3-beta.1, or 1.2.3+build.5."
+    if ($Value -notmatch '^[0-9]+\.[0-9]+\.[0-9]+\z') {
+        $context = if ($Description) { " Field: $Description." }
+        throw "Version '$Value' is not allowed: OMP versions must be plain major.minor.patch (three numeric segments, X.Y.Z) with no prerelease or build suffix.$context"
     }
 
-    $withoutMetadata = ($text -split '\+', 2)[0]
-    $parts = $withoutMetadata -split '-', 2
-    foreach ($corePart in ($parts[0] -split '\.')) {
+    foreach ($corePart in ($Value -split '\.')) {
         if ($corePart.Length -gt 1 -and $corePart.StartsWith('0')) {
             throw "Version '$Value' has a leading zero in the numeric core. Numeric core components must not have leading zeroes."
         }
 
         Assert-VersionCorePartInRange -Value $corePart -Version $Value
-    }
-
-    if ($parts.Count -gt 1) {
-        foreach ($identifier in ($parts[1] -split '\.')) {
-            if ($identifier -match '^[0-9]+$' -and $identifier.Length -gt 1 -and $identifier.StartsWith('0')) {
-                throw "Version '$Value' has a leading zero in the numeric prerelease identifier '$identifier'. Numeric prerelease identifiers must not have leading zeroes."
-            }
-        }
     }
 }
 
@@ -150,142 +140,6 @@ function Assert-VersionCorePartInRange {
     }
 
     throw "Version '$Version' has the numeric core component '$Value', which is outside the supported range 0..$maxText. The platform compares artifact versions with System.Version, whose major, minor and patch are Int32."
-}
-
-function Assert-VersionTextInContract {
-    <#
-    .SYNOPSIS
-    Validate one version text against the supported contract and name the
-    target it came from in the error message.
-    #>
-    param(
-        [Parameter(Mandatory = $true)][string]$Value,
-        [Parameter(Mandatory = $true)][string]$Description
-    )
-
-    try {
-        Test-VersionText -Value $Value
-    }
-    catch {
-        throw "$Description holds the unsupported version '$Value'. $($_.Exception.Message)"
-    }
-}
-
-function Assert-SelectedVersionTargets {
-    <#
-    .SYNOPSIS
-    Validate the existing version text of every selected target before the
-    first write.
-
-    .DESCRIPTION
-    The automatic bump validates the version it reads, but an explicit
-    -Version replaces the result without ever reading the existing text. The
-    existing version of every selected target is therefore validated here, so
-    a manifest that already holds an unsupported version is refused before
-    anything is written instead of being carried forward unchanged.
-
-    The input version is validated by Test-VersionText, and every result is
-    validated by the bounded increment in Get-BumpedVersion.
-    #>
-    param(
-        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Components,
-        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ModuleDefinitions,
-        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Widgets,
-        [Parameter(Mandatory = $true)][string]$RepositoryVersion,
-        [Parameter(Mandatory = $true)][bool]$RepositoryVersionIsSelected
-    )
-
-    foreach ($component in $Components) {
-        $componentKey = [string](Get-JsonPropertyValue -Object $component -Name 'componentKey')
-        $componentVersion = [string](Get-JsonPropertyValue -Object $component -Name 'version')
-        if ([string]::IsNullOrWhiteSpace($componentVersion)) {
-            throw "Component '$componentKey' has no version in the manifest. Set it manually before bumping."
-        }
-
-        Assert-VersionTextInContract -Value $componentVersion -Description "Component '$componentKey'"
-    }
-
-    foreach ($moduleDefinition in $ModuleDefinitions) {
-        $moduleKey = [string](Get-JsonPropertyValue -Object $moduleDefinition -Name 'moduleKey')
-        $definitionVersion = [string](Get-JsonPropertyValue -Object $moduleDefinition -Name 'definitionVersion')
-        if ([string]::IsNullOrWhiteSpace($definitionVersion)) {
-            throw "Module definition '$moduleKey' has no definitionVersion in the manifest. Set it manually before bumping."
-        }
-
-        Assert-VersionTextInContract -Value $definitionVersion -Description "Module definition '$moduleKey'"
-    }
-
-    foreach ($widgetEntry in $Widgets) {
-        $widgetVersion = [string]$widgetEntry.WidgetVersion
-        if ([string]::IsNullOrWhiteSpace($widgetVersion)) {
-            continue
-        }
-
-        Assert-VersionTextInContract -Value $widgetVersion -Description "Dashboard widget '$($widgetEntry.Path)'"
-    }
-
-    if ($RepositoryVersionIsSelected -and -not [string]::IsNullOrWhiteSpace($RepositoryVersion)) {
-        Assert-VersionTextInContract -Value $RepositoryVersion -Description 'repositoryVersion'
-    }
-}
-
-function ConvertTo-ComparableVersion {
-    <#
-    .SYNOPSIS
-    Parse the numeric core and prerelease identifiers for SemVer precedence.
-    Build metadata has no precedence. Compare using Compare-VersionPrecedence;
-    comparing only the core would allow a stable release to regress to a prerelease.
-    #>
-    param([Parameter(Mandatory = $true)][string]$Value)
-
-    $text = $Value.Trim()
-    Test-VersionText -Value $text
-    $withoutMetadata = ($text -split '\+', 2)[0]
-    $parts = $withoutMetadata -split '-', 2
-    $core = $parts[0]
-    $parsed = $null
-    if (-not [System.Version]::TryParse($core, [ref]$parsed)) {
-        throw "Version '$Value' has no numeric major.minor.patch core to compare."
-    }
-
-    return [pscustomobject]@{
-        Core = $parsed
-        Prerelease = @(if ($parts.Count -gt 1) { $parts[1] -split '\.' })
-    }
-}
-
-function Compare-VersionPrecedence {
-    param(
-        [Parameter(Mandatory = $true)][object]$Left,
-        [Parameter(Mandatory = $true)][object]$Right
-    )
-
-    $comparison = $Left.Core.CompareTo($Right.Core)
-    if ($comparison -ne 0) { return $comparison }
-    if ($Left.Prerelease.Count -eq 0 -and $Right.Prerelease.Count -eq 0) { return 0 }
-    if ($Left.Prerelease.Count -eq 0) { return 1 }
-    if ($Right.Prerelease.Count -eq 0) { return -1 }
-
-    for ($index = 0; $index -lt [Math]::Min($Left.Prerelease.Count, $Right.Prerelease.Count); $index++) {
-        $leftIdentifier = [string]$Left.Prerelease[$index]
-        $rightIdentifier = [string]$Right.Prerelease[$index]
-        $leftNumeric = $leftIdentifier -match '^[0-9]+$'
-        $rightNumeric = $rightIdentifier -match '^[0-9]+$'
-        if ($leftNumeric -and $rightNumeric) {
-            # Compare numeric identifiers without a fixed-width integer limit.
-            $leftIdentifier = $leftIdentifier.TrimStart('0')
-            $rightIdentifier = $rightIdentifier.TrimStart('0')
-            $comparison = $leftIdentifier.Length.CompareTo($rightIdentifier.Length)
-            if ($comparison -ne 0) { return $comparison }
-        }
-        elseif ($leftNumeric) { return -1 }
-        elseif ($rightNumeric) { return 1 }
-
-        $comparison = [StringComparer]::Ordinal.Compare($leftIdentifier, $rightIdentifier)
-        if ($comparison -ne 0) { return $comparison }
-    }
-
-    return $Left.Prerelease.Count.CompareTo($Right.Prerelease.Count)
 }
 
 function ConvertTo-VersionPart {
@@ -330,19 +184,10 @@ function Get-BumpedVersion {
         [Parameter(Mandatory = $true)][string]$VersionPart
     )
 
-    $match = [regex]::Match($CurrentVersion, '^([0-9]+)\.([0-9]+)\.([0-9]+)$')
-    if (-not $match.Success) {
-        throw "Cannot bump '$CurrentVersion' automatically. Automatic bumps only support plain major.minor.patch versions such as 1.2.3. Use -Version for prerelease/build metadata or other non-standard text."
-    }
-
-    # Validate the CURRENT core before the arithmetic. A leading zero or a
-    # component outside the supported range would otherwise be normalized
-    # away by the increment instead of being refused.
-    Test-VersionText -Value $CurrentVersion
-
-    $major = [long]$match.Groups[1].Value
-    $minor = [long]$match.Groups[2].Value
-    $patch = [long]$match.Groups[3].Value
+    $current = [version]$CurrentVersion
+    $major = $current.Major
+    $minor = $current.Minor
+    $patch = $current.Build
 
     switch ($VersionPart) {
         'major' {
@@ -363,14 +208,21 @@ function Get-BumpedVersion {
 }
 
 function Get-NextVersion {
-    param([Parameter(Mandatory = $true)][string]$CurrentVersion)
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$CurrentVersion,
+        [Parameter(Mandatory = $true)][string]$Description
+    )
 
-    if ([string]::IsNullOrWhiteSpace($script:Version)) {
+    # Present manifest versions were checked on load. Selected targets still
+    # require a current version, including when -Version supplies the result.
+    if (-not $CurrentVersion) {
+        Assert-VersionText -Value $CurrentVersion -Description $Description
+    }
+    if (-not $script:Version) {
         return Get-BumpedVersion -CurrentVersion $CurrentVersion -VersionPart $script:Part
     }
 
-    Test-VersionText -Value $script:Version
-    return $script:Version.Trim()
+    return $script:Version
 }
 
 function Get-JsonPropertyValue {
@@ -385,6 +237,35 @@ function Get-JsonPropertyValue {
     }
 
     return $property.Value
+}
+
+function Assert-VersionProperties {
+    param(
+        [Parameter(Mandatory = $true)][object]$Object,
+        [Parameter(Mandatory = $true)][string[]]$Names,
+        [string]$Description = ''
+    )
+
+    foreach ($name in $Names) {
+        $value = Get-JsonPropertyValue -Object $Object -Name $name
+        if ($null -ne $value) {
+            Assert-VersionText -Value ([string]$value) -Description "$Description$name"
+        }
+    }
+}
+
+function Read-ModuleDefinitionForBump {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $definition = Read-JsonFile -Path $Path
+    $description = "Module definition '$Path' "
+    Assert-VersionProperties -Object $definition -Names 'definitionVersion' -Description $description
+    foreach ($artifact in @(Get-JsonPropertyValue -Object $definition -Name 'compatibleArtifacts')) {
+        if ($null -ne $artifact) {
+            Assert-VersionProperties -Object $artifact -Names 'minVersion', 'maxVersion' -Description ($description + 'compatibleArtifacts.')
+        }
+    }
+    return $definition
 }
 
 function Set-JsonProperty {
@@ -780,7 +661,7 @@ function Get-ManifestWidgetFileEntries {
             Index = $index
             Entry = $entry
             Path = $path.Trim()
-            WidgetVersion = if ([string]::IsNullOrWhiteSpace($version)) { '' } else { $version.Trim() }
+            WidgetVersion = $version
         })
     }
 
@@ -822,9 +703,12 @@ function Get-WidgetPackageFileContent {
     }
 
     $json = Read-JsonFile -Path $Path
+    $description = "Dashboard widget package '$Path' "
+    Assert-VersionProperties -Object $json -Names 'packageVersion' -Description $description
     Set-JsonProperty -Object $json -Name 'packageVersion' -Value $Version
     foreach ($widget in @((Get-JsonPropertyValue -Object $json -Name 'widgets'))) {
         if ($null -ne $widget) {
+            Assert-VersionProperties -Object $widget -Names 'widgetVersion' -Description $description
             Set-JsonProperty -Object $widget -Name 'widgetVersion' -Value $Version
         }
     }
@@ -834,6 +718,9 @@ function Get-WidgetPackageFileContent {
 
 $exitCode = 0
 try {
+    if ($PSBoundParameters.ContainsKey('Version')) {
+        Assert-VersionText -Value $Version
+    }
     $Part = ConvertTo-VersionPart -Value $Part
     $scriptDirectory = Get-ScriptDirectory
     if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
@@ -849,6 +736,24 @@ try {
     $manifest = Read-JsonFile -Path $manifestPath
     $components = @($manifest.components)
     $moduleDefinitions = @($manifest.moduleDefinitions)
+
+    # The manifest is written as a whole, so check even versions that were
+    # not selected for a bump.
+    Assert-VersionProperties -Object $manifest -Names 'repositoryVersion'
+    foreach ($component in $components) {
+        $manifestComponentKey = Get-JsonPropertyValue -Object $component -Name 'componentKey'
+        Assert-VersionProperties -Object $component -Names 'version', 'minModuleDefinitionVersion', 'minWorkerHostVersion' -Description "Component '$manifestComponentKey' "
+    }
+    foreach ($moduleDefinition in $moduleDefinitions) {
+        $definitionKey = Get-JsonPropertyValue -Object $moduleDefinition -Name 'moduleKey'
+        Assert-VersionProperties -Object $moduleDefinition -Names 'definitionVersion' -Description "Module definition '$definitionKey' "
+    }
+    foreach ($widgetFileEntry in @(Get-JsonPropertyValue -Object $manifest -Name 'widgetFiles')) {
+        if ($null -ne $widgetFileEntry -and $widgetFileEntry -isnot [string]) {
+            $widgetPath = Get-JsonPropertyValue -Object $widgetFileEntry -Name 'path'
+            Assert-VersionProperties -Object $widgetFileEntry -Names 'widgetVersion', 'packageVersion', 'version' -Description "Dashboard widget '$widgetPath' "
+        }
+    }
     $repositoryVersion = [string](Get-JsonPropertyValue -Object $manifest -Name 'repositoryVersion')
     $widgetEntries = @(Get-ManifestWidgetFileEntries -Manifest $manifest -RepositoryVersion $repositoryVersion)
 
@@ -1067,23 +972,19 @@ try {
 
     $hasSelectedVersionTargets = $selectedComponents.Count -gt 0 -or $selectedModuleDefinitions.Count -gt 0 -or $selectedWidgets.Count -gt 0
     if (-not $SkipRepositoryVersion -and ($hasSelectedVersionTargets -or $RepositoryOnly)) {
-        $currentRepositoryVersion = [string]$manifest.repositoryVersion
+        $currentRepositoryVersion = $repositoryVersion
         if ([string]::IsNullOrWhiteSpace($currentRepositoryVersion)) {
             throw 'repositoryVersion is missing. Add it manually or use -SkipRepositoryVersion.'
         }
 
-        $nextRepositoryVersion = Get-NextVersion -CurrentVersion $currentRepositoryVersion
+        $nextRepositoryVersion = Get-NextVersion -CurrentVersion $currentRepositoryVersion -Description 'repositoryVersion'
 
         # Guard against a version REGRESSION. -Version is returned verbatim by Get-NextVersion for
         # EVERY selected target, the repository included, so setting components to an explicit
         # version silently drags repositoryVersion backwards (observed 2026-07-19: bumping two
         # example components to 0.3.83 rewrote repositoryVersion 0.3.279 -> 0.3.83). A published
         # version must never go backwards, so fail loudly instead of corrupting the manifest.
-        # ConvertTo-ComparableVersion throws on anything it cannot order, so the guard can
-        # never be skipped for a prerelease or build-suffixed version. Only a manifest that
-        # has no repositoryVersion yet has nothing to regress from.
-        if (-not [string]::IsNullOrWhiteSpace($currentRepositoryVersion) -and
-            (Compare-VersionPrecedence -Left (ConvertTo-ComparableVersion -Value $nextRepositoryVersion) -Right (ConvertTo-ComparableVersion -Value $currentRepositoryVersion)) -lt 0) {
+        if ([version]$nextRepositoryVersion -lt [version]$currentRepositoryVersion) {
             throw ("Refusing to regress repositoryVersion from '{0}' to '{1}'. -Version is applied to every " -f $currentRepositoryVersion, $nextRepositoryVersion) +
                   'selected target, including the repository. Pass -SkipRepositoryVersion when setting components ' +
                   'to an explicit version, or bump the repository separately.'
@@ -1110,8 +1011,8 @@ try {
     $definitionPathByKey = @{}
 
     foreach ($component in $selectedComponents) {
-        $currentVersion = [string]$component.version
-        $nextVersion = Get-NextVersion -CurrentVersion $currentVersion
+        $currentVersion = [string](Get-JsonPropertyValue -Object $component -Name 'version')
+        $nextVersion = Get-NextVersion -CurrentVersion $currentVersion -Description "Component '$($component.componentKey)' version"
         Set-JsonProperty -Object $component -Name 'version' -Value $nextVersion
         [void]$updates.Add([pscustomobject]@{
             Item = 'component'
@@ -1158,7 +1059,7 @@ try {
                 throw "Module definition '$componentModuleKey' file was not found: $definitionPath"
             }
 
-            $definitionJsonByKey[$componentModuleKey] = Read-JsonFile -Path $definitionPath
+            $definitionJsonByKey[$componentModuleKey] = Read-ModuleDefinitionForBump -Path $definitionPath
         }
 
         $definitionJson = $definitionJsonByKey[$componentModuleKey]
@@ -1182,32 +1083,7 @@ try {
             }
 
             $currentMaxVersion = [string](Get-JsonPropertyValue -Object $artifact -Name 'maxVersion')
-            $shouldUpdate = $false
-            if ([string]::IsNullOrWhiteSpace($currentMaxVersion)) {
-                $shouldUpdate = $true
-            }
-            else {
-                # Use the same SemVer precedence as the repository regression guard.
-                try {
-                    $parsedCurrentMaxVersion = ConvertTo-ComparableVersion -Value $currentMaxVersion
-                }
-                catch {
-                    throw "Module definition '$componentModuleKey' compatibleArtifacts entry for appKey '$componentAppKey' has non-numeric maxVersion '$currentMaxVersion'. Update it manually before bumping."
-                }
-
-                try {
-                    $parsedNextVersion = ConvertTo-ComparableVersion -Value $nextVersion
-                }
-                catch {
-                    throw "Component '$($component.componentKey)' was bumped to non-numeric version '$nextVersion'. Cannot compare with compatibleArtifacts.maxVersion '$currentMaxVersion'."
-                }
-
-                if ((Compare-VersionPrecedence -Left $parsedNextVersion -Right $parsedCurrentMaxVersion) -gt 0) {
-                    $shouldUpdate = $true
-                }
-            }
-
-            if ($shouldUpdate) {
+            if (-not $currentMaxVersion -or [version]$nextVersion -gt [version]$currentMaxVersion) {
                 Set-JsonProperty -Object $artifact -Name 'maxVersion' -Value $nextVersion
                 [void]$touchedModuleKeys.Add($componentModuleKey)
                 [void]$updates.Add([pscustomobject]@{
@@ -1273,20 +1149,6 @@ try {
     # or an encoding-guard refusal cannot leave earlier definitions, widgets or the
     # manifest partially bumped. Version edits are ASCII-only, so the encoding
     # check on the current in-memory text holds for the text eventually written.
-    #
-    # The version contract is checked here as well: every selected target's
-    # existing version has to be one the platform can parse and order, and the
-    # result of every bump has to stay inside the supported range. A refusal
-    # here happens before the first write, so a rejected run leaves the
-    # manifest, the definitions and the widget packages byte for byte as they
-    # were.
-    $null = Assert-SelectedVersionTargets `
-        -Components $selectedComponents.ToArray() `
-        -ModuleDefinitions $selectedModuleDefinitions `
-        -Widgets $selectedWidgets `
-        -RepositoryVersion ([string](Get-JsonPropertyValue -Object $manifest -Name 'repositoryVersion')) `
-        -RepositoryVersionIsSelected ((-not $SkipRepositoryVersion) -and ($hasSelectedVersionTargets -or $RepositoryOnly))
-
     foreach ($moduleDefinition in $selectedModuleDefinitions) {
         $definitionKey = [string]$moduleDefinition.moduleKey
         $definitionPath = Resolve-FullPath -Path (Join-Path $repositoryRoot ([string]$moduleDefinition.path))
@@ -1296,7 +1158,7 @@ try {
 
         # Load it once here, so the write below serializes the object checked here.
         if ($null -eq $definitionJsonByKey[$definitionKey]) {
-            $definitionJsonByKey[$definitionKey] = Read-JsonFile -Path $definitionPath
+            $definitionJsonByKey[$definitionKey] = Read-ModuleDefinitionForBump -Path $definitionPath
             $definitionPathByKey[$definitionKey] = $definitionPath
         }
     }
@@ -1378,8 +1240,8 @@ try {
 
     $moduleVersionByKey = @{}
     foreach ($moduleDefinition in $selectedModuleDefinitions) {
-        $currentVersion = [string]$moduleDefinition.definitionVersion
-        $nextVersion = Get-NextVersion -CurrentVersion $currentVersion
+        $currentVersion = [string](Get-JsonPropertyValue -Object $moduleDefinition -Name 'definitionVersion')
+        $nextVersion = Get-NextVersion -CurrentVersion $currentVersion -Description "Module definition '$($moduleDefinition.moduleKey)' definitionVersion"
         Set-JsonProperty -Object $moduleDefinition -Name 'definitionVersion' -Value $nextVersion
         $moduleVersionByKey[[string]$moduleDefinition.moduleKey] = $nextVersion
 
@@ -1393,7 +1255,7 @@ try {
             $definitionKey = [string]$moduleDefinition.moduleKey
             $definitionJson = $definitionJsonByKey[$definitionKey]
             if ($null -eq $definitionJson) {
-                $definitionJson = Read-JsonFile -Path $definitionPath
+                $definitionJson = Read-ModuleDefinitionForBump -Path $definitionPath
             }
             Set-JsonProperty -Object $definitionJson -Name 'definitionVersion' -Value $nextVersion
             $plannedWrites.Add([pscustomobject]@{
@@ -1444,7 +1306,7 @@ try {
             throw "Widget file '$($widgetEntry.Path)' has no widgetVersion and repositoryVersion is missing. Set a version manually or add repositoryVersion."
         }
 
-        $nextVersion = Get-NextVersion -CurrentVersion $currentVersion
+        $nextVersion = Get-NextVersion -CurrentVersion $currentVersion -Description "Dashboard widget '$($widgetEntry.Path)' widgetVersion"
         Set-WidgetFileEntryVersion -Manifest $manifest -WidgetEntry $widgetEntry -Version $nextVersion
 
         $widgetPath = Resolve-FullPath -Path (Join-Path $repositoryRoot ([string]$widgetEntry.Path))
