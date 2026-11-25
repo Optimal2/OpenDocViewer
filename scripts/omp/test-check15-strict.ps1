@@ -70,6 +70,17 @@ exit $ExitCode
     return $root
 }
 
+function ConvertTo-PlatformRootArgument {
+    param([string]$Path)
+
+    # The shared resolver rejects a leading slash as a Windows root-relative
+    # path. On Unix, express absolute fixture paths relative to this checkout.
+    if ([System.IO.Path]::DirectorySeparatorChar -eq '/' -and $Path.StartsWith('/')) {
+        return [System.IO.Path]::GetRelativePath($repositoryRoot, $Path)
+    }
+    return $Path
+}
+
 # Runs the validator in-process (its 'exit N' ends only the script) with a
 # controlled environment, and returns the exit code plus all output streams.
 function Invoke-Validator {
@@ -77,14 +88,15 @@ function Invoke-Validator {
         [string]$OmpPlatformRoot,
         [string]$OpenModulePlatformRoot,
         [hashtable]$Arguments,
+        [string]$PlatformRepositoryRoot = '',
         [string]$AllowMissingPlatform = $null
     )
     $savedOmp = $env:OMP_PLATFORM_ROOT
     $savedLegacy = $env:OpenModulePlatformRoot
     $savedAllowMissing = $env:OMP_ALLOW_MISSING_PLATFORM
     try {
-        $env:OMP_PLATFORM_ROOT = $OmpPlatformRoot
-        $env:OpenModulePlatformRoot = $OpenModulePlatformRoot
+        $env:OMP_PLATFORM_ROOT = ConvertTo-PlatformRootArgument $OmpPlatformRoot
+        $env:OpenModulePlatformRoot = ConvertTo-PlatformRootArgument $OpenModulePlatformRoot
         if ($null -eq $AllowMissingPlatform) {
             Remove-Item Env:\OMP_ALLOW_MISSING_PLATFORM -ErrorAction SilentlyContinue
         }
@@ -92,7 +104,7 @@ function Invoke-Validator {
             $env:OMP_ALLOW_MISSING_PLATFORM = $AllowMissingPlatform
         }
         $global:LASTEXITCODE = 0
-        $output = & $validator -BaseCommit '' @Arguments *>&1 | Out-String
+        $output = & $validator -BaseCommit '' -PlatformRepositoryRoot (ConvertTo-PlatformRootArgument $PlatformRepositoryRoot) @Arguments *>&1 | Out-String
         return [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $output }
     }
     finally {
@@ -147,7 +159,7 @@ try {
     Assert-True ($result.Output -match [regex]::Escape("platform=$passingStub")) 'OpenModulePlatformRoot fallback runs the guard'
 
     # 6. -PlatformRepositoryRoot wins over both environment variables.
-    $result = Invoke-Validator -OmpPlatformRoot $failingStub -OpenModulePlatformRoot $failingStub -Arguments @{ Strict = $true; PlatformRepositoryRoot = $passingStub }
+    $result = Invoke-Validator -OmpPlatformRoot $failingStub -OpenModulePlatformRoot $failingStub -PlatformRepositoryRoot $passingStub -Arguments @{ Strict = $true }
     Assert-True ($result.Output -match [regex]::Escape("platform=$passingStub")) '-PlatformRepositoryRoot precedes the environment'
     Assert-True ($result.ExitCode -eq 0) '-PlatformRepositoryRoot passing guard exits 0' "(exit $($result.ExitCode))"
 
