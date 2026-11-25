@@ -1419,9 +1419,8 @@ try {
             # Hashtable string key can ever match, so the loop body was unreachable and
             # -UpdateModuleMinimums printed a green table while writing nothing. The
             # documented repair command could not repair (R7-G4). Use
-            # Get-JsonPropertyValue for minModuleDefinitionVersion too: 10 of 13
-            # components do not carry the property, and direct access under
-            # Set-StrictMode would turn the silent no-op into a crash mid-write.
+            # Get-JsonPropertyValue for the optional minModuleDefinitionVersion
+            # property because Set-StrictMode throws on direct reads of absent properties.
             $componentModuleKey = [string](Get-JsonPropertyValue -Object $component -Name 'moduleKey')
             if ([string]::IsNullOrWhiteSpace($componentModuleKey) -or -not $moduleVersionByKey.ContainsKey($componentModuleKey)) {
                 continue
