@@ -20,8 +20,8 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>express-rate-limit</code> | <code>^8.7.5</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>file-type</code> | <code>^22.3.0</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>i18next</code> | <code>^27.2.6</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
-| <code>i18next-http-backend</code> | <code>^4.1.1</code> | 1 | <code>src/i18n.js</code> |
+| <code>i18next</code> | <code>^27.2.9</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
+| <code>i18next-http-backend</code> | <code>^4.1.2</code> | 1 | <code>src/i18n.js</code> |
 | <code>i18next-icu</code> | <code>^2.7.1</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 2 (dynamic) | <code>src/utils/printPdf.js</code><br><code>src/workers/pdfWorker.js</code> |
 | <code>jxl-oxide-wasm</code> | <code>0.12.6</code> | 2 (dynamic) | <code>src/utils/jxlDecode.js</code><br>(1 file total) |
