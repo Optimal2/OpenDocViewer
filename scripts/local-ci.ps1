@@ -5,57 +5,31 @@
 
 .DESCRIPTION
     This is a public repository; CI runs automatically on push, but still run
-    locally before pushing to catch build breaks, test failures and version
-    lockstep issues.
+    locally before pushing to catch build breaks and test failures.
 
     Steps:
       1. Build the web application: npm run build
       2. Run the Vitest suite: npx vitest run (with a JSON report for the count)
-      3. Validate version lockstep: scripts/omp/validate-component-versions.ps1
-         (run with -Strict, so Check 15 - shared-script drift against the
-         OpenModulePlatform checkout - fails when it cannot run)
+      3. Component version lockstep: not applicable on a release line.
+         release/x.y carries no OMP parts (no component manifest, no module
+         definition, no scripts/omp); OMP packages are built from main only.
+         The step number is kept so the later steps keep their numbers.
       4. Verify generated agent documentation is fresh: npm run doc:agent,
          then fail unless scripts/verify-agent-docs-fresh.mjs finds docs-agent
          identical in the working tree, the index and HEAD (shared with CI)
 
     Exit code 0 if all steps pass, 1 if any fail.
 
-.PARAMETER BaseCommit
-    Git ref the version validator diffs against. Defaults to origin/main;
-    pass another ref when the default branch is named differently or the
-    remote-tracking ref is stale and you want to compare against a fresh one.
-
-.PARAMETER PlatformRepositoryRoot
-    OpenModulePlatform checkout that Check 15 compares the shared scripts
-    against. When empty, the validator resolves $env:OMP_PLATFORM_ROOT, then
-    $env:OpenModulePlatformRoot, then a sibling folder named
-    OpenModulePlatform. Set OMP_PLATFORM_ROOT (or pass this parameter) when
-    running from a git worktree that has no sibling platform checkout.
-
-.PARAMETER AllowUnverifiedSharedScripts
-    Deliberately set OMP_ALLOW_MISSING_PLATFORM=1 so that, when no
-    OpenModulePlatform checkout can be found, Check 15 reports "NOT VERIFIED"
-    instead of failing the gate. Use it only when no platform checkout is
-    available on the machine; drift then goes unchecked.
-
 .EXAMPLE
-    $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'
     .\scripts\local-ci.ps1
 #>
 [CmdletBinding()]
-param(
-    [string]$BaseCommit = 'origin/main',
-
-    [string]$PlatformRepositoryRoot = '',
-
-    [switch]$AllowUnverifiedSharedScripts
-)
+param()
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$Validator = Join-Path (Join-Path (Join-Path $RepoRoot 'scripts') 'omp') 'validate-component-versions.ps1'
 
 # --- Local-ci telemetry (best-effort; never changes the gate's exit code) ----
 # One compact JSONL line per run under
@@ -190,48 +164,11 @@ try {
     if (-not $testPassed) { $overallSuccess = $false }
     Write-Host ""
 
-    # --- Step 3: Validate component versions -----------------------------------
-    $validatePassed = $false
-    # The exception is scoped to this step: an ambient OMP_ALLOW_MISSING_PLATFORM
-    # from the caller's session is cleared, and the previous value is restored in
-    # finally so it never leaks into later steps of this process.
-    $savedAllowMissingPlatform = $env:OMP_ALLOW_MISSING_PLATFORM
-    try {
-        Write-Host "[3/4] Validating component version lockstep" -ForegroundColor Cyan
-        if (-not (Test-Path $Validator)) {
-            throw "Validator script not found: $Validator"
-        }
-        # The validator ends with an explicit 'exit 0' / 'exit 1', so
-        # $LASTEXITCODE reflects its verdict rather than that of the last
-        # native git call it made internally. Reset it first so a stale value
-        # from an earlier step can never be mistaken for a validator result.
-        # Strict by default: a Check 15 that cannot find the platform checkout
-        # must fail the gate (the shared Resolve-PlatformCheckScript records it
-        # as an error), otherwise shared-script drift from a worktree without a
-        # sibling OpenModulePlatform folder passes as green. The only escape
-        # hatch is the explicit OMP_ALLOW_MISSING_PLATFORM=1 exception.
-        if ($AllowUnverifiedSharedScripts) {
-            Write-Warning 'Check 15 runs with OMP_ALLOW_MISSING_PLATFORM=1 (-AllowUnverifiedSharedScripts): a missing platform checkout is reported NOT VERIFIED instead of failing the gate.'
-            $env:OMP_ALLOW_MISSING_PLATFORM = '1'
-        }
-        else {
-            $env:OMP_ALLOW_MISSING_PLATFORM = $null
-        }
-        $global:LASTEXITCODE = 0
-        & $Validator -BaseCommit $BaseCommit -Strict:(-not $AllowUnverifiedSharedScripts) -PlatformRepositoryRoot $PlatformRepositoryRoot
-        if ($LASTEXITCODE -eq 0) {
-            $validatePassed = $true
-        }
-    }
-    catch {
-        Write-Host "Validation step threw an exception: $_" -ForegroundColor Red
-        $validatePassed = $false
-    }
-    finally {
-        $env:OMP_ALLOW_MISSING_PLATFORM = $savedAllowMissingPlatform
-    }
-    Write-StepResult -StepName "Validate component versions" -Passed $validatePassed
-    if (-not $validatePassed) { $overallSuccess = $false }
+    # --- Step 3: Component version lockstep ------------------------------------
+    # Not applicable on a release line: release/x.y carries no OMP parts, and OMP
+    # packages are built from main only. The banner is kept so the step numbers
+    # of the later steps, and the tests that anchor on them, stay unchanged.
+    Write-Host "[3/4] Component version lockstep: not applicable on a release line (no OMP parts)" -ForegroundColor Cyan
     Write-Host ""
 
     # --- Step 4: Agent documentation freshness ---------------------------------

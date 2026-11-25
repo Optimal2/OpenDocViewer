@@ -293,13 +293,10 @@ if (-not $SkipValidation) {
 
 $prevHead = (Exec 'git' @('rev-parse', 'HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
 
-# Version bump without commit/tag, then everything the pre-push gate expects to travel WITH a
-# package.json change lands in the same release commit:
-#   - docs-agent regenerated for the NEW version (the agent-documentation freshness check
-#     rejects a packet generated before the bump),
-#   - the OMP component bump (the canonical LOCKSTEP check rejects a change under a component's
-#     project files without a bump of omp-components.json + repositoryVersion + module definition).
-# A single `npm version` commit could satisfy neither, which blocked the push in practice.
+# Version bump without commit/tag, then the regenerated docs-agent packet lands in the same
+# release commit (the agent-documentation freshness check rejects a packet generated before
+# the bump). A release line carries no OMP parts, so there is no component bump here: OMP
+# packages are built from main only.
 Write-Host "`nBumping the package version ($ReleaseType) without a commit..." -ForegroundColor Yellow
 $null = ExecNpm -NpmArgs @('version', $ReleaseType, '--no-git-tag-version') -Cwd $repoRoot
 
@@ -308,14 +305,6 @@ $tagName = "v$newVersion"
 
 Write-Host "Regenerating the agent documentation packet for $newVersion..." -ForegroundColor Yellow
 $null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
-
-Write-Host 'Bumping the OMP component version so the release commit passes the lockstep gate...' -ForegroundColor Yellow
-# A PowerShell script invoked with & sets $LASTEXITCODE only when it calls exit, so under
-# Set-StrictMode the variable may not exist after a successful run. Seed it first and also
-# honour $? (false after a terminating error inside the script).
-$global:LASTEXITCODE = 0
-& (Join-Path $repoRoot 'scripts/omp/bump-version.ps1') -ComponentKey 'opendocviewer-web'
-if (-not $? -or $LASTEXITCODE -ne 0) { throw "scripts/omp/bump-version.ps1 failed (exit code $LASTEXITCODE)" }
 
 Write-Host "Creating release commit and tag $tagName..." -ForegroundColor Yellow
 $null = Exec 'git' @('add', '--all') -Cwd $repoRoot
