@@ -171,6 +171,18 @@ const appCmdStub = String.raw`
   Add-Content -LiteralPath $env:ODV_IIS_CALL_LOG -Encoding Ascii
 `;
 
+/** Remove XML comments until no comment opener can remain, including one without a terminator. */
+function stripXmlComments(text) {
+  let stripped = text;
+  let previous;
+  do {
+    previous = stripped;
+    stripped = stripped.replace(/<!--[\s\S]*?-->/g, '');
+  } while (stripped !== previous);
+  const unterminatedComment = stripped.indexOf('<!--');
+  return unterminatedComment === -1 ? stripped : stripped.slice(0, unterminatedComment);
+}
+
 /**
  * Environment for a PowerShell child. PSModulePath is left out: when the suite itself is started
  * from PowerShell 7 (the local gate), the inherited value makes Windows PowerShell load
@@ -567,7 +579,13 @@ test('the proxy template forwards the public host on the user-log rule only', ()
   assert.match(ruleBlock(text, 'Proxy_UserLog'), /<set name="HTTP_X_FORWARDED_HOST" value="\{HTTP_HOST\}" \/>/);
   assert.doesNotMatch(ruleBlock(text, 'Proxy_SystemLog'), /HTTP_X_FORWARDED_HOST/);
   // Every placeholder is a comment or an attribute value, so none can end up as raw text.
-  assert.doesNotMatch(text.replace(/<!--[\s\S]*?-->/g, '').replace(/"[^"]*"/g, '""'), /__[A-Z][A-Z_]*__/);
+  assert.doesNotMatch(stripXmlComments(text).replace(/"[^"]*"/g, '""'), /__[A-Z][A-Z_]*__/);
+});
+
+test('stripXmlComments leaves no comment opener behind overlapping markers', () => {
+  for (const text of ['<!-<!-- x -->-', 'a<!--<!-- x -->-->b']) {
+    assert.doesNotMatch(stripXmlComments(text), /<!--/);
+  }
 });
 
 // Every command that changes something has to sit inside an `if ($PSCmdlet.ShouldProcess(...))`
