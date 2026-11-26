@@ -143,7 +143,7 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
   await expect(docSymbol).toHaveAttribute('aria-label', /3 signatures/);
   await expect(page.locator('.odv-signature-badge--document')).toHaveCount(2);
 
-  const selectedBefore = await page.locator('#thumbnail-1').getAttribute('aria-selected');
+  const selectedBefore = await page.locator('#thumbnail-1').getAttribute('aria-current');
   await docSymbol.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -160,7 +160,7 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
   await expect(dialog).toHaveCount(0);
   await expect(docSymbol).toBeFocused();
   // The symbol did not steal the click that selects a page.
-  expect(await page.locator('#thumbnail-1').getAttribute('aria-selected')).toBe(selectedBefore);
+  expect(await page.locator('#thumbnail-1').getAttribute('aria-current')).toBe(selectedBefore);
 
   // A page symbol opens the same document dialog with its own file preselected, named in the
   // group heading with its page range inside the document.
@@ -339,16 +339,17 @@ test('pdfSignatures.thumbnailPageBadge=false hides only the page symbols', async
   await expect(page.locator('.odv-signature-badge--thumbnail')).toHaveCount(0);
 });
 
-test('A11y: the focusable signature symbols are not nested inside role="option"', async ({ page }) => {
+test('A11y: the focusable signature symbols are not nested inside the page button', async ({ page }) => {
   await openSession(page);
-  // ARIA makes the children of an option presentational, so a focusable button
-  // inside it may vanish from screen-reader browse mode (review finding F1,
-  // 2026-10-03). The page symbol must be a sibling of the option.
-  await expect(page.locator('#thumbnail-1[role="option"] .odv-signature-badge')).toHaveCount(0);
-  await expect(page.locator('#thumbnail-2[role="option"] .odv-signature-badge')).toHaveCount(0);
+  // A button makes its children presentational, so a focusable button inside it
+  // may vanish from screen-reader browse mode (review finding F1, 2026-10-03).
+  // The page symbol must be a sibling of the page button.
+  await expect(page.locator('#thumbnail-1')).toHaveAttribute('role', 'button');
+  await expect(page.locator('#thumbnail-1 .odv-signature-badge')).toHaveCount(0);
+  await expect(page.locator('#thumbnail-2 .odv-signature-badge')).toHaveCount(0);
   await expect(page.locator('[data-thumbnail-row="thumbnail-1"] .odv-signature-badge--thumbnail')).toBeVisible();
-  // The document header sits between the options inside the listbox, so it is a
-  // labelled group: a legal listbox descendant that keeps its symbol reachable.
+  // The document header sits in the row's list item, before the page button, as a
+  // labelled group that keeps its symbol reachable (tests/ui/thumbnail-list-semantics.spec.mjs).
   const header = page.locator('.thumbnails-static-list .thumbnail-document-boundary.start').first();
   await expect(header).toHaveAttribute('role', 'group');
   await expect(header).toHaveAttribute('aria-label', /Document 1/);

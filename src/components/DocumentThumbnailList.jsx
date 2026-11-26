@@ -353,9 +353,9 @@ function getDocumentBoundaryTitle(t, documentContext) {
  * start of each document and the sticky header shown while scrolling render through this one
  * component, so they share typography, size, spacing and the symbol's behaviour.
  *
- * The header sits inside the thumbnail strip's role="listbox" container, so it carries
- * role="group" with an accessible name: a listbox may only own options and groups, and the
- * document signature symbol is a tab stop that must not float bare between the options.
+ * The inline header sits in its row's list item, before the page button, and the sticky one
+ * sits above the list. Both carry role="group" with an accessible name, so the document
+ * signature symbol is announced together with the document it belongs to.
  *
  * @param {Object} props
  * @param {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number }} props.documentContext
@@ -492,6 +492,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   return (
     <div
       className={rowShellClassName}
+      role="listitem"
       style={{
         height: `${rowHeight}px`,
         ...(fullyRenderOffscreenRows
@@ -518,10 +519,10 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           onClick={(event) => onActivate(originalPageNumber, event)}
           onKeyDown={(event) => onKeyActivate(event, originalPageNumber)}
           onContextMenu={(event) => onOpenContextMenu(event, originalPageNumber, page)}
-          role="option"
+          role="button"
           tabIndex={isFocusedSelected ? 0 : -1}
           aria-label={rowTitle}
-          aria-selected={isFocusedSelected}
+          aria-current={isFocusedSelected ? 'page' : undefined}
         >
           <div
             className={`thumbnail-image-stage ${thumbnailStatus === 0 ? 'is-loading' : ''}`}
@@ -589,7 +590,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
         </div>
 
         {/* The page signature symbol is a tab stop of its own, so it must NOT live
-            inside role="option" (ARIA treats option children as presentational).
+            inside the page button (a button must not contain another control).
             It is absolutely positioned over the image stage by dialogs.css. */}
         {showSignatureBadge && reportHasSignatures(signatureReport) && typeof onOpenSignatures === 'function' ? (
           <SignatureStatusBadge
@@ -607,9 +608,9 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
 
 /**
  * Locate a row's inline document-boundary header and its row shell for the sticky-header
- * measurement. The option (`#thumbnail-N`) sits inside `.thumbnail-option-frame` (3d3a8ec);
+ * measurement. The page button (`#thumbnail-N`) sits inside `.thumbnail-option-frame` (3d3a8ec);
  * the header is the frame's previous sibling and the shell is the frame's parent. Rows without
- * the frame (legacy DOM) resolve from the option itself. Returns nulls when the row has no
+ * the frame (legacy DOM) resolve from the button itself. Returns nulls when the row has no
  * boundary header.
  *
  * @param {Element|null|undefined} listNode
@@ -778,7 +779,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     const targetPageNumber = Math.max(1, Number(autoScrollPageNumber) || Number(pageNumber) || 1);
     return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === targetPageNumber);
   }, [allPages, autoScrollPageNumber, pageNumber, totalCount]);
-  const activeDescendantId = selectedIndexForAutoScroll >= 0 ? `thumbnail-${selectedIndexForAutoScroll + 1}` : undefined;
   const focusedOriginalPageNumber = Math.max(1, Number(autoScrollPageNumber) || Number(pageNumber) || 1);
 
   useEffect(() => {
@@ -1407,9 +1407,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     <div
       className="thumbnails-container"
       ref={setContainerRef}
-      role="listbox"
-      aria-label={t('thumbnails.aria.container', { defaultValue: 'Document thumbnails' })}
-      aria-activedescendant={activeDescendantId}
       onScroll={handleScroll}
       style={{
         width: `${Math.max(0, Number(width) || 0)}px`,
@@ -1429,8 +1426,13 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         </div>
       ) : null}
 
+      {/* A list of page buttons, with the shown page marked aria-current. The strip is page
+          navigation and not a value choice, and its rows also hold document headers and
+          signature symbols, which a listbox may not contain (WCAG 1.3.1). */}
       <div
         className="thumbnails-static-list"
+        role="list"
+        aria-label={t('thumbnails.aria.container', { defaultValue: 'Document thumbnails' })}
         style={{
           position: 'relative',
           width: '100%',

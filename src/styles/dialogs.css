@@ -1862,8 +1862,8 @@ a.odv-help-close-icon {
 }
 
 /* Page symbol: a discreet 22px pill centred on the top edge of the thumbnail image, leaving the
-   top-right corner to the compare-mode L/R markers. It is a sibling of role="option" (ARIA
-   forbids interactive descendants inside an option) anchored to .thumbnail-option-frame:
+   top-right corner to the compare-mode L/R markers. It is a sibling of the page button (a
+   button must not contain another control) anchored to .thumbnail-option-frame:
    8px = 2px wrapper border + 4px wrapper padding + 2px below the image stage's top edge. */
 .odv-signature-badge--thumbnail {
   position: absolute;

@@ -207,7 +207,7 @@
 | <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:163</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
 | <code>clamp</code> | function | <code>src/components/DocumentThumbnailList.jsx:76</code> |  |
 | <code>DocumentBoundaryHeader</code> | function | <code>src/components/DocumentThumbnailList.jsx:369</code> | The &amp;quot;DOK n&amp;quot; document header with the document signature symbol. |
-| <code>DocumentThumbnailList</code> | constant | <code>src/components/DocumentThumbnailList.jsx:651</code> |  |
+| <code>DocumentThumbnailList</code> | constant | <code>src/components/DocumentThumbnailList.jsx:652</code> |  |
 | <code>formatMetricFraction</code> | function | <code>src/components/DocumentThumbnailList.jsx:120</code> |  |
 | <code>formatMetricValue</code> | function | <code>src/components/DocumentThumbnailList.jsx:130</code> |  |
 | <code>getDocumentBoundaryLabel</code> | function | <code>src/components/DocumentThumbnailList.jsx:328</code> |  |
@@ -226,8 +226,8 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentThumbnailList.jsx:1094</code> |  |
 | <code>&lt;anonymous&gt;~handleScroll</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1181</code> |  |
 | <code>isIndexInRange</code> | function | <code>src/components/DocumentThumbnailList.jsx:150</code> |  |
-| <code>resolveRowHeaderAndShell</code> | function | <code>src/components/DocumentThumbnailList.jsx:619</code> | Locate a row&#39;s inline document-boundary header and its row shell for the sticky-header measurement. |
-| <code>&lt;anonymous&gt;~resolveStickyHeaderRowIndex</code> | constant | <code>src/components/DocumentThumbnailList.jsx:743</code> | The sticky header shows the current document only once that document&#39;s inline header has scrolled out of view, so the two are never visible together. |
+| <code>resolveRowHeaderAndShell</code> | function | <code>src/components/DocumentThumbnailList.jsx:620</code> | Locate a row&#39;s inline document-boundary header and its row shell for the sticky-header measurement. |
+| <code>&lt;anonymous&gt;~resolveStickyHeaderRowIndex</code> | constant | <code>src/components/DocumentThumbnailList.jsx:744</code> | The sticky header shows the current document only once that document&#39;s inline header has scrolled out of view, so the two are never visible together. |
 | <code>&lt;anonymous&gt;~setContainerRef</code> | constant | <code>src/components/DocumentThumbnailList.jsx:865</code> |  |
 | <code>shouldWarmAllThumbnails</code> | function | <code>src/components/DocumentThumbnailList.jsx:85</code> |  |
 | <code>ThumbnailRow</code> | constant | <code>src/components/DocumentThumbnailList.jsx:417</code> |  |

@@ -2,8 +2,8 @@
 // File: src/components/__tests__/thumbnailHeaderLookup.test.js
 //
 // The sticky document header measures the inline boundary header of the first visible row.
-// Since 3d3a8ec the option (#thumbnail-N) sits inside .thumbnail-option-frame, so a lookup
-// that starts from the option itself finds no header and leaves headerBottom at its 24px
+// Since 3d3a8ec the page button (#thumbnail-N) sits inside .thumbnail-option-frame, so a lookup
+// that starts from the button itself finds no header and leaves headerBottom at its 24px
 // default (review finding 2026-10-05). This pins the frame-aware lookup for both DOM shapes.
 import { describe, expect, it } from 'vitest';
 import { resolveRowHeaderAndShell } from '../DocumentThumbnailList.jsx';
@@ -19,7 +19,7 @@ function build(withFrame, withHeader = true) {
   }
   const option = document.createElement('div');
   option.id = 'thumbnail-3';
-  option.setAttribute('role', 'option');
+  option.setAttribute('role', 'button');
   if (withFrame) {
     const frame = document.createElement('div');
     frame.className = 'thumbnail-option-frame';

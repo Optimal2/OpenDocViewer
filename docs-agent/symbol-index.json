@@ -5338,7 +5338,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 651,
+    "line": 652,
     "description": "",
     "params": [
       {
@@ -6029,7 +6029,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 619,
+    "line": 620,
     "description": "Locate a row's inline document-boundary header and its row shell for the sticky-header measurement.",
     "params": [
       {
@@ -6060,7 +6060,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 743,
+    "line": 744,
     "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
     "params": [
       {
