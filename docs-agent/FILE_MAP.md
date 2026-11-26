@@ -76,9 +76,9 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/LoadingMessage.jsx</code> | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
 | <code>src/components/Manual/manualDocument.js</code> | 415 | 2 | 15 | high | Manual source loading and HTML preparation shared by every manual host \(the overlay dialog and a full-page view\). |
-| <code>src/components/Manual/manualNavigation.js</code> | 128 | 1 | 8 | high | Scrolling, focus and URL-fragment helpers for navigating inside a rendered manual. |
+| <code>src/components/Manual/manualNavigation.js</code> | 172 | 1 | 10 | high | Scrolling, focus and URL-fragment helpers for navigating inside a rendered manual. |
 | <code>src/components/Manual/manualSearch.js</code> | 337 | 1 | 14 | high | In-manual text search: locale-aware case folding, match collection over the rendered manual and highlighting through the CSS Custom Highlight API with a \`&lt;mark&gt;\` fallback. |
-| <code>src/components/Manual/ManualView.jsx</code> | 871 | 2 | 13 | high | Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in-manual search with highlig |
+| <code>src/components/Manual/ManualView.jsx</code> | 866 | 2 | 13 | high | Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in-manual search with highlig |
 | <code>src/components/OcrTextLayer.jsx</code> | 264 | 1 | 4 | high | Selectable, invisible text over a recognised page image. |
 | <code>src/components/PrintSelectionWorkspace.jsx</code> | 2511 | 1 | 5 | high | Full-window print-selection workspace. |
 | <code>src/components/ReadAloudMenuItem.jsx</code> | 57 | 1 | 1 | high | The page context menu&#39;s read-aloud entry \(DocumentViewer/DocumentViewerRender.jsx\): &quot;Read the selection aloud&quot; while nothing is being read, greyed with the reason in its tooltip when nothing can be read \(no selection in |

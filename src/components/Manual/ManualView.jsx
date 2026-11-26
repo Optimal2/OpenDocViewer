@@ -39,6 +39,7 @@ import {
 import {
   captureScrollPositions,
   findManualElementById,
+  findManualSectionAtLine,
   isHiddenInManual,
   MANUAL_SECTION_ACTIVE_LINE,
   MANUAL_SECTION_SCROLL_GAP,
@@ -562,14 +563,8 @@ export default function ManualView({
       pinnedSectionRef.current = null;
       const paneBox = pane.getBoundingClientRect();
       const line = paneBox.top + pane.clientHeight * MANUAL_SECTION_ACTIVE_LINE;
-      let active = entries[0].id;
-      for (const entry of entries) {
-        const box = entry.element.getBoundingClientRect();
-        // Headings inside a collapsed <details> have no box; skip them.
-        if (box.width === 0 && box.height === 0) continue;
-        if (box.top > line) break;
-        active = entry.id;
-      }
+      // Headings inside a collapsed <details> are passed over (findManualSectionAtLine).
+      const active = findManualSectionAtLine(entries, line);
       // At the top of the manual there is nothing to return to after a same-content reload.
       currentSectionRef.current = pane.scrollTop < 2 ? '' : active;
       setActiveSectionId(active);

@@ -83,6 +83,50 @@ export function isHiddenInManual(target, container) {
 }
 
 /**
+ * False for an element the browser does not render: one with `display: none`, or one inside
+ * content the browser skips (`content-visibility: hidden`). The content of a collapsed
+ * `<details>` is the case that matters. A browser that hides it with `content-visibility: hidden`
+ * still reports a box for what is inside, placed below the summary where it would have been
+ * shown, so a box without size cannot be the only test. That test is the fallback where
+ * `checkVisibility()` does not exist, and it is enough for a browser that hides the content with
+ * `display: none`. `visibility` and `opacity` are not looked at, here or before.
+ *
+ * @param {(Element|null|undefined)} element
+ * @returns {boolean}
+ */
+export function isManualElementRendered(element) {
+  if (!element) return false;
+  if (typeof element.checkVisibility === 'function') return element.checkVisibility() !== false;
+  if (typeof element.getBoundingClientRect !== 'function') return false;
+  const box = element.getBoundingClientRect();
+  return !(box.width === 0 && box.height === 0);
+}
+
+/**
+ * The section being read: the last rendered heading at or above the active line of the content
+ * pane. Headings that are not rendered are passed over. Without that, the headings of a
+ * collapsed chapter count from where they would have been shown, which is on top of the chapters
+ * after it, and one of them is taken for the section being read.
+ *
+ * @param {Array<{id: string, element: Element}>} entries Contents entries in document order.
+ * @param {number} line Viewport y coordinate of the active line.
+ * @returns {string} The entry id, the first entry's id above every heading, or '' without entries.
+ */
+export function findManualSectionAtLine(entries, line) {
+  const list = Array.isArray(entries) ? entries : [];
+  let active = list[0]?.id || '';
+  for (const entry of list) {
+    if (!isManualElementRendered(entry.element)) continue;
+    const box = entry.element.getBoundingClientRect();
+    // Rendered, but without a box of its own: nothing to compare with the line.
+    if (box.width === 0 && box.height === 0) continue;
+    if (box.top > line) break;
+    active = entry.id;
+  }
+  return active;
+}
+
+/**
  * Record the scroll positions of the page and of every ancestor of `from`, so a fragment
  * navigation (which the browser may scroll for) can be undone.
  *

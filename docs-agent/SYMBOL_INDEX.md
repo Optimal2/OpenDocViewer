@@ -535,13 +535,15 @@
 | <code>rewriteManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:302</code> |  |
 | <code>rewriteManualSrcset</code> | function | <code>src/components/Manual/manualDocument.js:239</code> | Rewrite the URL in each srcset candidate while retaining its width or density descriptor. |
 | <code>sanitizeManualHtml</code> | function | <code>src/components/Manual/manualDocument.js:288</code> |  |
-| <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:92</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
+| <code>captureScrollPositions</code> | function | <code>src/components/Manual/manualNavigation.js:136</code> | Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone. |
 | <code>findManualElementById</code> | function | <code>src/components/Manual/manualNavigation.js:51</code> |  |
+| <code>findManualSectionAtLine</code> | function | <code>src/components/Manual/manualNavigation.js:115</code> | The section being read: the last rendered heading at or above the active line of the content pane. |
 | <code>isHiddenInManual</code> | function | <code>src/components/Manual/manualNavigation.js:74</code> | True when the element or one of its ancestors inside the manual is not rendered \( display: none \). |
+| <code>isManualElementRendered</code> | function | <code>src/components/Manual/manualNavigation.js:97</code> | False for an element the browser does not render: one with display: none , or one inside content the browser skips \( content-visibility: hidden \). |
 | <code>MANUAL_SECTION_ACTIVE_LINE</code> | constant | <code>src/components/Manual/manualNavigation.js:10</code> | Share of the content pane height, measured from its top, inside which a heading counts as the start of the section being read. |
 | <code>MANUAL_SECTION_SCROLL_GAP</code> | constant | <code>src/components/Manual/manualNavigation.js:13</code> | Gap in pixels kept above a heading when the content pane scrolls to it. |
 | <code>openDetailsAncestors</code> | function | <code>src/components/Manual/manualNavigation.js:21</code> | Open collapsed &amp;lt;details&amp;gt; ancestors so a target inside them can be shown. |
-| <code>replaceUrlFragment</code> | function | <code>src/components/Manual/manualNavigation.js:120</code> | Replace the URL fragment without adding a history entry. |
+| <code>replaceUrlFragment</code> | function | <code>src/components/Manual/manualNavigation.js:164</code> | Replace the URL fragment without adding a history entry. |
 | <code>scrollPaneToTarget</code> | function | <code>src/components/Manual/manualNavigation.js:38</code> | Scroll only the given pane so the target sits at its top. |
 | <code>applyCustomHighlight</code> | function | <code>src/components/Manual/manualSearch.js:177</code> | Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all. |
 | <code>applyMarkFallback</code> | function | <code>src/components/Manual/manualSearch.js:231</code> | Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &amp;lt;mark&amp;gt; carrying its hit index. |
@@ -557,19 +559,19 @@
 | <code>removeMarkFallback</code> | function | <code>src/components/Manual/manualSearch.js:292</code> | Unwrap fallback marks and merge the split text nodes back together. |
 | <code>revealManualMatch</code> | function | <code>src/components/Manual/manualSearch.js:314</code> | Open collapsed &amp;lt;details&amp;gt; ancestors of the hit and scroll it into the dialog scroll container. |
 | <code>setCurrentMark</code> | function | <code>src/components/Manual/manualSearch.js:273</code> |  |
-| <code>module.exports</code> | function | <code>src/components/Manual/ManualView.jsx:102</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/Manual/ManualView.jsx:344</code> |  |
-| <code>MANUAL_CONTENTS_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:51</code> | Id of the contents tree; the narrow-window toggle points at it with aria-controls. |
-| <code>MANUAL_SEARCH_INPUT_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:54</code> | Id of the manual search field. |
-| <code>ManualDocumentState</code> | typedef | <code>src/components/Manual/ManualView.jsx:56</code> | State of the loaded manual document as reported to the host. |
-| <code>ManualView~navigateToManualTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:229</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
-| <code>normalizeSectionId</code> | function | <code>src/components/Manual/ManualView.jsx:70</code> |  |
-| <code>ManualView~openFragmentTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:258</code> | Show a manual element that is hidden until it is the URL fragment target \(the bundled manuals&#39; :target image lightbox\) by making it the fragment target. |
-| <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:181</code> | Make the section holding target current and keep it current until the reader scrolls. |
-| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:703</code> |  |
-| <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:207</code> | Put back the URL fragment the page had before the manual set one. |
-| <code>ManualView~revalidateFragmentTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:277</code> | After new manual content has been rendered: a fragment the manual set is kept only while it still opens a lightbox in the new content; otherwise the page&#39;s own fragment is put bac... |
-| <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:196</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |
+| <code>module.exports</code> | function | <code>src/components/Manual/ManualView.jsx:103</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/Manual/ManualView.jsx:345</code> |  |
+| <code>MANUAL_CONTENTS_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:52</code> | Id of the contents tree; the narrow-window toggle points at it with aria-controls. |
+| <code>MANUAL_SEARCH_INPUT_ID</code> | constant | <code>src/components/Manual/ManualView.jsx:55</code> | Id of the manual search field. |
+| <code>ManualDocumentState</code> | typedef | <code>src/components/Manual/ManualView.jsx:57</code> | State of the loaded manual document as reported to the host. |
+| <code>ManualView~navigateToManualTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:230</code> | Scroll the content pane \(never the tree\) to an element in the manual and focus it. |
+| <code>normalizeSectionId</code> | function | <code>src/components/Manual/ManualView.jsx:71</code> |  |
+| <code>ManualView~openFragmentTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:259</code> | Show a manual element that is hidden until it is the URL fragment target \(the bundled manuals&#39; :target image lightbox\) by making it the fragment target. |
+| <code>ManualView~pinSectionFor</code> | constant | <code>src/components/Manual/ManualView.jsx:182</code> | Make the section holding target current and keep it current until the reader scrolls. |
+| <code>ManualView~renderContentsLink</code> | function | <code>src/components/Manual/ManualView.jsx:698</code> |  |
+| <code>ManualView~restoreViewerFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:208</code> | Put back the URL fragment the page had before the manual set one. |
+| <code>ManualView~revalidateFragmentTarget</code> | constant | <code>src/components/Manual/ManualView.jsx:278</code> | After new manual content has been rendered: a fragment the manual set is kept only while it still opens a lightbox in the new content; otherwise the page&#39;s own fragment is put bac... |
+| <code>ManualView~setManualFragment</code> | constant | <code>src/components/Manual/ManualView.jsx:197</code> | Set the URL fragment for a manual link whose target is styled through :target \(the bundled manuals&#39; image lightbox\), without moving the content pane, the host or the page behind i... |
 | <code>OCR_WORD_CURRENT_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:40</code> | Class of a word inside the current match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_MATCH_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:38</code> | Class of a word inside a match of the toolbar&#39;s OCR search. |
 | <code>OCR_WORD_SELECTED_CLASS</code> | constant | <code>src/components/OcrTextLayer.jsx:36</code> | Class of a word that the current selection touches. |

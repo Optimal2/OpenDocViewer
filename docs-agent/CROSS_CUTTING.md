@@ -48,7 +48,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 React raw HTML rendering.
 
-- `src/components/Manual/ManualView.jsx` lines 854 - Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in\-manual search with highlig
+- `src/components/Manual/ManualView.jsx` lines 849 - Shared manual body: loads the configured manual source for the current UI language, filters the standard manual by enabled features, renders a contents tree built from the h2/h3 headings, an in\-manual search with highlig
 
 ### innerHTML
 

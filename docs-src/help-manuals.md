@@ -84,6 +84,10 @@ next to the viewer). The manual overlay's **Open in new tab** title-bar control 
 the section being read as the URL fragment; opening such a link scrolls straight to the section
 once the manual has loaded.
 
+The section being read is the last heading at or above the upper quarter of the text pane, and
+it is the one marked in the contents tree. The headings of a collapsed section do not count: the
+browser reports positions for them although it does not render them.
+
 The control links to the page file by name (`manual/index.html#<section>`), not to the folder. A
 host that serves the ODV files as plain static files, without a directory default document,
 answers `manual/` with 404 although `manual/index.html` is there; the named file works on every

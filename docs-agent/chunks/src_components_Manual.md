@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/Manual
 
-File count: 4. Line count: 1751. JSDoc symbol count: 50.
+File count: 4. Line count: 1790. JSDoc symbol count: 52.
 
 ## src/components/Manual/manualDocument.js
 
@@ -29,7 +29,7 @@ Symbols:
 
 Scrolling, focus and URL\-fragment helpers for navigating inside a rendered manual.
 
-Exports: `MANUAL_SECTION_ACTIVE_LINE`, `MANUAL_SECTION_SCROLL_GAP`, `openDetailsAncestors`, `scrollPaneToTarget`, `findManualElementById`, `isHiddenInManual`, `captureScrollPositions`, `replaceUrlFragment`
+Exports: `MANUAL_SECTION_ACTIVE_LINE`, `MANUAL_SECTION_SCROLL_GAP`, `openDetailsAncestors`, `scrollPaneToTarget`, `findManualElementById`, `isHiddenInManual`, `isManualElementRendered`, `findManualSectionAtLine`, `captureScrollPositions`, `replaceUrlFragment`
 
 Symbols:
 
@@ -39,6 +39,8 @@ Symbols:
 - `scrollPaneToTarget` (function) - Scroll only the given pane so the target sits at its top.
 - `findManualElementById` (function) - No description.
 - `isHiddenInManual` (function) - True when the element or one of its ancestors inside the manual is not rendered \( display: none \).
+- `isManualElementRendered` (function) - False for an element the browser does not render: one with display: none , or one inside content the browser skips \( content\-visibility: hidden \).
+- `findManualSectionAtLine` (function) - The section being read: the last rendered heading at or above the active line of the content pane.
 - `captureScrollPositions` (function) - Record the scroll positions of the page and of every ancestor of from , so a fragment navigation \(which the browser may scroll for\) can be undone.
 - `replaceUrlFragment` (function) - Replace the URL fragment without adding a history entry.
 

@@ -14413,7 +14413,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualNavigation.js",
-    "line": 92,
+    "line": 136,
     "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
     "params": [
       {
@@ -14463,6 +14463,37 @@
     "examples": 0
   },
   {
+    "id": "findManualSectionAtLine",
+    "name": "findManualSectionAtLine",
+    "longname": "findManualSectionAtLine",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 115,
+    "description": "The section being read: the last rendered heading at or above the active line of the content pane.",
+    "params": [
+      {
+        "name": "entries",
+        "type": "Array.<{id: string, element: Element}>",
+        "optional": false,
+        "description": "Contents entries in document order."
+      },
+      {
+        "name": "line",
+        "type": "number",
+        "optional": false,
+        "description": "Viewport y coordinate of the active line."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": "The entry id, the first entry's id above every heading, or '' without entries."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "isHiddenInManual",
     "name": "isHiddenInManual",
     "longname": "isHiddenInManual",
@@ -14483,6 +14514,31 @@
         "type": "Element",
         "optional": false,
         "description": "Rendered manual container."
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isManualElementRendered",
+    "name": "isManualElementRendered",
+    "longname": "isManualElementRendered",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/Manual/manualNavigation.js",
+    "line": 97,
+    "description": "False for an element the browser does not render: one with display: none , or one inside content the browser skips ( content-visibility: hidden ).",
+    "params": [
+      {
+        "name": "element",
+        "type": "Element|null|undefined",
+        "optional": false,
+        "description": ""
       }
     ],
     "returns": [
@@ -14552,7 +14608,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/manualNavigation.js",
-    "line": 120,
+    "line": 164,
     "description": "Replace the URL fragment without adding a history entry.",
     "params": [
       {
@@ -14926,7 +14982,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 102,
+    "line": 103,
     "description": "",
     "params": [
       {
@@ -14987,7 +15043,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 344,
+    "line": 345,
     "description": "",
     "params": [
       {
@@ -15007,7 +15063,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 51,
+    "line": 52,
     "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
     "params": [],
     "returns": [],
@@ -15020,7 +15076,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 54,
+    "line": 55,
     "description": "Id of the manual search field.",
     "params": [],
     "returns": [],
@@ -15033,7 +15089,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 56,
+    "line": 57,
     "description": "State of the loaded manual document as reported to the host.",
     "params": [],
     "returns": [],
@@ -15046,7 +15102,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 229,
+    "line": 230,
     "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
     "params": [
       {
@@ -15066,7 +15122,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 70,
+    "line": 71,
     "description": "",
     "params": [
       {
@@ -15091,7 +15147,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 258,
+    "line": 259,
     "description": "Show a manual element that is hidden until it is the URL fragment target (the bundled manuals' :target image lightbox) by making it the fragment target.",
     "params": [
       {
@@ -15116,7 +15172,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 181,
+    "line": 182,
     "description": "Make the section holding target current and keep it current until the reader scrolls.",
     "params": [
       {
@@ -15136,7 +15192,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 703,
+    "line": 698,
     "description": "",
     "params": [
       {
@@ -15167,7 +15223,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 207,
+    "line": 208,
     "description": "Put back the URL fragment the page had before the manual set one.",
     "params": [],
     "returns": [],
@@ -15180,7 +15236,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 277,
+    "line": 278,
     "description": "After new manual content has been rendered: a fragment the manual set is kept only while it still opens a lightbox in the new content; otherwise the page's own fragment is put bac...",
     "params": [],
     "returns": [],
@@ -15193,7 +15249,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/Manual/ManualView.jsx",
-    "line": 196,
+    "line": 197,
     "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the host or the page behind i...",
     "params": [
       {
