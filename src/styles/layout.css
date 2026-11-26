@@ -522,6 +522,19 @@
   gap: 10px;
 }
 
+/*
+ * One grid cell: the tile button and, as its sibling, the "Show page" button. A button must not
+ * contain another control, so the frame is what holds the two together. It has the tile's box
+ * (the tile stretches across it), which makes "pointer over the frame" the same as "pointer over
+ * the tile or its Show page button".
+ */
+.print-selection-tile-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .print-selection-tile {
   display: inline-flex;
   flex-direction: column;
@@ -535,7 +548,9 @@
   cursor: pointer;
 }
 
-.print-selection-tile:hover,
+/* :where() keeps the specificity of a plain .print-selection-tile:hover, so the selected,
+   warning and dragging states below still win over the hover colours. */
+:where(.print-selection-tile-frame):hover > .print-selection-tile,
 .print-selection-tile:focus-visible {
   border-color: color-mix(in srgb, var(--primary-color) 50%, transparent 50%);
   background: color-mix(in srgb, var(--primary-color) 7%, transparent 93%);
@@ -556,7 +571,8 @@
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.45);
 }
 
-.print-selection-tile.is-included {
+/* On the frame, so the tile and its Show page button are dimmed as one layer. */
+.print-selection-tile-frame.is-included {
   opacity: 0.72;
 }
 
@@ -598,10 +614,17 @@
   overflow: hidden;
 }
 
+/*
+ * Placed against the frame, at the same inset from the top right corner of the tile's image as
+ * the metric badges have from their corners. The image stage is centred in the tile and starts
+ * below the tile's 1px border and 8px padding, hence 50% minus half the stage width, and 9px.
+ * The stage has no border width of its own; if it gets one, add that width to the 9px.
+ * tests/ui/selection-tiles.spec.mjs measures the result.
+ */
 .print-selection-tile-preview {
   position: absolute;
-  top: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 4px);
-  right: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 4px);
+  top: calc(9px + clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 4px));
+  right: calc(50% - (var(--print-selection-thumb-size, 92px) / 2) + clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 4px));
   z-index: 5;
   display: grid;
   place-items: center;
@@ -617,8 +640,8 @@
   transition: opacity 120ms ease, background-color 120ms ease, transform 120ms ease;
 }
 
-.print-selection-tile:hover .print-selection-tile-preview,
-.print-selection-tile:focus-visible .print-selection-tile-preview,
+.print-selection-tile-frame:hover > .print-selection-tile-preview,
+.print-selection-tile:focus-visible + .print-selection-tile-preview,
 .print-selection-tile-preview:focus-visible {
   opacity: 1;
 }

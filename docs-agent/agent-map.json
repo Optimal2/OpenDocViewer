@@ -94,7 +94,7 @@
   },
   "stats": {
     "fileCount": 220,
-    "sourceLineCount": 75724,
+    "sourceLineCount": 75731,
     "docletCount": 2224,
     "documentedFileCount": 214,
     "lowConfidenceSummaryCount": 2,
@@ -1102,7 +1102,7 @@
     {
       "name": "src/components",
       "fileCount": 22,
-      "lineCount": 8637,
+      "lineCount": 8644,
       "docletCount": 121,
       "importantFiles": [
         {
@@ -1126,7 +1126,7 @@
         {
           "path": "src/components/PrintSelectionWorkspace.jsx",
           "score": 48,
-          "lines": 2504,
+          "lines": 2511,
           "incomingLocalImports": 1,
           "doclets": 5,
           "summary": "Full-window print-selection workspace.",
@@ -30525,7 +30525,7 @@
     },
     {
       "path": "src/components/PrintSelectionWorkspace.jsx",
-      "lines": 2504,
+      "lines": 2511,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
       "sourceSummary": "Full-window print-selection workspace.",
@@ -30588,7 +30588,7 @@
         {
           "name": "PrintSelectionWorkspace",
           "kind": "default",
-          "line": 2503
+          "line": 2510
         }
       ],
       "declarations": [
@@ -30940,17 +30940,17 @@
         {
           "name": "handleTileClick",
           "kind": "function",
-          "line": 1917
+          "line": 1916
         },
         {
           "name": "handleTileKeyDown",
           "kind": "function",
-          "line": 1921
+          "line": 1920
         },
         {
           "name": "handleTileDoubleClick",
           "kind": "function",
-          "line": 1929
+          "line": 1928
         }
       ],
       "parseError": null,

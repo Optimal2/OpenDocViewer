@@ -1911,7 +1911,6 @@ const PrintSelectionWorkspace = ({
     };
     const handleTilePointerDown = (event) => {
       if (event.button !== 0) return;
-      if (event.target?.closest?.('.print-selection-tile-preview')) return;
       activateTile(event);
     };
     const handleTileClick = (event) => {
@@ -1937,65 +1936,73 @@ const PrintSelectionWorkspace = ({
       removeIndexes([originalIndex]);
     };
 
+    // The tile is a button, and a button must not contain another control (WCAG 4.1.2). The
+    // "Show page" button is therefore the tile's sibling inside a frame, and layout.css places it
+    // over the top right corner of the tile's image. The frame carries what the two share: the
+    // tile size, the dimming of a page that is already included, and the drag source.
     const tile = (
       <div
         key={`${side}-${originalIndex}`}
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        data-selection-page={originalIndex}
-        data-print-order-index={side === 'right' ? orderIndex : undefined}
-        className={[
-          'print-selection-tile',
-          selected ? 'is-selected' : '',
-          disabled ? 'is-included' : '',
-          draggingSource ? 'is-dragging-source' : '',
-          pulsing ? 'is-pulsing' : '',
-          warningLevel === 'page-order' ? 'has-order-warning' : '',
-        ].filter(Boolean).join(' ')}
+        className={`print-selection-tile-frame${disabled ? ' is-included' : ''}`}
         style={{ '--print-selection-thumb-size': `${thumbSize}px` }}
-        title={title}
-        aria-pressed={selected}
-        aria-disabled={disabled}
         draggable={!disabled}
-        onPointerDown={handleTilePointerDown}
-        onClick={handleTileClick}
-        onDoubleClick={handleTileDoubleClick}
         onDragStart={(event) => startDrag(side, originalIndex, event)}
         onDragEnd={clearDrag}
-        onKeyDown={handleTileKeyDown}
       >
-        <span className="print-selection-tile-stage">
-          {metricBadges.map((metric) => (
-            <span
-              key={metric.key}
-              className={`print-selection-metric-badge metric-${metric.key} position-${metric.position}`}
-              title={metric.title}
-            >
-              {metric.prefix ? <span className="print-selection-metric-badge-prefix">{metric.prefix}</span> : null}
-              <span className="print-selection-metric-badge-value">{metric.value}</span>
-            </span>
-          ))}
-          <img src={safeImageUrl} alt="" draggable={false} />
-          {item.loading ? (
-            <span className="print-selection-loading" aria-hidden="true">
-              <span className="material-icons">hourglass_empty</span>
-            </span>
-          ) : null}
-          <button
-            type="button"
-            className="print-selection-tile-preview"
-            onClick={(event) => openLightbox(originalIndex, side, event)}
-            title={t('printSelectionWorkspace.previewPage', { defaultValue: 'Show page' })}
-            aria-label={t('printSelectionWorkspace.previewPage', { defaultValue: 'Show page' })}
-          >
-            <span className="material-icons" aria-hidden="true">visibility</span>
-          </button>
-          {disabled ? (
-            <span className="print-selection-included-overlay" aria-hidden="true">
-              <span className="material-icons">done</span>
-            </span>
-          ) : null}
-        </span>
+        <div
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          data-selection-page={originalIndex}
+          data-print-order-index={side === 'right' ? orderIndex : undefined}
+          className={[
+            'print-selection-tile',
+            selected ? 'is-selected' : '',
+            disabled ? 'is-included' : '',
+            draggingSource ? 'is-dragging-source' : '',
+            pulsing ? 'is-pulsing' : '',
+            warningLevel === 'page-order' ? 'has-order-warning' : '',
+          ].filter(Boolean).join(' ')}
+          title={title}
+          aria-pressed={selected}
+          aria-disabled={disabled}
+          onPointerDown={handleTilePointerDown}
+          onClick={handleTileClick}
+          onDoubleClick={handleTileDoubleClick}
+          onKeyDown={handleTileKeyDown}
+        >
+          <span className="print-selection-tile-stage">
+            {metricBadges.map((metric) => (
+              <span
+                key={metric.key}
+                className={`print-selection-metric-badge metric-${metric.key} position-${metric.position}`}
+                title={metric.title}
+              >
+                {metric.prefix ? <span className="print-selection-metric-badge-prefix">{metric.prefix}</span> : null}
+                <span className="print-selection-metric-badge-value">{metric.value}</span>
+              </span>
+            ))}
+            <img src={safeImageUrl} alt="" draggable={false} />
+            {item.loading ? (
+              <span className="print-selection-loading" aria-hidden="true">
+                <span className="material-icons">hourglass_empty</span>
+              </span>
+            ) : null}
+            {disabled ? (
+              <span className="print-selection-included-overlay" aria-hidden="true">
+                <span className="material-icons">done</span>
+              </span>
+            ) : null}
+          </span>
+        </div>
+        <button
+          type="button"
+          className="print-selection-tile-preview"
+          onClick={(event) => openLightbox(originalIndex, side, event)}
+          title={t('printSelectionWorkspace.previewPage', { defaultValue: 'Show page' })}
+          aria-label={t('printSelectionWorkspace.previewPage', { defaultValue: 'Show page' })}
+        >
+          <span className="material-icons" aria-hidden="true">visibility</span>
+        </button>
       </div>
     );
 
