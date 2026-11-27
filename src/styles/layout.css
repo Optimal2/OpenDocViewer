@@ -161,12 +161,25 @@
   accent-color: var(--primary-color);
 }
 
+/* An icon alone, or an icon and a text, on one centred line. Left to the inline flow the icon
+   rides above the middle of the button and nothing separates it from the text. */
 .print-selection-history-action,
 .print-selection-cancel-action,
-.print-selection-commit-action {
+.print-selection-commit-action,
+.print-selection-reset-draft-action,
+.print-selection-save-action,
+.print-selection-leave-action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+/* A flex row starts at the left edge. Centred, a button wider than its contents (a min-width)
+   keeps them in the middle, as its text-align did while they were inline. */
+.print-selection-reset-draft-action,
+.print-selection-save-action,
+.print-selection-leave-action {
+  justify-content: center;
 }
 
 .print-selection-history-action:first-of-type {
